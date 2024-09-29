@@ -17,7 +17,7 @@ Currently, the app supports connecting users with:
 - And more!
 
 ## Development Progress
-The app is still under active development. For more detailed information about the development process, current progress, and updates, please refer to our [Wiki](link_to_wiki).
+The app is still under active development. For more detailed information about the development process, current progress, and updates, please refer to our [Wiki](https://github.com/arygm/QuickFix/wiki).
 
 ---
 
