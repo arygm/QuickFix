@@ -1,2 +1,2 @@
-# signify
-A mobile app to teach and translate sign language
+# QuickFix
+bref décrire l'appli ici
