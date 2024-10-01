@@ -3,7 +3,7 @@
 **QuickFix** is a platform designed to connect users who need tasks done with skilled manual workers. Whether it's painting, plumbing, or any other service, QuickFix makes it easy to find the right person for the job.
 
 ## Features
-- **User-friendly Interface**: Easy-to-navigate platform for users and workers alike.
+- **User-friendly Interface**: Easy-to-use platform offers a user-friendly interface that adapts to the needs of both users and workers, providing an intuitive experience tailored to each role.
 - **Worker Profiles**: Manual workers can create detailed profiles showcasing their experience, services, and rates.
 - **Rating & Reviews**: Users can leave feedback for workers after a job is completed, ensuring quality and trust in the system.
 
