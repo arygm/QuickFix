@@ -19,6 +19,9 @@ Currently, the app supports connecting users with:
 ## Development Progress
 The app is still under active development. For more detailed information about the development process, current progress, and updates, please refer to our [Wiki](https://github.com/arygm/QuickFix/wiki).
 
+## App Concept
+You can check out the Figma design of the app [here](https://www.figma.com/design/7PM5DUw0LOVGuODVoBtFEk/QuickFix?node-id=0-1&t=RP7Bd3AlO4wHatx8-1).
+
 ---
 
 *More details will be added to this README as the app gets developed. Stay tuned for future updates!*
