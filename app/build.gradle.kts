@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.android.sample"
+    namespace = "com.arygm.quickfix"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.android.sample"
+        applicationId = "com.arygm.quickfix"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
