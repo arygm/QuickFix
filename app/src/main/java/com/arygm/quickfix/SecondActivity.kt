@@ -1,4 +1,4 @@
-package com.android.sample
+package com.arygm.quickfix
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -12,8 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
-import com.android.sample.resources.C
-import com.android.sample.ui.theme.SampleAppTheme
+import com.arygm.quickfix.resources.C
+import com.arygm.quickfix.ui.theme.SampleAppTheme
 
 class SecondActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {

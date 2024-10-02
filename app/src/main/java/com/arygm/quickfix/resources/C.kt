@@ -1,4 +1,4 @@
-package com.android.sample.resources
+package com.arygm.quickfix.resources
 
 // Like R, but C
 object C {
