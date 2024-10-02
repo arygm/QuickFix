@@ -1,5 +1,5 @@
 [versions]
-agp = "8.3.0"
+agp = "8.6.0"
 kotlin = "1.8.10"
 coreKtx = "1.12.0"
 ktfmt = "0.17.0"
@@ -15,6 +15,9 @@ lifecycleRuntimeKtx = "2.7.0"
 kaspresso = "1.5.5"
 robolectric = "4.11.1"
 sonar = "4.4.1.3373"
+cucumber = "7.13.0" # Cucumber version
+allure = "2.22.3" # Allure version for reporting
+allureCommandline = "2.22.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,10 +42,20 @@ compose-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifes
 kaspresso = { group = "com.kaspersky.android-components", name = "kaspresso", version.ref = "kaspresso" }
 kaspresso-compose = { group = "com.kaspersky.android-components", name = "kaspresso-compose-support", version.ref = "kaspresso" }
 
-robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+cucumber-junit = { group = "io.cucumber", name = "cucumber-junit", version.ref = "cucumber" }
+cucumber-java = { group = "io.cucumber", name = "cucumber-java", version.ref = "cucumber" }
+allure-cucumber7-jvm = { group = "io.qameta.allure", name = "allure-cucumber7-jvm", version.ref = "allure" }
+allure-kotlin-model = { group = "io.qameta.allure", name = "allure-kotlin-model", version.ref = "allure" }
+allure-kotlin-commons = { group = "io.qameta.allure", name = "allure-kotlin-commons", version.ref = "allure" }
+allure-kotlin-junit4 = { group = "io.qameta.allure", name = "allure-kotlin-junit4", version.ref = "allure" }
+allure-kotlin-android = { group = "io.qameta.allure", name = "allure-kotlin-android", version.ref = "allure" }
+cucumber-android = { group = "io.cucumber", name = "cucumber-android", version.ref = "cucumber" }
+cucumber-picocontainer = { group = "io.cucumber", name = "cucumber-picocontainer", version.ref = "cucumber" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmt" }
 sonar = { id = "org.sonarqube", version.ref = "sonar" }
+allure = { id = "io.qameta.allure", version = "2.11.0" }

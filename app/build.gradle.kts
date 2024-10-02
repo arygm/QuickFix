@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.sonar)
+    alias(libs.plugins.allure)
     id("jacoco")
 }
 
@@ -17,7 +18,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "io.qameta.allure.android.runners.AllureAndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -106,6 +107,7 @@ sonar {
     }
 }
 
+
 // When a library is used both by robolectric and connected tests, use this function
 fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
     androidTestImplementation(dep)
@@ -148,6 +150,37 @@ dependencies {
 
     // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
+
+    // Cucumber dependencies for BDD
+    testImplementation(libs.cucumber.junit) // JUnit integration for Cucumber
+    testImplementation(libs.cucumber.java)  // Cucumber Java integration
+    testImplementation(libs.cucumber.android)      // Cucumber android integration
+    testImplementation(libs.cucumber.picocontainer)
+
+    androidTestImplementation(libs.cucumber.android)
+    androidTestImplementation(libs.cucumber.picocontainer)
+    androidTestImplementation(libs.cucumber.junit)
+    androidTestImplementation(libs.cucumber.java)
+
+    // Allure dependencies for reporting Cucumber test results
+    testImplementation(libs.allure.cucumber7.jvm) // Allure integration with Cucumber 7
+
+    // Allure for non-Cucumber JUnit and Robolectric tests
+    testImplementation (libs.allure.kotlin.junit4) // Allure integration with JUnit 4
+
+    // Allure for Kaspresso and Espresso (Android tests)
+    androidTestImplementation(libs.allure.kotlin.android)
+
+    // Allure Kotlin Dependencies for Android Instrumentation Tests
+    androidTestImplementation(libs.allure.kotlin.model)
+    androidTestImplementation(libs.allure.kotlin.commons)
+    androidTestImplementation(libs.allure.kotlin.junit4)
+    androidTestImplementation(libs.allure.kotlin.android)
+
+    // Allure Kotlin Dependencies for Unit Tests
+    testImplementation(libs.allure.kotlin.model)
+    testImplementation(libs.allure.kotlin.commons)
+    testImplementation(libs.allure.kotlin.junit4)
 }
 
 tasks.withType<Test> {
@@ -186,4 +219,8 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
+}
+
+tasks.withType<Test> {
+    finalizedBy("allureReport") // Automatically generate Allure report after tests
 }
