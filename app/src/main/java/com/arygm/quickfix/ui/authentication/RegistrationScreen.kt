@@ -50,13 +50,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Screen
 import java.util.regex.Pattern
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-@Preview
-fun RegistrationScreen(LoD: Boolean = true) {
+fun RegistrationScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
     val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
     val color2 = if (LoD) Color(0xFF731734) else Color(0xFFB78080)
     val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
@@ -106,7 +107,7 @@ fun RegistrationScreen(LoD: Boolean = true) {
                     title = { Text("") },
                     navigationIcon = {
                         IconButton(
-                            onClick = { /* TODO: Add navigation logic */ },
+                            onClick = { navigationActions.goBack() },
                             modifier = Modifier
                                 .testTag("goBackButton")
                                 .padding(start = 9.dp, top = 35.dp)
@@ -399,7 +400,8 @@ fun RegistrationScreen(LoD: Boolean = true) {
 
                         // Button
                         Button(
-                            onClick = { /* TODO: Add button logic */ },
+                            onClick = { /* TODO: Add button logic */
+                                navigationActions.navigateTo(Screen.PASSWORD)},
                             modifier = Modifier
                                 .width(360.dp)
                                 .height(48.dp),
