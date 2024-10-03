@@ -49,12 +49,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.navigation.navOptions
+import com.arygm.quickfix.ui.navigation.NavigationActions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-@Preview
-fun PasswordScreen(LoD: Boolean = true) {
+fun PasswordScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
     val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
     val color2 = if (LoD) Color(0xFF731734) else Color(0xFFB78080)
     val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
@@ -96,7 +97,7 @@ fun PasswordScreen(LoD: Boolean = true) {
                     title = { Text("") },
                     navigationIcon = {
                         IconButton(
-                            onClick = { /* TODO: Add navigation logic */ },
+                            onClick = { navigationActions.goBack()},
                             modifier = Modifier
                                 .testTag("goBackButton")
                                 .padding(start = 9.dp, top = 35.dp)
@@ -274,4 +275,3 @@ fun PasswordScreen(LoD: Boolean = true) {
         )
     }
 }
-
