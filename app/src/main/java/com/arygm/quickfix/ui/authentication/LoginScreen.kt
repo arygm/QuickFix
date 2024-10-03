@@ -45,12 +45,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-@Preview
-fun LogInScreen(LoD: Boolean = true) {
+fun LogInScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
 
     val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
     val color2 = if (LoD) Color(0xFF731734) else Color(0xFFB78080)
@@ -83,7 +84,7 @@ fun LogInScreen(LoD: Boolean = true) {
                     navigationIcon = {
                         IconButton(
                             //TODO: Button Logic When BackEnd Functions Are Done
-                            onClick = { },
+                            onClick = {navigationActions.goBack()},
                             modifier = Modifier
                                 .testTag("goBackButton")
                                 .padding(start = 9.dp, top = 35.dp)
