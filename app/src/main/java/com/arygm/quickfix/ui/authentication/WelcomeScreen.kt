@@ -30,12 +30,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Screen
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-@Preview
-fun WelcomeScreen(LoD: Boolean = true) {
+fun WelcomeScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
 
     val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
     val color2 = if (LoD) Color(0xFF731734) else Color(0xFFB78080)
@@ -115,7 +116,7 @@ fun WelcomeScreen(LoD: Boolean = true) {
 
             // Buttons
             Button(
-                onClick = { /* TODO: Log In action */ },
+                onClick = { navigationActions.navigateTo(Screen.LOGIN) },
                 colors = ButtonDefaults.buttonColors(containerColor = color2),
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
@@ -131,7 +132,7 @@ fun WelcomeScreen(LoD: Boolean = true) {
             }
 
             Button(
-                onClick = { /* TODO: Register action */ },
+                onClick = { navigationActions.navigateTo(Screen.REGISTRATION_INFO) },
                 colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
