@@ -7,14 +7,14 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 
 object Route {
-    const val AUTH = "Auth"
+    const val WELCOME = "Welcome"
     const val HOME = "Home"
 }
 
 object Screen {
-    const val AUTH = "Auth Screen"
+    const val WELCOME = "Welcome Screen"
     const val LOGIN = "Login Screen"
-    const val REGISTRATION_INFO = "Registration Screen"
+    const val INFO = "Info Screen"
     const val PASSWORD = "Password Screen"
     const val HOME = "Home Screen"
 }
@@ -44,7 +44,7 @@ open class NavigationActions(
                 inclusive = true
             }
             launchSingleTop = true
-            if (destination.route != Route.AUTH) {
+            if (destination.route != Route.WELCOME) {
                 restoreState = true
             }
         }
