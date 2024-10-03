@@ -43,29 +43,18 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-  Text(text = "Hello $name!", modifier = modifier.semantics { testTag = C.Tag.greeting })
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-  SampleAppTheme { Greeting("Android") }
-}
-
-@Composable
 fun QuickFixApp() {
     val navController = rememberNavController()
     val navigationActions = NavigationActions(navController)
 
-    NavHost(navController = navController, startDestination = Route.AUTH) {
+    NavHost(navController = navController, startDestination = Route.WELCOME) {
         navigation(
-            startDestination = Screen.AUTH,
-            route = Route.AUTH,
+            startDestination = Screen.WELCOME,
+            route = Route.WELCOME,
         ) {
-            composable(Screen.AUTH) { WelcomeScreen(navigationActions, true) }
+            composable(Screen.WELCOME) { WelcomeScreen(navigationActions, true) }
             composable(Screen.LOGIN) { LogInScreen(navigationActions, true) }
-            composable(Screen.REGISTRATION_INFO) { RegistrationScreen(navigationActions, true) }
+            composable(Screen.INFO) { RegistrationScreen(navigationActions, true) }
             composable(Screen.PASSWORD) { PasswordScreen(navigationActions, true) }
         }
 
