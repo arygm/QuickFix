@@ -6,12 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
@@ -44,19 +42,18 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun QuickFixApp() {
-    val navController = rememberNavController()
-    val navigationActions = NavigationActions(navController)
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
 
-    NavHost(navController = navController, startDestination = Route.WELCOME) {
-        navigation(
-            startDestination = Screen.WELCOME,
-            route = Route.WELCOME,
-        ) {
-            composable(Screen.WELCOME) { WelcomeScreen(navigationActions, true) }
-            composable(Screen.LOGIN) { LogInScreen(navigationActions, true) }
-            composable(Screen.INFO) { RegistrationScreen(navigationActions, true) }
-            composable(Screen.PASSWORD) { PasswordScreen(navigationActions, true) }
-        }
-
+  NavHost(navController = navController, startDestination = Route.WELCOME) {
+    navigation(
+        startDestination = Screen.WELCOME,
+        route = Route.WELCOME,
+    ) {
+      composable(Screen.WELCOME) { WelcomeScreen(navigationActions, true) }
+      composable(Screen.LOGIN) { LogInScreen(navigationActions, true) }
+      composable(Screen.INFO) { RegistrationScreen(navigationActions, true) }
+      composable(Screen.PASSWORD) { PasswordScreen(navigationActions, true) }
     }
+  }
 }
