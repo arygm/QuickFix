@@ -110,7 +110,7 @@ fun WelcomeScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
               }
 
           Button(
-              onClick = { navigationActions.navigateTo(Screen.REGISTRATION_INFO) },
+              onClick = { navigationActions.navigateTo(Screen.INFO) },
               colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
               modifier = Modifier.fillMaxWidth(0.8f).height(50.dp).padding(bottom = 8.dp),
               shape = RoundedCornerShape(10.dp)) {
