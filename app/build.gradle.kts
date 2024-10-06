@@ -1,3 +1,4 @@
+import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -22,6 +23,7 @@ android {
     }
 
     val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
+    val sonarToken: String = localProperties.getProperty("SONAR_TOKEN") ?: ""
 
     defaultConfig {
         applicationId = "com.arygm.quickfix"
@@ -35,6 +37,7 @@ android {
             useSupportLibrary = true
         }
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        manifestPlaceholders["SONAR_TOKEN"] = sonarToken
     }
 
     buildTypes {
@@ -111,6 +114,13 @@ sonar {
         property("sonar.projectName", "QuickFix")
         property("sonar.organization", "quickfix")
         property("sonar.host.url", "https://sonarcloud.io")
+        // Get the current branch name directly
+        val branchName = ByteArrayOutputStream()
+        exec {
+            commandLine = listOf("git", "symbolic-ref", "--short", "HEAD")
+            standardOutput = branchName
+        }
+        property("sonar.branch.name", branchName.toString().trim())
         // Comma-separated paths to the various directories containing the *.xml JUnit report files. Each path may be absolute or relative to the project base directory.
         property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/test-results/testDebugunitTest/")
         // Paths to xml files with Android Lint issues. If the main flavor is changed, this file will have to be changed too.
