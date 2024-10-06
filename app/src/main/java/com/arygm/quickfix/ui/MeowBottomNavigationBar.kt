@@ -4,17 +4,14 @@ import android.graphics.Color
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 import com.arygm.quickfix.R
 import com.arygm.quickfix.ui.navigation.TopLevelDestination
-import com.arygm.quickfix.ui.navigation.NavigationActions
 import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.ui.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.navigation.WORKER_TOP_LEVEL_DESTINATIONS
 

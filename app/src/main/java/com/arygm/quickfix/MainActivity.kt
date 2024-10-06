@@ -3,7 +3,6 @@ package com.arygm.quickfix
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -18,10 +17,6 @@ import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.resources.C
 import com.arygm.quickfix.ui.ActivityScreen
 import com.arygm.quickfix.ui.AnnouncementScreen
-import com.arygm.quickfix.ui.CalendarScreen
-import com.arygm.quickfix.ui.HomeScreen
-import com.arygm.quickfix.ui.MapScreen
-import com.arygm.quickfix.ui.OtherScreen
 import com.arygm.quickfix.ui.OtherScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.PasswordScreen
@@ -57,7 +52,7 @@ fun QuickFixApp() {
     val navController = rememberNavController()
     val navigationActions = NavigationActions(navController)
 
-    NavHost(navController = navController, startDestination = Route.WELCOME) {
+    NavHost(navController = navController, startDestination = Route.HOME) {
         navigation(
             startDestination = Screen.WELCOME,
             route = Route.WELCOME,
@@ -72,6 +67,18 @@ fun QuickFixApp() {
             route = Route.HOME,
         ) {
             composable(Screen.HOME) { HomeScreen(navigationActions,true) }
+        }
+        navigation(
+            startDestination = Screen.ANNOUNCEMENT,
+            route = Route.ANNOUNCEMENT,
+        ) {
+            composable(Screen.ANNOUNCEMENT) { AnnouncementScreen(navigationActions,true) }
+        }
+        navigation(
+            startDestination = Screen.ACTIVITY,
+            route = Route.ACTIVITY,
+        ) {
+            composable(Screen.ACTIVITY) { ActivityScreen(navigationActions,true) }
         }
         navigation(
             startDestination = Screen.OTHER,
