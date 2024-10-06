@@ -191,6 +191,14 @@ dependencies {
     implementation(libs.firebase.ui.auth)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.auth)
+
+    // ----------       Cucumber         ------------
+    testImplementation(libs.cucumber.junit) // JUnit integration for Cucumber
+    testImplementation(libs.cucumber.java)  // Cucumber Java integration
+    testImplementation(libs.cucumber.android) // Cucumber Kotlin integration
+    androidTestImplementation(libs.cucumber.junit)
+    androidTestImplementation(libs.cucumber.java)
+    androidTestImplementation(libs.cucumber.android)
 }
 
 tasks.withType<Test> {
