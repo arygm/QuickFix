@@ -15,9 +15,9 @@ import org.junit.runner.RunWith
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 @RunWith(AndroidJUnit4::class)
-class MainActivityTest : TestCase() {
+class SecondActivityTest : TestCase() {
 
-  @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
+  @get:Rule val composeTestRule = createAndroidComposeRule<SecondActivity>()
 
   @Test
   fun test() = run {
@@ -25,7 +25,7 @@ class MainActivityTest : TestCase() {
       ComposeScreen.onComposeScreen<MainScreen>(composeTestRule) {
         simpleText {
           assertIsDisplayed()
-          assertTextEquals("Hello Android!")
+          assertTextEquals("Hello Robolectric!")
         }
       }
     }
