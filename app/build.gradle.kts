@@ -114,13 +114,16 @@ sonar {
         property("sonar.projectName", "QuickFix")
         property("sonar.organization", "quickfix")
         property("sonar.host.url", "https://sonarcloud.io")
-        // Get the current branch name directly
-        val branchName = ByteArrayOutputStream()
-        exec {
-            commandLine = listOf("git", "symbolic-ref", "--short", "HEAD")
-            standardOutput = branchName
+        // Check if running locally by looking for the GITHUB_ACTIONS environment variable
+        if (System.getenv("GITHUB_ACTIONS") == null) {
+            // Get the current branch name directly
+            val branchName = ByteArrayOutputStream()
+            exec {
+                commandLine = listOf("git", "symbolic-ref", "--short", "HEAD")
+                standardOutput = branchName
+            }
+            property("sonar.branch.name", branchName.toString().trim())
         }
-        property("sonar.branch.name", branchName.toString().trim())
         // Comma-separated paths to the various directories containing the *.xml JUnit report files. Each path may be absolute or relative to the project base directory.
         property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/test-results/testDebugunitTest/")
         // Paths to xml files with Android Lint issues. If the main flavor is changed, this file will have to be changed too.
