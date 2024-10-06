@@ -58,6 +58,7 @@ android {
 
     buildFeatures {
         compose = true
+        dataBinding = true
     }
 
     composeOptions {
@@ -128,7 +129,9 @@ fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(files("libs/meow-bottom-navigation-java-1.2.0.aar"))
     implementation(libs.androidx.appcompat)
+    implementation("androidx.databinding:databinding-runtime:7.0.0")
     implementation(libs.material)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(platform(libs.compose.bom))
