@@ -2,7 +2,7 @@ package com.arygm.quickfix
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.arygm.quickfix.screen.MainScreen
+import com.arygm.quickfix.screen.SecondScreen
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen
 import org.junit.Rule
@@ -22,7 +22,7 @@ class SecondActivityTest : TestCase() {
   @Test
   fun test() = run {
     step("Start Main Activity") {
-      ComposeScreen.onComposeScreen<MainScreen>(composeTestRule) {
+      ComposeScreen.onComposeScreen<SecondScreen>(composeTestRule) {
         simpleText {
           assertIsDisplayed()
           assertTextEquals("Hello Robolectric!")

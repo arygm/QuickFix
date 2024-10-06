@@ -1,5 +1,5 @@
 [versions]
-agp = "8.3.0"
+agp = "8.6.1"
 kotlin = "1.8.10"
 coreKtx = "1.12.0"
 gms = "4.4.2"
@@ -36,6 +36,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 
