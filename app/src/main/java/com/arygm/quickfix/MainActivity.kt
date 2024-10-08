@@ -87,5 +87,5 @@ fun QuickFixApp() {
             composable(Screen.OTHER) { OtherScreen(navigationActions,true) }
         }
 
-    }
+  }
 }
