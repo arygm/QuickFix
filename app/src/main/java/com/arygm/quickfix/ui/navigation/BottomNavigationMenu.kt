@@ -56,11 +56,8 @@ fun BottomNavigationMenu(
                         Box(
                             modifier =
                                 Modifier.size(37.dp)
-                                    .offset(
-                                        y =
-                                            (16)
-                                                .dp) // Moves the red circle outside the white
-                                                     // ellipse
+                                    .offset(y = (16).dp) // Moves the red circle outside the white
+                                    // ellipse
                                     .clip(CircleShape)
                                     .background(selectedItemColor),
                             contentAlignment = Alignment.Center) {
