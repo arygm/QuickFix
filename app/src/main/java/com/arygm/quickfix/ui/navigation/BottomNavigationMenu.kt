@@ -27,76 +27,69 @@ fun BottomNavigationMenu(
     selectedItem: String,
     LoD: Boolean
 ) {
-    val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
-    val selectedItemColor = if (LoD) Color(0xFF731734) else Color(0xFFB78080)
-    val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
-    val tabList: List<TopLevelDestination> =
-        if (isUser) USER_TOP_LEVEL_DESTINATIONS else WORKER_TOP_LEVEL_DESTINATIONS
+  val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
+  val selectedItemColor = if (LoD) Color(0xFF731734) else Color(0xFFB78080)
+  val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
+  val tabList: List<TopLevelDestination> =
+      if (isUser) USER_TOP_LEVEL_DESTINATIONS else WORKER_TOP_LEVEL_DESTINATIONS
 
-    NavigationBar(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(73.dp),
-        containerColor = color1,
-        contentColor = backgroundColor
-    ) {
+  NavigationBar(
+      modifier = Modifier.fillMaxWidth().height(73.dp),
+      containerColor = color1,
+      contentColor = backgroundColor) {
         tabList.forEach { item ->
-            val isSelected = selectedItem == item.route
-            NavigationBarItem(
-                selected = selectedItem == item.route,
-                onClick = { onTabSelect(item) },
-                icon = {
-                    if (isSelected) {
+          val isSelected = selectedItem == item.route
+          NavigationBarItem(
+              selected = selectedItem == item.route,
+              onClick = { onTabSelect(item) },
+              icon = {
+                if (isSelected) {
+                  Box(
+                      modifier =
+                          Modifier.size(width = 70.dp, height = 100.dp)
+                              .offset(y = (-20).dp)
+                              .clip(RoundedCornerShape(24.dp))
+                              .background(backgroundColor),
+                      contentAlignment = Alignment.Center) {
+                        // This box ensures the red circle is centered horizontally and offset
+                        // vertically
                         Box(
-                            modifier = Modifier
-                                .size(width = 70.dp, height = 100.dp)
-                                .offset(y = (-20).dp)
-                                .clip(RoundedCornerShape(24.dp))
-                                .background(backgroundColor),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            // This box ensures the red circle is centered horizontally and offset vertically
-                            Box(
-                                modifier = Modifier
-                                    .size(37.dp)
-                                    .offset(y = (16).dp) // Moves the red circle outside the white ellipse
+                            modifier =
+                                Modifier.size(37.dp)
+                                    .offset(
+                                        y =
+                                            (16)
+                                                .dp) // Moves the red circle outside the white
+                                                     // ellipse
                                     .clip(CircleShape)
                                     .background(selectedItemColor),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = item.icon,
-                                    contentDescription = item.textId,
-                                    tint = backgroundColor
-                                )
+                            contentAlignment = Alignment.Center) {
+                              Icon(
+                                  imageVector = item.icon,
+                                  contentDescription = item.textId,
+                                  tint = backgroundColor)
                             }
-                        }
-
-                    } else {
-                        Icon(
-                            imageVector = item.icon,
-                            contentDescription = item.textId,
-                            tint = backgroundColor // Icon color when unselected
-                        )
-                    }
-                },
-                label = {
-                    if (selectedItem == item.route) {
-                        Text(
-                            text = item.textId,
-                            modifier = Modifier
-                                .offset(y = (-15).dp)
-                        )
-                    }
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = backgroundColor,
-                    unselectedIconColor = backgroundColor,
-                    selectedTextColor = backgroundColor,
-                    unselectedTextColor = backgroundColor,
-                    indicatorColor = color1
-                )
-            )
+                      }
+                } else {
+                  Icon(
+                      imageVector = item.icon,
+                      contentDescription = item.textId,
+                      tint = backgroundColor // Icon color when unselected
+                      )
+                }
+              },
+              label = {
+                if (selectedItem == item.route) {
+                  Text(text = item.textId, modifier = Modifier.offset(y = (-15).dp))
+                }
+              },
+              colors =
+                  NavigationBarItemDefaults.colors(
+                      selectedIconColor = backgroundColor,
+                      unselectedIconColor = backgroundColor,
+                      selectedTextColor = backgroundColor,
+                      unselectedTextColor = backgroundColor,
+                      indicatorColor = color1))
         }
-    }
+      }
 }

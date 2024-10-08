@@ -29,63 +29,59 @@ import com.arygm.quickfix.ui.theme.SampleAppTheme
 import com.github.se.bootcamp.ui.authentication.WelcomeScreen
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            SampleAppTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .semantics { testTag = C.Tag.main_screen_container },
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    QuickFixApp()
-                }
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContent {
+      SampleAppTheme {
+        // A surface container using the 'background' color from the theme
+        Surface(
+            modifier = Modifier.fillMaxSize().semantics { testTag = C.Tag.main_screen_container },
+            color = MaterialTheme.colorScheme.background) {
+              QuickFixApp()
             }
-        }
+      }
     }
+  }
 }
 
 @Composable
 fun QuickFixApp() {
-    val navController = rememberNavController()
-    val navigationActions = NavigationActions(navController)
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
 
-    NavHost(navController = navController, startDestination = Route.HOME) {
-        navigation(
-            startDestination = Screen.WELCOME,
-            route = Route.WELCOME,
-        ) {
-            composable(Screen.WELCOME) { WelcomeScreen(navigationActions, true) }
-            composable(Screen.LOGIN) { LogInScreen(navigationActions, true) }
-            composable(Screen.INFO) { RegistrationScreen(navigationActions, true) }
-            composable(Screen.PASSWORD) { PasswordScreen(navigationActions, true) }
-        }
-        navigation(
-            startDestination = Screen.HOME,
-            route = Route.HOME,
-        ) {
-            composable(Screen.HOME) { HomeScreen(navigationActions,true) }
-        }
-        navigation(
-            startDestination = Screen.ANNOUNCEMENT,
-            route = Route.ANNOUNCEMENT,
-        ) {
-            composable(Screen.ANNOUNCEMENT) { AnnouncementScreen(navigationActions,true) }
-        }
-        navigation(
-            startDestination = Screen.ACTIVITY,
-            route = Route.ACTIVITY,
-        ) {
-            composable(Screen.ACTIVITY) { ActivityScreen(navigationActions,true) }
-        }
-        navigation(
-            startDestination = Screen.OTHER,
-            route = Route.OTHER,
-        ) {
-            composable(Screen.OTHER) { OtherScreen(navigationActions,true) }
-        }
-
+  NavHost(navController = navController, startDestination = Route.WELCOME) {
+    navigation(
+        startDestination = Screen.WELCOME,
+        route = Route.WELCOME,
+    ) {
+      composable(Screen.WELCOME) { WelcomeScreen(navigationActions, true) }
+      composable(Screen.LOGIN) { LogInScreen(navigationActions, true) }
+      composable(Screen.INFO) { RegistrationScreen(navigationActions, true) }
+      composable(Screen.PASSWORD) { PasswordScreen(navigationActions, true) }
     }
+    navigation(
+        startDestination = Screen.HOME,
+        route = Route.HOME,
+    ) {
+      composable(Screen.HOME) { HomeScreen(navigationActions, true) }
+    }
+    navigation(
+        startDestination = Screen.ANNOUNCEMENT,
+        route = Route.ANNOUNCEMENT,
+    ) {
+      composable(Screen.ANNOUNCEMENT) { AnnouncementScreen(navigationActions, true) }
+    }
+    navigation(
+        startDestination = Screen.ACTIVITY,
+        route = Route.ACTIVITY,
+    ) {
+      composable(Screen.ACTIVITY) { ActivityScreen(navigationActions, true) }
+    }
+    navigation(
+        startDestination = Screen.OTHER,
+        route = Route.OTHER,
+    ) {
+      composable(Screen.OTHER) { OtherScreen(navigationActions, true) }
+    }
+  }
 }
