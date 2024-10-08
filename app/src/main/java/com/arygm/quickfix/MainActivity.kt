@@ -15,9 +15,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.resources.C
+import com.arygm.quickfix.ui.ActivityScreen
+import com.arygm.quickfix.ui.AnnouncementScreen
+import com.arygm.quickfix.ui.OtherScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.PasswordScreen
 import com.arygm.quickfix.ui.authentication.RegistrationScreen
+import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
@@ -54,6 +58,30 @@ fun QuickFixApp() {
       composable(Screen.LOGIN) { LogInScreen(navigationActions, true) }
       composable(Screen.INFO) { RegistrationScreen(navigationActions, true) }
       composable(Screen.PASSWORD) { PasswordScreen(navigationActions, true) }
+    }
+    navigation(
+        startDestination = Screen.HOME,
+        route = Route.HOME,
+    ) {
+      composable(Screen.HOME) { HomeScreen(navigationActions, true) }
+    }
+    navigation(
+        startDestination = Screen.ANNOUNCEMENT,
+        route = Route.ANNOUNCEMENT,
+    ) {
+      composable(Screen.ANNOUNCEMENT) { AnnouncementScreen(navigationActions, true) }
+    }
+    navigation(
+        startDestination = Screen.ACTIVITY,
+        route = Route.ACTIVITY,
+    ) {
+      composable(Screen.ACTIVITY) { ActivityScreen(navigationActions, true) }
+    }
+    navigation(
+        startDestination = Screen.OTHER,
+        route = Route.OTHER,
+    ) {
+      composable(Screen.OTHER) { OtherScreen(navigationActions, true) }
     }
   }
 }
