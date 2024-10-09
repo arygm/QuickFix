@@ -153,6 +153,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.mockk)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.mockk.agent)
     globalTestImplementation(libs.androidx.espresso.core)
 
     // ------------- Jetpack Compose ------------------
@@ -202,6 +205,12 @@ dependencies {
     androidTestImplementation(libs.cucumber.junit)
     androidTestImplementation(libs.cucumber.java)
     androidTestImplementation(libs.cucumber.android)
+
+    // ----------       Mockito         ------------
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.android)
 }
 
 tasks.withType<Test> {
