@@ -54,7 +54,7 @@ fun QuickFixApp() {
     val navController = rememberNavController()
     val navigationActions = NavigationActions(navController)
 
-    val LoD = false
+    val LoD = true
     val isUser = false  // TODO: This variable needs to get its value after the authentication
     NavHost(navController = navController, startDestination = Route.HOME) {
         navigation(

@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui
+package com.arygm.quickfix.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,7 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,9 +27,10 @@ import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
-fun ActivityScreen(navigationActions: NavigationActions, isUser: Boolean, LoD: Boolean) {
+fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true, LoD: Boolean) {
+
 
     val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
     val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
@@ -36,12 +42,12 @@ fun ActivityScreen(navigationActions: NavigationActions, isUser: Boolean, LoD: B
             Surface(
                 shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
                 modifier = Modifier.fillMaxWidth()
-            ){
+            ) {
                 TopAppBar(
                     title = {
                         Box(modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                text = "Activity",
+                                text = "Home",
                                 color = backgroundColor,
                                 modifier = Modifier.align(Alignment.Center)
                             )
@@ -49,19 +55,37 @@ fun ActivityScreen(navigationActions: NavigationActions, isUser: Boolean, LoD: B
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = color1
-                    )
+                    ),
+                    navigationIcon = {
+                        IconButton(onClick = {}) {
+                            Icon(
+                                imageVector = Icons.Outlined.AccountCircle,
+                                contentDescription = "Profile",
+                                tint = backgroundColor
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = {}) {
+                            Icon(
+                                imageVector = Icons.Outlined.Email,
+                                contentDescription = "Messages",
+                                tint = backgroundColor
+                            )
+                        }
+                    }
                 )
             }
         },
         bottomBar = {
             // Boolean isUser = true for this HomeScreen
             BottomNavigationMenu(
-                selectedItem = Route.ACTIVITY, // Start with the "Home" route
+                selectedItem = Route.HOME, // Start with the "Home" route
                 onTabSelect = { selectedDestination ->
                     // Use this block to navigate based on the selected tab
                     navigationActions.navigateTo(selectedDestination)
                 },
-                isUser = isUser,  // Assuming the user is of type User
+                isUser = isUser, // Assuming the user is of type User
                 LoD = LoD
             )
         },
@@ -72,10 +96,11 @@ fun ActivityScreen(navigationActions: NavigationActions, isUser: Boolean, LoD: B
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Welcome to the ACTIVITY Screen",
+                    text = "Welcome to the Home Screen",
                     modifier = Modifier
                         .padding(padding)
                 )
             }
+
         })
 }
