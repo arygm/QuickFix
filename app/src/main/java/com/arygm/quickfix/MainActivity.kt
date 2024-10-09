@@ -17,6 +17,8 @@ import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.resources.C
 import com.arygm.quickfix.ui.ActivityScreen
 import com.arygm.quickfix.ui.AnnouncementScreen
+import com.arygm.quickfix.ui.CalendarScreen
+import com.arygm.quickfix.ui.MapScreen
 import com.arygm.quickfix.ui.OtherScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.PasswordScreen
@@ -29,59 +31,76 @@ import com.arygm.quickfix.ui.theme.SampleAppTheme
 import com.github.se.bootcamp.ui.authentication.WelcomeScreen
 
 class MainActivity : ComponentActivity() {
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContent {
-      SampleAppTheme {
-        // A surface container using the 'background' color from the theme
-        Surface(
-            modifier = Modifier.fillMaxSize().semantics { testTag = C.Tag.main_screen_container },
-            color = MaterialTheme.colorScheme.background) {
-              QuickFixApp()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            SampleAppTheme {
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .semantics { testTag = C.Tag.main_screen_container },
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    QuickFixApp()
+                }
             }
-      }
+        }
     }
-  }
 }
 
 @Composable
 fun QuickFixApp() {
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
+    val navController = rememberNavController()
+    val navigationActions = NavigationActions(navController)
 
-  NavHost(navController = navController, startDestination = Route.WELCOME) {
-    navigation(
-        startDestination = Screen.WELCOME,
-        route = Route.WELCOME,
-    ) {
-      composable(Screen.WELCOME) { WelcomeScreen(navigationActions, true) }
-      composable(Screen.LOGIN) { LogInScreen(navigationActions, true) }
-      composable(Screen.INFO) { RegistrationScreen(navigationActions, true) }
-      composable(Screen.PASSWORD) { PasswordScreen(navigationActions, true) }
+    val LoD = true
+    val isUser = false  // TODO: This variable needs to get its value after the authentication
+    NavHost(navController = navController, startDestination = Route.HOME) {
+        navigation(
+            startDestination = Screen.WELCOME,
+            route = Route.WELCOME,
+        ) {
+            composable(Screen.WELCOME) { WelcomeScreen(navigationActions, LoD) }
+            composable(Screen.LOGIN) { LogInScreen(navigationActions, LoD) }
+            composable(Screen.INFO) { RegistrationScreen(navigationActions, LoD) }
+            composable(Screen.PASSWORD) { PasswordScreen(navigationActions, LoD) }
+        }
+        navigation(
+            startDestination = Screen.HOME,
+            route = Route.HOME,
+        ) {
+            composable(Screen.HOME) { HomeScreen(navigationActions, isUser, LoD) }
+        }
+        navigation(
+            startDestination = Screen.CALENDAR,
+            route = Route.CALENDAR,
+        ) {
+            composable(Screen.CALENDAR) { CalendarScreen(navigationActions, isUser, LoD) }
+        }
+        navigation(
+            startDestination = Screen.ANNOUNCEMENT,
+            route = Route.ANNOUNCEMENT,
+        ) {
+            composable(Screen.ANNOUNCEMENT) { AnnouncementScreen(navigationActions, isUser, LoD) }
+        }
+        navigation(
+            startDestination = Screen.MAP,
+            route = Route.MAP,
+        ) {
+            composable(Screen.MAP) { MapScreen(navigationActions, isUser, LoD) }
+        }
+        navigation(
+            startDestination = Screen.ACTIVITY,
+            route = Route.ACTIVITY,
+        ) {
+            composable(Screen.ACTIVITY) { ActivityScreen(navigationActions, isUser, LoD) }
+        }
+        navigation(
+            startDestination = Screen.OTHER,
+            route = Route.OTHER,
+        ) {
+            composable(Screen.OTHER) { OtherScreen(navigationActions, isUser, LoD) }
+        }
     }
-    navigation(
-        startDestination = Screen.HOME,
-        route = Route.HOME,
-    ) {
-      composable(Screen.HOME) { HomeScreen(navigationActions, true) }
-    }
-    navigation(
-        startDestination = Screen.ANNOUNCEMENT,
-        route = Route.ANNOUNCEMENT,
-    ) {
-      composable(Screen.ANNOUNCEMENT) { AnnouncementScreen(navigationActions, true) }
-    }
-    navigation(
-        startDestination = Screen.ACTIVITY,
-        route = Route.ACTIVITY,
-    ) {
-      composable(Screen.ACTIVITY) { ActivityScreen(navigationActions, true) }
-    }
-    navigation(
-        startDestination = Screen.OTHER,
-        route = Route.OTHER,
-    ) {
-      composable(Screen.OTHER) { OtherScreen(navigationActions, true) }
-    }
-  }
 }

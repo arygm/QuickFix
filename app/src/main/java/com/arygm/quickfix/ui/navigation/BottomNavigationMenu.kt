@@ -1,92 +1,97 @@
 package com.arygm.quickfix.ui.navigation
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.viewinterop.AndroidView
+import com.arygm.quickfix.R
+import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 
 @Composable
 fun BottomNavigationMenu(
+    selectedItem: String, // To track the selected item
     onTabSelect: (TopLevelDestination) -> Unit,
-    isUser: Boolean,
-    selectedItem: String,
+    isUser: Boolean, // Boolean flag to determine the user type
     LoD: Boolean
 ) {
-  val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
-  val selectedItemColor = if (LoD) Color(0xFF731734) else Color(0xFFB78080)
-  val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
-  val tabList: List<TopLevelDestination> =
-      if (isUser) USER_TOP_LEVEL_DESTINATIONS else WORKER_TOP_LEVEL_DESTINATIONS
 
-  NavigationBar(
-      modifier = Modifier.fillMaxWidth().height(73.dp),
-      containerColor = color1,
-      contentColor = backgroundColor) {
-        tabList.forEach { item ->
-          val isSelected = selectedItem == item.route
-          NavigationBarItem(
-              selected = selectedItem == item.route,
-              onClick = { onTabSelect(item) },
-              icon = {
-                if (isSelected) {
-                  Box(
-                      modifier =
-                          Modifier.size(width = 70.dp, height = 100.dp)
-                              .offset(y = (-20).dp)
-                              .clip(RoundedCornerShape(24.dp))
-                              .background(backgroundColor),
-                      contentAlignment = Alignment.Center) {
-                        // This box ensures the red circle is centered horizontally and offset
-                        // vertically
-                        Box(
-                            modifier =
-                                Modifier.size(37.dp)
-                                    .offset(y = (16).dp) // Moves the red circle outside the white
-                                    // ellipse
-                                    .clip(CircleShape)
-                                    .background(selectedItemColor),
-                            contentAlignment = Alignment.Center) {
-                              Icon(
-                                  imageVector = item.icon,
-                                  contentDescription = item.textId,
-                                  tint = backgroundColor)
-                            }
-                      }
-                } else {
-                  Icon(
-                      imageVector = item.icon,
-                      contentDescription = item.textId,
-                      tint = backgroundColor // Icon color when unselected
-                      )
+    val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
+    val selectedItemColor = if (LoD) Color(0xFF731734) else Color(0xFFB78080)
+    val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
+
+    // Determine the tab list based on the user type
+    val tabList: List<TopLevelDestination> =
+        if (isUser) USER_TOP_LEVEL_DESTINATIONS else WORKER_TOP_LEVEL_DESTINATIONS
+
+    // Use AndroidView to integrate MeowBottomNavigation
+    AndroidView(
+        factory = { ctx ->
+            MeowBottomNavigation(ctx).apply {
+                // Add menu items using the tabList
+                tabList.forEachIndexed { index, tab ->
+                    // Get the drawable resource from the ImageVector
+                    val drawableId = convertImageVectorToDrawableId(tab.icon)
+                    add(MeowBottomNavigation.Model(index + 1, drawableId))
                 }
-              },
-              label = {
-                if (selectedItem == item.route) {
-                  Text(text = item.textId, modifier = Modifier.offset(y = (-15).dp))
+
+                // Set design colors
+                circleColor = selectedItemColor.toArgb() // Central button color
+                backgroundBottomColor = color1.toArgb() // Orange background color
+                defaultIconColor = backgroundColor.toArgb() // Default icon color (unselected)
+                selectedIconColor = backgroundColor.toArgb() // Selected icon color
+
+                // Define a listener for item show events
+                setOnShowListener { model ->
+                    // Handle item show event
+                    Log.d("MeowBottomNavigation", "Item shown: ${model.id}")
                 }
-              },
-              colors =
-                  NavigationBarItemDefaults.colors(
-                      selectedIconColor = backgroundColor,
-                      unselectedIconColor = backgroundColor,
-                      selectedTextColor = backgroundColor,
-                      unselectedTextColor = backgroundColor,
-                      indicatorColor = color1))
-        }
-      }
+                // Define actions on selecting a menu item
+                setOnClickMenuListener { model ->
+                    val selectedTab = tabList.getOrNull(model.id - 1) // Find the corresponding tab
+                    if (selectedTab != null) {
+                        onTabSelect(selectedTab)
+                    }
+                }
+                // Handle reselect event to avoid crash
+                setOnReselectListener { model ->
+                    // Handle the event when the user clicks on the currently selected item
+                    Log.d("MeowBottomNavigation", "Reselected tab id: ${model.id}")
+                    // You can add a behavior here or just ignore the reselect event
+                }
+
+                // Attempt to show the default selected item
+                try {
+                    val defaultItemIndex = tabList.indexOfFirst { it.route == selectedItem }
+                    show(defaultItemIndex + 1, true)
+                } catch (e: Exception) {
+                    Log.e("MeowBottomNavigation", "Failed to call show(): ${e.message}")
+                }
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+// Helper function to convert ImageVector to drawable resource ID
+fun convertImageVectorToDrawableId(imageVector: ImageVector): Int {
+    return when (imageVector) {
+        Icons.Default.Home -> R.drawable.icon_home
+        Icons.Default.AddCircle -> R.drawable.icon_annoucement
+        Icons.Default.Menu -> R.drawable.icon_menu
+        Icons.Default.MoreVert -> R.drawable.icon_other
+        Icons.Default.Place -> R.drawable.icon_map
+        Icons.Default.DateRange -> R.drawable.icon_calendar
+        else -> R.drawable.ic_launcher_background // Default fallback icon
+    }
 }
