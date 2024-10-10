@@ -10,19 +10,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.resources.C
+import com.arygm.quickfix.ui.authentication.InfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.PasswordScreen
-import com.arygm.quickfix.ui.authentication.RegistrationScreen
+import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.theme.SampleAppTheme
-import com.github.se.bootcamp.ui.authentication.WelcomeScreen
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +42,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
+@Preview
 fun QuickFixApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -50,10 +52,10 @@ fun QuickFixApp() {
         startDestination = Screen.WELCOME,
         route = Route.WELCOME,
     ) {
-      composable(Screen.WELCOME) { WelcomeScreen(navigationActions, true) }
-      composable(Screen.LOGIN) { LogInScreen(navigationActions, true) }
-      composable(Screen.INFO) { RegistrationScreen(navigationActions, true) }
-      composable(Screen.PASSWORD) { PasswordScreen(navigationActions, true) }
+      composable(Screen.WELCOME) { WelcomeScreen(navigationActions) }
+      composable(Screen.LOGIN) { LogInScreen(navigationActions) }
+      composable(Screen.INFO) { InfoScreen(navigationActions) }
+      composable(Screen.PASSWORD) { PasswordScreen(navigationActions) }
     }
   }
 }
