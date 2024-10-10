@@ -1,42 +1,75 @@
-package com.github.se.bootcamp.ui.authentication
+package com.arygm.quickfix.ui.authentication
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun WelcomeScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
+fun WelcomeScreen(navigationActions: NavigationActions) {
+  val colorScheme = MaterialTheme.colorScheme
 
-  val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
-  val color2 = if (LoD) Color(0xFF731734) else Color(0xFFB78080)
-  val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
+  var fadeOut by remember { mutableStateOf(false) }
+  var expandBox by remember { mutableStateOf(false) }
+  var startAnimation by remember { mutableStateOf(false) }
+  var targetScreen by remember { mutableStateOf("") }
+
+  val elementsAlpha by
+      animateFloatAsState(targetValue = if (fadeOut) 0f else 1f, label = "elementsFade")
+
+  val boxOffsetX by
+      animateDpAsState(targetValue = if (expandBox) 0.dp else (-890).dp, label = "moveBoxX")
+
+  // Animation sequence when the Register button is clicked
+  @Composable
+  if (startAnimation) {
+    LaunchedEffect(Unit) {
+      fadeOut = true // Start fade-out animation
+      delay(300) // Wait for fade-out to complete
+      expandBox = true // Start expanding the box
+      delay(500) // Wait for box to fully shrink
+      navigationActions.navigateTo(targetScreen) // Navigate to RegistrationScreen
+    }
+  }
 
   Box(modifier = Modifier.fillMaxSize()) {
     Image(
@@ -49,33 +82,26 @@ fun WelcomeScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
     Box(
         modifier =
             Modifier.align(Alignment.BottomStart)
-                .size(1000.dp, 1000.dp)
-                .offset(x = (-164).dp, y = 43.dp)
-                .graphicsLayer(rotationZ = -30f)
-                .background(color1))
-    Box(modifier = Modifier.align(Alignment.BottomStart).size(425.dp, 150.dp).background(color1))
+                .requiredSize(1700.dp)
+                .offset(x = boxOffsetX, y = 30.dp)
+                .graphicsLayer(rotationZ = -28f)
+                .background(colorScheme.primary))
+    Box(
+        modifier =
+            Modifier.align(Alignment.BottomStart)
+                .size(425.dp, 150.dp)
+                .background(colorScheme.primary))
 
-    if (LoD) {
-      Image(
-          painter = painterResource(id = com.arygm.quickfix.R.drawable.light_quickfix_logo),
-          contentDescription = null,
-          contentScale = ContentScale.Crop,
-          modifier =
-              Modifier.align(Alignment.Center)
-                  .offset(x = 0.dp, y = -30.dp)
-                  .size(width = 283.dp, height = 325.dp)
-                  .graphicsLayer(rotationZ = 4.57f))
-    } else {
-      Image(
-          painter = painterResource(id = com.arygm.quickfix.R.drawable.dark_quickfix_logo),
-          contentDescription = null,
-          contentScale = ContentScale.Crop,
-          modifier =
-              Modifier.align(Alignment.Center)
-                  .offset(x = 0.dp, y = -30.dp)
-                  .size(width = 283.dp, height = 325.dp)
-                  .graphicsLayer(rotationZ = 4.57f))
-    }
+    Image(
+        painter = painterResource(id = com.arygm.quickfix.R.drawable.quickfix),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        colorFilter = ColorFilter.tint(colorScheme.background),
+        modifier =
+            Modifier.align(Alignment.Center)
+                .offset(x = 0.dp, y = (-30).dp)
+                .size(width = 283.dp, height = 332.7.dp)
+                .graphicsLayer(rotationZ = 4.57f, alpha = elementsAlpha))
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -88,75 +114,60 @@ fun WelcomeScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
           // QuickFix Text
           Text(
               text = "QuickFix",
-              fontSize = 64.sp,
-              fontWeight = FontWeight.ExtraBold,
-              fontStyle = FontStyle.Italic,
-              color = backgroundColor,
-              modifier = Modifier.padding(bottom = 24.dp) // Space between text and buttons
-              )
+              style = MaterialTheme.typography.titleLarge,
+              color = colorScheme.background,
+              modifier =
+                  Modifier.padding(bottom = 24.dp) // Space between text and buttons
+                      .graphicsLayer(alpha = elementsAlpha))
 
-          // Buttons
-          Button(
-              onClick = { navigationActions.navigateTo(Screen.LOGIN) },
-              colors = ButtonDefaults.buttonColors(containerColor = color2),
-              modifier = Modifier.fillMaxWidth(0.8f).height(50.dp).padding(bottom = 8.dp),
-              shape = RoundedCornerShape(10.dp)) {
-                Text(
-                    text = "LOG IN TO QUICKFIX",
-                    color = backgroundColor,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontStyle = FontStyle.Italic)
-              }
+          QuickFixButton(
+              buttonText = "LOG IN TO QUICKFIX",
+              onClickAction = {
+                targetScreen = Screen.LOGIN
+                startAnimation = true
+              },
+              buttonColor = colorScheme.secondary,
+              modifier = Modifier.graphicsLayer(alpha = elementsAlpha),
+              textColor = colorScheme.background)
 
-          Button(
-              onClick = { navigationActions.navigateTo(Screen.INFO) },
-              colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-              modifier = Modifier.fillMaxWidth(0.8f).height(50.dp).padding(bottom = 8.dp),
-              shape = RoundedCornerShape(10.dp)) {
-                Text(
-                    text = "REGISTER TO QUICKFIX",
-                    color = color2,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontStyle = FontStyle.Italic)
-              }
+          QuickFixButton(
+              buttonText = "REGISTER TO QUICKFIX",
+              onClickAction = {
+                targetScreen = Screen.INFO
+                startAnimation = true
+              },
+              buttonColor = colorScheme.background,
+              modifier = Modifier.graphicsLayer(alpha = elementsAlpha),
+              textColor = colorScheme.secondary)
 
           Button(
               onClick = { /* TODO: Google action */},
               colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-              border = BorderStroke(2.dp, backgroundColor),
-              modifier = Modifier.fillMaxWidth(0.8f).height(50.dp),
+              border = BorderStroke(2.dp, colorScheme.background),
+              modifier =
+                  Modifier.fillMaxWidth(0.8f).height(50.dp).graphicsLayer(alpha = elementsAlpha),
               shape = RoundedCornerShape(10.dp)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start,
                     modifier = Modifier.fillMaxWidth().padding(start = 0.dp)) {
-                      if (LoD) {
-                        Image(
-                            painter =
-                                painterResource(
-                                    id = com.arygm.quickfix.R.drawable.light_google_logo),
-                            contentDescription = "Google Logo",
-                            modifier = Modifier.size(20.dp).offset(x = (-3).dp))
-                      } else {
-                        Image(
-                            painter =
-                                painterResource(
-                                    id = com.arygm.quickfix.R.drawable.dark_google_logo),
-                            contentDescription = "Google Logo",
-                            modifier = Modifier.size(20.dp).offset(x = (-3).dp))
-                      }
+                      Image(
+                          painter =
+                              painterResource(
+                                  id = com.arygm.quickfix.R.drawable.google,
+                              ),
+                          contentDescription = "Google Logo",
+                          colorFilter = ColorFilter.tint(colorScheme.background),
+                          modifier = Modifier.size(30.dp).offset(x = (-3).dp))
 
                       Spacer(modifier = Modifier.width(16.dp))
 
                       // Button Text
                       Text(
                           text = "CONTINUE WITH GOOGLE",
-                          color = backgroundColor,
-                          fontSize = 18.sp,
-                          fontWeight = FontWeight.ExtraBold,
-                          fontStyle = FontStyle.Italic)
+                          color = colorScheme.background,
+                          style = MaterialTheme.typography.labelMedium,
+                      )
                     }
               }
         }

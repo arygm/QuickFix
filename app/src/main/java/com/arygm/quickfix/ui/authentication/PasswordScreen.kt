@@ -1,6 +1,9 @@
 package com.arygm.quickfix.ui.authentication
 
+import QuickFixTextField
 import android.annotation.SuppressLint
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,20 +20,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,9 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -48,17 +46,17 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
+import com.arygm.quickfix.ui.elements.QuickFixBackButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
+import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
+import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UseOfNonLambdaOffsetOverload")
 @Composable
-fun PasswordScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
-  val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
-  val color2 = if (LoD) Color(0xFF731734) else Color(0xFFB78080)
-  val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
-  val errorColor = if (LoD) Color(0xFFFF5353) else Color(0xFFC54646)
-  val defaultTextColor = Color(0xFFC0C0C0)
+fun PasswordScreen(navigationActions: NavigationActions) {
 
   var password by remember { mutableStateOf("") }
   var repeatPassword by remember { mutableStateOf("") }
@@ -66,6 +64,14 @@ fun PasswordScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
   val noMatch by remember {
     derivedStateOf { password != repeatPassword && repeatPassword.isNotEmpty() }
   }
+  var shrinkBox by remember { mutableStateOf(false) }
+  val boxOffsetX by
+      animateDpAsState(
+          targetValue = if (shrinkBox) BOX_OFFSET_X_SHRUNK else BOX_OFFSET_X_EXPANDED,
+          animationSpec = tween(durationMillis = BOX_COLLAPSE_SPEED),
+          label = "shrinkingBox")
+
+  LaunchedEffect(Unit) { shrinkBox = true }
 
   val passwordConditions =
       listOf(
@@ -77,41 +83,28 @@ fun PasswordScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
   val buttonActive = passwordConditions.all { it.second } && !noMatch
 
   Box(modifier = Modifier.fillMaxSize()) {
-    Box(
-        modifier =
-            Modifier.align(Alignment.TopEnd)
-                .size(180.dp, 180.dp)
-                .offset(x = 115.dp, y = (-80).dp)
-                .graphicsLayer(rotationZ = 57f)
-                .background(color1)
-                .zIndex(1f))
+    QuickFixAnimatedBox(boxOffsetX)
 
     Scaffold(
-        modifier = Modifier.background(backgroundColor),
+        modifier = Modifier.background(colorScheme.background),
         topBar = {
           TopAppBar(
               title = { Text("") },
               navigationIcon = {
-                IconButton(
-                    onClick = { navigationActions.goBack() },
-                    modifier =
-                        Modifier.testTag("goBackButton")
-                            .padding(start = 9.dp, top = 35.dp)
-                            .size(48.dp)) {
-                      Icon(
-                          imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                          contentDescription = "Back",
-                          tint = color1,
-                          modifier = Modifier.size(45.dp))
-                    }
+                QuickFixBackButton(
+                    onClick = {
+                      shrinkBox = false
+                      navigationActions.goBack()
+                    },
+                    color = colorScheme.primary)
               },
-              colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
+              colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
         },
         content = { pd ->
           Box(
               modifier =
                   Modifier.fillMaxSize()
-                      .background(backgroundColor)
+                      .background(colorScheme.background)
                       .padding(pd)
                       .imePadding() // Adjust layout when keyboard is shown
               ) {
@@ -121,7 +114,7 @@ fun PasswordScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
                             .size(180.dp, 180.dp)
                             .offset(x = (-150).dp, y = 64.dp)
                             .graphicsLayer(rotationZ = 57f)
-                            .background(color1)
+                            .background(colorScheme.primary)
                             .zIndex(0f))
 
                 Column(
@@ -136,75 +129,30 @@ fun PasswordScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
                       Text(
                           "ENTER YOUR\nPASSWORD",
                           fontSize = 32.sp,
-                          color = color1,
+                          color = colorScheme.primary,
                           fontWeight = FontWeight.ExtraBold,
                           fontStyle = FontStyle.Italic,
                           lineHeight = 40.sp)
 
                       Spacer(modifier = Modifier.padding(6.dp))
 
-                      // Password Field
-                      OutlinedTextField(
+                      QuickFixTextField(
                           value = password,
                           onValueChange = { password = it },
-                          label = {
-                            Text(
-                                "PASSWORD",
-                                color = color2.copy(alpha = 0.6f),
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 20.sp,
-                                fontStyle = FontStyle.Italic)
-                          },
-                          visualTransformation =
-                              PasswordVisualTransformation(), // Shows password as dots
-                          textStyle =
-                              androidx.compose.ui.text.TextStyle(
-                                  color = color2.copy(alpha = 1f), // Full opacity
-                                  fontWeight = FontWeight.ExtraBold,
-                                  fontSize = 20.sp,
-                                  fontStyle = FontStyle.Italic),
-                          singleLine = true,
-                          shape = RoundedCornerShape(10.dp),
+                          label = "PASSWORD",
                           modifier = Modifier.width(360.dp),
-                          colors =
-                              OutlinedTextFieldDefaults.colors(
-                                  focusedBorderColor = color1,
-                                  unfocusedBorderColor = color1,
-                                  cursorColor = color1),
+                          visualTransformation = PasswordVisualTransformation(),
                           keyboardOptions =
                               KeyboardOptions.Default.copy(imeAction = ImeAction.Next))
 
                       Spacer(modifier = Modifier.padding(3.dp))
 
-                      // Repeat Password Field
-                      OutlinedTextField(
+                      QuickFixTextField(
                           value = repeatPassword,
                           onValueChange = { repeatPassword = it },
-                          label = {
-                            Text(
-                                "REPEAT PASSWORD",
-                                color = color2.copy(alpha = 0.6f),
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 20.sp,
-                                fontStyle = FontStyle.Italic,
-                            )
-                          },
-                          visualTransformation =
-                              PasswordVisualTransformation(), // Shows password as dots
-                          textStyle =
-                              androidx.compose.ui.text.TextStyle(
-                                  color = color2.copy(alpha = 1f), // Full opacity
-                                  fontWeight = FontWeight.ExtraBold,
-                                  fontSize = 20.sp,
-                                  fontStyle = FontStyle.Italic),
-                          singleLine = true,
-                          shape = RoundedCornerShape(10.dp),
+                          label = "REPEAT PASSWORD",
                           modifier = Modifier.width(360.dp),
-                          colors =
-                              OutlinedTextFieldDefaults.colors(
-                                  focusedBorderColor = color1,
-                                  unfocusedBorderColor = color1,
-                                  cursorColor = color1),
+                          visualTransformation = PasswordVisualTransformation(),
                           keyboardOptions =
                               KeyboardOptions.Default.copy(imeAction = ImeAction.Done))
 
@@ -215,10 +163,8 @@ fun PasswordScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
                         passwordConditions.forEach { (condition, met) ->
                           Text(
                               text = condition,
-                              color = if (met) defaultTextColor else errorColor,
-                              fontSize = 12.sp,
-                              fontStyle = FontStyle.Italic,
-                              fontWeight = FontWeight.ExtraBold,
+                              color = if (met) colorScheme.tertiary else colorScheme.error,
+                              style = MaterialTheme.typography.labelSmall,
                               modifier = Modifier.padding(start = 3.dp))
                         }
                       }
@@ -227,12 +173,10 @@ fun PasswordScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
                       if (noMatch) {
                         Text(
                             "PASSWORDS DO NOT MATCH.",
-                            fontSize = 12.sp,
-                            fontStyle = FontStyle.Italic,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = errorColor,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colorScheme.error,
                             modifier = Modifier.padding(start = 3.dp))
-                        Spacer(modifier = Modifier.padding(18.2.dp))
+                        Spacer(modifier = Modifier.padding(22.9.dp))
                       } else {
                         Spacer(modifier = Modifier.padding(30.dp))
                       }
@@ -241,14 +185,13 @@ fun PasswordScreen(navigationActions: NavigationActions, LoD: Boolean = true) {
                           onClick = { /* TODO: Add button logic */},
                           modifier = Modifier.width(360.dp).height(48.dp),
                           shape = RoundedCornerShape(10.dp),
-                          colors = ButtonDefaults.buttonColors(containerColor = color1),
+                          colors =
+                              ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                           enabled = buttonActive) {
                             Text(
                                 "REGISTER",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontStyle = FontStyle.Italic,
-                                color = if (LoD) Color.White else Color(0xFFB78080))
+                                style = MaterialTheme.typography.labelLarge,
+                                color = colorScheme.background)
                           }
                     }
               }
