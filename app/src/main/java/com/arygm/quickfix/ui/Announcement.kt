@@ -26,56 +26,46 @@ import com.arygm.quickfix.ui.navigation.Route
 @Composable
 fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean, LoD: Boolean) {
 
-    val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
-    val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
+  val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
+  val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
 
-    // Use Scaffold for the layout structure
-    Scaffold(
-        containerColor = backgroundColor,
-        topBar = {
-            Surface(
-                shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ){
-                TopAppBar(
-                    title = {
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            Text(
-                                text = "Announcement",
-                                color = backgroundColor,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = color1
-                    )
-                )
+  // Use Scaffold for the layout structure
+  Scaffold(
+      containerColor = backgroundColor,
+      topBar = {
+        Surface(
+            shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
+            modifier = Modifier.fillMaxWidth()) {
+              TopAppBar(
+                  title = {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                      Text(
+                          text = "Announcement",
+                          color = backgroundColor,
+                          modifier = Modifier.align(Alignment.Center))
+                    }
+                  },
+                  colors = TopAppBarDefaults.topAppBarColors(containerColor = color1))
             }
-        },
-        bottomBar = {
-            // Boolean isUser = true for this HomeScreen
-            BottomNavigationMenu(
-                selectedItem = Route.ANNOUNCEMENT, // Start with the "Home" route
-                onTabSelect = { selectedDestination ->
-                    // Use this block to navigate based on the selected tab
-                    navigationActions.navigateTo(selectedDestination)
-                },
-                isUser = isUser, // Assuming the user is of type User,
-                LoD = LoD
-            )
-        },
-        content = { padding ->
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Welcome to the ANNOUNCEMENT Screen",
-                    modifier = Modifier
-                        .padding(padding)
-                )
+      },
+      bottomBar = {
+        // Boolean isUser = true for this HomeScreen
+        BottomNavigationMenu(
+            selectedItem = Route.ANNOUNCEMENT, // Start with the "Home" route
+            onTabSelect = { selectedDestination ->
+              // Use this block to navigate based on the selected tab
+              navigationActions.navigateTo(selectedDestination)
+            },
+            isUser = isUser, // Assuming the user is of type User,
+            LoD = LoD)
+      },
+      content = { padding ->
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              Text(
+                  text = "Welcome to the ANNOUNCEMENT Screen", modifier = Modifier.padding(padding))
             }
-        })
+      })
 }

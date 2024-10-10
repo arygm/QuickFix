@@ -31,76 +31,61 @@ import com.arygm.quickfix.ui.navigation.Route
 @Composable
 fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true, LoD: Boolean) {
 
+  val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
+  val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
 
-    val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
-    val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
-
-    // Use Scaffold for the layout structure
-    Scaffold(
-        containerColor = backgroundColor,
-        topBar = {
-            Surface(
-                shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                TopAppBar(
-                    title = {
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            Text(
-                                text = "Home",
-                                color = backgroundColor,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = color1
-                    ),
-                    navigationIcon = {
-                        IconButton(onClick = {}) {
-                            Icon(
-                                imageVector = Icons.Outlined.AccountCircle,
-                                contentDescription = "Profile",
-                                tint = backgroundColor
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = {}) {
-                            Icon(
-                                imageVector = Icons.Outlined.Email,
-                                contentDescription = "Messages",
-                                tint = backgroundColor
-                            )
-                        }
+  // Use Scaffold for the layout structure
+  Scaffold(
+      containerColor = backgroundColor,
+      topBar = {
+        Surface(
+            shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
+            modifier = Modifier.fillMaxWidth()) {
+              TopAppBar(
+                  title = {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                      Text(
+                          text = "Home",
+                          color = backgroundColor,
+                          modifier = Modifier.align(Alignment.Center))
                     }
-                )
+                  },
+                  colors = TopAppBarDefaults.topAppBarColors(containerColor = color1),
+                  navigationIcon = {
+                    IconButton(onClick = {}) {
+                      Icon(
+                          imageVector = Icons.Outlined.AccountCircle,
+                          contentDescription = "Profile",
+                          tint = backgroundColor)
+                    }
+                  },
+                  actions = {
+                    IconButton(onClick = {}) {
+                      Icon(
+                          imageVector = Icons.Outlined.Email,
+                          contentDescription = "Messages",
+                          tint = backgroundColor)
+                    }
+                  })
             }
-        },
-        bottomBar = {
-            // Boolean isUser = true for this HomeScreen
-            BottomNavigationMenu(
-                selectedItem = Route.HOME, // Start with the "Home" route
-                onTabSelect = { selectedDestination ->
-                    // Use this block to navigate based on the selected tab
-                    navigationActions.navigateTo(selectedDestination)
-                },
-                isUser = isUser, // Assuming the user is of type User
-                LoD = LoD
-            )
-        },
-        content = { padding ->
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Welcome to the Home Screen",
-                    modifier = Modifier
-                        .padding(padding)
-                )
+      },
+      bottomBar = {
+        // Boolean isUser = true for this HomeScreen
+        BottomNavigationMenu(
+            selectedItem = Route.HOME, // Start with the "Home" route
+            onTabSelect = { selectedDestination ->
+              // Use this block to navigate based on the selected tab
+              navigationActions.navigateTo(selectedDestination)
+            },
+            isUser = isUser, // Assuming the user is of type User
+            LoD = LoD)
+      },
+      content = { padding ->
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              Text(text = "Welcome to the Home Screen", modifier = Modifier.padding(padding))
             }
-
-        })
+      })
 }

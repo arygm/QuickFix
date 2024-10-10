@@ -27,55 +27,46 @@ import com.arygm.quickfix.ui.navigation.TopLevelDestination
 @Composable
 fun OtherScreen(navigationActions: NavigationActions, isUser: Boolean = true, LoD: Boolean) {
 
-    val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
-    val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
+  val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
+  val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
 
-    // Use Scaffold for the layout structure
-    Scaffold(
-        containerColor = backgroundColor,
-        topBar = {
-            Surface(
-                shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                TopAppBar(
-                    title = {
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            Text(
-                                text = "Other",
-                                color = backgroundColor,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = color1
-                    )
-                )
+  // Use Scaffold for the layout structure
+  Scaffold(
+      containerColor = backgroundColor,
+      topBar = {
+        Surface(
+            shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
+            modifier = Modifier.fillMaxWidth()) {
+              TopAppBar(
+                  title = {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                      Text(
+                          text = "Other",
+                          color = backgroundColor,
+                          modifier = Modifier.align(Alignment.Center))
+                    }
+                  },
+                  colors = TopAppBarDefaults.topAppBarColors(containerColor = color1))
             }
-        },
-        bottomBar = {
-            // Use MeowBottomNavigationMenu for the bottom navigation bar
-            BottomNavigationMenu(
-                selectedItem = Route.OTHER,
-                onTabSelect = { selectedTab: TopLevelDestination ->
-                    navigationActions.navigateTo(selectedTab)
-                },
-                isUser = isUser, // Pass the user type to determine the tabs
-                LoD = LoD
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Welcome to the other features Screen",
-                    modifier = Modifier
-                        .padding(paddingValues)
-                )
+      },
+      bottomBar = {
+        // Use MeowBottomNavigationMenu for the bottom navigation bar
+        BottomNavigationMenu(
+            selectedItem = Route.OTHER,
+            onTabSelect = { selectedTab: TopLevelDestination ->
+              navigationActions.navigateTo(selectedTab)
+            },
+            isUser = isUser, // Pass the user type to determine the tabs
+            LoD = LoD)
+      },
+      content = { paddingValues ->
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              Text(
+                  text = "Welcome to the other features Screen",
+                  modifier = Modifier.padding(paddingValues))
             }
-        })
+      })
 }
