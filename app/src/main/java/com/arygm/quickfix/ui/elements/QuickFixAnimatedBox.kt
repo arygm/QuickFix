@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.utils.ANIMATED_BOX_ROTATION
@@ -29,5 +30,6 @@ fun QuickFixAnimatedBox(
               .offset(x = xOffset, y = yOffset)
               .graphicsLayer(rotationZ = rotation)
               .background(color)
-              .zIndex(1f))
+              .zIndex(1f)
+              .testTag("AnimationBox"))
 }
