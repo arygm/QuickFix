@@ -13,6 +13,8 @@ import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -21,7 +23,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -29,14 +30,11 @@ import com.arygm.quickfix.ui.navigation.Route
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true, LoD: Boolean) {
-
-  val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
-  val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
+fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
 
   // Use Scaffold for the layout structure
   Scaffold(
-      containerColor = backgroundColor,
+      containerColor = colorScheme.background,
       topBar = {
         Surface(
             shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
@@ -45,26 +43,27 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true, LoD
                   title = {
                     Box(modifier = Modifier.fillMaxWidth()) {
                       Text(
-                          text = "Home",
-                          color = backgroundColor,
+                          text = "HOME",
+                          style = MaterialTheme.typography.headlineLarge,
+                          color = colorScheme.background,
                           modifier = Modifier.align(Alignment.Center))
                     }
                   },
-                  colors = TopAppBarDefaults.topAppBarColors(containerColor = color1),
+                  colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.primary),
                   navigationIcon = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = { /* TODO: add navigation to profile */}) {
                       Icon(
                           imageVector = Icons.Outlined.AccountCircle,
                           contentDescription = "Profile",
-                          tint = backgroundColor)
+                          tint = colorScheme.background)
                     }
                   },
                   actions = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = { /* TODO: add navigation to messages */}) {
                       Icon(
                           imageVector = Icons.Outlined.Email,
                           contentDescription = "Messages",
-                          tint = backgroundColor)
+                          tint = colorScheme.background)
                     }
                   })
             }
@@ -78,7 +77,7 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true, LoD
               navigationActions.navigateTo(selectedDestination)
             },
             isUser = isUser, // Assuming the user is of type User
-            LoD = LoD)
+        )
       },
       content = { padding ->
         Column(

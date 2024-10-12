@@ -23,12 +23,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,14 +39,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
-import com.arygm.quickfix.ui.elements.QuickFixBackButton
+import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixCheckBoxRow
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.isValidEmail
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun InfoScreen(navigationActions: NavigationActions) {
@@ -87,18 +83,11 @@ fun InfoScreen(navigationActions: NavigationActions) {
     Scaffold(
         modifier = Modifier.background(colorScheme.background).testTag("InfoScaffold"),
         topBar = {
-          TopAppBar(
-              title = { Text("") },
-              navigationIcon = {
-                QuickFixBackButton(
-                    onClick = {
-                      shrinkBox = false
-                      navigationActions.goBack()
-                    },
-                    color = colorScheme.primary,
-                    modifier = Modifier.testTag("goBackButton"))
-              },
-              colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
+          QuickFixBackButtonTopBar(
+              onBackClick = {
+                shrinkBox = false
+                navigationActions.goBack()
+              })
         },
         content = { pd ->
           Box(
