@@ -2,7 +2,7 @@ package com.arygm.quickfix.utils
 
 import androidx.compose.ui.unit.dp
 
-/** Set helper functions / constants for animations */
+/** Set helper functions/constants for animations */
 
 // Constants for authentication transitions
 const val BOX_COLLAPSE_SPEED = 300

@@ -22,13 +22,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -47,13 +44,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
-import com.arygm.quickfix.ui.elements.QuickFixBackButton
+import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UseOfNonLambdaOffsetOverload")
 @Composable
 fun PasswordScreen(navigationActions: NavigationActions) {
@@ -88,17 +85,11 @@ fun PasswordScreen(navigationActions: NavigationActions) {
     Scaffold(
         modifier = Modifier.background(colorScheme.background),
         topBar = {
-          TopAppBar(
-              title = { Text("") },
-              navigationIcon = {
-                QuickFixBackButton(
-                    onClick = {
-                      shrinkBox = false
-                      navigationActions.goBack()
-                    },
-                    color = colorScheme.primary)
-              },
-              colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
+          QuickFixBackButtonTopBar(
+              onBackClick = {
+                shrinkBox = false
+                navigationActions.goBack()
+              })
         },
         content = { pd ->
           Box(
@@ -182,7 +173,10 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                       }
 
                       Button(
-                          onClick = { /* TODO: Add button logic */},
+                          onClick = {
+                            shrinkBox = false
+                            navigationActions.navigateTo(Screen.HOME)
+                          },
                           modifier = Modifier.width(360.dp).height(48.dp),
                           shape = RoundedCornerShape(10.dp),
                           colors =
