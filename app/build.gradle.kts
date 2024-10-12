@@ -80,6 +80,8 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/LICENSE-notice.md"
+            excludes += "META-INF/LICENSE.md"// Exclude conflicting LICENSE.md files
         }
     }
 
@@ -151,9 +153,11 @@ dependencies {
     implementation(libs.androidx.navigation.common.ktx)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.ui.text.google.fonts)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.mockk)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.mockk.agent)
     globalTestImplementation(libs.androidx.espresso.core)
 
     // ------------- Jetpack Compose ------------------
@@ -203,6 +207,12 @@ dependencies {
     androidTestImplementation(libs.cucumber.junit)
     androidTestImplementation(libs.cucumber.java)
     androidTestImplementation(libs.cucumber.android)
+
+    // ----------       Mockito         ------------
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.android)
 }
 
 tasks.withType<Test> {

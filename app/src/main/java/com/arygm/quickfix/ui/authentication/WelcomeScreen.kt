@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -71,13 +72,13 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
     }
   }
 
-  Box(modifier = Modifier.fillMaxSize()) {
+  Box(modifier = Modifier.fillMaxSize().testTag("welcomeBox")) {
     Image(
         painter = painterResource(id = com.arygm.quickfix.R.drawable.worker_image),
         contentDescription = null,
         contentScale = ContentScale.Crop,
         alignment = Alignment.TopStart,
-        modifier = Modifier.fillMaxSize())
+        modifier = Modifier.fillMaxSize().testTag("workerBackground"))
 
     Box(
         modifier =
@@ -85,12 +86,14 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
                 .requiredSize(1700.dp)
                 .offset(x = boxOffsetX, y = 30.dp)
                 .graphicsLayer(rotationZ = -28f)
-                .background(colorScheme.primary))
+                .background(colorScheme.primary)
+                .testTag("boxDecoration1"))
     Box(
         modifier =
             Modifier.align(Alignment.BottomStart)
                 .size(425.dp, 150.dp)
-                .background(colorScheme.primary))
+                .background(colorScheme.primary)
+                .testTag("boxDecoration2"))
 
     Image(
         painter = painterResource(id = com.arygm.quickfix.R.drawable.quickfix),
@@ -101,7 +104,8 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
             Modifier.align(Alignment.Center)
                 .offset(x = 0.dp, y = (-30).dp)
                 .size(width = 283.dp, height = 332.7.dp)
-                .graphicsLayer(rotationZ = 4.57f, alpha = elementsAlpha))
+                .graphicsLayer(rotationZ = 4.57f, alpha = elementsAlpha)
+                .testTag("quickFixLogo"))
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -118,7 +122,8 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
               color = colorScheme.background,
               modifier =
                   Modifier.padding(bottom = 24.dp) // Space between text and buttons
-                      .graphicsLayer(alpha = elementsAlpha))
+                      .graphicsLayer(alpha = elementsAlpha)
+                      .testTag("quickFixText"))
 
           QuickFixButton(
               buttonText = "LOG IN TO QUICKFIX",
@@ -127,7 +132,7 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
                 startAnimation = true
               },
               buttonColor = colorScheme.secondary,
-              modifier = Modifier.graphicsLayer(alpha = elementsAlpha),
+              modifier = Modifier.graphicsLayer(alpha = elementsAlpha).testTag("logInButton"),
               textColor = colorScheme.background)
 
           QuickFixButton(
@@ -137,7 +142,8 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
                 startAnimation = true
               },
               buttonColor = colorScheme.background,
-              modifier = Modifier.graphicsLayer(alpha = elementsAlpha),
+              modifier =
+                  Modifier.graphicsLayer(alpha = elementsAlpha).testTag("RegistrationButton"),
               textColor = colorScheme.secondary)
 
           Button(
@@ -145,7 +151,10 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
               colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
               border = BorderStroke(2.dp, colorScheme.background),
               modifier =
-                  Modifier.fillMaxWidth(0.8f).height(50.dp).graphicsLayer(alpha = elementsAlpha),
+                  Modifier.fillMaxWidth(0.8f)
+                      .height(50.dp)
+                      .graphicsLayer(alpha = elementsAlpha)
+                      .testTag("googleButton"),
               shape = RoundedCornerShape(10.dp)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -158,7 +167,7 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
                               ),
                           contentDescription = "Google Logo",
                           colorFilter = ColorFilter.tint(colorScheme.background),
-                          modifier = Modifier.size(30.dp).offset(x = (-3).dp))
+                          modifier = Modifier.size(30.dp).offset(x = (-3).dp).testTag("googleLogo"))
 
                       Spacer(modifier = Modifier.width(16.dp))
 

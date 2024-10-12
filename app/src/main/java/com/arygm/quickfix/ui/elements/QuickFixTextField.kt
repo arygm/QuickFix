@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
@@ -59,6 +60,6 @@ fun QuickFixTextField(
         errorText,
         color = MaterialTheme.colorScheme.error,
         style = MaterialTheme.typography.labelSmall,
-        modifier = Modifier.padding(top = 4.dp, start = 3.dp))
+        modifier = Modifier.padding(top = 4.dp, start = 3.dp).testTag("errorText"))
   }
 }

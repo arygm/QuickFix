@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
@@ -74,7 +75,7 @@ fun InfoScreen(navigationActions: NavigationActions) {
           email.isNotEmpty() &&
           birthDate.isNotEmpty()
 
-  Box(modifier = Modifier.fillMaxSize()) {
+  Box(modifier = Modifier.fillMaxSize().testTag("InfoBox")) {
     QuickFixAnimatedBox(boxOffsetX)
 
     Scaffold(
@@ -92,7 +93,8 @@ fun InfoScreen(navigationActions: NavigationActions) {
                   Modifier.fillMaxSize()
                       .background(colorScheme.background)
                       .padding(pd)
-                      .imePadding()) {
+                      .imePadding()
+                      .testTag("contentBox")) {
                 Box(
                     modifier =
                         Modifier.align(Alignment.BottomStart)
@@ -100,7 +102,8 @@ fun InfoScreen(navigationActions: NavigationActions) {
                             .offset(x = (-150).dp, y = 64.dp)
                             .graphicsLayer(rotationZ = -28f)
                             .background(colorScheme.primary)
-                            .zIndex(0f))
+                            .zIndex(0f)
+                            .testTag("decorationBox"))
 
                 Column(
                     modifier =
@@ -115,7 +118,7 @@ fun InfoScreen(navigationActions: NavigationActions) {
                           "WELCOME",
                           color = colorScheme.primary,
                           style = MaterialTheme.typography.headlineLarge,
-                      )
+                          modifier = Modifier.testTag("welcomeText"))
 
                       Row(
                           modifier = Modifier.fillMaxWidth().padding(end = 18.dp),
@@ -126,14 +129,20 @@ fun InfoScreen(navigationActions: NavigationActions) {
                                 value = firstName,
                                 onValueChange = { firstName = it },
                                 label = "FIRST NAME",
-                                modifier = Modifier.weight(1f).padding(end = 8.dp),
+                                modifier =
+                                    Modifier.weight(1f)
+                                        .padding(end = 8.dp)
+                                        .testTag("firstNameInput"),
                             )
 
                             QuickFixTextField(
                                 value = lastName,
                                 onValueChange = { lastName = it },
                                 label = "LAST NAME",
-                                modifier = Modifier.weight(1f).padding(end = 8.dp),
+                                modifier =
+                                    Modifier.weight(1f)
+                                        .padding(end = 8.dp)
+                                        .testTag("lastNameInput"),
                             )
                           }
 
@@ -148,7 +157,7 @@ fun InfoScreen(navigationActions: NavigationActions) {
                           },
                           label = "E-MAIL",
                           isError = emailError,
-                          modifier = Modifier.width(360.dp),
+                          modifier = Modifier.width(360.dp).testTag("emailInput"),
                           singleLine = false,
                           errorText = "INVALID EMAIL",
                           showError = emailError)
@@ -164,7 +173,7 @@ fun InfoScreen(navigationActions: NavigationActions) {
                           },
                           label = "BIRTH DATE (DD/MM/YYYY)",
                           isError = birthDateError,
-                          modifier = Modifier.width(360.dp),
+                          modifier = Modifier.width(360.dp).testTag("birthDateInput"),
                           singleLine = false,
                           errorText = "INVALID DATE",
                           showError = birthDateError)
@@ -206,7 +215,7 @@ fun InfoScreen(navigationActions: NavigationActions) {
                                   filledForm &&
                                   !emailError &&
                                   !birthDateError,
-                          modifier = Modifier.width(360.dp).height(48.dp),
+                          modifier = Modifier.width(360.dp).height(48.dp).testTag("nextButton"),
                       )
                     }
               }

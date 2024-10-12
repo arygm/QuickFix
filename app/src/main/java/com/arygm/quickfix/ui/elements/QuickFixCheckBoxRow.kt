@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 
@@ -36,15 +37,19 @@ fun QuickFixCheckBoxRow(
                 checkedColor = colorScheme.primary,
                 uncheckedColor = colorScheme.tertiary,
                 checkmarkColor = Color.Transparent),
-        modifier = Modifier.size(24.dp))
+        modifier = Modifier.size(24.dp).testTag("checkbox"))
     Spacer(modifier = Modifier.width(10.dp))
-    Text(label, style = MaterialTheme.typography.labelSmall, color = Color(0xFFC0C0C0))
+    Text(
+        label,
+        style = MaterialTheme.typography.labelSmall,
+        color = Color(0xFFC0C0C0),
+        modifier = Modifier.testTag("checkBoxInfo"))
     Spacer(modifier = Modifier.width(4.dp))
     Text(
         text = underlinedText,
         style = MaterialTheme.typography.labelSmall,
         color = colorScheme.primary,
         textDecoration = TextDecoration.Underline,
-        modifier = Modifier.clickable(onClick = onUnderlinedTextClick))
+        modifier = Modifier.clickable(onClick = onUnderlinedTextClick).testTag("clickableLink"))
   }
 }
