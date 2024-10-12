@@ -21,7 +21,8 @@ fun QuickFixButton(
     buttonColor: Color,
     buttonOpacity: Float = 1f,
     textColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
   Button(
       onClick = onClickAction,
@@ -32,7 +33,8 @@ fun QuickFixButton(
               .height(50.dp)
               .padding(bottom = 8.dp)
               .graphicsLayer(alpha = buttonOpacity),
-      shape = RoundedCornerShape(10.dp)) {
+      shape = RoundedCornerShape(10.dp),
+      enabled = enabled) {
         Text(text = buttonText, style = MaterialTheme.typography.labelMedium, color = textColor)
       }
 }

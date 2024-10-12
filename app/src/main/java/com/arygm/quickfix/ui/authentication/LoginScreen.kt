@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
+import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
@@ -145,7 +146,16 @@ fun LogInScreen(navigationActions: NavigationActions) {
                   } else {
                     Spacer(modifier = Modifier.padding(30.dp))
                   }
-
+                  QuickFixButton(
+                      buttonText = "LOG IN",
+                      onClickAction = {
+                        shrinkBox = false
+                        navigationActions.navigateTo(Screen.HOME)
+                      },
+                      buttonColor = colorScheme.secondary,
+                      textColor = colorScheme.background,
+                      modifier = Modifier.graphicsLayer(alpha = 1f),
+                      enabled = filledForm && isValidEmail(email))
                   Button(
                       // TODO: Button Logic When BackEnd Functions Are Done
                       onClick = {

@@ -19,10 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
+import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixCheckBoxRow
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
@@ -194,22 +192,22 @@ fun InfoScreen(navigationActions: NavigationActions) {
 
                       Spacer(modifier = Modifier.padding(10.dp))
 
-                      // Button
-                      Button(
-                          onClick = {
+                      QuickFixButton(
+                          buttonText = "NEXT",
+                          onClickAction = {
                             shrinkBox = false
                             navigationActions.navigateTo(Screen.PASSWORD)
                           },
+                          buttonColor = colorScheme.primary,
+                          textColor = colorScheme.background,
+                          enabled =
+                              acceptTerms &&
+                                  acceptPrivacyPolicy &&
+                                  filledForm &&
+                                  !emailError &&
+                                  !birthDateError,
                           modifier = Modifier.width(360.dp).height(48.dp),
-                          shape = RoundedCornerShape(10.dp),
-                          colors =
-                              ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-                          enabled = acceptTerms && acceptPrivacyPolicy && filledForm) {
-                            Text(
-                                "NEXT",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = colorScheme.background)
-                          }
+                      )
                     }
               }
         })
