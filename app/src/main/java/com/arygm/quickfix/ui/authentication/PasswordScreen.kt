@@ -22,13 +22,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -39,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -48,13 +44,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
-import com.arygm.quickfix.ui.elements.QuickFixBackButton
+import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UseOfNonLambdaOffsetOverload")
 @Composable
 fun PasswordScreen(navigationActions: NavigationActions) {
@@ -81,26 +77,19 @@ fun PasswordScreen(navigationActions: NavigationActions) {
           "PASSWORD SHOULD CONTAIN A LOWERCASE LETTER (a-z)" to password.any { it.isLowerCase() },
           "PASSWORD SHOULD CONTAIN A DIGIT (0-9)" to password.any { it.isDigit() })
 
-  val buttonActive = passwordConditions.all { it.second } && !noMatch && repeatPassword.isNotEmpty()
+  val buttonActive = passwordConditions.all { it.second } && !noMatch
 
-  Box(modifier = Modifier.fillMaxSize().testTag("passwordBox")) {
+  Box(modifier = Modifier.fillMaxSize()) {
     QuickFixAnimatedBox(boxOffsetX)
 
     Scaffold(
         modifier = Modifier.background(colorScheme.background),
         topBar = {
-          TopAppBar(
-              title = { Text("") },
-              navigationIcon = {
-                QuickFixBackButton(
-                    onClick = {
-                      shrinkBox = false
-                      navigationActions.goBack()
-                    },
-                    color = colorScheme.primary,
-                    modifier = Modifier.testTag("goBackButton"))
-              },
-              colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
+          QuickFixBackButtonTopBar(
+              onBackClick = {
+                shrinkBox = false
+                navigationActions.goBack()
+              })
         },
         content = { pd ->
           Box(
@@ -108,8 +97,7 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                   Modifier.fillMaxSize()
                       .background(colorScheme.background)
                       .padding(pd)
-                      .imePadding()
-                      .testTag("contentBox") // Adjust layout when keyboard is shown
+                      .imePadding() // Adjust layout when keyboard is shown
               ) {
                 Box(
                     modifier =
@@ -118,8 +106,7 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                             .offset(x = (-150).dp, y = 64.dp)
                             .graphicsLayer(rotationZ = 57f)
                             .background(colorScheme.primary)
-                            .zIndex(0f)
-                            .testTag("boxDecoration"))
+                            .zIndex(0f))
 
                 Column(
                     modifier =
@@ -136,8 +123,7 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                           color = colorScheme.primary,
                           fontWeight = FontWeight.ExtraBold,
                           fontStyle = FontStyle.Italic,
-                          lineHeight = 40.sp,
-                          modifier = Modifier.testTag("passwordText"))
+                          lineHeight = 40.sp)
 
                       Spacer(modifier = Modifier.padding(6.dp))
 
@@ -145,7 +131,7 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                           value = password,
                           onValueChange = { password = it },
                           label = "PASSWORD",
-                          modifier = Modifier.width(360.dp).testTag("passwordInput"),
+                          modifier = Modifier.width(360.dp),
                           visualTransformation = PasswordVisualTransformation(),
                           keyboardOptions =
                               KeyboardOptions.Default.copy(imeAction = ImeAction.Next))
@@ -156,7 +142,7 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                           value = repeatPassword,
                           onValueChange = { repeatPassword = it },
                           label = "REPEAT PASSWORD",
-                          modifier = Modifier.width(360.dp).testTag("repeatPasswordInput"),
+                          modifier = Modifier.width(360.dp),
                           visualTransformation = PasswordVisualTransformation(),
                           keyboardOptions =
                               KeyboardOptions.Default.copy(imeAction = ImeAction.Done))
@@ -170,7 +156,7 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                               text = condition,
                               color = if (met) colorScheme.tertiary else colorScheme.error,
                               style = MaterialTheme.typography.labelSmall,
-                              modifier = Modifier.padding(start = 3.dp).testTag(condition))
+                              modifier = Modifier.padding(start = 3.dp))
                         }
                       }
 
@@ -180,15 +166,18 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                             "PASSWORDS DO NOT MATCH.",
                             style = MaterialTheme.typography.labelSmall,
                             color = colorScheme.error,
-                            modifier = Modifier.padding(start = 3.dp).testTag("noMatchText"))
+                            modifier = Modifier.padding(start = 3.dp))
                         Spacer(modifier = Modifier.padding(22.9.dp))
                       } else {
                         Spacer(modifier = Modifier.padding(30.dp))
                       }
 
                       Button(
-                          onClick = { /* TODO: Add button logic */},
-                          modifier = Modifier.width(360.dp).height(48.dp).testTag("registerButton"),
+                          onClick = {
+                            shrinkBox = false
+                            navigationActions.navigateTo(Screen.HOME)
+                          },
+                          modifier = Modifier.width(360.dp).height(48.dp),
                           shape = RoundedCornerShape(10.dp),
                           colors =
                               ButtonDefaults.buttonColors(containerColor = colorScheme.primary),

@@ -19,13 +19,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,20 +33,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
-import com.arygm.quickfix.ui.elements.QuickFixBackButton
+import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.isValidEmail
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun LogInScreen(navigationActions: NavigationActions) {
@@ -70,117 +66,103 @@ fun LogInScreen(navigationActions: NavigationActions) {
 
   val filledForm = email.isNotEmpty() && password.isNotEmpty()
 
-  Box(modifier = Modifier.fillMaxSize().testTag("LoginBox")) {
+  Box(modifier = Modifier.fillMaxSize()) {
     QuickFixAnimatedBox(boxOffsetX)
 
     Scaffold(
-        modifier = Modifier.background(colorScheme.background).testTag("LoginScaffold"),
+        modifier = Modifier.background(colorScheme.background),
         topBar = {
-          TopAppBar(
-              title = { Text("") },
-              navigationIcon = {
-                QuickFixBackButton(
-                    onClick = {
-                      shrinkBox = false
-                      navigationActions.goBack()
-                    },
-                    color = colorScheme.primary,
-                    modifier = Modifier.testTag("goBackButton"))
-              },
-              colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
+          QuickFixBackButtonTopBar(
+              onBackClick = {
+                shrinkBox = false
+                navigationActions.goBack()
+              })
         },
         content = { pd ->
-          Box(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .background(colorScheme.background)
-                      .padding(pd)
-                      .testTag("ContentBox")) {
-                Box(
-                    modifier =
-                        Modifier.align(Alignment.BottomStart)
-                            .size(180.dp, 180.dp)
-                            .offset(x = (-150).dp, y = 64.dp)
-                            .graphicsLayer(rotationZ = 57f)
-                            .background(colorScheme.primary)
-                            .zIndex(0f)
-                            .testTag("BoxDecoration"))
+          Box(modifier = Modifier.fillMaxSize().background(colorScheme.background).padding(pd)) {
+            Box(
+                modifier =
+                    Modifier.align(Alignment.BottomStart)
+                        .size(180.dp, 180.dp)
+                        .offset(x = (-150).dp, y = 64.dp)
+                        .graphicsLayer(rotationZ = 57f)
+                        .background(colorScheme.primary)
+                        .zIndex(0f))
 
-                Column(
-                    modifier = Modifier.fillMaxSize().padding(start = 24.dp),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Top) {
-                      Spacer(modifier = Modifier.padding(100.dp))
+            Column(
+                modifier = Modifier.fillMaxSize().padding(start = 24.dp),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Top) {
+                  Spacer(modifier = Modifier.padding(100.dp))
 
-                      Text(
-                          "WELCOME BACK",
-                          style = MaterialTheme.typography.headlineLarge,
-                          color = colorScheme.primary,
-                          modifier = Modifier.testTag("WelcomeText"))
+                  Text(
+                      "WELCOME BACK",
+                      style = MaterialTheme.typography.headlineLarge,
+                      color = colorScheme.primary)
 
-                      Spacer(modifier = Modifier.padding(6.dp))
+                  Spacer(modifier = Modifier.padding(6.dp))
 
-                      QuickFixTextField(
-                          value = email,
-                          onValueChange = { email = it },
-                          label = "E-MAIL ADDRESS",
-                          isError = !isValidEmail(email),
-                          errorText = "INVALID EMAIL",
-                          modifier = Modifier.width(360.dp).testTag("inputEmail"),
-                          showError = email.isNotEmpty() && !isValidEmail(email))
+                  QuickFixTextField(
+                      value = email,
+                      onValueChange = { email = it },
+                      label = "E-MAIL ADDRESS",
+                      isError = !isValidEmail(email),
+                      errorText = "INVALID EMAIL",
+                      modifier = Modifier.width(360.dp),
+                      showError = email.isNotEmpty() && !isValidEmail(email))
 
-                      Spacer(modifier = Modifier.padding(3.dp))
+                  Spacer(modifier = Modifier.padding(3.dp))
 
-                      QuickFixTextField(
-                          value = password,
-                          onValueChange = { password = it },
-                          label = "PASSWORD",
-                          visualTransformation = PasswordVisualTransformation(),
-                          modifier = Modifier.width(360.dp).testTag("inputPassword"))
+                  QuickFixTextField(
+                      value = password,
+                      onValueChange = { password = it },
+                      label = "PASSWORD",
+                      visualTransformation = PasswordVisualTransformation(),
+                      modifier = Modifier.width(360.dp))
 
-                      Spacer(modifier = Modifier.padding(3.dp))
+                  Spacer(modifier = Modifier.padding(3.dp))
 
-                      Row(modifier = Modifier.padding(start = 3.dp)) {
+                  Row(modifier = Modifier.padding(start = 3.dp)) {
+                    Text(
+                        "FORGOT YOUR PASSWORD ? TRY",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFFC0C0C0))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        "THIS.",
+                        style = MaterialTheme.typography.labelSmall,
+                        textDecoration = TextDecoration.Underline,
+                        color = colorScheme.primary)
+                  }
+
+                  if (errorHasOccured) {
+                    Text(
+                        "INVALID EMAIL OR PASSWORD, TRY AGAIN.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colorScheme.error,
+                        modifier = Modifier.padding(start = 3.dp))
+                    Spacer(modifier = Modifier.padding(22.9.dp))
+                  } else {
+                    Spacer(modifier = Modifier.padding(30.dp))
+                  }
+
+                  Button(
+                      // TODO: Button Logic When BackEnd Functions Are Done
+                      onClick = {
+                        shrinkBox = false
+                        navigationActions.navigateTo(Screen.HOME)
+                      },
+                      modifier = Modifier.width(360.dp).height(48.dp),
+                      shape = RoundedCornerShape(10.dp),
+                      colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+                      enabled = filledForm) {
                         Text(
-                            "FORGOT YOUR PASSWORD ? TRY",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFFC0C0C0),
-                            modifier = Modifier.testTag("forgotText"))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            "THIS.",
-                            style = MaterialTheme.typography.labelSmall,
-                            textDecoration = TextDecoration.Underline,
-                            color = colorScheme.primary,
-                            modifier = Modifier.testTag("clickableFG"))
+                            "LOGIN",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colorScheme.background)
                       }
-
-                      if (errorHasOccured) {
-                        Text(
-                            "INVALID EMAIL OR PASSWORD, TRY AGAIN.",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colorScheme.error,
-                            modifier = Modifier.padding(start = 3.dp).testTag("errorText"))
-                        Spacer(modifier = Modifier.padding(22.9.dp))
-                      } else {
-                        Spacer(modifier = Modifier.padding(30.dp))
-                      }
-
-                      Button(
-                          // TODO: Button Logic When BackEnd Functions Are Done
-                          onClick = { errorHasOccured = !errorHasOccured },
-                          modifier = Modifier.width(360.dp).height(48.dp).testTag("logInButton"),
-                          shape = RoundedCornerShape(10.dp),
-                          colors =
-                              ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-                          enabled = filledForm) {
-                            Text(
-                                "LOGIN",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = colorScheme.background)
-                          }
-                    }
-              }
+                }
+          }
         })
   }
 }

@@ -53,7 +53,6 @@ fun QuickFixApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
 
-  val LoD = true
   val isUser = false // TODO: This variable needs to get its value after the authentication
   NavHost(navController = navController, startDestination = Route.WELCOME) {
     navigation(
@@ -69,37 +68,37 @@ fun QuickFixApp() {
         startDestination = Screen.HOME,
         route = Route.HOME,
     ) {
-      composable(Screen.HOME) { HomeScreen(navigationActions, isUser, LoD) }
+      composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
     }
     navigation(
         startDestination = Screen.CALENDAR,
         route = Route.CALENDAR,
     ) {
-      composable(Screen.CALENDAR) { CalendarScreen(navigationActions, isUser, LoD) }
+      composable(Screen.CALENDAR) { CalendarScreen(navigationActions, isUser) }
     }
     navigation(
         startDestination = Screen.ANNOUNCEMENT,
         route = Route.ANNOUNCEMENT,
     ) {
-      composable(Screen.ANNOUNCEMENT) { AnnouncementScreen(navigationActions, isUser, LoD) }
+      composable(Screen.ANNOUNCEMENT) { AnnouncementScreen(navigationActions, isUser) }
     }
     navigation(
         startDestination = Screen.MAP,
         route = Route.MAP,
     ) {
-      composable(Screen.MAP) { MapScreen(navigationActions, isUser, LoD) }
+      composable(Screen.MAP) { MapScreen(navigationActions, isUser) }
     }
     navigation(
         startDestination = Screen.ACTIVITY,
         route = Route.ACTIVITY,
     ) {
-      composable(Screen.ACTIVITY) { ActivityScreen(navigationActions, isUser, LoD) }
+      composable(Screen.ACTIVITY) { ActivityScreen(navigationActions, isUser) }
     }
     navigation(
         startDestination = Screen.OTHER,
         route = Route.OTHER,
     ) {
-      composable(Screen.OTHER) { OtherScreen(navigationActions, isUser, LoD) }
+      composable(Screen.OTHER) { OtherScreen(navigationActions, isUser) }
     }
   }
 }

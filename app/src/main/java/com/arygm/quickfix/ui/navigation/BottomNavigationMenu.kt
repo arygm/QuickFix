@@ -9,9 +9,9 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.viewinterop.AndroidView
@@ -23,12 +23,9 @@ fun BottomNavigationMenu(
     selectedItem: String, // To track the selected item
     onTabSelect: (TopLevelDestination) -> Unit,
     isUser: Boolean, // Boolean flag to determine the user type
-    LoD: Boolean
 ) {
 
-  val color1 = if (LoD) Color(0xFFF16138) else Color(0xFF633040)
-  val selectedItemColor = if (LoD) Color(0xFF731734) else Color(0xFFB78080)
-  val backgroundColor = if (LoD) Color.White else Color(0xFF282828)
+  val colorScheme = colorScheme
 
   // Determine the tab list based on the user type
   val tabList: List<TopLevelDestination> =
@@ -46,10 +43,10 @@ fun BottomNavigationMenu(
           }
 
           // Set design colors
-          circleColor = selectedItemColor.toArgb() // Central button color
-          backgroundBottomColor = color1.toArgb() // Orange background color
-          defaultIconColor = backgroundColor.toArgb() // Default icon color (unselected)
-          selectedIconColor = backgroundColor.toArgb() // Selected icon color
+          circleColor = colorScheme.secondary.toArgb() // Central button color
+          backgroundBottomColor = colorScheme.primary.toArgb() // Orange background color
+          defaultIconColor = colorScheme.background.toArgb() // Default icon color (unselected)
+          selectedIconColor = colorScheme.background.toArgb() // Selected icon color
 
           // Define a listener for item show events
           setOnShowListener { model ->
