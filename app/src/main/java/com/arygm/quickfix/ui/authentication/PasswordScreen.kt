@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -77,9 +78,9 @@ fun PasswordScreen(navigationActions: NavigationActions) {
           "PASSWORD SHOULD CONTAIN A LOWERCASE LETTER (a-z)" to password.any { it.isLowerCase() },
           "PASSWORD SHOULD CONTAIN A DIGIT (0-9)" to password.any { it.isDigit() })
 
-  val buttonActive = passwordConditions.all { it.second } && !noMatch
+  val buttonActive = passwordConditions.all { it.second } && !noMatch && repeatPassword.isNotEmpty()
 
-  Box(modifier = Modifier.fillMaxSize()) {
+  Box(modifier = Modifier.fillMaxSize().testTag("passwordBox")) {
     QuickFixAnimatedBox(boxOffsetX)
 
     Scaffold(
@@ -97,7 +98,8 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                   Modifier.fillMaxSize()
                       .background(colorScheme.background)
                       .padding(pd)
-                      .imePadding() // Adjust layout when keyboard is shown
+                      .imePadding()
+                      .testTag("contentBox") // Adjust layout when keyboard is shown
               ) {
                 Box(
                     modifier =
@@ -106,7 +108,8 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                             .offset(x = (-150).dp, y = 64.dp)
                             .graphicsLayer(rotationZ = 57f)
                             .background(colorScheme.primary)
-                            .zIndex(0f))
+                            .zIndex(0f)
+                            .testTag("boxDecoration"))
 
                 Column(
                     modifier =
@@ -123,7 +126,8 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                           color = colorScheme.primary,
                           fontWeight = FontWeight.ExtraBold,
                           fontStyle = FontStyle.Italic,
-                          lineHeight = 40.sp)
+                          lineHeight = 40.sp,
+                          modifier = Modifier.testTag("passwordText"))
 
                       Spacer(modifier = Modifier.padding(6.dp))
 
@@ -131,7 +135,7 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                           value = password,
                           onValueChange = { password = it },
                           label = "PASSWORD",
-                          modifier = Modifier.width(360.dp),
+                          modifier = Modifier.width(360.dp).testTag("passwordInput"),
                           visualTransformation = PasswordVisualTransformation(),
                           keyboardOptions =
                               KeyboardOptions.Default.copy(imeAction = ImeAction.Next))
@@ -142,7 +146,7 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                           value = repeatPassword,
                           onValueChange = { repeatPassword = it },
                           label = "REPEAT PASSWORD",
-                          modifier = Modifier.width(360.dp),
+                          modifier = Modifier.width(360.dp).testTag("repeatPasswordInput"),
                           visualTransformation = PasswordVisualTransformation(),
                           keyboardOptions =
                               KeyboardOptions.Default.copy(imeAction = ImeAction.Done))
@@ -156,7 +160,7 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                               text = condition,
                               color = if (met) colorScheme.tertiary else colorScheme.error,
                               style = MaterialTheme.typography.labelSmall,
-                              modifier = Modifier.padding(start = 3.dp))
+                              modifier = Modifier.padding(start = 3.dp).testTag(condition))
                         }
                       }
 
@@ -166,7 +170,7 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                             "PASSWORDS DO NOT MATCH.",
                             style = MaterialTheme.typography.labelSmall,
                             color = colorScheme.error,
-                            modifier = Modifier.padding(start = 3.dp))
+                            modifier = Modifier.padding(start = 3.dp).testTag("noMatchText"))
                         Spacer(modifier = Modifier.padding(22.9.dp))
                       } else {
                         Spacer(modifier = Modifier.padding(30.dp))
@@ -177,7 +181,7 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                             shrinkBox = false
                             navigationActions.navigateTo(Screen.HOME)
                           },
-                          modifier = Modifier.width(360.dp).height(48.dp),
+                          modifier = Modifier.width(360.dp).height(48.dp).testTag("registerButton"),
                           shape = RoundedCornerShape(10.dp),
                           colors =
                               ButtonDefaults.buttonColors(containerColor = colorScheme.primary),

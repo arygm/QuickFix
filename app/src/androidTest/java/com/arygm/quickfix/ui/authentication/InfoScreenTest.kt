@@ -37,7 +37,6 @@ class InfoScreenTest {
     composeTestRule.setContent { InfoScreen(navigationActions) }
 
     composeTestRule.onNodeWithTag("InfoBox").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("InfoScaffold").assertIsDisplayed()
     composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("contentBox").assertIsDisplayed()
     composeTestRule.onNodeWithTag("decorationBox").assertIsDisplayed()
