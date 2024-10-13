@@ -69,12 +69,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     packaging {
@@ -114,19 +114,9 @@ android {
 sonar {
     properties {
         property("sonar.projectKey", "arygm_QuickFix")
-        property("sonar.projectName", "QuickFix")
         property("sonar.organization", "quickfix")
         property("sonar.host.url", "https://sonarcloud.io")
         // Check if running locally by looking for the GITHUB_ACTIONS environment variable
-        if (System.getenv("GITHUB_ACTIONS") == null) {
-            // Get the current branch name directly
-            val branchName = ByteArrayOutputStream()
-            exec {
-                commandLine = listOf("git", "symbolic-ref", "--short", "HEAD")
-                standardOutput = branchName
-            }
-            property("sonar.branch.name", branchName.toString().trim())
-        }
         // Comma-separated paths to the various directories containing the *.xml JUnit report files. Each path may be absolute or relative to the project base directory.
         property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/test-results/testDebugunitTest/")
         // Paths to xml files with Android Lint issues. If the main flavor is changed, this file will have to be changed too.

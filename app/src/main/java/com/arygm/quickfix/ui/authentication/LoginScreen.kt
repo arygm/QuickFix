@@ -147,7 +147,7 @@ fun LogInScreen(navigationActions: NavigationActions) {
                             "INVALID EMAIL OR PASSWORD, TRY AGAIN.",
                             style = MaterialTheme.typography.labelSmall,
                             color = colorScheme.error,
-                            modifier = Modifier.padding(start = 3.dp))
+                            modifier = Modifier.padding(start = 3.dp).testTag("errorText"))
                         Spacer(modifier = Modifier.padding(22.9.dp))
                       } else {
                         Spacer(modifier = Modifier.padding(30.dp))
