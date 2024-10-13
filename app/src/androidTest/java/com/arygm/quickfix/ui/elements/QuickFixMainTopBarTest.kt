@@ -29,6 +29,6 @@ class QuickFixMainTopBarTest {
     composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
 
     // Check if the title is displayed
-    composeTestRule.onNodeWithTag("topBarTitle").assertIsDisplayed().assertTextEquals(title)
+    composeTestRule.onNodeWithTag(title).assertIsDisplayed().assertTextEquals(title)
   }
 }

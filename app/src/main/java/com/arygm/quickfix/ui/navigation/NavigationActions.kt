@@ -32,6 +32,8 @@ object Screen {
   const val OTHER = "Other Screen"
   const val CALENDAR = "Calendar Screen"
   const val MAP = "Map Screen"
+  const val PROFILE = "Profile Screen"
+  const val MESSAGES = "Messages Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)

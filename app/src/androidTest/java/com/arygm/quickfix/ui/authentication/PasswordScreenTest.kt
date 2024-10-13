@@ -108,7 +108,7 @@ class PasswordScreenTest {
 
   @Test
   fun testBackButtonNavigatesBack() {
-    composeTestRule.setContent { LogInScreen(navigationActions) }
+    composeTestRule.setContent { PasswordScreen(navigationActions) }
 
     // Click the back button
     composeTestRule.onNodeWithTag("goBackButton").performClick()
