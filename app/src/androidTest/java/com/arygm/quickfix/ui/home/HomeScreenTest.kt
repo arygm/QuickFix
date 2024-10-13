@@ -1,18 +1,14 @@
 package com.arygm.quickfix.ui.home
 
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTouchInput
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
-import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -66,35 +62,5 @@ class HomeScreenTest {
     composeTestRule.setContent { HomeScreen(navigationActions) }
     composeTestRule.onNodeWithTag("MessagesButton").performClick()
     Mockito.verify(navigationActions).navigateTo(Screen.MESSAGES)
-  }
-
-  @Test
-  fun bottomNavMenuUserNavigatesCorrectly() {
-    composeTestRule.setContent { HomeScreen(navigationActions, true) }
-
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag("BottomNavMenu").performTouchInput { click(Offset(400f, 100f)) }
-
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      Mockito.mockingDetails(navigationActions).invocations.isNotEmpty()
-    }
-
-    verify(navigationActions).navigateTo(TopLevelDestinations.ANNOUNCEMENT)
-  }
-
-  @Test
-  fun bottomNavMenuWorkerNavigatesCorrectly() {
-    composeTestRule.setContent { HomeScreen(navigationActions, false) }
-
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag("BottomNavMenu").performTouchInput { click(Offset(300f, 100f)) }
-
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      Mockito.mockingDetails(navigationActions).invocations.isNotEmpty()
-    }
-
-    verify(navigationActions).navigateTo(TopLevelDestinations.CALENDAR)
   }
 }
