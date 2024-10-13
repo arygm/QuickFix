@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -32,7 +33,8 @@ fun QuickFixButton(
               .fillMaxWidth(0.8f)
               .height(50.dp)
               .padding(bottom = 8.dp)
-              .graphicsLayer(alpha = buttonOpacity),
+              .graphicsLayer(alpha = buttonOpacity)
+              .testTag("quickfixButton"),
       shape = RoundedCornerShape(10.dp),
       enabled = enabled) {
         Text(text = buttonText, style = MaterialTheme.typography.labelMedium, color = textColor)
