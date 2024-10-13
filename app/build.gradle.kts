@@ -56,7 +56,7 @@ android {
     }
 
     testCoverage {
-        jacocoVersion = "0.8.8"
+        jacocoVersion = "0.8.12"
     }
 
     buildFeatures {
@@ -65,21 +65,23 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.2"
+        kotlinCompilerExtensionVersion = "1.5.15"
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/LICENSE-notice.md"
+            excludes += "META-INF/LICENSE.md"// Exclude conflicting LICENSE.md files
         }
     }
 
@@ -144,7 +146,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(files("libs/meow-bottom-navigation-java-1.2.0.aar"))
     implementation(libs.androidx.appcompat)
-    implementation("androidx.databinding:databinding-runtime:7.0.0")
+    implementation(libs.androidx.databinding.runtime)
     implementation(libs.material)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(platform(libs.compose.bom))
