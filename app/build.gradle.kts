@@ -56,7 +56,7 @@ android {
     }
 
     testCoverage {
-        jacocoVersion = "0.8.8"
+        jacocoVersion = "0.8.12"
     }
 
     buildFeatures {
@@ -65,7 +65,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.2"
+        kotlinCompilerExtensionVersion = "1.5.15"
     }
 
     compileOptions {
@@ -114,9 +114,19 @@ android {
 sonar {
     properties {
         property("sonar.projectKey", "arygm_QuickFix")
+        property("sonar.projectName", "QuickFix")
         property("sonar.organization", "quickfix")
         property("sonar.host.url", "https://sonarcloud.io")
         // Check if running locally by looking for the GITHUB_ACTIONS environment variable
+        if (System.getenv("GITHUB_ACTIONS") == null) {
+            // Get the current branch name directly
+            val branchName = ByteArrayOutputStream()
+            exec {
+                commandLine = listOf("git", "symbolic-ref", "--short", "HEAD")
+                standardOutput = branchName
+            }
+            property("sonar.branch.name", branchName.toString().trim())
+        }
         // Comma-separated paths to the various directories containing the *.xml JUnit report files. Each path may be absolute or relative to the project base directory.
         property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/test-results/testDebugunitTest/")
         // Paths to xml files with Android Lint issues. If the main flavor is changed, this file will have to be changed too.
@@ -136,7 +146,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(files("libs/meow-bottom-navigation-java-1.2.0.aar"))
     implementation(libs.androidx.appcompat)
-    implementation("androidx.databinding:databinding-runtime:7.0.0")
+    implementation(libs.androidx.databinding.runtime)
     implementation(libs.material)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(platform(libs.compose.bom))
