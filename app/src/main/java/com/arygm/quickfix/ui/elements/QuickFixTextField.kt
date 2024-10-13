@@ -40,7 +40,7 @@ fun QuickFixTextField(
             style = MaterialTheme.typography.labelLarge)
       },
       isError = isError,
-      modifier = modifier,
+      modifier = modifier.testTag("textField"),
       textStyle =
           androidx.compose.ui.text.TextStyle(
               color = color2.copy(alpha = 1f), // Full opacity

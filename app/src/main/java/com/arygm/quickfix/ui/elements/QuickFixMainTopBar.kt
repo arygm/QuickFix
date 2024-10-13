@@ -12,6 +12,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -19,7 +20,7 @@ import androidx.compose.ui.unit.dp
 fun QuickFixMainTopBar(title: String, modifier: Modifier = Modifier) {
   Surface(
       shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
-      modifier = modifier.fillMaxWidth()) {
+      modifier = modifier.fillMaxWidth().testTag("topBarSurface")) {
         TopAppBar(
             title = {
               Box(modifier = Modifier.fillMaxWidth()) {
@@ -27,11 +28,12 @@ fun QuickFixMainTopBar(title: String, modifier: Modifier = Modifier) {
                     text = title,
                     style = MaterialTheme.typography.headlineLarge,
                     color = MaterialTheme.colorScheme.background,
-                    modifier = Modifier.align(Alignment.Center))
+                    modifier = Modifier.align(Alignment.Center).testTag("topBarTitle"))
               }
             },
             colors =
                 TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary))
+                    containerColor = MaterialTheme.colorScheme.primary),
+            modifier = Modifier.testTag("topBar"))
       }
 }
