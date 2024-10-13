@@ -1,3 +1,8 @@
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=arygm_QuickFix&metric=coverage)](https://sonarcloud.io/summary/new_code?id=arygm_QuickFix)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=arygm_QuickFix&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=arygm_QuickFix)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=arygm_QuickFix&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=arygm_QuickFix)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=arygm_QuickFix&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=arygm_QuickFix)
+
 # QuickFix
 
 **QuickFix** is a platform designed to connect users who need tasks done with skilled manual workers. Whether it's painting, plumbing, or any other service, QuickFix makes it easy to find the right person for the job.
