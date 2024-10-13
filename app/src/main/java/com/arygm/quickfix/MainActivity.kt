@@ -64,6 +64,9 @@ fun QuickFixApp() {
         route = Route.HOME,
     ) {
       composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
+      // TODO Change the screen when implemented as well as the tests
+      composable(Screen.PROFILE) { HomeScreen(navigationActions, isUser) }
+      composable(Screen.MESSAGES) { HomeScreen(navigationActions, isUser) }
     }
     navigation(
         startDestination = Screen.CALENDAR,

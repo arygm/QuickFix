@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arygm.quickfix.R
 import com.etebarian.meowbottomnavigation.MeowBottomNavigation
@@ -76,7 +77,7 @@ fun BottomNavigationMenu(
           }
         }
       },
-      modifier = Modifier.fillMaxWidth())
+      modifier = Modifier.fillMaxWidth().testTag("BottomNavMenu"))
 }
 
 // Helper function to convert ImageVector to drawable resource ID

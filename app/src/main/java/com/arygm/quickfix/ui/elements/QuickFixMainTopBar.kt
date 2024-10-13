@@ -28,7 +28,7 @@ fun QuickFixMainTopBar(title: String, modifier: Modifier = Modifier) {
                     text = title,
                     style = MaterialTheme.typography.headlineLarge,
                     color = MaterialTheme.colorScheme.background,
-                    modifier = Modifier.align(Alignment.Center).testTag("topBarTitle"))
+                    modifier = Modifier.align(Alignment.Center).testTag(title))
               }
             },
             colors =

@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import com.arygm.quickfix.ui.elements.QuickFixMainTopBar
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -22,7 +23,7 @@ fun OtherScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
   // Use Scaffold for the layout structure
   Scaffold(
       containerColor = colorScheme.background,
-      topBar = { QuickFixMainTopBar("OTHER") },
+      topBar = { QuickFixMainTopBar("OTHER", modifier = Modifier.testTag("OtherTopBar")) },
       bottomBar = {
         // Use MeowBottomNavigationMenu for the bottom navigation bar
         BottomNavigationMenu(
@@ -35,12 +36,12 @@ fun OtherScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
       },
       content = { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().testTag("OtherContent"),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
               Text(
                   text = "Welcome to the other features Screen",
-                  modifier = Modifier.padding(paddingValues))
+                  modifier = Modifier.padding(paddingValues).testTag("OtherText"))
             }
       })
 }

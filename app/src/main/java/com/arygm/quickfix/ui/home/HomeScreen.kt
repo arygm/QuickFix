@@ -23,10 +23,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
+import com.arygm.quickfix.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -38,33 +40,37 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
       topBar = {
         Surface(
             shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
-            modifier = Modifier.fillMaxWidth()) {
+            modifier = Modifier.fillMaxWidth().testTag("TopAppBarSurface")) {
               TopAppBar(
                   title = {
-                    Box(modifier = Modifier.fillMaxWidth()) {
+                    Box(modifier = Modifier.fillMaxWidth().testTag("TopAppBarTitle")) {
                       Text(
                           text = "HOME",
                           style = MaterialTheme.typography.headlineLarge,
                           color = colorScheme.background,
-                          modifier = Modifier.align(Alignment.Center))
+                          modifier = Modifier.align(Alignment.Center).testTag("HomeText"))
                     }
                   },
                   colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.primary),
                   navigationIcon = {
-                    IconButton(onClick = { /* TODO: add navigation to profile */}) {
-                      Icon(
-                          imageVector = Icons.Outlined.AccountCircle,
-                          contentDescription = "Profile",
-                          tint = colorScheme.background)
-                    }
+                    IconButton(
+                        onClick = { navigationActions.navigateTo(Screen.PROFILE) },
+                        Modifier.testTag("ProfileButton")) {
+                          Icon(
+                              imageVector = Icons.Outlined.AccountCircle,
+                              contentDescription = "Profile",
+                              tint = colorScheme.background)
+                        }
                   },
                   actions = {
-                    IconButton(onClick = { /* TODO: add navigation to messages */}) {
-                      Icon(
-                          imageVector = Icons.Outlined.Email,
-                          contentDescription = "Messages",
-                          tint = colorScheme.background)
-                    }
+                    IconButton(
+                        onClick = { navigationActions.navigateTo(Screen.MESSAGES) },
+                        Modifier.testTag("MessagesButton")) {
+                          Icon(
+                              imageVector = Icons.Outlined.Email,
+                              contentDescription = "Messages",
+                              tint = colorScheme.background)
+                        }
                   })
             }
       },
@@ -81,10 +87,12 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
       },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().testTag("HomeContent"),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
-              Text(text = "Welcome to the Home Screen", modifier = Modifier.padding(padding))
+              Text(
+                  text = "Welcome to the Home Screen",
+                  modifier = Modifier.padding(padding).testTag("WelcomeText"))
             }
       })
 }

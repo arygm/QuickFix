@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import com.arygm.quickfix.ui.elements.QuickFixMainTopBar
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -20,7 +21,9 @@ fun ActivityScreen(navigationActions: NavigationActions, isUser: Boolean) {
   // Use Scaffold for the layout structure
   Scaffold(
       containerColor = colorScheme.background,
-      topBar = { QuickFixMainTopBar(title = "ACTIVITY") },
+      topBar = {
+        QuickFixMainTopBar(title = "ACTIVITY", modifier = Modifier.testTag("ActivityTopBar"))
+      },
       bottomBar = {
         // Boolean isUser = true for this HomeScreen
         BottomNavigationMenu(
@@ -34,10 +37,12 @@ fun ActivityScreen(navigationActions: NavigationActions, isUser: Boolean) {
       },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().testTag("ActivityContent"),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
-              Text(text = "Welcome to the ACTIVITY Screen", modifier = Modifier.padding(padding))
+              Text(
+                  text = "Welcome to the ACTIVITY Screen",
+                  modifier = Modifier.padding(padding).testTag("ActivityText"))
             }
       })
 }
