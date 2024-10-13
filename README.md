@@ -2,6 +2,7 @@
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=arygm_QuickFix&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=arygm_QuickFix)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=arygm_QuickFix&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=arygm_QuickFix)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=arygm_QuickFix&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=arygm_QuickFix)
+[![Lines Coverage](https://sonarcloud.io/api/project_badges/measure?project=arygm_QuickFix&metric=line_coverage)](https://sonarcloud.io/summary/new_code?id=arygm_QuickFix)
 
 # QuickFix
 
