@@ -1,6 +1,13 @@
 package com.arygm.quickfix.ui.authentication
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
@@ -29,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,18 +44,49 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.model.profile.Profile
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.auth
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun WelcomeScreen(navigationActions: NavigationActions) {
+fun WelcomeScreen(navigationActions: NavigationActions, profileViewModel: ProfileViewModel) {
   val colorScheme = MaterialTheme.colorScheme
+
+  val context = LocalContext.current
+
+  val launcher =
+      rememberFirebaseAuthLauncher(
+          onAuthComplete = { result ->
+            Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
+            Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
+            navigationActions.navigateTo(Screen.PASSWORD)
+          },
+          onAuthError = {
+            Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}")
+            Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show()
+          },
+          profileViewModel)
+
+  val token = stringResource(com.arygm.quickfix.R.string.default_web_client_id)
 
   var fadeOut by remember { mutableStateOf(false) }
   var expandBox by remember { mutableStateOf(false) }
@@ -147,7 +186,15 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
               textColor = colorScheme.secondary)
 
           Button(
-              onClick = { /* TODO: Google action */},
+              onClick = {
+                val gso =
+                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(token)
+                        .requestEmail()
+                        .build()
+                val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                launcher.launch(googleSignInClient.signInIntent)
+              },
               colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
               border = BorderStroke(2.dp, colorScheme.background),
               modifier =
@@ -180,5 +227,64 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
                     }
               }
         }
+  }
+}
+
+@Composable
+fun rememberFirebaseAuthLauncher(
+    onAuthComplete: (AuthResult) -> Unit,
+    onAuthError: (ApiException) -> Unit,
+    profileViewModel: ProfileViewModel
+): ManagedActivityResultLauncher<Intent, ActivityResult> {
+  val scope = rememberCoroutineScope()
+  return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+      result ->
+    val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+    try {
+      val account = task.getResult(ApiException::class.java)!!
+      val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+      scope.launch {
+        val authResult = Firebase.auth.signInWithCredential(credential).await()
+        val user = Firebase.auth.currentUser
+
+        user?.let {
+          profileViewModel.fetchUserProfile(it.uid) { existingProfile ->
+            if (existingProfile != null) {
+              profileViewModel.setLoggedInProfile(existingProfile)
+              onAuthComplete(authResult)
+            } else {
+              // Extract user information from Google account
+              val firstName = account.givenName ?: ""
+              val lastName = account.familyName ?: ""
+              val email = account.email ?: ""
+              val uid = user.uid
+
+              // Create a new Profile object
+              val profile =
+                  Profile(
+                      uid = uid,
+                      firstName = firstName,
+                      lastName = lastName,
+                      email = email,
+                      password = "",
+                      birthDate = Timestamp.now())
+
+              // Save the profile to Firestore
+              profileViewModel.addProfile(
+                  profile,
+                  onSuccess = {
+                    profileViewModel.setLoggedInProfile(profile)
+                    onAuthComplete(authResult)
+                  },
+                  onFailure = { exception ->
+                    Log.e("Google SignIn", "Failed to save new profile", exception)
+                  })
+            }
+          }
+        } ?: run { Log.e("Google SignIn", "User Null After Sign In") }
+      }
+    } catch (e: ApiException) {
+      onAuthError(e)
+    }
   }
 }

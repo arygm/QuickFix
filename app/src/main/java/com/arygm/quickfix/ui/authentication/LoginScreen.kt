@@ -2,6 +2,8 @@ package com.arygm.quickfix.ui.authentication
 
 import QuickFixTextField
 import android.annotation.SuppressLint
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -29,24 +31,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.isValidEmail
+import com.google.firebase.auth.FirebaseAuth
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun LogInScreen(navigationActions: NavigationActions) {
+fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileViewModel) {
+
+  val context = LocalContext.current
 
   var errorHasOccured by remember { mutableStateOf(false) }
 
@@ -157,7 +164,19 @@ fun LogInScreen(navigationActions: NavigationActions) {
                           buttonText = "LOG IN",
                           onClickAction = {
                             shrinkBox = false
-                            navigationActions.navigateTo(Screen.HOME)
+                            signInWithEmailAndFetchProfile(
+                                email,
+                                password,
+                                profileViewModel,
+                                onResult = { result ->
+                                  if (result) {
+                                    navigationActions.navigateTo(TopLevelDestinations.HOME)
+                                  } else {
+                                    Toast.makeText(context, "Log In Failed.", Toast.LENGTH_LONG)
+                                        .show()
+                                    errorHasOccured = true
+                                  }
+                                })
                           },
                           buttonColor = colorScheme.secondary,
                           textColor = colorScheme.background,
@@ -166,5 +185,39 @@ fun LogInScreen(navigationActions: NavigationActions) {
                     }
               }
         })
+  }
+}
+
+fun signInWithEmailAndFetchProfile(
+    email: String,
+    password: String,
+    profileViewModel: ProfileViewModel,
+    onResult: (Boolean) -> Unit
+) {
+  FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
+      task ->
+    if (task.isSuccessful) {
+      val user = FirebaseAuth.getInstance().currentUser
+      user?.let {
+        profileViewModel.fetchUserProfile(
+            it.uid,
+            onResult = { profile ->
+              if (profile != null) {
+                profileViewModel.setLoggedInProfile(profile)
+                onResult(true)
+              } else {
+                Log.e("Login Screen", "Error Logging in Profile.")
+                onResult(false)
+              }
+            })
+      }
+          ?: run {
+            Log.e("Login Screen", "Error Logging in Profile.")
+            onResult(false)
+          }
+    } else {
+      Log.e("Login Screen", "Error Logging in Profile.")
+      onResult(false)
+    }
   }
 }

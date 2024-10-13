@@ -2,6 +2,8 @@ package com.arygm.quickfix.ui.authentication
 
 import QuickFixTextField
 import android.annotation.SuppressLint
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -24,6 +26,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +44,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.arygm.quickfix.model.profile.Profile
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -48,10 +55,25 @@ import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
+import com.google.firebase.auth.FirebaseAuth
+import java.security.Timestamp
+import java.util.Calendar
+import java.util.GregorianCalendar
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UseOfNonLambdaOffsetOverload")
 @Composable
-fun PasswordScreen(navigationActions: NavigationActions) {
+fun PasswordScreen(
+    navigationActions: NavigationActions,
+    registrationViewModel: RegistrationViewModel,
+    profileViewModel: ProfileViewModel
+) {
+
+  val context = LocalContext.current
+
+  val firstName by registrationViewModel.firstName.collectAsState()
+  val lastName by registrationViewModel.lastName.collectAsState()
+  val email by registrationViewModel.email.collectAsState()
+  val birthDate by registrationViewModel.birthDate.collectAsState()
 
   var password by remember { mutableStateOf("") }
   var repeatPassword by remember { mutableStateOf("") }
@@ -177,7 +199,18 @@ fun PasswordScreen(navigationActions: NavigationActions) {
                           buttonText = "REGISTER",
                           onClickAction = {
                             shrinkBox = false
-                            navigationActions.navigateTo(Screen.HOME)
+                            createAccountWithEmailAndPassword(
+                                firstName = firstName,
+                                lastName = lastName,
+                                email = email,
+                                password = password,
+                                birthDate = birthDate,
+                                profileViewModel = profileViewModel,
+                                onSuccess = { navigationActions.navigateTo(Screen.WELCOME) },
+                                onFailure = {
+                                  Toast.makeText(context, "Registration Failed.", Toast.LENGTH_LONG)
+                                      .show()
+                                })
                           },
                           buttonColor = colorScheme.primary,
                           modifier = Modifier.graphicsLayer(alpha = 1f).testTag("registerButton"),
@@ -187,4 +220,81 @@ fun PasswordScreen(navigationActions: NavigationActions) {
               }
         })
   }
+}
+
+fun stringToTimestamp(birthDate: String): com.google.firebase.Timestamp? {
+  val dateParts = birthDate.split("/")
+  return if (dateParts.size == 3) {
+    val day = dateParts[0].toIntOrNull()
+    val month = dateParts[1].toIntOrNull()
+    val year = dateParts[2].toIntOrNull()
+    if (day != null && month != null && year != null) {
+      val calendar =
+          GregorianCalendar(year, month - 1, day).apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+          }
+      val date = calendar.time
+      com.google.firebase.Timestamp(date)
+    } else {
+      Log.e("DateConversion", "Invalid date format: $birthDate")
+      null
+    }
+  } else {
+    Log.e("DateConversion", "Date string is not in the correct format: $birthDate")
+    null
+  }
+}
+
+fun createAccountWithEmailAndPassword(
+    firstName: String,
+    lastName: String,
+    email: String,
+    password: String,
+    birthDate: String,
+    profileViewModel: ProfileViewModel,
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit
+) {
+  FirebaseAuth.getInstance()
+      .createUserWithEmailAndPassword(email, password)
+      .addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+          val user = FirebaseAuth.getInstance().currentUser
+          user?.let {
+            val profile =
+                stringToTimestamp(birthDate)?.let { birthTimestamp ->
+                  Profile(
+                      uid = it.uid,
+                      firstName = firstName,
+                      lastName = lastName,
+                      email = email,
+                      password = "",
+                      birthDate = birthTimestamp)
+                }
+
+            profile?.let { createdProfile ->
+              profileViewModel.addProfile(
+                  createdProfile,
+                  onSuccess = {
+                    profileViewModel.setLoggedInProfile(createdProfile)
+                    onSuccess()
+                  },
+                  onFailure = {
+                    Log.e("Registration", "Failed to save profile")
+                    onFailure()
+                  })
+            }
+                ?: run {
+                  Log.e("Registration", "Failed to create profile")
+                  onFailure()
+                }
+          }
+        } else {
+          Log.e("Registration", "Error creating account: ${task.exception?.message}")
+          onFailure()
+        }
+      }
 }

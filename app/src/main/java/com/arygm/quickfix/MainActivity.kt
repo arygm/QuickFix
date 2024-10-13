@@ -9,10 +9,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.ActivityScreen
 import com.arygm.quickfix.ui.AnnouncementScreen
 import com.arygm.quickfix.ui.CalendarScreen
@@ -47,6 +50,8 @@ class MainActivity : ComponentActivity() {
 fun QuickFixApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
+  val profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
+  val registrationViewModel: RegistrationViewModel = RegistrationViewModel()
 
   val isUser = false // TODO: This variable needs to get its value after the authentication
   NavHost(navController = navController, startDestination = Route.WELCOME) {
@@ -54,10 +59,14 @@ fun QuickFixApp() {
         startDestination = Screen.WELCOME,
         route = Route.WELCOME,
     ) {
-      composable(Screen.WELCOME) { WelcomeScreen(navigationActions) }
-      composable(Screen.LOGIN) { LogInScreen(navigationActions) }
-      composable(Screen.INFO) { InfoScreen(navigationActions) }
-      composable(Screen.PASSWORD) { PasswordScreen(navigationActions) }
+      composable(Screen.WELCOME) { WelcomeScreen(navigationActions, profileViewModel) }
+      composable(Screen.LOGIN) { LogInScreen(navigationActions, profileViewModel) }
+      composable(Screen.INFO) {
+        InfoScreen(navigationActions, registrationViewModel, profileViewModel)
+      }
+      composable(Screen.PASSWORD) {
+        PasswordScreen(navigationActions, registrationViewModel, profileViewModel)
+      }
     }
     navigation(
         startDestination = Screen.HOME,

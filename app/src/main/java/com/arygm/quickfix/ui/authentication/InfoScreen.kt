@@ -35,6 +35,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -46,7 +48,11 @@ import com.arygm.quickfix.utils.isValidEmail
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun InfoScreen(navigationActions: NavigationActions) {
+fun InfoScreen(
+    navigationActions: NavigationActions,
+    registrationViewModel: RegistrationViewModel,
+    profileViewModel: ProfileViewModel
+) {
   val colorScheme = MaterialTheme.colorScheme
 
   var firstName by remember { mutableStateOf("") }
@@ -153,7 +159,13 @@ fun InfoScreen(navigationActions: NavigationActions) {
                           value = email,
                           onValueChange = {
                             email = it
-                            emailError = !isValidEmail(it)
+                            profileViewModel.profileExists(email) { exists, profile ->
+                              if (exists && profile != null) {
+                                emailError = true
+                              } else {
+                                emailError = !isValidEmail(it)
+                              }
+                            }
                           },
                           label = "E-MAIL",
                           isError = emailError,
@@ -205,6 +217,10 @@ fun InfoScreen(navigationActions: NavigationActions) {
                           buttonText = "NEXT",
                           onClickAction = {
                             shrinkBox = false
+                            registrationViewModel.updateFirstName(firstName)
+                            registrationViewModel.updateLastName(lastName)
+                            registrationViewModel.updateEmail(email)
+                            registrationViewModel.updateBirthDate(birthDate)
                             navigationActions.navigateTo(Screen.PASSWORD)
                           },
                           buttonColor = colorScheme.primary,
