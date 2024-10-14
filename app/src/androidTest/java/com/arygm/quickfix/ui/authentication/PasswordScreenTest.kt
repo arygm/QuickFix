@@ -2,30 +2,42 @@ package com.arygm.quickfix.ui.authentication
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 
 class PasswordScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
+  private lateinit var profileRepository: ProfileRepository
+  private lateinit var profileViewModel: ProfileViewModel
   private lateinit var navigationActions: NavigationActions
+  private lateinit var registrationViewModel: RegistrationViewModel
 
   @Before
   fun setup() {
-    navigationActions = Mockito.mock(NavigationActions::class.java)
+    profileRepository = mock(ProfileRepository::class.java)
+    navigationActions = mock(NavigationActions::class.java)
+    profileViewModel = ProfileViewModel(profileRepository)
+    registrationViewModel = RegistrationViewModel()
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.PASSWORD)
   }
 
   @Test
   fun testInitialState() {
-    composeTestRule.setContent { PasswordScreen(navigationActions) }
+    composeTestRule.setContent {
+      PasswordScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Check that the input fields, password conditions, and button are displayed
     composeTestRule.onNodeWithTag("passwordBox").assertIsDisplayed()
@@ -52,7 +64,9 @@ class PasswordScreenTest {
 
   @Test
   fun testPasswordConditionsUpdateOnInput() {
-    composeTestRule.setContent { PasswordScreen(navigationActions) }
+    composeTestRule.setContent {
+      PasswordScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Input a password that meets all conditions
     composeTestRule.onNodeWithTag("passwordInput").performTextInput("Password1")
@@ -71,7 +85,9 @@ class PasswordScreenTest {
 
   @Test
   fun testPasswordMismatchShowsError() {
-    composeTestRule.setContent { PasswordScreen(navigationActions) }
+    composeTestRule.setContent {
+      PasswordScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Input a password and a mismatching repeated password
     composeTestRule.onNodeWithTag("passwordInput").performTextInput("Password1")
@@ -84,7 +100,9 @@ class PasswordScreenTest {
 
   @Test
   fun testRegisterButtonEnabledWhenConditionsAreMet() {
-    composeTestRule.setContent { PasswordScreen(navigationActions) }
+    composeTestRule.setContent {
+      PasswordScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Input matching passwords that meet all conditions
     composeTestRule.onNodeWithTag("passwordInput").performTextInput("Password1")
@@ -97,7 +115,9 @@ class PasswordScreenTest {
 
   @Test
   fun testRegisterButtonDisabledWhenConditionsAreNotMet() {
-    composeTestRule.setContent { PasswordScreen(navigationActions) }
+    composeTestRule.setContent {
+      PasswordScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Input a password that does not meet all conditions (no digit)
     composeTestRule.onNodeWithTag("passwordInput").performTextInput("Password")
@@ -108,7 +128,9 @@ class PasswordScreenTest {
 
   @Test
   fun testBackButtonNavigatesBack() {
-    composeTestRule.setContent { PasswordScreen(navigationActions) }
+    composeTestRule.setContent {
+      PasswordScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Click the back button
     composeTestRule.onNodeWithTag("goBackButton").performClick()

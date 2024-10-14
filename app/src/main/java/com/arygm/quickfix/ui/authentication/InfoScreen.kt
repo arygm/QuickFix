@@ -159,6 +159,7 @@ fun InfoScreen(
                           value = email,
                           onValueChange = {
                             email = it
+                            emailError = !isValidEmail(it)
                             profileViewModel.profileExists(email) { exists, profile ->
                               if (exists && profile != null) {
                                 emailError = true

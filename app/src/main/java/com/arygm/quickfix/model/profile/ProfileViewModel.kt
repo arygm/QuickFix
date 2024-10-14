@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-open class ProfileViewModel(private val repository: ProfileRepositoryFirestore) : ViewModel() {
+open class ProfileViewModel(private val repository: ProfileRepository) : ViewModel() {
 
   private val profiles_ = MutableStateFlow<List<Profile>>(emptyList())
   val profiles: StateFlow<List<Profile>> = profiles_.asStateFlow()

@@ -4,12 +4,16 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import org.junit.Before
@@ -23,18 +27,26 @@ class InfoScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
+  private lateinit var profileRepository: ProfileRepository
+  private lateinit var profileViewModel: ProfileViewModel
   private lateinit var navigationActions: NavigationActions
+  private lateinit var registrationViewModel: RegistrationViewModel
 
   @Before
   fun setup() {
+    profileRepository = mock(ProfileRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
+    profileViewModel = ProfileViewModel(profileRepository)
+    registrationViewModel = RegistrationViewModel()
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.INFO)
   }
 
   @Test
   fun testInitialState() {
-    composeTestRule.setContent { InfoScreen(navigationActions) }
+    composeTestRule.setContent {
+      InfoScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     composeTestRule.onNodeWithTag("InfoBox").assertIsDisplayed()
     composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
@@ -80,19 +92,24 @@ class InfoScreenTest {
 
   @Test
   fun testInvalidEmailShowsError() {
-    composeTestRule.setContent { InfoScreen(navigationActions) }
+    composeTestRule.setContent {
+      InfoScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Input an invalid email
     composeTestRule.onNodeWithTag("emailInput").performTextInput("invalidemail")
 
     // Assert that the email error is shown
-    composeTestRule.onNodeWithText("INVALID EMAIL").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("errorText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("errorText").assertTextEquals("INVALID EMAIL")
     composeTestRule.onNodeWithTag("nextButton").assertIsNotEnabled()
   }
 
   @Test
   fun testInvalidDateShowsError() {
-    composeTestRule.setContent { InfoScreen(navigationActions) }
+    composeTestRule.setContent {
+      InfoScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Input an invalid birth date
     composeTestRule.onNodeWithTag("birthDateInput").performTextInput("99/99/9999")
@@ -104,7 +121,9 @@ class InfoScreenTest {
 
   @Test
   fun testNextButtonEnabledWhenFormIsValid() {
-    composeTestRule.setContent { InfoScreen(navigationActions) }
+    composeTestRule.setContent {
+      InfoScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Fill out valid inputs
     composeTestRule.onNodeWithTag("firstNameInput").performTextInput("John")
@@ -126,7 +145,9 @@ class InfoScreenTest {
 
   @Test
   fun testNextButtonDisabledWhenFormIncomplete() {
-    composeTestRule.setContent { InfoScreen(navigationActions) }
+    composeTestRule.setContent {
+      InfoScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Fill only partial inputs
     composeTestRule.onNodeWithTag("firstNameInput").performTextInput("John")
@@ -143,7 +164,9 @@ class InfoScreenTest {
 
   @Test
   fun testBackButtonNavigatesBack() {
-    composeTestRule.setContent { InfoScreen(navigationActions) }
+    composeTestRule.setContent {
+      InfoScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Click the back button
     composeTestRule.onNodeWithTag("goBackButton").performClick()

@@ -2,6 +2,8 @@ package com.arygm.quickfix.ui.authentication
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import org.junit.Before
@@ -16,17 +18,21 @@ class WelcomeScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
+  private lateinit var profileRepository: ProfileRepository
+  private lateinit var profileViewModel: ProfileViewModel
 
   @Before
   fun setup() {
     navigationActions = mock(NavigationActions::class.java)
+    profileRepository = mock(ProfileRepository::class.java)
+    profileViewModel = ProfileViewModel(profileRepository)
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.WELCOME)
   }
 
   @Test
   fun testInitialState() {
-    composeTestRule.setContent { WelcomeScreen(navigationActions) }
+    composeTestRule.setContent { WelcomeScreen(navigationActions, profileViewModel) }
 
     // Check if the background image is displayed
     composeTestRule.onNodeWithTag("welcomeBox").assertIsDisplayed()
@@ -56,7 +62,7 @@ class WelcomeScreenTest {
 
   @Test
   fun testLogInButtonClickNavigatesToLogin() {
-    composeTestRule.setContent { WelcomeScreen(navigationActions) }
+    composeTestRule.setContent { WelcomeScreen(navigationActions, profileViewModel) }
 
     // Click the "LOG IN TO QUICKFIX" button
     composeTestRule.onNodeWithTag("logInButton").performClick()
@@ -71,7 +77,7 @@ class WelcomeScreenTest {
 
   @Test
   fun testRegistrationButtonClickNavigatesToInfo() {
-    composeTestRule.setContent { WelcomeScreen(navigationActions) }
+    composeTestRule.setContent { WelcomeScreen(navigationActions, profileViewModel) }
 
     // Click the "REGISTER TO QUICKFIX" button
     composeTestRule.onNodeWithTag("RegistrationButton").performClick()
@@ -86,7 +92,7 @@ class WelcomeScreenTest {
 
   @Test
   fun testGoogleButtonClick() {
-    composeTestRule.setContent { WelcomeScreen(navigationActions) }
+    composeTestRule.setContent { WelcomeScreen(navigationActions, profileViewModel) }
 
     // Click the "CONTINUE WITH GOOGLE" button
     composeTestRule.onNodeWithTag("googleButton").performClick()

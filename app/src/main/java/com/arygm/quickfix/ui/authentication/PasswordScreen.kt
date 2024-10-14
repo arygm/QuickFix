@@ -56,7 +56,6 @@ import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.google.firebase.auth.FirebaseAuth
-import java.security.Timestamp
 import java.util.Calendar
 import java.util.GregorianCalendar
 
