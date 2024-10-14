@@ -206,7 +206,9 @@ fun PasswordScreen(
                                 password = password,
                                 birthDate = birthDate,
                                 profileViewModel = profileViewModel,
-                                onSuccess = { navigationActions.navigateTo(TopLevelDestinations.HOME) },
+                                onSuccess = {
+                                  navigationActions.navigateTo(TopLevelDestinations.HOME)
+                                },
                                 onFailure = {
                                   Toast.makeText(context, "Registration Failed.", Toast.LENGTH_LONG)
                                       .show()
