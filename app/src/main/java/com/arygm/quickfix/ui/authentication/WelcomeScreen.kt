@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.theme.*
 import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -131,7 +132,7 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
                 targetScreen = Screen.LOGIN
                 startAnimation = true
               },
-              buttonColor = colorScheme.secondary,
+              buttonColor = MaterialTheme.colorScheme.tertiary,
               modifier = Modifier.graphicsLayer(alpha = elementsAlpha).testTag("logInButton"),
               textColor = colorScheme.background)
 
@@ -144,7 +145,7 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
               buttonColor = colorScheme.background,
               modifier =
                   Modifier.graphicsLayer(alpha = elementsAlpha).testTag("RegistrationButton"),
-              textColor = colorScheme.secondary)
+              textColor = ButtonPrimary)
 
           Button(
               onClick = { /* TODO: Google action */},

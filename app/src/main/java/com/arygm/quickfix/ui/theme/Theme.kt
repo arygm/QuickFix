@@ -20,27 +20,45 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import com.arygm.quickfix.R
 
-private val DarkColorScheme =
-    darkColorScheme(
-        background = DarkBackgroundPrimary,
-        primary = DarkButtonPrimary,
-        secondary = DarkButtonSecondary,
-        error = DarkError,
-        onPrimary = DarkTextPrimary,
-        onSecondary = DarkTextSecondary,
-        errorContainer = ErrorTextField)
-
 private val LightColorScheme =
     lightColorScheme(
-        background = BackgroundPrimary,
         primary = ButtonPrimary,
         secondary = ButtonSecondary,
-        error = Error,
-        onPrimary = TextPrimary,
-        onSecondary = TextSecondary,
-        errorContainer = ErrorTextField,
-    )
+        tertiary = ButtonTertiary,
+        background = BackgroundPrimary,
+        surface = BackgroundSecondary,
+        onPrimary = TextButtonPrimary,
+        onSecondary = TextButtonSecondary,
+        onTertiary = TextButtonTertiary,
+        error = AccentPrimary,
+        onError = AccentSecondary,
+        onBackground = TextPrimary,
+        onSurface = TextSecondary,
+        outline = TitlePrimary,
+        surfaceVariant = ButtonQuaternary, // Fourth button color
+        onSurfaceVariant = TextButtonQuaternary, // Text color for the quaternary button,
+        onSecondaryContainer = TextDisabled,
+        tertiaryContainer = ButtonDisabled)
 
+private val DarkColorScheme =
+    darkColorScheme(
+        primary = DarkButtonPrimary,
+        secondary = DarkButtonSecondary,
+        tertiary = DarkButtonTertiary,
+        background = DarkBackgroundPrimary,
+        surface = DarkBackgroundSecondary,
+        onPrimary = DarkTextButtonPrimary,
+        onSecondary = DarkTextButtonSecondary,
+        onTertiary = DarkTextButtonTertiary,
+        error = DarkAccentPrimary,
+        onError = DarkAccentSecondary,
+        onBackground = DarkTextPrimary,
+        onSurface = DarkTextSecondary,
+        outline = DarkTitlePrimary,
+        surfaceVariant = DarkButtonQuaternary, // Fourth button color
+        onSurfaceVariant = DarkTextButtonQuaternary, // Text color for the quaternary button
+        onSecondaryContainer = DarkTextDisabled,
+        tertiaryContainer = DarkButtonDisabled)
 val poppinsFontFamily =
     FontFamily(
         Font(R.font.poppins_black, FontWeight.Black, FontStyle.Normal),
@@ -77,11 +95,17 @@ val poppinsTypography =
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 32.sp,
                 fontStyle = FontStyle.Normal),
+        headlineSmall =
+            TextStyle(
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.Medium,
+                fontSize = 12.sp,
+                fontStyle = FontStyle.Normal),
         labelLarge =
             TextStyle(
                 fontFamily = poppinsFontFamily,
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
+                fontSize = 22.sp,
                 fontStyle = FontStyle.Normal),
         labelMedium =
             TextStyle(

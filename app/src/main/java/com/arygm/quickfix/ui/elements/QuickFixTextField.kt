@@ -23,12 +23,14 @@ fun QuickFixTextField(
     isError: Boolean = false,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    color: Color = MaterialTheme.colorScheme.onSecondary,
+    color: Color = MaterialTheme.colorScheme.onSecondaryContainer,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
     singleLine: Boolean = true,
     errorText: String = "",
     showError: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    backgroundColor: Color = MaterialTheme.colorScheme.background
+    backgroundColor: Color = MaterialTheme.colorScheme.surface
 ) {
   OutlinedTextField(
       value = value,
@@ -40,6 +42,8 @@ fun QuickFixTextField(
             style = MaterialTheme.typography.labelSmall)
       },
       isError = isError,
+      leadingIcon = leadingIcon,
+      trailingIcon = trailingIcon,
       modifier = modifier.testTag("textField"),
       textStyle =
           androidx.compose.ui.text.TextStyle(
@@ -48,7 +52,7 @@ fun QuickFixTextField(
               fontSize = 16.sp,
               fontStyle = FontStyle.Normal),
       singleLine = singleLine,
-      shape = RoundedCornerShape(10.dp),
+      shape = RoundedCornerShape(12.dp),
       colors =
           OutlinedTextFieldDefaults.colors(
               unfocusedContainerColor = backgroundColor,
