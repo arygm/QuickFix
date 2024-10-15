@@ -131,9 +131,9 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
                 targetScreen = Screen.LOGIN
                 startAnimation = true
               },
-              buttonColor = colorScheme.secondary,
+              buttonColor = colorScheme.tertiary,
               modifier = Modifier.graphicsLayer(alpha = elementsAlpha).testTag("logInButton"),
-              textColor = colorScheme.background)
+              textColor = colorScheme.onTertiary)
 
           QuickFixButton(
               buttonText = "REGISTER TO QUICKFIX",
@@ -141,10 +141,10 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
                 targetScreen = Screen.INFO
                 startAnimation = true
               },
-              buttonColor = colorScheme.background,
+              buttonColor = colorScheme.surfaceVariant,
               modifier =
                   Modifier.graphicsLayer(alpha = elementsAlpha).testTag("RegistrationButton"),
-              textColor = colorScheme.secondary)
+              textColor = colorScheme.onSurfaceVariant)
 
           Button(
               onClick = { /* TODO: Google action */},
