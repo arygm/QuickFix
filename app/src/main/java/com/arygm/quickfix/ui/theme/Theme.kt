@@ -22,59 +22,79 @@ import com.arygm.quickfix.R
 
 private val DarkColorScheme =
     darkColorScheme(
-        background = DarkSlateGray,
-        primary = DarkBordeaux,
-        secondary = RosyBrown,
-        tertiary = Silver,
-        error = IndianRed)
+        background = DarkBackgroundPrimary,
+        primary = DarkButtonPrimary,
+        secondary = DarkButtonSecondary,
+        error = DarkError,
+        onPrimary = DarkTextPrimary,
+        onSecondary = DarkTextSecondary,
+        errorContainer = ErrorTextField)
 
 private val LightColorScheme =
     lightColorScheme(
-        background = White,
-        primary = Orange,
-        secondary = Bordeaux,
-        tertiary = LightGray,
-        error = Tomato,
+        background = BackgroundPrimary,
+        primary = ButtonPrimary,
+        secondary = ButtonSecondary,
+        error = Error,
+        onPrimary = TextPrimary,
+        onSecondary = TextSecondary,
+        errorContainer = ErrorTextField,
     )
 
-val interFontFamily =
+val poppinsFontFamily =
     FontFamily(
-        Font(R.font.inter_extrabolditalic, FontWeight.ExtraBold, FontStyle.Italic),
-        Font(R.font.inter_extrabold, FontWeight.ExtraBold, FontStyle.Normal),
+        Font(R.font.poppins_black, FontWeight.Black, FontStyle.Normal),
+        Font(R.font.poppins_blackitalic, FontWeight.Black, FontStyle.Italic),
+        Font(R.font.poppins_extrabold, FontWeight.ExtraBold, FontStyle.Normal),
+        Font(R.font.poppins_extrabolditalic, FontWeight.ExtraBold, FontStyle.Italic),
+        Font(R.font.poppins_bold, FontWeight.Bold, FontStyle.Normal),
+        Font(R.font.poppins_bolditalic, FontWeight.Bold, FontStyle.Italic),
+        Font(R.font.poppins_semibold, FontWeight.SemiBold, FontStyle.Normal),
+        Font(R.font.poppins_semibolditalic, FontWeight.SemiBold, FontStyle.Italic),
+        Font(R.font.poppins_medium, FontWeight.Medium, FontStyle.Normal),
+        Font(R.font.poppins_mediumitalic, FontWeight.Medium, FontStyle.Italic),
+        Font(R.font.poppins_regular, FontWeight.Normal, FontStyle.Normal),
+        Font(R.font.poppins_italic, FontWeight.Normal, FontStyle.Italic),
+        Font(R.font.poppins_light, FontWeight.Light, FontStyle.Normal),
+        Font(R.font.poppins_lightitalic, FontWeight.Light, FontStyle.Italic),
+        Font(R.font.poppins_extralight, FontWeight.ExtraLight, FontStyle.Normal),
+        Font(R.font.poppins_extralightitalic, FontWeight.ExtraLight, FontStyle.Italic),
+        Font(R.font.poppins_thin, FontWeight.Thin, FontStyle.Normal),
+        Font(R.font.poppins_thinitalic, FontWeight.Thin, FontStyle.Italic),
     )
 
-val interTypography =
+val poppinsTypography =
     Typography(
         titleLarge =
             TextStyle(
-                fontFamily = interFontFamily,
+                fontFamily = poppinsFontFamily,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 64.sp,
-                fontStyle = FontStyle.Italic),
+                fontStyle = FontStyle.Normal),
         headlineLarge =
             TextStyle(
-                fontFamily = interFontFamily,
+                fontFamily = poppinsFontFamily,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 32.sp,
-                fontStyle = FontStyle.Italic),
+                fontStyle = FontStyle.Normal),
         labelLarge =
             TextStyle(
-                fontFamily = interFontFamily,
-                fontWeight = FontWeight.ExtraBold,
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
-                fontStyle = FontStyle.Italic),
+                fontStyle = FontStyle.Normal),
         labelMedium =
             TextStyle(
-                fontFamily = interFontFamily,
+                fontFamily = poppinsFontFamily,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 18.sp,
-                fontStyle = FontStyle.Italic),
+                fontStyle = FontStyle.Normal),
         labelSmall =
             TextStyle(
-                fontFamily = interFontFamily,
-                fontWeight = FontWeight.ExtraBold,
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.Normal,
                 fontSize = 12.sp,
-                fontStyle = FontStyle.Italic),
+                fontStyle = FontStyle.Normal),
     )
 
 @Composable
@@ -101,5 +121,5 @@ fun QuickFixTheme(
     }
   }
 
-  MaterialTheme(colorScheme = colorScheme, typography = interTypography, content = content)
+  MaterialTheme(colorScheme = colorScheme, typography = poppinsTypography, content = content)
 }
