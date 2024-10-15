@@ -13,10 +13,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.arygm.quickfix.ui.ActivityScreen
+import com.arygm.quickfix.ui.ProfileScreen
 import com.arygm.quickfix.ui.AnnouncementScreen
-import com.arygm.quickfix.ui.CalendarScreen
-import com.arygm.quickfix.ui.MapScreen
+import com.arygm.quickfix.ui.SearchScreen
+import com.arygm.quickfix.ui.DashboardScreen
 import com.arygm.quickfix.ui.OtherScreen
 import com.arygm.quickfix.ui.authentication.InfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
@@ -49,7 +49,7 @@ fun QuickFixApp() {
   val navigationActions = NavigationActions(navController)
 
   val isUser = false // TODO: This variable needs to get its value after the authentication
-  NavHost(navController = navController, startDestination = Route.WELCOME) {
+  NavHost(navController = navController, startDestination = Route.HOME) {
     navigation(
         startDestination = Screen.WELCOME,
         route = Route.WELCOME,
@@ -69,10 +69,10 @@ fun QuickFixApp() {
       composable(Screen.MESSAGES) { HomeScreen(navigationActions, isUser) }
     }
     navigation(
-        startDestination = Screen.CALENDAR,
-        route = Route.CALENDAR,
+        startDestination = Screen.SEARCH,
+        route = Route.SEARCH,
     ) {
-      composable(Screen.CALENDAR) { CalendarScreen(navigationActions, isUser) }
+      composable(Screen.SEARCH) { SearchScreen(navigationActions, isUser) }
     }
     navigation(
         startDestination = Screen.ANNOUNCEMENT,
@@ -81,16 +81,16 @@ fun QuickFixApp() {
       composable(Screen.ANNOUNCEMENT) { AnnouncementScreen(navigationActions, isUser) }
     }
     navigation(
-        startDestination = Screen.MAP,
-        route = Route.MAP,
+        startDestination = Screen.DASHBOARD,
+        route = Route.DASHBOARD,
     ) {
-      composable(Screen.MAP) { MapScreen(navigationActions, isUser) }
+      composable(Screen.DASHBOARD) { DashboardScreen(navigationActions, isUser) }
     }
     navigation(
-        startDestination = Screen.ACTIVITY,
-        route = Route.ACTIVITY,
+        startDestination = Screen.PROFILE,
+        route = Route.PROFILE,
     ) {
-      composable(Screen.ACTIVITY) { ActivityScreen(navigationActions, isUser) }
+      composable(Screen.PROFILE) { ProfileScreen(navigationActions, isUser) }
     }
     navigation(
         startDestination = Screen.OTHER,

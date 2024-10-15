@@ -17,16 +17,17 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 
 @Composable
-fun CalendarScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
-
+fun ProfileScreen(navigationActions: NavigationActions, isUser: Boolean) {
   // Use Scaffold for the layout structure
   Scaffold(
       containerColor = colorScheme.background,
-      topBar = { QuickFixMainTopBar("CALENDAR", modifier = Modifier.testTag("CalendarTopBar")) },
+      topBar = {
+        QuickFixMainTopBar(title = "PROFILE", modifier = Modifier.testTag("ProfileTopBar"))
+      },
       bottomBar = {
         // Boolean isUser = true for this HomeScreen
         BottomNavigationMenu(
-            selectedItem = Route.CALENDAR, // Start with the "Home" route
+            selectedItem = Route.PROFILE, // Start with the "Home" route
             onTabSelect = { selectedDestination ->
               // Use this block to navigate based on the selected tab
               navigationActions.navigateTo(selectedDestination)
@@ -36,12 +37,12 @@ fun CalendarScreen(navigationActions: NavigationActions, isUser: Boolean = true)
       },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().testTag("CalendarContent"),
+            modifier = Modifier.fillMaxSize().testTag("ProfileContent"),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
               Text(
-                  text = "Welcome to the CALENDAR Screen",
-                  modifier = Modifier.padding(padding).testTag("CalendarText"))
+                  text = "Welcome to the PROFILE Screen",
+                  modifier = Modifier.padding(padding).testTag("ProfileText"))
             }
       })
 }

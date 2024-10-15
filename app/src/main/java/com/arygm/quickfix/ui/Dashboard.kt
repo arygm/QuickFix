@@ -17,16 +17,16 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 
 @Composable
-fun MapScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
+fun DashboardScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
 
   // Use Scaffold for the layout structure
   Scaffold(
       containerColor = colorScheme.background,
-      topBar = { QuickFixMainTopBar("MAP", modifier = Modifier.testTag("MapTopBar")) },
+      topBar = { QuickFixMainTopBar("DASHBOARD", modifier = Modifier.testTag("DashboardTopBar")) },
       bottomBar = {
         // Boolean isUser = true for this HomeScreen
         BottomNavigationMenu(
-            selectedItem = Route.MAP, // Start with the "Home" route
+            selectedItem = Route.DASHBOARD, // Start with the "Home" route
             onTabSelect = { selectedDestination ->
               // Use this block to navigate based on the selected tab
               navigationActions.navigateTo(selectedDestination)
@@ -35,12 +35,12 @@ fun MapScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
       },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().testTag("MapContent"),
+            modifier = Modifier.fillMaxSize().testTag("DashboardContent"),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
               Text(
-                  text = "Welcome to the MAP Screen",
-                  modifier = Modifier.padding(padding).testTag("MapText"))
+                  text = "Welcome to the DASHBOARD Screen",
+                  modifier = Modifier.padding(padding).testTag("DashboardText"))
             }
       })
 }

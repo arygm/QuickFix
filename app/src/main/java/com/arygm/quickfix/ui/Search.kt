@@ -17,17 +17,16 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 
 @Composable
-fun ActivityScreen(navigationActions: NavigationActions, isUser: Boolean) {
+fun SearchScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
+
   // Use Scaffold for the layout structure
   Scaffold(
       containerColor = colorScheme.background,
-      topBar = {
-        QuickFixMainTopBar(title = "ACTIVITY", modifier = Modifier.testTag("ActivityTopBar"))
-      },
+      topBar = { QuickFixMainTopBar("SEARCH", modifier = Modifier.testTag("SearchTopBar")) },
       bottomBar = {
         // Boolean isUser = true for this HomeScreen
         BottomNavigationMenu(
-            selectedItem = Route.ACTIVITY, // Start with the "Home" route
+            selectedItem = Route.SEARCH, // Start with the "Home" route
             onTabSelect = { selectedDestination ->
               // Use this block to navigate based on the selected tab
               navigationActions.navigateTo(selectedDestination)
@@ -37,12 +36,12 @@ fun ActivityScreen(navigationActions: NavigationActions, isUser: Boolean) {
       },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().testTag("ActivityContent"),
+            modifier = Modifier.fillMaxSize().testTag("SearchContent"),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
               Text(
-                  text = "Welcome to the ACTIVITY Screen",
-                  modifier = Modifier.padding(padding).testTag("ActivityText"))
+                  text = "Welcome to the SEARCH Screen",
+                  modifier = Modifier.padding(padding).testTag("SearchText"))
             }
       })
 }
