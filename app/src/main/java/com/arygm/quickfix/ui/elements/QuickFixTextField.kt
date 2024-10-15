@@ -23,35 +23,37 @@ fun QuickFixTextField(
     isError: Boolean = false,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    color1: Color = MaterialTheme.colorScheme.primary,
-    color2: Color = MaterialTheme.colorScheme.secondary,
+    color: Color = MaterialTheme.colorScheme.onSecondary,
     singleLine: Boolean = true,
     errorText: String = "",
     showError: Boolean = false,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    backgroundColor: Color = MaterialTheme.colorScheme.background
 ) {
   OutlinedTextField(
       value = value,
       onValueChange = onValueChange,
-      label = {
-        Text(
-            text = label,
-            color = color2.copy(alpha = 0.6f),
-            style = MaterialTheme.typography.labelLarge)
-      },
+      placeholder = {
+          Text(
+              text = label,
+              color = color.copy(alpha = 0.6f),
+              style = MaterialTheme.typography.labelSmall)
+        },
       isError = isError,
       modifier = modifier.testTag("textField"),
       textStyle =
           androidx.compose.ui.text.TextStyle(
-              color = color2.copy(alpha = 1f), // Full opacity
-              fontWeight = FontWeight.ExtraBold,
-              fontSize = 20.sp,
-              fontStyle = FontStyle.Italic),
+              color = color.copy(alpha = 1f), // Full opacity
+              fontWeight = FontWeight.Normal,
+              fontSize = 16.sp,
+              fontStyle = FontStyle.Normal),
       singleLine = singleLine,
       shape = RoundedCornerShape(10.dp),
       colors =
           OutlinedTextFieldDefaults.colors(
-              focusedBorderColor = color1, unfocusedBorderColor = color1, cursorColor = color1),
+              unfocusedContainerColor = backgroundColor, focusedContainerColor = backgroundColor, errorContainerColor = MaterialTheme.colorScheme.errorContainer,
+              unfocusedPlaceholderColor = backgroundColor, focusedPlaceholderColor = backgroundColor, errorTextColor = MaterialTheme.colorScheme.error,
+              unfocusedBorderColor = Color.Transparent, focusedBorderColor = Color.Transparent, errorBorderColor = MaterialTheme.colorScheme.error),
       visualTransformation = visualTransformation,
       keyboardOptions = keyboardOptions)
 

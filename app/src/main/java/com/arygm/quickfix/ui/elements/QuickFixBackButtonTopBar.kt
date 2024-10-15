@@ -7,6 +7,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -14,6 +15,7 @@ import androidx.compose.ui.platform.testTag
 fun QuickFixBackButtonTopBar(
     onBackClick: () -> Unit,
     title: String = "",
+    color: Color = MaterialTheme.colorScheme.background,
     modifier: Modifier = Modifier
 ) {
   TopAppBar(
@@ -25,6 +27,6 @@ fun QuickFixBackButtonTopBar(
             modifier = Modifier.testTag("goBackButton"))
       },
       colors =
-          TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
+          TopAppBarDefaults.topAppBarColors(containerColor = color),
       modifier = modifier.testTag("goBackTopBar"))
 }
