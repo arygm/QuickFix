@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 
 @Composable
@@ -25,7 +26,7 @@ fun QuickFixBackButtonTopBarLogin(
                     com.arygm.quickfix.R.drawable.worker_image), // Replace with your image resource
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        modifier = Modifier.fillMaxSize())
+        modifier = Modifier.fillMaxSize().testTag("topBarLoginBackground"))
     QuickFixBackButtonTopBar(
         onBackClick = onBackClick, title = title, color = color, modifier = modifier)
   }
