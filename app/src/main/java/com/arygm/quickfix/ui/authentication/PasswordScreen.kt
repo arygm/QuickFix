@@ -272,8 +272,8 @@ fun createAccountWithEmailAndPassword(
                       firstName = firstName,
                       lastName = lastName,
                       email = email,
-                      password = "",
-                      birthDate = birthTimestamp)
+                      birthDate = birthTimestamp,
+                      description = "")
                 }
 
             profile?.let { createdProfile ->

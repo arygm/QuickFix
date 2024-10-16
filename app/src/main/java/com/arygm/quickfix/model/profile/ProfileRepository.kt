@@ -2,8 +2,6 @@ package com.arygm.quickfix.model.profile
 
 interface ProfileRepository {
 
-  fun getNewUid(): String
-
   fun init(onSuccess: () -> Unit)
 
   fun getProfiles(onSuccess: (List<Profile>) -> Unit, onFailure: (Exception) -> Unit)

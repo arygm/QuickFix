@@ -267,8 +267,8 @@ fun rememberFirebaseAuthLauncher(
                       firstName = firstName,
                       lastName = lastName,
                       email = email,
-                      password = "",
-                      birthDate = Timestamp.now())
+                      birthDate = Timestamp.now(),
+                      description = "")
 
               // Save the profile to Firestore
               profileViewModel.addProfile(

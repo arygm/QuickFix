@@ -31,11 +31,7 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
     repository.init { getProfiles() }
   }
 
-  fun getNewUid(): String {
-    return repository.getNewUid()
-  }
-
-  private fun getProfiles() {
+  fun getProfiles() {
     repository.getProfiles(
         onSuccess = { profiles_.value = it },
         onFailure = { e -> Log.e("ProfileViewModel", "Failed to fetch profiles: ${e.message}") })

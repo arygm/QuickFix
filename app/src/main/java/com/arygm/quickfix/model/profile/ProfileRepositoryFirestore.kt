@@ -11,10 +11,6 @@ class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRep
 
   private val collectionPath = "profiles"
 
-  override fun getNewUid(): String {
-    return db.collection(collectionPath).document().id
-  }
-
   override fun init(onSuccess: () -> Unit) {
     Firebase.auth.addAuthStateListener {
       if (it.currentUser != null) {
@@ -108,16 +104,16 @@ class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRep
       val firstName = document.getString("firstName") ?: return null
       val lastName = document.getString("lastName") ?: return null
       val email = document.getString("email") ?: return null
-      val password = document.getString("password") ?: return null
       val birthDate = document.getTimestamp("birthDate") ?: return null
+      val description = document.getString("description") ?: return null
 
       Profile(
           uid = uid,
           firstName = firstName,
           lastName = lastName,
           email = email,
-          password = password,
-          birthDate = birthDate)
+          birthDate = birthDate,
+          description = description)
     } catch (e: Exception) {
       Log.e("TodosRepositoryFirestore", "Error converting document to ToDo", e)
       null
