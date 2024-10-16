@@ -141,6 +141,9 @@ fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
     androidTestImplementation(dep)
     testImplementation(dep)
 }
+configurations.configureEach {
+    exclude(group = "com.google.protobuf", module = "protobuf-lite")
+}
 
 dependencies {
     implementation(libs.androidx.core.ktx)
