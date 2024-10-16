@@ -261,43 +261,41 @@ fun createAccountWithEmailAndPassword(
     onSuccess: () -> Unit,
     onFailure: () -> Unit
 ) {
-    firebaseAuth
-      .createUserWithEmailAndPassword(email, password)
-      .addOnCompleteListener { task ->
-        if (task.isSuccessful) {
-          val user = FirebaseAuth.getInstance().currentUser
-          user?.let {
-            val profile =
-                stringToTimestamp(birthDate)?.let { birthTimestamp ->
-                  Profile(
-                      uid = it.uid,
-                      firstName = firstName,
-                      lastName = lastName,
-                      email = email,
-                      birthDate = birthTimestamp,
-                      description = "")
-                }
-
-            profile?.let { createdProfile ->
-              profileViewModel.addProfile(
-                  createdProfile,
-                  onSuccess = {
-                    profileViewModel.setLoggedInProfile(createdProfile)
-                    onSuccess()
-                  },
-                  onFailure = {
-                    Log.e("Registration", "Failed to save profile")
-                    onFailure()
-                  })
+  firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+    if (task.isSuccessful) {
+      val user = FirebaseAuth.getInstance().currentUser
+      user?.let {
+        val profile =
+            stringToTimestamp(birthDate)?.let { birthTimestamp ->
+              Profile(
+                  uid = it.uid,
+                  firstName = firstName,
+                  lastName = lastName,
+                  email = email,
+                  birthDate = birthTimestamp,
+                  description = "")
             }
-                ?: run {
-                  Log.e("Registration", "Failed to create profile")
-                  onFailure()
-                }
-          }
-        } else {
-          Log.e("Registration", "Error creating account: ${task.exception?.message}")
-          onFailure()
+
+        profile?.let { createdProfile ->
+          profileViewModel.addProfile(
+              createdProfile,
+              onSuccess = {
+                profileViewModel.setLoggedInProfile(createdProfile)
+                onSuccess()
+              },
+              onFailure = {
+                Log.e("Registration", "Failed to save profile")
+                onFailure()
+              })
         }
+            ?: run {
+              Log.e("Registration", "Failed to create profile")
+              onFailure()
+            }
       }
+    } else {
+      Log.e("Registration", "Error creating account: ${task.exception?.message}")
+      onFailure()
+    }
+  }
 }
