@@ -23,6 +23,7 @@ import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.PasswordScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.home.HomeScreen
+import com.arygm.quickfix.ui.home.ProfileScreen
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
@@ -49,7 +50,7 @@ fun QuickFixApp() {
   val navigationActions = NavigationActions(navController)
 
   val isUser = false // TODO: This variable needs to get its value after the authentication
-  NavHost(navController = navController, startDestination = Route.WELCOME) {
+  NavHost(navController = navController, startDestination = Route.PROFILE) {
     navigation(
         startDestination = Screen.WELCOME,
         route = Route.WELCOME,
@@ -60,12 +61,12 @@ fun QuickFixApp() {
       composable(Screen.PASSWORD) { PasswordScreen(navigationActions) }
     }
     navigation(
-        startDestination = Screen.HOME,
-        route = Route.HOME,
+        startDestination = Screen.PROFILE,
+        route = Route.PROFILE,
     ) {
       composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
       // TODO Change the screen when implemented as well as the tests
-      composable(Screen.PROFILE) { HomeScreen(navigationActions, isUser) }
+      composable(Screen.PROFILE) { ProfileScreen(navigationActions) }
       composable(Screen.MESSAGES) { HomeScreen(navigationActions, isUser) }
     }
     navigation(

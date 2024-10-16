@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -19,6 +20,7 @@ object Route {
   const val OTHER = "Other"
   const val CALENDAR = "Calendar"
   const val MAP = "Map"
+  const val PROFILE = "Profile"
 }
 
 object Screen {
@@ -51,6 +53,9 @@ object TopLevelDestinations {
       TopLevelDestination(
           route = Route.CALENDAR, icon = Icons.Filled.DateRange, textId = "Calendar")
   val MAP = TopLevelDestination(route = Route.MAP, icon = Icons.Filled.Place, textId = "Map")
+  val PROFILE =
+      TopLevelDestination(
+          route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
 }
 
 val USER_TOP_LEVEL_DESTINATIONS =
