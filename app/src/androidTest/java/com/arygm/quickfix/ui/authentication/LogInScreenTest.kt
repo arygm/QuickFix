@@ -44,8 +44,11 @@ class LogInScreenTest {
     composeTestRule.onNodeWithTag("AnimationBox").assertIsDisplayed()
     composeTestRule.onNodeWithTag("BoxDecoration").assertIsDisplayed()
 
-    // Check that the "WELCOME BACK" text is displayed
+    // Check that the "Login" text is displayed
     composeTestRule.onNodeWithTag("WelcomeText").assertIsDisplayed()
+
+    // Check that the "Your perfect fix is just a click away" text is displayed
+    composeTestRule.onNodeWithTag("WelcomeTextBis").assertIsDisplayed()
 
     // Check that the email and password fields are empty initially
     composeTestRule.onNodeWithTag("inputEmail").assertIsDisplayed()
@@ -55,8 +58,13 @@ class LogInScreenTest {
     composeTestRule.onNodeWithTag("logInButton").assertIsDisplayed()
 
     // Check that the forgot password texts are displayed
-    composeTestRule.onNodeWithTag("forgotText").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("clickableFG").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("forgetPasswordButtonText").assertIsDisplayed()
+
+    // Check that the "Don't have an account?" text is displayed
+    composeTestRule.onNodeWithTag("noAccountText").assertIsDisplayed()
+
+    // Check that the "Create One" text is displayed
+    composeTestRule.onNodeWithTag("clickableCreateAccount").assertIsDisplayed()
   }
 
   @Test
@@ -116,8 +124,7 @@ class LogInScreenTest {
     composeTestRule.setContent { LogInScreen(navigationActions, profileViewModel) }
 
     // Check that the forgot password text is displayed
-    composeTestRule.onNodeWithTag("forgotText").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("clickableFG").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("forgetPasswordButtonText").assertIsDisplayed()
   }
 
   @Test

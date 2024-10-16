@@ -1,13 +1,6 @@
 package com.arygm.quickfix.ui.authentication
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.util.Log
-import android.widget.Toast
-import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
@@ -36,7 +29,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,51 +36,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
-import com.arygm.quickfix.ui.navigation.TopLevelDestinations
-import com.arygm.quickfix.utils.rememberFirebaseAuthLauncher
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.firebase.Firebase
-import com.google.firebase.Timestamp
-import com.google.firebase.auth.AuthResult
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.auth
+import com.arygm.quickfix.ui.theme.*
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun WelcomeScreen(navigationActions: NavigationActions, profileViewModel: ProfileViewModel) {
   val colorScheme = MaterialTheme.colorScheme
-
-  val context = LocalContext.current
-
-  val launcher =
-      rememberFirebaseAuthLauncher(
-          onAuthComplete = { result ->
-            Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
-            Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
-            navigationActions.navigateTo(TopLevelDestinations.HOME)
-          },
-          onAuthError = {
-            Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}")
-            Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show()
-          },
-          profileViewModel)
-
-  val token = stringResource(com.arygm.quickfix.R.string.default_web_client_id)
 
   var fadeOut by remember { mutableStateOf(false) }
   var expandBox by remember { mutableStateOf(false) }
@@ -172,7 +133,7 @@ fun WelcomeScreen(navigationActions: NavigationActions, profileViewModel: Profil
                 targetScreen = Screen.LOGIN
                 startAnimation = true
               },
-              buttonColor = colorScheme.secondary,
+              buttonColor = MaterialTheme.colorScheme.tertiary,
               modifier = Modifier.graphicsLayer(alpha = elementsAlpha).testTag("logInButton"),
               textColor = colorScheme.background)
 
@@ -185,18 +146,10 @@ fun WelcomeScreen(navigationActions: NavigationActions, profileViewModel: Profil
               buttonColor = colorScheme.background,
               modifier =
                   Modifier.graphicsLayer(alpha = elementsAlpha).testTag("RegistrationButton"),
-              textColor = colorScheme.secondary)
+              textColor = ButtonPrimary)
 
           Button(
-              onClick = {
-                val gso =
-                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(token)
-                        .requestEmail()
-                        .build()
-                val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                launcher.launch(googleSignInClient.signInIntent)
-              },
+              onClick = { /* TODO: Google action */},
               colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
               border = BorderStroke(2.dp, colorScheme.background),
               modifier =
@@ -231,4 +184,3 @@ fun WelcomeScreen(navigationActions: NavigationActions, profileViewModel: Profil
         }
   }
 }
-

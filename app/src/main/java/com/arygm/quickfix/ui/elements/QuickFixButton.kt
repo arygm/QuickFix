@@ -1,5 +1,8 @@
 package com.arygm.quickfix.ui.elements
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -22,6 +26,9 @@ fun QuickFixButton(
     buttonColor: Color,
     buttonOpacity: Float = 1f,
     textColor: Color,
+    textStyle: TextStyle = MaterialTheme.typography.labelMedium,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.Center,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
@@ -36,7 +43,13 @@ fun QuickFixButton(
               .graphicsLayer(alpha = buttonOpacity)
               .testTag("quickfixButton"),
       shape = RoundedCornerShape(10.dp),
+      contentPadding = contentPadding,
       enabled = enabled) {
-        Text(text = buttonText, style = MaterialTheme.typography.labelMedium, color = textColor)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = horizontalArrangement,
+        ) {
+          Text(text = buttonText, style = textStyle, color = textColor)
+        }
       }
 }

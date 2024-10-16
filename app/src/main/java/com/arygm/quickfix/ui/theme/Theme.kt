@@ -20,61 +20,105 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import com.arygm.quickfix.R
 
-private val DarkColorScheme =
-    darkColorScheme(
-        background = DarkSlateGray,
-        primary = DarkBordeaux,
-        secondary = RosyBrown,
-        tertiary = Silver,
-        error = IndianRed)
-
 private val LightColorScheme =
     lightColorScheme(
-        background = White,
-        primary = Orange,
-        secondary = Bordeaux,
-        tertiary = LightGray,
-        error = Tomato,
-    )
+        primary = ButtonPrimary,
+        secondary = ButtonSecondary,
+        tertiary = ButtonTertiary,
+        background = BackgroundPrimary,
+        surface = BackgroundSecondary,
+        onPrimary = TextButtonPrimary,
+        onSecondary = TextButtonSecondary,
+        onTertiary = TextButtonTertiary,
+        error = AccentPrimary,
+        onError = AccentSecondary,
+        onBackground = TextPrimary,
+        onSurface = TextSecondary,
+        outline = TitlePrimary,
+        surfaceVariant = ButtonQuaternary, // Fourth button color
+        onSurfaceVariant = TextButtonQuaternary, // Text color for the quaternary button,
+        onSecondaryContainer = TextDisabled,
+        tertiaryContainer = ButtonDisabled)
 
-val interFontFamily =
+private val DarkColorScheme =
+    darkColorScheme(
+        primary = DarkButtonPrimary,
+        secondary = DarkButtonSecondary,
+        tertiary = DarkButtonTertiary,
+        background = DarkBackgroundPrimary,
+        surface = DarkBackgroundSecondary,
+        onPrimary = DarkTextButtonPrimary,
+        onSecondary = DarkTextButtonSecondary,
+        onTertiary = DarkTextButtonTertiary,
+        error = DarkAccentPrimary,
+        onError = DarkAccentSecondary,
+        onBackground = DarkTextPrimary,
+        onSurface = DarkTextSecondary,
+        outline = DarkTitlePrimary,
+        surfaceVariant = DarkButtonQuaternary, // Fourth button color
+        onSurfaceVariant = DarkTextButtonQuaternary, // Text color for the quaternary button
+        onSecondaryContainer = DarkTextDisabled,
+        tertiaryContainer = DarkButtonDisabled)
+val poppinsFontFamily =
     FontFamily(
-        Font(R.font.inter_extrabolditalic, FontWeight.ExtraBold, FontStyle.Italic),
-        Font(R.font.inter_extrabold, FontWeight.ExtraBold, FontStyle.Normal),
+        Font(R.font.poppins_black, FontWeight.Black, FontStyle.Normal),
+        Font(R.font.poppins_blackitalic, FontWeight.Black, FontStyle.Italic),
+        Font(R.font.poppins_extrabold, FontWeight.ExtraBold, FontStyle.Normal),
+        Font(R.font.poppins_extrabolditalic, FontWeight.ExtraBold, FontStyle.Italic),
+        Font(R.font.poppins_bold, FontWeight.Bold, FontStyle.Normal),
+        Font(R.font.poppins_bolditalic, FontWeight.Bold, FontStyle.Italic),
+        Font(R.font.poppins_semibold, FontWeight.SemiBold, FontStyle.Normal),
+        Font(R.font.poppins_semibolditalic, FontWeight.SemiBold, FontStyle.Italic),
+        Font(R.font.poppins_medium, FontWeight.Medium, FontStyle.Normal),
+        Font(R.font.poppins_mediumitalic, FontWeight.Medium, FontStyle.Italic),
+        Font(R.font.poppins_regular, FontWeight.Normal, FontStyle.Normal),
+        Font(R.font.poppins_italic, FontWeight.Normal, FontStyle.Italic),
+        Font(R.font.poppins_light, FontWeight.Light, FontStyle.Normal),
+        Font(R.font.poppins_lightitalic, FontWeight.Light, FontStyle.Italic),
+        Font(R.font.poppins_extralight, FontWeight.ExtraLight, FontStyle.Normal),
+        Font(R.font.poppins_extralightitalic, FontWeight.ExtraLight, FontStyle.Italic),
+        Font(R.font.poppins_thin, FontWeight.Thin, FontStyle.Normal),
+        Font(R.font.poppins_thinitalic, FontWeight.Thin, FontStyle.Italic),
     )
 
-val interTypography =
+val poppinsTypography =
     Typography(
         titleLarge =
             TextStyle(
-                fontFamily = interFontFamily,
+                fontFamily = poppinsFontFamily,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 64.sp,
-                fontStyle = FontStyle.Italic),
+                fontStyle = FontStyle.Normal),
         headlineLarge =
             TextStyle(
-                fontFamily = interFontFamily,
+                fontFamily = poppinsFontFamily,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 32.sp,
-                fontStyle = FontStyle.Italic),
+                fontStyle = FontStyle.Normal),
+        headlineSmall =
+            TextStyle(
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.Medium,
+                fontSize = 12.sp,
+                fontStyle = FontStyle.Normal),
         labelLarge =
             TextStyle(
-                fontFamily = interFontFamily,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 20.sp,
-                fontStyle = FontStyle.Italic),
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp,
+                fontStyle = FontStyle.Normal),
         labelMedium =
             TextStyle(
-                fontFamily = interFontFamily,
+                fontFamily = poppinsFontFamily,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 18.sp,
-                fontStyle = FontStyle.Italic),
+                fontStyle = FontStyle.Normal),
         labelSmall =
             TextStyle(
-                fontFamily = interFontFamily,
-                fontWeight = FontWeight.ExtraBold,
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.Normal,
                 fontSize = 12.sp,
-                fontStyle = FontStyle.Italic),
+                fontStyle = FontStyle.Normal),
     )
 
 @Composable
@@ -101,5 +145,5 @@ fun QuickFixTheme(
     }
   }
 
-  MaterialTheme(colorScheme = colorScheme, typography = interTypography, content = content)
+  MaterialTheme(colorScheme = colorScheme, typography = poppinsTypography, content = content)
 }
