@@ -48,7 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
-import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBarLogin
+import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
@@ -102,13 +102,23 @@ fun LogInScreen(navigationActions: NavigationActions) {
                           alignment = Alignment.TopStart,
                           modifier = Modifier.fillMaxWidth().size(180.dp))
 
-                      QuickFixBackButtonTopBarLogin(
-                          onBackClick = {
-                            shrinkBox = false
-                            navigationActions.goBack()
-                          },
-                          color = Color.Transparent,
-                      )
+                      Box(modifier = Modifier.fillMaxSize()) {
+                        Image(
+                            painter =
+                                painterResource(
+                                    id =
+                                        com.arygm.quickfix.R.drawable
+                                            .worker_image), // Replace with your image resource
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize().testTag("topBarLoginBackground"))
+                        QuickFixBackButtonTopBar(
+                            onBackClick = {
+                              shrinkBox = false
+                              navigationActions.goBack()
+                            },
+                            color = Color.Transparent)
+                      }
                     }
 
                 // Foreground content (on top of the TopAppBar)
@@ -147,7 +157,7 @@ fun LogInScreen(navigationActions: NavigationActions) {
                             Spacer(modifier = Modifier.padding(3.dp))
 
                             Text(
-                                "Your perfect fix is just a click away !",
+                                "Your perfect fix is just a click away!",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.onSecondaryContainer,
                                 modifier = Modifier.testTag("WelcomeTextBis"))
@@ -254,7 +264,6 @@ fun LogInScreen(navigationActions: NavigationActions) {
                             } else {
                               Spacer(modifier = Modifier.padding(40.dp))
                             }
-                            // Add more content like text fields, buttons, etc.
                           }
                     }
               }
