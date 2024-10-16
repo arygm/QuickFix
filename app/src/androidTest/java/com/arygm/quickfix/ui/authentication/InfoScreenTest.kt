@@ -121,6 +121,9 @@ class InfoScreenTest {
 
     // Click the button and verify navigation
     composeTestRule.onNodeWithTag("nextButton").performClick()
+
+    composeTestRule.mainClock.advanceTimeBy(500L)
+
     Mockito.verify(navigationActions).navigateTo(Screen.PASSWORD)
   }
 
@@ -148,6 +151,8 @@ class InfoScreenTest {
     // Click the back button
     composeTestRule.onNodeWithTag("goBackButton").performClick()
 
+    // perform delay here 500ms
+    composeTestRule.mainClock.advanceTimeBy(500L)
     // Verify that the navigation action was triggered
     Mockito.verify(navigationActions).goBack()
   }

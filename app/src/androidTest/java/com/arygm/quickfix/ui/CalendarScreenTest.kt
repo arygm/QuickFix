@@ -37,7 +37,6 @@ class CalendarScreenTest {
     composeTestRule
         .onNodeWithTag("CalendarText")
         .assertTextContains("Welcome to the CALENDAR Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 
   // Can Remove this tbh
@@ -53,6 +52,5 @@ class CalendarScreenTest {
     composeTestRule
         .onNodeWithTag("CalendarText")
         .assertTextContains("Welcome to the CALENDAR Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 }

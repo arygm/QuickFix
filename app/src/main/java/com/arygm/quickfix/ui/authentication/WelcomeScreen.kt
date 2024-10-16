@@ -50,8 +50,8 @@ import kotlinx.coroutines.delay
 fun WelcomeScreen(navigationActions: NavigationActions) {
   val colorScheme = MaterialTheme.colorScheme
 
-  var fadeOut by remember { mutableStateOf(false) }
-  var expandBox by remember { mutableStateOf(false) }
+  var fadeOut by remember { mutableStateOf(true) }
+  var expandBox by remember { mutableStateOf(true) }
   var startAnimation by remember { mutableStateOf(false) }
   var targetScreen by remember { mutableStateOf("") }
 
@@ -61,6 +61,13 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
   val boxOffsetX by
       animateDpAsState(targetValue = if (expandBox) 0.dp else (-890).dp, label = "moveBoxX")
 
+  LaunchedEffect(Unit) {
+    expandBox = false // Start expanding the box
+    delay(200) // Wait for box to fully shrink
+    fadeOut = false // Start fade-out animation
+    delay(300) // Wait for fade-out to complete
+    // Navigate to RegistrationScreen
+  }
   // Animation sequence when the Register button is clicked
   @Composable
   if (startAnimation) {
