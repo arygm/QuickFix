@@ -51,7 +51,7 @@ fun QuickFixApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
   val profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
-  val registrationViewModel: RegistrationViewModel = RegistrationViewModel()
+  val registrationViewModel = RegistrationViewModel()
 
   val isUser = false // TODO: This variable needs to get its value after the authentication
   NavHost(navController = navController, startDestination = Route.WELCOME) {

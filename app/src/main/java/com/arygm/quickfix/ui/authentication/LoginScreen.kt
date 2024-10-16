@@ -2,7 +2,6 @@ package com.arygm.quickfix.ui.authentication
 
 import QuickFixTextField
 import android.annotation.SuppressLint
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -47,177 +46,175 @@ import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.isValidEmail
-import com.google.firebase.auth.FirebaseAuth
+import com.arygm.quickfix.utils.signInWithEmailAndFetchProfile
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileViewModel) {
 
-  val context = LocalContext.current
+    val context = LocalContext.current
 
-  var errorHasOccured by remember { mutableStateOf(false) }
+    var errorHasOccured by remember { mutableStateOf(false) }
 
-  var email by remember { mutableStateOf("") }
-  var password by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
-  var shrinkBox by remember { mutableStateOf(false) }
-  val boxOffsetX by
-      animateDpAsState(
-          targetValue = if (shrinkBox) BOX_OFFSET_X_SHRUNK else BOX_OFFSET_X_EXPANDED,
-          animationSpec = tween(durationMillis = BOX_COLLAPSE_SPEED),
-          label = "shrinkingBox")
+    var shrinkBox by remember { mutableStateOf(false) }
+    val boxOffsetX by
+    animateDpAsState(
+        targetValue = if (shrinkBox) BOX_OFFSET_X_SHRUNK else BOX_OFFSET_X_EXPANDED,
+        animationSpec = tween(durationMillis = BOX_COLLAPSE_SPEED),
+        label = "shrinkingBox"
+    )
 
-  LaunchedEffect(Unit) { shrinkBox = true }
+    LaunchedEffect(Unit) { shrinkBox = true }
 
-  val filledForm = email.isNotEmpty() && password.isNotEmpty()
+    val filledForm = email.isNotEmpty() && password.isNotEmpty()
 
-  Box(modifier = Modifier.fillMaxSize().testTag("LoginBox")) {
-    QuickFixAnimatedBox(boxOffsetX)
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .testTag("LoginBox")) {
+        QuickFixAnimatedBox(boxOffsetX)
 
-    Scaffold(
-        modifier = Modifier.background(colorScheme.background).testTag("LoginScaffold"),
-        topBar = {
-          QuickFixBackButtonTopBar(
-              onBackClick = {
-                shrinkBox = false
-                navigationActions.goBack()
-              })
-        },
-        content = { pd ->
-          Box(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .background(colorScheme.background)
-                      .padding(pd)
-                      .testTag("ContentBox")) {
+        Scaffold(
+            modifier = Modifier
+                .background(colorScheme.background)
+                .testTag("LoginScaffold"),
+            topBar = {
+                QuickFixBackButtonTopBar(
+                    onBackClick = {
+                        shrinkBox = false
+                        navigationActions.goBack()
+                    })
+            },
+            content = { pd ->
                 Box(
                     modifier =
-                        Modifier.align(Alignment.BottomStart)
+                    Modifier
+                        .fillMaxSize()
+                        .background(colorScheme.background)
+                        .padding(pd)
+                        .testTag("ContentBox")
+                ) {
+                    Box(
+                        modifier =
+                        Modifier
+                            .align(Alignment.BottomStart)
                             .size(180.dp, 180.dp)
                             .offset(x = (-150).dp, y = 64.dp)
                             .graphicsLayer(rotationZ = 57f)
                             .background(colorScheme.primary)
                             .zIndex(0f)
-                            .testTag("BoxDecoration"))
+                            .testTag("BoxDecoration")
+                    )
 
-                Column(
-                    modifier = Modifier.fillMaxSize().padding(start = 24.dp),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Top) {
-                      Spacer(modifier = Modifier.padding(100.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(start = 24.dp),
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        Spacer(modifier = Modifier.padding(100.dp))
 
-                      Text(
-                          "WELCOME BACK",
-                          style = MaterialTheme.typography.headlineLarge,
-                          color = colorScheme.primary,
-                          modifier = Modifier.testTag("WelcomeText"))
-
-                      Spacer(modifier = Modifier.padding(6.dp))
-
-                      QuickFixTextField(
-                          value = email,
-                          onValueChange = { email = it },
-                          label = "E-MAIL ADDRESS",
-                          isError = !isValidEmail(email),
-                          errorText = "INVALID EMAIL",
-                          modifier = Modifier.width(360.dp).testTag("inputEmail"),
-                          showError = email.isNotEmpty() && !isValidEmail(email))
-
-                      Spacer(modifier = Modifier.padding(3.dp))
-
-                      QuickFixTextField(
-                          value = password,
-                          onValueChange = { password = it },
-                          label = "PASSWORD",
-                          visualTransformation = PasswordVisualTransformation(),
-                          modifier = Modifier.width(360.dp).testTag("inputPassword"))
-
-                      Spacer(modifier = Modifier.padding(3.dp))
-
-                      Row(modifier = Modifier.padding(start = 3.dp)) {
                         Text(
-                            "FORGOT YOUR PASSWORD ? TRY",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFFC0C0C0),
-                            modifier = Modifier.testTag("forgotText"))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            "THIS.",
-                            style = MaterialTheme.typography.labelSmall,
-                            textDecoration = TextDecoration.Underline,
+                            "WELCOME BACK",
+                            style = MaterialTheme.typography.headlineLarge,
                             color = colorScheme.primary,
-                            modifier = Modifier.testTag("clickableFG"))
-                      }
+                            modifier = Modifier.testTag("WelcomeText")
+                        )
 
-                      if (errorHasOccured) {
-                        Text(
-                            "INVALID EMAIL OR PASSWORD, TRY AGAIN.",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colorScheme.error,
-                            modifier = Modifier.padding(start = 3.dp).testTag("errorText"))
-                        Spacer(modifier = Modifier.padding(22.9.dp))
-                      } else {
-                        Spacer(modifier = Modifier.padding(30.dp))
-                      }
+                        Spacer(modifier = Modifier.padding(6.dp))
 
-                      QuickFixButton(
-                          buttonText = "LOG IN",
-                          onClickAction = {
-                            shrinkBox = false
-                            signInWithEmailAndFetchProfile(
-                                email,
-                                password,
-                                profileViewModel,
-                                onResult = { result ->
-                                  if (result) {
-                                    navigationActions.navigateTo(TopLevelDestinations.HOME)
-                                  } else {
-                                    Toast.makeText(context, "Log In Failed.", Toast.LENGTH_LONG)
-                                        .show()
-                                    errorHasOccured = true
-                                  }
-                                })
-                          },
-                          buttonColor = colorScheme.secondary,
-                          textColor = colorScheme.background,
-                          modifier = Modifier.graphicsLayer(alpha = 1f).testTag("logInButton"),
-                          enabled = filledForm && isValidEmail(email))
+                        QuickFixTextField(
+                            value = email,
+                            onValueChange = { email = it },
+                            label = "E-MAIL ADDRESS",
+                            isError = !isValidEmail(email),
+                            errorText = "INVALID EMAIL",
+                            modifier = Modifier
+                                .width(360.dp)
+                                .testTag("inputEmail"),
+                            showError = email.isNotEmpty() && !isValidEmail(email)
+                        )
+
+                        Spacer(modifier = Modifier.padding(3.dp))
+
+                        QuickFixTextField(
+                            value = password,
+                            onValueChange = { password = it },
+                            label = "PASSWORD",
+                            visualTransformation = PasswordVisualTransformation(),
+                            modifier = Modifier
+                                .width(360.dp)
+                                .testTag("inputPassword")
+                        )
+
+                        Spacer(modifier = Modifier.padding(3.dp))
+
+                        Row(modifier = Modifier.padding(start = 3.dp)) {
+                            Text(
+                                "FORGOT YOUR PASSWORD ? TRY",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFFC0C0C0),
+                                modifier = Modifier.testTag("forgotText")
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                "THIS.",
+                                style = MaterialTheme.typography.labelSmall,
+                                textDecoration = TextDecoration.Underline,
+                                color = colorScheme.primary,
+                                modifier = Modifier.testTag("clickableFG")
+                            )
+                        }
+
+                        if (errorHasOccured) {
+                            Text(
+                                "INVALID EMAIL OR PASSWORD, TRY AGAIN.",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colorScheme.error,
+                                modifier = Modifier
+                                    .padding(start = 3.dp)
+                                    .testTag("errorText")
+                            )
+                            Spacer(modifier = Modifier.padding(22.9.dp))
+                        } else {
+                            Spacer(modifier = Modifier.padding(30.dp))
+                        }
+
+                        QuickFixButton(
+                            buttonText = "LOG IN",
+                            onClickAction = {
+                                shrinkBox = false
+                                signInWithEmailAndFetchProfile(
+                                    email,
+                                    password,
+                                    profileViewModel,
+                                    onResult = { result ->
+                                        if (result) {
+                                            navigationActions.navigateTo(TopLevelDestinations.HOME)
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                "Log In Failed.",
+                                                Toast.LENGTH_LONG
+                                            )
+                                                .show()
+                                            errorHasOccured = true
+                                        }
+                                    })
+                            },
+                            buttonColor = colorScheme.secondary,
+                            textColor = colorScheme.background,
+                            modifier = Modifier
+                                .graphicsLayer(alpha = 1f)
+                                .testTag("logInButton"),
+                            enabled = filledForm && isValidEmail(email)
+                        )
                     }
-              }
-        })
-  }
+                }
+            })
+    }
 }
 
-fun signInWithEmailAndFetchProfile(
-    email: String,
-    password: String,
-    profileViewModel: ProfileViewModel,
-    onResult: (Boolean) -> Unit
-) {
-  FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
-      task ->
-    if (task.isSuccessful) {
-      val user = FirebaseAuth.getInstance().currentUser
-      user?.let {
-        profileViewModel.fetchUserProfile(
-            it.uid,
-            onResult = { profile ->
-              if (profile != null) {
-                profileViewModel.setLoggedInProfile(profile)
-                onResult(true)
-              } else {
-                Log.e("Login Screen", "Error Logging in Profile.")
-                onResult(false)
-              }
-            })
-      }
-          ?: run {
-            Log.e("Login Screen", "Error Logging in Profile.")
-            onResult(false)
-          }
-    } else {
-      Log.e("Login Screen", "Error Logging in Profile.")
-      onResult(false)
-    }
-  }
-}

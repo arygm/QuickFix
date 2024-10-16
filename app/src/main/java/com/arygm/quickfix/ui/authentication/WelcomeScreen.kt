@@ -55,6 +55,7 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
+import com.arygm.quickfix.utils.rememberFirebaseAuthLauncher
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -231,61 +232,3 @@ fun WelcomeScreen(navigationActions: NavigationActions, profileViewModel: Profil
   }
 }
 
-@Composable
-fun rememberFirebaseAuthLauncher(
-    onAuthComplete: (AuthResult) -> Unit,
-    onAuthError: (ApiException) -> Unit,
-    profileViewModel: ProfileViewModel
-): ManagedActivityResultLauncher<Intent, ActivityResult> {
-  val scope = rememberCoroutineScope()
-  return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-      result ->
-    val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-    try {
-      val account = task.getResult(ApiException::class.java)!!
-      val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-      scope.launch {
-        val authResult = Firebase.auth.signInWithCredential(credential).await()
-        val user = Firebase.auth.currentUser
-
-        user?.let {
-          profileViewModel.fetchUserProfile(it.uid) { existingProfile ->
-            if (existingProfile != null) {
-              profileViewModel.setLoggedInProfile(existingProfile)
-              onAuthComplete(authResult)
-            } else {
-              // Extract user information from Google account
-              val firstName = account.givenName ?: ""
-              val lastName = account.familyName ?: ""
-              val email = account.email ?: ""
-              val uid = user.uid
-
-              // Create a new Profile object
-              val profile =
-                  Profile(
-                      uid = uid,
-                      firstName = firstName,
-                      lastName = lastName,
-                      email = email,
-                      birthDate = Timestamp.now(),
-                      description = "")
-
-              // Save the profile to Firestore
-              profileViewModel.addProfile(
-                  profile,
-                  onSuccess = {
-                    profileViewModel.setLoggedInProfile(profile)
-                    onAuthComplete(authResult)
-                  },
-                  onFailure = { exception ->
-                    Log.e("Google SignIn", "Failed to save new profile", exception)
-                  })
-            }
-          }
-        } ?: run { Log.e("Google SignIn", "User Null After Sign In") }
-      }
-    } catch (e: ApiException) {
-      onAuthError(e)
-    }
-  }
-}

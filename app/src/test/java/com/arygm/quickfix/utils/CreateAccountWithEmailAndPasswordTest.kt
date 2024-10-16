@@ -1,10 +1,11 @@
-package com.arygm.quickfix.ui.authentication
+package com.arygm.quickfix.utils
 
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.ui.authentication.createAccountWithEmailAndPassword
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.AuthResult
@@ -24,7 +25,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
-class CreateAccountTest {
+class CreateAccountWithEmailAndPasswordTest {
 
   private lateinit var firebaseAuth: FirebaseAuth
 
