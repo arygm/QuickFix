@@ -70,10 +70,6 @@ class ProfileRepositoryFirestoreTest {
     firebaseAuthMockedStatic
         .`when`<FirebaseAuth> { FirebaseAuth.getInstance() }
         .thenReturn(mockFirebaseAuth)
-    // Alternatively, for Firebase.auth
-    firebaseAuthMockedStatic
-        .`when`<FirebaseAuth> { FirebaseAuth.getInstance() }
-        .thenReturn(mockFirebaseAuth)
 
     profileRepositoryFirestore = ProfileRepositoryFirestore(mockFirestore)
 

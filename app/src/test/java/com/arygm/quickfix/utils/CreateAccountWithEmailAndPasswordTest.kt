@@ -5,7 +5,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.ui.authentication.createAccountWithEmailAndPassword
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.AuthResult
@@ -53,10 +52,6 @@ class CreateAccountWithEmailAndPasswordTest {
     firebaseAuth = Mockito.mock(FirebaseAuth::class.java)
 
     // Mock FirebaseAuth.getInstance() to return the mockFirebaseAuth
-    firebaseAuthMockedStatic
-        .`when`<FirebaseAuth> { FirebaseAuth.getInstance() }
-        .thenReturn(firebaseAuth)
-    // Alternatively, for Firebase.auth
     firebaseAuthMockedStatic
         .`when`<FirebaseAuth> { FirebaseAuth.getInstance() }
         .thenReturn(firebaseAuth)
