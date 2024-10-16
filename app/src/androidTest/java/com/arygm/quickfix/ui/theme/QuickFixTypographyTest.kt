@@ -21,7 +21,7 @@ class QuickFixThemeTypographyTest {
   fun TypographyTextSample() {
     Text(
         text = "Sample Text",
-        style = interTypography.headlineLarge // Using headlineLarge from QuickFixTheme
+        style = poppinsTypography.headlineLarge // Using headlineLarge from QuickFixTheme
         )
   }
 

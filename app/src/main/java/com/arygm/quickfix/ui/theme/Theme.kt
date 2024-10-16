@@ -24,8 +24,8 @@ private val LightColorScheme = lightColorScheme(
     primary = ButtonPrimary,
     secondary = ButtonSecondary,
     tertiary = ButtonTertiary,
-    background = BackgroundPrimary,
-    surface = BackgroundSecondary,
+    background =  BackgroundSecondary,
+    surface = BackgroundPrimary,
     onPrimary = TextButtonPrimary,
     onSecondary = TextButtonSecondary,
     onTertiary = TextButtonTertiary,
@@ -110,8 +110,8 @@ val poppinsTypography =
         labelSmall =
             TextStyle(
                 fontFamily = poppinsFontFamily,
-                fontWeight = FontWeight.Normal,
-                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp,
                 fontStyle = FontStyle.Normal),
     )
 

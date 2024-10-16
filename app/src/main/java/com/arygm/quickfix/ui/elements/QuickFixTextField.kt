@@ -1,3 +1,4 @@
+import android.graphics.drawable.Icon
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -12,6 +13,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -19,16 +21,18 @@ import androidx.compose.ui.unit.sp
 fun QuickFixTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String,
+    label: String = "",
     isError: Boolean = false,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    color: Color = MaterialTheme.colorScheme.onSecondary,
+    color: Color = MaterialTheme.colorScheme.onSurface,
     singleLine: Boolean = true,
     errorText: String = "",
     showError: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    backgroundColor: Color = MaterialTheme.colorScheme.background
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    cornerRadius: Dp = 10.dp
 ) {
   OutlinedTextField(
       value = value,
@@ -39,6 +43,7 @@ fun QuickFixTextField(
               color = color.copy(alpha = 0.6f),
               style = MaterialTheme.typography.labelSmall)
         },
+      leadingIcon = leadingIcon,
       isError = isError,
       modifier = modifier.testTag("textField"),
       textStyle =
@@ -48,7 +53,7 @@ fun QuickFixTextField(
               fontSize = 16.sp,
               fontStyle = FontStyle.Normal),
       singleLine = singleLine,
-      shape = RoundedCornerShape(10.dp),
+      shape = RoundedCornerShape(cornerRadius),
       colors =
           OutlinedTextFieldDefaults.colors(
               unfocusedContainerColor = backgroundColor, focusedContainerColor = backgroundColor, errorContainerColor = MaterialTheme.colorScheme.errorContainer,
