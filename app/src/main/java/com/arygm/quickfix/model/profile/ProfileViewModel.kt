@@ -97,6 +97,9 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
             onResult(null)
           }
         },
-        onFailure = { e -> Log.e("ProfileViewModel", "Error fetching profile: ${e.message}") })
+        onFailure = { e ->
+          Log.e("ProfileViewModel", "Error fetching profile: ${e.message}")
+          onResult(null)
+        })
   }
 }
