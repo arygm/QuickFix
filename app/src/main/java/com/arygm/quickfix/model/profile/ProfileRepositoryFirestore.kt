@@ -24,7 +24,8 @@ class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRep
     db.collection(collectionPath).get().addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val profiles =
-            task.result?.mapNotNull { document -> documentToProfile(document) } ?: emptyList()
+            task.result?.documents?.mapNotNull { document -> documentToProfile(document) }
+                ?: emptyList()
         onSuccess(profiles)
       } else {
         task.exception?.let { e ->
