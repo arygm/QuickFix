@@ -199,6 +199,7 @@ fun PasswordScreen(
                           onClickAction = {
                             shrinkBox = false
                             createAccountWithEmailAndPassword(
+                                firebaseAuth = FirebaseAuth.getInstance(),
                                 firstName = firstName,
                                 lastName = lastName,
                                 email = email,
@@ -250,6 +251,7 @@ fun stringToTimestamp(birthDate: String): com.google.firebase.Timestamp? {
 }
 
 fun createAccountWithEmailAndPassword(
+    firebaseAuth: FirebaseAuth,
     firstName: String,
     lastName: String,
     email: String,
@@ -259,7 +261,7 @@ fun createAccountWithEmailAndPassword(
     onSuccess: () -> Unit,
     onFailure: () -> Unit
 ) {
-  FirebaseAuth.getInstance()
+    firebaseAuth
       .createUserWithEmailAndPassword(email, password)
       .addOnCompleteListener { task ->
         if (task.isSuccessful) {
