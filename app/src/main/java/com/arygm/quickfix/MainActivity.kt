@@ -13,9 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.arygm.quickfix.ui.AnnouncementScreen
 import com.arygm.quickfix.ui.DashboardScreen
-import com.arygm.quickfix.ui.OtherScreen
 import com.arygm.quickfix.ui.ProfileScreen
 import com.arygm.quickfix.ui.SearchScreen
 import com.arygm.quickfix.ui.authentication.InfoScreen
@@ -75,12 +73,6 @@ fun QuickFixApp() {
       composable(Screen.SEARCH) { SearchScreen(navigationActions, isUser) }
     }
     navigation(
-        startDestination = Screen.ANNOUNCEMENT,
-        route = Route.ANNOUNCEMENT,
-    ) {
-      composable(Screen.ANNOUNCEMENT) { AnnouncementScreen(navigationActions, isUser) }
-    }
-    navigation(
         startDestination = Screen.DASHBOARD,
         route = Route.DASHBOARD,
     ) {
@@ -91,12 +83,6 @@ fun QuickFixApp() {
         route = Route.PROFILE,
     ) {
       composable(Screen.PROFILE) { ProfileScreen(navigationActions, isUser) }
-    }
-    navigation(
-        startDestination = Screen.OTHER,
-        route = Route.OTHER,
-    ) {
-      composable(Screen.OTHER) { OtherScreen(navigationActions, isUser) }
     }
   }
 }

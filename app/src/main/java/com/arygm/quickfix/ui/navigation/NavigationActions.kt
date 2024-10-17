@@ -27,8 +27,6 @@ object Screen {
   const val INFO = "Info Screen"
   const val PASSWORD = "Password Screen"
   const val HOME = "Home Screen"
-  const val ANNOUNCEMENT = "Announcement Screen"
-  const val OTHER = "Other Screen"
   const val SEARCH = "Search Screen"
   const val DASHBOARD = "Dashboard Screen"
   const val PROFILE = "Profile Screen"
@@ -39,14 +37,9 @@ data class TopLevelDestination(val route: String, val icon: ImageVector, val tex
 
 object TopLevelDestinations {
   val HOME = TopLevelDestination(route = Route.HOME, icon = Icons.Filled.Home, textId = "Home")
-  val ANNOUNCEMENT =
-      TopLevelDestination(
-          route = Route.ANNOUNCEMENT, icon = Icons.Filled.AddCircle, textId = "Announcement")
   val PROFILE =
       TopLevelDestination(
           route = Route.PROFILE, icon = Icons.Filled.AccountCircle, textId = "Profile")
-  val OTHER =
-      TopLevelDestination(route = Route.OTHER, icon = Icons.Filled.MoreVert, textId = "Other")
   val SEARCH =
       TopLevelDestination(route = Route.SEARCH, icon = Icons.Filled.Search, textId = "Search")
   val DASHBOARD =
@@ -56,9 +49,10 @@ object TopLevelDestinations {
 val USER_TOP_LEVEL_DESTINATIONS =
     listOf(
         TopLevelDestinations.HOME,
-        TopLevelDestinations.ANNOUNCEMENT,
+        TopLevelDestinations.SEARCH,
+        TopLevelDestinations.DASHBOARD,
         TopLevelDestinations.PROFILE,
-        TopLevelDestinations.OTHER)
+        )
 val WORKER_TOP_LEVEL_DESTINATIONS =
     listOf(
         TopLevelDestinations.HOME,
@@ -69,11 +63,9 @@ val WORKER_TOP_LEVEL_DESTINATIONS =
 fun getBottomBarId(route: String, isUser: Boolean): Int {
   return when (route) {
     Route.HOME -> 1
-    Route.ANNOUNCEMENT -> 2
     Route.SEARCH -> 2
     Route.DASHBOARD -> 3
-    Route.PROFILE -> if (isUser) 3 else 4
-    Route.OTHER -> if (isUser) 4 else 5
+    Route.PROFILE -> 4
     else -> -1 // Should not happen
   }
 }
