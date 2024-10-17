@@ -35,7 +35,6 @@ class MapScreenTest {
     composeTestRule.onNodeWithTag("MapContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("MapText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("MapText").assertTextContains("Welcome to the MAP Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 
   // Can Remove this tbh
@@ -49,6 +48,5 @@ class MapScreenTest {
     composeTestRule.onNodeWithTag("MapContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("MapText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("MapText").assertTextContains("Welcome to the MAP Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 }

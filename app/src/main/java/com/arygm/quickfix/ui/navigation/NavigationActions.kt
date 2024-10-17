@@ -7,7 +7,9 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -20,8 +22,6 @@ object Route {
   const val OTHER = "Other"
   const val CALENDAR = "Calendar"
   const val MAP = "Map"
-  const val PROFILE = "Profile"
-  const val ACCOUNT_CONFIGURATION = "Account configuration"
 }
 
 object Screen {
@@ -37,7 +37,6 @@ object Screen {
   const val MAP = "Map Screen"
   const val PROFILE = "Profile Screen"
   const val MESSAGES = "Messages Screen"
-  const val ACCOUNT_CONFIGURATION = "Account configuration screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
@@ -55,9 +54,6 @@ object TopLevelDestinations {
       TopLevelDestination(
           route = Route.CALENDAR, icon = Icons.Filled.DateRange, textId = "Calendar")
   val MAP = TopLevelDestination(route = Route.MAP, icon = Icons.Filled.Place, textId = "Map")
-  val PROFILE =
-      TopLevelDestination(
-          route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
 }
 
 val USER_TOP_LEVEL_DESTINATIONS =
@@ -65,14 +61,14 @@ val USER_TOP_LEVEL_DESTINATIONS =
         TopLevelDestinations.HOME,
         TopLevelDestinations.ANNOUNCEMENT,
         TopLevelDestinations.ACTIVITY,
-        TopLevelDestinations.PROFILE)
+        TopLevelDestinations.OTHER)
 val WORKER_TOP_LEVEL_DESTINATIONS =
     listOf(
         TopLevelDestinations.HOME,
         TopLevelDestinations.CALENDAR,
         TopLevelDestinations.MAP,
         TopLevelDestinations.ACTIVITY,
-        TopLevelDestinations.PROFILE)
+        TopLevelDestinations.OTHER)
 
 fun getBottomBarId(route: String, isUser: Boolean): Int {
   return when (route) {
@@ -89,6 +85,8 @@ fun getBottomBarId(route: String, isUser: Boolean): Int {
 open class NavigationActions(
     private val navController: NavHostController,
 ) {
+  var currentScreen by mutableStateOf(Screen.WELCOME)
+
   /**
    * Navigate to the specified [TopLevelDestination]
    *
@@ -116,6 +114,7 @@ open class NavigationActions(
    * @param screen The screen to navigate to
    */
   open fun navigateTo(screen: String) {
+    currentScreen = screen
     navController.navigate(screen)
   }
 
