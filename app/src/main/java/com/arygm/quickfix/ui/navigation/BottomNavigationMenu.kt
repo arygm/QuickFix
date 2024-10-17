@@ -71,7 +71,7 @@ fun BottomNavigationMenu(
           // Attempt to show the default selected item
           try {
             val defaultItemIndex = tabList.indexOfFirst { it.route == selectedItem }
-            show(defaultItemIndex + 1, true)
+            show(defaultItemIndex + 1, true) // Immediately show the selected item
           } catch (e: Exception) {
             Log.e("MeowBottomNavigation", "Failed to call show(): ${e.message}")
           }

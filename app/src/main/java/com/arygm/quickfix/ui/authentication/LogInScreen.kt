@@ -34,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,10 +57,12 @@ import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.isValidEmail
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun LogInScreen(navigationActions: NavigationActions) {
-  var errorHasOccurred by remember { mutableStateOf(false) }
+  val errorHasOccurred by remember { mutableStateOf(false) }
 
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
@@ -73,6 +76,8 @@ fun LogInScreen(navigationActions: NavigationActions) {
           label = "shrinkingBox")
 
   val filledForm = email.isNotEmpty() && password.isNotEmpty()
+
+  val coroutineScope = rememberCoroutineScope()
 
   LaunchedEffect(Unit) { shrinkBox = true }
   Box(modifier = Modifier.fillMaxSize().testTag("LoginBox")) {
@@ -115,7 +120,10 @@ fun LogInScreen(navigationActions: NavigationActions) {
                         QuickFixBackButtonTopBar(
                             onBackClick = {
                               shrinkBox = false
-                              navigationActions.goBack()
+                              coroutineScope.launch {
+                                delay(BOX_COLLAPSE_SPEED.toLong())
+                                navigationActions.goBack()
+                              }
                             },
                             color = Color.Transparent)
                       }
@@ -217,7 +225,10 @@ fun LogInScreen(navigationActions: NavigationActions) {
                                 buttonText = "LOGIN",
                                 onClickAction = {
                                   shrinkBox = false
-                                  navigationActions.navigateTo(Screen.HOME)
+                                  coroutineScope.launch {
+                                    delay(BOX_COLLAPSE_SPEED.toLong())
+                                    navigationActions.navigateTo(Screen.HOME)
+                                  }
                                 },
                                 buttonColor = colorScheme.primary,
                                 textColor = colorScheme.onPrimary,

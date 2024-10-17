@@ -12,9 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.arygm.quickfix.ui.elements.QuickFixMainTopBar
-import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Route
 
 @Composable
 fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean) {
@@ -24,17 +22,6 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean) {
       containerColor = colorScheme.background,
       topBar = {
         QuickFixMainTopBar("ANNOUNCEMENT", modifier = Modifier.testTag("AnnouncementTopBar"))
-      },
-      bottomBar = {
-        // Boolean isUser = true for this HomeScreen
-        BottomNavigationMenu(
-            selectedItem = Route.ANNOUNCEMENT, // Start with the "Home" route
-            onTabSelect = { selectedDestination ->
-              // Use this block to navigate based on the selected tab
-              navigationActions.navigateTo(selectedDestination)
-            },
-            isUser = isUser, // Assuming the user is of type User,
-        )
       },
       content = { padding ->
         Column(
