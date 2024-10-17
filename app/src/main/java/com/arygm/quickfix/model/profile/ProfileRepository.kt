@@ -8,7 +8,6 @@ interface ProfileRepository {
 
   fun filterWorkers(
       hourlyRateThreshold: Double? = null,
-      location: String? = null,
       fieldOfWork: String? = null,
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit

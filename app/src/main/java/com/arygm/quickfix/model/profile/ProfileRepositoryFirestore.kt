@@ -39,7 +39,6 @@ class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRep
 
   override fun filterWorkers(
       hourlyRateThreshold: Double?,
-      location: String?,
       fieldOfWork: String?,
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit
@@ -51,8 +50,6 @@ class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRep
     fieldOfWork?.let { query = query.whereEqualTo("fieldOfWork", it) }
 
     hourlyRateThreshold?.let { query = query.whereLessThan("hourlyRate", it) }
-
-    location?.let { query = query.whereEqualTo("location", it) }
 
     query
         .get()
