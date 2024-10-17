@@ -34,7 +34,6 @@ import com.arygm.quickfix.ui.ActivityScreen
 import com.arygm.quickfix.ui.AnnouncementScreen
 import com.arygm.quickfix.ui.CalendarScreen
 import com.arygm.quickfix.ui.MapScreen
-import com.arygm.quickfix.ui.OtherScreen
 import com.arygm.quickfix.ui.authentication.InfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.PasswordScreen
@@ -44,138 +43,155 @@ import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.profile.ProfileConfigurationScreen
+import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContent {
-      QuickFixTheme {
-        // A surface container using the 'background' color from the theme
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          QuickFixApp()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            QuickFixTheme {
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    QuickFixApp()
+                }
+            }
         }
-      }
     }
-  }
 }
 
 @Composable
 @Preview
 fun QuickFixApp() {
 
-  val navController = rememberNavController()
-  val navigationActions = remember { NavigationActions(navController) }
+    val navController = rememberNavController()
+    val navigationActions = remember { NavigationActions(navController) }
 
-  val profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
-  val registrationViewModel = RegistrationViewModel()
+    val profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
+    val registrationViewModel = RegistrationViewModel()
 
-  val isUser = false // TODO: This variable needs to get its value after the authentication
-  val screen by remember { navigationActions::currentScreen }
-  // Make `bottomBarVisible` reactive to changes in `screen`
-  val shouldShowBottomBar by remember {
-    derivedStateOf {
-      screen != Screen.WELCOME &&
-          screen != Screen.LOGIN &&
-          screen != Screen.INFO &&
-          screen != Screen.PASSWORD
+    val isUser = true // TODO: This variable needs to get its value after the authentication
+    val screen by remember { navigationActions::currentScreen }
+    // Make `bottomBarVisible` reactive to changes in `screen`
+    val shouldShowBottomBar by remember {
+        derivedStateOf {
+            screen != Screen.WELCOME &&
+                    screen != Screen.LOGIN &&
+                    screen != Screen.INFO &&
+                    screen != Screen.PASSWORD
+        }
     }
-  }
 
-  var showBottomBar by remember { mutableStateOf(false) }
+    var showBottomBar by remember { mutableStateOf(false) }
 
-  // Delay the appearance of the bottom bar
-  LaunchedEffect(shouldShowBottomBar) {
-    if (shouldShowBottomBar) {
-      delay(200) // Adjust the delay duration (in milliseconds) as needed
-      showBottomBar = true
-    } else {
-      showBottomBar = false
+    // Delay the appearance of the bottom bar
+    LaunchedEffect(shouldShowBottomBar) {
+        if (shouldShowBottomBar) {
+            delay(200) // Adjust the delay duration (in milliseconds) as needed
+            showBottomBar = true
+        } else {
+            showBottomBar = false
+        }
     }
-  }
 
-  Scaffold(
-      bottomBar = {
-        // Show BottomNavigationMenu only if the route is not part of the login/registration flow
-        AnimatedVisibility(
-            visible = showBottomBar,
-            enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from the bottom
-            exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to the bottom
-            modifier = Modifier.testTag("BNM")) {
-              BottomNavigationMenu(
-                  selectedItem = Route.HOME, // Use the current route, or fallback to HOME
-                  onTabSelect = { selectedDestination ->
-                    // Use this block to navigate based on the selected tab
-                    navigationActions.navigateTo(selectedDestination)
-                  },
-                  isUser = isUser // Pass the user type to determine the tabs
-                  )
+    Scaffold(
+        bottomBar = {
+            // Show BottomNavigationMenu only if the route is not part of the login/registration flow
+            AnimatedVisibility(
+                visible = showBottomBar,
+                enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from the bottom
+                exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to the bottom
+                modifier = Modifier.testTag("BNM")
+            ) {
+                BottomNavigationMenu(
+                    selectedItem = Route.HOME, // Use the current route, or fallback to HOME
+                    onTabSelect = { selectedDestination ->
+                        // Use this block to navigate based on the selected tab
+                        navigationActions.navigateTo(selectedDestination)
+                    },
+                    isUser = isUser // Pass the user type to determine the tabs
+                )
             }
-      }) { innerPadding ->
+        }) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = Route.WELCOME,
             modifier = Modifier.padding(innerPadding), // Apply padding from the Scaffold
             enterTransition = {
-              // You can change whatever you want for transitions
-              EnterTransition.None
+                // You can change whatever you want for transitions
+                EnterTransition.None
             },
             exitTransition = {
-              // You can change whatever you want for transitions
-              ExitTransition.None
+                // You can change whatever you want for transitions
+                ExitTransition.None
             }) {
-              navigation(
-                  startDestination = Screen.WELCOME,
-                  route = Route.WELCOME,
-              ) {
+            navigation(
+                startDestination = Screen.WELCOME,
+                route = Route.WELCOME,
+            ) {
                 composable(Screen.WELCOME) { WelcomeScreen(navigationActions, profileViewModel) }
                 composable(Screen.LOGIN) { LogInScreen(navigationActions, profileViewModel) }
                 composable(Screen.INFO) {
-                  InfoScreen(navigationActions, registrationViewModel, profileViewModel)
+                    InfoScreen(navigationActions, registrationViewModel, profileViewModel)
                 }
                 composable(Screen.PASSWORD) {
-                  PasswordScreen(navigationActions, registrationViewModel, profileViewModel)
+                    PasswordScreen(navigationActions, registrationViewModel, profileViewModel)
                 }
-              }
-              navigation(
-                  startDestination = Screen.HOME,
-                  route = Route.HOME,
-              ) {
-                composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
-                composable(Screen.PROFILE) { HomeScreen(navigationActions, isUser) }
-                composable(Screen.MESSAGES) { HomeScreen(navigationActions, isUser) }
-              }
-              navigation(
-                  startDestination = Screen.CALENDAR,
-                  route = Route.CALENDAR,
-              ) {
-                composable(Screen.CALENDAR) { CalendarScreen(navigationActions, isUser) }
-              }
-              navigation(
-                  startDestination = Screen.ANNOUNCEMENT,
-                  route = Route.ANNOUNCEMENT,
-              ) {
-                composable(Screen.ANNOUNCEMENT) { AnnouncementScreen(navigationActions, isUser) }
-              }
-              navigation(
-                  startDestination = Screen.MAP,
-                  route = Route.MAP,
-              ) {
-                composable(Screen.MAP) { MapScreen(navigationActions, isUser) }
-              }
-              navigation(
-                  startDestination = Screen.ACTIVITY,
-                  route = Route.ACTIVITY,
-              ) {
-                composable(Screen.ACTIVITY) { ActivityScreen(navigationActions, isUser) }
-              }
-              navigation(
-                  startDestination = Screen.OTHER,
-                  route = Route.OTHER,
-              ) {
-                composable(Screen.OTHER) { OtherScreen(navigationActions, isUser) }
-              }
             }
-      }
+            navigation(
+                startDestination = Screen.HOME,
+                route = Route.HOME,
+            ) {
+                composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
+                composable(Screen.MESSAGES) { HomeScreen(navigationActions, isUser) }
+            }
+            navigation(
+                startDestination = Screen.CALENDAR,
+                route = Route.CALENDAR,
+            ) {
+                composable(Screen.CALENDAR) { CalendarScreen(navigationActions, isUser) }
+            }
+            navigation(
+                startDestination = Screen.ANNOUNCEMENT,
+                route = Route.ANNOUNCEMENT,
+            ) {
+                composable(Screen.ANNOUNCEMENT) { AnnouncementScreen(navigationActions, isUser) }
+            }
+            navigation(
+                startDestination = Screen.MAP,
+                route = Route.MAP,
+            ) {
+                composable(Screen.MAP) { MapScreen(navigationActions, isUser) }
+            }
+            navigation(
+                startDestination = Screen.ACTIVITY,
+                route = Route.ACTIVITY,
+            ) {
+                composable(Screen.ACTIVITY) { ActivityScreen(navigationActions, isUser) }
+            }
+            navigation(
+                startDestination = Screen.PROFILE,
+                route = Route.PROFILE,
+            ) {
+                composable(Screen.PROFILE) {
+                    ProfileScreen(
+                        navigationActions,
+                        isUser,
+                        profileViewModel
+                    )
+                }
+                composable(Screen.ACCOUNT_CONFIGURATION) {
+                    ProfileConfigurationScreen(
+                        navigationActions,
+                        isUser
+                    )
+                }
+            }
+        }
+    }
 }

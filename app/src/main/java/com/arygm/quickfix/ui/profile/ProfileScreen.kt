@@ -29,22 +29,27 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
-import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
-
+fun ProfileScreen(
+    navigationActions: NavigationActions, isUser: Boolean = true,
+    profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
+) {
+    val loggedInProfile by profileViewModel.loggedInProfile.collectAsState()
     // List of options handled by the profile screen
     val options =
         listOf(
@@ -109,11 +114,20 @@ fun ProfileScreen(navigationActions: NavigationActions, isUser: Boolean = true) 
                                     tint = colorScheme.primary,
                                     modifier = Modifier.size(24.dp)
                                 )
-                                Spacer(modifier = Modifier.width(14.dp))
+                                Spacer(modifier = Modifier.width(65.dp))
+
+                                val displayName = if (loggedInProfile != null) {
+                                    capitalizeName(
+                                        loggedInProfile?.firstName,
+                                        loggedInProfile?.lastName
+                                    )
+                                } else {
+                                    "Loading..."
+                                }
                                 Text(
-                                    text = "Mohamed Abbes",
+                                    text = displayName,
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = colorScheme.onSurface,
+                                    color = colorScheme.onBackground,
                                     modifier = Modifier.testTag("ProfileName")
                                 )
                             }
@@ -331,15 +345,6 @@ fun ProfileScreen(navigationActions: NavigationActions, isUser: Boolean = true) 
                 }
             }
         },
-        bottomBar = {
-            BottomNavigationMenu(
-                selectedItem = Route.PROFILE,
-                onTabSelect = { selectedDestination ->
-                    navigationActions.navigateTo(selectedDestination)
-                },
-                isUser = isUser
-            )
-        },
     )
 
 }
@@ -352,4 +357,8 @@ sealed class IconType {
 
 data class OptionItem(val label: String, val icon: IconType, val onClick: () -> Unit)
 
-
+private fun capitalizeName(firstName: String?, lastName: String?): String {
+    val capitalizedFirstName = firstName?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""
+    val capitalizedLastName = lastName?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""
+    return "$capitalizedFirstName $capitalizedLastName".trim()
+}

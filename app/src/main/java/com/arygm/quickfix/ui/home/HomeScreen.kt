@@ -32,54 +32,72 @@ import com.arygm.quickfix.ui.navigation.Screen
 @Composable
 fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
 
-  // Use Scaffold for the layout structure
-  Scaffold(
-      containerColor = colorScheme.background,
-      topBar = {
-        Surface(
-            shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
-            modifier = Modifier.fillMaxWidth().testTag("TopAppBarSurface")) {
-              TopAppBar(
-                  title = {
-                    Box(modifier = Modifier.fillMaxWidth().testTag("TopAppBarTitle")) {
-                      Text(
-                          text = "HOME",
-                          style = MaterialTheme.typography.headlineLarge,
-                          color = colorScheme.background,
-                          modifier = Modifier.align(Alignment.Center).testTag("HomeText"))
-                    }
-                  },
-                  colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.primary),
-                  navigationIcon = {
-                    IconButton(
-                        onClick = { navigationActions.navigateTo(Screen.PROFILE) },
-                        Modifier.testTag("ProfileButton")) {
-                          Icon(
-                              imageVector = Icons.Outlined.AccountCircle,
-                              contentDescription = "Profile",
-                              tint = colorScheme.background)
+    // Use Scaffold for the layout structure
+    Scaffold(
+        containerColor = colorScheme.background,
+        topBar = {
+            Surface(
+                shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("TopAppBarSurface")
+            ) {
+                TopAppBar(
+                    title = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("TopAppBarTitle")) {
+                            Text(
+                                text = "HOME",
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = colorScheme.background,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .testTag("HomeText")
+                            )
                         }
-                  },
-                  actions = {
-                    IconButton(
-                        onClick = { navigationActions.navigateTo(Screen.MESSAGES) },
-                        Modifier.testTag("MessagesButton")) {
-                          Icon(
-                              imageVector = Icons.Outlined.Email,
-                              contentDescription = "Messages",
-                              tint = colorScheme.background)
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.primary),
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {},
+                            Modifier.testTag("ProfileButton")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.AccountCircle,
+                                contentDescription = "Profile",
+                                tint = colorScheme.background
+                            )
                         }
-                  })
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = { navigationActions.navigateTo(Screen.MESSAGES) },
+                            Modifier.testTag("MessagesButton")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Email,
+                                contentDescription = "Messages",
+                                tint = colorScheme.background
+                            )
+                        }
+                    })
             }
-      },
-      content = { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().testTag("HomeContent"),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              Text(
-                  text = "Welcome to the Home Screen",
-                  modifier = Modifier.padding(padding).testTag("WelcomeText"))
+        },
+        content = { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag("HomeContent"),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Welcome to the Home Screen",
+                    modifier = Modifier
+                        .padding(padding)
+                        .testTag("WelcomeText")
+                )
             }
-      })
+        })
 }
