@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import com.arygm.quickfix.utils.routeToScreen
 
 object Route {
   const val WELCOME = "Welcome"
@@ -22,6 +23,9 @@ object Route {
   const val OTHER = "Other"
   const val CALENDAR = "Calendar"
   const val MAP = "Map"
+  const val INFO = "Info"
+  const val LOGIN = "Login"
+  const val PASSWORD = "Password"
 }
 
 object Screen {
@@ -29,6 +33,7 @@ object Screen {
   const val LOGIN = "Login Screen"
   const val INFO = "Info Screen"
   const val PASSWORD = "Password Screen"
+  const val REGISTER = "Register Screen"
   const val HOME = "Home Screen"
   const val ANNOUNCEMENT = "Announcement Screen"
   const val ACTIVITY = "Activity Screen"
@@ -95,7 +100,7 @@ open class NavigationActions(
    *   bottom navigation bar as we don't want to keep the previous screen in the back stack
    */
   open fun navigateTo(destination: TopLevelDestination) {
-
+    currentScreen = routeToScreen(destination.route)
     navController.navigate(destination.route) {
       popUpTo(navController.graph.findStartDestination().id) {
         saveState = true
@@ -121,6 +126,7 @@ open class NavigationActions(
   /** Navigate back to the previous screen. */
   open fun goBack() {
     navController.popBackStack()
+    currentScreen = routeToScreen(navController.currentBackStackEntry?.destination?.route ?: "")
   }
 
   /**

@@ -56,6 +56,7 @@ import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.createAccountWithEmailAndPassword
 import com.google.firebase.auth.FirebaseAuth
 
+@Deprecated("This composable is deprecated", ReplaceWith("RegisterScreen(navigationActions)"))
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UseOfNonLambdaOffsetOverload")
 @Composable
 fun PasswordScreen(

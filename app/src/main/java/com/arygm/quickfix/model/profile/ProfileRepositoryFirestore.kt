@@ -6,6 +6,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRepository {
 
@@ -34,6 +35,30 @@ class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRep
         }
       }
     }
+  }
+
+  override fun filterWorkers(
+      hourlyRateThreshold: Double?,
+      fieldOfWork: String?,
+      onSuccess: (List<Profile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    var query: Query = db.collection("worker_profiles")
+
+    query = query.whereEqualTo("isWorker", true)
+
+    fieldOfWork?.let { query = query.whereEqualTo("fieldOfWork", it) }
+
+    hourlyRateThreshold?.let { query = query.whereLessThan("hourlyRate", it) }
+
+    query
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val workerProfiles =
+              querySnapshot.documents.mapNotNull { it.toObject(Profile::class.java) }
+          onSuccess(workerProfiles)
+        }
+        .addOnFailureListener { exception -> onFailure(exception) }
   }
 
   override fun addProfile(profile: Profile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {

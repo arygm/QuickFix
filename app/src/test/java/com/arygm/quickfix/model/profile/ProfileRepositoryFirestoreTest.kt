@@ -38,6 +38,7 @@ class ProfileRepositoryFirestoreTest {
   @Mock private lateinit var mockDocumentReference: DocumentReference
   @Mock private lateinit var mockCollectionReference: CollectionReference
   @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
+  @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
   @Mock private lateinit var mockProfileQuerySnapshot: QuerySnapshot
   @Mock private lateinit var mockQuery: Query
 
@@ -78,6 +79,10 @@ class ProfileRepositoryFirestoreTest {
     `when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
     `when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
     `when`(mockCollectionReference.whereEqualTo(any<String>(), any())).thenReturn(mockQuery)
+
+    `when`(mockQuery.whereEqualTo(any<String>(), any())).thenReturn(mockQuery)
+    `when`(mockQuery.whereLessThan(any<String>(), any())).thenReturn(mockQuery)
+    `when`(mockQuery.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
   }
 
   @Test
@@ -495,5 +500,128 @@ class ProfileRepositoryFirestoreTest {
     val result = invokeDocumentToProfile(document)
 
     assert(result == null)
+  }
+
+  @Test
+  fun filterWorkers_withFieldOfWork_callsOnSuccess() {
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+    `when`(mockQuery.get()).thenReturn(taskCompletionSource.task)
+
+    // Mock query result to return one worker profile
+    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
+    `when`(mockDocumentSnapshot.toObject(Profile::class.java)).thenReturn(profile)
+
+    var callbackCalled = false
+    var returnedProfiles: List<Profile>? = null
+
+    profileRepositoryFirestore.filterWorkers(
+        fieldOfWork = "Plumber",
+        hourlyRateThreshold = null,
+        onSuccess = { profiles ->
+          callbackCalled = true
+          returnedProfiles = profiles
+        },
+        onFailure = { fail("Failure callback should not be called") })
+
+    // Simulate Firestore success
+    taskCompletionSource.setResult(mockQuerySnapshot)
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert that the success callback was called and the profile matches
+    assert(callbackCalled)
+    assert(returnedProfiles != null)
+    assert(returnedProfiles!!.size == 1)
+    assert(returnedProfiles!![0] == profile)
+  }
+
+  @Test
+  fun filterWorkers_withHourlyRateThreshold_callsOnSuccess() {
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+    `when`(mockQuery.get()).thenReturn(taskCompletionSource.task)
+
+    // Mock query result to return one worker profile
+    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
+    `when`(mockDocumentSnapshot.toObject(Profile::class.java)).thenReturn(profile)
+
+    var callbackCalled = false
+    var returnedProfiles: List<Profile>? = null
+
+    profileRepositoryFirestore.filterWorkers(
+        hourlyRateThreshold = 30.0,
+        fieldOfWork = null,
+        onSuccess = { profiles ->
+          callbackCalled = true
+          returnedProfiles = profiles
+        },
+        onFailure = { fail("Failure callback should not be called") })
+
+    // Simulate Firestore success
+    taskCompletionSource.setResult(mockQuerySnapshot)
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert that the success callback was called and the profile matches
+    assert(callbackCalled)
+    assert(returnedProfiles != null)
+    assert(returnedProfiles!!.size == 1)
+    assert(returnedProfiles!![0] == profile)
+  }
+
+  @Test
+  fun filterWorkers_withFieldOfWorkAndHourlyRateThreshold_callsOnSuccess() {
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+    `when`(mockQuery.get()).thenReturn(taskCompletionSource.task)
+
+    // Mock query result to return one worker profile
+    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
+    `when`(mockDocumentSnapshot.toObject(Profile::class.java)).thenReturn(profile)
+
+    var callbackCalled = false
+    var returnedProfiles: List<Profile>? = null
+
+    profileRepositoryFirestore.filterWorkers(
+        hourlyRateThreshold = 30.0,
+        fieldOfWork = "Plumber",
+        onSuccess = { profiles ->
+          callbackCalled = true
+          returnedProfiles = profiles
+        },
+        onFailure = { fail("Failure callback should not be called") })
+
+    // Simulate Firestore success
+    taskCompletionSource.setResult(mockQuerySnapshot)
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert that the success callback was called and the profile matches
+    assert(callbackCalled)
+    assert(returnedProfiles != null)
+    assert(returnedProfiles!!.size == 1)
+    assert(returnedProfiles!![0] == profile)
+  }
+
+  @Test
+  fun filterWorkers_onFailure_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+    `when`(mockQuery.get()).thenReturn(taskCompletionSource.task)
+
+    val exception = Exception("Test exception")
+    var callbackCalled = false
+    var returnedException: Exception? = null
+
+    profileRepositoryFirestore.filterWorkers(
+        hourlyRateThreshold = 30.0,
+        fieldOfWork = "Plumber",
+        onSuccess = { fail("Success callback should not be called") },
+        onFailure = { e ->
+          callbackCalled = true
+          returnedException = e
+        })
+
+    // Simulate Firestore failure
+    taskCompletionSource.setException(exception)
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert that the failure callback was called and the exception matches
+    assert(callbackCalled)
+    assert(returnedException == exception)
   }
 }

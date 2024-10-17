@@ -1,6 +1,5 @@
 package com.arygm.quickfix.ui.authentication
 
-import QuickFixTextField
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -53,6 +52,7 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
+import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
@@ -175,22 +175,27 @@ fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileV
 
                             Spacer(modifier = Modifier.padding(10.dp))
 
-                            QuickFixTextField(
+                            QuickFixTextFieldCustom(
                                 value = email,
                                 onValueChange = { email = it },
-                                label = "Username or Email",
+                                shape = RoundedCornerShape(12.dp),
+                                widthField = 360.dp,
+                                moveContentHorizontal = 10.dp,
+                                placeHolderText = "Username or Email",
                                 isError = email.isNotEmpty() && !isValidEmail(email),
                                 errorText = "INVALID EMAIL",
-                                modifier =
-                                    Modifier.width(360.dp).height(50.dp).testTag("inputEmail"),
-                                showError = email.isNotEmpty() && !isValidEmail(email))
+                                showError = email.isNotEmpty() && !isValidEmail(email),
+                                modifier = Modifier.testTag("inputEmail"))
 
                             Spacer(modifier = Modifier.padding(10.dp))
 
-                            QuickFixTextField(
+                            QuickFixTextFieldCustom(
                                 value = password,
                                 onValueChange = { password = it },
-                                label = "Password",
+                                placeHolderText = "Password",
+                                shape = RoundedCornerShape(12.dp),
+                                widthField = 360.dp,
+                                moveContentHorizontal = 10.dp,
                                 trailingIcon = {
                                   val image =
                                       if (passwordVisible) Icons.Filled.VisibilityOff
@@ -205,8 +210,7 @@ fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileV
                                 visualTransformation =
                                     if (passwordVisible) VisualTransformation.None
                                     else PasswordVisualTransformation(),
-                                modifier =
-                                    Modifier.width(360.dp).height(50.dp).testTag("inputPassword"))
+                                modifier = Modifier.testTag("inputPassword"))
 
                             Spacer(modifier = Modifier.padding(4.dp))
 
@@ -222,7 +226,7 @@ fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileV
                                     Modifier.align(Alignment.End)
                                         .testTag("forgetPasswordButtonText"))
 
-                            Spacer(modifier = Modifier.padding(10.dp))
+                            Spacer(modifier = Modifier.padding(7.dp))
 
                             QuickFixButton(
                                 buttonText = "LOGIN",
@@ -270,7 +274,7 @@ fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileV
 
                               QuickFixButton(
                                   buttonText = "Create one !",
-                                  onClickAction = { navigationActions.navigateTo(Screen.INFO) },
+                                  onClickAction = { navigationActions.navigateTo(Screen.REGISTER) },
                                   buttonColor = Color.Transparent,
                                   textColor = colorScheme.primary,
                                   textStyle = MaterialTheme.typography.headlineSmall,
