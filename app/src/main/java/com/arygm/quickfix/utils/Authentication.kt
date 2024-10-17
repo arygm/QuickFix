@@ -27,59 +27,58 @@ fun rememberFirebaseAuthLauncher(
     onAuthError: (ApiException) -> Unit,
     profileViewModel: ProfileViewModel
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
-    val scope = rememberCoroutineScope()
-    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)!!
-            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-            scope.launch {
-                val authResult = Firebase.auth.signInWithCredential(credential).await()
-                val user = Firebase.auth.currentUser
+  val scope = rememberCoroutineScope()
+  return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+      result ->
+    val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+    try {
+      val account = task.getResult(ApiException::class.java)!!
+      val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+      scope.launch {
+        val authResult = Firebase.auth.signInWithCredential(credential).await()
+        val user = Firebase.auth.currentUser
 
-                user?.let {
-                    profileViewModel.fetchUserProfile(it.uid) { existingProfile ->
-                        if (existingProfile != null) {
-                            profileViewModel.setLoggedInProfile(existingProfile)
-                            onAuthComplete(authResult)
-                        } else {
-                            // Extract user information from Google account
-                            val firstName = account.givenName ?: ""
-                            val lastName = account.familyName ?: ""
-                            val email = account.email ?: ""
-                            val uid = user.uid
+        user?.let {
+          profileViewModel.fetchUserProfile(it.uid) { existingProfile ->
+            if (existingProfile != null) {
+              profileViewModel.setLoggedInProfile(existingProfile)
+              onAuthComplete(authResult)
+            } else {
+              // Extract user information from Google account
+              val firstName = account.givenName ?: ""
+              val lastName = account.familyName ?: ""
+              val email = account.email ?: ""
+              val uid = user.uid
 
-                            // Create a new Profile object
-                            val profile =
-                                Profile(
-                                    uid = uid,
-                                    firstName = firstName,
-                                    lastName = lastName,
-                                    email = email,
-                                    birthDate = Timestamp.now(),
-                                    description = "")
+              // Create a new Profile object
+              val profile =
+                  Profile(
+                      uid = uid,
+                      firstName = firstName,
+                      lastName = lastName,
+                      email = email,
+                      birthDate = Timestamp.now(),
+                      description = "")
 
-                            // Save the profile to Firestore
-                            profileViewModel.addProfile(
-                                profile,
-                                onSuccess = {
-                                    profileViewModel.setLoggedInProfile(profile)
-                                    onAuthComplete(authResult)
-                                },
-                                onFailure = { exception ->
-                                    Log.e("Google SignIn", "Failed to save new profile", exception)
-                                })
-                        }
-                    }
-                } ?: run { Log.e("Google SignIn", "User Null After Sign In") }
+              // Save the profile to Firestore
+              profileViewModel.addProfile(
+                  profile,
+                  onSuccess = {
+                    profileViewModel.setLoggedInProfile(profile)
+                    onAuthComplete(authResult)
+                  },
+                  onFailure = { exception ->
+                    Log.e("Google SignIn", "Failed to save new profile", exception)
+                  })
             }
-        } catch (e: ApiException) {
-            onAuthError(e)
-        }
+          }
+        } ?: run { Log.e("Google SignIn", "User Null After Sign In") }
+      }
+    } catch (e: ApiException) {
+      onAuthError(e)
     }
+  }
 }
-
 
 fun signInWithEmailAndFetchProfile(
     email: String,
@@ -87,35 +86,36 @@ fun signInWithEmailAndFetchProfile(
     profileViewModel: ProfileViewModel,
     onResult: (Boolean) -> Unit
 ) {
-    FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
-            task ->
-        if (task.isSuccessful) {
-            val user = FirebaseAuth.getInstance().currentUser
-            user?.let {
-                profileViewModel.fetchUserProfile(
-                    it.uid,
-                    onResult = { profile ->
-                        if (profile != null) {
-                            profileViewModel.setLoggedInProfile(profile)
-                            onResult(true)
-                        } else {
-                            Log.e("Login Screen", "Error Logging in Profile.")
-                            onResult(false)
-                        }
-                    })
-            }
-                ?: run {
-                    Log.e("Login Screen", "Error Logging in Profile.")
-                    onResult(false)
-                }
-        } else {
+  FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
+      task ->
+    if (task.isSuccessful) {
+      val user = FirebaseAuth.getInstance().currentUser
+      user?.let {
+        profileViewModel.fetchUserProfile(
+            it.uid,
+            onResult = { profile ->
+              if (profile != null) {
+                profileViewModel.setLoggedInProfile(profile)
+                onResult(true)
+              } else {
+                Log.e("Login Screen", "Error Logging in Profile.")
+                onResult(false)
+              }
+            })
+      }
+          ?: run {
             Log.e("Login Screen", "Error Logging in Profile.")
             onResult(false)
-        }
+          }
+    } else {
+      Log.e("Login Screen", "Error Logging in Profile.")
+      onResult(false)
     }
+  }
 }
 
 fun createAccountWithEmailAndPassword(
+    firebaseAuth: FirebaseAuth,
     firstName: String,
     lastName: String,
     email: String,
@@ -125,43 +125,42 @@ fun createAccountWithEmailAndPassword(
     onSuccess: () -> Unit,
     onFailure: () -> Unit
 ) {
-    FirebaseAuth.getInstance()
-        .createUserWithEmailAndPassword(email, password)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val user = FirebaseAuth.getInstance().currentUser
-                user?.let {
-                    val profile =
-                        stringToTimestamp(birthDate)?.let { birthTimestamp ->
-                            Profile(
-                                uid = it.uid,
-                                firstName = firstName,
-                                lastName = lastName,
-                                email = email,
-                                birthDate = birthTimestamp,
-                                description = "")
-                        }
-
-                    profile?.let { createdProfile ->
-                        profileViewModel.addProfile(
-                            createdProfile,
-                            onSuccess = {
-                                profileViewModel.setLoggedInProfile(createdProfile)
-                                onSuccess()
-                            },
-                            onFailure = {
-                                Log.e("Registration", "Failed to save profile")
-                                onFailure()
-                            })
-                    }
-                        ?: run {
-                            Log.e("Registration", "Failed to create profile")
-                            onFailure()
-                        }
-                }
-            } else {
-                Log.e("Registration", "Error creating account: ${task.exception?.message}")
-                onFailure()
+  firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+    if (task.isSuccessful) {
+      val user = FirebaseAuth.getInstance().currentUser
+      user?.let {
+        val profile =
+            com.arygm.quickfix.ui.authentication.stringToTimestamp(birthDate)?.let { birthTimestamp
+              ->
+              Profile(
+                  uid = it.uid,
+                  firstName = firstName,
+                  lastName = lastName,
+                  email = email,
+                  birthDate = birthTimestamp,
+                  description = "")
             }
+
+        profile?.let { createdProfile ->
+          profileViewModel.addProfile(
+              createdProfile,
+              onSuccess = {
+                profileViewModel.setLoggedInProfile(createdProfile)
+                onSuccess()
+              },
+              onFailure = {
+                Log.e("Registration", "Failed to save profile")
+                onFailure()
+              })
         }
+            ?: run {
+              Log.e("Registration", "Failed to create profile")
+              onFailure()
+            }
+      }
+    } else {
+      Log.e("Registration", "Error creating account: ${task.exception?.message}")
+      onFailure()
+    }
+  }
 }

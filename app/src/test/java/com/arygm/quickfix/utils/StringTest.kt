@@ -1,14 +1,13 @@
 package com.arygm.quickfix.utils
 
-
 import com.google.firebase.Timestamp
+import java.util.Calendar
+import java.util.GregorianCalendar
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import java.util.Calendar
-import java.util.GregorianCalendar
 
 class StringTest {
 
@@ -62,22 +61,19 @@ class StringTest {
   @Test
   fun `test valid date strings for stringToTimestamp`() {
     val timestamp = stringToTimestamp("01/01/2023")
-    val expectedCalendar = GregorianCalendar(2023,
-      Calendar.JANUARY, 1, 0, 0, 0)
+    val expectedCalendar = GregorianCalendar(2023, Calendar.JANUARY, 1, 0, 0, 0)
     expectedCalendar.set(Calendar.MILLISECOND, 0)
     val expectedTimestamp = Timestamp(expectedCalendar.time)
     assertEquals(expectedTimestamp, timestamp)
 
     val leapYearTimestamp = stringToTimestamp("29/02/2020")
-    val expectedLeapYearCalendar = GregorianCalendar(2020,
-      Calendar.FEBRUARY, 29, 0, 0, 0)
+    val expectedLeapYearCalendar = GregorianCalendar(2020, Calendar.FEBRUARY, 29, 0, 0, 0)
     expectedLeapYearCalendar.set(Calendar.MILLISECOND, 0)
     val expectedLeapYearTimestamp = Timestamp(expectedLeapYearCalendar.time)
     assertEquals(expectedLeapYearTimestamp, leapYearTimestamp)
 
     val oldDateTimestamp = stringToTimestamp("31/12/1999")
-    val expectedOldDateCalendar = GregorianCalendar(1999,
-      Calendar.DECEMBER, 31, 0, 0, 0)
+    val expectedOldDateCalendar = GregorianCalendar(1999, Calendar.DECEMBER, 31, 0, 0, 0)
     expectedOldDateCalendar.set(Calendar.MILLISECOND, 0)
     val expectedOldDateTimestamp = Timestamp(expectedOldDateCalendar.time)
     assertEquals(expectedOldDateTimestamp, oldDateTimestamp)

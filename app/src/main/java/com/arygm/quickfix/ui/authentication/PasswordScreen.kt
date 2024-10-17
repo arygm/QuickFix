@@ -44,7 +44,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
@@ -55,6 +54,7 @@ import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
+import com.arygm.quickfix.utils.createAccountWithEmailAndPassword
 import com.google.firebase.auth.FirebaseAuth
 import java.util.Calendar
 import java.util.GregorianCalendar
@@ -64,9 +64,21 @@ import java.util.GregorianCalendar
 fun PasswordScreen(
     navigationActions: NavigationActions,
     registrationViewModel: RegistrationViewModel,
-    profileViewModel: ProfileViewModel
+    profileViewModel: ProfileViewModel,
+    firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(), // Injected dependency
+    createAccountFunc:
+        (
+            firebaseAuth: FirebaseAuth,
+            firstName: String,
+            lastName: String,
+            email: String,
+            password: String,
+            birthDate: String,
+            profileViewModel: ProfileViewModel,
+            onSuccess: () -> Unit,
+            onFailure: () -> Unit) -> Unit =
+        ::createAccountWithEmailAndPassword // Default implementation
 ) {
-
   val context = LocalContext.current
 
   val firstName by registrationViewModel.firstName.collectAsState()
@@ -198,18 +210,16 @@ fun PasswordScreen(
                           buttonText = "REGISTER",
                           onClickAction = {
                             shrinkBox = false
-                            createAccountWithEmailAndPassword(
-                                firebaseAuth = FirebaseAuth.getInstance(),
-                                firstName = firstName,
-                                lastName = lastName,
-                                email = email,
-                                password = password,
-                                birthDate = birthDate,
-                                profileViewModel = profileViewModel,
-                                onSuccess = {
-                                  navigationActions.navigateTo(TopLevelDestinations.HOME)
-                                },
-                                onFailure = {
+                            createAccountFunc(
+                                firebaseAuth,
+                                firstName,
+                                lastName,
+                                email,
+                                password,
+                                birthDate,
+                                profileViewModel,
+                                { navigationActions.navigateTo(TopLevelDestinations.HOME) },
+                                {
                                   Toast.makeText(context, "Registration Failed.", Toast.LENGTH_LONG)
                                       .show()
                                 })
@@ -247,55 +257,5 @@ fun stringToTimestamp(birthDate: String): com.google.firebase.Timestamp? {
   } else {
     Log.e("DateConversion", "Date string is not in the correct format: $birthDate")
     null
-  }
-}
-
-fun createAccountWithEmailAndPassword(
-    firebaseAuth: FirebaseAuth,
-    firstName: String,
-    lastName: String,
-    email: String,
-    password: String,
-    birthDate: String,
-    profileViewModel: ProfileViewModel,
-    onSuccess: () -> Unit,
-    onFailure: () -> Unit
-) {
-  firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-    if (task.isSuccessful) {
-      val user = FirebaseAuth.getInstance().currentUser
-      user?.let {
-        val profile =
-            stringToTimestamp(birthDate)?.let { birthTimestamp ->
-              Profile(
-                  uid = it.uid,
-                  firstName = firstName,
-                  lastName = lastName,
-                  email = email,
-                  birthDate = birthTimestamp,
-                  description = "")
-            }
-
-        profile?.let { createdProfile ->
-          profileViewModel.addProfile(
-              createdProfile,
-              onSuccess = {
-                profileViewModel.setLoggedInProfile(createdProfile)
-                onSuccess()
-              },
-              onFailure = {
-                Log.e("Registration", "Failed to save profile")
-                onFailure()
-              })
-        }
-            ?: run {
-              Log.e("Registration", "Failed to create profile")
-              onFailure()
-            }
-      }
-    } else {
-      Log.e("Registration", "Error creating account: ${task.exception?.message}")
-      onFailure()
-    }
   }
 }

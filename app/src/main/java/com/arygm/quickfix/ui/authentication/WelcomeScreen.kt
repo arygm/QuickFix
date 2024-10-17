@@ -1,6 +1,8 @@
 package com.arygm.quickfix.ui.authentication
 
 import android.annotation.SuppressLint
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
@@ -36,20 +38,43 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
-import com.arygm.quickfix.ui.theme.*
+import com.arygm.quickfix.ui.navigation.TopLevelDestinations
+import com.arygm.quickfix.utils.rememberFirebaseAuthLauncher
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun WelcomeScreen(navigationActions: NavigationActions, profileViewModel: ProfileViewModel) {
   val colorScheme = MaterialTheme.colorScheme
+
+  val context = LocalContext.current
+
+  val launcher =
+      rememberFirebaseAuthLauncher(
+          onAuthComplete = { result ->
+            Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
+            Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
+            navigationActions.navigateTo(TopLevelDestinations.HOME)
+          },
+          onAuthError = {
+            Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}")
+            Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show()
+          },
+          profileViewModel)
+
+  val token = stringResource(com.arygm.quickfix.R.string.default_web_client_id)
 
   var fadeOut by remember { mutableStateOf(false) }
   var expandBox by remember { mutableStateOf(false) }
@@ -133,7 +158,7 @@ fun WelcomeScreen(navigationActions: NavigationActions, profileViewModel: Profil
                 targetScreen = Screen.LOGIN
                 startAnimation = true
               },
-              buttonColor = MaterialTheme.colorScheme.tertiary,
+              buttonColor = colorScheme.secondary,
               modifier = Modifier.graphicsLayer(alpha = elementsAlpha).testTag("logInButton"),
               textColor = colorScheme.background)
 
@@ -146,10 +171,18 @@ fun WelcomeScreen(navigationActions: NavigationActions, profileViewModel: Profil
               buttonColor = colorScheme.background,
               modifier =
                   Modifier.graphicsLayer(alpha = elementsAlpha).testTag("RegistrationButton"),
-              textColor = ButtonPrimary)
+              textColor = colorScheme.secondary)
 
           Button(
-              onClick = { /* TODO: Google action */},
+              onClick = {
+                val gso =
+                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(token)
+                        .requestEmail()
+                        .build()
+                val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                launcher.launch(googleSignInClient.signInIntent)
+              },
               colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
               border = BorderStroke(2.dp, colorScheme.background),
               modifier =
