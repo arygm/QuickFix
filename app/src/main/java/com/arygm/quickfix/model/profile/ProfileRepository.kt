@@ -6,6 +6,14 @@ interface ProfileRepository {
 
   fun getProfiles(onSuccess: (List<Profile>) -> Unit, onFailure: (Exception) -> Unit)
 
+  fun filterWorkers(
+      hourlyRateThreshold: Double? = null,
+      location: String? = null,
+      fieldOfWork: String? = null,
+      onSuccess: (List<Profile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   fun addProfile(profile: Profile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
   fun updateProfile(profile: Profile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
