@@ -429,27 +429,21 @@ fun RegisterScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween) {
                                       Column(modifier = Modifier.padding(vertical = 8.dp)) {
                                         passwordConditions.take(2).forEach { (condition, met) ->
-                                          Text(
-                                              text = condition,
-                                              color =
-                                                  if (met || password.isEmpty())
-                                                      colorScheme.onSecondaryContainer
-                                                  else colorScheme.error,
-                                              style = MaterialTheme.typography.bodySmall,
-                                              modifier = Modifier.padding(start = 3.dp))
+                                          PasswordConditions(
+                                              condition,
+                                              met,
+                                              password,
+                                          )
                                         }
                                       }
 
                                       Column(modifier = Modifier.padding(vertical = 8.dp)) {
                                         passwordConditions.drop(2).forEach { (condition, met) ->
-                                          Text(
-                                              text = condition,
-                                              color =
-                                                  if (met || password.isEmpty())
-                                                      colorScheme.onSecondaryContainer
-                                                  else colorScheme.error,
-                                              style = MaterialTheme.typography.bodySmall,
-                                              modifier = Modifier.padding(start = 3.dp))
+                                          PasswordConditions(
+                                              condition,
+                                              met,
+                                              password,
+                                          )
                                         }
                                       }
                                     }
@@ -548,4 +542,18 @@ fun RegisterScreen(
                   }
             })
       }
+}
+
+@Composable
+private fun PasswordConditions(
+    condition: String,
+    met: Boolean,
+    password: String,
+) {
+  Text(
+      text = condition,
+      color =
+          if (met || password.isEmpty()) colorScheme.onSecondaryContainer else colorScheme.error,
+      style = MaterialTheme.typography.bodySmall,
+      modifier = Modifier.padding(start = 3.dp))
 }
