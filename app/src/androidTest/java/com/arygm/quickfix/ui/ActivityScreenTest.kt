@@ -37,7 +37,6 @@ class ActivityScreenTest {
     composeTestRule
         .onNodeWithTag("ActivityText")
         .assertTextContains("Welcome to the ACTIVITY Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 
   // Can Remove this tbh
@@ -53,6 +52,5 @@ class ActivityScreenTest {
     composeTestRule
         .onNodeWithTag("ActivityText")
         .assertTextContains("Welcome to the ACTIVITY Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 }

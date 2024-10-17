@@ -6,6 +6,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import org.junit.Before
@@ -20,17 +22,21 @@ class LogInScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
+  private lateinit var profileRepository: ProfileRepository
+  private lateinit var profileViewModel: ProfileViewModel
 
   @Before
   fun setup() {
+    profileRepository = mock(ProfileRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
+    profileViewModel = ProfileViewModel(profileRepository)
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.LOGIN)
   }
 
   @Test
   fun testInitialUI() {
-    composeTestRule.setContent { LogInScreen(navigationActions) }
+    composeTestRule.setContent { LogInScreen(navigationActions, profileViewModel) }
 
     // Check that the scaffold and content boxes are displayed
     composeTestRule.onNodeWithTag("LoginScaffold").assertIsDisplayed()
@@ -38,8 +44,11 @@ class LogInScreenTest {
     composeTestRule.onNodeWithTag("AnimationBox").assertIsDisplayed()
     composeTestRule.onNodeWithTag("BoxDecoration").assertIsDisplayed()
 
-    // Check that the "WELCOME BACK" text is displayed
+    // Check that the "Login" text is displayed
     composeTestRule.onNodeWithTag("WelcomeText").assertIsDisplayed()
+
+    // Check that the "Your perfect fix is just a click away" text is displayed
+    composeTestRule.onNodeWithTag("WelcomeTextBis").assertIsDisplayed()
 
     // Check that the email and password fields are empty initially
     composeTestRule.onNodeWithTag("inputEmail").assertIsDisplayed()
@@ -49,13 +58,18 @@ class LogInScreenTest {
     composeTestRule.onNodeWithTag("logInButton").assertIsDisplayed()
 
     // Check that the forgot password texts are displayed
-    composeTestRule.onNodeWithTag("forgotText").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("clickableFG").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("forgetPasswordButtonText").assertIsDisplayed()
+
+    // Check that the "Don't have an account?" text is displayed
+    composeTestRule.onNodeWithTag("noAccountText").assertIsDisplayed()
+
+    // Check that the "Create One" text is displayed
+    composeTestRule.onNodeWithTag("clickableCreateAccount").assertIsDisplayed()
   }
 
   @Test
   fun testLoginButtonEnabledWhenFieldsAreFilled() {
-    composeTestRule.setContent { LogInScreen(navigationActions) }
+    composeTestRule.setContent { LogInScreen(navigationActions, profileViewModel) }
 
     // Input valid email and password
     composeTestRule.onNodeWithTag("inputEmail").performTextInput("test@example.com")
@@ -67,7 +81,7 @@ class LogInScreenTest {
 
   @Test
   fun testInvalidEmailShowsError() {
-    composeTestRule.setContent { LogInScreen(navigationActions) }
+    composeTestRule.setContent { LogInScreen(navigationActions, profileViewModel) }
 
     // Input an invalid email
     composeTestRule.onNodeWithTag("inputEmail").performTextInput("invalidemail")
@@ -107,19 +121,20 @@ class LogInScreenTest {
 
   @Test
   fun testForgotPasswordLinkIsDisplayed() {
-    composeTestRule.setContent { LogInScreen(navigationActions) }
+    composeTestRule.setContent { LogInScreen(navigationActions, profileViewModel) }
 
     // Check that the forgot password text is displayed
-    composeTestRule.onNodeWithTag("forgotText").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("clickableFG").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("forgetPasswordButtonText").assertIsDisplayed()
   }
 
   @Test
   fun testBackButtonNavigatesBack() {
-    composeTestRule.setContent { LogInScreen(navigationActions) }
+    composeTestRule.setContent { LogInScreen(navigationActions, profileViewModel) }
 
     // Click the back button
     composeTestRule.onNodeWithTag("goBackButton").performClick()
+
+    composeTestRule.mainClock.advanceTimeBy(500L)
 
     // Verify that the navigation action was triggered
     Mockito.verify(navigationActions).goBack()

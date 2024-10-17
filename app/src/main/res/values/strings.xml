@@ -2,4 +2,5 @@
     <string name="app_name">QuickFix</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_second">SecondActivity</string>
+    <string name="default_web_client_id" translatable="false">474287435896-7dj2qgfcu02g1bpesctlrtv22i69s23p.apps.googleusercontent.com</string>
 </resources>

@@ -12,10 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.arygm.quickfix.ui.elements.QuickFixMainTopBar
-import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Route
-import com.arygm.quickfix.ui.navigation.TopLevelDestination
 
 @Composable
 fun OtherScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
@@ -24,16 +21,6 @@ fun OtherScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
   Scaffold(
       containerColor = colorScheme.background,
       topBar = { QuickFixMainTopBar("OTHER", modifier = Modifier.testTag("OtherTopBar")) },
-      bottomBar = {
-        // Use MeowBottomNavigationMenu for the bottom navigation bar
-        BottomNavigationMenu(
-            selectedItem = Route.OTHER,
-            onTabSelect = { selectedTab: TopLevelDestination ->
-              navigationActions.navigateTo(selectedTab)
-            },
-            isUser = isUser, // Pass the user type to determine the tabs
-        )
-      },
       content = { paddingValues ->
         Column(
             modifier = Modifier.fillMaxSize().testTag("OtherContent"),
