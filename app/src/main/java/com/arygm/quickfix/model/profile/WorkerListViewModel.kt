@@ -1,16 +1,20 @@
 package com.arygm.quickfix.model.profile
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class WorkerListViewModel(private val repository: ProfileRepositoryFirestore) : ViewModel() {
 
-  var workerProfiles = mutableStateOf<List<Profile>>(emptyList())
-  var errorMessage = mutableStateOf<String?>(null)
+  private val _workerProfiles = MutableStateFlow<List<Profile>>(emptyList())
+  val workerProfiles: StateFlow<List<Profile>> = _workerProfiles
+
+  private val _errorMessage = MutableStateFlow<String?>(null)
+  val errorMessage: StateFlow<String?> = _errorMessage
 
   fun filterWorkerProfiles(
       hourlyRateThreshold: Double? = null,
@@ -31,12 +35,12 @@ class WorkerListViewModel(private val repository: ProfileRepositoryFirestore) : 
                   val distance = calculateDistance(userLat, userLon, workerLat, workerLon)
                   distance <= maxDistanceInKm
                 }
-            workerProfiles.value = filteredProfiles
+            _workerProfiles.value = filteredProfiles
           } else {
-            workerProfiles.value = profiles
+            _workerProfiles.value = profiles
           }
         },
-        { error -> errorMessage.value = error.message })
+        { error -> _errorMessage.value = error.message })
   }
 
   private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
