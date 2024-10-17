@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -94,8 +95,8 @@ fun QuickFixApp() {
         AnimatedVisibility(
             visible = showBottomBar,
             enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from the bottom
-            exit = slideOutVertically { fullHeight -> fullHeight } // Slide out to the bottom
-            ) {
+            exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to the bottom
+            modifier = Modifier.testTag("BNM")) {
               BottomNavigationMenu(
                   selectedItem = Route.HOME, // Use the current route, or fallback to HOME
                   onTabSelect = { selectedDestination ->
