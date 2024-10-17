@@ -8,6 +8,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import org.junit.Before
@@ -21,17 +24,29 @@ class RegisterScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
+  private lateinit var profileRepository: ProfileRepository
+  private lateinit var profileViewModel: ProfileViewModel
   private lateinit var navigationActions: NavigationActions
+  private lateinit var registrationViewModel: RegistrationViewModel
 
   @Before
   fun setup() {
+    profileRepository = mock(ProfileRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
+    profileViewModel = mock(ProfileViewModel::class.java) // Mock the ProfileViewModel
+    registrationViewModel = RegistrationViewModel()
+    registrationViewModel.updateFirstName("John")
+    registrationViewModel.updateFirstName("Doe")
+    registrationViewModel.updateFirstName("john.doe@example.com")
+    registrationViewModel.updateFirstName("01/01/1990")
     `when`(navigationActions.currentRoute()).thenReturn(Screen.REGISTER)
   }
 
   @Test
   fun testInitialUI() {
-    composeTestRule.setContent { RegisterScreen(navigationActions) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Check that the scaffold and content boxes are displayed
     composeTestRule.onNodeWithTag("RegisterScaffold").assertIsDisplayed()
@@ -73,7 +88,9 @@ class RegisterScreenTest {
 
   @Test
   fun testInvalidEmailShowsError() {
-    composeTestRule.setContent { RegisterScreen(navigationActions) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Input an invalid email
     composeTestRule.onNodeWithTag("emailInput").performTextInput("invalidemail")
@@ -85,7 +102,9 @@ class RegisterScreenTest {
 
   @Test
   fun testInvalidDateShowsError() {
-    composeTestRule.setContent { RegisterScreen(navigationActions) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Input an invalid birth date
     composeTestRule.onNodeWithTag("birthDateInput").performTextInput("99/99/9999")
@@ -97,7 +116,9 @@ class RegisterScreenTest {
 
   @Test
   fun testPasswordMismatch() {
-    composeTestRule.setContent { RegisterScreen(navigationActions) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Enter different passwords
     composeTestRule.onNodeWithTag("passwordInput").performTextInput("Password123")
@@ -109,7 +130,9 @@ class RegisterScreenTest {
 
   @Test
   fun testRegisterButtonEnabledWhenFormIsValid() {
-    composeTestRule.setContent { RegisterScreen(navigationActions) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Fill out valid inputs
     composeTestRule.onNodeWithTag("firstNameInput").performTextInput("John")
@@ -132,7 +155,9 @@ class RegisterScreenTest {
 
   @Test
   fun testRegisterButtonDisabledWhenFormIncomplete() {
-    composeTestRule.setContent { RegisterScreen(navigationActions) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Fill only partial inputs
     composeTestRule.onNodeWithTag("firstNameInput").performTextInput("John")
@@ -149,7 +174,9 @@ class RegisterScreenTest {
 
   @Test
   fun testBackButtonNavigatesBack() {
-    composeTestRule.setContent { RegisterScreen(navigationActions) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Click the back button
     composeTestRule.onNodeWithTag("goBackButton").performClick()
@@ -160,7 +187,9 @@ class RegisterScreenTest {
 
   @Test
   fun testLoginButtonNavigatesToLogin() {
-    composeTestRule.setContent { RegisterScreen(navigationActions) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
 
     // Click the "Login !" button
     composeTestRule.onNodeWithTag("clickableLoginButtonText").performClick()

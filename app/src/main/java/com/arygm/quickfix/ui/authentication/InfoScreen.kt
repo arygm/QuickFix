@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,19 +36,30 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixCheckBoxRow
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
+import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
+import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.isValidEmail
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Deprecated("This composable is deprecated", ReplaceWith("RegisterScreen(navigationActions)"))
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun InfoScreen(navigationActions: NavigationActions) {
+fun InfoScreen(
+    navigationActions: NavigationActions,
+    registrationViewModel: RegistrationViewModel,
+    profileViewModel: ProfileViewModel
+) {
   val colorScheme = MaterialTheme.colorScheme
 
   var firstName by remember { mutableStateOf("") }
@@ -64,8 +76,8 @@ fun InfoScreen(navigationActions: NavigationActions) {
   var shrinkBox by remember { mutableStateOf(false) }
   val boxOffsetX by
       animateDpAsState(
-          targetValue = if (shrinkBox) 1285.dp else 0.dp,
-          animationSpec = tween(durationMillis = 300),
+          targetValue = if (shrinkBox) BOX_OFFSET_X_SHRUNK else BOX_OFFSET_X_EXPANDED,
+          animationSpec = tween(durationMillis = BOX_COLLAPSE_SPEED),
           label = "shrinkingBox")
 
   LaunchedEffect(Unit) { shrinkBox = true }
@@ -76,6 +88,8 @@ fun InfoScreen(navigationActions: NavigationActions) {
           email.isNotEmpty() &&
           birthDate.isNotEmpty()
 
+  val coroutineScope = rememberCoroutineScope()
+
   Box(modifier = Modifier.fillMaxSize().testTag("InfoBox")) {
     QuickFixAnimatedBox(boxOffsetX)
 
@@ -85,7 +99,10 @@ fun InfoScreen(navigationActions: NavigationActions) {
           QuickFixBackButtonTopBar(
               onBackClick = {
                 shrinkBox = false
-                navigationActions.goBack()
+                coroutineScope.launch {
+                  delay(BOX_COLLAPSE_SPEED.toLong())
+                  navigationActions.goBack()
+                }
               })
         },
         content = { pd ->
@@ -155,6 +172,14 @@ fun InfoScreen(navigationActions: NavigationActions) {
                           onValueChange = {
                             email = it
                             emailError = !isValidEmail(it)
+                            profileViewModel.profileExists(email) { exists, profile ->
+                              emailError =
+                                  if (exists && profile != null) {
+                                    true
+                                  } else {
+                                    !isValidEmail(it)
+                                  }
+                            }
                           },
                           label = "E-MAIL",
                           isError = emailError,
@@ -206,7 +231,14 @@ fun InfoScreen(navigationActions: NavigationActions) {
                           buttonText = "NEXT",
                           onClickAction = {
                             shrinkBox = false
-                            navigationActions.navigateTo(Screen.PASSWORD)
+                            registrationViewModel.updateFirstName(firstName)
+                            registrationViewModel.updateLastName(lastName)
+                            registrationViewModel.updateEmail(email)
+                            registrationViewModel.updateBirthDate(birthDate)
+                            coroutineScope.launch {
+                              delay(BOX_COLLAPSE_SPEED.toLong())
+                              navigationActions.navigateTo(Screen.PASSWORD)
+                            }
                           },
                           buttonColor = colorScheme.primary,
                           textColor = colorScheme.background,
