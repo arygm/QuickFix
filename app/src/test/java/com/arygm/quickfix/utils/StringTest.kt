@@ -1,13 +1,13 @@
 package com.arygm.quickfix.utils
 
 import com.google.firebase.Timestamp
-import java.util.Calendar
-import java.util.GregorianCalendar
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import java.util.Calendar
+import java.util.GregorianCalendar
 
 class StringTest {
 
