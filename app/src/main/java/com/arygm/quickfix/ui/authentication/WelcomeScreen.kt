@@ -167,7 +167,7 @@ fun WelcomeScreen(navigationActions: NavigationActions, profileViewModel: Profil
           QuickFixButton(
               buttonText = "REGISTER TO QUICKFIX",
               onClickAction = {
-                targetScreen = Screen.INFO
+                targetScreen = Screen.REGISTER
                 startAnimation = true
               },
               buttonColor = colorScheme.background,

@@ -33,6 +33,7 @@ object Screen {
   const val LOGIN = "Login Screen"
   const val INFO = "Info Screen"
   const val PASSWORD = "Password Screen"
+  const val REGISTER = "Register Screen"
   const val HOME = "Home Screen"
   const val ANNOUNCEMENT = "Announcement Screen"
   const val ACTIVITY = "Activity Screen"

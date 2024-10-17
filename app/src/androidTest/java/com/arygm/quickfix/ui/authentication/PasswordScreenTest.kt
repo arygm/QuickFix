@@ -23,6 +23,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 
+@Deprecated("Theses tests are deprecated", ReplaceWith("RegisterScreenTests"))
 class PasswordScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
