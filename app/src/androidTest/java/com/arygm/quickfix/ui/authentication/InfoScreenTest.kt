@@ -11,17 +11,22 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.whenever
 
 class InfoScreenTest {
 
@@ -173,5 +178,71 @@ class InfoScreenTest {
 
     // Verify that the navigation action was triggered
     Mockito.verify(navigationActions).goBack()
+  }
+
+  @Test
+  fun testEmailAlreadyExistsShowsError() {
+    // Arrange
+    val existingEmail = "john.doe@example.com"
+    val profile =
+        Profile(
+            uid = "testUid",
+            firstName = "John",
+            lastName = "Doe",
+            email = existingEmail,
+            birthDate = Timestamp.now(),
+            description = "Existing user")
+
+    // Mock the profileRepository.profileExists to return exists = true, profile != null
+    whenever(profileRepository.profileExists(eq(existingEmail), any(), any())).thenAnswer {
+        invocation ->
+      val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
+      onSuccess(Pair(true, profile))
+      null
+    }
+
+    // Act
+    composeTestRule.setContent {
+      InfoScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("emailInput").performTextInput(existingEmail)
+
+    // Wait for possible recompositions
+    composeTestRule.waitForIdle()
+
+    // Assert
+    composeTestRule.onNodeWithTag("errorText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("errorText").assertTextEquals("INVALID EMAIL")
+    composeTestRule.onNodeWithTag("nextButton").assertIsNotEnabled()
+  }
+
+  @Test
+  fun testValidEmailDoesNotShowErrorWhenEmailDoesNotExist() {
+    // Arrange
+    val newEmail = "new.user@example.com"
+
+    // Mock the profileRepository.profileExists to return exists = false, profile = null
+    whenever(profileRepository.profileExists(eq(newEmail), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
+      onSuccess(Pair(false, null))
+      null
+    }
+
+    // Act
+    composeTestRule.setContent {
+      InfoScreen(navigationActions, registrationViewModel, profileViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("emailInput").performTextInput(newEmail)
+
+    // Wait for possible recompositions
+    composeTestRule.waitForIdle()
+
+    // Assert
+    composeTestRule.onNodeWithTag("errorText").assertDoesNotExist()
+    // Ensure the "NEXT" button remains disabled until other fields are filled and checkboxes are
+    // checked
+    composeTestRule.onNodeWithTag("nextButton").assertIsNotEnabled()
   }
 }

@@ -7,6 +7,9 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.navigation.TopLevelDestinations
+import com.google.firebase.auth.FirebaseAuth
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -27,8 +30,12 @@ class PasswordScreenTest {
   fun setup() {
     profileRepository = mock(ProfileRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
-    profileViewModel = ProfileViewModel(profileRepository)
+    profileViewModel = mock(ProfileViewModel::class.java) // Mock the ProfileViewModel
     registrationViewModel = RegistrationViewModel()
+    registrationViewModel.updateFirstName("John")
+    registrationViewModel.updateFirstName("Doe")
+    registrationViewModel.updateFirstName("john.doe@example.com")
+    registrationViewModel.updateFirstName("01/01/1990")
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.PASSWORD)
   }
@@ -137,5 +144,87 @@ class PasswordScreenTest {
 
     // Verify that the navigation action was triggered
     Mockito.verify(navigationActions).goBack()
+  }
+
+  @Test
+  fun testRegisterButtonClickSuccessfulRegistration() {
+    var createAccountFuncCalled = false
+
+    val testCreateAccountFunc =
+        {
+            _: FirebaseAuth,
+            _: String,
+            _: String,
+            _: String,
+            _: String,
+            _: String,
+            _: ProfileViewModel,
+            onSuccess: () -> Unit,
+            _: () -> Unit ->
+          createAccountFuncCalled = true
+          onSuccess() // Simulate success
+    }
+
+    composeTestRule.setContent {
+      PasswordScreen(
+          navigationActions = navigationActions,
+          registrationViewModel = registrationViewModel,
+          profileViewModel = profileViewModel,
+          createAccountFunc = testCreateAccountFunc)
+    }
+
+    // Input matching passwords that meet all conditions
+    composeTestRule.onNodeWithTag("passwordInput").performTextInput("Password1")
+    composeTestRule.onNodeWithTag("repeatPasswordInput").performTextInput("Password1")
+
+    // Click the register button
+    composeTestRule.onNodeWithTag("registerButton").performClick()
+
+    // Verify that createAccountFunc was called
+    assertTrue(createAccountFuncCalled)
+
+    // Verify that navigation to HOME was triggered
+    Mockito.verify(navigationActions).navigateTo(TopLevelDestinations.HOME)
+  }
+
+  @Test
+  fun testRegisterButtonClickFailedRegistration() {
+    var createAccountFuncCalled = false
+
+    val testCreateAccountFunc =
+        {
+            _: FirebaseAuth,
+            _: String,
+            _: String,
+            _: String,
+            _: String,
+            _: String,
+            _: ProfileViewModel,
+            _: () -> Unit,
+            onFailure: () -> Unit ->
+          createAccountFuncCalled = true
+          onFailure() // Simulate failure
+    }
+
+    composeTestRule.setContent {
+      PasswordScreen(
+          navigationActions = navigationActions,
+          registrationViewModel = registrationViewModel,
+          profileViewModel = profileViewModel,
+          createAccountFunc = testCreateAccountFunc)
+    }
+
+    // Input matching passwords that meet all conditions
+    composeTestRule.onNodeWithTag("passwordInput").performTextInput("Password1")
+    composeTestRule.onNodeWithTag("repeatPasswordInput").performTextInput("Password1")
+
+    // Click the register button
+    composeTestRule.onNodeWithTag("registerButton").performClick()
+
+    // Verify that createAccountFunc was called
+    assertTrue(createAccountFuncCalled)
+
+    // Verify that navigation to HOME was not triggered
+    Mockito.verify(navigationActions, Mockito.never()).navigateTo(TopLevelDestinations.HOME)
   }
 }

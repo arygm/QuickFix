@@ -64,9 +64,21 @@ import java.util.GregorianCalendar
 fun PasswordScreen(
     navigationActions: NavigationActions,
     registrationViewModel: RegistrationViewModel,
-    profileViewModel: ProfileViewModel
+    profileViewModel: ProfileViewModel,
+    firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(), // Injected dependency
+    createAccountFunc:
+        (
+            firebaseAuth: FirebaseAuth,
+            firstName: String,
+            lastName: String,
+            email: String,
+            password: String,
+            birthDate: String,
+            profileViewModel: ProfileViewModel,
+            onSuccess: () -> Unit,
+            onFailure: () -> Unit) -> Unit =
+        ::createAccountWithEmailAndPassword // Default implementation
 ) {
-
   val context = LocalContext.current
 
   val firstName by registrationViewModel.firstName.collectAsState()
@@ -198,18 +210,16 @@ fun PasswordScreen(
                           buttonText = "REGISTER",
                           onClickAction = {
                             shrinkBox = false
-                            createAccountWithEmailAndPassword(
-                                firebaseAuth = FirebaseAuth.getInstance(),
-                                firstName = firstName,
-                                lastName = lastName,
-                                email = email,
-                                password = password,
-                                birthDate = birthDate,
-                                profileViewModel = profileViewModel,
-                                onSuccess = {
-                                  navigationActions.navigateTo(TopLevelDestinations.HOME)
-                                },
-                                onFailure = {
+                            createAccountFunc(
+                                firebaseAuth,
+                                firstName,
+                                lastName,
+                                email,
+                                password,
+                                birthDate,
+                                profileViewModel,
+                                { navigationActions.navigateTo(TopLevelDestinations.HOME) },
+                                {
                                   Toast.makeText(context, "Registration Failed.", Toast.LENGTH_LONG)
                                       .show()
                                 })
