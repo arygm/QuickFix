@@ -6,7 +6,6 @@ import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mockito.doAnswer
@@ -28,27 +27,27 @@ class WorkerListViewModelTest {
   @Test
   fun testFilterWorkerProfilesByHourlyRateSuccess() {
     // Arrange: Prepare expected worker profile and mock repository success behavior
-    val expectedProfiles = listOf(
-      Profile(
-        uid = "worker_123",
-        firstName = "John",
-        lastName = "Doe",
-        email = "johnDoes@gmail.com",
-        birthDate = Timestamp.now(),
-        description = "I'm a professional worker",
-        isWorker = true,
-        fieldOfWork = "Plumber",
-        hourlyRate = 25.0
-      )
-    )
+    val expectedProfiles =
+        listOf(
+            Profile(
+                uid = "worker_123",
+                firstName = "John",
+                lastName = "Doe",
+                email = "johnDoes@gmail.com",
+                birthDate = Timestamp.now(),
+                description = "I'm a professional worker",
+                isWorker = true,
+                fieldOfWork = "Plumber",
+                hourlyRate = 25.0))
 
     // Mock repository behavior for a successful response
     doAnswer { invocation ->
-      val onSuccess = invocation.arguments[3] as (List<Profile>) -> Unit
-      onSuccess(expectedProfiles) // Simulate success callback
-      null
-    }.`when`(mockRepository)
-      .filterWorkers(eq(30.0), isNull(), anyOrNull(), anyOrNull(), anyOrNull())
+          val onSuccess = invocation.arguments[3] as (List<Profile>) -> Unit
+          onSuccess(expectedProfiles) // Simulate success callback
+          null
+        }
+        .`when`(mockRepository)
+        .filterWorkers(eq(30.0), isNull(), anyOrNull(), anyOrNull(), anyOrNull())
 
     // Act: Call ViewModel's function to filter worker profiles
     viewModel.filterWorkerProfiles(hourlyRateThreshold = 30.0)
@@ -65,11 +64,12 @@ class WorkerListViewModelTest {
 
     // Mock repository behavior for a failure response
     doAnswer { invocation ->
-      val onFailure = invocation.arguments[4] as (Exception) -> Unit
-      onFailure(Exception(errorMessage)) // Simulate failure callback
-      null
-    }.`when`(mockRepository)
-      .filterWorkers(eq(30.0), isNull(), anyOrNull(), anyOrNull(), anyOrNull())
+          val onFailure = invocation.arguments[4] as (Exception) -> Unit
+          onFailure(Exception(errorMessage)) // Simulate failure callback
+          null
+        }
+        .`when`(mockRepository)
+        .filterWorkers(eq(30.0), isNull(), anyOrNull(), anyOrNull(), anyOrNull())
 
     // Act: Call ViewModel's function to filter worker profiles
     viewModel.filterWorkerProfiles(hourlyRateThreshold = 30.0)

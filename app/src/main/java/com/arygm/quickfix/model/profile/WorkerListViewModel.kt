@@ -8,7 +8,11 @@ class WorkerListViewModel(private val repository: ProfileRepositoryFirestore) : 
   var workerProfiles = mutableStateOf<List<Profile>>(emptyList())
   var errorMessage = mutableStateOf<String?>(null)
 
-  fun filterWorkerProfiles(hourlyRateThreshold: Double? = null, location: String? = null, fieldOfWork: String? = null) {
+  fun filterWorkerProfiles(
+      hourlyRateThreshold: Double? = null,
+      location: String? = null,
+      fieldOfWork: String? = null
+  ) {
     repository.filterWorkers(
         hourlyRateThreshold,
         location,
