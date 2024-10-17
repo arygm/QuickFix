@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import com.arygm.quickfix.utils.routeToScreen
 
 object Route {
   const val WELCOME = "Welcome"
@@ -134,23 +135,5 @@ open class NavigationActions(
    */
   open fun currentRoute(): String {
     return navController.currentDestination?.route ?: ""
-  }
-
-  private fun routeToScreen(route: String): String {
-    return when (route) {
-      Route.HOME -> Screen.HOME
-      Route.ANNOUNCEMENT -> Screen.ANNOUNCEMENT
-      Route.ACTIVITY -> Screen.ACTIVITY
-      Route.OTHER -> Screen.OTHER
-      Route.CALENDAR -> Screen.CALENDAR
-      Route.MAP -> Screen.MAP
-      Route.WELCOME -> Screen.WELCOME
-      Route.INFO -> Screen.INFO
-      Route.LOGIN -> Screen.LOGIN
-      Route.PASSWORD -> Screen.PASSWORD
-      else -> {
-        Screen.WELCOME
-      }
-    }
   }
 }
