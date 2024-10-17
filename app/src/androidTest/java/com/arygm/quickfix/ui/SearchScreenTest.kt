@@ -34,9 +34,7 @@ class SearchScreenTest {
     composeTestRule.onNodeWithTag("SEARCH").assertTextEquals("SEARCH")
     composeTestRule.onNodeWithTag("SearchContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SearchText").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("SearchText")
-        .assertTextContains("Welcome to the SEARCH Screen")
+    composeTestRule.onNodeWithTag("SearchText").assertTextContains("Welcome to the SEARCH Screen")
     composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 
@@ -50,9 +48,7 @@ class SearchScreenTest {
     composeTestRule.onNodeWithTag("SEARCH").assertTextEquals("SEARCH")
     composeTestRule.onNodeWithTag("SearchContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SearchText").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("SearchText")
-        .assertTextContains("Welcome to the SEARCH Screen")
+    composeTestRule.onNodeWithTag("SearchText").assertTextContains("Welcome to the SEARCH Screen")
     composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 }

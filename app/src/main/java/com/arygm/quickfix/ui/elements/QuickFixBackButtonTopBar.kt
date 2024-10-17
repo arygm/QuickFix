@@ -26,7 +26,6 @@ fun QuickFixBackButtonTopBar(
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.testTag("goBackButton"))
       },
-      colors =
-          TopAppBarDefaults.topAppBarColors(containerColor = color),
+      colors = TopAppBarDefaults.topAppBarColors(containerColor = color),
       modifier = modifier.testTag("goBackTopBar"))
 }

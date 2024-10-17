@@ -5,11 +5,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
@@ -48,7 +46,8 @@ fun BottomNavigationMenu(
           // Set design colors
           circleColor = colorScheme.primary.toArgb() // Central button color
           backgroundBottomColor = colorScheme.surface.toArgb() // Orange background color
-          defaultIconColor = colorScheme.tertiaryContainer.toArgb() // Default icon color (unselected)
+          defaultIconColor =
+              colorScheme.tertiaryContainer.toArgb() // Default icon color (unselected)
           selectedIconColor = colorScheme.surface.toArgb() // Selected icon color
 
           // Define a listener for item show events

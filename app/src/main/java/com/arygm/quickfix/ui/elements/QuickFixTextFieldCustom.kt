@@ -22,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,23 +30,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.theme.poppinsTypography
-
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 
 @Preview
 @Composable
-fun QuickFixSearchBar(
+fun QuickFixTextFieldCustom(
     showLeadingIcon: () -> Boolean = { true }, // Boolean flag to show or hide the leading icon
     showTrailingIcon: () -> Boolean = { true }, // Boolean flag to show or hide the trailing icon
     leadingIcon: ImageVector = Icons.Default.Search,
@@ -64,89 +67,93 @@ fun QuickFixSearchBar(
     moveContentHorizontal: Dp = 5.dp, // Move the icon and text group horizontally
     moveContentBottom: Dp = 0.dp, // Move the icon and text group down as you increase
     moveContentTop: Dp = 0.dp, // Move the icon and text group to the top as you increase
-    sizeIconGroup: Dp = 30.dp, // Size of the icon (if you want to change the size of the text you have to increase the font)
+    sizeIconGroup: Dp =
+        30.dp, // Size of the icon (if you want to change the size of the text you have to
+    // increase the font)
     spaceBetweenLeadIconText: Dp = 0.dp, // Space between leading icon and text
-    onTextFieldClick: () -> Unit = { },
+    onTextFieldClick: () -> Unit = {},
     focusRequester: FocusRequester = FocusRequester()
 ) {
-    var textState by remember { mutableStateOf(TextFieldValue("")) }
-    val scrollState = rememberScrollState() // Scroll state for horizontal scrolling
+  var textState by remember { mutableStateOf(TextFieldValue("")) }
+  val scrollState = rememberScrollState() // Scroll state for horizontal scrolling
 
-    // Launch a coroutine to scroll to the end of the text when typing
-    LaunchedEffect(textState) {
-        scrollState.animateScrollTo(scrollState.maxValue)
-    }
+  // Launch a coroutine to scroll to the end of the text when typing
+  LaunchedEffect(textState) { scrollState.animateScrollTo(scrollState.maxValue) }
 
-    Box(
-        modifier = Modifier
-            .size(width = widthField, height = heightField) // Set the width and height
-            .fillMaxWidth() // Fill the width of the container
-            .clip(shape) // Clip with shape
-            .background(MaterialTheme.colorScheme.surface) // Apply background
-            .padding(start = moveContentHorizontal, top = moveContentTop, bottom = moveContentTop)
-            .clickable { onTextFieldClick() } ,// Apply padding
-        contentAlignment = Alignment.Center
-    ) {
+  Box(
+      modifier =
+          Modifier.size(width = widthField, height = heightField) // Set the width and height
+              .fillMaxWidth() // Fill the width of the container
+              .clip(shape) // Clip with shape
+              .background(MaterialTheme.colorScheme.surface) // Apply background
+              .padding(start = moveContentHorizontal, top = moveContentTop, bottom = moveContentTop)
+              .clickable { onTextFieldClick() }
+              .semantics(mergeDescendants = false) {
+                testTag = C.Tag.main_container_text_field_custom
+              }, // Apply padding
+      contentAlignment = Alignment.Center) {
         Row(
             horizontalArrangement = Arrangement.Center, // Aligning icon and text horizontally
             verticalAlignment = Alignment.CenterVertically, // Aligning icon and text vertically
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            if (showLeadingIcon()) { // Conditionally show the leading icon
+            modifier = Modifier.fillMaxWidth().testTag(C.Tag.group_icon_custom_text_field)) {
+              if (showLeadingIcon()) { // Conditionally show the leading icon
                 Icon(
                     imageVector = leadingIcon,
                     contentDescription = descriptionLeadIcon,
                     tint = leadIconColor, // Icon color
-                    modifier = Modifier
-                        .size(sizeIconGroup) // Set icon size
-                        .padding(end = 8.dp) // Space between icon and text
-                )
-            }
+                    modifier =
+                        Modifier.size(sizeIconGroup) // Set icon size
+                            .padding(end = 8.dp)
+                            .testTag(C.Tag.icon_custom_text_field)
+                    // Space between icon and text
+                    )
+              }
 
-            Spacer(Modifier.padding(horizontal = spaceBetweenLeadIconText)) // Space between icon and text
+              Spacer(
+                  Modifier.padding(
+                      horizontal = spaceBetweenLeadIconText)) // Space between icon and text
 
-            Box(
-                modifier = Modifier.weight(1f)
-
-            ) {
+              Box(modifier = Modifier.weight(1f)) {
                 BasicTextField(
                     value = textState,
-                    onValueChange = { newText ->
-                        textState = newText
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(scrollState)
-                        .focusable(true)
-                        .focusRequester(focusRequester)// Makes the text field take up remaining space
-
-                        , // Enable horizontal scrolling
+                    onValueChange = { newText -> textState = newText },
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .horizontalScroll(scrollState)
+                            .focusable(true)
+                            .focusRequester(
+                                focusRequester) // Makes the text field take up remaining space
+                            .testTag(C.Tag.text_field_custom), // Enable horizontal scrolling
                     textStyle = textStyle.copy(color = textColor), // Text style with color
                     singleLine = true // Keep the text on a single line
-                )
+                    )
 
                 if (textState.text.isEmpty()) {
-                    Text(
-                        text = placeHolderText,
-                        style = textStyle.copy(color = placeHolderColor) // Placeholder text style
-                    )
+                  Text(
+                      modifier = Modifier.testTag(C.Tag.place_holder_text_field_custom),
+                      text = placeHolderText,
+                      style = textStyle.copy(color = placeHolderColor) // Placeholder text style
+                      )
                 }
-            }
-            if (showTrailingIcon() && textState.text.isNotEmpty() ) { // Conditionally show the trailing icon
+              }
+              if (showTrailingIcon() &&
+                  textState.text.isNotEmpty()) { // Conditionally show the trailing icon
                 IconButton(
                     onClick = { textState = TextFieldValue("") }, // Clear the text when clicked
-                    modifier = Modifier
-                        .size(sizeIconGroup) // Set icon size
-                        .padding(end = 9.dp) // Space between icon and text
-                        .align(Alignment.CenterVertically) // Align the icon vertically
-                ) {
-                    Icon(
-                        imageVector = trailingIcon,
-                        contentDescription = descriptionTrailIcon,
-                        tint = trailIconColor, // Icon color
-                    )
-                }
+                    modifier =
+                        Modifier.size(sizeIconGroup) // Set icon size
+                            .padding(end = 9.dp) // Space between icon and text
+                            .align(Alignment.CenterVertically) // Align the icon vertically
+                            .testTag(C.Tag.clear_button_text_field_custom)) {
+                      Icon(
+                          imageVector = trailingIcon,
+                          contentDescription = descriptionTrailIcon,
+                          tint = trailIconColor, // Icon color
+                          modifier =
+                              Modifier.testTag(C.Tag.clear_icon_text_field_custom) // Set icon size
+                          )
+                    }
+              }
             }
-        }
-    }
+      }
 }

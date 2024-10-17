@@ -13,11 +13,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.arygm.quickfix.ui.ProfileScreen
 import com.arygm.quickfix.ui.AnnouncementScreen
-import com.arygm.quickfix.ui.SearchScreen
 import com.arygm.quickfix.ui.DashboardScreen
 import com.arygm.quickfix.ui.OtherScreen
+import com.arygm.quickfix.ui.ProfileScreen
+import com.arygm.quickfix.ui.SearchScreen
 import com.arygm.quickfix.ui.authentication.InfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.PasswordScreen

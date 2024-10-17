@@ -34,7 +34,9 @@ class DashboardScreenTest {
     composeTestRule.onNodeWithTag("DASHBOARD").assertTextEquals("DASHBOARD")
     composeTestRule.onNodeWithTag("DashboardContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DashboardText").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("DashboardText").assertTextContains("Welcome to the DASHBOARD Screen")
+    composeTestRule
+        .onNodeWithTag("DashboardText")
+        .assertTextContains("Welcome to the DASHBOARD Screen")
     composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 
@@ -48,7 +50,9 @@ class DashboardScreenTest {
     composeTestRule.onNodeWithTag("DASHBOARD").assertTextEquals("DASHBOARD")
     composeTestRule.onNodeWithTag("DashboardContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DashboardText").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("DashboardText").assertTextContains("Welcome to the DASHBOARD Screen")
+    composeTestRule
+        .onNodeWithTag("DashboardText")
+        .assertTextContains("Welcome to the DASHBOARD Screen")
     composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 }

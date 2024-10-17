@@ -25,7 +25,7 @@ fun QuickFixButton(
     textColor: Color,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    cornerRadius : Dp = 10.dp
+    cornerRadius: Dp = 10.dp
 ) {
   Button(
       onClick = onClickAction,

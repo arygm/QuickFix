@@ -34,9 +34,7 @@ class ProfileScreenTest {
     composeTestRule.onNodeWithTag("PROFILE").assertTextEquals("PROFILE")
     composeTestRule.onNodeWithTag("ProfileContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProfileText").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("ProfileText")
-        .assertTextContains("Welcome to the PROFILE Screen")
+    composeTestRule.onNodeWithTag("ProfileText").assertTextContains("Welcome to the PROFILE Screen")
     composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 
@@ -50,9 +48,7 @@ class ProfileScreenTest {
     composeTestRule.onNodeWithTag("PROFILE").assertTextEquals("PROFILE")
     composeTestRule.onNodeWithTag("ProfileContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProfileText").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("ProfileText")
-        .assertTextContains("Welcome to the PROFILE Screen")
+    composeTestRule.onNodeWithTag("ProfileText").assertTextContains("Welcome to the PROFILE Screen")
     composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 }

@@ -3,11 +3,9 @@ package com.arygm.quickfix.ui.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -45,13 +43,14 @@ object TopLevelDestinations {
       TopLevelDestination(
           route = Route.ANNOUNCEMENT, icon = Icons.Filled.AddCircle, textId = "Announcement")
   val PROFILE =
-      TopLevelDestination(route = Route.PROFILE, icon = Icons.Filled.AccountCircle, textId = "Profile")
+      TopLevelDestination(
+          route = Route.PROFILE, icon = Icons.Filled.AccountCircle, textId = "Profile")
   val OTHER =
       TopLevelDestination(route = Route.OTHER, icon = Icons.Filled.MoreVert, textId = "Other")
   val SEARCH =
-      TopLevelDestination(
-          route = Route.SEARCH, icon = Icons.Filled.Search, textId = "Search")
-  val DASHBOARD = TopLevelDestination(route = Route.DASHBOARD, icon = Icons.Filled.Menu, textId = "Dashboard")
+      TopLevelDestination(route = Route.SEARCH, icon = Icons.Filled.Search, textId = "Search")
+  val DASHBOARD =
+      TopLevelDestination(route = Route.DASHBOARD, icon = Icons.Filled.Menu, textId = "Dashboard")
 }
 
 val USER_TOP_LEVEL_DESTINATIONS =

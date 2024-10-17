@@ -1,0 +1,99 @@
+package com.arygm.quickfix.kaspresso
+
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.printToLog
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.arygm.quickfix.kaspresso.element.QuickFixSearchBarElement
+import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
+import io.github.kakaocup.compose.node.element.ComposeScreen
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
+@RunWith(AndroidJUnit4::class)
+class QuickFixTextFieldCustomTest : TestCase() {
+
+  @get:Rule val composeTestRule = createComposeRule()
+
+  @Test
+  fun testQuickFixTextFieldCustom() = run {
+    // Step 1: Set up the content to test
+    composeTestRule.setContent {
+      QuickFixTextFieldCustom(
+          showLeadingIcon = { true }, // Test with leading icon visible
+          showTrailingIcon = { true } // Test with trailing icon visible
+          )
+    }
+    step("Test UI elements are displayed when text is empty") {
+      ComposeScreen.onComposeScreen<QuickFixSearchBarElement>(composeTestRule) {
+        // Assert leading icon is displayed
+        composeTestRule.onRoot(useUnmergedTree = true).printToLog("TAG")
+        leadingIcon { assertIsDisplayed() }
+        placeHolder {
+          assertIsDisplayed()
+          assertTextEquals("Find your perfect fix with QuickFix")
+        }
+        // Assert the trailing icon is not displayed because the text is empty
+        clearButton { assertDoesNotExist() }
+        // Assert the input field is displayed
+        textFieldCustom { assertIsDisplayed() }
+      }
+    }
+
+    step("Test text input and clear functionality") {
+      ComposeScreen.onComposeScreen<QuickFixSearchBarElement>(composeTestRule) {
+        // Input some text
+        textFieldCustom { performTextInput("QuickFix") }
+
+        // Verify the text input was successful and placeholder is gone
+        textFieldCustom { assertTextEquals("QuickFix") }
+
+        // The placeholder should no longer exist when the text is not empty
+        placeHolder { assertDoesNotExist() }
+
+        // Assert that the trailing icon (clear button) is now visible
+        clearButton {
+          assertIsDisplayed()
+          assertIsEnabled()
+          // Click the clear button to reset the text field
+          performClick()
+        }
+
+        // Verify that the text field is cleared
+        textFieldCustom { assertTextEquals("") }
+      }
+    }
+
+    step("Test UI elements when text is non-empty and cleared") {
+      ComposeScreen.onComposeScreen<QuickFixSearchBarElement>(composeTestRule) {
+        // Assert the leading icon is still displayed
+        leadingIcon { assertIsDisplayed() }
+
+        // Assert the text field is empty after clearing
+        textFieldCustom { assertTextEquals("") }
+
+        // Assert that the placeholder is visible again
+        placeHolder { assertIsDisplayed() }
+
+        // Assert that the clear button is no longer visible after clearing the text
+        clearButton { assertDoesNotExist() }
+      }
+    }
+
+    step("Test horizontal scrolling behavior") {
+      ComposeScreen.onComposeScreen<QuickFixSearchBarElement>(composeTestRule) {
+        // Input long text to trigger horizontal scrolling
+        textFieldCustom {
+          performTextInput("This is a very long text to trigger scrolling behavior")
+        }
+
+        // Assert that the text field contains the input
+        textFieldCustom {
+          assertTextEquals("This is a very long text to trigger scrolling behavior")
+        }
+      }
+    }
+  }
+}

@@ -28,62 +28,65 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import com.arygm.quickfix.R
-import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
-import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Route
-import com.arygm.quickfix.ui.navigation.Screen
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
-import com.arygm.quickfix.ui.elements.QuickFixSearchBar
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.R
+import com.arygm.quickfix.ressources.C
+import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
+import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
+import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Route
+import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
-    val focusRequesterSearchBar = remember { FocusRequester() }
-    val focusManager = LocalFocusManager.current
+  val focusRequesterSearchBar = remember { FocusRequester() }
+  val focusManager = LocalFocusManager.current
   // Use Scaffold for the layout structure
   Scaffold(
-      modifier = Modifier.pointerInput(Unit) {
-          detectTapGestures(onTap = { focusManager.clearFocus() }) // Clear focus when tapping outside
-      },
+      modifier =
+          Modifier.pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { focusManager.clearFocus() }) // Clear focus when tapping outside
+              }
+              .testTag("HomeScreen"),
       containerColor = colorScheme.background,
       topBar = {
-              TopAppBar(
-                  title = {
-                      Column {
-                          Row(
-                              modifier = Modifier.fillMaxSize().padding(0.dp),
-                              horizontalArrangement = Arrangement.Start,
-                              verticalAlignment = Alignment.CenterVertically)
-                          {
-                              Image(
-                                  painter = painterResource(id = R.drawable.home_screen_headline),
-                                  contentDescription = "home_title",
-                                  modifier = Modifier.size(200.dp)
-                              )
-                          }
-                      }
-                  },
-                  colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
-                  navigationIcon = {},
-                  actions = {
-                    IconButton(
-                        onClick = { navigationActions.navigateTo(Screen.MESSAGES) },
-                        Modifier.testTag("MessagesButton")) {
-                          Icon(
-                              imageVector = Icons.Outlined.Email,
-                              contentDescription = "Messages",
-                              tint = colorScheme.background)
-                        }
-                  })
+        TopAppBar(
+            title = {
+              Column {
+                Row(
+                    modifier = Modifier.fillMaxSize().padding(0.dp),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically) {
+                      Image(
+                          painter = painterResource(id = R.drawable.home_screen_headline),
+                          contentDescription = "home_title",
+                          modifier = Modifier.size(200.dp))
+                    }
+              }
             },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
+            navigationIcon = {},
+            actions = {
+              IconButton(
+                  onClick = { navigationActions.navigateTo(Screen.MESSAGES) },
+                  Modifier.testTag("MessagesButton")) {
+                    Icon(
+                        imageVector = Icons.Outlined.Email,
+                        contentDescription = "Messages",
+                        tint = colorScheme.background)
+                  }
+            })
+      },
       bottomBar = {
         // Boolean isUser = true for this HomeScreen
         BottomNavigationMenu(
@@ -97,14 +100,20 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
       },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(vertical = 8.dp).testTag("HomeContent"),
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(padding)
+                    .padding(vertical = 8.dp)
+                    .testTag(
+                        "homeContent"), // This should match the exact value you're asserting in the
+            // test,
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+              Row(
+                  modifier = Modifier.fillMaxWidth(),
+              ) {
                 Spacer(modifier = Modifier.width(10.dp))
-                QuickFixSearchBar(
+                QuickFixTextFieldCustom(
                     showLeadingIcon = { true },
                     showTrailingIcon = { true },
                     leadingIcon = Icons.Outlined.Search,
@@ -125,31 +134,27 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
                     moveContentTop = 0.dp,
                     sizeIconGroup = 30.dp,
                     spaceBetweenLeadIconText = 0.dp,
-                    onTextFieldClick = { },
-                    focusRequester = focusRequesterSearchBar
-                )
+                    onTextFieldClick = {},
+                    focusRequester = focusRequesterSearchBar)
 
                 Spacer(modifier = Modifier.width(20.dp))
                 IconButton(
                     onClick = {},
-                    modifier = Modifier
-                        .size(40.dp) // Define the size of the button
-                        .clip(CircleShape)
-                        .background(color = colorScheme.surface) // Add a border
-                        .padding(8.dp)
-                // Make it circular
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.bell),
-                        contentDescription = "notifications",
-                        tint = colorScheme.primary,// Set the icon color
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                }
-
+                    modifier =
+                        Modifier.size(40.dp) // Define the size of the button
+                            .clip(CircleShape)
+                            .background(color = colorScheme.surface) // Add a border
+                            .padding(8.dp)
+                            .testTag(C.Tag.notification)
+                    // Make it circular
+                    ) {
+                      Icon(
+                          painter = painterResource(id = R.drawable.bell),
+                          contentDescription = "notifications",
+                          tint = colorScheme.primary, // Set the icon color
+                          modifier = Modifier.size(20.dp))
+                    }
+              }
             }
       })
 }
-
-

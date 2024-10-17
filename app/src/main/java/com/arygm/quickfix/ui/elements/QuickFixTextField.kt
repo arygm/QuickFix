@@ -1,4 +1,3 @@
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -38,11 +37,11 @@ fun QuickFixTextField(
       value = value,
       onValueChange = onValueChange,
       placeholder = {
-          Text(
-              text = label,
-              color = color.copy(alpha = 0.6f),
-              style = MaterialTheme.typography.labelSmall)
-        },
+        Text(
+            text = label,
+            color = color.copy(alpha = 0.6f),
+            style = MaterialTheme.typography.labelSmall)
+      },
       leadingIcon = leadingIcon,
       isError = isError,
       modifier = modifier.testTag("textField"),
@@ -56,9 +55,15 @@ fun QuickFixTextField(
       shape = RoundedCornerShape(cornerRadius),
       colors =
           OutlinedTextFieldDefaults.colors(
-              unfocusedContainerColor = backgroundColor, focusedContainerColor = backgroundColor, errorContainerColor = MaterialTheme.colorScheme.errorContainer,
-              unfocusedPlaceholderColor = backgroundColor, focusedPlaceholderColor = backgroundColor, errorTextColor = MaterialTheme.colorScheme.error,
-              unfocusedBorderColor = Color.Transparent, focusedBorderColor = Color.Transparent, errorBorderColor = MaterialTheme.colorScheme.error),
+              unfocusedContainerColor = backgroundColor,
+              focusedContainerColor = backgroundColor,
+              errorContainerColor = MaterialTheme.colorScheme.errorContainer,
+              unfocusedPlaceholderColor = backgroundColor,
+              focusedPlaceholderColor = backgroundColor,
+              errorTextColor = MaterialTheme.colorScheme.error,
+              unfocusedBorderColor = Color.Transparent,
+              focusedBorderColor = Color.Transparent,
+              errorBorderColor = MaterialTheme.colorScheme.error),
       visualTransformation = visualTransformation,
       keyboardOptions = keyboardOptions)
 
