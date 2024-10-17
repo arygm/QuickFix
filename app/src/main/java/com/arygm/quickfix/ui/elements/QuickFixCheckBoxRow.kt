@@ -63,7 +63,7 @@ fun QuickFixCheckBoxRow(
               textDecoration = TextDecoration.Underline,
               maxLines = 1,
               modifier =
-              modifier.clickable(onClick = onUnderlinedTextClick).testTag("clickableLink"))
+                  modifier.clickable(onClick = onUnderlinedTextClick).testTag("clickableLink"))
         }
     Row(
         modifier = modifier.padding(start = 22.dp),
@@ -79,7 +79,8 @@ fun QuickFixCheckBoxRow(
               color = colorScheme.primary,
               textDecoration = TextDecoration.Underline,
               modifier =
-              modifier.clickable(
+                  modifier
+                      .clickable(
                           onClick = {
                             if (onUnderlinedTextClickBis != null) onUnderlinedTextClickBis()
                           })

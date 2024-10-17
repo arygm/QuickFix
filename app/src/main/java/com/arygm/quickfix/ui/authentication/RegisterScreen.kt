@@ -404,8 +404,7 @@ fun RegisterScreen(navigationActions: NavigationActions? = null) {
                                           Text(
                                               text = condition,
                                               color =
-                                                  if (met ||
-                                                      password.isEmpty())
+                                                  if (met || password.isEmpty())
                                                       colorScheme.onSecondaryContainer
                                                   else colorScheme.error,
                                               style = MaterialTheme.typography.bodySmall,
@@ -418,8 +417,7 @@ fun RegisterScreen(navigationActions: NavigationActions? = null) {
                                           Text(
                                               text = condition,
                                               color =
-                                                  if (met ||
-                                                      password.isEmpty())
+                                                  if (met || password.isEmpty())
                                                       colorScheme.onSecondaryContainer
                                                   else colorScheme.error,
                                               style = MaterialTheme.typography.bodySmall,
