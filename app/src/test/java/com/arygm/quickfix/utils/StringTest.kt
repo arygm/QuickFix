@@ -1,5 +1,7 @@
 package com.arygm.quickfix.utils
 
+import com.arygm.quickfix.ui.navigation.Route
+import com.arygm.quickfix.ui.navigation.Screen
 import com.google.firebase.Timestamp
 import java.util.Calendar
 import java.util.GregorianCalendar
@@ -85,5 +87,71 @@ class StringTest {
     assertNull(stringToTimestamp("31-12-1999")) // Incorrect format
     assertNull(stringToTimestamp("12/31/2023")) // MM/DD/YYYY format instead of DD/MM/YYYY
     assertNull(stringToTimestamp("29/02/2021")) // Not a leap year
+  }
+
+  @Test
+  fun `test routeToScreen with HOME route`() {
+    val result = routeToScreen(Route.HOME)
+    assertEquals(Screen.HOME, result)
+  }
+
+  @Test
+  fun `test routeToScreen with ANNOUNCEMENT route`() {
+    val result = routeToScreen(Route.ANNOUNCEMENT)
+    assertEquals(Screen.ANNOUNCEMENT, result)
+  }
+
+  @Test
+  fun `test routeToScreen with ACTIVITY route`() {
+    val result = routeToScreen(Route.ACTIVITY)
+    assertEquals(Screen.ACTIVITY, result)
+  }
+
+  @Test
+  fun `test routeToScreen with OTHER route`() {
+    val result = routeToScreen(Route.OTHER)
+    assertEquals(Screen.OTHER, result)
+  }
+
+  @Test
+  fun `test routeToScreen with CALENDAR route`() {
+    val result = routeToScreen(Route.CALENDAR)
+    assertEquals(Screen.CALENDAR, result)
+  }
+
+  @Test
+  fun `test routeToScreen with MAP route`() {
+    val result = routeToScreen(Route.MAP)
+    assertEquals(Screen.MAP, result)
+  }
+
+  @Test
+  fun `test routeToScreen with WELCOME route`() {
+    val result = routeToScreen(Route.WELCOME)
+    assertEquals(Screen.WELCOME, result)
+  }
+
+  @Test
+  fun `test routeToScreen with INFO route`() {
+    val result = routeToScreen(Route.INFO)
+    assertEquals(Screen.INFO, result)
+  }
+
+  @Test
+  fun `test routeToScreen with LOGIN route`() {
+    val result = routeToScreen(Route.LOGIN)
+    assertEquals(Screen.LOGIN, result)
+  }
+
+  @Test
+  fun `test routeToScreen with PASSWORD route`() {
+    val result = routeToScreen(Route.PASSWORD)
+    assertEquals(Screen.PASSWORD, result)
+  }
+
+  @Test
+  fun `test routeToScreen with invalid route defaults to WELCOME`() {
+    val result = routeToScreen("INVALID_ROUTE")
+    assertEquals(Screen.WELCOME, result)
   }
 }
