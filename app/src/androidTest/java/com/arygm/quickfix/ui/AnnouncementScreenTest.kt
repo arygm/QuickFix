@@ -37,7 +37,6 @@ class AnnouncementScreenTest {
     composeTestRule
         .onNodeWithTag("AnnouncementText")
         .assertTextContains("Welcome to the ANNOUNCEMENT Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 
   // Can Remove this tbh
@@ -53,6 +52,5 @@ class AnnouncementScreenTest {
     composeTestRule
         .onNodeWithTag("AnnouncementText")
         .assertTextContains("Welcome to the ANNOUNCEMENT Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 }

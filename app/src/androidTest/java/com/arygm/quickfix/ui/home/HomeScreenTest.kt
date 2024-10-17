@@ -12,7 +12,6 @@ import com.arygm.quickfix.ui.navigation.Screen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -45,7 +44,6 @@ class HomeScreenTest {
     composeTestRule.onNodeWithTag("HomeContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("WelcomeText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("WelcomeText").assertTextContains("Welcome to the Home Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 
   // TODO When we add the screen implementations
@@ -53,7 +51,7 @@ class HomeScreenTest {
   fun profileIconClickTest() {
     composeTestRule.setContent { HomeScreen(navigationActions) }
     composeTestRule.onNodeWithTag("ProfileButton").performClick()
-    Mockito.verify(navigationActions).navigateTo(Screen.PROFILE)
+    verify(navigationActions).navigateTo(Screen.PROFILE)
   }
 
   // TODO When we add button logic
@@ -61,6 +59,6 @@ class HomeScreenTest {
   fun messagesIconClickTest() {
     composeTestRule.setContent { HomeScreen(navigationActions) }
     composeTestRule.onNodeWithTag("MessagesButton").performClick()
-    Mockito.verify(navigationActions).navigateTo(Screen.MESSAGES)
+    verify(navigationActions).navigateTo(Screen.MESSAGES)
   }
 }

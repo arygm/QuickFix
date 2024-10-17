@@ -25,9 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
@@ -73,17 +71,6 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
                         }
                   })
             }
-      },
-      bottomBar = {
-        // Boolean isUser = true for this HomeScreen
-        BottomNavigationMenu(
-            selectedItem = Route.HOME, // Start with the "Home" route
-            onTabSelect = { selectedDestination ->
-              // Use this block to navigate based on the selected tab
-              navigationActions.navigateTo(selectedDestination)
-            },
-            isUser = isUser, // Assuming the user is of type User
-        )
       },
       content = { padding ->
         Column(

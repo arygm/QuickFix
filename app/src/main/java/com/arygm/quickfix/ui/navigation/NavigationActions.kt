@@ -7,6 +7,9 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -82,6 +85,8 @@ fun getBottomBarId(route: String, isUser: Boolean): Int {
 open class NavigationActions(
     private val navController: NavHostController,
 ) {
+  var currentScreen by mutableStateOf(Screen.WELCOME)
+
   /**
    * Navigate to the specified [TopLevelDestination]
    *
@@ -109,6 +114,7 @@ open class NavigationActions(
    * @param screen The screen to navigate to
    */
   open fun navigateTo(screen: String) {
+    currentScreen = screen
     navController.navigate(screen)
   }
 

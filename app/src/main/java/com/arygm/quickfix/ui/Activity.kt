@@ -12,9 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.arygm.quickfix.ui.elements.QuickFixMainTopBar
-import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Route
 
 @Composable
 fun ActivityScreen(navigationActions: NavigationActions, isUser: Boolean) {
@@ -23,17 +21,6 @@ fun ActivityScreen(navigationActions: NavigationActions, isUser: Boolean) {
       containerColor = colorScheme.background,
       topBar = {
         QuickFixMainTopBar(title = "ACTIVITY", modifier = Modifier.testTag("ActivityTopBar"))
-      },
-      bottomBar = {
-        // Boolean isUser = true for this HomeScreen
-        BottomNavigationMenu(
-            selectedItem = Route.ACTIVITY, // Start with the "Home" route
-            onTabSelect = { selectedDestination ->
-              // Use this block to navigate based on the selected tab
-              navigationActions.navigateTo(selectedDestination)
-            },
-            isUser = isUser, // Assuming the user is of type User
-        )
       },
       content = { padding ->
         Column(
