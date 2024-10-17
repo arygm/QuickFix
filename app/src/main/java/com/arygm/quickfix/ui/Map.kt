@@ -12,9 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.arygm.quickfix.ui.elements.QuickFixMainTopBar
-import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Route
 
 @Composable
 fun MapScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
@@ -23,16 +21,6 @@ fun MapScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
   Scaffold(
       containerColor = colorScheme.background,
       topBar = { QuickFixMainTopBar("MAP", modifier = Modifier.testTag("MapTopBar")) },
-      bottomBar = {
-        // Boolean isUser = true for this HomeScreen
-        BottomNavigationMenu(
-            selectedItem = Route.MAP, // Start with the "Home" route
-            onTabSelect = { selectedDestination ->
-              // Use this block to navigate based on the selected tab
-              navigationActions.navigateTo(selectedDestination)
-            },
-            isUser = isUser)
-      },
       content = { padding ->
         Column(
             modifier = Modifier.fillMaxSize().testTag("MapContent"),

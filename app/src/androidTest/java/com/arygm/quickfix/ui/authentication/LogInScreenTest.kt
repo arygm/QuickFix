@@ -134,6 +134,8 @@ class LogInScreenTest {
     // Click the back button
     composeTestRule.onNodeWithTag("goBackButton").performClick()
 
+    composeTestRule.mainClock.advanceTimeBy(500L)
+
     // Verify that the navigation action was triggered
     Mockito.verify(navigationActions).goBack()
   }

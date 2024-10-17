@@ -34,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,7 +48,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -57,10 +57,12 @@ import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.isValidEmail
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
-fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileViewModel) {
-  var errorHasOccurred by remember { mutableStateOf(false) }
+fun LogInScreen(navigationActions: NavigationActions) {
+  val errorHasOccurred by remember { mutableStateOf(false) }
 
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
@@ -74,6 +76,8 @@ fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileV
           label = "shrinkingBox")
 
   val filledForm = email.isNotEmpty() && password.isNotEmpty()
+
+  val coroutineScope = rememberCoroutineScope()
 
   LaunchedEffect(Unit) { shrinkBox = true }
   Box(modifier = Modifier.fillMaxSize().testTag("LoginBox")) {
@@ -116,7 +120,10 @@ fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileV
                         QuickFixBackButtonTopBar(
                             onBackClick = {
                               shrinkBox = false
-                              navigationActions.goBack()
+                              coroutineScope.launch {
+                                delay(BOX_COLLAPSE_SPEED.toLong())
+                                navigationActions.goBack()
+                              }
                             },
                             color = Color.Transparent)
                       }
@@ -218,7 +225,10 @@ fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileV
                                 buttonText = "LOGIN",
                                 onClickAction = {
                                   shrinkBox = false
-                                  navigationActions.navigateTo(Screen.HOME)
+                                  coroutineScope.launch {
+                                    delay(BOX_COLLAPSE_SPEED.toLong())
+                                    navigationActions.navigateTo(Screen.HOME)
+                                  }
                                 },
                                 buttonColor = colorScheme.primary,
                                 textColor = colorScheme.onPrimary,

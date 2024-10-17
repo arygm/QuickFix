@@ -37,7 +37,6 @@ class OtherScreenTest {
     composeTestRule
         .onNodeWithTag("OtherText")
         .assertTextContains("Welcome to the other features Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 
   // Can Remove this tbh
@@ -53,6 +52,5 @@ class OtherScreenTest {
     composeTestRule
         .onNodeWithTag("OtherText")
         .assertTextContains("Welcome to the other features Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 }
