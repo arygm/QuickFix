@@ -2,7 +2,6 @@ package com.arygm.quickfix.ui.authentication
 
 import QuickFixTextField
 import android.annotation.SuppressLint
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -56,8 +55,6 @@ import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.createAccountWithEmailAndPassword
 import com.google.firebase.auth.FirebaseAuth
-import java.util.Calendar
-import java.util.GregorianCalendar
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UseOfNonLambdaOffsetOverload")
 @Composable
@@ -231,31 +228,5 @@ fun PasswordScreen(
                     }
               }
         })
-  }
-}
-
-fun stringToTimestamp(birthDate: String): com.google.firebase.Timestamp? {
-  val dateParts = birthDate.split("/")
-  return if (dateParts.size == 3) {
-    val day = dateParts[0].toIntOrNull()
-    val month = dateParts[1].toIntOrNull()
-    val year = dateParts[2].toIntOrNull()
-    if (day != null && month != null && year != null) {
-      val calendar =
-          GregorianCalendar(year, month - 1, day).apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-          }
-      val date = calendar.time
-      com.google.firebase.Timestamp(date)
-    } else {
-      Log.e("DateConversion", "Invalid date format: $birthDate")
-      null
-    }
-  } else {
-    Log.e("DateConversion", "Date string is not in the correct format: $birthDate")
-    null
   }
 }

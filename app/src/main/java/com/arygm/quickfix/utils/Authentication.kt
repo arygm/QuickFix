@@ -130,8 +130,7 @@ fun createAccountWithEmailAndPassword(
       val user = FirebaseAuth.getInstance().currentUser
       user?.let {
         val profile =
-            com.arygm.quickfix.ui.authentication.stringToTimestamp(birthDate)?.let { birthTimestamp
-              ->
+            stringToTimestamp(birthDate)?.let { birthTimestamp ->
               Profile(
                   uid = it.uid,
                   firstName = firstName,

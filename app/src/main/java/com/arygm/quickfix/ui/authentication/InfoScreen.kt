@@ -36,6 +36,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -52,7 +54,11 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun InfoScreen(navigationActions: NavigationActions) {
+fun InfoScreen(
+    navigationActions: NavigationActions,
+    registrationViewModel: RegistrationViewModel,
+    profileViewModel: ProfileViewModel
+) {
   val colorScheme = MaterialTheme.colorScheme
 
   var firstName by remember { mutableStateOf("") }
@@ -165,6 +171,14 @@ fun InfoScreen(navigationActions: NavigationActions) {
                           onValueChange = {
                             email = it
                             emailError = !isValidEmail(it)
+                            profileViewModel.profileExists(email) { exists, profile ->
+                              emailError =
+                                  if (exists && profile != null) {
+                                    true
+                                  } else {
+                                    !isValidEmail(it)
+                                  }
+                            }
                           },
                           label = "E-MAIL",
                           isError = emailError,
@@ -216,6 +230,10 @@ fun InfoScreen(navigationActions: NavigationActions) {
                           buttonText = "NEXT",
                           onClickAction = {
                             shrinkBox = false
+                            registrationViewModel.updateFirstName(firstName)
+                            registrationViewModel.updateLastName(lastName)
+                            registrationViewModel.updateEmail(email)
+                            registrationViewModel.updateBirthDate(birthDate)
                             coroutineScope.launch {
                               delay(BOX_COLLAPSE_SPEED.toLong())
                               navigationActions.navigateTo(Screen.PASSWORD)
