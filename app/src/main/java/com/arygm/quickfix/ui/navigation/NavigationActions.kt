@@ -22,6 +22,9 @@ object Route {
   const val OTHER = "Other"
   const val CALENDAR = "Calendar"
   const val MAP = "Map"
+    const val INFO = "Info"
+    const val LOGIN = "Login"
+    const val PASSWORD = "Password"
 }
 
 object Screen {
@@ -95,7 +98,7 @@ open class NavigationActions(
    *   bottom navigation bar as we don't want to keep the previous screen in the back stack
    */
   open fun navigateTo(destination: TopLevelDestination) {
-
+    currentScreen = routeToScreen(destination.route)
     navController.navigate(destination.route) {
       popUpTo(navController.graph.findStartDestination().id) {
         saveState = true
@@ -121,6 +124,7 @@ open class NavigationActions(
   /** Navigate back to the previous screen. */
   open fun goBack() {
     navController.popBackStack()
+      currentScreen = routeToScreen(navController.currentBackStackEntry?.destination?.route ?: "")
   }
 
   /**
@@ -131,4 +135,22 @@ open class NavigationActions(
   open fun currentRoute(): String {
     return navController.currentDestination?.route ?: ""
   }
+
+    private fun routeToScreen(route: String): String {
+        return when (route) {
+            Route.HOME -> Screen.HOME
+            Route.ANNOUNCEMENT -> Screen.ANNOUNCEMENT
+            Route.ACTIVITY -> Screen.ACTIVITY
+            Route.OTHER -> Screen.OTHER
+            Route.CALENDAR -> Screen.CALENDAR
+            Route.MAP -> Screen.MAP
+            Route.WELCOME -> Screen.WELCOME
+            Route.INFO -> Screen.INFO
+            Route.LOGIN -> Screen.LOGIN
+            Route.PASSWORD -> Screen.PASSWORD
+            else -> {
+                Screen.WELCOME
+            }
+        }
+    }
 }
