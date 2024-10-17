@@ -2,16 +2,19 @@ package com.arygm.quickfix.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import com.arygm.quickfix.utils.routeToScreen
 
 object Route {
+  const val CALENDAR = "Calendar"
   const val WELCOME = "Welcome"
   const val HOME = "Home"
   const val ANNOUNCEMENT = "Annoucement"
@@ -19,6 +22,9 @@ object Route {
   const val OTHER = "Other"
   const val SEARCH = "Search"
   const val DASHBOARD = "Dashboard"
+  const val INFO = "Info"
+  const val LOGIN = "Login"
+  const val PASSWORD = "Password"
 }
 
 object Screen {
@@ -26,11 +32,13 @@ object Screen {
   const val LOGIN = "Login Screen"
   const val INFO = "Info Screen"
   const val PASSWORD = "Password Screen"
+  const val REGISTER = "Register Screen"
   const val HOME = "Home Screen"
   const val SEARCH = "Search Screen"
   const val DASHBOARD = "Dashboard Screen"
   const val PROFILE = "Profile Screen"
   const val MESSAGES = "Messages Screen"
+  const val CALENDAR = "Calendar Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
@@ -52,7 +60,7 @@ val USER_TOP_LEVEL_DESTINATIONS =
         TopLevelDestinations.SEARCH,
         TopLevelDestinations.DASHBOARD,
         TopLevelDestinations.PROFILE,
-        )
+    )
 val WORKER_TOP_LEVEL_DESTINATIONS =
     listOf(
         TopLevelDestinations.HOME,
@@ -73,6 +81,8 @@ fun getBottomBarId(route: String, isUser: Boolean): Int {
 open class NavigationActions(
     private val navController: NavHostController,
 ) {
+  var currentScreen by mutableStateOf(Screen.WELCOME)
+
   /**
    * Navigate to the specified [TopLevelDestination]
    *
@@ -81,7 +91,7 @@ open class NavigationActions(
    *   bottom navigation bar as we don't want to keep the previous screen in the back stack
    */
   open fun navigateTo(destination: TopLevelDestination) {
-
+    currentScreen = routeToScreen(destination.route)
     navController.navigate(destination.route) {
       popUpTo(navController.graph.findStartDestination().id) {
         saveState = true
@@ -100,12 +110,14 @@ open class NavigationActions(
    * @param screen The screen to navigate to
    */
   open fun navigateTo(screen: String) {
+    currentScreen = screen
     navController.navigate(screen)
   }
 
   /** Navigate back to the previous screen. */
   open fun goBack() {
     navController.popBackStack()
+    currentScreen = routeToScreen(navController.currentBackStackEntry?.destination?.route ?: "")
   }
 
   /**

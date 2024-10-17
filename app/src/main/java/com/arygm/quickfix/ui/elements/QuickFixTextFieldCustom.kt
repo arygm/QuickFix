@@ -1,6 +1,7 @@
 package com.arygm.quickfix.ui.elements
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.horizontalScroll
@@ -14,9 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,30 +35,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import org.w3c.dom.Text
 
-@Preview
 @Composable
 fun QuickFixTextFieldCustom(
+    modifier: Modifier = Modifier,
+    value: String,
+    singleLine: Boolean = true,
+    onValueChange: (String) -> Unit,
     showLeadingIcon: () -> Boolean = { true }, // Boolean flag to show or hide the leading icon
     showTrailingIcon: () -> Boolean = { true }, // Boolean flag to show or hide the trailing icon
-    leadingIcon: ImageVector = Icons.Default.Search,
-    trailingIcon: ImageVector = Icons.Default.Clear,
-    descriptionLeadIcon: String = "Search",
-    descriptionTrailIcon: String = "Clear",
-    placeHolderText: String = "Find your perfect fix with QuickFix",
+    leadingIcon: ImageVector? = null,
+    trailingIcon: @Composable() (() -> Unit)? = null,
+    descriptionLeadIcon: String = "",
+    descriptionTrailIcon: String = "",
+    placeHolderText: String = "",
     shape: Shape = CircleShape, // Define the shape of the textField
     textStyle: TextStyle = poppinsTypography.labelSmall,
     textColor: Color = MaterialTheme.colorScheme.onBackground,
-    placeHolderColor: Color = MaterialTheme.colorScheme.onBackground,
+    placeHolderColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
     leadIconColor: Color = MaterialTheme.colorScheme.onBackground,
     trailIconColor: Color = MaterialTheme.colorScheme.onBackground,
     widthField: Dp = 330.dp, // Set the width of the container (the rectangle)
@@ -72,88 +73,118 @@ fun QuickFixTextFieldCustom(
     // increase the font)
     spaceBetweenLeadIconText: Dp = 0.dp, // Space between leading icon and text
     onTextFieldClick: () -> Unit = {},
-    focusRequester: FocusRequester = FocusRequester()
+    focusRequester: FocusRequester = FocusRequester(),
+    isError: Boolean = false,
+    errorText: String = "",
+    errorColor: Color = MaterialTheme.colorScheme.error,
+    showError: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    showLabel: Boolean = false,
+    label: @Composable (() -> Unit)? = {},
+    onClick: Boolean = false
 ) {
-  var textState by remember { mutableStateOf(TextFieldValue("")) }
+  var textState by remember { mutableStateOf(TextFieldValue(value)) }
   val scrollState = rememberScrollState() // Scroll state for horizontal scrolling
-
   // Launch a coroutine to scroll to the end of the text when typing
   LaunchedEffect(textState) { scrollState.animateScrollTo(scrollState.maxValue) }
 
+  if (showLabel) {
+    if (label != null) {
+      label()
+      Spacer(modifier = Modifier.padding(1.5.dp))
+    }
+  }
   Box(
       modifier =
-          Modifier.size(width = widthField, height = heightField) // Set the width and height
+          Modifier.clip(shape)
+              .background(MaterialTheme.colorScheme.surface)
+              .let {
+                if (isError)
+                    it.border(1.dp, errorColor, shape).background(errorColor.copy(alpha = 0.2f))
+                else it
+              }
+              .size(width = widthField, height = heightField) // Set the width and height
               .fillMaxWidth() // Fill the width of the container
-              .clip(shape) // Clip with shape
-              .background(MaterialTheme.colorScheme.surface) // Apply background
               .padding(start = moveContentHorizontal, top = moveContentTop, bottom = moveContentTop)
               .clickable { onTextFieldClick() }
-              .semantics(mergeDescendants = false) {
-                testTag = C.Tag.main_container_text_field_custom
-              }, // Apply padding
+              .testTag(C.Tag.main_container_text_field_custom), // Apply padding
       contentAlignment = Alignment.Center) {
         Row(
             horizontalArrangement = Arrangement.Center, // Aligning icon and text horizontally
             verticalAlignment = Alignment.CenterVertically, // Aligning icon and text vertically
-            modifier = Modifier.fillMaxWidth().testTag(C.Tag.group_icon_custom_text_field)) {
+            modifier = modifier.fillMaxWidth()) {
               if (showLeadingIcon()) { // Conditionally show the leading icon
-                Icon(
-                    imageVector = leadingIcon,
-                    contentDescription = descriptionLeadIcon,
-                    tint = leadIconColor, // Icon color
-                    modifier =
-                        Modifier.size(sizeIconGroup) // Set icon size
-                            .padding(end = 8.dp)
-                            .testTag(C.Tag.icon_custom_text_field)
-                    // Space between icon and text
-                    )
+                if (leadingIcon != null) {
+                  Icon(
+                      imageVector = leadingIcon,
+                      contentDescription = descriptionLeadIcon,
+                      tint = leadIconColor, // Icon color
+                      modifier =
+                          Modifier.size(sizeIconGroup) // Set icon size
+                              .padding(end = 8.dp)
+                              .testTag(C.Tag.icon_custom_text_field) // Space between icon and text
+                      )
+                }
               }
-
               Spacer(
-                  Modifier.padding(
+                  modifier.padding(
                       horizontal = spaceBetweenLeadIconText)) // Space between icon and text
-
               Box(modifier = Modifier.weight(1f)) {
                 BasicTextField(
                     value = textState,
-                    onValueChange = { newText -> textState = newText },
+                    onValueChange = { newText ->
+                      textState = newText
+                      onValueChange(newText.text)
+                    },
                     modifier =
-                        Modifier.fillMaxWidth()
-                            .horizontalScroll(scrollState)
+                        modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(scrollState) // Enable horizontal scrolling
                             .focusable(true)
-                            .focusRequester(
-                                focusRequester) // Makes the text field take up remaining space
-                            .testTag(C.Tag.text_field_custom), // Enable horizontal scrolling
-                    textStyle = textStyle.copy(color = textColor), // Text style with color
-                    singleLine = true // Keep the text on a single line
-                    )
-
+                            .focusRequester(focusRequester)
+                            .testTag(
+                                C.Tag.text_field_custom) // Makes the text field take up remaining
+                    // space
+                    ,
+                    textStyle =
+                        textStyle.copy(
+                            color =
+                                if (isError) errorColor else textColor), // Text style with color
+                    singleLine = singleLine, // Keep the text on a single line
+                    keyboardOptions = keyboardOptions,
+                    visualTransformation = visualTransformation,
+                )
                 if (textState.text.isEmpty()) {
                   Text(
                       modifier = Modifier.testTag(C.Tag.place_holder_text_field_custom),
                       text = placeHolderText,
-                      style = textStyle.copy(color = placeHolderColor) // Placeholder text style
+                      style =
+                          textStyle.copy(
+                              color =
+                                  if (isError) errorColor
+                                  else placeHolderColor) // Placeholder text style
                       )
                 }
               }
-              if (showTrailingIcon() &&
-                  textState.text.isNotEmpty()) { // Conditionally show the trailing icon
+              if (showTrailingIcon() && textState.text.isNotEmpty()) {
                 IconButton(
-                    onClick = { textState = TextFieldValue("") }, // Clear the text when clicked
+                    onClick = { if (onClick) textState = TextFieldValue("") },
                     modifier =
-                        Modifier.size(sizeIconGroup) // Set icon size
-                            .padding(end = 9.dp) // Space between icon and text
-                            .align(Alignment.CenterVertically) // Align the icon vertically
-                            .testTag(C.Tag.clear_button_text_field_custom)) {
-                      Icon(
-                          imageVector = trailingIcon,
-                          contentDescription = descriptionTrailIcon,
-                          tint = trailIconColor, // Icon color
-                          modifier =
-                              Modifier.testTag(C.Tag.clear_icon_text_field_custom) // Set icon size
-                          )
+                        Modifier.testTag(C.Tag.clear_button_text_field_custom)
+                            .size(sizeIconGroup)
+                            .padding(end = 9.dp)
+                            .align(Alignment.CenterVertically)) {
+                      trailingIcon?.invoke()
                     }
               }
             }
       }
+  if (showError && isError) {
+    Text(
+        errorText,
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.padding(top = 4.dp, start = 3.dp).testTag("errorText"))
+  }
 }

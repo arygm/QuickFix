@@ -1,11 +1,20 @@
 package com.arygm.quickfix.kaspresso
 
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.printToLog
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.kaspresso.element.QuickFixSearchBarElement
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
+import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen
 import org.junit.Rule
@@ -22,9 +31,29 @@ class QuickFixTextFieldCustomTest : TestCase() {
     // Step 1: Set up the content to test
     composeTestRule.setContent {
       QuickFixTextFieldCustom(
-          showLeadingIcon = { true }, // Test with leading icon visible
-          showTrailingIcon = { true } // Test with trailing icon visible
-          )
+          showLeadingIcon = { true },
+          showTrailingIcon = { true },
+          leadingIcon = Icons.Outlined.Search,
+          trailingIcon = { Icons.Default.Clear },
+          descriptionLeadIcon = "Search",
+          descriptionTrailIcon = "Clear",
+          placeHolderText = "Find your perfect fix with QuickFix",
+          shape = CircleShape,
+          textStyle = poppinsTypography.bodyMedium,
+          textColor = colorScheme.onBackground,
+          placeHolderColor = colorScheme.onBackground,
+          leadIconColor = colorScheme.onBackground,
+          trailIconColor = colorScheme.onBackground,
+          widthField = 330.dp,
+          heightField = 40.dp,
+          moveContentHorizontal = 5.dp,
+          moveContentBottom = 0.dp,
+          moveContentTop = 0.dp,
+          sizeIconGroup = 30.dp,
+          spaceBetweenLeadIconText = 0.dp,
+          onValueChange = {},
+          value = "",
+          onClick = true)
     }
     step("Test UI elements are displayed when text is empty") {
       ComposeScreen.onComposeScreen<QuickFixSearchBarElement>(composeTestRule) {

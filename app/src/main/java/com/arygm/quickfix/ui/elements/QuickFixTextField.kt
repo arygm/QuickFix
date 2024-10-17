@@ -12,7 +12,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -20,18 +19,18 @@ import androidx.compose.ui.unit.sp
 fun QuickFixTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String = "",
+    label: String,
     isError: Boolean = false,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    color: Color = MaterialTheme.colorScheme.onSurface,
+    color: Color = MaterialTheme.colorScheme.onSecondaryContainer,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
     singleLine: Boolean = true,
     errorText: String = "",
     showError: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    leadingIcon: @Composable (() -> Unit)? = null,
-    cornerRadius: Dp = 10.dp
+    backgroundColor: Color = MaterialTheme.colorScheme.surface
 ) {
   OutlinedTextField(
       value = value,
@@ -42,8 +41,9 @@ fun QuickFixTextField(
             color = color.copy(alpha = 0.6f),
             style = MaterialTheme.typography.labelSmall)
       },
-      leadingIcon = leadingIcon,
       isError = isError,
+      leadingIcon = leadingIcon,
+      trailingIcon = trailingIcon,
       modifier = modifier.testTag("textField"),
       textStyle =
           androidx.compose.ui.text.TextStyle(
@@ -52,7 +52,7 @@ fun QuickFixTextField(
               fontSize = 16.sp,
               fontStyle = FontStyle.Normal),
       singleLine = singleLine,
-      shape = RoundedCornerShape(cornerRadius),
+      shape = RoundedCornerShape(12.dp),
       colors =
           OutlinedTextFieldDefaults.colors(
               unfocusedContainerColor = backgroundColor,

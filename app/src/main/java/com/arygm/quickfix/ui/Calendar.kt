@@ -15,21 +15,20 @@ import com.arygm.quickfix.ui.elements.QuickFixMainTopBar
 import com.arygm.quickfix.ui.navigation.NavigationActions
 
 @Composable
-fun ProfileScreen(navigationActions: NavigationActions, isUser: Boolean) {
+fun CalendarScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
+
   // Use Scaffold for the layout structure
   Scaffold(
       containerColor = colorScheme.background,
-      topBar = {
-        QuickFixMainTopBar(title = "PROFILE", modifier = Modifier.testTag("ProfileTopBar"))
-      },
+      topBar = { QuickFixMainTopBar("CALENDAR", modifier = Modifier.testTag("CalendarTopBar")) },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().testTag("ProfileContent"),
+            modifier = Modifier.fillMaxSize().testTag("CalendarContent"),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
               Text(
-                  text = "Welcome to the PROFILE Screen",
-                  modifier = Modifier.padding(padding).testTag("ProfileText"))
+                  text = "Welcome to the CALENDAR Screen",
+                  modifier = Modifier.padding(padding).testTag("CalendarText"))
             }
       })
 }

@@ -30,25 +30,21 @@ class SearchScreenTest {
     composeTestRule.setContent { SearchScreen(navigationActions, true) }
 
     composeTestRule.onNodeWithTag("SearchTopBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("SEARCH").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("SEARCH").assertTextEquals("SEARCH")
+    composeTestRule.onNodeWithTag("SearchTopBarTitle").assertTextEquals("Search")
     composeTestRule.onNodeWithTag("SearchContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SearchText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SearchText").assertTextContains("Welcome to the SEARCH Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 
   // Can Remove this tbh
   @Test
   fun calendarScreenWorkerDisplaysCorrectly() {
-    composeTestRule.setContent { SearchScreen(navigationActions, false) }
+    composeTestRule.setContent { SearchScreen(navigationActions, true) }
 
     composeTestRule.onNodeWithTag("SearchTopBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("SEARCH").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("SEARCH").assertTextEquals("SEARCH")
+    composeTestRule.onNodeWithTag("SearchTopBarTitle").assertTextEquals("Search")
     composeTestRule.onNodeWithTag("SearchContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SearchText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SearchText").assertTextContains("Welcome to the SEARCH Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 }

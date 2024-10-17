@@ -2,7 +2,6 @@ package com.arygm.quickfix.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -30,25 +29,19 @@ class ProfileScreenTest {
     composeTestRule.setContent { ProfileScreen(navigationActions, true) }
 
     composeTestRule.onNodeWithTag("ProfileTopBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("PROFILE").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("PROFILE").assertTextEquals("PROFILE")
     composeTestRule.onNodeWithTag("ProfileContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProfileText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProfileText").assertTextContains("Welcome to the PROFILE Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 
   // Can Remove this tbh
   @Test
   fun activityScreenWorkerDisplaysCorrectly() {
-    composeTestRule.setContent { ProfileScreen(navigationActions, false) }
+    composeTestRule.setContent { ProfileScreen(navigationActions, true) }
 
     composeTestRule.onNodeWithTag("ProfileTopBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("PROFILE").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("PROFILE").assertTextEquals("PROFILE")
     composeTestRule.onNodeWithTag("ProfileContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProfileText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProfileText").assertTextContains("Welcome to the PROFILE Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 }

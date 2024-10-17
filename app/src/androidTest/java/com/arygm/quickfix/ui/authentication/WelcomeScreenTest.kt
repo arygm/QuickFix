@@ -1,32 +1,59 @@
 package com.arygm.quickfix.ui.authentication
 
-import androidx.compose.ui.test.*
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.test.espresso.intent.Intents
+import androidx.test.espresso.intent.matcher.IntentMatchers
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 
+@RunWith(AndroidJUnit4::class)
 class WelcomeScreenTest {
 
-  @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
   private lateinit var navigationActions: NavigationActions
+  private lateinit var profileRepository: ProfileRepository
+  private lateinit var profileViewModel: ProfileViewModel
+  private var intentsInitialized = false // Keep track of Intents initialization
 
   @Before
   fun setup() {
     navigationActions = mock(NavigationActions::class.java)
+    profileRepository = mock(ProfileRepository::class.java)
+    profileViewModel = ProfileViewModel(profileRepository)
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.WELCOME)
   }
 
+  @After
+  fun tearDown() {
+    // Only release Intents if they were initialized
+    if (intentsInitialized) {
+      Intents.release()
+      intentsInitialized = false
+    }
+  }
+
   @Test
   fun testInitialState() {
-    composeTestRule.setContent { WelcomeScreen(navigationActions) }
+    composeTestRule.setContent { WelcomeScreen(navigationActions, profileViewModel) }
 
     // Check if the background image is displayed
     composeTestRule.onNodeWithTag("welcomeBox").assertIsDisplayed()
@@ -56,7 +83,7 @@ class WelcomeScreenTest {
 
   @Test
   fun testLogInButtonClickNavigatesToLogin() {
-    composeTestRule.setContent { WelcomeScreen(navigationActions) }
+    composeTestRule.setContent { WelcomeScreen(navigationActions, profileViewModel) }
 
     // Click the "LOG IN TO QUICKFIX" button
     composeTestRule.onNodeWithTag("logInButton").performClick()
@@ -70,8 +97,8 @@ class WelcomeScreenTest {
   }
 
   @Test
-  fun testRegistrationButtonClickNavigatesToInfo() {
-    composeTestRule.setContent { WelcomeScreen(navigationActions) }
+  fun testRegistrationButtonClickNavigatesToRegister() {
+    composeTestRule.setContent { WelcomeScreen(navigationActions, profileViewModel) }
 
     // Click the "REGISTER TO QUICKFIX" button
     composeTestRule.onNodeWithTag("RegistrationButton").performClick()
@@ -81,16 +108,21 @@ class WelcomeScreenTest {
     }
 
     // Verify that the navigation action is triggered for the registration/info screen
-    Mockito.verify(navigationActions).navigateTo(Screen.INFO)
+    Mockito.verify(navigationActions).navigateTo(Screen.REGISTER)
   }
 
   @Test
-  fun testGoogleButtonClick() {
-    composeTestRule.setContent { WelcomeScreen(navigationActions) }
+  fun testGoogleButtonClickSendsIntent() {
+    // Initialize Intents for this test
+    Intents.init()
+    intentsInitialized = true // Mark Intents as initialized
 
-    // Click the "CONTINUE WITH GOOGLE" button
+    composeTestRule.setContent { WelcomeScreen(navigationActions, profileViewModel) }
+
+    // Perform click on the Google Sign-In button
     composeTestRule.onNodeWithTag("googleButton").performClick()
 
-    // TODO: Add logic here for Google button click behavior when implemented
+    // Assert that an Intent resolving to Google Mobile Services has been sent
+    Intents.intended(IntentMatchers.toPackage("com.google.android.gms"))
   }
 }

@@ -141,6 +141,9 @@ fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
     androidTestImplementation(dep)
     testImplementation(dep)
 }
+configurations.configureEach {
+    exclude(group = "com.google.protobuf", module = "protobuf-lite")
+}
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -153,6 +156,8 @@ dependencies {
     implementation(libs.androidx.navigation.common.ktx)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.espresso.intents)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.mockk)
@@ -169,6 +174,7 @@ dependencies {
     implementation(libs.compose.ui.graphics)
     // Material Design 3
     implementation(libs.compose.material3)
+    implementation(libs.androidx.material.icons.extended)
     // Integration with activities
     implementation(libs.compose.activity)
     // Integration with ViewModels
@@ -212,6 +218,7 @@ dependencies {
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.inline)
     testImplementation(libs.mockito.kotlin)
+    globalTestImplementation(libs.mockito.kotlin)
     androidTestImplementation(libs.mockito.android)
 }
 

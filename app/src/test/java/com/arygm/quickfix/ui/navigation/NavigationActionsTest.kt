@@ -58,8 +58,6 @@ class NavigationActionsTest {
 
   @Test
   fun `test announcement and calendar routes return 2`() {
-    assertEquals(2, getBottomBarId(Route.ANNOUNCEMENT, true))
-    assertEquals(2, getBottomBarId(Route.ANNOUNCEMENT, false))
     assertEquals(2, getBottomBarId(Route.SEARCH, true))
     assertEquals(2, getBottomBarId(Route.SEARCH, false))
   }
@@ -72,14 +70,8 @@ class NavigationActionsTest {
 
   @Test
   fun `test activity route returns 3 for user and 4 for others`() {
-    assertEquals(3, getBottomBarId(Route.PROFILE, true))
+    assertEquals(4, getBottomBarId(Route.PROFILE, true))
     assertEquals(4, getBottomBarId(Route.PROFILE, false))
-  }
-
-  @Test
-  fun `test other route returns 4 for user and 5 for others`() {
-    assertEquals(4, getBottomBarId(Route.OTHER, true))
-    assertEquals(5, getBottomBarId(Route.OTHER, false))
   }
 
   @Test

@@ -30,29 +30,25 @@ class DashboardScreenTest {
     composeTestRule.setContent { DashboardScreen(navigationActions, true) }
 
     composeTestRule.onNodeWithTag("DashboardTopBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("DASHBOARD").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("DASHBOARD").assertTextEquals("DASHBOARD")
+    composeTestRule.onNodeWithTag("DashboardTopBarTitle").assertTextEquals("Dashboard")
     composeTestRule.onNodeWithTag("DashboardContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DashboardText").assertIsDisplayed()
     composeTestRule
         .onNodeWithTag("DashboardText")
         .assertTextContains("Welcome to the DASHBOARD Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 
   // Can Remove this tbh
   @Test
   fun mapScreenWorkerDisplaysCorrectly() {
-    composeTestRule.setContent { DashboardScreen(navigationActions, false) }
+    composeTestRule.setContent { DashboardScreen(navigationActions, true) }
 
     composeTestRule.onNodeWithTag("DashboardTopBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("DASHBOARD").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("DASHBOARD").assertTextEquals("DASHBOARD")
+    composeTestRule.onNodeWithTag("DashboardTopBarTitle").assertTextEquals("Dashboard")
     composeTestRule.onNodeWithTag("DashboardContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DashboardText").assertIsDisplayed()
     composeTestRule
         .onNodeWithTag("DashboardText")
         .assertTextContains("Welcome to the DASHBOARD Screen")
-    composeTestRule.onNodeWithTag("BottomNavMenu").assertIsDisplayed()
   }
 }

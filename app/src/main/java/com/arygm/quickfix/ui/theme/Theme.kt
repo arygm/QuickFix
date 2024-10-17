@@ -25,8 +25,8 @@ private val LightColorScheme =
         primary = ButtonPrimary,
         secondary = ButtonSecondary,
         tertiary = ButtonTertiary,
-        background = BackgroundSecondary,
-        surface = BackgroundPrimary,
+        background = BackgroundPrimary,
+        surface = BackgroundSecondary,
         onPrimary = TextButtonPrimary,
         onSecondary = TextButtonSecondary,
         onTertiary = TextButtonTertiary,
@@ -95,11 +95,17 @@ val poppinsTypography =
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 32.sp,
                 fontStyle = FontStyle.Normal),
+        headlineSmall =
+            TextStyle(
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 11.sp,
+                fontStyle = FontStyle.Normal),
         labelLarge =
             TextStyle(
                 fontFamily = poppinsFontFamily,
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
+                fontSize = 22.sp,
                 fontStyle = FontStyle.Normal),
         labelMedium =
             TextStyle(
@@ -110,10 +116,21 @@ val poppinsTypography =
         labelSmall =
             TextStyle(
                 fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 12.sp,
+                fontStyle = FontStyle.Normal),
+        bodySmall =
+            TextStyle(
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 9.sp,
+                fontStyle = FontStyle.Normal),
+        bodyMedium =
+            TextStyle(
+                fontFamily = poppinsFontFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 14.sp,
-                fontStyle = FontStyle.Normal),
-    )
+                fontStyle = FontStyle.Normal))
 
 @Composable
 fun QuickFixTheme(
