@@ -70,7 +70,7 @@ class WelcomeScreenTest {
   }
 
   @Test
-  fun testRegistrationButtonClickNavigatesToInfo() {
+  fun testRegistrationButtonClickNavigatesToRegister() {
     composeTestRule.setContent { WelcomeScreen(navigationActions) }
 
     // Click the "REGISTER TO QUICKFIX" button
@@ -81,7 +81,7 @@ class WelcomeScreenTest {
     }
 
     // Verify that the navigation action is triggered for the registration/info screen
-    Mockito.verify(navigationActions).navigateTo(Screen.INFO)
+    Mockito.verify(navigationActions).navigateTo(Screen.REGISTER)
   }
 
   @Test

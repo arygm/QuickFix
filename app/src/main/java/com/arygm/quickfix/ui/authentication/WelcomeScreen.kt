@@ -139,7 +139,7 @@ fun WelcomeScreen(navigationActions: NavigationActions) {
           QuickFixButton(
               buttonText = "REGISTER TO QUICKFIX",
               onClickAction = {
-                targetScreen = Screen.INFO
+                targetScreen = Screen.REGISTER
                 startAnimation = true
               },
               buttonColor = colorScheme.background,

@@ -21,6 +21,7 @@ import com.arygm.quickfix.ui.OtherScreen
 import com.arygm.quickfix.ui.authentication.InfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.PasswordScreen
+import com.arygm.quickfix.ui.authentication.RegisterScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -58,6 +59,7 @@ fun QuickFixApp() {
       composable(Screen.LOGIN) { LogInScreen(navigationActions) }
       composable(Screen.INFO) { InfoScreen(navigationActions) }
       composable(Screen.PASSWORD) { PasswordScreen(navigationActions) }
+      composable(Screen.REGISTER) { RegisterScreen(navigationActions) }
     }
     navigation(
         startDestination = Screen.HOME,

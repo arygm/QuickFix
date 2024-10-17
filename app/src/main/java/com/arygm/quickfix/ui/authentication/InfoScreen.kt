@@ -44,6 +44,7 @@ import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.isValidEmail
 
+@Deprecated("This composable is deprecated", ReplaceWith("RegisterScreen(navigationActions)"))
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun InfoScreen(navigationActions: NavigationActions) {

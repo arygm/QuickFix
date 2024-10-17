@@ -49,6 +49,7 @@ import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 
+@Deprecated("This composable is deprecated", ReplaceWith("RegisterScreen(navigationActions)"))
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UseOfNonLambdaOffsetOverload")
 @Composable
 fun PasswordScreen(navigationActions: NavigationActions) {
