@@ -40,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -107,10 +106,13 @@ fun RegisterScreen(
     derivedStateOf { password != repeatPassword && repeatPassword.isNotEmpty() }
   }
 
-  val passwordConditions =
+  val passwordConditions1 =
       listOf(
           "• At least 8 characters" to (password.length >= 8),
-          "• Contains an uppercase letter (A-Z)" to password.any { it.isUpperCase() },
+          "• Contains an uppercase letter (A-Z)" to password.any { it.isUpperCase() })
+
+  val passwordConditions2 =
+      listOf(
           "• Contains a lowercase letter (a-z)" to password.any { it.isLowerCase() },
           "• Contains a digit (0-9)" to password.any { it.isDigit() })
 
@@ -123,7 +125,6 @@ fun RegisterScreen(
 
   LaunchedEffect(Unit) { shrinkBox = true }
 
-  val focusRequester = remember { FocusRequester() }
   val focursManager = LocalFocusManager.current
 
   val filledForm =
@@ -131,7 +132,8 @@ fun RegisterScreen(
           lastName.isNotEmpty() &&
           email.isNotEmpty() &&
           birthDate.isNotEmpty() &&
-          passwordConditions.all { it.second } &&
+          passwordConditions1.all { it.second } &&
+          passwordConditions2.all { it.second } &&
           !noMatch &&
           repeatPassword.isNotEmpty() &&
           acceptTerms
@@ -179,7 +181,7 @@ fun RegisterScreen(
                             QuickFixBackButtonTopBar(
                                 onBackClick = {
                                   shrinkBox = false
-                                  navigationActions?.goBack()
+                                  navigationActions.goBack()
                                 },
                                 color = Color.Transparent)
                           }
@@ -234,45 +236,23 @@ fun RegisterScreen(
                                         Modifier.fillMaxWidth().height(55.dp).padding(start = 8.dp),
                                     horizontalArrangement = Arrangement.SpaceEvenly,
                                     verticalAlignment = Alignment.CenterVertically) {
-                                      Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
-                                        Text(
-                                            "First Name",
-                                            style = MaterialTheme.typography.headlineSmall,
-                                            color = colorScheme.onBackground,
-                                            modifier =
-                                                Modifier.padding(start = 3.dp)
-                                                    .testTag("firstNameText"))
-                                        Spacer(modifier = Modifier.padding(1.5.dp))
-                                        QuickFixTextFieldCustom(
-                                            value = firstName,
-                                            onValueChange = { firstName = it },
-                                            placeHolderText = "First Name",
-                                            placeHolderColor = colorScheme.onSecondaryContainer,
-                                            shape = RoundedCornerShape(12.dp),
-                                            moveContentHorizontal = 10.dp,
-                                            heightField = 42.dp,
-                                            modifier = Modifier.testTag("firstNameInput"))
-                                      }
+                                      CustomTextField(
+                                          value = firstName,
+                                          onValueChange = { firstName = it },
+                                          placeHolderText = "First Name",
+                                          placeHolderColor = colorScheme.onSecondaryContainer,
+                                          label = "First Name",
+                                          columnModifier = Modifier.weight(1f),
+                                          modifier = Modifier.testTag("firstNameInput"))
 
-                                      Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
-                                        Text(
-                                            "Last Name",
-                                            style = MaterialTheme.typography.headlineSmall,
-                                            color = colorScheme.onBackground,
-                                            modifier =
-                                                Modifier.padding(start = 3.dp)
-                                                    .testTag("lastNameText"))
-                                        Spacer(modifier = Modifier.padding(1.5.dp))
-                                        QuickFixTextFieldCustom(
-                                            value = lastName,
-                                            onValueChange = { lastName = it },
-                                            placeHolderText = "Last Name ",
-                                            placeHolderColor = colorScheme.onSecondaryContainer,
-                                            shape = RoundedCornerShape(12.dp),
-                                            moveContentHorizontal = 10.dp,
-                                            heightField = 42.dp,
-                                            modifier = Modifier.testTag("lastNameInput"))
-                                      }
+                                      CustomTextField(
+                                          value = lastName,
+                                          onValueChange = { lastName = it },
+                                          placeHolderText = "Last Name",
+                                          placeHolderColor = colorScheme.onSecondaryContainer,
+                                          label = "Last Name",
+                                          columnModifier = Modifier.weight(1f),
+                                          modifier = Modifier.testTag("lastNameInput"))
                                     }
 
                                 Spacer(modifier = Modifier.padding(6.dp))
@@ -280,13 +260,6 @@ fun RegisterScreen(
                                 Column(
                                     modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
                                 ) {
-                                  Text(
-                                      "Email",
-                                      style = MaterialTheme.typography.headlineSmall,
-                                      color = colorScheme.onBackground,
-                                      modifier =
-                                          Modifier.padding(start = 3.dp).testTag("emailText"))
-                                  Spacer(modifier = Modifier.padding(1.5.dp))
                                   QuickFixTextFieldCustom(
                                       value = email,
                                       onValueChange = {
@@ -310,7 +283,16 @@ fun RegisterScreen(
                                       moveContentHorizontal = 10.dp,
                                       heightField = 42.dp,
                                       widthField = 360.dp,
-                                      modifier = Modifier.testTag("emailInput"))
+                                      modifier = Modifier.testTag("emailInput"),
+                                      showLabel = true,
+                                      label = {
+                                        Text(
+                                            "Email",
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            color = colorScheme.onBackground,
+                                            modifier =
+                                                Modifier.padding(start = 3.dp).testTag("emailText"))
+                                      })
                                 }
 
                                 Spacer(modifier = Modifier.padding(6.dp))
@@ -318,13 +300,6 @@ fun RegisterScreen(
                                 Column(
                                     modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
                                 ) {
-                                  Text(
-                                      "Birthdate",
-                                      style = MaterialTheme.typography.headlineSmall,
-                                      color = colorScheme.onBackground,
-                                      modifier =
-                                          Modifier.padding(start = 3.dp).testTag("birthDateText"))
-                                  Spacer(modifier = Modifier.padding(1.5.dp))
                                   QuickFixTextFieldCustom(
                                       value = birthDate,
                                       onValueChange = {
@@ -341,7 +316,17 @@ fun RegisterScreen(
                                       heightField = 42.dp,
                                       widthField = 360.dp,
                                       shape = RoundedCornerShape(12.dp),
-                                      modifier = Modifier.testTag("birthDateInput"))
+                                      modifier = Modifier.testTag("birthDateInput"),
+                                      showLabel = true,
+                                      label = {
+                                        Text(
+                                            "Birthdate",
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            color = colorScheme.onBackground,
+                                            modifier =
+                                                Modifier.padding(start = 3.dp)
+                                                    .testTag("birthDateText"))
+                                      })
                                 }
 
                                 Spacer(modifier = Modifier.padding(6.dp))
@@ -349,13 +334,6 @@ fun RegisterScreen(
                                 Column(
                                     modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
                                 ) {
-                                  Text(
-                                      "Password",
-                                      style = MaterialTheme.typography.headlineSmall,
-                                      color = colorScheme.onBackground,
-                                      modifier =
-                                          Modifier.padding(start = 3.dp).testTag("passwordText"))
-                                  Spacer(modifier = Modifier.padding(1.5.dp))
                                   QuickFixTextFieldCustom(
                                       value = password,
                                       onValueChange = { password = it },
@@ -383,7 +361,17 @@ fun RegisterScreen(
                                           else PasswordVisualTransformation(),
                                       keyboardOptions =
                                           KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                                      modifier = Modifier.testTag("passwordInput"))
+                                      modifier = Modifier.testTag("passwordInput"),
+                                      showLabel = true,
+                                      label = {
+                                        Text(
+                                            "Password",
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            color = colorScheme.onBackground,
+                                            modifier =
+                                                Modifier.padding(start = 3.dp)
+                                                    .testTag("passwordText"))
+                                      })
 
                                   Spacer(modifier = Modifier.padding(6.dp))
 
@@ -427,25 +415,8 @@ fun RegisterScreen(
                                             .padding(horizontal = 8.dp)
                                             .testTag("passwordConditions"),
                                     horizontalArrangement = Arrangement.SpaceBetween) {
-                                      Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                                        passwordConditions.take(2).forEach { (condition, met) ->
-                                          PasswordConditions(
-                                              condition,
-                                              met,
-                                              password,
-                                          )
-                                        }
-                                      }
-
-                                      Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                                        passwordConditions.drop(2).forEach { (condition, met) ->
-                                          PasswordConditions(
-                                              condition,
-                                              met,
-                                              password,
-                                          )
-                                        }
-                                      }
+                                      PasswordConditions(password, passwordConditions1)
+                                      PasswordConditions(password, passwordConditions2)
                                     }
 
                                 // Error message if passwords don't match
@@ -545,15 +516,61 @@ fun RegisterScreen(
 }
 
 @Composable
-private fun PasswordConditions(
-    condition: String,
-    met: Boolean,
-    password: String,
+private fun PasswordConditions(password: String, listConditions: List<Pair<String, Boolean>>) {
+  Column(modifier = Modifier.padding(vertical = 8.dp)) {
+    listConditions.forEach { (condition, met) ->
+      Text(
+          text = condition,
+          color =
+              if (met || password.isEmpty()) colorScheme.onSecondaryContainer
+              else colorScheme.error,
+          style = MaterialTheme.typography.bodySmall,
+          modifier = Modifier.padding(start = 3.dp))
+    }
+  }
+}
+
+@Composable
+fun CustomTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeHolderText: String,
+    placeHolderColor: Color,
+    label: String,
+    columnModifier: Modifier = Modifier,
+    isError: Boolean = false,
+    showError: Boolean = false,
+    errorText: String = "",
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    showTrailingIcon: () -> Boolean = { false },
+    modifier: Modifier = Modifier
 ) {
-  Text(
-      text = condition,
-      color =
-          if (met || password.isEmpty()) colorScheme.onSecondaryContainer else colorScheme.error,
-      style = MaterialTheme.typography.bodySmall,
-      modifier = Modifier.padding(start = 3.dp))
+  Column(modifier = columnModifier.padding(end = 12.dp)) {
+    QuickFixTextFieldCustom(
+        value = value,
+        onValueChange = onValueChange,
+        placeHolderText = placeHolderText,
+        placeHolderColor = placeHolderColor,
+        shape = RoundedCornerShape(12.dp),
+        moveContentHorizontal = 10.dp,
+        heightField = 42.dp,
+        isError = isError,
+        showError = showError,
+        errorText = errorText,
+        keyboardOptions = keyboardOptions,
+        visualTransformation = visualTransformation,
+        trailingIcon = trailingIcon,
+        showTrailingIcon = showTrailingIcon,
+        modifier = modifier,
+        showLabel = true,
+        label = {
+          Text(
+              label,
+              style = MaterialTheme.typography.headlineSmall,
+              color = colorScheme.onBackground,
+              modifier = Modifier.padding(start = 3.dp))
+        })
+  }
 }

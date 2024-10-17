@@ -41,6 +41,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import org.w3c.dom.Text
 
 @Composable
 fun QuickFixTextFieldCustom(
@@ -78,11 +79,20 @@ fun QuickFixTextFieldCustom(
     showError: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    showLabel: Boolean = false,
+    label: @Composable (() -> Unit)? = {},
 ) {
   var textState by remember { mutableStateOf(TextFieldValue(value)) }
   val scrollState = rememberScrollState() // Scroll state for horizontal scrolling
   // Launch a coroutine to scroll to the end of the text when typing
   LaunchedEffect(textState) { scrollState.animateScrollTo(scrollState.maxValue) }
+
+  if (showLabel) {
+    if (label != null) {
+      label()
+      Spacer(modifier = Modifier.padding(1.5.dp))
+    }
+  }
   Box(
       modifier =
           Modifier.clip(shape)
