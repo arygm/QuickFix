@@ -1,7 +1,6 @@
 package com.arygm.quickfix.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,10 +9,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
@@ -22,7 +22,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
@@ -33,11 +32,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.R
+import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Route
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,96 +48,141 @@ fun ProfileScreen(navigationActions: NavigationActions) {
       topBar = {
         TopAppBar(
             title = {
-              Box(modifier = Modifier.fillMaxWidth()) {
+              Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                // "Profile" Title
                 Text(
-                    text = "Mohamed Abbes",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = colorScheme.onBackground,
-                    modifier = Modifier.align(Alignment.Center))
+                    text = "Profile",
+                    color = colorScheme.primary,
+                    style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier.padding(bottom = 8.dp))
+
+                // Profile Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(0.85f).align(Alignment.CenterHorizontally),
+                    shape = RoundedCornerShape(16.dp),
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = colorScheme.surface,
+                            contentColor = colorScheme.onSurface),
+                    elevation = CardDefaults.cardElevation(4.dp)) {
+                      Row(
+                          verticalAlignment = Alignment.CenterVertically,
+                          modifier = Modifier.padding(7.dp)) {
+                            Icon(
+                                painter = painterResource(R.drawable.profilevector),
+                                contentDescription = "Profile Icon",
+                                tint = colorScheme.primary,
+                                modifier = Modifier.size(24.dp))
+                            Spacer(modifier = Modifier.width(14.dp))
+                            Text(
+                                text = "Mohamed Abbes",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = colorScheme.onSurface)
+                          }
+                    }
               }
             },
-            navigationIcon = {
-              IconButton(onClick = { /*Nothing to do here*/}, Modifier.testTag("ProfileButton")) {
-                Icon(
-                    painter = painterResource(R.drawable.profilevector),
-                    contentDescription = "Profile Icon",
-                    tint = colorScheme.primary,
-                    modifier = Modifier.size(24.dp) // Adjust size of the icon if needed
-                    )
-              }
-            },
-            // modifier = Modifier.height(56.dp),
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
-        )
+            modifier = Modifier.height(110.dp))
       },
       content = { padding ->
         Column(
             modifier =
                 Modifier.fillMaxWidth()
-                    .padding(top = padding.calculateTopPadding())
-                    .padding(horizontal = 16.dp)) {
-              // Remove the profile card that was originally here
+                    .padding(
+                        top = padding.calculateTopPadding(),
+                        bottom = padding.calculateBottomPadding())
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState())) {
+              Column(modifier = Modifier.fillMaxWidth().padding(bottom = 0.dp)) {
+                // Upcoming Activities Placeholder
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = colorScheme.surface,
+                            contentColor = colorScheme.onBackground),
+                    elevation = CardDefaults.cardElevation(4.dp)) {
+                      Text(
+                          text =
+                              "This isn’t developed yet; but it can display upcoming activities for both a user and worker",
+                          modifier = Modifier.padding(16.dp),
+                          style = MaterialTheme.typography.bodyMedium)
+                    }
 
-              // Upcoming Activities Placeholder
-              Card(
-                  modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                  shape = RoundedCornerShape(5.dp),
-                  colors =
-                      CardDefaults.cardColors(
-                          containerColor = colorScheme.surface,
-                          contentColor = colorScheme.onBackground),
-                  elevation = CardDefaults.cardElevation(4.dp)) {
-                    Text(
-                        text =
-                            "This isn’t developed yet; but it can display upcoming activities for both a user and worker",
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyMedium)
-                  }
-
-              // Wallet and Help Row
-              Row(
-                  modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                  horizontalArrangement = Arrangement.SpaceBetween) {
-                    Button(
-                        onClick = { /* Wallet click action */},
-                        modifier = Modifier.weight(1f).height(70.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.surface),
-                        shape = RoundedCornerShape(5.dp),
-                        elevation = ButtonDefaults.buttonElevation(4.dp)) {
-                          Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                painter = painterResource(R.drawable.wallletvector),
-                                contentDescription = "Wallet Icon",
-                                modifier = Modifier.size(24.dp),
-                                tint = colorScheme.primary)
-                            Text(text = "Wallet", color = colorScheme.onBackground)
-                            Text(text = "___ CHF", color = colorScheme.onBackground)
+                // Wallet and Help Row
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween) {
+                      Button(
+                          onClick = { /* Wallet click action */},
+                          modifier = Modifier.weight(1f).height(80.dp),
+                          colors =
+                              ButtonDefaults.buttonColors(containerColor = colorScheme.surface),
+                          shape = RoundedCornerShape(8.dp),
+                          elevation = ButtonDefaults.buttonElevation(4.dp)) {
+                            Column(
+                                horizontalAlignment = Alignment.Start,
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier.fillMaxWidth()) {
+                                  Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.wallletvector),
+                                        contentDescription = "Wallet Icon",
+                                        modifier = Modifier.size(30.dp),
+                                        tint = colorScheme.primary)
+                                    Spacer(modifier = Modifier.width(35.dp))
+                                    Column {
+                                      Text(
+                                          text = "Wallet",
+                                          color = colorScheme.onBackground,
+                                          style = MaterialTheme.typography.bodyLarge)
+                                      Text(
+                                          text = "___ CHF", // Placeholder for the wallet amount
+                                          color = colorScheme.onBackground,
+                                          style = MaterialTheme.typography.bodyMedium)
+                                    }
+                                  }
+                                }
                           }
-                        }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Button(
-                        onClick = { /* Help click action */},
-                        modifier = Modifier.weight(1f).height(70.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.surface),
-                        shape = RoundedCornerShape(5.dp),
-                        elevation = ButtonDefaults.buttonElevation(4.dp)) {
-                          Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                painter = painterResource(R.drawable.helpvector),
-                                contentDescription = "Help Icon",
-                                modifier = Modifier.size(24.dp),
-                                tint = colorScheme.primary)
-                            Text(text = "Help", color = colorScheme.onBackground)
-                          }
-                        }
-                  }
 
-              // Options Section
-              Column(modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
+                      Spacer(modifier = Modifier.width(16.dp))
+
+                      // Help Button
+                      Button(
+                          onClick = { /* Help click action */},
+                          modifier = Modifier.weight(1f).height(80.dp),
+                          colors =
+                              ButtonDefaults.buttonColors(containerColor = colorScheme.surface),
+                          shape = RoundedCornerShape(8.dp),
+                          elevation = ButtonDefaults.buttonElevation(4.dp)) {
+                            Column(
+                                horizontalAlignment = Alignment.Start,
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier.fillMaxWidth()) {
+                                  Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.helpvector),
+                                        contentDescription = "Help Icon",
+                                        modifier = Modifier.size(30.dp),
+                                        tint = colorScheme.primary)
+                                    Spacer(modifier = Modifier.width(35.dp))
+                                    Text(
+                                        text = "Help",
+                                        color = colorScheme.onBackground,
+                                        style = MaterialTheme.typography.bodyLarge)
+                                  }
+                                }
+                          }
+                    }
+              }
+
+              Column(modifier = Modifier.fillMaxWidth()) {
                 options.forEach { option ->
                   Card(
                       modifier = Modifier.fillMaxWidth().height(65.dp).padding(vertical = 4.dp),
-                      shape = RoundedCornerShape(7.dp),
+                      shape = RoundedCornerShape(8.dp),
                       colors =
                           CardDefaults.cardColors(
                               containerColor = colorScheme.surface,
@@ -177,11 +222,21 @@ fun ProfileScreen(navigationActions: NavigationActions) {
                   colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
                     Text(
                         text = "Log out",
-                        color = colorScheme.onBackground,
+                        color = colorScheme.onPrimary,
                         style = MaterialTheme.typography.titleMedium)
                   }
             }
-      })
+      },
+      bottomBar = {
+        BottomNavigationMenu(
+            selectedItem = Route.PROFILE,
+            onTabSelect = { selectedDestination ->
+              navigationActions.navigateTo(selectedDestination)
+            },
+            isUser = true, // Assuming the user is of type User
+        )
+      },
+  )
 }
 
 sealed class IconType {
@@ -195,11 +250,8 @@ private data class OptionItem(val label: String, val icon: IconType)
 private val options =
     listOf(
         OptionItem("Settings", IconType.Vector(Icons.Outlined.Settings)),
-        OptionItem(
-            "Activity",
-            IconType.Vector(Icons.Outlined.List)), // Assuming you're using Material Icons
+        OptionItem("Activity", IconType.Resource(R.drawable.dashboardvector)),
         OptionItem("Set up your business account", IconType.Resource(R.drawable.workvector)),
         OptionItem("Account configuration", IconType.Resource(R.drawable.accountsettingsvector)),
         OptionItem("Workers network", IconType.Vector(Icons.Outlined.Phone)),
-        OptionItem("Legal", IconType.Vector(Icons.Outlined.Info)) // Example vector icon
-        )
+        OptionItem("Legal", IconType.Vector(Icons.Outlined.Info)))
