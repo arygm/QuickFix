@@ -3,22 +3,30 @@ package com.arygm.quickfix.ui.authentication
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.navigation.TopLevelDestinations
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.whenever
 
 class RegisterScreenTest {
 
@@ -27,26 +35,18 @@ class RegisterScreenTest {
   private lateinit var profileRepository: ProfileRepository
   private lateinit var profileViewModel: ProfileViewModel
   private lateinit var navigationActions: NavigationActions
-  private lateinit var registrationViewModel: RegistrationViewModel
 
   @Before
   fun setup() {
     profileRepository = mock(ProfileRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
-    profileViewModel = mock(ProfileViewModel::class.java) // Mock the ProfileViewModel
-    registrationViewModel = RegistrationViewModel()
-    registrationViewModel.updateFirstName("John")
-    registrationViewModel.updateFirstName("Doe")
-    registrationViewModel.updateFirstName("john.doe@example.com")
-    registrationViewModel.updateFirstName("01/01/1990")
+    profileViewModel = ProfileViewModel(profileRepository)
     `when`(navigationActions.currentRoute()).thenReturn(Screen.REGISTER)
   }
 
   @Test
   fun testInitialUI() {
-    composeTestRule.setContent {
-      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
-    }
+    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
 
     // Check that the scaffold and content boxes are displayed
     composeTestRule.onNodeWithTag("RegisterScaffold").assertIsDisplayed()
@@ -88,9 +88,7 @@ class RegisterScreenTest {
 
   @Test
   fun testInvalidEmailShowsError() {
-    composeTestRule.setContent {
-      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
-    }
+    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
 
     // Input an invalid email
     composeTestRule.onNodeWithTag("emailInput").performTextInput("invalidemail")
@@ -102,9 +100,7 @@ class RegisterScreenTest {
 
   @Test
   fun testInvalidDateShowsError() {
-    composeTestRule.setContent {
-      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
-    }
+    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
 
     // Input an invalid birth date
     composeTestRule.onNodeWithTag("birthDateInput").performTextInput("99/99/9999")
@@ -116,9 +112,7 @@ class RegisterScreenTest {
 
   @Test
   fun testPasswordMismatch() {
-    composeTestRule.setContent {
-      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
-    }
+    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
 
     // Enter different passwords
     composeTestRule.onNodeWithTag("passwordInput").performTextInput("Password123")
@@ -130,14 +124,43 @@ class RegisterScreenTest {
 
   @Test
   fun testRegisterButtonEnabledWhenFormIsValid() {
+    var createAccountFuncCalled = false
+    // Arrange
+    val newEmail = "new.user@example.com"
+
+    val testCreateAccountFunc =
+        {
+            _: FirebaseAuth,
+            _: String,
+            _: String,
+            _: String,
+            _: String,
+            _: String,
+            _: ProfileViewModel,
+            onSuccess: () -> Unit,
+            _: () -> Unit ->
+          createAccountFuncCalled = true
+          onSuccess() // Simulate success
+    }
+
+    // Mock the profileRepository.profileExists to return exists = false, profile = null
+    whenever(profileRepository.profileExists(eq(newEmail), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
+      onSuccess(Pair(false, null))
+      null
+    }
+
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
+      RegisterScreen(
+          navigationActions = navigationActions,
+          profileViewModel = profileViewModel,
+          createAccountFunc = testCreateAccountFunc)
     }
 
     // Fill out valid inputs
     composeTestRule.onNodeWithTag("firstNameInput").performTextInput("John")
     composeTestRule.onNodeWithTag("lastNameInput").performTextInput("Doe")
-    composeTestRule.onNodeWithTag("emailInput").performTextInput("john.doe@example.com")
+    composeTestRule.onNodeWithTag("emailInput").performTextInput(newEmail)
     composeTestRule.onNodeWithTag("birthDateInput").performTextInput("01/01/1990")
     composeTestRule.onNodeWithTag("passwordInput").performTextInput("Password123")
     composeTestRule.onNodeWithTag("repeatPasswordInput").performTextInput("Password123")
@@ -150,14 +173,16 @@ class RegisterScreenTest {
 
     // Click the button and verify navigation
     composeTestRule.onNodeWithTag("registerButton").performClick()
-    Mockito.verify(navigationActions).navigateTo(Screen.HOME)
+
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      Mockito.mockingDetails(navigationActions).invocations.isNotEmpty()
+    }
+    Mockito.verify(navigationActions).navigateTo(TopLevelDestinations.HOME)
   }
 
   @Test
   fun testRegisterButtonDisabledWhenFormIncomplete() {
-    composeTestRule.setContent {
-      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
-    }
+    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
 
     // Fill only partial inputs
     composeTestRule.onNodeWithTag("firstNameInput").performTextInput("John")
@@ -174,9 +199,7 @@ class RegisterScreenTest {
 
   @Test
   fun testBackButtonNavigatesBack() {
-    composeTestRule.setContent {
-      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
-    }
+    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
 
     // Click the back button
     composeTestRule.onNodeWithTag("goBackButton").performClick()
@@ -187,14 +210,204 @@ class RegisterScreenTest {
 
   @Test
   fun testLoginButtonNavigatesToLogin() {
-    composeTestRule.setContent {
-      RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
-    }
+    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
 
     // Click the "Login !" button
     composeTestRule.onNodeWithTag("clickableLoginButtonText").performClick()
 
     // Verify that the navigation action is triggered for the login screen
     Mockito.verify(navigationActions).navigateTo(Screen.LOGIN)
+  }
+
+  @Test
+  fun testEmailAlreadyExistsShowsError() {
+    // Arrange
+    val existingEmail = "john.doe@example.com"
+    val profile =
+        Profile(
+            uid = "testUid",
+            firstName = "John",
+            lastName = "Doe",
+            email = existingEmail,
+            birthDate = Timestamp.now(),
+            description = "Existing user")
+
+    // Mock the profileRepository.profileExists to return exists = true, profile != null
+    whenever(profileRepository.profileExists(eq(existingEmail), any(), any())).thenAnswer {
+        invocation ->
+      val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
+      onSuccess(Pair(true, profile))
+      null
+    }
+
+    // Act
+    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
+
+    composeTestRule.onNodeWithTag("emailInput").performTextInput(existingEmail)
+
+    // Wait for possible recompositions
+    composeTestRule.waitForIdle()
+
+    // Fill out valid inputs
+    composeTestRule.onNodeWithTag("firstNameInput").performTextInput("John")
+    composeTestRule.onNodeWithTag("lastNameInput").performTextInput("Doe")
+    composeTestRule.onNodeWithTag("birthDateInput").performTextInput("01/01/1990")
+    composeTestRule.onNodeWithTag("passwordInput").performTextInput("Password123")
+    composeTestRule.onNodeWithTag("repeatPasswordInput").performTextInput("Password123")
+    composeTestRule.onNodeWithTag("checkbox").performClick()
+
+    // Assert
+    composeTestRule.onNodeWithTag("errorText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("errorText").assertTextEquals("INVALID EMAIL")
+    composeTestRule.onNodeWithTag("registerButton").assertIsNotEnabled()
+  }
+
+  @Test
+  fun testValidEmailDoesNotShowErrorWhenEmailDoesNotExist() {
+    // Arrange
+    val newEmail = "new.user@example.com"
+
+    // Mock the profileRepository.profileExists to return exists = false, profile = null
+    whenever(profileRepository.profileExists(eq(newEmail), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
+      onSuccess(Pair(false, null))
+      null
+    }
+
+    // Act
+    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
+
+    composeTestRule.onNodeWithTag("emailInput").performTextInput(newEmail)
+
+    // Wait for possible recompositions
+    composeTestRule.waitForIdle()
+
+    // Fill out valid inputs
+    composeTestRule.onNodeWithTag("firstNameInput").performTextInput("John")
+    composeTestRule.onNodeWithTag("lastNameInput").performTextInput("Doe")
+    composeTestRule.onNodeWithTag("birthDateInput").performTextInput("01/01/1990")
+    composeTestRule.onNodeWithTag("passwordInput").performTextInput("Password123")
+    composeTestRule.onNodeWithTag("repeatPasswordInput").performTextInput("Password123")
+    composeTestRule.onNodeWithTag("checkbox").performClick()
+
+    // Assert
+    composeTestRule.onNodeWithTag("errorText").assertDoesNotExist()
+    // Ensure the "NEXT" button remains disabled until other fields are filled and checkboxes are
+    // checked
+    composeTestRule.onNodeWithTag("registerButton").assertIsEnabled()
+  }
+
+  @Test
+  fun testRegisterButtonClickSuccessfulRegistration() {
+    val existingEmail = "john.doe@example.com"
+    var createAccountFuncCalled = false
+
+    val testCreateAccountFunc =
+        {
+            _: FirebaseAuth,
+            _: String,
+            _: String,
+            _: String,
+            _: String,
+            _: String,
+            _: ProfileViewModel,
+            onSuccess: () -> Unit,
+            _: () -> Unit ->
+          createAccountFuncCalled = true
+          onSuccess() // Simulate success
+    }
+
+    composeTestRule.setContent {
+      RegisterScreen(
+          navigationActions = navigationActions,
+          profileViewModel = profileViewModel,
+          createAccountFunc = testCreateAccountFunc)
+    }
+
+    // Mock the profileRepository.profileExists to return exists = false, profile = null
+    whenever(profileRepository.profileExists(eq(existingEmail), any(), any())).thenAnswer {
+        invocation ->
+      val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
+      onSuccess(Pair(false, null))
+      null
+    }
+
+    // Fill out valid inputs
+    composeTestRule.onNodeWithTag("firstNameInput").performTextInput("John")
+    composeTestRule.onNodeWithTag("lastNameInput").performTextInput("Doe")
+    composeTestRule.onNodeWithTag("birthDateInput").performTextInput("01/01/1990")
+    composeTestRule.onNodeWithTag("emailInput").performTextInput(existingEmail)
+    composeTestRule.onNodeWithTag("checkbox").performClick()
+
+    // Input matching passwords that meet all conditions
+    composeTestRule.onNodeWithTag("passwordInput").performTextInput("Password1")
+    composeTestRule.onNodeWithTag("repeatPasswordInput").performTextInput("Password1")
+
+    composeTestRule.onNodeWithTag("registerButton").assertIsEnabled()
+    // Click the register button
+    composeTestRule.onNodeWithTag("registerButton").performClick()
+
+    // Verify that createAccountFunc was called
+    assertTrue(createAccountFuncCalled)
+
+    // Verify that navigation to HOME was triggered
+    Mockito.verify(navigationActions).navigateTo(TopLevelDestinations.HOME)
+  }
+
+  @Test
+  fun testRegisterButtonClickFailedRegistration() {
+
+    val newEmail = "example@gmail.com"
+
+    // Mock the profileRepository.profileExists to return exists = false, profile = null
+    whenever(profileRepository.profileExists(eq(newEmail), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
+      onSuccess(Pair(false, null))
+      null
+    }
+    var createAccountFuncCalled = false
+
+    val testCreateAccountFunc =
+        {
+            _: FirebaseAuth,
+            _: String,
+            _: String,
+            _: String,
+            _: String,
+            _: String,
+            _: ProfileViewModel,
+            _: () -> Unit,
+            onFailure: () -> Unit ->
+          createAccountFuncCalled = true
+          onFailure() // Simulate failure
+    }
+
+    composeTestRule.setContent {
+      RegisterScreen(
+          navigationActions = navigationActions,
+          profileViewModel = profileViewModel,
+          createAccountFunc = testCreateAccountFunc,
+      )
+    }
+    // Fill out valid inputs
+    composeTestRule.onNodeWithTag("firstNameInput").performTextInput("John")
+    composeTestRule.onNodeWithTag("lastNameInput").performTextInput("Doe")
+    composeTestRule.onNodeWithTag("birthDateInput").performTextInput("01/01/1990")
+    composeTestRule.onNodeWithTag("emailInput").performTextInput(newEmail)
+    composeTestRule.onNodeWithTag("checkbox").performClick()
+
+    // Input matching passwords that meet all conditions
+    composeTestRule.onNodeWithTag("passwordInput").performTextInput("Password1")
+    composeTestRule.onNodeWithTag("repeatPasswordInput").performTextInput("Password1")
+
+    composeTestRule.onNodeWithTag("registerButton").assertIsEnabled()
+    // Click the register button
+    composeTestRule.onNodeWithTag("registerButton").performClick()
+
+    // Verify that createAccountFunc was called
+    assertTrue(createAccountFuncCalled)
+
+    // Verify that navigation to HOME was not triggered
+    Mockito.verify(navigationActions, Mockito.never()).navigateTo(TopLevelDestinations.HOME)
   }
 }

@@ -139,9 +139,7 @@ fun QuickFixApp() {
                 composable(Screen.PASSWORD) {
                   PasswordScreen(navigationActions, registrationViewModel, profileViewModel)
                 }
-                composable(Screen.REGISTER) {
-                  RegisterScreen(navigationActions, registrationViewModel, profileViewModel)
-                }
+                composable(Screen.REGISTER) { RegisterScreen(navigationActions, profileViewModel) }
               }
               navigation(
                   startDestination = Screen.HOME,

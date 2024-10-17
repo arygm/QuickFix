@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.authentication
 
+import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -44,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -54,7 +56,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -62,15 +63,31 @@ import com.arygm.quickfix.ui.elements.QuickFixCheckBoxRow
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.navigation.TopLevelDestinations
+import com.arygm.quickfix.utils.createAccountWithEmailAndPassword
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.isValidEmail
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun RegisterScreen(
     navigationActions: NavigationActions,
-    registrationViewModel: RegistrationViewModel,
     profileViewModel: ProfileViewModel,
+    firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(), // Injected dependency
+    createAccountFunc:
+        (
+            firebaseAuth: FirebaseAuth,
+            firstName: String,
+            lastName: String,
+            email: String,
+            password: String,
+            birthDate: String,
+            profileViewModel: ProfileViewModel,
+            onSuccess: () -> Unit,
+            onFailure: () -> Unit) -> Unit =
+        ::createAccountWithEmailAndPassword // Default implementation
 ) {
+  val context = LocalContext.current
   var firstName by remember { mutableStateOf("") }
   var lastName by remember { mutableStateOf("") }
   var email by remember { mutableStateOf("") }
@@ -80,7 +97,6 @@ fun RegisterScreen(
   var birthDateError by remember { mutableStateOf(false) }
 
   var acceptTerms by remember { mutableStateOf(false) }
-  var acceptPrivacyPolicy by remember { mutableStateOf(false) }
 
   var password by remember { mutableStateOf("") }
   var passwordVisible by remember { mutableStateOf(false) }
@@ -276,6 +292,14 @@ fun RegisterScreen(
                                       onValueChange = {
                                         email = it
                                         emailError = !isValidEmail(it)
+                                        profileViewModel.profileExists(email) { exists, profile ->
+                                          emailError =
+                                              if (exists && profile != null) {
+                                                true
+                                              } else {
+                                                !isValidEmail(it)
+                                              }
+                                        }
                                       },
                                       placeHolderText = "Enter your email address",
                                       placeHolderColor = colorScheme.onSecondaryContainer,
@@ -460,7 +484,24 @@ fun RegisterScreen(
                                     buttonText = "Register",
                                     onClickAction = {
                                       shrinkBox = false
-                                      navigationActions?.navigateTo(Screen.HOME)
+                                      createAccountFunc(
+                                          firebaseAuth,
+                                          firstName,
+                                          lastName,
+                                          email,
+                                          password,
+                                          birthDate,
+                                          profileViewModel,
+                                          {
+                                            navigationActions.navigateTo(TopLevelDestinations.HOME)
+                                          },
+                                          {
+                                            Toast.makeText(
+                                                    context,
+                                                    "Registration Failed.",
+                                                    Toast.LENGTH_LONG)
+                                                .show()
+                                          })
                                     },
                                     buttonColor = colorScheme.primary,
                                     textColor = colorScheme.onPrimary,
@@ -470,7 +511,7 @@ fun RegisterScreen(
                                             .height(55.dp)
                                             .testTag("registerButton")
                                             .graphicsLayer(alpha = 1f),
-                                    enabled = filledForm)
+                                    enabled = filledForm && !emailError && !birthDateError)
 
                                 Spacer(modifier = Modifier.padding(4.dp))
 
@@ -492,7 +533,7 @@ fun RegisterScreen(
                                   QuickFixButton(
                                       buttonText = "Login !",
                                       onClickAction = {
-                                        navigationActions?.navigateTo(Screen.LOGIN)
+                                        navigationActions.navigateTo(Screen.LOGIN)
                                       },
                                       buttonColor = Color.Transparent,
                                       textColor = colorScheme.primary,
