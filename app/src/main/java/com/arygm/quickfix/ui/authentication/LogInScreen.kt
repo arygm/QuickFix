@@ -1,6 +1,7 @@
 package com.arygm.quickfix.ui.authentication
 
 import QuickFixTextField
+import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -57,12 +59,13 @@ import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.isValidEmail
+import com.arygm.quickfix.utils.signInWithEmailAndFetchProfile
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun LogInScreen(navigationActions: NavigationActions) {
-  val errorHasOccurred by remember { mutableStateOf(false) }
+fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileViewModel) {
+  var errorHasOccurred by remember { mutableStateOf(false) }
 
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
@@ -225,10 +228,21 @@ fun LogInScreen(navigationActions: NavigationActions) {
                                 buttonText = "LOGIN",
                                 onClickAction = {
                                   shrinkBox = false
-                                  coroutineScope.launch {
-                                    delay(BOX_COLLAPSE_SPEED.toLong())
-                                    navigationActions.navigateTo(Screen.HOME)
-                                  }
+                                  signInWithEmailAndFetchProfile(
+                                      email = email,
+                                      password = password,
+                                      profileViewModel = profileViewModel,
+                                      onResult = {
+                                        if (it) {
+                                          coroutineScope.launch {
+                                            delay(BOX_COLLAPSE_SPEED.toLong())
+                                            navigationActions.navigateTo(Screen.HOME)
+                                          }
+                                        } else {
+                                          Log.e("LogInScreen", "Error occurred while signing in")
+                                          errorHasOccurred = true
+                                        }
+                                      })
                                 },
                                 buttonColor = colorScheme.primary,
                                 textColor = colorScheme.onPrimary,

@@ -6,6 +6,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import org.junit.Before
@@ -20,17 +22,21 @@ class LogInScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
+  private lateinit var profileRepository: ProfileRepository
+  private lateinit var profileViewModel: ProfileViewModel
 
   @Before
   fun setup() {
+    profileRepository = mock(ProfileRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
+    profileViewModel = ProfileViewModel(profileRepository)
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.LOGIN)
   }
 
   @Test
   fun testInitialUI() {
-    composeTestRule.setContent { LogInScreen(navigationActions) }
+    composeTestRule.setContent { LogInScreen(navigationActions, profileViewModel) }
 
     // Check that the scaffold and content boxes are displayed
     composeTestRule.onNodeWithTag("LoginScaffold").assertIsDisplayed()
@@ -63,7 +69,7 @@ class LogInScreenTest {
 
   @Test
   fun testLoginButtonEnabledWhenFieldsAreFilled() {
-    composeTestRule.setContent { LogInScreen(navigationActions) }
+    composeTestRule.setContent { LogInScreen(navigationActions, profileViewModel) }
 
     // Input valid email and password
     composeTestRule.onNodeWithTag("inputEmail").performTextInput("test@example.com")
@@ -75,7 +81,7 @@ class LogInScreenTest {
 
   @Test
   fun testInvalidEmailShowsError() {
-    composeTestRule.setContent { LogInScreen(navigationActions) }
+    composeTestRule.setContent { LogInScreen(navigationActions, profileViewModel) }
 
     // Input an invalid email
     composeTestRule.onNodeWithTag("inputEmail").performTextInput("invalidemail")
@@ -115,7 +121,7 @@ class LogInScreenTest {
 
   @Test
   fun testForgotPasswordLinkIsDisplayed() {
-    composeTestRule.setContent { LogInScreen(navigationActions) }
+    composeTestRule.setContent { LogInScreen(navigationActions, profileViewModel) }
 
     // Check that the forgot password text is displayed
     composeTestRule.onNodeWithTag("forgetPasswordButtonText").assertIsDisplayed()
@@ -123,7 +129,7 @@ class LogInScreenTest {
 
   @Test
   fun testBackButtonNavigatesBack() {
-    composeTestRule.setContent { LogInScreen(navigationActions) }
+    composeTestRule.setContent { LogInScreen(navigationActions, profileViewModel) }
 
     // Click the back button
     composeTestRule.onNodeWithTag("goBackButton").performClick()
