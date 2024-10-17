@@ -17,16 +17,16 @@ import com.arygm.quickfix.ui.ActivityScreen
 import com.arygm.quickfix.ui.AnnouncementScreen
 import com.arygm.quickfix.ui.CalendarScreen
 import com.arygm.quickfix.ui.MapScreen
-import com.arygm.quickfix.ui.OtherScreen
 import com.arygm.quickfix.ui.authentication.InfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.PasswordScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.home.HomeScreen
-import com.arygm.quickfix.ui.home.ProfileScreen
+import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.profile.ProfileConfigurationScreen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 
 class MainActivity : ComponentActivity() {
@@ -49,8 +49,8 @@ fun QuickFixApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
 
-  val isUser = false // TODO: This variable needs to get its value after the authentication
-  NavHost(navController = navController, startDestination = Route.PROFILE) {
+  val isUser = true // TODO: This variable needs to get its value after the authentication
+  NavHost(navController = navController, startDestination = Route.HOME) {
     navigation(
         startDestination = Screen.WELCOME,
         route = Route.WELCOME,
@@ -61,8 +61,8 @@ fun QuickFixApp() {
       composable(Screen.PASSWORD) { PasswordScreen(navigationActions) }
     }
     navigation(
-        startDestination = Screen.PROFILE,
-        route = Route.PROFILE,
+        startDestination = Screen.HOME,
+        route = Route.HOME,
     ) {
       composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
       // TODO Change the screen when implemented as well as the tests
@@ -94,10 +94,12 @@ fun QuickFixApp() {
       composable(Screen.ACTIVITY) { ActivityScreen(navigationActions, isUser) }
     }
     navigation(
-        startDestination = Screen.OTHER,
-        route = Route.OTHER,
+        startDestination = Screen.PROFILE,
+        route = Route.PROFILE,
     ) {
-      composable(Screen.OTHER) { OtherScreen(navigationActions, isUser) }
+      composable(Screen.PROFILE) { ProfileScreen(navigationActions) }
+      composable(Screen.ACCOUNT_CONFIGURATION) { ProfileConfigurationScreen(navigationActions) }
+
     }
   }
 }

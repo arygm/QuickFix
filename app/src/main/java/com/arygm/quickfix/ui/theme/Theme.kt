@@ -38,7 +38,8 @@ private val LightColorScheme =
         surfaceVariant = ButtonQuaternary, // Fourth button color
         onSurfaceVariant = TextButtonQuaternary, // Text color for the quaternary button,
         onSecondaryContainer = TextDisabled,
-        tertiaryContainer = ButtonDisabled)
+        tertiaryContainer = ButtonDisabled
+    )
 
 private val DarkColorScheme =
     darkColorScheme(
@@ -58,7 +59,8 @@ private val DarkColorScheme =
         surfaceVariant = DarkButtonQuaternary, // Fourth button color
         onSurfaceVariant = DarkTextButtonQuaternary, // Text color for the quaternary button
         onSecondaryContainer = DarkTextDisabled,
-        tertiaryContainer = DarkButtonDisabled)
+        tertiaryContainer = DarkButtonDisabled
+    )
 val poppinsFontFamily =
     FontFamily(
         Font(R.font.poppins_black, FontWeight.Black, FontStyle.Normal),
@@ -84,41 +86,54 @@ val poppinsFontFamily =
 val poppinsTypography =
     Typography(
         titleLarge =
-            TextStyle(
-                fontFamily = poppinsFontFamily,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 64.sp,
-                fontStyle = FontStyle.Normal),
+        TextStyle(
+            fontFamily = poppinsFontFamily,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 64.sp,
+            fontStyle = FontStyle.Normal
+        ),
         headlineLarge =
-            TextStyle(
-                fontFamily = poppinsFontFamily,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 32.sp,
-                fontStyle = FontStyle.Normal),
+        TextStyle(
+            fontFamily = poppinsFontFamily,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 32.sp,
+            fontStyle = FontStyle.Normal
+        ),
+        headlineMedium =
+        TextStyle(
+            fontFamily = poppinsFontFamily,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp,
+            fontStyle = FontStyle.Normal
+        ),
         headlineSmall =
-            TextStyle(
-                fontFamily = poppinsFontFamily,
-                fontWeight = FontWeight.Medium,
-                fontSize = 12.sp,
-                fontStyle = FontStyle.Normal),
+        TextStyle(
+            fontFamily = poppinsFontFamily,
+            fontWeight = FontWeight.Medium,
+            fontSize = 12.sp,
+            fontStyle = FontStyle.Normal
+        ),
         labelLarge =
-            TextStyle(
-                fontFamily = poppinsFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                fontStyle = FontStyle.Normal),
+        TextStyle(
+            fontFamily = poppinsFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 22.sp,
+            fontStyle = FontStyle.Normal
+        ),
         labelMedium =
-            TextStyle(
-                fontFamily = poppinsFontFamily,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 18.sp,
-                fontStyle = FontStyle.Normal),
+        TextStyle(
+            fontFamily = poppinsFontFamily,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 18.sp,
+            fontStyle = FontStyle.Normal
+        ),
         labelSmall =
-            TextStyle(
-                fontFamily = poppinsFontFamily,
-                fontWeight = FontWeight.Normal,
-                fontSize = 12.sp,
-                fontStyle = FontStyle.Normal),
+        TextStyle(
+            fontFamily = poppinsFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = 12.sp,
+            fontStyle = FontStyle.Normal
+        ),
     )
 
 @Composable
@@ -128,22 +143,23 @@ fun QuickFixTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-  val colorScheme =
-      when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-          if (darkTheme) DarkColorScheme else LightColorScheme
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-      }
-  val view = LocalView.current
-  if (!view.isInEditMode) {
-    SideEffect {
-      val window = (view.context as Activity).window
-      window.statusBarColor = colorScheme.primary.toArgb()
-      WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
-    }
-  }
+    val colorScheme =
+        when {
+            dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                if (darkTheme) DarkColorScheme else LightColorScheme
+            }
 
-  MaterialTheme(colorScheme = colorScheme, typography = poppinsTypography, content = content)
+            darkTheme -> DarkColorScheme
+            else -> LightColorScheme
+        }
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.primary.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+        }
+    }
+
+    MaterialTheme(colorScheme = colorScheme, typography = poppinsTypography, content = content)
 }

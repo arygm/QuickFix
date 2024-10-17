@@ -21,6 +21,7 @@ object Route {
   const val CALENDAR = "Calendar"
   const val MAP = "Map"
   const val PROFILE = "Profile"
+  const val ACCOUNT_CONFIGURATION = "Account configuration"
 }
 
 object Screen {
@@ -36,6 +37,7 @@ object Screen {
   const val MAP = "Map Screen"
   const val PROFILE = "Profile Screen"
   const val MESSAGES = "Messages Screen"
+  const val ACCOUNT_CONFIGURATION = "Account configuration screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
@@ -63,14 +65,14 @@ val USER_TOP_LEVEL_DESTINATIONS =
         TopLevelDestinations.HOME,
         TopLevelDestinations.ANNOUNCEMENT,
         TopLevelDestinations.ACTIVITY,
-        TopLevelDestinations.OTHER)
+        TopLevelDestinations.PROFILE)
 val WORKER_TOP_LEVEL_DESTINATIONS =
     listOf(
         TopLevelDestinations.HOME,
         TopLevelDestinations.CALENDAR,
         TopLevelDestinations.MAP,
         TopLevelDestinations.ACTIVITY,
-        TopLevelDestinations.OTHER)
+        TopLevelDestinations.PROFILE)
 
 fun getBottomBarId(route: String, isUser: Boolean): Int {
   return when (route) {
