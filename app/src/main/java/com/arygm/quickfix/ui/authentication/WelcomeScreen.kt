@@ -47,7 +47,7 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
-import com.arygm.quickfix.ui.theme.*
+import com.arygm.quickfix.ui.theme.ButtonPrimary
 import com.arygm.quickfix.utils.rememberFirebaseAuthLauncher
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
