@@ -43,6 +43,8 @@ import com.arygm.quickfix.R
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,10 +59,11 @@ fun ProfileScreen(
       listOf(
           OptionItem("Settings", IconType.Vector(Icons.Outlined.Settings)) {},
           OptionItem("Activity", IconType.Resource(R.drawable.dashboardvector)) {},
-          OptionItem("Set up your business account", IconType.Resource(R.drawable.workvector)) {},
+          OptionItem("Set up your business account", IconType.Resource(R.drawable.workvector)) {
+            navigationActions.navigateTo(Screen.TO_WORKER)
+          },
           OptionItem("Account configuration", IconType.Resource(R.drawable.accountsettingsvector)) {
             navigationActions.navigateTo(Screen.ACCOUNT_CONFIGURATION)
-            Log.d("userResult", navigationActions.currentRoute())
           },
           OptionItem("Workers network", IconType.Vector(Icons.Outlined.Phone)) {},
           OptionItem("Legal", IconType.Vector(Icons.Outlined.Info)) {})
@@ -267,7 +270,11 @@ fun ProfileScreen(
 
               // Logout Button
               Button(
-                  onClick = { /* Handle logout */},
+                  onClick = {
+                    profileViewModel.logOut(Firebase.auth)
+                    navigationActions.navigateTo(Screen.WELCOME)
+                    Log.d("user", Firebase.auth.currentUser.toString())
+                  },
                   modifier =
                       Modifier.fillMaxWidth().padding(vertical = 16.dp).testTag("LogoutButton"),
                   colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {

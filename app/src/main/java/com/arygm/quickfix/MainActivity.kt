@@ -43,6 +43,7 @@ import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.profile.BusinessScreen
 import com.arygm.quickfix.ui.profile.ProfileConfigurationScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
@@ -82,7 +83,8 @@ fun QuickFixApp() {
           screen != Screen.INFO &&
           screen != Screen.PASSWORD &&
           screen != Screen.REGISTER &&
-          screen != Screen.ACCOUNT_CONFIGURATION
+          screen != Screen.ACCOUNT_CONFIGURATION &&
+          screen != Screen.TO_WORKER
     }
   }
 
@@ -175,6 +177,7 @@ fun QuickFixApp() {
                 composable(Screen.ACCOUNT_CONFIGURATION) {
                   ProfileConfigurationScreen(navigationActions, isUser, profileViewModel)
                 }
+                composable(Screen.TO_WORKER) { BusinessScreen(navigationActions, profileViewModel) }
               }
             }
       }

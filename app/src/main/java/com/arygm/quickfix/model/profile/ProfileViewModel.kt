@@ -3,7 +3,9 @@ package com.arygm.quickfix.model.profile
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.arygm.quickfix.utils.logOut
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -53,7 +55,10 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
   fun updateProfile(profile: Profile) {
     repository.updateProfile(
         profile = profile,
-        onSuccess = { getProfiles() },
+        onSuccess = {
+          getProfiles()
+          fetchUserProfile(profile.uid) { setLoggedInProfile(profile) }
+        },
         onFailure = { e -> Log.e("ProfileViewModel", "Failed to update profile: ${e.message}") })
   }
 
@@ -101,5 +106,10 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
           Log.e("ProfileViewModel", "Error fetching profile: ${e.message}")
           onResult(null)
         })
+  }
+
+  fun logOut(firebasAuth: FirebaseAuth) {
+    loggedInProfile_.value = null
+    com.arygm.quickfix.utils.logOut(firebasAuth)
   }
 }
