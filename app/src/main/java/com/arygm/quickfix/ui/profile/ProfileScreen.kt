@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.profile
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -59,6 +60,7 @@ fun ProfileScreen(
           OptionItem("Set up your business account", IconType.Resource(R.drawable.workvector)) {},
           OptionItem("Account configuration", IconType.Resource(R.drawable.accountsettingsvector)) {
             navigationActions.navigateTo(Screen.ACCOUNT_CONFIGURATION)
+            Log.d("userResult", navigationActions.currentRoute())
           },
           OptionItem("Workers network", IconType.Vector(Icons.Outlined.Phone)) {},
           OptionItem("Legal", IconType.Vector(Icons.Outlined.Info)) {})

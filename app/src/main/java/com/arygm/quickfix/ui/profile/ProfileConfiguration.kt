@@ -1,6 +1,7 @@
 package com.arygm.quickfix.ui.profile
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -96,7 +97,11 @@ fun ProfileConfigurationScreen(
             },
             navigationIcon = {
               IconButton(
-                  onClick = { navigationActions.goBack() },
+                  onClick = {
+                    navigationActions.goBack()
+                    Log.d("user1", navigationActions.currentScreen)
+                    Log.d("user2", navigationActions.currentRoute())
+                  },
                   modifier = Modifier.testTag("goBackButton")) {
                     Icon(
                         Icons.Outlined.ArrowBack,

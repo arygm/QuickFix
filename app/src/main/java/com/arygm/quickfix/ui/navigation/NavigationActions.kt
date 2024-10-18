@@ -17,14 +17,13 @@ object Route {
   const val CALENDAR = "Calendar"
   const val WELCOME = "Welcome"
   const val HOME = "Home"
-  const val ANNOUNCEMENT = "Annoucement"
-  const val PROFILE = "Profile"
-  const val OTHER = "Other"
   const val SEARCH = "Search"
   const val DASHBOARD = "Dashboard"
   const val INFO = "Info"
   const val LOGIN = "Login"
   const val PASSWORD = "Password"
+  const val PROFILE = "Profile"
+  const val ACCOUNT_CONFIGURATION = "Account configuration"
 }
 
 object Screen {
@@ -36,9 +35,10 @@ object Screen {
   const val HOME = "Home Screen"
   const val SEARCH = "Search Screen"
   const val DASHBOARD = "Dashboard Screen"
-  const val PROFILE = "Profile Screen"
   const val MESSAGES = "Messages Screen"
   const val CALENDAR = "Calendar Screen"
+  const val PROFILE = "Profile Screen"
+  const val ACCOUNT_CONFIGURATION = "Account configuration Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
