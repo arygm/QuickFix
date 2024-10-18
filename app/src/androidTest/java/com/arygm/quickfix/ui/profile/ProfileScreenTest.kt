@@ -105,25 +105,26 @@ class ProfileScreenTest {
 
     composeTestRule.onNodeWithTag("LogoutButton").performClick()
   }
-    @Test
-    fun navigateToAccountConfigurationTest() {
-        composeTestRule.setContent { ProfileScreen(navigationActions) }
 
-        // Perform click on "Account configuration"
-        composeTestRule.onNodeWithTag("AccountconfigurationOption").performClick()
+  @Test
+  fun navigateToAccountConfigurationTest() {
+    composeTestRule.setContent { ProfileScreen(navigationActions) }
 
-        // Verify that the navigation to Screen.ACCOUNT_CONFIGURATION happened
-        verify(navigationActions).navigateTo(Screen.ACCOUNT_CONFIGURATION)
-    }
+    // Perform click on "Account configuration"
+    composeTestRule.onNodeWithTag("AccountconfigurationOption").performClick()
 
-    @Test
-    fun navigateToWorkerSetupTest() {
-        composeTestRule.setContent { ProfileScreen(navigationActions) }
+    // Verify that the navigation to Screen.ACCOUNT_CONFIGURATION happened
+    verify(navigationActions).navigateTo(Screen.ACCOUNT_CONFIGURATION)
+  }
 
-        // Perform click on "Set up your business account"
-        composeTestRule.onNodeWithTag("SetupyourbusinessaccountOption").performClick()
+  @Test
+  fun navigateToWorkerSetupTest() {
+    composeTestRule.setContent { ProfileScreen(navigationActions) }
 
-        // Verify that the navigation to Screen.TO_WORKER happened
-        verify(navigationActions).navigateTo(Screen.TO_WORKER)
-    }
+    // Perform click on "Set up your business account"
+    composeTestRule.onNodeWithTag("SetupyourbusinessaccountOption").performClick()
+
+    // Verify that the navigation to Screen.TO_WORKER happened
+    verify(navigationActions).navigateTo(Screen.TO_WORKER)
+  }
 }
