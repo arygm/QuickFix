@@ -28,6 +28,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 
+@Deprecated("Theses tests are deprecated", ReplaceWith("RegisterScreenTests"))
 class InfoScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()

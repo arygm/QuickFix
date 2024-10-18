@@ -1,6 +1,8 @@
 package com.arygm.quickfix.utils
 
 import android.util.Log
+import com.arygm.quickfix.ui.navigation.Route
+import com.arygm.quickfix.ui.navigation.Screen
 import java.util.Calendar
 import java.util.GregorianCalendar
 import java.util.regex.Pattern
@@ -63,4 +65,21 @@ fun splitDate(date: String): Triple<Int, Int, Int> {
   val month = dateParts[1].toInt()
   val year = dateParts[2].toInt()
   return Triple(day, month, year)
+}
+
+fun routeToScreen(route: String): String {
+  return when (route) {
+    Route.HOME -> Screen.HOME
+    Route.CALENDAR -> Screen.CALENDAR
+    Route.WELCOME -> Screen.WELCOME
+    Route.INFO -> Screen.INFO
+    Route.LOGIN -> Screen.LOGIN
+    Route.PASSWORD -> Screen.PASSWORD
+    Route.SEARCH -> Screen.SEARCH
+    Route.DASHBOARD -> Screen.DASHBOARD
+    Route.PROFILE -> Screen.PROFILE
+    else -> {
+      Screen.WELCOME
+    }
+  }
 }

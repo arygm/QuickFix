@@ -15,21 +15,21 @@ import com.arygm.quickfix.ui.elements.QuickFixMainTopBar
 import com.arygm.quickfix.ui.navigation.NavigationActions
 
 @Composable
-fun ActivityScreen(navigationActions: NavigationActions, isUser: Boolean) {
+fun ProfileScreen(navigationActions: NavigationActions, isUser: Boolean) {
   // Use Scaffold for the layout structure
   Scaffold(
       containerColor = colorScheme.background,
       topBar = {
-        QuickFixMainTopBar(title = "ACTIVITY", modifier = Modifier.testTag("ActivityTopBar"))
+        QuickFixMainTopBar(title = "PROFILE", modifier = Modifier.testTag("ProfileTopBar"))
       },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().testTag("ActivityContent"),
+            modifier = Modifier.fillMaxSize().testTag("ProfileContent"),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
               Text(
-                  text = "Welcome to the ACTIVITY Screen",
-                  modifier = Modifier.padding(padding).testTag("ActivityText"))
+                  text = "Welcome to the PROFILE Screen",
+                  modifier = Modifier.padding(padding).testTag("ProfileText"))
             }
       })
 }

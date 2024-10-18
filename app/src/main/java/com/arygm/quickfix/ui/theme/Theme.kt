@@ -104,8 +104,8 @@ val poppinsTypography =
         headlineSmall =
             TextStyle(
                 fontFamily = poppinsFontFamily,
-                fontWeight = FontWeight.Medium,
-                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 11.sp,
                 fontStyle = FontStyle.Normal),
         labelLarge =
             TextStyle(
@@ -125,7 +125,18 @@ val poppinsTypography =
                 fontWeight = FontWeight.Normal,
                 fontSize = 12.sp,
                 fontStyle = FontStyle.Normal),
-    )
+        bodySmall =
+            TextStyle(
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 9.sp,
+                fontStyle = FontStyle.Normal),
+        bodyMedium =
+            TextStyle(
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp,
+                fontStyle = FontStyle.Normal))
 
 @Composable
 fun QuickFixTheme(

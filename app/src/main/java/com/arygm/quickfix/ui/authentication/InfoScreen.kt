@@ -52,6 +52,7 @@ import com.arygm.quickfix.utils.isValidEmail
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@Deprecated("This composable is deprecated", ReplaceWith("RegisterScreen(navigationActions)"))
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun InfoScreen(

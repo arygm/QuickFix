@@ -1,12 +1,17 @@
+package com.arygm.quickfix.ui.authentication
+
 import androidx.activity.ComponentActivity
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import org.junit.After
@@ -92,7 +97,7 @@ class WelcomeScreenTest {
   }
 
   @Test
-  fun testRegistrationButtonClickNavigatesToInfo() {
+  fun testRegistrationButtonClickNavigatesToRegister() {
     composeTestRule.setContent { WelcomeScreen(navigationActions, profileViewModel) }
 
     // Click the "REGISTER TO QUICKFIX" button
@@ -103,7 +108,7 @@ class WelcomeScreenTest {
     }
 
     // Verify that the navigation action is triggered for the registration/info screen
-    Mockito.verify(navigationActions).navigateTo(Screen.INFO)
+    Mockito.verify(navigationActions).navigateTo(Screen.REGISTER)
   }
 
   @Test

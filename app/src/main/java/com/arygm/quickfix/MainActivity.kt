@@ -30,21 +30,19 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.RegistrationViewModel
-import com.arygm.quickfix.ui.ActivityScreen
-import com.arygm.quickfix.ui.AnnouncementScreen
-import com.arygm.quickfix.ui.CalendarScreen
-import com.arygm.quickfix.ui.MapScreen
+import com.arygm.quickfix.ui.DashboardScreen
+import com.arygm.quickfix.ui.ProfileScreen
+import com.arygm.quickfix.ui.SearchScreen
 import com.arygm.quickfix.ui.authentication.InfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.PasswordScreen
+import com.arygm.quickfix.ui.authentication.RegisterScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
-import com.arygm.quickfix.ui.profile.ProfileConfigurationScreen
-import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import kotlinx.coroutines.delay
 
@@ -72,7 +70,7 @@ fun QuickFixApp() {
   val profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
   val registrationViewModel = RegistrationViewModel()
 
-  val isUser = true // TODO: This variable needs to get its value after the authentication
+  val isUser = false // TODO: This variable needs to get its value after the authentication
   val screen by remember { navigationActions::currentScreen }
   // Make `bottomBarVisible` reactive to changes in `screen`
   val shouldShowBottomBar by remember {
@@ -80,7 +78,8 @@ fun QuickFixApp() {
       screen != Screen.WELCOME &&
           screen != Screen.LOGIN &&
           screen != Screen.INFO &&
-          screen != Screen.PASSWORD
+          screen != Screen.PASSWORD &&
+          screen != Screen.REGISTER
     }
   }
 
@@ -138,48 +137,33 @@ fun QuickFixApp() {
                 composable(Screen.PASSWORD) {
                   PasswordScreen(navigationActions, registrationViewModel, profileViewModel)
                 }
+                composable(Screen.REGISTER) { RegisterScreen(navigationActions, profileViewModel) }
               }
               navigation(
                   startDestination = Screen.HOME,
                   route = Route.HOME,
               ) {
                 composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
+                composable(Screen.PROFILE) { HomeScreen(navigationActions, isUser) }
                 composable(Screen.MESSAGES) { HomeScreen(navigationActions, isUser) }
               }
               navigation(
-                  startDestination = Screen.CALENDAR,
-                  route = Route.CALENDAR,
+                  startDestination = Screen.SEARCH,
+                  route = Route.SEARCH,
               ) {
-                composable(Screen.CALENDAR) { CalendarScreen(navigationActions, isUser) }
+                composable(Screen.SEARCH) { SearchScreen(navigationActions, isUser) }
               }
               navigation(
-                  startDestination = Screen.ANNOUNCEMENT,
-                  route = Route.ANNOUNCEMENT,
+                  startDestination = Screen.DASHBOARD,
+                  route = Route.DASHBOARD,
               ) {
-                composable(Screen.ANNOUNCEMENT) { AnnouncementScreen(navigationActions, isUser) }
-              }
-              navigation(
-                  startDestination = Screen.MAP,
-                  route = Route.MAP,
-              ) {
-                composable(Screen.MAP) { MapScreen(navigationActions, isUser) }
-              }
-              navigation(
-                  startDestination = Screen.ACTIVITY,
-                  route = Route.ACTIVITY,
-              ) {
-                composable(Screen.ACTIVITY) { ActivityScreen(navigationActions, isUser) }
+                composable(Screen.DASHBOARD) { DashboardScreen(navigationActions, isUser) }
               }
               navigation(
                   startDestination = Screen.PROFILE,
                   route = Route.PROFILE,
               ) {
-                composable(Screen.PROFILE) {
-                  ProfileScreen(navigationActions, isUser, profileViewModel)
-                }
-                composable(Screen.ACCOUNT_CONFIGURATION) {
-                  ProfileConfigurationScreen(navigationActions, isUser, profileViewModel)
-                }
+                composable(Screen.PROFILE) { ProfileScreen(navigationActions, isUser) }
               }
             }
       }
