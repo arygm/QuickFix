@@ -3,29 +3,38 @@ package com.arygm.quickfix.ui.profile
 import QuickFixTextField
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag // Import pour les testTag
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.PopupProperties
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
-import com.arygm.quickfix.model.profile.Profile
-import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.theme.QuickFixTheme
+import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.google.firebase.firestore.GeoPoint
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,226 +42,328 @@ fun BusinessScreen(
     navigationActions: NavigationActions,
     profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
 ) {
-    val context = LocalContext.current
-    val loggedInProfile by profileViewModel.loggedInProfile.collectAsState()
+  val context = LocalContext.current
+  val loggedInProfile by profileViewModel.loggedInProfile.collectAsState()
+  var errorMessage by remember { mutableStateOf("") }
 
-    // Local state variables to hold business details
-    var occupation by remember { mutableStateOf("") }
-    var typedOccupation by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var hourlyRate by remember { mutableStateOf("0") }
-    var location by remember { mutableStateOf("") }
+  // Variables d'état locales pour les détails de l'entreprise
+  var occupation by remember { mutableStateOf("") }
+  var typedOccupation by remember { mutableStateOf("") }
+  var description by remember { mutableStateOf("") }
+  var hourlyRate by remember { mutableStateOf("") }
+  var location by remember { mutableStateOf("") }
 
-    // Dropdown menu related state for occupation
-    var showOccupationDropdown by remember { mutableStateOf(false) }
-    val occupations = listOf("Carpenter", "Painter", "Plumber", "Electrician", "Mechanic")
-    val filteredOccupations = occupations.filter { it.startsWith(typedOccupation, ignoreCase = true) }
+  // État du menu déroulant pour l'occupation
+  var expanded by remember { mutableStateOf(false) }
+  val occupations = listOf("Carpenter", "Painter", "Plumber", "Electrician", "Mechanic")
+  val filteredOccupations = occupations.filter { it.startsWith(typedOccupation, ignoreCase = true) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "<Last name and first name>",
-                        color = Color.White,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navigationActions.goBack() }) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
-                )
-            )
-        },
-        containerColor = Color(0xFFF2F2F2),
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(15.dp)
-                    .padding(paddingValues)
-            ) {
-                @Composable
-                fun ShadowBox(content: @Composable () -> Unit) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .shadow(
-                                4.dp,
-                                RoundedCornerShape(16.dp),
-                                spotColor = Color.Black,
-                                ambientColor = Color(0x40000000)
-                            )
-                            .background(Color.White, RoundedCornerShape(10.dp))
-                            .padding(8.dp)
-                    ) {
-                        content()
-                    }
-                }
+  var textFieldSize by remember { mutableStateOf(Size.Zero) }
+  val icon = Icons.Filled.ArrowDropDown
 
-                // Occupation Input with Dropdown Menu
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            title = {
+              Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "Occupation",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(start = 11.dp)
-                )
-                Box {
-                    ShadowBox {
-                        QuickFixTextField(
-                            value = occupation,
-                            onValueChange = { input ->
-                                typedOccupation = input // Update typed text to filter dropdown
-                                occupation = input // Continue showing typed text
-                                showOccupationDropdown = input.isNotEmpty() // Show dropdown on typing
-                            },
-                            label = "Select occupation",
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            color = Color.Gray
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = showOccupationDropdown && filteredOccupations.isNotEmpty(),
-                        onDismissRequest = { showOccupationDropdown = false },
-                        properties = PopupProperties(focusable = false), // Allow typing while dropdown is open
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        filteredOccupations.forEach { item ->
-                            DropdownMenuItem(
-                                text = { Text(item) },
-                                onClick = {
-                                    occupation = item // Set the selected item in the text field
-                                    typedOccupation = "" // Reset typed occupation
-                                    showOccupationDropdown = false // Close dropdown
-                                }
-                            )
+                    "Business Account",
+                    modifier = Modifier.testTag("BusinessAccountTitle").padding(end = 29.dp),
+                    style = poppinsTypography.headlineMedium,
+                    color = colorScheme.primary)
+              }
+            },
+            navigationIcon = {
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("goBackButton")) {
+                    Icon(
+                        Icons.Outlined.ArrowBack,
+                        contentDescription = "Back",
+                        tint = colorScheme.primary)
+                  }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
+      },
+      content = { padding ->
+        Column(
+            modifier = Modifier.fillMaxSize().padding(padding),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              // Profile Image Placeholder
+              Icon(
+                  imageVector = Icons.Default.AccountCircle,
+                  contentDescription = "Account Circle Icon",
+                  tint = colorScheme.surface,
+                  modifier =
+                      Modifier.size(100.dp)
+                          .clip(CircleShape)
+                          .border(2.dp, colorScheme.background, CircleShape))
+
+              Spacer(modifier = Modifier.height(16.dp))
+
+              // Profile Card
+              Card(
+                  modifier =
+                      Modifier.fillMaxWidth(0.85f)
+                          .align(Alignment.CenterHorizontally)
+                          .testTag("ProfileCard"),
+                  shape = RoundedCornerShape(16.dp),
+                  colors =
+                      CardDefaults.cardColors(
+                          containerColor = colorScheme.surface,
+                          contentColor = colorScheme.onSurface),
+                  elevation = CardDefaults.cardElevation(4.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(7.dp)) {
+                          Icon(
+                              imageVector = Icons.Default.AccountCircle,
+                              contentDescription = "Profile Icon",
+                              tint = colorScheme.primary,
+                              modifier = Modifier.size(24.dp))
+                          Spacer(modifier = Modifier.width(65.dp))
+
+                          val displayName =
+                              capitalizeName(loggedInProfile?.firstName, loggedInProfile?.lastName)
+
+                          Text(
+                              text = displayName,
+                              style = MaterialTheme.typography.bodyLarge,
+                              color = colorScheme.onBackground,
+                              modifier = Modifier.testTag("ProfileName"))
                         }
-                    }
+                  }
+              Spacer(modifier = Modifier.height(18.dp))
+              // Champ de saisie pour l'occupation avec menu déroulant
+              Column(modifier = Modifier.fillMaxSize().padding(15.dp)) {
+                QuickDescription(description = "Occupation")
+
+                Box {
+
+                  // Champ de texte pour l'occupation
+                  OutlinedTextField(
+                      value = occupation,
+                      onValueChange = { input ->
+                        typedOccupation = input
+                        occupation = input
+                        expanded = input.isNotEmpty()
+                      },
+                      placeholder = { Text("Select occupation") },
+                      trailingIcon = {
+                        IconButton(
+                            onClick = { expanded = !expanded },
+                            modifier =
+                                Modifier.testTag("occupationDropdownIcon") // Ajout du testTag
+                            ) {
+                              Icon(imageVector = icon, contentDescription = "Dropdown Icon")
+                            }
+                      },
+                      modifier =
+                          Modifier.fillMaxWidth()
+                              .testTag("occupationInput") // Ajout du testTag
+                              .zIndex(0f)
+                              .onGloballyPositioned { coordinates ->
+                                textFieldSize = coordinates.size.toSize()
+                              }
+                              .background(
+                                  color = MaterialTheme.colorScheme.surface,
+                                  shape =
+                                      RoundedCornerShape(
+                                          topStart = 12.dp,
+                                          topEnd = 12.dp,
+                                          bottomStart = if (expanded) 0.dp else 12.dp,
+                                          bottomEnd = if (expanded) 0.dp else 12.dp)),
+                      singleLine = true,
+                      colors =
+                          OutlinedTextFieldDefaults.colors(
+                              focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                              unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                              unfocusedContainerColor = Color.Transparent,
+                              focusedContainerColor = Color.Transparent,
+                              errorContainerColor = MaterialTheme.colorScheme.errorContainer,
+                              unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurface,
+                              focusedPlaceholderColor = MaterialTheme.colorScheme.onSurface,
+                              errorTextColor = MaterialTheme.colorScheme.error,
+                              unfocusedBorderColor = Color.Transparent,
+                              focusedBorderColor = Color.Transparent,
+                              errorBorderColor = MaterialTheme.colorScheme.error),
+                      shape =
+                          RoundedCornerShape(
+                              topStart = 12.dp,
+                              topEnd = 12.dp,
+                              bottomStart = if (expanded) 0.dp else 12.dp,
+                              bottomEnd = if (expanded) 0.dp else 12.dp))
+
+                  if (expanded && filteredOccupations.isNotEmpty()) {
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        properties = PopupProperties(focusable = false),
+                        shadowElevation = 0.dp,
+                        shape =
+                            RoundedCornerShape(
+                                topStart = 0.dp,
+                                topEnd = 0.dp,
+                                bottomStart = 12.dp,
+                                bottomEnd = 12.dp),
+                        modifier =
+                            Modifier.width(
+                                    with(LocalDensity.current) { textFieldSize.width.toDp() })
+                                .offset(y = (-1).dp)
+                                .zIndex(1f)
+                                .background(MaterialTheme.colorScheme.surface)) {
+                          // Contenu du DropdownMenu
+                          DropdownMenuContent(
+                              items = filteredOccupations,
+                              selectedItem = occupation, // Passe l'élément sélectionné actuel
+                              onItemClick = { item ->
+                                occupation = item
+                                typedOccupation = ""
+                                expanded = false
+                              })
+                        }
+                  }
                 }
 
                 Spacer(modifier = Modifier.height(18.dp))
+                QuickDescription(description = "Description")
 
-                // Description Input
-                Text(
-                    text = "Description",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(start = 11.dp)
-                )
-                ShadowBox {
-                    QuickFixTextField(
-                        value = description,
-                        onValueChange = { description = it },
-                        label = "Description",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(150.dp),
-                        singleLine = false,
-                        color = Color.Gray
-                    )
-                }
+                QuickFixTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = "Description",
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .height(150.dp)
+                            .testTag("descriptionInput"), // Ajout du testTag
+                    singleLine = false,
+                    color = MaterialTheme.colorScheme.onBackground)
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                // Hourly Rate Input
-                Text(
-                    text = "Hourly rate",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(start = 11.dp)
-                )
-                ShadowBox {
-                    QuickFixTextField(
-                        value = "$hourlyRate Chf/h",
-                        onValueChange = { newValue ->
-                            hourlyRate = newValue.filter { it.isDigit() }
-                        },
-                        label = "",
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        color = Color.Gray
-                    )
-                }
+                // Champ de saisie pour le taux horaire
+
+                QuickDescription(description = "Hourly rate")
+
+                QuickFixTextField(
+                    value = hourlyRate,
+                    onValueChange = { newValue ->
+                      hourlyRate = newValue.filter { it.isDigit() || it == '.' || it == ',' }
+                    },
+                    label = "Hourly Rate",
+                    modifier = Modifier.fillMaxWidth().testTag("hourlyRateInput"),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    trailingIcon = {
+                      Text("CHF/h", color = MaterialTheme.colorScheme.onBackground)
+                    })
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                // Location Input
-                Text(
-                    text = "Location",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(start = 11.dp)
-                )
-                ShadowBox {
-                    QuickFixTextField(
-                        value = location,
-                        onValueChange = { location = it },
-                        label = "Location",
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        color = Color.Gray
-                    )
-                }
+                // Champ de saisie pour la localisation
+
+                QuickDescription(description = "Location")
+
+                QuickFixTextField(
+                    value = location,
+                    onValueChange = { location = it },
+                    label = "Location",
+                    modifier = Modifier.fillMaxWidth().testTag("locationInput"), // Ajout du testTag
+                    singleLine = true,
+                    color = MaterialTheme.colorScheme.onBackground)
 
                 Spacer(modifier = Modifier.height(70.dp))
 
-                // Validate Business Account Button
+                // Validation Boutton
                 QuickFixButton(
                     buttonText = "Validate my business account",
                     onClickAction = {
-                        if (occupation.isNotBlank() && hourlyRate.isNotBlank() && location.isNotBlank()) {
-                            loggedInProfile?.let { profile ->
-                                val updatedProfile = profile.copy(
-                                    occupation = occupation,
-                                    description = description,
-                                    hourlyRate = hourlyRate,
-                                    location = location
-                                )
-                                profileViewModel.updateProfile(updatedProfile)
-                            } ?: Toast.makeText(context, "Profile not found!", Toast.LENGTH_SHORT)
-                                .show()
-                        } else {
-                            Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT)
-                                .show()
+                      val hourlyRateValue = hourlyRate.replace(",", ".").toDoubleOrNull() ?: 0.0
+                      if (occupation.isNotBlank() &&
+                          hourlyRateValue != 0.0 &&
+                          location.isNotBlank()) {
+                        loggedInProfile?.let { profile ->
+                          val updatedProfile =
+                              profile.copy(
+                                  isWorker = true,
+                                  fieldOfWork = occupation,
+                                  description = description,
+                                  hourlyRate = hourlyRateValue,
+                                  location = GeoPoint(0.0, 0.0))
+                          profileViewModel.updateProfile(
+                              profile = updatedProfile,
+                          )
+                          Toast.makeText(context, "Business account validated!", Toast.LENGTH_SHORT)
+                              .show()
+                          navigationActions.goBack()
                         }
+                            ?: Toast.makeText(context, "Profile not found!", Toast.LENGTH_SHORT)
+                                .show()
+                        errorMessage = ""
+                      } else {
+                        errorMessage = "Please fill all fields"
+                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                      }
                     },
                     buttonColor = MaterialTheme.colorScheme.primary,
                     textColor = Color.White,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                    modifier = Modifier.fillMaxWidth().testTag("validateButton"))
+                if (errorMessage.isNotEmpty()) {
+                  Text(
+                      text = errorMessage,
+                      color = MaterialTheme.colorScheme.error,
+                      style = MaterialTheme.typography.bodyMedium,
+                      modifier = Modifier.padding(top = 8.dp).testTag("errorMessage"))
+                }
+              }
             }
-        }
-    )
+      })
 }
 
-@Preview(showBackground = true)
 @Composable
-fun PreviewBusinessScreen() {
-    val navController = rememberNavController()
-    val navigationActions = NavigationActions(navController)
-
-    val sampleProfileViewModel = ProfileViewModel(object : ProfileRepository {
-        override fun getNewUid(): String = "12345"
-        override fun init(onSuccess: () -> Unit) = onSuccess()
-        override fun getProfiles(onSuccess: (List<Profile>) -> Unit, onFailure: (Exception) -> Unit) {}
-        override fun addProfile(profile: Profile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {}
-        override fun updateProfile(profile: Profile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = onSuccess()
-        override fun deleteProfileById(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {}
-        override fun profileExists(email: String, onSuccess: (Pair<Boolean, Profile?>) -> Unit, onFailure: (Exception) -> Unit) {}
-        override fun getProfileById(uid: String, onSuccess: (Profile?) -> Unit, onFailure: (Exception) -> Unit) {}
-    })
-
-    QuickFixTheme {
-        BusinessScreen(
-            navigationActions = navigationActions,
-            profileViewModel = sampleProfileViewModel
+fun DropdownMenuContent(
+    items: List<String>,
+    selectedItem: String?, // Paramètre pour l'élément sélectionné
+    onItemClick: (String) -> Unit
+) {
+  items.forEachIndexed { index, item ->
+    DropdownMenuItem(
+        text = {
+          Text(
+              item,
+              color = MaterialTheme.colorScheme.onSurface,
+              style = MaterialTheme.typography.headlineMedium)
+        },
+        onClick = { onItemClick(item) },
+        modifier =
+            Modifier.fillMaxWidth()
+                .background(
+                    if (item == selectedItem) MaterialTheme.colorScheme.tertiary
+                    else MaterialTheme.colorScheme.surface)
+                .testTag(item) // Ajout du testTag pour chaque option
         )
+
+    // Ajouter un séparateur entre les éléments, sauf après le dernier
+    if (index < items.size - 1) {
+      Divider(
+          color = Color.LightGray, thickness = 1.dp, modifier = Modifier.padding(horizontal = 8.dp))
     }
+  }
+}
+
+@Composable
+fun QuickDescription(description: String) {
+  Text(
+      text = description,
+      style = MaterialTheme.typography.headlineSmall,
+      color = MaterialTheme.colorScheme.onBackground,
+      modifier = Modifier.padding(start = 11.dp))
+}
+
+private fun capitalizeName(firstName: String?, lastName: String?): String {
+  val capitalizedFirstName = firstName?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""
+  val capitalizedLastName = lastName?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""
+  return "$capitalizedFirstName $capitalizedLastName".trim()
 }
