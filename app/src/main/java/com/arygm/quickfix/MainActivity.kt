@@ -1,6 +1,7 @@
 package com.arygm.quickfix
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
@@ -31,7 +32,6 @@ import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.DashboardScreen
-import com.arygm.quickfix.ui.ProfileScreen
 import com.arygm.quickfix.ui.SearchScreen
 import com.arygm.quickfix.ui.authentication.InfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
@@ -43,6 +43,8 @@ import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.profile.ProfileConfigurationScreen
+import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import kotlinx.coroutines.delay
 
@@ -79,7 +81,8 @@ fun QuickFixApp() {
           screen != Screen.LOGIN &&
           screen != Screen.INFO &&
           screen != Screen.PASSWORD &&
-          screen != Screen.REGISTER
+          screen != Screen.REGISTER &&
+          screen != Screen.ACCOUNT_CONFIGURATION
     }
   }
 
@@ -108,6 +111,7 @@ fun QuickFixApp() {
                   onTabSelect = { selectedDestination ->
                     // Use this block to navigate based on the selected tab
                     navigationActions.navigateTo(selectedDestination)
+                    Log.d("user", navigationActions.currentRoute())
                   },
                   isUser = isUser // Pass the user type to determine the tabs
                   )
@@ -163,7 +167,12 @@ fun QuickFixApp() {
                   startDestination = Screen.PROFILE,
                   route = Route.PROFILE,
               ) {
-                composable(Screen.PROFILE) { ProfileScreen(navigationActions, isUser) }
+                composable(Screen.PROFILE) {
+                  ProfileScreen(navigationActions, isUser, profileViewModel)
+                }
+                composable(Screen.ACCOUNT_CONFIGURATION) {
+                  ProfileConfigurationScreen(navigationActions, isUser, profileViewModel)
+                }
               }
             }
       }

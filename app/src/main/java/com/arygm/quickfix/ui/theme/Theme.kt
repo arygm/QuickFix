@@ -95,6 +95,12 @@ val poppinsTypography =
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 32.sp,
                 fontStyle = FontStyle.Normal),
+        headlineMedium =
+            TextStyle(
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp,
+                fontStyle = FontStyle.Normal),
         headlineSmall =
             TextStyle(
                 fontFamily = poppinsFontFamily,

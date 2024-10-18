@@ -78,6 +78,7 @@ fun routeToScreen(route: String): String {
     Route.SEARCH -> Screen.SEARCH
     Route.DASHBOARD -> Screen.DASHBOARD
     Route.PROFILE -> Screen.PROFILE
+    Route.ACCOUNT_CONFIGURATION -> Screen.ACCOUNT_CONFIGURATION
     else -> {
       Screen.WELCOME
     }
