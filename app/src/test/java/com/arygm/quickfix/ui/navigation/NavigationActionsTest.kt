@@ -32,8 +32,8 @@ class NavigationActionsTest {
     navigationActions.navigateTo(TopLevelDestinations.HOME)
     verify(navHostController).navigate(eq(Route.HOME), any<NavOptionsBuilder.() -> Unit>())
 
-    navigationActions.navigateTo(Screen.ACTIVITY)
-    verify(navHostController).navigate(Screen.ACTIVITY)
+    navigationActions.navigateTo(Screen.PROFILE)
+    verify(navHostController).navigate(Screen.PROFILE)
   }
 
   @Test
@@ -58,28 +58,20 @@ class NavigationActionsTest {
 
   @Test
   fun `test announcement and calendar routes return 2`() {
-    assertEquals(2, getBottomBarId(Route.ANNOUNCEMENT, true))
-    assertEquals(2, getBottomBarId(Route.ANNOUNCEMENT, false))
-    assertEquals(2, getBottomBarId(Route.CALENDAR, true))
-    assertEquals(2, getBottomBarId(Route.CALENDAR, false))
+    assertEquals(2, getBottomBarId(Route.SEARCH, true))
+    assertEquals(2, getBottomBarId(Route.SEARCH, false))
   }
 
   @Test
   fun `test map route returns 3`() {
-    assertEquals(3, getBottomBarId(Route.MAP, true))
-    assertEquals(3, getBottomBarId(Route.MAP, false))
+    assertEquals(3, getBottomBarId(Route.DASHBOARD, true))
+    assertEquals(3, getBottomBarId(Route.DASHBOARD, false))
   }
 
   @Test
   fun `test activity route returns 3 for user and 4 for others`() {
-    assertEquals(3, getBottomBarId(Route.ACTIVITY, true))
-    assertEquals(4, getBottomBarId(Route.ACTIVITY, false))
-  }
-
-  @Test
-  fun `test other route returns 4 for user and 5 for others`() {
-    assertEquals(4, getBottomBarId(Route.OTHER, true))
-    assertEquals(5, getBottomBarId(Route.OTHER, false))
+    assertEquals(4, getBottomBarId(Route.PROFILE, true))
+    assertEquals(4, getBottomBarId(Route.PROFILE, false))
   }
 
   @Test

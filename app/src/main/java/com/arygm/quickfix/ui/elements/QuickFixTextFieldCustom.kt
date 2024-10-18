@@ -40,6 +40,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import org.w3c.dom.Text
 
@@ -81,6 +82,7 @@ fun QuickFixTextFieldCustom(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     showLabel: Boolean = false,
     label: @Composable (() -> Unit)? = {},
+    onClick: Boolean = false
 ) {
   var textState by remember { mutableStateOf(TextFieldValue(value)) }
   val scrollState = rememberScrollState() // Scroll state for horizontal scrolling
@@ -105,7 +107,8 @@ fun QuickFixTextFieldCustom(
               .size(width = widthField, height = heightField) // Set the width and height
               .fillMaxWidth() // Fill the width of the container
               .padding(start = moveContentHorizontal, top = moveContentTop, bottom = moveContentTop)
-              .clickable { onTextFieldClick() }, // Apply padding
+              .clickable { onTextFieldClick() }
+              .testTag(C.Tag.main_container_text_field_custom), // Apply padding
       contentAlignment = Alignment.Center) {
         Row(
             horizontalArrangement = Arrangement.Center, // Aligning icon and text horizontally
@@ -119,7 +122,8 @@ fun QuickFixTextFieldCustom(
                       tint = leadIconColor, // Icon color
                       modifier =
                           Modifier.size(sizeIconGroup) // Set icon size
-                              .padding(end = 8.dp) // Space between icon and text
+                              .padding(end = 8.dp)
+                              .testTag(C.Tag.icon_custom_text_field) // Space between icon and text
                       )
                 }
               }
@@ -138,8 +142,10 @@ fun QuickFixTextFieldCustom(
                             .fillMaxWidth()
                             .horizontalScroll(scrollState) // Enable horizontal scrolling
                             .focusable(true)
-                            .focusRequester(
-                                focusRequester) // Makes the text field take up remaining space
+                            .focusRequester(focusRequester)
+                            .testTag(
+                                C.Tag.text_field_custom) // Makes the text field take up remaining
+                    // space
                     ,
                     textStyle =
                         textStyle.copy(
@@ -151,6 +157,7 @@ fun QuickFixTextFieldCustom(
                 )
                 if (textState.text.isEmpty()) {
                   Text(
+                      modifier = Modifier.testTag(C.Tag.place_holder_text_field_custom),
                       text = placeHolderText,
                       style =
                           textStyle.copy(
@@ -162,9 +169,10 @@ fun QuickFixTextFieldCustom(
               }
               if (showTrailingIcon() && textState.text.isNotEmpty()) {
                 IconButton(
-                    onClick = {},
+                    onClick = { if (onClick) textState = TextFieldValue("") },
                     modifier =
-                        Modifier.size(sizeIconGroup)
+                        Modifier.testTag(C.Tag.clear_button_text_field_custom)
+                            .size(sizeIconGroup)
                             .padding(end = 9.dp)
                             .align(Alignment.CenterVertically)) {
                       trailingIcon?.invoke()

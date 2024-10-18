@@ -15,3 +15,23 @@ data class Profile(
     val hourlyRate: Double? = null,
     val location: GeoPoint? = null
 )
+
+sealed class WorkerCategory {
+  sealed class ConstructionAndMaintenance : WorkerCategory() {
+    object GeneralLaborer : ConstructionAndMaintenance()
+
+    object Mason : ConstructionAndMaintenance()
+  }
+
+  sealed class HomeImprovementAndRepair : WorkerCategory() {
+    object Handyman : HomeImprovementAndRepair()
+
+    object FlooringInstaller : HomeImprovementAndRepair()
+  }
+
+  sealed class MechanicalAndVehicleMaintenance : WorkerCategory() {
+    object AutoMechanic : MechanicalAndVehicleMaintenance()
+
+    object DieselMechanic : MechanicalAndVehicleMaintenance()
+  }
+}

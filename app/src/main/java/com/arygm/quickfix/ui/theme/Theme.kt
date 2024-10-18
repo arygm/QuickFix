@@ -125,7 +125,12 @@ val poppinsTypography =
                 fontWeight = FontWeight.Bold,
                 fontSize = 9.sp,
                 fontStyle = FontStyle.Normal),
-    )
+        bodyMedium =
+            TextStyle(
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp,
+                fontStyle = FontStyle.Normal))
 
 @Composable
 fun QuickFixTheme(

@@ -3,12 +3,12 @@ package com.arygm.quickfix.ui.navigation
 import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -44,10 +44,11 @@ fun BottomNavigationMenu(
           }
 
           // Set design colors
-          circleColor = colorScheme.secondary.toArgb() // Central button color
-          backgroundBottomColor = colorScheme.primary.toArgb() // Orange background color
-          defaultIconColor = colorScheme.background.toArgb() // Default icon color (unselected)
-          selectedIconColor = colorScheme.background.toArgb() // Selected icon color
+          circleColor = colorScheme.primary.toArgb() // Central button color
+          backgroundBottomColor = colorScheme.surface.toArgb() // Orange background color
+          defaultIconColor =
+              colorScheme.tertiaryContainer.toArgb() // Default icon color (unselected)
+          selectedIconColor = colorScheme.surface.toArgb() // Selected icon color
 
           // Define a listener for item show events
           setOnShowListener { model ->
@@ -83,12 +84,12 @@ fun BottomNavigationMenu(
 // Helper function to convert ImageVector to drawable resource ID
 fun convertImageVectorToDrawableId(imageVector: ImageVector): Int {
   return when (imageVector) {
-    Icons.Default.Home -> R.drawable.icon_home
+    Icons.Default.Home -> R.drawable.icon_home_vector
     Icons.Default.AddCircle -> R.drawable.icon_annoucement
-    Icons.Default.Menu -> R.drawable.icon_menu
+    Icons.Default.AccountCircle -> R.drawable.profile
     Icons.Default.MoreVert -> R.drawable.icon_other
-    Icons.Default.Place -> R.drawable.icon_map
-    Icons.Default.DateRange -> R.drawable.icon_calendar
+    Icons.Default.Menu -> R.drawable.dashboard
+    Icons.Default.Search -> R.drawable.logo
     else -> R.drawable.ic_launcher_background // Default fallback icon
   }
 }

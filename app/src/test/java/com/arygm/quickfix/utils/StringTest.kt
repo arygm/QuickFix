@@ -96,33 +96,9 @@ class StringTest {
   }
 
   @Test
-  fun `test routeToScreen with ANNOUNCEMENT route`() {
-    val result = routeToScreen(Route.ANNOUNCEMENT)
-    assertEquals(Screen.ANNOUNCEMENT, result)
-  }
-
-  @Test
-  fun `test routeToScreen with ACTIVITY route`() {
-    val result = routeToScreen(Route.ACTIVITY)
-    assertEquals(Screen.ACTIVITY, result)
-  }
-
-  @Test
-  fun `test routeToScreen with OTHER route`() {
-    val result = routeToScreen(Route.OTHER)
-    assertEquals(Screen.OTHER, result)
-  }
-
-  @Test
   fun `test routeToScreen with CALENDAR route`() {
     val result = routeToScreen(Route.CALENDAR)
     assertEquals(Screen.CALENDAR, result)
-  }
-
-  @Test
-  fun `test routeToScreen with MAP route`() {
-    val result = routeToScreen(Route.MAP)
-    assertEquals(Screen.MAP, result)
   }
 
   @Test
@@ -147,6 +123,24 @@ class StringTest {
   fun `test routeToScreen with PASSWORD route`() {
     val result = routeToScreen(Route.PASSWORD)
     assertEquals(Screen.PASSWORD, result)
+  }
+
+  @Test
+  fun `test routeToScreen with SEARCH route`() {
+    val result = routeToScreen(Route.SEARCH)
+    assertEquals(Screen.SEARCH, result)
+  }
+
+  @Test
+  fun `test routeToScreen with DASHBOARD route`() {
+    val result = routeToScreen(Route.DASHBOARD)
+    assertEquals(Screen.DASHBOARD, result)
+  }
+
+  @Test
+  fun `test routeToScreen with PROFILE route`() {
+    val result = routeToScreen(Route.PROFILE)
+    assertEquals(Screen.PROFILE, result)
   }
 
   @Test

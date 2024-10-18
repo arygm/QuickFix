@@ -1,12 +1,12 @@
 package com.arygm.quickfix.ui.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
@@ -17,7 +17,7 @@ class BottomNavigationMenuTest {
   fun testConvertImageVectorToDrawableId_HomeIcon() {
     // Test Home icon case
     val result = convertImageVectorToDrawableId(Icons.Default.Home)
-    assertEquals(com.arygm.quickfix.R.drawable.icon_home, result)
+    assertEquals(com.arygm.quickfix.R.drawable.icon_home_vector, result)
   }
 
   @Test
@@ -28,10 +28,17 @@ class BottomNavigationMenuTest {
   }
 
   @Test
+  fun testConvertImageVectorToDrawableId_AccountCircleIcon() {
+    // Test AccountCircle icon case
+    val result = convertImageVectorToDrawableId(Icons.Default.AccountCircle)
+    assertEquals(com.arygm.quickfix.R.drawable.profile, result)
+  }
+
+  @Test
   fun testConvertImageVectorToDrawableId_MenuIcon() {
     // Test Menu icon case
     val result = convertImageVectorToDrawableId(Icons.Default.Menu)
-    assertEquals(com.arygm.quickfix.R.drawable.icon_menu, result)
+    assertEquals(com.arygm.quickfix.R.drawable.dashboard, result)
   }
 
   @Test
@@ -42,17 +49,10 @@ class BottomNavigationMenuTest {
   }
 
   @Test
-  fun testConvertImageVectorToDrawableId_PlaceIcon() {
-    // Test Place icon case
-    val result = convertImageVectorToDrawableId(Icons.Default.Place)
-    assertEquals(com.arygm.quickfix.R.drawable.icon_map, result)
-  }
-
-  @Test
-  fun testConvertImageVectorToDrawableId_DateRangeIcon() {
-    // Test DateRange icon case
-    val result = convertImageVectorToDrawableId(Icons.Default.DateRange)
-    assertEquals(com.arygm.quickfix.R.drawable.icon_calendar, result)
+  fun testConvertImageVectorToDrawableId_SearchIcon() {
+    // Test Search icon case
+    val result = convertImageVectorToDrawableId(Icons.Default.Search)
+    assertEquals(com.arygm.quickfix.R.drawable.logo, result)
   }
 
   @Test
