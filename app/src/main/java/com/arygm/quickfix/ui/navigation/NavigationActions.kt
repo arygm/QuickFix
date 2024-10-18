@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.arygm.quickfix.utils.routeToScreen
+import com.arygm.quickfix.utils.screenToRoute
 
 object Route {
   const val CALENDAR = "Calendar"
@@ -117,7 +118,7 @@ open class NavigationActions(
   /** Navigate back to the previous screen. */
   open fun goBack() {
     navController.popBackStack()
-    currentScreen = routeToScreen(navController.currentBackStackEntry?.destination?.route ?: "")
+    currentScreen = routeToScreen(currentRoute())
   }
 
   /**
@@ -126,6 +127,6 @@ open class NavigationActions(
    * @return The current route
    */
   open fun currentRoute(): String {
-    return navController.currentDestination?.route ?: ""
+    return screenToRoute(navController.currentDestination?.route ?: "")
   }
 }

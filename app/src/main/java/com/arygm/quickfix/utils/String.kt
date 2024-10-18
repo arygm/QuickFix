@@ -84,3 +84,21 @@ fun routeToScreen(route: String): String {
     }
   }
 }
+
+fun screenToRoute(route: String): String {
+  return when (route) {
+    Screen.HOME -> Route.HOME
+    Screen.CALENDAR -> Route.CALENDAR
+    Screen.WELCOME -> Route.WELCOME
+    Screen.INFO -> Route.INFO
+    Screen.LOGIN -> Route.LOGIN
+    Screen.PASSWORD -> Route.PASSWORD
+    Screen.SEARCH -> Route.SEARCH
+    Screen.DASHBOARD -> Route.DASHBOARD
+    Screen.PROFILE -> Route.PROFILE
+    Screen.ACCOUNT_CONFIGURATION -> Route.ACCOUNT_CONFIGURATION
+    else -> {
+      Route.WELCOME
+    }
+  }
+}

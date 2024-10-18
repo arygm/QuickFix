@@ -107,7 +107,9 @@ fun QuickFixApp() {
             exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to the bottom
             modifier = Modifier.testTag("BNM")) {
               BottomNavigationMenu(
-                  selectedItem = Route.HOME, // Use the current route, or fallback to HOME
+                  selectedItem =
+                      navigationActions
+                          .currentRoute(), // Use the current route, or fallback to HOME
                   onTabSelect = { selectedDestination ->
                     // Use this block to navigate based on the selected tab
                     navigationActions.navigateTo(selectedDestination)

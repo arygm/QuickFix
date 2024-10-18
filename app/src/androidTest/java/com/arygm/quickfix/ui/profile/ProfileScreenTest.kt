@@ -1,5 +1,6 @@
-package com.arygm.quickfix.ui
+package com.arygm.quickfix.ui.profile
 
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Phone
@@ -12,9 +13,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.arygm.quickfix.R
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.profile.IconType
-import com.arygm.quickfix.ui.profile.OptionItem
-import com.arygm.quickfix.ui.profile.ProfileScreen
+import com.arygm.quickfix.ui.navigation.Screen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -28,12 +27,15 @@ class ProfileScreenTest {
 
   private val options =
       listOf(
-          OptionItem("Settings", IconType.Vector(Icons.Outlined.Settings)),
-          OptionItem("Activity", IconType.Resource(R.drawable.dashboardvector)),
-          OptionItem("Set up your business account", IconType.Resource(R.drawable.workvector)),
-          OptionItem("Account configuration", IconType.Resource(R.drawable.accountsettingsvector)),
-          OptionItem("Workers network", IconType.Vector(Icons.Outlined.Phone)),
-          OptionItem("Legal", IconType.Vector(Icons.Outlined.Info)))
+          OptionItem("Settings", IconType.Vector(Icons.Outlined.Settings)) {},
+          OptionItem("Activity", IconType.Resource(R.drawable.dashboardvector)) {},
+          OptionItem("Set up your business account", IconType.Resource(R.drawable.workvector)) {},
+          OptionItem("Account configuration", IconType.Resource(R.drawable.accountsettingsvector)) {
+            navigationActions.navigateTo(Screen.ACCOUNT_CONFIGURATION)
+            Log.d("userResult", navigationActions.currentRoute())
+          },
+          OptionItem("Workers network", IconType.Vector(Icons.Outlined.Phone)) {},
+          OptionItem("Legal", IconType.Vector(Icons.Outlined.Info)) {})
 
   @Before
   fun setup() {
