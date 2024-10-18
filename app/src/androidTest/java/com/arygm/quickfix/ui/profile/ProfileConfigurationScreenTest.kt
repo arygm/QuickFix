@@ -1,23 +1,23 @@
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createComposeRule
 import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.profile.ProfileConfigurationScreen
 import com.google.firebase.Timestamp
+import java.util.Calendar
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.*
-import java.util.Calendar
 
 class ProfileConfigurationScreenTest {
 
@@ -25,17 +25,17 @@ class ProfileConfigurationScreenTest {
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var profileViewModel: ProfileViewModel
-  private val mockProfile = Profile(
-    uid = "123",
-    firstName = "John",
-    lastName = "Doe",
-    email = "john.doe@example.com",
-    birthDate = Timestamp.now(),
-    description = "Test user",
-    isWorker = false,
-    fieldOfWork = "N/A",
-    hourlyRate = 0.0
-  )
+  private val mockProfile =
+      Profile(
+          uid = "123",
+          firstName = "John",
+          lastName = "Doe",
+          email = "john.doe@example.com",
+          birthDate = Timestamp.now(),
+          description = "Test user",
+          isWorker = false,
+          fieldOfWork = "N/A",
+          hourlyRate = 0.0)
 
   @Before
   fun setup() {
@@ -53,7 +53,9 @@ class ProfileConfigurationScreenTest {
     }
 
     composeTestRule.onNodeWithTag("AccountConfigurationTopAppBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("AccountConfigurationTitle").assertTextEquals("Account configuration")
+    composeTestRule
+        .onNodeWithTag("AccountConfigurationTitle")
+        .assertTextEquals("Account configuration")
     composeTestRule.onNodeWithTag("ProfileImage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProfileCard").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProfileName").assertTextEquals("John Doe")
@@ -123,8 +125,9 @@ class ProfileConfigurationScreenTest {
     composeTestRule.onNodeWithTag("SaveButton").performClick()
 
     // Verify that the toast message is displayed
-    composeTestRule.onNodeWithTag("ToastMessage") // Assuming you have a way to identify the Toast
-      .assertIsDisplayed() // Adjust based on how you implement Toast handling in the UI
+    composeTestRule
+        .onNodeWithTag("ToastMessage") // Assuming you have a way to identify the Toast
+        .assertIsDisplayed() // Adjust based on how you implement Toast handling in the UI
   }
 
   @Test
@@ -152,33 +155,30 @@ class ProfileConfigurationScreenTest {
 
     // Act - call the updateProfile function
     profileViewModel.updateProfile(
-      Profile(
-        uid = uid,
-        firstName = firstName,
-        lastName = lastName,
-        email = email,
-        birthDate = Timestamp(calendar.time),
-        description = description,
-        isWorker = isWorker,
-        fieldOfWork = fieldOfWork,
-        hourlyRate = hourlyRate
-      )
-    )
+        Profile(
+            uid = uid,
+            firstName = firstName,
+            lastName = lastName,
+            email = email,
+            birthDate = Timestamp(calendar.time),
+            description = description,
+            isWorker = isWorker,
+            fieldOfWork = fieldOfWork,
+            hourlyRate = hourlyRate))
 
     // Verify that updateProfile was called with the expected parameters
-    verify(profileViewModel).updateProfile(
-      Profile(
-        uid = uid,
-        firstName = firstName,
-        lastName = lastName,
-        email = email,
-        birthDate = Timestamp(calendar.time),
-        description = description,
-        isWorker = isWorker,
-        fieldOfWork = fieldOfWork,
-        hourlyRate = hourlyRate
-      )
-    )
+    verify(profileViewModel)
+        .updateProfile(
+            Profile(
+                uid = uid,
+                firstName = firstName,
+                lastName = lastName,
+                email = email,
+                birthDate = Timestamp(calendar.time),
+                description = description,
+                isWorker = isWorker,
+                fieldOfWork = fieldOfWork,
+                hourlyRate = hourlyRate))
 
     // Verify that navigationActions.goBack() was called
     verify(navigationActions).goBack()
