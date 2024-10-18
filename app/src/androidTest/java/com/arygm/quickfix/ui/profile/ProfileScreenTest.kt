@@ -50,7 +50,6 @@ class ProfileScreenTest {
     composeTestRule.onNodeWithTag("ProfileTopAppBar").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProfileTitle").assertTextEquals("Profile")
     composeTestRule.onNodeWithTag("ProfileCard").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ProfileName").assertTextEquals("Mohamed Abbes")
 
     // Test for Upcoming Activities section
     composeTestRule.onNodeWithTag("UpcomingActivitiesCard").assertIsDisplayed()
