@@ -8,7 +8,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.printToLog
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.kaspresso.screen.HomeScreenObject
-import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -41,7 +40,7 @@ class HomeScreenTest : TestCase() {
       }
     }
     step("Click inside the search bar to gain focus") {
-      composeTestRule.onNodeWithTag(C.Tag.text_field_custom).performClick()
+      composeTestRule.onNodeWithTag("searchBar").performClick()
     }
 
     // Step 3: Simulate clicking outside the search bar to lose focus
@@ -51,7 +50,7 @@ class HomeScreenTest : TestCase() {
 
     // Step 4: Assert that the search bar has lost focus
     step("Assert the search bar has lost focus") {
-      composeTestRule.onNodeWithTag(C.Tag.text_field_custom).assertIsNotFocused()
+      composeTestRule.onNodeWithTag("searchBar").assertIsNotFocused()
     }
   }
 }

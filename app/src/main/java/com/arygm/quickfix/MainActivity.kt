@@ -124,8 +124,7 @@ fun QuickFixApp() {
             exitTransition = {
               // You can change whatever you want for transitions
               ExitTransition.None
-            }
-        ) {
+            }) {
               navigation(
                   startDestination = Screen.WELCOME,
                   route = Route.WELCOME,
