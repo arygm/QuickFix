@@ -24,12 +24,14 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag // Import pour les testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arygm.quickfix.R
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -92,7 +94,7 @@ fun BusinessScreen(
             horizontalAlignment = Alignment.CenterHorizontally) {
               // Profile Image Placeholder
               Icon(
-                  imageVector = Icons.Default.AccountCircle,
+                  painter = painterResource(R.drawable.profilevector),
                   contentDescription = "Account Circle Icon",
                   tint = colorScheme.surface,
                   modifier =

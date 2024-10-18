@@ -18,6 +18,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 
 class ProfileScreenTest {
 
@@ -103,5 +104,27 @@ class ProfileScreenTest {
     composeTestRule.setContent { ProfileScreen(navigationActions) }
 
     composeTestRule.onNodeWithTag("LogoutButton").performClick()
+  }
+
+  @Test
+  fun navigateToAccountConfigurationTest() {
+    composeTestRule.setContent { ProfileScreen(navigationActions) }
+
+    // Perform click on "Account configuration"
+    composeTestRule.onNodeWithTag("AccountconfigurationOption").performClick()
+
+    // Verify that the navigation to Screen.ACCOUNT_CONFIGURATION happened
+    verify(navigationActions).navigateTo(Screen.ACCOUNT_CONFIGURATION)
+  }
+
+  @Test
+  fun navigateToWorkerSetupTest() {
+    composeTestRule.setContent { ProfileScreen(navigationActions) }
+
+    // Perform click on "Set up your business account"
+    composeTestRule.onNodeWithTag("SetupyourbusinessaccountOption").performClick()
+
+    // Verify that the navigation to Screen.TO_WORKER happened
+    verify(navigationActions).navigateTo(Screen.TO_WORKER)
   }
 }

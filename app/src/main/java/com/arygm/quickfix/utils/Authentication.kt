@@ -163,3 +163,7 @@ fun createAccountWithEmailAndPassword(
     }
   }
 }
+
+fun logOut(firebaseAuth: FirebaseAuth) {
+  firebaseAuth.signOut()
+}

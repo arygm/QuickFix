@@ -25,6 +25,7 @@ object Route {
   const val PASSWORD = "Password"
   const val PROFILE = "Profile"
   const val ACCOUNT_CONFIGURATION = "Account configuration"
+  const val TO_WORKER = "To Worker"
 }
 
 object Screen {
@@ -40,6 +41,7 @@ object Screen {
   const val CALENDAR = "Calendar Screen"
   const val PROFILE = "Profile Screen"
   const val ACCOUNT_CONFIGURATION = "Account configuration Screen"
+  const val TO_WORKER = "To Worker Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
