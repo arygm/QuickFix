@@ -32,6 +32,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.R
@@ -98,6 +99,7 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
               ) {
                 Spacer(modifier = Modifier.width(10.dp))
                 QuickFixTextFieldCustom(
+                    modifier = Modifier.semantics { testTag = "searchBar" },
                     showLeadingIcon = { true },
                     showTrailingIcon = { true },
                     leadingIcon = Icons.Outlined.Search,
