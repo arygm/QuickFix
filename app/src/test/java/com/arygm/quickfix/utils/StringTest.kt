@@ -90,62 +90,74 @@ class StringTest {
   }
 
   @Test
-  fun `test routeToScreen with HOME route`() {
-    val result = routeToScreen(Route.HOME)
-    assertEquals(Screen.HOME, result)
+  fun `test screeToRoute with HOME screen`() {
+    val result = screenToRoute(Screen.HOME)
+    assertEquals(Route.HOME, result)
   }
 
   @Test
-  fun `test routeToScreen with CALENDAR route`() {
-    val result = routeToScreen(Route.CALENDAR)
-    assertEquals(Screen.CALENDAR, result)
+  fun `test screeToRoute with CALENDAR screen`() {
+    val result = screenToRoute(Screen.CALENDAR)
+    assertEquals(Route.CALENDAR, result)
   }
 
   @Test
-  fun `test routeToScreen with WELCOME route`() {
-    val result = routeToScreen(Route.WELCOME)
-    assertEquals(Screen.WELCOME, result)
+  fun `test screeToRoute with WELCOME screen`() {
+    val result = screenToRoute(Screen.WELCOME)
+    assertEquals(Route.WELCOME, result)
   }
 
   @Test
-  fun `test routeToScreen with INFO route`() {
-    val result = routeToScreen(Route.INFO)
-    assertEquals(Screen.INFO, result)
+  fun `test screeToRoute with INFO screen`() {
+    val result = screenToRoute(Screen.INFO)
+    assertEquals(Route.INFO, result)
   }
 
   @Test
-  fun `test routeToScreen with LOGIN route`() {
-    val result = routeToScreen(Route.LOGIN)
-    assertEquals(Screen.LOGIN, result)
+  fun `test screeToRoute with LOGIN screen`() {
+    val result = screenToRoute(Screen.LOGIN)
+    assertEquals(Route.LOGIN, result)
   }
 
   @Test
-  fun `test routeToScreen with PASSWORD route`() {
-    val result = routeToScreen(Route.PASSWORD)
-    assertEquals(Screen.PASSWORD, result)
+  fun `test screeToRoute with PASSWORD screen`() {
+    val result = screenToRoute(Screen.PASSWORD)
+    assertEquals(Route.PASSWORD, result)
   }
 
   @Test
-  fun `test routeToScreen with SEARCH route`() {
-    val result = routeToScreen(Route.SEARCH)
-    assertEquals(Screen.SEARCH, result)
+  fun `test screeToRoute with SEARCH screen`() {
+    val result = screenToRoute(Screen.SEARCH)
+    assertEquals(Route.SEARCH, result)
   }
 
   @Test
-  fun `test routeToScreen with DASHBOARD route`() {
-    val result = routeToScreen(Route.DASHBOARD)
-    assertEquals(Screen.DASHBOARD, result)
+  fun `test screeToRoute with DASHBOARD screen`() {
+    val result = screenToRoute(Screen.DASHBOARD)
+    assertEquals(Route.DASHBOARD, result)
   }
 
   @Test
-  fun `test routeToScreen with PROFILE route`() {
-    val result = routeToScreen(Route.PROFILE)
-    assertEquals(Screen.PROFILE, result)
+  fun `test screeToRoute with PROFILE screen`() {
+    val result = screenToRoute(Screen.PROFILE)
+    assertEquals(Route.PROFILE, result)
+  }
+
+  @Test
+  fun `test screeToRoute with ACCOUNT_CONFIGURATION screen`() {
+    val result = screenToRoute(Screen.ACCOUNT_CONFIGURATION)
+    assertEquals(Route.ACCOUNT_CONFIGURATION, result)
+  }
+
+  @Test
+  fun `test screeToRoute with TO_WORKER screen`() {
+    val result = screenToRoute(Screen.TO_WORKER)
+    assertEquals(Route.TO_WORKER, result)
   }
 
   @Test
   fun `test routeToScreen with invalid route defaults to WELCOME`() {
-    val result = routeToScreen("INVALID_ROUTE")
-    assertEquals(Screen.WELCOME, result)
+    val result = screenToRoute("INVALID_ROUTE")
+    assertEquals(Route.WELCOME, result)
   }
 }

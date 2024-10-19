@@ -11,8 +11,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import com.arygm.quickfix.utils.routeToScreen
-import com.arygm.quickfix.utils.screenToRoute
 
 object Route {
   const val CALENDAR = "Calendar"
@@ -94,7 +92,6 @@ open class NavigationActions(
    *   bottom navigation bar as we don't want to keep the previous screen in the back stack
    */
   open fun navigateTo(destination: TopLevelDestination) {
-    currentScreen = routeToScreen(destination.route)
     navController.navigate(destination.route) {
       popUpTo(navController.graph.findStartDestination().id) {
         saveState = true
@@ -105,6 +102,7 @@ open class NavigationActions(
         restoreState = true
       }
     }
+    currentScreen = currentRoute()
   }
 
   /**
@@ -113,14 +111,14 @@ open class NavigationActions(
    * @param screen The screen to navigate to
    */
   open fun navigateTo(screen: String) {
-    currentScreen = screen
     navController.navigate(screen)
+    currentScreen = currentRoute()
   }
 
   /** Navigate back to the previous screen. */
   open fun goBack() {
     navController.popBackStack()
-    currentScreen = routeToScreen(currentRoute())
+    currentScreen = currentRoute()
   }
 
   /**
@@ -129,6 +127,6 @@ open class NavigationActions(
    * @return The current route
    */
   open fun currentRoute(): String {
-    return screenToRoute(navController.currentDestination?.route ?: "")
+    return navController.currentDestination?.route ?: ""
   }
 }
