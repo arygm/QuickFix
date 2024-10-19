@@ -47,6 +47,7 @@ import com.arygm.quickfix.ui.profile.BusinessScreen
 import com.arygm.quickfix.ui.profile.ProfileConfigurationScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
+import com.arygm.quickfix.utils.screenToRoute
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
@@ -110,8 +111,9 @@ fun QuickFixApp() {
             modifier = Modifier.testTag("BNM")) {
               BottomNavigationMenu(
                   selectedItem =
-                      navigationActions
-                          .currentRoute(), // Use the current route, or fallback to HOME
+                      screenToRoute(
+                          navigationActions
+                              .currentRoute()), // Use the current route, or fallback to HOME
                   onTabSelect = { selectedDestination ->
                     // Use this block to navigate based on the selected tab
                     navigationActions.navigateTo(selectedDestination)
@@ -152,7 +154,6 @@ fun QuickFixApp() {
                   route = Route.HOME,
               ) {
                 composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
-                composable(Screen.PROFILE) { HomeScreen(navigationActions, isUser) }
                 composable(Screen.MESSAGES) { HomeScreen(navigationActions, isUser) }
               }
               navigation(

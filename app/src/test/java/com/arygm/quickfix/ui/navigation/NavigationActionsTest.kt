@@ -45,11 +45,9 @@ class NavigationActionsTest {
   @Test
   fun currentRouteWorksWithDestination() {
     `when`(navHostController.currentDestination).thenReturn(navigationDestination)
-    // todo Look at the current route function after the milestone because it doesnt work the way it
-    // should
     `when`(navigationDestination.route).thenReturn(Screen.HOME)
 
-    assertThat(navigationActions.currentRoute(), `is`(Route.HOME))
+    assertThat(navigationActions.currentRoute(), `is`(Screen.HOME))
   }
 
   @Test
@@ -80,5 +78,27 @@ class NavigationActionsTest {
   fun `test unknown route returns -1`() {
     assertEquals(-1, getBottomBarId("unknown_route", true))
     assertEquals(-1, getBottomBarId("unknown_route", false))
+  }
+
+  @Test
+  fun `test currentScreen is updated after navigation`() {
+    `when`(navHostController.currentDestination).thenReturn(navigationDestination)
+    `when`(navigationDestination.route).thenReturn(Screen.HOME)
+    assertEquals(Screen.WELCOME, navigationActions.currentScreen)
+
+    navigationActions.navigateTo(TopLevelDestinations.HOME)
+
+    assertEquals(Screen.HOME, navigationActions.currentScreen)
+  }
+
+  @Test
+  fun `test currentScreen is updated after go back`() {
+    `when`(navHostController.currentDestination).thenReturn(navigationDestination)
+    `when`(navigationDestination.route).thenReturn(Screen.HOME)
+    assertEquals(Screen.WELCOME, navigationActions.currentScreen)
+
+    navigationActions.goBack()
+
+    assertEquals(Screen.HOME, navigationActions.currentScreen)
   }
 }
