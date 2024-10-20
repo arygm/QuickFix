@@ -21,7 +21,6 @@ import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 
 @Composable
 fun BottomNavigationMenu(
-    selectedItem: String, // To track the selected item
     onTabSelect: (TopLevelDestination) -> Unit,
     isUser: Boolean, // Boolean flag to determine the user type
 ) {
@@ -71,8 +70,7 @@ fun BottomNavigationMenu(
 
           // Attempt to show the default selected item
           try {
-            val defaultItemIndex = tabList.indexOfFirst { it.route == selectedItem }
-            show(defaultItemIndex + 1, true) // Immediately show the selected item
+            show(1, true) // Immediately show the selected item
           } catch (e: Exception) {
             Log.e("MeowBottomNavigation", "Failed to call show(): ${e.message}")
           }
