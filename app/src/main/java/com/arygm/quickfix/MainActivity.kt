@@ -34,9 +34,7 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.DashboardScreen
 import com.arygm.quickfix.ui.SearchScreen
-import com.arygm.quickfix.ui.authentication.InfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
-import com.arygm.quickfix.ui.authentication.PasswordScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.home.HomeScreen
@@ -72,8 +70,8 @@ fun QuickFixApp() {
   val navigationActions = remember { NavigationActions(navController) }
 
   val userViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory)
-    val workerViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.WorkerFactory)
-    val loggedInProfileViewModel: LoggedInProfileViewModel = LoggedInProfileViewModel()
+  val workerViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.WorkerFactory)
+  val loggedInProfileViewModel: LoggedInProfileViewModel = LoggedInProfileViewModel()
   val registrationViewModel = RegistrationViewModel()
 
   val isUser = false // TODO: This variable needs to get its value after the authentication
@@ -140,9 +138,15 @@ fun QuickFixApp() {
                   startDestination = Screen.WELCOME,
                   route = Route.WELCOME,
               ) {
-                composable(Screen.WELCOME) { WelcomeScreen(navigationActions, userViewModel, loggedInProfileViewModel) }
-                composable(Screen.LOGIN) { LogInScreen(navigationActions, userViewModel, loggedInProfileViewModel) }
-                composable(Screen.REGISTER) { RegisterScreen(navigationActions, userViewModel, loggedInProfileViewModel) }
+                composable(Screen.WELCOME) {
+                  WelcomeScreen(navigationActions, userViewModel, loggedInProfileViewModel)
+                }
+                composable(Screen.LOGIN) {
+                  LogInScreen(navigationActions, userViewModel, loggedInProfileViewModel)
+                }
+                composable(Screen.REGISTER) {
+                  RegisterScreen(navigationActions, userViewModel, loggedInProfileViewModel)
+                }
               }
               navigation(
                   startDestination = Screen.HOME,
@@ -168,12 +172,25 @@ fun QuickFixApp() {
                   route = Route.PROFILE,
               ) {
                 composable(Screen.PROFILE) {
-                  ProfileScreen(navigationActions, isUser, userViewModel, workerViewModel, loggedInProfileViewModel)
+                  ProfileScreen(
+                      navigationActions,
+                      isUser,
+                      userViewModel,
+                      workerViewModel,
+                      loggedInProfileViewModel)
                 }
                 composable(Screen.ACCOUNT_CONFIGURATION) {
-                  ProfileConfigurationScreen(navigationActions, isUser, userViewModel, workerViewModel, loggedInProfileViewModel)
+                  ProfileConfigurationScreen(
+                      navigationActions,
+                      isUser,
+                      userViewModel,
+                      workerViewModel,
+                      loggedInProfileViewModel)
                 }
-                composable(Screen.TO_WORKER) { BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel) }
+                composable(Screen.TO_WORKER) {
+                  BusinessScreen(
+                      navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+                }
               }
             }
       }

@@ -8,15 +8,15 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class LoggedInProfileViewModel : ViewModel() {
 
-    private val loggedInProfile_ = MutableStateFlow<Profile?>(null)
-    val loggedInProfile: StateFlow<Profile?> = loggedInProfile_.asStateFlow()
+  private val loggedInProfile_ = MutableStateFlow<Profile?>(null)
+  val loggedInProfile: StateFlow<Profile?> = loggedInProfile_.asStateFlow()
 
-    fun setLoggedInProfile(profile: Profile) {
-        loggedInProfile_.value = profile
-    }
+  fun setLoggedInProfile(profile: Profile) {
+    loggedInProfile_.value = profile
+  }
 
-    fun logOut(firebasAuth: FirebaseAuth) {
-        loggedInProfile_.value = null
-        com.arygm.quickfix.utils.logOut(firebasAuth)
-    }
+  fun logOut(firebasAuth: FirebaseAuth) {
+    loggedInProfile_.value = null
+    com.arygm.quickfix.utils.logOut(firebasAuth)
+  }
 }

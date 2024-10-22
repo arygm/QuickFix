@@ -47,10 +47,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
-import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.ui.authentication.CustomTextField
@@ -296,26 +294,26 @@ fun ProfileConfigurationScreen(
                             0,
                             0)
 
-                          if (loggedInProfile is UserProfile) {
-                              userViewModel.updateProfile(
-                                  UserProfile(
-                                      uid = loggedInProfile.uid,
-                                      firstName = firstName,
-                                      lastName = lastName,
-                                      email = email,
-                                      birthDate = Timestamp(calendar.time),
-                                      isWorker = loggedInProfile.isWorker),
-                                  onSuccess = {
-                                      userViewModel.fetchUserProfile(loggedInProfile.uid) {profile -> loggedInProfileViewModel.setLoggedInProfile(
-                                          profile!!
-                                      ) }
-                                  },
-                                  onFailure = {})
-                              navigationActions.goBack()
-                              return@Button
-                          } else {
-                              // TODO
-                          }
+                        if (loggedInProfile is UserProfile) {
+                          userViewModel.updateProfile(
+                              UserProfile(
+                                  uid = loggedInProfile.uid,
+                                  firstName = firstName,
+                                  lastName = lastName,
+                                  email = email,
+                                  birthDate = Timestamp(calendar.time),
+                                  isWorker = loggedInProfile.isWorker),
+                              onSuccess = {
+                                userViewModel.fetchUserProfile(loggedInProfile.uid) { profile ->
+                                  loggedInProfileViewModel.setLoggedInProfile(profile!!)
+                                }
+                              },
+                              onFailure = {})
+                          navigationActions.goBack()
+                          return@Button
+                        } else {
+                          // TODO
+                        }
                       } catch (_: NumberFormatException) {}
                     }
 

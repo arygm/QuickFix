@@ -65,9 +65,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun LogInScreen(navigationActions: NavigationActions, userViewModel: ProfileViewModel, loggedInProfileViewModel: LoggedInProfileViewModel) {
+fun LogInScreen(
+    navigationActions: NavigationActions,
+    userViewModel: ProfileViewModel,
+    loggedInProfileViewModel: LoggedInProfileViewModel
+) {
   var errorHasOccurred by remember { mutableStateOf(false) }
-    var emailError = false
+  var emailError = false
 
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
@@ -179,22 +183,25 @@ fun LogInScreen(navigationActions: NavigationActions, userViewModel: ProfileView
 
                             QuickFixTextFieldCustom(
                                 value = email,
-                                onValueChange = { email = it
-                                    userViewModel.profileExists(email) { exists, profile ->
-                                        emailError =
-                                            if (exists && profile != null) {
-                                                !isValidEmail(it)
-                                            } else {
-                                                true
-                                            }
-                                    }},
+                                onValueChange = {
+                                  email = it
+                                  userViewModel.profileExists(email) { exists, profile ->
+                                    emailError =
+                                        if (exists && profile != null) {
+                                          !isValidEmail(it)
+                                        } else {
+                                          true
+                                        }
+                                  }
+                                },
                                 shape = RoundedCornerShape(12.dp),
                                 widthField = 360.dp,
                                 moveContentHorizontal = 10.dp,
                                 placeHolderText = "Username or Email",
                                 isError = email.isNotEmpty() && !isValidEmail(email) && emailError,
                                 errorText = "INVALID EMAIL",
-                                showError = email.isNotEmpty() && !isValidEmail(email) && emailError,
+                                showError =
+                                    email.isNotEmpty() && !isValidEmail(email) && emailError,
                                 modifier = Modifier.testTag("inputEmail"))
 
                             Spacer(modifier = Modifier.padding(10.dp))

@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
@@ -294,47 +293,50 @@ fun BusinessScreen(
 
                         loggedInProfile?.let { profile ->
                           userViewModel.updateProfile(
-                              profile = UserProfile(
-                                  uid = profile.uid,
-                                  firstName = profile.firstName,
-                                  lastName = profile.lastName,
-                                  birthDate = profile.birthDate,
-                                  email = profile.email,
-                                  location = profile.location,
-                                  isWorker = true
-                              ),
+                              profile =
+                                  UserProfile(
+                                      uid = profile.uid,
+                                      firstName = profile.firstName,
+                                      lastName = profile.lastName,
+                                      birthDate = profile.birthDate,
+                                      email = profile.email,
+                                      location = profile.location,
+                                      isWorker = true),
                               onSuccess = {
-                                  userViewModel.fetchUserProfile(profile.uid) {profile -> loggedInProfileViewModel.setLoggedInProfile(
-                                      profile!!
-                                  ) }
+                                userViewModel.fetchUserProfile(profile.uid) { profile ->
+                                  loggedInProfileViewModel.setLoggedInProfile(profile!!)
+                                }
                               },
                               onFailure = {
-                                  Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT)
-                                      .show()
-                              }
-                          )
-                            workerViewModel.addProfile(
-                                profile = WorkerProfile(
-                                    uid = profile.uid,
-                                    firstName = profile.firstName,
-                                    lastName = profile.lastName,
-                                    birthDate = profile.birthDate,
-                                    email = profile.email,
-                                    location = GeoPoint(0.0,0.0),
-                                    description = description,
-                                    fieldOfWork = occupation,
-                                    hourlyRate = hourlyRateValue
-                                ),
-                                onSuccess = {
-                                    Toast.makeText(context, "Business account validated!", Toast.LENGTH_SHORT)
-                                        .show()
-                                    navigationActions.goBack()
-                                },
-                                onFailure = {
-                                    Toast.makeText(context, "Business account creation failed", Toast.LENGTH_SHORT)
-                                        .show()
-                                }
-                            )
+                                Toast.makeText(
+                                        context, "Failed to update profile", Toast.LENGTH_SHORT)
+                                    .show()
+                              })
+                          workerViewModel.addProfile(
+                              profile =
+                                  WorkerProfile(
+                                      uid = profile.uid,
+                                      firstName = profile.firstName,
+                                      lastName = profile.lastName,
+                                      birthDate = profile.birthDate,
+                                      email = profile.email,
+                                      location = GeoPoint(0.0, 0.0),
+                                      description = description,
+                                      fieldOfWork = occupation,
+                                      hourlyRate = hourlyRateValue),
+                              onSuccess = {
+                                Toast.makeText(
+                                        context, "Business account validated!", Toast.LENGTH_SHORT)
+                                    .show()
+                                navigationActions.goBack()
+                              },
+                              onFailure = {
+                                Toast.makeText(
+                                        context,
+                                        "Business account creation failed",
+                                        Toast.LENGTH_SHORT)
+                                    .show()
+                              })
                         }
                             ?: Toast.makeText(context, "Profile not found!", Toast.LENGTH_SHORT)
                                 .show()

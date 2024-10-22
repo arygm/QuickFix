@@ -3,9 +3,7 @@ package com.arygm.quickfix.model.profile
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.arygm.quickfix.utils.logOut
 import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,15 +23,14 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
           }
         }
 
-      val WorkerFactory: ViewModelProvider.Factory =
-          object : ViewModelProvider.Factory {
-              @Suppress("UNCHECKED_CAST")
-              override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                  return ProfileViewModel(WorkerProfileRepositoryFirestore(Firebase.firestore)) as T
-              }
+    val WorkerFactory: ViewModelProvider.Factory =
+        object : ViewModelProvider.Factory {
+          @Suppress("UNCHECKED_CAST")
+          override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return ProfileViewModel(WorkerProfileRepositoryFirestore(Firebase.firestore)) as T
           }
+        }
   }
-
 
   init {
     repository.init { getProfiles() }
@@ -63,11 +60,13 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
         profile = profile,
         onSuccess = {
           getProfiles()
-            onSuccess()
-          //fetchUserProfile(profile.uid) { loggedInProfileViewModel.setLoggedInProfile(profile) }
+          onSuccess()
+          // fetchUserProfile(profile.uid) { loggedInProfileViewModel.setLoggedInProfile(profile) }
         },
-        onFailure = { e -> Log.e("ProfileViewModel", "Failed to update profile: ${e.message}")
-        onFailure(e)})
+        onFailure = { e ->
+          Log.e("ProfileViewModel", "Failed to update profile: ${e.message}")
+          onFailure(e)
+        })
   }
 
   fun deleteProfileById(id: String) {
@@ -94,7 +93,6 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
           onResult(false, null)
         })
   }
-
 
   fun fetchUserProfile(uid: String, onResult: (Profile?) -> Unit) {
     repository.getProfileById(

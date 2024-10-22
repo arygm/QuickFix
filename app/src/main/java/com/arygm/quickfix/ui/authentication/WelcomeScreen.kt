@@ -56,7 +56,11 @@ import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun WelcomeScreen(navigationActions: NavigationActions, userViewModel: ProfileViewModel, loggedInProfileViewModel: LoggedInProfileViewModel) {
+fun WelcomeScreen(
+    navigationActions: NavigationActions,
+    userViewModel: ProfileViewModel,
+    loggedInProfileViewModel: LoggedInProfileViewModel
+) {
   val colorScheme = MaterialTheme.colorScheme
 
   var fadeOut by remember { mutableStateOf(true) }
