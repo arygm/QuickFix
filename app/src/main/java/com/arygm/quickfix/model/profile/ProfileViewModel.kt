@@ -13,8 +13,11 @@ import kotlinx.coroutines.flow.asStateFlow
 
 open class ProfileViewModel(private val repository: ProfileRepository) : ViewModel() {
 
-  private val profiles_ = MutableStateFlow<List<Profile>>(emptyList())
-  val profiles: StateFlow<List<Profile>> = profiles_.asStateFlow()
+  private val users_ = MutableStateFlow<List<UserProfile>>(emptyList())
+  val users: StateFlow<List<UserProfile>> = users_.asStateFlow()
+
+  private val workers_ = MutableStateFlow<List<WorkerProfile>>(emptyList())
+  val workers: StateFlow<List<WorkerProfile>> = workers_.asStateFlow()
 
   private val loggedInProfile_ = MutableStateFlow<Profile?>(null)
   open val loggedInProfile: StateFlow<Profile?> = loggedInProfile_.asStateFlow()
@@ -30,20 +33,35 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
   }
 
   init {
-    repository.init { getProfiles() }
+    repository.init {
+      getProfiles(ProfileType.USER)
+      getProfiles(ProfileType.WORKER)
+    }
   }
 
-  fun getProfiles() {
+  fun getProfiles(type: ProfileType) {
     repository.getProfiles(
-        onSuccess = { profiles_.value = it },
+        type,
+        onSuccess = { profiles ->
+          when (type) {
+            ProfileType.USER -> users_.value = profiles.filterIsInstance<UserProfile>()
+            ProfileType.WORKER -> workers_.value = profiles.filterIsInstance<WorkerProfile>()
+          }
+        },
         onFailure = { e -> Log.e("ProfileViewModel", "Failed to fetch profiles: ${e.message}") })
   }
 
-  fun addProfile(profile: Profile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+  fun addProfile(
+      type: ProfileType,
+      profile: Profile,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
     repository.addProfile(
+        type,
         profile = profile,
         onSuccess = {
-          getProfiles()
+          getProfiles(type)
           onSuccess()
         },
         onFailure = { e ->
@@ -52,25 +70,28 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
         })
   }
 
-  fun updateProfile(profile: Profile) {
+  fun updateProfile(type: ProfileType, profile: Profile) {
     repository.updateProfile(
+        type,
         profile = profile,
         onSuccess = {
-          getProfiles()
-          fetchUserProfile(profile.uid) { setLoggedInProfile(profile) }
+          getProfiles(type)
+          fetchUserProfile(type, profile.uid) { setLoggedInProfile(profile) }
         },
         onFailure = { e -> Log.e("ProfileViewModel", "Failed to update profile: ${e.message}") })
   }
 
-  fun deleteProfileById(id: String) {
+  fun deleteProfileById(type: ProfileType, id: String) {
     repository.deleteProfileById(
+        type,
         id = id,
-        onSuccess = { getProfiles() },
+        onSuccess = { getProfiles(type) },
         onFailure = { e -> Log.e("ProfileViewModel", "Failed to delete profile: ${e.message}") })
   }
 
-  fun profileExists(email: String, onResult: (Boolean, Profile?) -> Unit) {
+  fun profileExists(type: ProfileType, email: String, onResult: (Boolean, Profile?) -> Unit) {
     repository.profileExists(
+        type,
         email,
         onSuccess = { (exists, profile) ->
           if (exists) {
@@ -91,8 +112,9 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
     loggedInProfile_.value = profile
   }
 
-  fun fetchUserProfile(uid: String, onResult: (Profile?) -> Unit) {
+  fun fetchUserProfile(type: ProfileType, uid: String, onResult: (Profile?) -> Unit) {
     repository.getProfileById(
+        type,
         uid,
         onSuccess = { profile ->
           if (profile != null) {

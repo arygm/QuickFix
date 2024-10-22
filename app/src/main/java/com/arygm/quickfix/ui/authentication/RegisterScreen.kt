@@ -54,6 +54,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.arygm.quickfix.model.profile.ProfileType
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
@@ -265,7 +266,9 @@ fun RegisterScreen(
                                       onValueChange = {
                                         email = it
                                         emailError = !isValidEmail(it)
-                                        profileViewModel.profileExists(email) { exists, profile ->
+                                        profileViewModel.profileExists(ProfileType.USER, email) {
+                                            exists,
+                                            profile ->
                                           emailError =
                                               if (exists && profile != null) {
                                                 true

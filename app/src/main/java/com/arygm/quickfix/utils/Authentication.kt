@@ -8,8 +8,9 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import com.arygm.quickfix.model.profile.Profile
+import com.arygm.quickfix.model.profile.ProfileType
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Firebase
@@ -39,7 +40,7 @@ fun rememberFirebaseAuthLauncher(
         val user = Firebase.auth.currentUser
 
         user?.let {
-          profileViewModel.fetchUserProfile(it.uid) { existingProfile ->
+          profileViewModel.fetchUserProfile(ProfileType.USER, it.uid) { existingProfile ->
             if (existingProfile != null) {
               profileViewModel.setLoggedInProfile(existingProfile)
               onAuthComplete(authResult)
@@ -52,7 +53,7 @@ fun rememberFirebaseAuthLauncher(
 
               // Create a new Profile object
               val profile =
-                  Profile(
+                  UserProfile(
                       uid = uid,
                       firstName = firstName,
                       lastName = lastName,
@@ -62,6 +63,7 @@ fun rememberFirebaseAuthLauncher(
 
               // Save the profile to Firestore
               profileViewModel.addProfile(
+                  ProfileType.USER,
                   profile,
                   onSuccess = {
                     profileViewModel.setLoggedInProfile(profile)
@@ -92,6 +94,7 @@ fun signInWithEmailAndFetchProfile(
       val user = FirebaseAuth.getInstance().currentUser
       user?.let {
         profileViewModel.fetchUserProfile(
+            ProfileType.USER,
             it.uid,
             onResult = { profile ->
               if (profile != null) {
@@ -131,7 +134,7 @@ fun createAccountWithEmailAndPassword(
       user?.let {
         val profile =
             stringToTimestamp(birthDate)?.let { birthTimestamp ->
-              Profile(
+              UserProfile(
                   uid = it.uid,
                   firstName = firstName,
                   lastName = lastName,
@@ -142,6 +145,7 @@ fun createAccountWithEmailAndPassword(
 
         profile?.let { createdProfile ->
           profileViewModel.addProfile(
+              ProfileType.USER,
               createdProfile,
               onSuccess = {
                 profileViewModel.setLoggedInProfile(createdProfile)

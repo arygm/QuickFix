@@ -3,18 +3,43 @@ package com.arygm.quickfix.model.profile
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
 
-data class Profile(
+open class Profile(
     val uid: String,
     val firstName: String,
     val lastName: String,
     val email: String,
     val birthDate: Timestamp,
     val description: String,
-    val isWorker: Boolean = false,
-    val fieldOfWork: String? = null,
-    val hourlyRate: Double? = null,
     val location: GeoPoint? = null
 )
+
+class UserProfile(
+    val isWorker: Boolean = false,
+    uid: String,
+    firstName: String,
+    lastName: String,
+    email: String,
+    birthDate: Timestamp,
+    description: String,
+    location: GeoPoint? = null
+) : Profile(uid, firstName, lastName, email, birthDate, description, location)
+
+class WorkerProfile(
+    val fieldOfWork: String? = null,
+    val hourlyRate: Double? = null,
+    uid: String,
+    firstName: String,
+    lastName: String,
+    email: String,
+    birthDate: Timestamp,
+    description: String,
+    location: GeoPoint? = null
+) : Profile(uid, firstName, lastName, email, birthDate, description, location)
+
+enum class ProfileType {
+  USER,
+  WORKER
+}
 
 sealed class WorkerCategory {
   sealed class ConstructionAndMaintenance : WorkerCategory() {

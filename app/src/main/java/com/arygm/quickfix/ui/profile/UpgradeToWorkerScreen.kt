@@ -32,7 +32,10 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.profile.ProfileType
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
@@ -288,18 +291,43 @@ fun BusinessScreen(
                           location.isNotBlank()) {
                         loggedInProfile?.let { profile ->
                           val updatedProfile =
-                              profile.copy(
+                              UserProfile(
                                   isWorker = true,
-                                  fieldOfWork = occupation,
+                                  uid = profile.uid,
+                                  firstName = profile.firstName,
+                                  lastName = profile.lastName,
+                                  birthDate = profile.birthDate,
+                                  email = profile.email,
+                                  description = profile.description,
+                                  location = profile.location)
+                          val workerProfile =
+                              WorkerProfile(
+                                  uid = profile.uid,
+                                  firstName = profile.firstName,
+                                  lastName = profile.lastName,
+                                  birthDate = profile.birthDate,
+                                  email = profile.email,
                                   description = description,
-                                  hourlyRate = hourlyRateValue,
-                                  location = GeoPoint(0.0, 0.0))
-                          profileViewModel.updateProfile(
-                              profile = updatedProfile,
-                          )
-                          Toast.makeText(context, "Business account validated!", Toast.LENGTH_SHORT)
-                              .show()
-                          navigationActions.goBack()
+                                  location = GeoPoint(0.0, 0.0),
+                                  fieldOfWork = occupation,
+                                  hourlyRate = hourlyRateValue)
+                          profileViewModel.updateProfile(ProfileType.USER, profile = updatedProfile)
+                          profileViewModel.addProfile(
+                              ProfileType.WORKER,
+                              profile = workerProfile,
+                              onSuccess = {
+                                Toast.makeText(
+                                        context, "Business account validated!", Toast.LENGTH_SHORT)
+                                    .show()
+                                navigationActions.goBack()
+                              },
+                              onFailure = {
+                                Toast.makeText(
+                                        context,
+                                        "Error creating worker profile",
+                                        Toast.LENGTH_SHORT)
+                                    .show()
+                              })
                         }
                             ?: Toast.makeText(context, "Profile not found!", Toast.LENGTH_SHORT)
                                 .show()

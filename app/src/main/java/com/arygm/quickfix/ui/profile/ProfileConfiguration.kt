@@ -49,8 +49,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
-import com.arygm.quickfix.model.profile.Profile
+import com.arygm.quickfix.model.profile.ProfileType
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.ui.authentication.CustomTextField
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -209,7 +210,9 @@ fun ProfileConfigurationScreen(
                           onValueChange = {
                             email = it
                             emailError = !isValidEmail(it)
-                            profileViewModel.profileExists(email) { exists, profile ->
+                            profileViewModel.profileExists(ProfileType.USER, email) {
+                                exists,
+                                profile ->
                               emailError =
                                   exists && profile != null && email != loggedInProfile.email
                             }
@@ -292,19 +295,22 @@ fun ProfileConfigurationScreen(
                             0,
                             0)
 
-                        profileViewModel.updateProfile(
-                            Profile(
-                                uid = loggedInProfile.uid,
-                                firstName = firstName,
-                                lastName = lastName,
-                                email = email,
-                                birthDate = Timestamp(calendar.time),
-                                description = loggedInProfile.description,
-                                isWorker = loggedInProfile.isWorker,
-                                fieldOfWork = loggedInProfile.fieldOfWork,
-                                hourlyRate = loggedInProfile.hourlyRate))
-                        navigationActions.goBack()
-                        return@Button
+                        if (loggedInProfile is UserProfile) {
+                          profileViewModel.updateProfile(
+                              ProfileType.USER,
+                              UserProfile(
+                                  uid = loggedInProfile.uid,
+                                  firstName = firstName,
+                                  lastName = lastName,
+                                  email = email,
+                                  birthDate = Timestamp(calendar.time),
+                                  description = loggedInProfile.description,
+                                  isWorker = loggedInProfile.isWorker))
+                          navigationActions.goBack()
+                          return@Button
+                        } else {
+                          // TODO
+                        }
                       } catch (_: NumberFormatException) {}
                     }
 

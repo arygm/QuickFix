@@ -4,7 +4,11 @@ interface ProfileRepository {
 
   fun init(onSuccess: () -> Unit)
 
-  fun getProfiles(onSuccess: (List<Profile>) -> Unit, onFailure: (Exception) -> Unit)
+  fun getProfiles(
+      type: ProfileType,
+      onSuccess: (List<Profile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 
   fun filterWorkers(
       hourlyRateThreshold: Double? = null,
@@ -13,17 +17,38 @@ interface ProfileRepository {
       onFailure: (Exception) -> Unit
   )
 
-  fun addProfile(profile: Profile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+  fun addProfile(
+      type: ProfileType,
+      profile: Profile,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 
-  fun updateProfile(profile: Profile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+  fun updateProfile(
+      type: ProfileType,
+      profile: Profile,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 
-  fun deleteProfileById(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+  fun deleteProfileById(
+      type: ProfileType,
+      id: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 
   fun profileExists(
+      type: ProfileType,
       email: String,
       onSuccess: (Pair<Boolean, Profile?>) -> Unit,
       onFailure: (Exception) -> Unit
   )
 
-  fun getProfileById(uid: String, onSuccess: (Profile?) -> Unit, onFailure: (Exception) -> Unit)
+  fun getProfileById(
+      type: ProfileType,
+      uid: String,
+      onSuccess: (Profile?) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 }
