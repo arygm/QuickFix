@@ -48,6 +48,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
@@ -64,8 +65,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileViewModel) {
+fun LogInScreen(navigationActions: NavigationActions, userViewModel: ProfileViewModel, loggedInProfileViewModel: LoggedInProfileViewModel) {
   var errorHasOccurred by remember { mutableStateOf(false) }
+    var emailError = false
 
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
@@ -177,14 +179,22 @@ fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileV
 
                             QuickFixTextFieldCustom(
                                 value = email,
-                                onValueChange = { email = it },
+                                onValueChange = { email = it
+                                    userViewModel.profileExists(email) { exists, profile ->
+                                        emailError =
+                                            if (exists && profile != null) {
+                                                !isValidEmail(it)
+                                            } else {
+                                                true
+                                            }
+                                    }},
                                 shape = RoundedCornerShape(12.dp),
                                 widthField = 360.dp,
                                 moveContentHorizontal = 10.dp,
                                 placeHolderText = "Username or Email",
-                                isError = email.isNotEmpty() && !isValidEmail(email),
+                                isError = email.isNotEmpty() && !isValidEmail(email) && emailError,
                                 errorText = "INVALID EMAIL",
-                                showError = email.isNotEmpty() && !isValidEmail(email),
+                                showError = email.isNotEmpty() && !isValidEmail(email) && emailError,
                                 modifier = Modifier.testTag("inputEmail"))
 
                             Spacer(modifier = Modifier.padding(10.dp))
@@ -235,7 +245,8 @@ fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileV
                                   signInWithEmailAndFetchProfile(
                                       email = email,
                                       password = password,
-                                      profileViewModel = profileViewModel,
+                                      userViewModel = userViewModel,
+                                      loggedInProfileViewModel = loggedInProfileViewModel,
                                       onResult = {
                                         if (it) {
                                           coroutineScope.launch {

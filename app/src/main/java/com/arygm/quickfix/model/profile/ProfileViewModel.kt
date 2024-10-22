@@ -16,18 +16,24 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
   private val profiles_ = MutableStateFlow<List<Profile>>(emptyList())
   val profiles: StateFlow<List<Profile>> = profiles_.asStateFlow()
 
-  private val loggedInProfile_ = MutableStateFlow<Profile?>(null)
-  open val loggedInProfile: StateFlow<Profile?> = loggedInProfile_.asStateFlow()
-
   companion object {
-    val Factory: ViewModelProvider.Factory =
+    val UserFactory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ProfileViewModel(ProfileRepositoryFirestore(Firebase.firestore)) as T
+            return ProfileViewModel(UserProfileRepositoryFirestore(Firebase.firestore)) as T
           }
         }
+
+      val WorkerFactory: ViewModelProvider.Factory =
+          object : ViewModelProvider.Factory {
+              @Suppress("UNCHECKED_CAST")
+              override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                  return ProfileViewModel(WorkerProfileRepositoryFirestore(Firebase.firestore)) as T
+              }
+          }
   }
+
 
   init {
     repository.init { getProfiles() }
@@ -52,14 +58,16 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
         })
   }
 
-  fun updateProfile(profile: Profile) {
+  fun updateProfile(profile: Profile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     repository.updateProfile(
         profile = profile,
         onSuccess = {
           getProfiles()
-          fetchUserProfile(profile.uid) { setLoggedInProfile(profile) }
+            onSuccess()
+          //fetchUserProfile(profile.uid) { loggedInProfileViewModel.setLoggedInProfile(profile) }
         },
-        onFailure = { e -> Log.e("ProfileViewModel", "Failed to update profile: ${e.message}") })
+        onFailure = { e -> Log.e("ProfileViewModel", "Failed to update profile: ${e.message}")
+        onFailure(e)})
   }
 
   fun deleteProfileById(id: String) {
@@ -87,9 +95,6 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
         })
   }
 
-  fun setLoggedInProfile(profile: Profile) {
-    loggedInProfile_.value = profile
-  }
 
   fun fetchUserProfile(uid: String, onResult: (Profile?) -> Unit) {
     repository.getProfileById(
@@ -106,10 +111,5 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
           Log.e("ProfileViewModel", "Error fetching profile: ${e.message}")
           onResult(null)
         })
-  }
-
-  fun logOut(firebasAuth: FirebaseAuth) {
-    loggedInProfile_.value = null
-    com.arygm.quickfix.utils.logOut(firebasAuth)
   }
 }

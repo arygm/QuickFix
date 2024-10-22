@@ -32,7 +32,10 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
@@ -42,10 +45,12 @@ import com.google.firebase.firestore.GeoPoint
 @Composable
 fun BusinessScreen(
     navigationActions: NavigationActions,
-    profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
+    userViewModel: ProfileViewModel,
+    workerViewModel: ProfileViewModel,
+    loggedInProfileViewModel: LoggedInProfileViewModel
 ) {
   val context = LocalContext.current
-  val loggedInProfile by profileViewModel.loggedInProfile.collectAsState()
+  val loggedInProfile by loggedInProfileViewModel.loggedInProfile.collectAsState()
   var errorMessage by remember { mutableStateOf("") }
 
   // Variables d'état locales pour les détails de l'entreprise
@@ -286,20 +291,50 @@ fun BusinessScreen(
                       if (occupation.isNotBlank() &&
                           hourlyRateValue != 0.0 &&
                           location.isNotBlank()) {
+
                         loggedInProfile?.let { profile ->
-                          val updatedProfile =
-                              profile.copy(
-                                  isWorker = true,
-                                  fieldOfWork = occupation,
-                                  description = description,
-                                  hourlyRate = hourlyRateValue,
-                                  location = GeoPoint(0.0, 0.0))
-                          profileViewModel.updateProfile(
-                              profile = updatedProfile,
+                          userViewModel.updateProfile(
+                              profile = UserProfile(
+                                  uid = profile.uid,
+                                  firstName = profile.firstName,
+                                  lastName = profile.lastName,
+                                  birthDate = profile.birthDate,
+                                  email = profile.email,
+                                  location = profile.location,
+                                  isWorker = true
+                              ),
+                              onSuccess = {
+                                  userViewModel.fetchUserProfile(profile.uid) {profile -> loggedInProfileViewModel.setLoggedInProfile(
+                                      profile!!
+                                  ) }
+                              },
+                              onFailure = {
+                                  Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT)
+                                      .show()
+                              }
                           )
-                          Toast.makeText(context, "Business account validated!", Toast.LENGTH_SHORT)
-                              .show()
-                          navigationActions.goBack()
+                            workerViewModel.addProfile(
+                                profile = WorkerProfile(
+                                    uid = profile.uid,
+                                    firstName = profile.firstName,
+                                    lastName = profile.lastName,
+                                    birthDate = profile.birthDate,
+                                    email = profile.email,
+                                    location = GeoPoint(0.0,0.0),
+                                    description = description,
+                                    fieldOfWork = occupation,
+                                    hourlyRate = hourlyRateValue
+                                ),
+                                onSuccess = {
+                                    Toast.makeText(context, "Business account validated!", Toast.LENGTH_SHORT)
+                                        .show()
+                                    navigationActions.goBack()
+                                },
+                                onFailure = {
+                                    Toast.makeText(context, "Business account creation failed", Toast.LENGTH_SHORT)
+                                        .show()
+                                }
+                            )
                         }
                             ?: Toast.makeText(context, "Profile not found!", Toast.LENGTH_SHORT)
                                 .show()
