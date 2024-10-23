@@ -131,15 +131,13 @@ class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRep
       val lastName = document.getString("lastName") ?: return null
       val email = document.getString("email") ?: return null
       val birthDate = document.getTimestamp("birthDate") ?: return null
-      val description = document.getString("description") ?: return null
 
       Profile(
           uid = uid,
           firstName = firstName,
           lastName = lastName,
           email = email,
-          birthDate = birthDate,
-          description = description)
+          birthDate = birthDate)
     } catch (e: Exception) {
       Log.e("TodosRepositoryFirestore", "Error converting document to ToDo", e)
       null
