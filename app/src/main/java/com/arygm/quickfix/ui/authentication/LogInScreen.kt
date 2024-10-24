@@ -55,6 +55,7 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
@@ -240,7 +241,7 @@ fun LogInScreen(navigationActions: NavigationActions, profileViewModel: ProfileV
                                         if (it) {
                                           coroutineScope.launch {
                                             delay(BOX_COLLAPSE_SPEED.toLong())
-                                            navigationActions.navigateTo(Screen.HOME)
+                                            navigationActions.navigateTo(TopLevelDestinations.HOME)
                                           }
                                         } else {
                                           Log.e("LogInScreen", "Error occurred while signing in")
