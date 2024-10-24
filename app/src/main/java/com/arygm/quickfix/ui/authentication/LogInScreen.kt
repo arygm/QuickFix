@@ -198,10 +198,11 @@ fun LogInScreen(
                                 widthField = 360.dp,
                                 moveContentHorizontal = 10.dp,
                                 placeHolderText = "Username or Email",
-                                isError = email.isNotEmpty() && !isValidEmail(email) && emailError,
+                                isError =
+                                    email.isNotEmpty() && (!isValidEmail(email) || emailError),
                                 errorText = "INVALID EMAIL",
                                 showError =
-                                    email.isNotEmpty() && !isValidEmail(email) && emailError,
+                                    email.isNotEmpty() && (!isValidEmail(email) || emailError),
                                 modifier = Modifier.testTag("inputEmail"))
 
                             Spacer(modifier = Modifier.padding(10.dp))

@@ -9,14 +9,17 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.GeoPoint
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -35,18 +38,22 @@ class RegisterScreenTest {
   private lateinit var profileRepository: ProfileRepository
   private lateinit var profileViewModel: ProfileViewModel
   private lateinit var navigationActions: NavigationActions
+  private lateinit var loggedInProfileViewModel: LoggedInProfileViewModel
 
   @Before
   fun setup() {
     profileRepository = mock(ProfileRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
     profileViewModel = ProfileViewModel(profileRepository)
+    loggedInProfileViewModel = LoggedInProfileViewModel()
     `when`(navigationActions.currentRoute()).thenReturn(Screen.REGISTER)
   }
 
   @Test
   fun testInitialUI() {
-    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+    }
 
     // Check that the scaffold and content boxes are displayed
     composeTestRule.onNodeWithTag("RegisterScaffold").assertIsDisplayed()
@@ -88,7 +95,9 @@ class RegisterScreenTest {
 
   @Test
   fun testInvalidEmailShowsError() {
-    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+    }
 
     // Input an invalid email
     composeTestRule.onNodeWithTag("emailInput").performTextInput("invalidemail")
@@ -100,7 +109,9 @@ class RegisterScreenTest {
 
   @Test
   fun testInvalidDateShowsError() {
-    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+    }
 
     // Input an invalid birth date
     composeTestRule.onNodeWithTag("birthDateInput").performTextInput("99/99/9999")
@@ -112,7 +123,9 @@ class RegisterScreenTest {
 
   @Test
   fun testPasswordMismatch() {
-    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+    }
 
     // Enter different passwords
     composeTestRule.onNodeWithTag("passwordInput").performTextInput("Password123")
@@ -137,6 +150,7 @@ class RegisterScreenTest {
             _: String,
             _: String,
             _: ProfileViewModel,
+            _: LoggedInProfileViewModel,
             onSuccess: () -> Unit,
             _: () -> Unit ->
           createAccountFuncCalled = true
@@ -153,7 +167,8 @@ class RegisterScreenTest {
     composeTestRule.setContent {
       RegisterScreen(
           navigationActions = navigationActions,
-          profileViewModel = profileViewModel,
+          userViewModel = profileViewModel,
+          loggedInProfileViewModel = loggedInProfileViewModel,
           createAccountFunc = testCreateAccountFunc)
     }
 
@@ -182,7 +197,9 @@ class RegisterScreenTest {
 
   @Test
   fun testRegisterButtonDisabledWhenFormIncomplete() {
-    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+    }
 
     // Fill only partial inputs
     composeTestRule.onNodeWithTag("firstNameInput").performTextInput("John")
@@ -199,7 +216,9 @@ class RegisterScreenTest {
 
   @Test
   fun testBackButtonNavigatesBack() {
-    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+    }
 
     // Click the back button
     composeTestRule.onNodeWithTag("goBackButton").performClick()
@@ -210,7 +229,9 @@ class RegisterScreenTest {
 
   @Test
   fun testLoginButtonNavigatesToLogin() {
-    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+    }
 
     // Click the "Login !" button
     composeTestRule.onNodeWithTag("clickableLoginButtonText").performClick()
@@ -224,13 +245,13 @@ class RegisterScreenTest {
     // Arrange
     val existingEmail = "john.doe@example.com"
     val profile =
-        Profile(
+        UserProfile(
             uid = "testUid",
             firstName = "John",
             lastName = "Doe",
             email = existingEmail,
             birthDate = Timestamp.now(),
-            description = "Existing user")
+            location = GeoPoint(0.0, 0.0))
 
     // Mock the profileRepository.profileExists to return exists = true, profile != null
     whenever(profileRepository.profileExists(eq(existingEmail), any(), any())).thenAnswer {
@@ -241,7 +262,9 @@ class RegisterScreenTest {
     }
 
     // Act
-    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+    }
 
     composeTestRule.onNodeWithTag("emailInput").performTextInput(existingEmail)
 
@@ -275,7 +298,9 @@ class RegisterScreenTest {
     }
 
     // Act
-    composeTestRule.setContent { RegisterScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent {
+      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+    }
 
     composeTestRule.onNodeWithTag("emailInput").performTextInput(newEmail)
 
@@ -311,6 +336,7 @@ class RegisterScreenTest {
             _: String,
             _: String,
             _: ProfileViewModel,
+            _: LoggedInProfileViewModel,
             onSuccess: () -> Unit,
             _: () -> Unit ->
           createAccountFuncCalled = true
@@ -320,7 +346,8 @@ class RegisterScreenTest {
     composeTestRule.setContent {
       RegisterScreen(
           navigationActions = navigationActions,
-          profileViewModel = profileViewModel,
+          userViewModel = profileViewModel,
+          loggedInProfileViewModel = loggedInProfileViewModel,
           createAccountFunc = testCreateAccountFunc)
     }
 
@@ -376,6 +403,7 @@ class RegisterScreenTest {
             _: String,
             _: String,
             _: ProfileViewModel,
+            _: LoggedInProfileViewModel,
             _: () -> Unit,
             onFailure: () -> Unit ->
           createAccountFuncCalled = true
@@ -385,7 +413,8 @@ class RegisterScreenTest {
     composeTestRule.setContent {
       RegisterScreen(
           navigationActions = navigationActions,
-          profileViewModel = profileViewModel,
+          userViewModel = profileViewModel,
+          loggedInProfileViewModel = loggedInProfileViewModel,
           createAccountFunc = testCreateAccountFunc,
       )
     }
