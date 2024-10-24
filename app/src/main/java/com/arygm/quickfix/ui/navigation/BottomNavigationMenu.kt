@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
+import com.arygm.quickfix.BuildConfig
 import com.arygm.quickfix.R
 import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 
@@ -39,17 +40,25 @@ fun BottomNavigationMenu(
           tabList.forEachIndexed { index, tab ->
             // Get the drawable resource from the ImageVector
             val drawableId = convertImageVectorToDrawableId(tab.icon)
-            add(MeowBottomNavigation.Model(index + 1, drawableId))
-          }
+            val model = MeowBottomNavigation.Model(index + 1, drawableId)
+            model.icon = drawableId // Set the icon of the model
+            if (BuildConfig
+                .DEBUG) { // when we'll want to generate the APK since it will be in release mode
+              // normally this will not be executed
+              model.count = tab.route // Set the count of the model
+              countBackgroundColor = 0
+            }
 
+            id = index + 1 // Set the ID of the model
+            // Add the model to MeowBottomNavigation
+            add(model)
+          }
           // Set design colors
           circleColor = colorScheme.primary.toArgb() // Central button color
           backgroundBottomColor = colorScheme.surface.toArgb() // Orange background color
           defaultIconColor =
               colorScheme.tertiaryContainer.toArgb() // Default icon color (unselected)
           selectedIconColor = colorScheme.surface.toArgb() // Selected icon color
-
-          // Define a listener for item show events
           setOnShowListener { model ->
             // Handle item show event
             Log.d("MeowBottomNavigation", "Item shown: ${model.id}")
@@ -74,6 +83,7 @@ fun BottomNavigationMenu(
           } catch (e: Exception) {
             Log.e("MeowBottomNavigation", "Failed to call show(): ${e.message}")
           }
+          contentDescription = "MeowBottomNavigation"
         }
       },
       modifier = Modifier.fillMaxWidth().testTag("BottomNavMenu"))
