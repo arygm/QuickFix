@@ -2,15 +2,18 @@ package com.arygm.quickfix.utils
 
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
+import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.Profile
-import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.GeoPoint
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -39,7 +42,9 @@ class SignInWithEmailAndPasswordTest {
 
   @Mock private lateinit var authResult: AuthResult
 
-  @Mock private lateinit var profileRepository: ProfileRepository
+  @Mock private lateinit var profileRepository: UserProfileRepositoryFirestore
+
+  private lateinit var loggedInProfileViewModel: LoggedInProfileViewModel
 
   private lateinit var profileViewModel: ProfileViewModel
 
@@ -65,6 +70,7 @@ class SignInWithEmailAndPasswordTest {
 
     // Initialize profileViewModel with the mocked repository
     profileViewModel = ProfileViewModel(profileRepository)
+    loggedInProfileViewModel = LoggedInProfileViewModel()
 
     // Mock FirebaseAuth.getInstance().currentUser
     whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
@@ -83,13 +89,13 @@ class SignInWithEmailAndPasswordTest {
     val uid = "testUid"
 
     val profile =
-        Profile(
+        UserProfile(
             uid = uid,
             firstName = "John",
             lastName = "Doe",
             email = email,
             birthDate = Timestamp.now(),
-            description = "Test user")
+            location = GeoPoint(0.0, 0.0))
 
     // Mock FirebaseAuth behavior
     val signInTaskCompletionSource = TaskCompletionSource<AuthResult>()
@@ -114,7 +120,8 @@ class SignInWithEmailAndPasswordTest {
     signInWithEmailAndFetchProfile(
         email = email,
         password = password,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -134,7 +141,7 @@ class SignInWithEmailAndPasswordTest {
     verify(profileRepository).getProfileById(eq(uid), any(), any())
 
     // Verify that the loggedInProfile was set
-    assertEquals(profile, profileViewModel.loggedInProfile.value)
+    assertEquals(profile, loggedInProfileViewModel.loggedInProfile.value)
   }
 
   @Test
@@ -157,7 +164,8 @@ class SignInWithEmailAndPasswordTest {
     signInWithEmailAndFetchProfile(
         email = email,
         password = password,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -207,7 +215,8 @@ class SignInWithEmailAndPasswordTest {
     signInWithEmailAndFetchProfile(
         email = email,
         password = password,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -224,7 +233,7 @@ class SignInWithEmailAndPasswordTest {
     assertFalse(resultValue == true)
 
     // Verify that loggedInProfile was not set
-    assertNull(profileViewModel.loggedInProfile.value)
+    assertNull(loggedInProfileViewModel.loggedInProfile.value)
   }
 
   @Test
@@ -249,7 +258,8 @@ class SignInWithEmailAndPasswordTest {
     signInWithEmailAndFetchProfile(
         email = email,
         password = password,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -300,7 +310,8 @@ class SignInWithEmailAndPasswordTest {
     signInWithEmailAndFetchProfile(
         email = email,
         password = password,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -317,7 +328,7 @@ class SignInWithEmailAndPasswordTest {
     assertFalse(resultValue == true)
 
     // Verify that loggedInProfile was not set
-    assertNull(profileViewModel.loggedInProfile.value)
+    assertNull(loggedInProfileViewModel.loggedInProfile.value)
   }
 
   @Test
@@ -340,7 +351,8 @@ class SignInWithEmailAndPasswordTest {
     signInWithEmailAndFetchProfile(
         email = email,
         password = password,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -380,7 +392,8 @@ class SignInWithEmailAndPasswordTest {
     signInWithEmailAndFetchProfile(
         email = email,
         password = password,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -420,7 +433,8 @@ class SignInWithEmailAndPasswordTest {
     signInWithEmailAndFetchProfile(
         email = email,
         password = password,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result

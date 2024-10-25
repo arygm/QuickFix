@@ -88,6 +88,7 @@ jobs:
           ./gradlew check --parallel --build-cache
 
       - name: Run instrumentation tests
+        id : androidTesting
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
@@ -97,7 +98,19 @@ jobs:
           force-avd-creation: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 1080x1920
           disable-animations: true
-          script: ./gradlew connectedCheck --parallel --build-cache
+          script: |
+            adb logcat -c                             # clear logs
+            touch app/emulator.log                    # create log file
+            chmod 777 app/emulator.log                # allow writing to log file
+            adb logcat >> app/emulator.log &          # pipe all logcat messages into log file as a background process
+            ./gradlew connectedCheck --parallel --build-cache                  # here run your tests   
+
+      - name: Upload Failing Test Report Log
+        if: failure()        # upload the generated log on failure of the tests job
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          path: app/emulator.log # path to where the log is
 
       # This step generates the coverage report which will be used later in the semster for monitoring purposes
       - name: Generate coverage

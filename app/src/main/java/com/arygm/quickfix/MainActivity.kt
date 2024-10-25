@@ -30,13 +30,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.DashboardScreen
 import com.arygm.quickfix.ui.SearchScreen
-import com.arygm.quickfix.ui.authentication.InfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
-import com.arygm.quickfix.ui.authentication.PasswordScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.home.HomeScreen
@@ -71,8 +69,12 @@ fun QuickFixApp() {
   val rootNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(rootNavController) }
 
-  val profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
-  val registrationViewModel = RegistrationViewModel()
+  val userViewModel: ProfileViewModel =
+      viewModel(key = "userViewModel", factory = ProfileViewModel.UserFactory)
+
+  val workerViewModel: ProfileViewModel =
+      viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
+  val loggedInProfileViewModel: LoggedInProfileViewModel = viewModel()
 
   val isUser = false // TODO: This variable needs to get its value after the authentication
   val screen by remember { navigationActions::currentScreen }
@@ -135,15 +137,15 @@ fun QuickFixApp() {
                   startDestination = Screen.WELCOME,
                   route = Route.WELCOME,
               ) {
-                composable(Screen.WELCOME) { WelcomeScreen(navigationActions, profileViewModel) }
-                composable(Screen.LOGIN) { LogInScreen(navigationActions, profileViewModel) }
-                composable(Screen.INFO) {
-                  InfoScreen(navigationActions, registrationViewModel, profileViewModel)
+                composable(Screen.WELCOME) {
+                  WelcomeScreen(navigationActions, userViewModel, loggedInProfileViewModel)
                 }
-                composable(Screen.PASSWORD) {
-                  PasswordScreen(navigationActions, registrationViewModel, profileViewModel)
+                composable(Screen.LOGIN) {
+                  LogInScreen(navigationActions, userViewModel, loggedInProfileViewModel)
                 }
-                composable(Screen.REGISTER) { RegisterScreen(navigationActions, profileViewModel) }
+                composable(Screen.REGISTER) {
+                  RegisterScreen(navigationActions, userViewModel, loggedInProfileViewModel)
+                }
               }
 
               composable(Route.HOME) { HomeNavHost(innerPadding, isUser) }
@@ -152,7 +154,10 @@ fun QuickFixApp() {
 
               composable(Route.DASHBOARD) { DashBoardNavHost(innerPadding, isUser) }
 
-              composable(Route.PROFILE) { ProfileNavHost(innerPadding, isUser, profileViewModel) }
+              composable(Route.PROFILE) {
+                ProfileNavHost(
+                    innerPadding, isUser, userViewModel, workerViewModel, loggedInProfileViewModel)
+              }
             }
       }
 }
@@ -174,7 +179,9 @@ fun HomeNavHost(innerPadding: PaddingValues, isUser: Boolean) {
 fun ProfileNavHost(
     innerPadding: PaddingValues,
     isUser: Boolean,
-    profileViewModel: ProfileViewModel
+    userViewModel: ProfileViewModel,
+    workerViewModel: ProfileViewModel,
+    loggedInProfileViewModel: LoggedInProfileViewModel
 ) {
   val profileNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(profileNavController) }
@@ -183,11 +190,17 @@ fun ProfileNavHost(
       startDestination = Screen.PROFILE,
       modifier = Modifier.padding(innerPadding),
   ) {
-    composable(Screen.PROFILE) { ProfileScreen(navigationActions, isUser, profileViewModel) }
-    composable(Screen.ACCOUNT_CONFIGURATION) {
-      ProfileConfigurationScreen(navigationActions, isUser, profileViewModel)
+    composable(Screen.PROFILE) {
+      ProfileScreen(
+          navigationActions, isUser, userViewModel, workerViewModel, loggedInProfileViewModel)
     }
-    composable(Screen.TO_WORKER) { BusinessScreen(navigationActions, profileViewModel) }
+    composable(Screen.ACCOUNT_CONFIGURATION) {
+      ProfileConfigurationScreen(
+          navigationActions, isUser, userViewModel, workerViewModel, loggedInProfileViewModel)
+    }
+    composable(Screen.TO_WORKER) {
+      BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+    }
   }
 }
 

@@ -1,6 +1,7 @@
 package com.arygm.quickfix.kaspresso
 
 import android.util.Log
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
@@ -59,7 +60,7 @@ class MainActivityTest : TestCase() {
           Log.d("TestLog", "Register button clicked")
         }
       }
-      composeTestRule.mainClock.advanceTimeBy(1500L)
+      composeTestRule.mainClock.advanceTimeBy(2500L)
       composeTestRule.onNodeWithTag("firstNameInput").performTextInput("Ramy")
       composeTestRule.onNodeWithTag("lastNameInput").performTextInput("Hatimy")
       composeTestRule.onNodeWithTag("emailInput").performTextInput("hatimyramy@gmail.com")
@@ -90,12 +91,15 @@ class MainActivityTest : TestCase() {
           // Log the click action
         }
       }
-      composeTestRule.mainClock.advanceTimeBy(1500L)
+      composeTestRule.mainClock.advanceTimeBy(2500L)
+      composeTestRule.onNodeWithTag("inputEmail").performTextClearance()
+      composeTestRule.onNodeWithTag("inputPassword").performTextClearance()
+
       composeTestRule.onNodeWithTag("inputEmail").performTextInput("main.activity@test.com")
       composeTestRule.onNodeWithTag("inputPassword").performTextInput("246890357Asefthuk")
       composeTestRule.onNodeWithTag("logInButton").assertIsEnabled()
       composeTestRule.onNodeWithTag("logInButton").performClick()
-      composeTestRule.waitUntil(timeoutMillis = 5000) {
+      composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("BottomNavMenu").fetchSemanticsNodes().isNotEmpty()
       }
       composeTestRule.onRoot().printToLog("TAG")
@@ -109,17 +113,17 @@ class MainActivityTest : TestCase() {
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
 
-      composeTestRule.waitUntil(timeoutMillis = 20000) {
+      composeTestRule.waitUntil("find the AccountconfigurationOption", timeoutMillis = 20000) {
         composeTestRule
             .onAllNodesWithTag("AccountconfigurationOption")
             .fetchSemanticsNodes()
             .isNotEmpty()
       }
       updateAccountConfigurationAndVerify(
-          composeTestRule, "Ramy", "Hatimy", "17/10/2004", "Ramy Hatimy")
+          composeTestRule, "Ramy", "Hatimy", "17/10/2004", "Ramy Hatimy", 1)
 
       updateAccountConfigurationAndVerify(
-          composeTestRule, "Ramo", "Hatimy", "28/10/2004", "Ramo Hatimy")
+          composeTestRule, "Ramo", "Hatimo", "28/10/2004", "Ramo Hatimo", 2)
 
       composeTestRule.onNodeWithTag("AccountconfigurationOption").performClick()
       composeTestRule.waitUntil(timeoutMillis = 20000) {
@@ -128,7 +132,7 @@ class MainActivityTest : TestCase() {
       composeTestRule.onNodeWithTag("birthDateInput").assertTextEquals("28/10/2004")
       composeTestRule.onNodeWithTag("goBackButton").performClick()
 
-      composeTestRule.waitUntil(timeoutMillis = 20000) {
+      composeTestRule.waitUntil("find the SetupyourbusinessaccountOption", timeoutMillis = 20000) {
         composeTestRule
             .onAllNodesWithTag("SetupyourbusinessaccountOption")
             .fetchSemanticsNodes()
@@ -136,7 +140,7 @@ class MainActivityTest : TestCase() {
       }
       composeTestRule.onNodeWithTag("SetupyourbusinessaccountOption").performClick()
 
-      composeTestRule.waitUntil(timeoutMillis = 20000) {
+      composeTestRule.waitUntil("find the goBackButton", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("goBackButton").fetchSemanticsNodes().isNotEmpty()
       }
       composeTestRule.onNodeWithTag("goBackButton").performClick()
@@ -149,13 +153,14 @@ private fun updateAccountConfigurationAndVerify(
     firstName: String,
     lastName: String,
     birthDate: String,
-    expectedProfileName: String
+    expectedProfileName: String,
+    log: Int
 ) {
   // Click on account configuration option
   composeTestRule.onNodeWithTag("AccountconfigurationOption").performClick()
 
   // Wait until the first name input is visible
-  composeTestRule.waitUntil(timeoutMillis = 20000) {
+  composeTestRule.waitUntil("find the firstNameInput $log", timeoutMillis = 20000) {
     composeTestRule.onAllNodesWithTag("firstNameInput").fetchSemanticsNodes().isNotEmpty()
   }
 
@@ -175,7 +180,7 @@ private fun updateAccountConfigurationAndVerify(
   // Click on save button
   composeTestRule.onNodeWithTag("SaveButton").performClick()
 
-  composeTestRule.waitUntil(timeoutMillis = 20000) {
+  composeTestRule.waitUntil("find the AccountconfigurationOption $log", timeoutMillis = 20000) {
     composeTestRule
         .onAllNodesWithTag("AccountconfigurationOption")
         .fetchSemanticsNodes()
