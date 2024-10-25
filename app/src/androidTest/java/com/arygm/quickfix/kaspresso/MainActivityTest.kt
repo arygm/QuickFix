@@ -49,7 +49,7 @@ class MainActivityTest : TestCase() {
           Log.d("TestLog", "Register button clicked")
         }
       }
-      composeTestRule.mainClock.advanceTimeBy(1500L)
+      composeTestRule.mainClock.advanceTimeBy(2500L)
       composeTestRule.onNodeWithTag("firstNameInput").performTextInput("Ramy")
       composeTestRule.onNodeWithTag("lastNameInput").performTextInput("Hatimy")
       composeTestRule.onNodeWithTag("emailInput").performTextInput("hatimyramy@gmail.com")
@@ -72,7 +72,7 @@ class MainActivityTest : TestCase() {
           // Log the click action
         }
       }
-      composeTestRule.mainClock.advanceTimeBy(1500L)
+      composeTestRule.mainClock.advanceTimeBy(2500L)
       composeTestRule.onNodeWithTag("inputEmail").performTextInput("main.activity@test.com")
       composeTestRule.onNodeWithTag("inputPassword").performTextInput("246890357Asefthuk")
       composeTestRule.onNodeWithTag("logInButton").assertIsEnabled()

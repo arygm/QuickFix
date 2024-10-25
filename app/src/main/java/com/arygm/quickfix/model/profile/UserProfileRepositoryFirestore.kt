@@ -6,11 +6,11 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.GeoPoint
 
-class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRepository {
+class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRepository {
 
-  private val collectionPath = "profiles"
+  private val collectionPath = "users"
 
   override fun init(onSuccess: () -> Unit) {
     Firebase.auth.addAuthStateListener {
@@ -21,16 +21,16 @@ class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRep
   }
 
   override fun getProfiles(onSuccess: (List<Profile>) -> Unit, onFailure: (Exception) -> Unit) {
-    Log.d("ProfileRepositoryFirestore", "getProfiles")
+    Log.d("UserProfileRepositoryFirestore", "getProfiles")
     db.collection(collectionPath).get().addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val profiles =
-            task.result?.documents?.mapNotNull { document -> documentToProfile(document) }
+            task.result?.documents?.mapNotNull { document -> documentToUser(document) }
                 ?: emptyList()
         onSuccess(profiles)
       } else {
         task.exception?.let { e ->
-          Log.e("ProfileRepositoryFirestore", "Error getting documents", e)
+          Log.e("UserProfileRepositoryFirestore", "Error getting documents", e)
           onFailure(e)
         }
       }
@@ -43,22 +43,22 @@ class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRep
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    var query: Query = db.collection("worker_profiles")
-
-    query = query.whereEqualTo("isWorker", true)
-
-    fieldOfWork?.let { query = query.whereEqualTo("fieldOfWork", it) }
-
-    hourlyRateThreshold?.let { query = query.whereLessThan("hourlyRate", it) }
-
-    query
-        .get()
-        .addOnSuccessListener { querySnapshot ->
-          val workerProfiles =
-              querySnapshot.documents.mapNotNull { it.toObject(Profile::class.java) }
-          onSuccess(workerProfiles)
-        }
-        .addOnFailureListener { exception -> onFailure(exception) }
+    //        var query: Query = db.collection("worker_profiles")
+    //
+    //        query = query.whereEqualTo("isWorker", true)
+    //
+    //        fieldOfWork?.let { query = query.whereEqualTo("fieldOfWork", it) }
+    //
+    //        hourlyRateThreshold?.let { query = query.whereLessThan("hourlyRate", it) }
+    //
+    //        query
+    //            .get()
+    //            .addOnSuccessListener { querySnapshot ->
+    //                val workerProfiles =
+    //                    querySnapshot.documents.mapNotNull { it.toObject(Profile::class.java) }
+    //                onSuccess(workerProfiles)
+    //            }
+    //            .addOnFailureListener { exception -> onFailure(exception) }
   }
 
   override fun addProfile(profile: Profile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
@@ -95,14 +95,14 @@ class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRep
         .addOnSuccessListener { querySnapshot ->
           if (!querySnapshot.isEmpty) {
             val document = querySnapshot.documents.first()
-            val profile = documentToProfile(document)
+            val profile = documentToUser(document)
             onSuccess(Pair(true, profile))
           } else {
             onSuccess(Pair(false, null))
           }
         }
         .addOnFailureListener { exception ->
-          Log.e("ProfileRepositoryFirestore", "Error checking if profile exists", exception)
+          Log.e("UserProfileRepositoryFirestore", "Error checking if profile exists", exception)
           onFailure(exception)
         }
   }
@@ -117,31 +117,33 @@ class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRep
         onSuccess()
       } else {
         result.exception?.let { e ->
-          Log.e("ProfileRepositoryFirestore", "Error performing Firestore operation", e)
+          Log.e("UserProfileRepositoryFirestore", "Error performing Firestore operation", e)
           onFailure(e)
         }
       }
     }
   }
 
-  private fun documentToProfile(document: DocumentSnapshot): Profile? {
+  private fun documentToUser(document: DocumentSnapshot): UserProfile? {
     return try {
       val uid = document.id
       val firstName = document.getString("firstName") ?: return null
       val lastName = document.getString("lastName") ?: return null
       val email = document.getString("email") ?: return null
       val birthDate = document.getTimestamp("birthDate") ?: return null
-      val description = document.getString("description") ?: return null
+      val location = document.getGeoPoint("location") ?: GeoPoint(0.0, 0.0)
+      val isWorker = document.getBoolean("isWorker") ?: false
 
-      Profile(
+      UserProfile(
           uid = uid,
           firstName = firstName,
           lastName = lastName,
           email = email,
           birthDate = birthDate,
-          description = description)
+          location = location,
+          isWorker = isWorker)
     } catch (e: Exception) {
-      Log.e("TodosRepositoryFirestore", "Error converting document to ToDo", e)
+      Log.e("UserProfileRepositoryFirestore", "Error converting document to UserProfile", e)
       null
     }
   }
@@ -156,14 +158,14 @@ class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRep
         .get()
         .addOnSuccessListener { document ->
           if (document.exists()) {
-            val profile = documentToProfile(document)
+            val profile = documentToUser(document)
             onSuccess(profile)
           } else {
             onSuccess(null)
           }
         }
         .addOnFailureListener { exception ->
-          Log.e("ProfileRepositoryFirestore", "Error fetching profile", exception)
+          Log.e("UserProfileRepositoryFirestore", "Error fetching profile", exception)
           onFailure(exception)
         }
   }

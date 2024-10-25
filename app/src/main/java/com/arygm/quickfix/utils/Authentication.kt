@@ -8,8 +8,9 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import com.arygm.quickfix.model.profile.Profile
+import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Firebase
@@ -18,6 +19,7 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -25,7 +27,8 @@ import kotlinx.coroutines.tasks.await
 fun rememberFirebaseAuthLauncher(
     onAuthComplete: (AuthResult) -> Unit,
     onAuthError: (ApiException) -> Unit,
-    profileViewModel: ProfileViewModel
+    userViewModel: ProfileViewModel,
+    loggedInProfileViewModel: LoggedInProfileViewModel
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
   val scope = rememberCoroutineScope()
   return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -39,9 +42,12 @@ fun rememberFirebaseAuthLauncher(
         val user = Firebase.auth.currentUser
 
         user?.let {
-          profileViewModel.fetchUserProfile(it.uid) { existingProfile ->
+          userViewModel.fetchUserProfile(it.uid) { existingProfile ->
             if (existingProfile != null) {
-              profileViewModel.setLoggedInProfile(existingProfile)
+              if (existingProfile is UserProfile) {
+                Log.d("HELLLOO", "ALOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+                loggedInProfileViewModel.setLoggedInProfile(existingProfile)
+              }
               onAuthComplete(authResult)
             } else {
               // Extract user information from Google account
@@ -52,19 +58,18 @@ fun rememberFirebaseAuthLauncher(
 
               // Create a new Profile object
               val profile =
-                  Profile(
+                  UserProfile(
                       uid = uid,
                       firstName = firstName,
                       lastName = lastName,
                       email = email,
-                      birthDate = Timestamp.now(),
-                      description = "")
+                      birthDate = Timestamp.now())
 
               // Save the profile to Firestore
-              profileViewModel.addProfile(
+              userViewModel.addProfile(
                   profile,
                   onSuccess = {
-                    profileViewModel.setLoggedInProfile(profile)
+                    loggedInProfileViewModel.setLoggedInProfile(profile)
                     onAuthComplete(authResult)
                   },
                   onFailure = { exception ->
@@ -83,7 +88,8 @@ fun rememberFirebaseAuthLauncher(
 fun signInWithEmailAndFetchProfile(
     email: String,
     password: String,
-    profileViewModel: ProfileViewModel,
+    userViewModel: ProfileViewModel,
+    loggedInProfileViewModel: LoggedInProfileViewModel,
     onResult: (Boolean) -> Unit
 ) {
   FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
@@ -91,11 +97,13 @@ fun signInWithEmailAndFetchProfile(
     if (task.isSuccessful) {
       val user = FirebaseAuth.getInstance().currentUser
       user?.let {
-        profileViewModel.fetchUserProfile(
+        userViewModel.fetchUserProfile(
             it.uid,
             onResult = { profile ->
               if (profile != null) {
-                profileViewModel.setLoggedInProfile(profile)
+                if (profile is UserProfile) {
+                  loggedInProfileViewModel.setLoggedInProfile(profile)
+                }
                 onResult(true)
               } else {
                 Log.e("Login Screen", "Error Logging in Profile.")
@@ -121,7 +129,8 @@ fun createAccountWithEmailAndPassword(
     email: String,
     password: String,
     birthDate: String,
-    profileViewModel: ProfileViewModel,
+    userViewModel: ProfileViewModel,
+    loggedInProfileViewModel: LoggedInProfileViewModel,
     onSuccess: () -> Unit,
     onFailure: () -> Unit
 ) {
@@ -131,20 +140,21 @@ fun createAccountWithEmailAndPassword(
       user?.let {
         val profile =
             stringToTimestamp(birthDate)?.let { birthTimestamp ->
-              Profile(
+              UserProfile(
                   uid = it.uid,
                   firstName = firstName,
                   lastName = lastName,
                   email = email,
                   birthDate = birthTimestamp,
-                  description = "")
+                  location = GeoPoint(0.0, 0.0),
+                  isWorker = false)
             }
 
         profile?.let { createdProfile ->
-          profileViewModel.addProfile(
+          userViewModel.addProfile(
               createdProfile,
               onSuccess = {
-                profileViewModel.setLoggedInProfile(createdProfile)
+                loggedInProfileViewModel.setLoggedInProfile(createdProfile)
                 onSuccess()
               },
               onFailure = {
