@@ -29,6 +29,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.RegistrationViewModel
@@ -68,11 +70,11 @@ fun QuickFixApp() {
 
   val navController = rememberNavController()
   val navigationActions = remember { NavigationActions(navController) }
-
   val userViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory)
   val workerViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.WorkerFactory)
-  val loggedInProfileViewModel: LoggedInProfileViewModel = LoggedInProfileViewModel()
+  val loggedInAccountViewModel: LoggedInAccountViewModel = viewModel(factory = LoggedInAccountViewModel.Factory)
   val registrationViewModel = RegistrationViewModel()
+    val accountViewModel : AccountViewModel = viewModel(factory = AccountViewModel.Factory)
 
   val isUser = false // TODO: This variable needs to get its value after the authentication
   val screen by remember { navigationActions::currentScreen }
@@ -139,13 +141,13 @@ fun QuickFixApp() {
                   route = Route.WELCOME,
               ) {
                 composable(Screen.WELCOME) {
-                  WelcomeScreen(navigationActions, userViewModel, loggedInProfileViewModel)
+                  WelcomeScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
                 }
                 composable(Screen.LOGIN) {
-                  LogInScreen(navigationActions, userViewModel, loggedInProfileViewModel)
+                  LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
                 }
                 composable(Screen.REGISTER) {
-                  RegisterScreen(navigationActions, userViewModel, loggedInProfileViewModel)
+                  RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
                 }
               }
               navigation(

@@ -8,6 +8,8 @@ import kotlin.math.sqrt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+/*
+
 class WorkerListViewModel(private val repository: ProfileRepositoryFirestore) : ViewModel() {
 
   private val _workerProfiles = MutableStateFlow<List<Profile>>(emptyList())
@@ -56,3 +58,5 @@ class WorkerListViewModel(private val repository: ProfileRepositoryFirestore) : 
     return earthRadius * c
   }
 }
+
+ */
