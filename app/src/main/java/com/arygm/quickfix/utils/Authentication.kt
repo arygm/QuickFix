@@ -19,6 +19,7 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -43,7 +44,10 @@ fun rememberFirebaseAuthLauncher(
         user?.let {
           userViewModel.fetchUserProfile(it.uid) { existingProfile ->
             if (existingProfile != null) {
-              loggedInProfileViewModel.setLoggedInProfile(existingProfile)
+              if (existingProfile is UserProfile) {
+                Log.d("HELLLOO", "ALOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+                loggedInProfileViewModel.setLoggedInProfile(existingProfile)
+              }
               onAuthComplete(authResult)
             } else {
               // Extract user information from Google account
@@ -97,7 +101,9 @@ fun signInWithEmailAndFetchProfile(
             it.uid,
             onResult = { profile ->
               if (profile != null) {
-                loggedInProfileViewModel.setLoggedInProfile(profile)
+                if (profile is UserProfile) {
+                  loggedInProfileViewModel.setLoggedInProfile(profile)
+                }
                 onResult(true)
               } else {
                 Log.e("Login Screen", "Error Logging in Profile.")
@@ -139,7 +145,9 @@ fun createAccountWithEmailAndPassword(
                   firstName = firstName,
                   lastName = lastName,
                   email = email,
-                  birthDate = birthTimestamp)
+                  birthDate = birthTimestamp,
+                  location = GeoPoint(0.0, 0.0),
+                  isWorker = false)
             }
 
         profile?.let { createdProfile ->

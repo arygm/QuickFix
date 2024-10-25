@@ -69,9 +69,12 @@ fun QuickFixApp() {
   val navController = rememberNavController()
   val navigationActions = remember { NavigationActions(navController) }
 
-  val userViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory)
-  val workerViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.WorkerFactory)
-  val loggedInProfileViewModel: LoggedInProfileViewModel = LoggedInProfileViewModel()
+  val userViewModel: ProfileViewModel =
+      viewModel(key = "userViewModel", factory = ProfileViewModel.UserFactory)
+
+  val workerViewModel: ProfileViewModel =
+      viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
+  val loggedInProfileViewModel: LoggedInProfileViewModel = viewModel()
   val registrationViewModel = RegistrationViewModel()
 
   val isUser = false // TODO: This variable needs to get its value after the authentication

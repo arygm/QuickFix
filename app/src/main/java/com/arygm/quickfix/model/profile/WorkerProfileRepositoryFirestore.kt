@@ -6,6 +6,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
 
 class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRepository {
 
@@ -123,17 +124,17 @@ class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : Prof
     }
   }
 
-  private fun documentToWorker(document: DocumentSnapshot): Profile? {
+  private fun documentToWorker(document: DocumentSnapshot): WorkerProfile? {
     return try {
       val uid = document.id
       val firstName = document.getString("firstName") ?: return null
       val lastName = document.getString("lastName") ?: return null
       val email = document.getString("email") ?: return null
       val birthDate = document.getTimestamp("birthDate") ?: return null
-      val description = document.getString("description") ?: return null
-      val location = document.getGeoPoint("location") ?: return null
-      val fieldOfWork = document.getString("fieldOfWork") ?: return null
-      val hourlyRate = document.getDouble("hourlyRate") ?: return null
+      val description = document.getString("description") ?: ""
+      val location = document.getGeoPoint("location") ?: GeoPoint(0.0, 0.0)
+      val fieldOfWork = document.getString("fieldOfWork") ?: "return null"
+      val hourlyRate = document.getDouble("hourlyRate") ?: 0.0
 
       WorkerProfile(
           uid = uid,

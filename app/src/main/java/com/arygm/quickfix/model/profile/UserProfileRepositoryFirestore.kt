@@ -6,6 +6,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
 
 class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRepository {
 
@@ -130,8 +131,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : Profil
       val lastName = document.getString("lastName") ?: return null
       val email = document.getString("email") ?: return null
       val birthDate = document.getTimestamp("birthDate") ?: return null
-      val location = document.getGeoPoint("location") ?: return null
-      val isWorker = document.getBoolean("isWorker") ?: return null
+      val location = document.getGeoPoint("location") ?: GeoPoint(0.0, 0.0)
+      val isWorker = document.getBoolean("isWorker") ?: false
 
       UserProfile(
           uid = uid,
