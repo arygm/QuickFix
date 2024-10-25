@@ -270,7 +270,7 @@ fun RegisterScreen(
                                         emailError = !isValidEmail(it)
                                         userViewModel.profileExists(email) { exists, profile ->
                                           emailError =
-                                              if (exists && profile != null) {
+                                              if (exists) {
                                                 true
                                               } else {
                                                 !isValidEmail(it)

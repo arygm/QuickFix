@@ -281,6 +281,7 @@ fun ProfileConfigurationScreen(
 
               // Save button
               Button(
+                  enabled = !emailError,
                   onClick = {
                     val calendar = GregorianCalendar()
                     val parts = birthDate.split("/")
