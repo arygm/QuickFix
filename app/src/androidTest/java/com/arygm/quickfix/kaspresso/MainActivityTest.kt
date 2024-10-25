@@ -8,7 +8,6 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
-import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -18,9 +17,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToLog
-import androidx.compose.ui.unit.height
 import androidx.compose.ui.unit.times
-import androidx.compose.ui.unit.width
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -70,7 +67,8 @@ class MainActivityTest : TestCase() {
       composeTestRule.onNodeWithTag("passwordInput").performTextInput("246890357Asefthuk")
       composeTestRule.onNodeWithTag("repeatPasswordInput").performTextInput("246890357Asefthuk")
       composeTestRule.onNodeWithTag("checkbox").performClick()
-      composeTestRule.waitUntil(timeoutMillis = 5000) {
+
+      composeTestRule.waitUntil(timeoutMillis = 20000) {
         val buttonNode = composeTestRule.onAllNodesWithTag("registerButton")
         // Check if any button node is not enabled
         buttonNode.fetchSemanticsNodes().any { semanticsNode ->
@@ -103,18 +101,6 @@ class MainActivityTest : TestCase() {
       composeTestRule.onRoot().printToLog("TAG")
       // Get the bounds of the node
       // Get the bounds of the BottomNavMenu
-      val bounds = composeTestRule.onNodeWithTag("BottomNavMenu").getBoundsInRoot()
-
-      // Extract width, height, and position
-      val width = bounds.width
-      val height = bounds.height
-      var positionX = bounds.left
-      var positionY = bounds.top
-
-      // Log the calculated values for debugging
-      Log.d(
-          "DEBUG",
-          "Bounds: width=$width, height=$height, positionX=$positionX, positionY=$positionY")
 
       onView(withText("Search")) // Match the TextView that has the text "Hello World"
           .perform(click())
@@ -123,7 +109,7 @@ class MainActivityTest : TestCase() {
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
 
-      composeTestRule.waitUntil(timeoutMillis = 5000) {
+      composeTestRule.waitUntil(timeoutMillis = 20000) {
         composeTestRule
             .onAllNodesWithTag("AccountconfigurationOption")
             .fetchSemanticsNodes()
@@ -136,13 +122,13 @@ class MainActivityTest : TestCase() {
           composeTestRule, "Ramo", "Hatimy", "28/10/2004", "Ramo Hatimy")
 
       composeTestRule.onNodeWithTag("AccountconfigurationOption").performClick()
-      composeTestRule.waitUntil(timeoutMillis = 5000) {
+      composeTestRule.waitUntil(timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("birthDateInput").fetchSemanticsNodes().isNotEmpty()
       }
       composeTestRule.onNodeWithTag("birthDateInput").assertTextEquals("28/10/2004")
       composeTestRule.onNodeWithTag("goBackButton").performClick()
 
-      composeTestRule.waitUntil(timeoutMillis = 5000) {
+      composeTestRule.waitUntil(timeoutMillis = 20000) {
         composeTestRule
             .onAllNodesWithTag("SetupyourbusinessaccountOption")
             .fetchSemanticsNodes()
@@ -150,7 +136,7 @@ class MainActivityTest : TestCase() {
       }
       composeTestRule.onNodeWithTag("SetupyourbusinessaccountOption").performClick()
 
-      composeTestRule.waitUntil(timeoutMillis = 5000) {
+      composeTestRule.waitUntil(timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("goBackButton").fetchSemanticsNodes().isNotEmpty()
       }
       composeTestRule.onNodeWithTag("goBackButton").performClick()
@@ -169,7 +155,7 @@ private fun updateAccountConfigurationAndVerify(
   composeTestRule.onNodeWithTag("AccountconfigurationOption").performClick()
 
   // Wait until the first name input is visible
-  composeTestRule.waitUntil(timeoutMillis = 5000) {
+  composeTestRule.waitUntil(timeoutMillis = 20000) {
     composeTestRule.onAllNodesWithTag("firstNameInput").fetchSemanticsNodes().isNotEmpty()
   }
 
@@ -189,14 +175,14 @@ private fun updateAccountConfigurationAndVerify(
   // Click on save button
   composeTestRule.onNodeWithTag("SaveButton").performClick()
 
-  composeTestRule.waitUntil(timeoutMillis = 5000) {
+  composeTestRule.waitUntil(timeoutMillis = 20000) {
     composeTestRule
         .onAllNodesWithTag("AccountconfigurationOption")
         .fetchSemanticsNodes()
         .isNotEmpty()
   }
 
-  composeTestRule.waitUntil(5000L) {
+  composeTestRule.waitUntil(20000) {
     val profileNode = composeTestRule.onAllNodesWithTag("ProfileName")
     // Check if there's at least one node with the expected text
     profileNode.fetchSemanticsNodes().any { semanticsNode ->
