@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -31,6 +32,8 @@ class WelcomeScreenTest {
   private lateinit var navigationActions: NavigationActions
   private lateinit var profileRepository: ProfileRepository
   private lateinit var profileViewModel: ProfileViewModel
+  private lateinit var loggedInProfileViewModel: LoggedInProfileViewModel
+
   private var intentsInitialized = false // Keep track of Intents initialization
 
   @Before
@@ -38,6 +41,7 @@ class WelcomeScreenTest {
     navigationActions = mock(NavigationActions::class.java)
     profileRepository = mock(ProfileRepository::class.java)
     profileViewModel = ProfileViewModel(profileRepository)
+    loggedInProfileViewModel = LoggedInProfileViewModel()
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.WELCOME)
   }
@@ -53,7 +57,9 @@ class WelcomeScreenTest {
 
   @Test
   fun testInitialState() {
-    composeTestRule.setContent { WelcomeScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent {
+      WelcomeScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+    }
 
     // Check if the background image is displayed
     composeTestRule.onNodeWithTag("welcomeBox").assertIsDisplayed()
@@ -83,7 +89,9 @@ class WelcomeScreenTest {
 
   @Test
   fun testLogInButtonClickNavigatesToLogin() {
-    composeTestRule.setContent { WelcomeScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent {
+      WelcomeScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+    }
 
     // Click the "LOG IN TO QUICKFIX" button
     composeTestRule.onNodeWithTag("logInButton").performClick()
@@ -98,7 +106,9 @@ class WelcomeScreenTest {
 
   @Test
   fun testRegistrationButtonClickNavigatesToRegister() {
-    composeTestRule.setContent { WelcomeScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent {
+      WelcomeScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+    }
 
     // Click the "REGISTER TO QUICKFIX" button
     composeTestRule.onNodeWithTag("RegistrationButton").performClick()
@@ -117,7 +127,9 @@ class WelcomeScreenTest {
     Intents.init()
     intentsInitialized = true // Mark Intents as initialized
 
-    composeTestRule.setContent { WelcomeScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent {
+      WelcomeScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+    }
 
     // Perform click on the Google Sign-In button
     composeTestRule.onNodeWithTag("googleButton").performClick()

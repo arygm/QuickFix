@@ -2,9 +2,10 @@ package com.arygm.quickfix.utils
 
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
+import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.Profile
-import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.AuthResult
@@ -37,7 +38,9 @@ class CreateAccountWithEmailAndPasswordTest {
 
   @Mock private lateinit var authResult: AuthResult
 
-  @Mock private lateinit var profileRepository: ProfileRepository
+  @Mock private lateinit var profileRepository: UserProfileRepositoryFirestore
+
+  @Mock private lateinit var loggedInProfileViewModel: LoggedInProfileViewModel
 
   private lateinit var profileViewModel: ProfileViewModel
 
@@ -108,7 +111,8 @@ class CreateAccountWithEmailAndPasswordTest {
         email = email,
         password = password,
         birthDate = birthDate,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -159,7 +163,8 @@ class CreateAccountWithEmailAndPasswordTest {
         email = email,
         password = password,
         birthDate = birthDate,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -212,7 +217,8 @@ class CreateAccountWithEmailAndPasswordTest {
         email = email,
         password = password,
         birthDate = birthDate,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -264,7 +270,8 @@ class CreateAccountWithEmailAndPasswordTest {
         email = email,
         password = password,
         birthDate = birthDate,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -305,7 +312,8 @@ class CreateAccountWithEmailAndPasswordTest {
         email = email,
         password = password,
         birthDate = birthDate,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onSuccess = {},
         onFailure = {})
 
@@ -345,7 +353,8 @@ class CreateAccountWithEmailAndPasswordTest {
         email = email,
         password = password,
         birthDate = birthDate,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -387,7 +396,8 @@ class CreateAccountWithEmailAndPasswordTest {
         email = email,
         password = password,
         birthDate = birthDate,
-        profileViewModel = profileViewModel,
+        userViewModel = profileViewModel,
+        loggedInProfileViewModel = loggedInProfileViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 

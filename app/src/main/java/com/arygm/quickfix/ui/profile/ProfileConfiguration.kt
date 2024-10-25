@@ -47,10 +47,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
-import com.arygm.quickfix.model.profile.Profile
+import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.ui.authentication.CustomTextField
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -67,10 +67,12 @@ import java.util.GregorianCalendar
 fun ProfileConfigurationScreen(
     navigationActions: NavigationActions,
     isUser: Boolean = true,
-    profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
+    userViewModel: ProfileViewModel,
+    workerViewModel: ProfileViewModel,
+    loggedInProfileViewModel: LoggedInProfileViewModel
 ) {
   val loggedInProfile =
-      profileViewModel.loggedInProfile.collectAsState().value
+      loggedInProfileViewModel.loggedInProfile.collectAsState().value
           ?: return Text(
               text = "No profile currently selected. Should not happen",
               color = colorScheme.primary)
@@ -209,7 +211,7 @@ fun ProfileConfigurationScreen(
                           onValueChange = {
                             email = it
                             emailError = !isValidEmail(it)
-                            profileViewModel.profileExists(email) { exists, profile ->
+                            userViewModel.profileExists(email) { exists, profile ->
                               emailError =
                                   exists && profile != null && email != loggedInProfile.email
                             }
@@ -279,6 +281,7 @@ fun ProfileConfigurationScreen(
 
               // Save button
               Button(
+                  enabled = !emailError,
                   onClick = {
                     val calendar = GregorianCalendar()
                     val parts = birthDate.split("/")
@@ -292,19 +295,26 @@ fun ProfileConfigurationScreen(
                             0,
                             0)
 
-                        profileViewModel.updateProfile(
-                            Profile(
-                                uid = loggedInProfile.uid,
-                                firstName = firstName,
-                                lastName = lastName,
-                                email = email,
-                                birthDate = Timestamp(calendar.time),
-                                description = loggedInProfile.description,
-                                isWorker = loggedInProfile.isWorker,
-                                fieldOfWork = loggedInProfile.fieldOfWork,
-                                hourlyRate = loggedInProfile.hourlyRate))
-                        navigationActions.goBack()
-                        return@Button
+                        if (loggedInProfile is UserProfile) {
+                          userViewModel.updateProfile(
+                              UserProfile(
+                                  uid = loggedInProfile.uid,
+                                  firstName = firstName,
+                                  lastName = lastName,
+                                  email = email,
+                                  birthDate = Timestamp(calendar.time),
+                                  isWorker = loggedInProfile.isWorker),
+                              onSuccess = {
+                                userViewModel.fetchUserProfile(loggedInProfile.uid) { profile ->
+                                  loggedInProfileViewModel.setLoggedInProfile(profile!!)
+                                }
+                              },
+                              onFailure = {})
+                          navigationActions.goBack()
+                          return@Button
+                        } else {
+                          // TODO
+                        }
                       } catch (_: NumberFormatException) {}
                     }
 

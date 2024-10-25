@@ -38,8 +38,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
@@ -51,9 +51,11 @@ import com.google.firebase.auth.auth
 fun ProfileScreen(
     navigationActions: NavigationActions,
     isUser: Boolean = true,
-    profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
+    userViewModel: ProfileViewModel,
+    workerViewModel: ProfileViewModel,
+    loggedInProfileViewModel: LoggedInProfileViewModel
 ) {
-  val loggedInProfile by profileViewModel.loggedInProfile.collectAsState()
+  val loggedInProfile by loggedInProfileViewModel.loggedInProfile.collectAsState()
   // List of options handled by the profile screen
   val options =
       listOf(
@@ -271,7 +273,7 @@ fun ProfileScreen(
               // Logout Button
               Button(
                   onClick = {
-                    profileViewModel.logOut(Firebase.auth)
+                    loggedInProfileViewModel.logOut(Firebase.auth)
                     navigationActions.navigateTo(Screen.WELCOME)
                     Log.d("user", Firebase.auth.currentUser.toString())
                   },
