@@ -92,34 +92,37 @@ fun signInWithEmailAndFetchProfile(
     loggedInProfileViewModel: LoggedInProfileViewModel,
     onResult: (Boolean) -> Unit
 ) {
-  FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
-      task ->
-    if (task.isSuccessful) {
-      val user = FirebaseAuth.getInstance().currentUser
-      user?.let {
-        userViewModel.fetchUserProfile(
-            it.uid,
-            onResult = { profile ->
-              if (profile != null) {
-                if (profile is UserProfile) {
-                  loggedInProfileViewModel.setLoggedInProfile(profile)
-                }
-                onResult(true)
-              } else {
-                Log.e("Login Screen", "Error Logging in Profile. profile is null")
+  FirebaseAuth.getInstance()
+      .signInWithEmailAndPassword(email, password)
+      .addOnCompleteListener { // it fails here since the task is not successful for the CI i don't
+          // know why but it works on my local machine
+          task ->
+        if (task.isSuccessful) {
+          val user = FirebaseAuth.getInstance().currentUser
+          user?.let {
+            userViewModel.fetchUserProfile(
+                it.uid,
+                onResult = { profile ->
+                  if (profile != null) {
+                    if (profile is UserProfile) {
+                      loggedInProfileViewModel.setLoggedInProfile(profile)
+                    }
+                    onResult(true)
+                  } else {
+                    Log.e("Login Screen", "Error Logging in Profile. profile is null")
+                    onResult(false)
+                  }
+                })
+          }
+              ?: run {
+                Log.e("Login Screen", "Error Logging in Profile. user is null")
                 onResult(false)
               }
-            })
+        } else {
+          Log.e("Login Screen", "Error Logging in Profile. Exception: ${task.exception}")
+          onResult(false)
+        }
       }
-          ?: run {
-            Log.e("Login Screen", "Error Logging in Profile. user is null")
-            onResult(false)
-          }
-    } else {
-      Log.e("Login Screen", "Error Logging in Profile. task is not succesful")
-      onResult(false)
-    }
-  }
 }
 
 fun createAccountWithEmailAndPassword(
