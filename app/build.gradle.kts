@@ -13,6 +13,11 @@ plugins {
 }
 
 android {
+    buildFeatures {
+        buildConfig = true
+        compose = true
+        dataBinding = true
+    }
     namespace = "com.arygm.quickfix"
     compileSdk = 34
 
@@ -51,11 +56,7 @@ android {
         }
     }
 
-    buildFeatures {
-        compose = true
-        dataBinding = true
-        buildConfig = true
-    }
+
 
     buildTypes {
         release {
@@ -177,6 +178,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.espresso.core)
     implementation(libs.androidx.espresso.intents)
+    implementation(libs.mockk.android)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.mockk)

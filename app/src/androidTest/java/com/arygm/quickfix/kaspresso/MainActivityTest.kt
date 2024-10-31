@@ -19,6 +19,7 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.unit.times
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -26,6 +27,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.kaspresso.screen.WelcomeScreen
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.kaspersky.kaspresso.flakysafety.*
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen
@@ -44,6 +49,20 @@ class MainActivityTest : TestCase() {
 
   @Before
   fun setup() {
+    FirebaseApp.clearInstancesForTest()
+    FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
+
+    // Configure Firestore to use the emulator
+    val firestore = FirebaseFirestore.getInstance()
+    firestore.useEmulator("10.0.2.2", 8080)
+
+    // Disable offline persistence
+    firestore.firestoreSettings =
+        FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build()
+
+    // Configure FirebaseAuth to use the emulator
+    FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099)
+
     // Initialize the navigationActions mock
     navigationActions = Mockito.mock(NavigationActions::class.java)
   }
