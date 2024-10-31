@@ -2,42 +2,45 @@ package com.arygm.quickfix.ui.profile
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import com.arygm.quickfix.model.Location.Location
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
-import com.arygm.quickfix.model.profile.*
+import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
+import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.account.AccountConfigurationScreen
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Calendar
 import java.util.GregorianCalendar
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.*
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.*
+import org.mockito.Mockito.never
+import org.mockito.kotlin.*
 
 class ProfileConfigurationScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
-  private lateinit var navigationActions: NavigationActions
-  private lateinit var mockFirestore: FirebaseFirestore
-  private lateinit var accountRepository: AccountRepository
+  // Mocked dependencies
+  @Mock private lateinit var navigationActions: NavigationActions
+  @Mock private lateinit var accountRepository: AccountRepository
+  @Mock private lateinit var userProfileRepositoryFirestore: UserProfileRepositoryFirestore
+  @Mock private lateinit var workerProfileRepositoryFirestore: WorkerProfileRepositoryFirestore
+
+  // The ViewModels under test
   private lateinit var accountViewModel: AccountViewModel
   private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
-  private lateinit var userProfileRepositoryFirestore: ProfileRepository
-  private lateinit var workerProfileRepositoryFirestore: ProfileRepository
 
-  private val testUserProfile =
+  // Test Accounts and Profiles
+  private val testUserAccount =
       Account(
           uid = "testUid",
           firstName = "John",
@@ -46,20 +49,184 @@ class ProfileConfigurationScreenTest {
           email = "john.doe@example.com",
           isWorker = false)
 
+  private val testUserProfile =
+      UserProfile(
+          uid = "testUid",
+          locations =
+              listOf(
+                  Location(latitude = 0.0, longitude = 0.0, name = "Home"),
+                  Location(latitude = 1.0, longitude = 1.0, name = "Work"))
+          // Initialize other fields as necessary
+          )
+
+  private val testWorkerAccount =
+      Account(
+          uid = "workerUid",
+          firstName = "Jane",
+          lastName = "Smith",
+          birthDate = Timestamp.now(),
+          email = "jane.smith@example.com",
+          isWorker = true)
+
+  private val testWorkerProfile =
+      WorkerProfile(
+          uid = "workerUid",
+          fieldOfWork = "Plumbing",
+          hourlyRate = 30.0,
+          description = "Experienced plumber",
+          location = Location(latitude = 40.7128, longitude = -74.0060, name = "New York"))
+
   @Before
   fun setup() {
-    mockFirestore = mock(FirebaseFirestore::class.java)
-    navigationActions = mock(NavigationActions::class.java)
-    userProfileRepositoryFirestore = mock(ProfileRepository::class.java)
-    workerProfileRepositoryFirestore = mock(ProfileRepository::class.java)
-    accountRepository = mock(AccountRepository::class.java)
+    // Initialize Mockito annotations
+    MockitoAnnotations.openMocks(this)
+
+    // Initialize ViewModels with mocked repositories
     accountViewModel = AccountViewModel(accountRepository)
     loggedInAccountViewModel =
         LoggedInAccountViewModel(
             userProfileRepo = userProfileRepositoryFirestore,
             workerProfileRepo = workerProfileRepositoryFirestore)
-    loggedInAccountViewModel.loggedInAccount_.value = testUserProfile
   }
+
+  /** Helper function to mock getProfileById for UserProfileRepositoryFirestore. */
+  private fun mockUserProfileRepository(uid: String, profile: UserProfile?) {
+    doAnswer { invocation ->
+          val calledUid = invocation.getArgument<String>(0)
+          val onSuccess = invocation.getArgument<(UserProfile?) -> Unit>(1)
+          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
+          if (calledUid == uid) {
+            onSuccess(profile)
+          } else {
+            onSuccess(null)
+          }
+          null
+        }
+        .whenever(userProfileRepositoryFirestore)
+        .getProfileById(eq(uid), any(), any())
+  }
+
+  /** Helper function to mock getProfileById for WorkerProfileRepositoryFirestore. */
+  private fun mockWorkerProfileRepository(uid: String, profile: WorkerProfile?) {
+    doAnswer { invocation ->
+          val calledUid = invocation.getArgument<String>(0)
+          val onSuccess = invocation.getArgument<(WorkerProfile?) -> Unit>(1)
+          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
+          if (calledUid == uid) {
+            onSuccess(profile)
+          } else {
+            onSuccess(null)
+          }
+          null
+        }
+        .whenever(workerProfileRepositoryFirestore)
+        .getProfileById(eq(uid), any(), any())
+  }
+
+  /**
+   * Test Scenario 1: Set account to User1 (UID = "testUid", isWorker = false) Verify that only the
+   * `loggedInAccount` and `userProfile` are updated. `workerProfile` should remain null.
+   */
+  @Test
+  fun setLoggedInAccount_toUser_updatesLoggedInAccountAndUserProfileOnly() {
+    // Arrange
+    mockUserProfileRepository(testUserAccount.uid, testUserProfile)
+    // Since isWorker = false, workerProfileRepo.getProfileById should not be called
+
+    // Act
+    loggedInAccountViewModel.setLoggedInAccount(testUserAccount)
+
+    // Assert
+    // Verify that getProfileById was called on userProfileRepo
+    verify(userProfileRepositoryFirestore).getProfileById(eq(testUserAccount.uid), any(), any())
+
+    // Verify that getProfileById was not called on workerProfileRepo
+    verify(workerProfileRepositoryFirestore, never()).getProfileById(any(), any(), any())
+
+    // Check the state flows
+    val loggedInAccount = loggedInAccountViewModel.loggedInAccount.value
+    val userProfile = loggedInAccountViewModel.userProfile.value
+    val workerProfile = loggedInAccountViewModel.workerProfile.value
+
+    assertEquals(testUserAccount, loggedInAccount)
+    assertEquals(testUserProfile, userProfile)
+    assertNull(workerProfile)
+  }
+
+  /**
+   * Test Scenario 2: Set account to Worker1 (UID = "workerUid", isWorker = true) Verify that
+   * `loggedInAccount`, `userProfile`, and `workerProfile` are all updated.
+   */
+  @Test
+  fun setLoggedInAccount_toWorker_updatesAllProfiles() {
+    // Arrange
+    mockUserProfileRepository(testWorkerAccount.uid, testUserProfile) // Assuming userProfile exists
+    mockWorkerProfileRepository(testWorkerAccount.uid, testWorkerProfile)
+
+    // Act
+    loggedInAccountViewModel.setLoggedInAccount(testWorkerAccount)
+
+    // Assert
+    // Verify that getProfileById was called on both repositories
+    verify(userProfileRepositoryFirestore).getProfileById(eq(testWorkerAccount.uid), any(), any())
+    verify(workerProfileRepositoryFirestore).getProfileById(eq(testWorkerAccount.uid), any(), any())
+
+    // Check the state flows
+    val loggedInAccount = loggedInAccountViewModel.loggedInAccount.value
+    val userProfile = loggedInAccountViewModel.userProfile.value
+    val workerProfile = loggedInAccountViewModel.workerProfile.value
+
+    assertEquals(testWorkerAccount, loggedInAccount)
+    assertEquals(testUserProfile, userProfile)
+    assertEquals(testWorkerProfile, workerProfile)
+  }
+
+  /**
+   * Test Scenario 3: Set account to User2 (UID = "2", isWorker = false) Verify that only the
+   * `loggedInAccount` and `userProfile` are updated. `workerProfile` should remain null.
+   */
+  @Test
+  fun setLoggedInAccount_toUser2_updatesLoggedInAccountAndUserProfileOnly() {
+    // Arrange
+    val user2 =
+        Account(
+            uid = "2",
+            firstName = "Alice",
+            lastName = "Johnson",
+            birthDate = Timestamp.now(),
+            email = "alice.johnson@example.com",
+            isWorker = false)
+    val userProfile2 =
+        UserProfile(
+            uid = "2",
+            locations =
+                listOf(Location(latitude = 34.0522, longitude = -118.2437, name = "Los Angeles"))
+            // Initialize other fields as necessary
+            )
+    mockUserProfileRepository(user2.uid, userProfile2)
+
+    // Act
+    loggedInAccountViewModel.setLoggedInAccount(user2)
+
+    // Assert
+    // Verify that getProfileById was called on userProfileRepo
+    verify(userProfileRepositoryFirestore).getProfileById(eq(user2.uid), any(), any())
+
+    // Verify that getProfileById was not called on workerProfileRepo
+    verify(workerProfileRepositoryFirestore, never()).getProfileById(any(), any(), any())
+
+    // Check the state flows
+    val loggedInAccount = loggedInAccountViewModel.loggedInAccount.value
+    val userProfile = loggedInAccountViewModel.userProfile.value
+    val workerProfile = loggedInAccountViewModel.workerProfile.value
+
+    assertEquals(user2, loggedInAccount)
+    assertEquals(userProfile2, userProfile)
+    assertNull(workerProfile)
+  }
+
+  // ----- Existing Test Methods -----
+  // (Include all your existing @Test methods here without changes)
 
   @Test
   fun testUpdateFirstNameAndLastName() {
@@ -104,7 +271,7 @@ class ProfileConfigurationScreenTest {
     // Arrange
     doAnswer { invocation ->
           val email = invocation.getArgument<String>(0)
-          val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
+          val onSuccess = invocation.getArgument<(Pair<Boolean, Account?>) -> Unit>(1)
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           // Simulate that the profile does not exist
           onSuccess(Pair(false, null))
@@ -243,6 +410,7 @@ class ProfileConfigurationScreenTest {
     composeTestRule.onNodeWithTag("ChangePasswordButton").performClick()
 
     // Since the action is not implemented, verify that nothing crashes
+    // No assertions needed; if the test doesn't throw, it's successful
   }
 
   @Test
@@ -264,12 +432,12 @@ class ProfileConfigurationScreenTest {
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           val updatedProfile =
               Account(
-                  uid = testUserProfile.uid,
+                  uid = testUserAccount.uid,
                   firstName = "Jane",
-                  lastName = testUserProfile.lastName,
-                  email = testUserProfile.email,
-                  birthDate = testUserProfile.birthDate,
-                  isWorker = testUserProfile.isWorker)
+                  lastName = testUserAccount.lastName,
+                  email = testUserAccount.email,
+                  birthDate = testUserAccount.birthDate,
+                  isWorker = testUserAccount.isWorker)
           onSuccess(updatedProfile)
           null
         }
@@ -295,7 +463,7 @@ class ProfileConfigurationScreenTest {
     composeTestRule.waitForIdle()
 
     // Check that the displayed name is updated
-    composeTestRule.onNodeWithTag("AccountName").assertTextEquals("Jane Doe")
+    composeTestRule.onNodeWithTag("ProfileName").assertTextEquals("Jane Doe")
   }
 
   @Test

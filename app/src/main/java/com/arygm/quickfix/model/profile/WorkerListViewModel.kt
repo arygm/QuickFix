@@ -1,13 +1,5 @@
 package com.arygm.quickfix.model.profile
 
-import androidx.lifecycle.ViewModel
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-
 /*
 
 class WorkerListViewModel(private val repository: ProfileRepositoryFirestore) : ViewModel() {

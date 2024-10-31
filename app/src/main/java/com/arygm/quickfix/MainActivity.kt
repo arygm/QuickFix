@@ -31,11 +31,10 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.DashboardScreen
 import com.arygm.quickfix.ui.SearchScreen
+import com.arygm.quickfix.ui.account.AccountConfigurationScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
@@ -45,7 +44,6 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.profile.BusinessScreen
-import com.arygm.quickfix.ui.profile.ProfileConfigurationScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import kotlinx.coroutines.delay
@@ -70,11 +68,13 @@ fun QuickFixApp() {
 
   val navController = rememberNavController()
   val navigationActions = remember { NavigationActions(navController) }
-  val userViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory)
-  val workerViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.WorkerFactory)
-  val loggedInAccountViewModel: LoggedInAccountViewModel = viewModel(factory = LoggedInAccountViewModel.Factory)
-  val registrationViewModel = RegistrationViewModel()
-    val accountViewModel : AccountViewModel = viewModel(factory = AccountViewModel.Factory)
+  val userViewModel: ProfileViewModel =
+      viewModel(key = "userViewModel", factory = ProfileViewModel.UserFactory)
+  val workerViewModel: ProfileViewModel =
+      viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
+  val loggedInAccountViewModel: LoggedInAccountViewModel =
+      viewModel(factory = LoggedInAccountViewModel.Factory)
+  val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
 
   val isUser = false // TODO: This variable needs to get its value after the authentication
   val screen by remember { navigationActions::currentScreen }
@@ -141,13 +141,15 @@ fun QuickFixApp() {
                   route = Route.WELCOME,
               ) {
                 composable(Screen.WELCOME) {
-                  WelcomeScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+                  WelcomeScreen(
+                      navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
                 }
                 composable(Screen.LOGIN) {
                   LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
                 }
                 composable(Screen.REGISTER) {
-                  RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+                  RegisterScreen(
+                      navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
                 }
               }
               navigation(
@@ -175,23 +177,18 @@ fun QuickFixApp() {
               ) {
                 composable(Screen.PROFILE) {
                   ProfileScreen(
-                      navigationActions,
-                      isUser,
-                      userViewModel,
-                      workerViewModel,
-                      loggedInProfileViewModel)
+                      navigationActions, loggedInAccountViewModel = loggedInAccountViewModel)
                 }
                 composable(Screen.ACCOUNT_CONFIGURATION) {
-                  ProfileConfigurationScreen(
-                      navigationActions,
-                      isUser,
-                      userViewModel,
-                      workerViewModel,
-                      loggedInProfileViewModel)
+                  AccountConfigurationScreen(
+                      navigationActions, accountViewModel, loggedInAccountViewModel)
                 }
                 composable(Screen.TO_WORKER) {
                   BusinessScreen(
-                      navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+                      navigationActions,
+                      accountViewModel,
+                      workerViewModel,
+                      loggedInAccountViewModel)
                 }
               }
             }

@@ -12,7 +12,7 @@ interface AccountRepository {
 
   fun deleteAccountById(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
-  fun accountExists (
+  fun accountExists(
       email: String,
       onSuccess: (Pair<Boolean, Account?>) -> Unit,
       onFailure: (Exception) -> Unit

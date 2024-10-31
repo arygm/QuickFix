@@ -8,9 +8,12 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import com.arygm.quickfix.model.Location.Location
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Firebase
@@ -27,7 +30,8 @@ fun rememberFirebaseAuthLauncher(
     onAuthComplete: (AuthResult) -> Unit,
     onAuthError: (ApiException) -> Unit,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel
+    loggedInAccountViewModel: LoggedInAccountViewModel,
+    userViewModel: ProfileViewModel,
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
   val scope = rememberCoroutineScope()
   return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -43,7 +47,7 @@ fun rememberFirebaseAuthLauncher(
         user?.let {
           accountViewModel.fetchUserAccount(it.uid) { existingAccount ->
             if (existingAccount != null) {
-                loggedInAccountViewModel.setLoggedInAccount(existingAccount)
+              loggedInAccountViewModel.setLoggedInAccount(existingAccount)
               onAuthComplete(authResult)
             } else {
               // Extract user information from Google account
@@ -61,16 +65,21 @@ fun rememberFirebaseAuthLauncher(
                       email = email,
                       birthDate = Timestamp.now())
 
-              // Save the account to Firestore
-              accountViewModel.addAccount(
-                  account,
+              val defaultLocation = Location(0.0, 0.0, "defaultLocation")
+              val defaultUserProfile =
+                  UserProfile(uid = it.uid, locations = listOf(defaultLocation))
+              userViewModel.addProfile(
+                  defaultUserProfile,
                   onSuccess = {
-                      loggedInAccountViewModel.setLoggedInAccount(account)
-                    onAuthComplete(authResult)
+                    accountViewModel.addAccount(
+                        account,
+                        onSuccess = {
+                          loggedInAccountViewModel.setLoggedInAccount(account)
+                          onAuthComplete(authResult)
+                        },
+                        onFailure = { Log.e("Registration", "Failed to save account") })
                   },
-                  onFailure = { exception ->
-                    Log.e("Google SignIn", "Failed to save new account", exception)
-                  })
+                  onFailure = { Log.e("Registration", "Failed to create User Profile") })
             }
           }
         } ?: run { Log.e("Google SignIn", "User Null After Sign In") }
@@ -125,6 +134,7 @@ fun createAccountWithEmailAndPassword(
     birthDate: String,
     accountViewModel: AccountViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
+    userViewModel: ProfileViewModel,
     onSuccess: () -> Unit,
     onFailure: () -> Unit
 ) {
@@ -141,24 +151,37 @@ fun createAccountWithEmailAndPassword(
                   email = email,
                   birthDate = birthTimestamp)
             }
-
-        account?.let { createdAccount ->
-          accountViewModel.addAccount(
-              createdAccount,
-              onSuccess = {
-                loggedInAccountViewModel.setLoggedInAccount(createdAccount)
-                onSuccess()
-              },
-              onFailure = {
-                Log.e("Registration", "Failed to save account")
-                onFailure()
-              })
+        if (account == null) {
+          Log.e("Registration", "Invalid BirthDate.")
+          onFailure()
         }
-            ?: run {
-              Log.e("Registration", "Failed to create account")
+        val defaultLocation = Location(0.0, 0.0, "defaultLocation")
+        val defaultUserProfile = UserProfile(uid = it.uid, locations = listOf(defaultLocation))
+        userViewModel.addProfile(
+            defaultUserProfile,
+            onSuccess = {
+              account?.let { createdAccount ->
+                accountViewModel.addAccount(
+                    createdAccount,
+                    onSuccess = {
+                      loggedInAccountViewModel.setLoggedInAccount(createdAccount)
+                      onSuccess()
+                    },
+                    onFailure = {
+                      Log.e("Registration", "Failed to save account")
+                      onFailure()
+                    })
+              }
+            },
+            onFailure = {
+              Log.e("Registration", "Failed to create User Profile")
               onFailure()
-            }
+            })
       }
+          ?: run {
+            Log.e("Registration", "Failed to create account")
+            onFailure()
+          }
     } else {
       Log.e("Registration", "Error creating account: ${task.exception?.message}")
       onFailure()

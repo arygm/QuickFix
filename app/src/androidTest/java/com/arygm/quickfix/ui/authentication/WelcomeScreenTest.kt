@@ -10,11 +10,15 @@ import androidx.compose.ui.test.performClick
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
-import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.account.AccountRepository
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.google.firebase.firestore.FirebaseFirestore
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -30,18 +34,29 @@ class WelcomeScreenTest {
   @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
   private lateinit var navigationActions: NavigationActions
-  private lateinit var profileRepository: ProfileRepository
-  private lateinit var profileViewModel: ProfileViewModel
-  private lateinit var loggedInProfileViewModel: LoggedInProfileViewModel
+  private lateinit var mockFirestore: FirebaseFirestore
+  private lateinit var accountRepository: AccountRepository
+  private lateinit var accountViewModel: AccountViewModel
+  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
+  private lateinit var userProfileRepositoryFirestore: UserProfileRepositoryFirestore
+  private lateinit var workerProfileRepositoryFirestore: WorkerProfileRepositoryFirestore
+  private lateinit var userViewModel: ProfileViewModel
 
   private var intentsInitialized = false // Keep track of Intents initialization
 
   @Before
   fun setup() {
+    mockFirestore = mock(FirebaseFirestore::class.java)
     navigationActions = mock(NavigationActions::class.java)
-    profileRepository = mock(ProfileRepository::class.java)
-    profileViewModel = ProfileViewModel(profileRepository)
-    loggedInProfileViewModel = LoggedInProfileViewModel()
+    userProfileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore)
+    workerProfileRepositoryFirestore = WorkerProfileRepositoryFirestore(mockFirestore)
+    accountRepository = mock(AccountRepository::class.java)
+    accountViewModel = AccountViewModel(accountRepository)
+    userViewModel = ProfileViewModel(userProfileRepositoryFirestore)
+    loggedInAccountViewModel =
+        LoggedInAccountViewModel(
+            userProfileRepo = userProfileRepositoryFirestore,
+            workerProfileRepo = workerProfileRepositoryFirestore)
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.WELCOME)
   }
@@ -58,7 +73,7 @@ class WelcomeScreenTest {
   @Test
   fun testInitialState() {
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      WelcomeScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
     }
 
     // Check if the background image is displayed
@@ -90,7 +105,7 @@ class WelcomeScreenTest {
   @Test
   fun testLogInButtonClickNavigatesToLogin() {
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      WelcomeScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
     }
 
     // Click the "LOG IN TO QUICKFIX" button
@@ -107,7 +122,7 @@ class WelcomeScreenTest {
   @Test
   fun testRegistrationButtonClickNavigatesToRegister() {
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      WelcomeScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
     }
 
     // Click the "REGISTER TO QUICKFIX" button
@@ -128,7 +143,7 @@ class WelcomeScreenTest {
     intentsInitialized = true // Mark Intents as initialized
 
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      WelcomeScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
     }
 
     // Perform click on the Google Sign-In button

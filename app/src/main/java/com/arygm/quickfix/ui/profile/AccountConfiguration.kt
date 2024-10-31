@@ -291,22 +291,21 @@ fun AccountConfigurationScreen(
                             0,
                             0,
                             0)
-                          accountViewModel.updateAccount(
-                              Account(
-                                  uid = loggedInAccount.uid,
-                                  firstName = firstName,
-                                  lastName = lastName,
-                                  email = email,
-                                  birthDate = Timestamp(calendar.time)),
-                              onSuccess = {
-                                accountViewModel.fetchUserAccount(loggedInAccount.uid) { account ->
-                                  loggedInAccountViewModel.setLoggedInAccount(account!!)
-                                }
-                              },
-                              onFailure = {})
-                          navigationActions.goBack()
-                          return@Button
-
+                        accountViewModel.updateAccount(
+                            Account(
+                                uid = loggedInAccount.uid,
+                                firstName = firstName,
+                                lastName = lastName,
+                                email = email,
+                                birthDate = Timestamp(calendar.time)),
+                            onSuccess = {
+                              accountViewModel.fetchUserAccount(loggedInAccount.uid) { account ->
+                                loggedInAccountViewModel.setLoggedInAccount(account!!)
+                              }
+                            },
+                            onFailure = {})
+                        navigationActions.goBack()
+                        return@Button
                       } catch (_: NumberFormatException) {}
                     }
 
@@ -314,6 +313,7 @@ fun AccountConfigurationScreen(
                             context, "Invalid format, date must be DD/MM/YYYY.", Toast.LENGTH_SHORT)
                         .show()
                   },
+                  enabled = !emailError && !birthDateError,
                   modifier =
                       Modifier.fillMaxWidth(0.8f).padding(horizontal = 16.dp).testTag("SaveButton"),
                   colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {

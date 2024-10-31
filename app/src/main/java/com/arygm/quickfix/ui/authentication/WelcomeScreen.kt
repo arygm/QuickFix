@@ -44,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
@@ -59,7 +60,8 @@ import kotlinx.coroutines.delay
 fun WelcomeScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel
+    loggedInAccountViewModel: LoggedInAccountViewModel,
+    userViewModel: ProfileViewModel
 ) {
   val colorScheme = MaterialTheme.colorScheme
 
@@ -84,7 +86,8 @@ fun WelcomeScreen(
           },
           onAuthError = { Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}") },
           accountViewModel,
-          loggedInAccountViewModel = loggedInAccountViewModel)
+          loggedInAccountViewModel = loggedInAccountViewModel,
+          userViewModel = userViewModel)
 
   val token = stringResource(com.arygm.quickfix.R.string.default_web_client_id)
 

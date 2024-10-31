@@ -80,17 +80,16 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : Profil
   private fun documentToUser(document: DocumentSnapshot): UserProfile? {
     return try {
       val uid = document.id
-        val locationsData = document.get("locations") as? List<Map<String, Any>>
-        val locations = locationsData?.map { map ->
+      val locationsData = document.get("locations") as? List<Map<String, Any>> ?: return null
+      val locations =
+          locationsData?.map { map ->
             Location(
                 latitude = map["latitude"] as? Double ?: 0.0,
                 longitude = map["longitude"] as? Double ?: 0.0,
-                name = map["name"] as? String ?: ""
-            ) } ?: emptyList()
+                name = map["name"] as? String ?: "")
+          } ?: emptyList()
 
-      UserProfile(
-          uid = uid,
-          locations = locations)
+      UserProfile(uid = uid, locations = locations)
     } catch (e: Exception) {
       Log.e("UserProfileRepositoryFirestore", "Error converting document to UserProfile", e)
       null

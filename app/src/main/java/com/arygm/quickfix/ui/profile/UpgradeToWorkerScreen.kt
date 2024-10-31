@@ -36,13 +36,10 @@ import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.model.profile.UserProfile
-import com.arygm.quickfix.model.profile.WorkerCategory
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import com.google.firebase.firestore.GeoPoint
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -319,9 +316,11 @@ fun BusinessScreen(
                               profile =
                                   WorkerProfile(
                                       uid = account.uid,
-                                      location = Location(0.0,0.0,"default"),
+                                      location = Location(0.0, 0.0, "default"),
                                       description = description,
-                                      fieldOfWork = WorkerCategory.HomeImprovementAndRepair.Handyman,// we will have to rework the UI to let the user choose the category
+                                      fieldOfWork =
+                                          occupation, // we will have to rework the UI to let the
+                                      // user choose the category
                                       hourlyRate = hourlyRateValue),
                               onSuccess = {
                                 Toast.makeText(

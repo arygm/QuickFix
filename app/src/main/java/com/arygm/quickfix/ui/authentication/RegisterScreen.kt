@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -74,19 +75,21 @@ fun RegisterScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
+    userViewModel: ProfileViewModel,
     firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(), // Injected dependency
     createAccountFunc:
         (
-        firebaseAuth: FirebaseAuth,
-        firstName: String,
-        lastName: String,
-        email: String,
-        password: String,
-        birthDate: String,
-        accountViewModel: AccountViewModel,
-        loggedInAccountViewModel: LoggedInAccountViewModel,
-        onSuccess: () -> Unit,
-        onFailure: () -> Unit) -> Unit =
+            firebaseAuth: FirebaseAuth,
+            firstName: String,
+            lastName: String,
+            email: String,
+            password: String,
+            birthDate: String,
+            accountViewModel: AccountViewModel,
+            loggedInAccountViewModel: LoggedInAccountViewModel,
+            userViewModel: ProfileViewModel,
+            onSuccess: () -> Unit,
+            onFailure: () -> Unit) -> Unit =
         ::createAccountWithEmailAndPassword // Default implementation
 ) {
   val context = LocalContext.current
@@ -461,6 +464,7 @@ fun RegisterScreen(
                                           birthDate,
                                           accountViewModel,
                                           loggedInAccountViewModel,
+                                          userViewModel,
                                           {
                                             navigationActions.navigateTo(TopLevelDestinations.HOME)
                                           },

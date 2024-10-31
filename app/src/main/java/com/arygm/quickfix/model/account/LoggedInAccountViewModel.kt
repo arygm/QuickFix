@@ -2,6 +2,7 @@ package com.arygm.quickfix.model.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfile
@@ -13,9 +14,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class LoggedInAccountViewModel(private val userProfileRepo: UserProfileRepositoryFirestore, private val workerProfileRepo: WorkerProfileRepositoryFirestore) : ViewModel() {
+class LoggedInAccountViewModel(
+    private val userProfileRepo: ProfileRepository,
+    private val workerProfileRepo: ProfileRepository
+) : ViewModel() {
 
-  private val loggedInAccount_ = MutableStateFlow<Account?>(null)
+  val loggedInAccount_ = MutableStateFlow<Account?>(null)
   val loggedInAccount: StateFlow<Account?> = loggedInAccount_.asStateFlow()
   val userProfile_ = MutableStateFlow<UserProfile?>(null)
   val userProfile: StateFlow<UserProfile?> = userProfile_.asStateFlow()
@@ -24,21 +28,26 @@ class LoggedInAccountViewModel(private val userProfileRepo: UserProfileRepositor
 
   companion object {
     val Factory: ViewModelProvider.Factory =
-      object : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-          return LoggedInAccountViewModel(UserProfileRepositoryFirestore(Firebase.firestore), WorkerProfileRepositoryFirestore(Firebase.firestore)) as T
+        object : ViewModelProvider.Factory {
+          @Suppress("UNCHECKED_CAST")
+          override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return LoggedInAccountViewModel(
+                UserProfileRepositoryFirestore(Firebase.firestore),
+                WorkerProfileRepositoryFirestore(Firebase.firestore))
+                as T
+          }
         }
-      }
   }
 
   fun setLoggedInAccount(account: Account) {
     loggedInAccount_.value = account
-    userProfileRepo.getProfileById(account.uid,
+    userProfileRepo.getProfileById(
+        account.uid,
         onSuccess = { userProfile_.value = it as UserProfile? },
         onFailure = { e -> println("Failed to fetch user profile: ${e.message}") })
     if (account.isWorker) {
-      workerProfileRepo.getProfileById(account.uid,
+      workerProfileRepo.getProfileById(
+          account.uid,
           onSuccess = { workerProfile_.value = it as WorkerProfile? },
           onFailure = { e -> println("Failed to fetch worker profile: ${e.message}") })
     }

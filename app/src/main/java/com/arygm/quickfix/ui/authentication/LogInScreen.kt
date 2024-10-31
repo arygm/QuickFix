@@ -61,7 +61,6 @@ import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.isValidEmail
 import com.arygm.quickfix.utils.signInWithEmailAndFetchAccount
-import com.arygm.quickfix.utils.signInWithEmailAndFetchAccount
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
