@@ -12,29 +12,29 @@ on:
       - synchronize
       - reopened
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   quickfix-ci:
     name: CI-QuickFix
-    # Execute the CI on the course's runners
     runs-on: ubuntu-latest
 
     env:
       app_name: QuickFixDebug
+      FIREBASE_PROJECT_ID: quickfix-1fd34  # Replace with your actual Firebase project ID
+      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}  # Add this line
 
     defaults:
       run:
         working-directory: ./${{ env.base_folder }}
 
     steps:
-      # First step : Checkout the repository on the runner
+      # Checkout the repository
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: recursive
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of Sonar analysis (if we use Sonar Later)
+          fetch-depth: 0
 
-      # This step removes the current gradle cache to avoid any caching issues
+      # Remove current Gradle cache
       - name: Remove current gradle cache
         run: rm -rf ~/.gradle
 
@@ -49,6 +49,15 @@ jobs:
         with:
           distribution: "temurin"
           java-version: "17"
+
+      # Setup Node.js and install Firebase CLI
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
 
       - name: Retrieve gradle cache
         uses: actions/cache@v3
@@ -68,27 +77,20 @@ jobs:
           echo "$LOCAL_PROPERTIES" | base64 --decode > ./local.properties
 
       - name: Grant execute permission for gradlew
-        run: |
-          chmod +x ./gradlew
+        run: chmod +x ./gradlew
 
       - name: KTFmt Check
-        run: |
-          # To run the CI with debug informations, add --info
-          ./gradlew ktfmtCheck
+        run: ./gradlew ktfmtCheck
 
-      # This step runs gradle commands to build the application
+      # Build the application
       - name: Assemble
-        run: |
-          # To run the CI with debug information, add --info
-          ./gradlew assembleDebug lint --parallel --build-cache
+        run: ./gradlew assembleDebug lint --parallel --build-cache
 
       - name: Run tests
-        run: |
-          # To run the CI with debug information, add --info
-          ./gradlew check --parallel --build-cache
+        run: ./gradlew check --parallel --build-cache
 
       - name: Run instrumentation tests
-        id : androidTesting
+        id: androidTesting
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
@@ -99,23 +101,25 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 1080x1920
           disable-animations: true
           script: |
-            adb logcat -c                             # clear logs
-            touch app/emulator.log                    # create log file
-            chmod 777 app/emulator.log                # allow writing to log file
-            adb logcat >> app/emulator.log &          # pipe all logcat messages into log file as a background process
-            ./gradlew connectedCheck --parallel --build-cache                  # here run your tests   
+            adb logcat -c                             # Clear logs
+            touch app/emulator.log                    # Create log file
+            chmod 777 app/emulator.log                # Allow writing to log file
+            adb logcat >> app/emulator.log &          # Pipe all logcat messages into log file as a background process
 
+            # Verify Firebase CLI installation
+            firebase --version
+
+            firebase emulators:exec --debug --inspect-functions --project $FIREBASE_PROJECT_ID --import=./end2end-data --only firestore,auth './gradlew connectedCheck --parallel --build-cache'
       - name: Upload Failing Test Report Log
-        if: failure()        # upload the generated log on failure of the tests job
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: logs
-          path: app/emulator.log # path to where the log is
+          path: app/emulator.log
 
-      # This step generates the coverage report which will be used later in the semster for monitoring purposes
+      # Generate coverage report
       - name: Generate coverage
-        run: |
-          ./gradlew jacocoTestReport
+        run: ./gradlew jacocoTestReport
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
@@ -125,6 +129,6 @@ jobs:
 
       - name: Upload report to Sonar cloud
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew sonar --parallel --build-cache

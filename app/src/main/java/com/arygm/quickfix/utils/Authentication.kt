@@ -40,7 +40,6 @@ fun rememberFirebaseAuthLauncher(
       scope.launch {
         val authResult = Firebase.auth.signInWithCredential(credential).await()
         val user = Firebase.auth.currentUser
-
         user?.let {
           userViewModel.fetchUserProfile(it.uid) { existingProfile ->
             if (existingProfile != null) {
@@ -137,44 +136,46 @@ fun createAccountWithEmailAndPassword(
     onSuccess: () -> Unit,
     onFailure: () -> Unit
 ) {
-  firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-    if (task.isSuccessful) {
-      val user = FirebaseAuth.getInstance().currentUser
-      user?.let {
-        val profile =
-            stringToTimestamp(birthDate)?.let { birthTimestamp ->
-              UserProfile(
-                  uid = it.uid,
-                  firstName = firstName,
-                  lastName = lastName,
-                  email = email,
-                  birthDate = birthTimestamp,
-                  location = GeoPoint(0.0, 0.0),
-                  isWorker = false)
-            }
+  FirebaseAuth.getInstance()
+      .createUserWithEmailAndPassword(email, password)
+      .addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+          val user = FirebaseAuth.getInstance().currentUser
+          user?.let {
+            val profile =
+                stringToTimestamp(birthDate)?.let { birthTimestamp ->
+                  UserProfile(
+                      uid = it.uid,
+                      firstName = firstName,
+                      lastName = lastName,
+                      email = email,
+                      birthDate = birthTimestamp,
+                      location = GeoPoint(0.0, 0.0),
+                      isWorker = false)
+                }
 
-        profile?.let { createdProfile ->
-          userViewModel.addProfile(
-              createdProfile,
-              onSuccess = {
-                loggedInProfileViewModel.setLoggedInProfile(createdProfile)
-                onSuccess()
-              },
-              onFailure = {
-                Log.e("Registration", "Failed to save profile")
-                onFailure()
-              })
-        }
-            ?: run {
-              Log.e("Registration", "Failed to create profile")
-              onFailure()
+            profile?.let { createdProfile ->
+              userViewModel.addProfile(
+                  createdProfile,
+                  onSuccess = {
+                    loggedInProfileViewModel.setLoggedInProfile(createdProfile)
+                    onSuccess()
+                  },
+                  onFailure = {
+                    Log.e("Registration", "Failed to save profile")
+                    onFailure()
+                  })
             }
+                ?: run {
+                  Log.e("Registration", "Failed to create profile")
+                  onFailure()
+                }
+          }
+        } else {
+          Log.e("Registration", "Error creating account: ${task.exception?.message}")
+          onFailure()
+        }
       }
-    } else {
-      Log.e("Registration", "Error creating account: ${task.exception?.message}")
-      onFailure()
-    }
-  }
 }
 
 fun logOut(firebaseAuth: FirebaseAuth) {
