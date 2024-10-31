@@ -1,3 +1,4 @@
+import org.gradle.internal.classpath.Instrumented.systemProperty
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.util.Properties
@@ -12,6 +13,11 @@ plugins {
 }
 
 android {
+    buildFeatures {
+        buildConfig = true
+        compose = true
+        dataBinding = true
+    }
     namespace = "com.arygm.quickfix"
     compileSdk = 34
 
@@ -46,8 +52,11 @@ android {
             storePassword = System.getenv("KEYSTORE_PASSWORD") ?: localProperties.getProperty("KEYSTORE_PASSWORD")
             keyAlias = System.getenv("KEY_ALIAS") ?: localProperties.getProperty("KEY_ALIAS")
             keyPassword = System.getenv("KEY_PASSWORD") ?: localProperties.getProperty("KEY_PASSWORD")
+            storeType = "PKCS12" // Add this line if your keystore is PKCS12
         }
     }
+
+
 
     buildTypes {
         release {
@@ -57,11 +66,15 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
+            buildConfigField("boolean", "IS_TESTING", "false")
+            buildConfigField("String", "BUILD_TYPE", "\"DEBUG\"")
         }
 
         debug {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
+            buildConfigField("boolean", "IS_TESTING", "true")
+            buildConfigField("String", "BUILD_TYPE", "\"RELEASE\"")
         }
     }
 
@@ -69,10 +82,7 @@ android {
         jacocoVersion = "0.8.12"
     }
 
-    buildFeatures {
-        compose = true
-        dataBinding = true
-    }
+
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.15"
@@ -168,6 +178,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.espresso.core)
     implementation(libs.androidx.espresso.intents)
+    implementation(libs.mockk.android)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.mockk)
