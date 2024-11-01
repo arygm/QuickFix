@@ -249,7 +249,6 @@ fun LogInScreen(
                             QuickFixButton(
                                 buttonText = "LOGIN",
                                 onClickAction = {
-                                  shrinkBox = false
                                   signInWithEmailAndFetchProfile(
                                       email = email,
                                       password = password,
@@ -258,6 +257,7 @@ fun LogInScreen(
                                       onResult = {
                                         if (it) {
                                           coroutineScope.launch {
+                                            shrinkBox = false
                                             delay(BOX_COLLAPSE_SPEED.toLong())
                                             navigationActions.navigateTo(Screen.HOME)
                                           }
