@@ -81,10 +81,10 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
         email,
         onSuccess = { (exists, profile) ->
           if (exists) {
-            Log.d("ProfileCheck", "Profile with this email exists.")
+            Log.d("ProfileCheck", "Profile with this email : $email exists.")
             onResult(true, profile)
           } else {
-            Log.d("ProfileCheck", "No profile found with this email.")
+            Log.d("ProfileCheck", "No profile found with this email: $email.")
             onResult(false, null)
           }
         },
@@ -100,6 +100,7 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
         onSuccess = { profile ->
           if (profile != null) {
             onResult(profile)
+            Log.d("ProfileViewModel", "profile found for user with UID: $uid")
           } else {
             Log.e("ProfileViewModel", "No profile found for user with UID: $uid")
             onResult(null)

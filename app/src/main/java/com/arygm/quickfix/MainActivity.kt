@@ -9,6 +9,7 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +32,6 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.DashboardScreen
 import com.arygm.quickfix.ui.SearchScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
@@ -66,8 +66,8 @@ class MainActivity : ComponentActivity() {
 @Preview
 fun QuickFixApp() {
 
-  val navController = rememberNavController()
-  val navigationActions = remember { NavigationActions(navController) }
+  val rootNavController = rememberNavController()
+  val navigationActions = remember { NavigationActions(rootNavController) }
 
   val userViewModel: ProfileViewModel =
       viewModel(key = "userViewModel", factory = ProfileViewModel.UserFactory)
@@ -75,7 +75,6 @@ fun QuickFixApp() {
   val workerViewModel: ProfileViewModel =
       viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
   val loggedInProfileViewModel: LoggedInProfileViewModel = viewModel()
-  val registrationViewModel = RegistrationViewModel()
 
   val isUser = false // TODO: This variable needs to get its value after the authentication
   val screen by remember { navigationActions::currentScreen }
@@ -87,7 +86,7 @@ fun QuickFixApp() {
           screen != Screen.INFO &&
           screen != Screen.PASSWORD &&
           screen != Screen.REGISTER &&
-          screen != Screen.ACCOUNT_CONFIGURATION &&
+          // screen != Screen.ACCOUNT_CONFIGURATION &&
           screen != Screen.TO_WORKER
     }
   }
@@ -113,9 +112,6 @@ fun QuickFixApp() {
             exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to the bottom
             modifier = Modifier.testTag("BNM")) {
               BottomNavigationMenu(
-                  selectedItem =
-                      navigationActions
-                          .currentRoute(), // Use the current route, or fallback to HOME
                   onTabSelect = { selectedDestination ->
                     // Use this block to navigate based on the selected tab
                     navigationActions.navigateTo(selectedDestination)
@@ -126,7 +122,7 @@ fun QuickFixApp() {
             }
       }) { innerPadding ->
         NavHost(
-            navController = navController,
+            navController = rootNavController,
             startDestination = Route.WELCOME,
             modifier = Modifier.padding(innerPadding), // Apply padding from the Scaffold
             enterTransition = {
@@ -151,50 +147,85 @@ fun QuickFixApp() {
                   RegisterScreen(navigationActions, userViewModel, loggedInProfileViewModel)
                 }
               }
-              navigation(
-                  startDestination = Screen.HOME,
-                  route = Route.HOME,
-              ) {
-                composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
-                composable(Screen.MESSAGES) { HomeScreen(navigationActions, isUser) }
-              }
-              navigation(
-                  startDestination = Screen.SEARCH,
-                  route = Route.SEARCH,
-              ) {
-                composable(Screen.SEARCH) { SearchScreen(navigationActions, isUser) }
-              }
-              navigation(
-                  startDestination = Screen.DASHBOARD,
-                  route = Route.DASHBOARD,
-              ) {
-                composable(Screen.DASHBOARD) { DashboardScreen(navigationActions, isUser) }
-              }
-              navigation(
-                  startDestination = Screen.PROFILE,
-                  route = Route.PROFILE,
-              ) {
-                composable(Screen.PROFILE) {
-                  ProfileScreen(
-                      navigationActions,
-                      isUser,
-                      userViewModel,
-                      workerViewModel,
-                      loggedInProfileViewModel)
-                }
-                composable(Screen.ACCOUNT_CONFIGURATION) {
-                  ProfileConfigurationScreen(
-                      navigationActions,
-                      isUser,
-                      userViewModel,
-                      workerViewModel,
-                      loggedInProfileViewModel)
-                }
-                composable(Screen.TO_WORKER) {
-                  BusinessScreen(
-                      navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
-                }
+
+              composable(Route.HOME) { HomeNavHost(innerPadding, isUser) }
+
+              composable(Route.SEARCH) { SearchNavHost(innerPadding, isUser) }
+
+              composable(Route.DASHBOARD) { DashBoardNavHost(innerPadding, isUser) }
+
+              composable(Route.PROFILE) {
+                ProfileNavHost(
+                    innerPadding, isUser, userViewModel, workerViewModel, loggedInProfileViewModel)
               }
             }
       }
+}
+
+@Composable
+fun HomeNavHost(innerPadding: PaddingValues, isUser: Boolean) {
+  val homeNavController = rememberNavController()
+  val navigationActions = remember { NavigationActions(homeNavController) }
+  NavHost(
+      navController = homeNavController,
+      startDestination = Screen.HOME,
+      modifier = Modifier.padding(innerPadding),
+  ) {
+    composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
+  }
+}
+
+@Composable
+fun ProfileNavHost(
+    innerPadding: PaddingValues,
+    isUser: Boolean,
+    userViewModel: ProfileViewModel,
+    workerViewModel: ProfileViewModel,
+    loggedInProfileViewModel: LoggedInProfileViewModel
+) {
+  val profileNavController = rememberNavController()
+  val navigationActions = remember { NavigationActions(profileNavController) }
+  NavHost(
+      navController = profileNavController,
+      startDestination = Screen.PROFILE,
+      modifier = Modifier.padding(innerPadding),
+  ) {
+    composable(Screen.PROFILE) {
+      ProfileScreen(
+          navigationActions, isUser, userViewModel, workerViewModel, loggedInProfileViewModel)
+    }
+    composable(Screen.ACCOUNT_CONFIGURATION) {
+      ProfileConfigurationScreen(
+          navigationActions, isUser, userViewModel, workerViewModel, loggedInProfileViewModel)
+    }
+    composable(Screen.TO_WORKER) {
+      BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+    }
+  }
+}
+
+@Composable
+fun DashBoardNavHost(innerPadding: PaddingValues, isUser: Boolean) {
+  val dashboardNavController = rememberNavController()
+  val navigationActions = remember { NavigationActions(dashboardNavController) }
+  NavHost(
+      navController = dashboardNavController,
+      startDestination = Screen.DASHBOARD,
+      modifier = Modifier.padding(innerPadding),
+  ) {
+    composable(Screen.DASHBOARD) { DashboardScreen(navigationActions, isUser) }
+  }
+}
+
+@Composable
+fun SearchNavHost(innerPadding: PaddingValues, isUser: Boolean) {
+  val searchNavController = rememberNavController()
+  val navigationActions = remember { NavigationActions(searchNavController) }
+  NavHost(
+      navController = searchNavController,
+      startDestination = Screen.SEARCH,
+      modifier = Modifier.padding(innerPadding),
+  ) {
+    composable(Screen.SEARCH) { SearchScreen(navigationActions, isUser) }
+  }
 }

@@ -233,26 +233,28 @@ fun LogInScreen(
                             QuickFixButton(
                                 buttonText = "LOGIN",
                                 onClickAction = {
-                                    shrinkBox = false
-                                    signInWithEmailAndFetchProfile(
-                                        email = email,
-                                        password = password,
-                                        userViewModel = userViewModel,
-                                        loggedInProfileViewModel = loggedInProfileViewModel,
-                                        onResult = {
-                                            if (it) {
-                                                coroutineScope.launch {
-                                                    delay(BOX_COLLAPSE_SPEED.toLong())
-                                                    navigationActions.navigateTo(Screen.HOME)
-                                                }
-                                            } else {
-                                                Log.e(
-                                                    "LogInScreen",
-                                                    "Error occurred while signing in"
-                                                )
-                                                errorHasOccurred = true
-                                            }
-                                        })
+
+                                  shrinkBox = false
+                                  signInWithEmailAndFetchProfile(
+                                      email = email,
+                                      password = password,
+                                      userViewModel = userViewModel,
+                                      loggedInProfileViewModel = loggedInProfileViewModel,
+                                      onResult = {
+                                        if (it) {
+                                          coroutineScope.launch {
+                                            delay(BOX_COLLAPSE_SPEED.toLong())
+                                            Log.d("LoginFlow", "Starting login with email: $email")
+                                            navigationActions.navigateTo(TopLevelDestinations.HOME)
+                                          }
+                                        } else {
+                                          Log.e("LogInScreen", "Error occurred while signing in")
+                                          Log.e(
+                                              "email don't exist",
+                                              "Error occurred while signing here's the email: $email")
+                                          errorHasOccurred = true
+                                        }
+                                      })
                                 },
                                 buttonColor = colorScheme.primary,
                                 textColor = colorScheme.onPrimary,
