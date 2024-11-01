@@ -50,7 +50,11 @@ fun QuickFixButton(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = horizontalArrangement,
         ) {
-          Text(text = buttonText, style = textStyle, color = textColor, fontSize = textStyle.fontSize * widthRatio)
+          Text(
+              text = buttonText,
+              style = textStyle,
+              color = textColor,
+              fontSize = textStyle.fontSize * widthRatio)
         }
       }
 }

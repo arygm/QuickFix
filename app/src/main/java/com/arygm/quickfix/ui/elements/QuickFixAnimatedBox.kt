@@ -33,6 +33,5 @@ fun QuickFixAnimatedBox(
               .graphicsLayer(rotationZ = rotation)
               .background(color)
               .zIndex(1f)
-              .testTag("AnimationBox")
-  )
+              .testTag("AnimationBox"))
 }

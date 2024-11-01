@@ -65,205 +65,171 @@ fun WelcomeScreen(
     userViewModel: ProfileViewModel,
     loggedInProfileViewModel: LoggedInProfileViewModel,
 ) {
-    var fadeOut by remember { mutableStateOf(true) }
-    var expandBox by remember { mutableStateOf(true) }
-    var startAnimation by remember { mutableStateOf(false) }
-    var targetScreen by remember { mutableStateOf("") }
+  var fadeOut by remember { mutableStateOf(true) }
+  var expandBox by remember { mutableStateOf(true) }
+  var startAnimation by remember { mutableStateOf(false) }
+  var targetScreen by remember { mutableStateOf("") }
 
-    // Animation properties
-    val elementsAlpha by animateFloatAsState(
-        targetValue = if (fadeOut) 0f else 1f,
-        label = "elementsOpacity"
-    )
+  // Animation properties
+  val elementsAlpha by
+      animateFloatAsState(targetValue = if (fadeOut) 0f else 1f, label = "elementsOpacity")
 
-    val context = LocalContext.current
-    val launcher =
-        rememberFirebaseAuthLauncher(
-            onAuthComplete = { result ->
-                Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
-                navigationActions.navigateTo(TopLevelDestinations.HOME)
-            },
-            onAuthError = { Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}") },
-            userViewModel,
-            loggedInProfileViewModel = loggedInProfileViewModel
-        )
+  val context = LocalContext.current
+  val launcher =
+      rememberFirebaseAuthLauncher(
+          onAuthComplete = { result ->
+            Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
+            navigationActions.navigateTo(TopLevelDestinations.HOME)
+          },
+          onAuthError = { Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}") },
+          userViewModel,
+          loggedInProfileViewModel = loggedInProfileViewModel)
 
-    val token = stringResource(com.arygm.quickfix.R.string.default_web_client_id)
+  val token = stringResource(com.arygm.quickfix.R.string.default_web_client_id)
 
-    // Capture screen constraints
-    BoxWithConstraints(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        val screenWidth = maxWidth
-        val screenHeight = maxHeight
+  // Capture screen constraints
+  BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    val screenWidth = maxWidth
+    val screenHeight = maxHeight
 
-        // Scaling factors for responsive design
-        val widthRatio = screenWidth / referenceWidth
-        val heightRatio = screenHeight / referenceHeight
+    // Scaling factors for responsive design
+    val widthRatio = screenWidth / referenceWidth
+    val heightRatio = screenHeight / referenceHeight
 
-        val boxOffsetX by animateDpAsState(
-            targetValue = if (expandBox) 0.dp else (-890).dp * widthRatio,
-            label = "BoxOffsetX"
-        )
+    val boxOffsetX by
+        animateDpAsState(
+            targetValue = if (expandBox) 0.dp else (-890).dp * widthRatio, label = "BoxOffsetX")
 
-        LaunchedEffect(Unit) {
-            expandBox = false
-            delay(200)
-            fadeOut = false
-            delay(300)
-        }
+    LaunchedEffect(Unit) {
+      expandBox = false
+      delay(200)
+      fadeOut = false
+      delay(300)
+    }
 
-        if (startAnimation) {
-            LaunchedEffect(Unit) {
-                fadeOut = true
-                delay(300)
-                expandBox = true
-                delay(500)
-                navigationActions.navigateTo(targetScreen)
-            }
-        }
+    if (startAnimation) {
+      LaunchedEffect(Unit) {
+        fadeOut = true
+        delay(300)
+        expandBox = true
+        delay(500)
+        navigationActions.navigateTo(targetScreen)
+      }
+    }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .testTag("welcomeBox")
-        ) {
+    Box(modifier = Modifier.fillMaxSize().testTag("welcomeBox")) {
+      Image(
+          painter = painterResource(id = com.arygm.quickfix.R.drawable.worker_image),
+          contentDescription = null,
+          contentScale = ContentScale.FillWidth,
+          alignment = Alignment.TopStart,
+          modifier = Modifier.fillMaxSize().testTag("workerBackground"))
+
+      Box(
+          modifier =
+              Modifier.align(Alignment.BottomStart)
+                  .requiredSize(1700.dp * widthRatio, 1700.dp * widthRatio)
+                  .offset(x = boxOffsetX, y = 60.dp * heightRatio)
+                  .graphicsLayer(rotationZ = -28f)
+                  .background(colorScheme.primary)
+                  .testTag("boxDecoration1"))
+
+      Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.spacedBy(8.dp * heightRatio),
+          modifier =
+              Modifier.fillMaxSize().padding(top = 200.dp * heightRatio).align(Alignment.Center)) {
             Image(
-                painter = painterResource(id = com.arygm.quickfix.R.drawable.worker_image),
+                painter = painterResource(id = com.arygm.quickfix.R.drawable.quickfix),
                 contentDescription = null,
-                contentScale = ContentScale.FillWidth,
-                alignment = Alignment.TopStart,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .testTag("workerBackground")
-            )
-
-            Box(
+                contentScale = ContentScale.Crop,
+                colorFilter = ColorFilter.tint(colorScheme.background),
                 modifier =
-                Modifier
-                    .align(Alignment.BottomStart)
-                    .requiredSize(1700.dp * widthRatio, 1700.dp * widthRatio)
-                    .offset(x = boxOffsetX, y = 60.dp * heightRatio)
-                    .graphicsLayer(rotationZ = -28f)
-                    .background(colorScheme.primary)
-                    .testTag("boxDecoration1")
-            )
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp * heightRatio),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 200.dp * heightRatio)
-                    .align(Alignment.Center)
-            ) {
-                Image(
-                    painter = painterResource(id = com.arygm.quickfix.R.drawable.quickfix),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(colorScheme.background),
-                    modifier = Modifier
-                        .size(283.dp * heightRatio, 333.dp * heightRatio)
+                    Modifier.size(283.dp * heightRatio, 333.dp * heightRatio)
                         .graphicsLayer(rotationZ = 4.57f, alpha = elementsAlpha)
-                        .testTag("quickFixLogo")
-                )
+                        .testTag("quickFixLogo"))
 
-                Text(
-                    text = "QuickFix",
-                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 64.sp * heightRatio),
-                    color = colorScheme.background,
-                    modifier = Modifier
-                        .graphicsLayer(alpha = elementsAlpha)
-                        .testTag("quickFixText")
-                )
+            Text(
+                text = "QuickFix",
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = 64.sp * heightRatio),
+                color = colorScheme.background,
+                modifier = Modifier.graphicsLayer(alpha = elementsAlpha).testTag("quickFixText"))
 
-
-                QuickFixButton(
-                    buttonText = "LOG IN TO QUICKFIX",
-                    onClickAction = {
-                        targetScreen = Screen.LOGIN
-                        startAnimation = true
-                    },
-                    buttonColor = colorScheme.tertiary,
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
+            QuickFixButton(
+                buttonText = "LOG IN TO QUICKFIX",
+                onClickAction = {
+                  targetScreen = Screen.LOGIN
+                  startAnimation = true
+                },
+                buttonColor = colorScheme.tertiary,
+                modifier =
+                    Modifier.fillMaxWidth(0.8f)
                         .height(50.dp * widthRatio)
                         .graphicsLayer(alpha = elementsAlpha)
                         .testTag("logInButton"),
-                    textColor = colorScheme.background,
-                    widthRatio = widthRatio
-                )
+                textColor = colorScheme.background,
+                widthRatio = widthRatio)
 
-                QuickFixButton(
-                    buttonText = "REGISTER TO QUICKFIX",
-                    onClickAction = {
-                        targetScreen = Screen.REGISTER
-                        startAnimation = true
-                    },
-                    buttonColor = colorScheme.background,
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
+            QuickFixButton(
+                buttonText = "REGISTER TO QUICKFIX",
+                onClickAction = {
+                  targetScreen = Screen.REGISTER
+                  startAnimation = true
+                },
+                buttonColor = colorScheme.background,
+                modifier =
+                    Modifier.fillMaxWidth(0.8f)
                         .height(50.dp * widthRatio)
                         .graphicsLayer(alpha = elementsAlpha)
                         .testTag("registrationButton"),
-                    textColor = colorScheme.primary,
-                    widthRatio = widthRatio
-                )
+                textColor = colorScheme.primary,
+                widthRatio = widthRatio)
 
-                Button(
-                    onClick = {
-                        val gso =
-                            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                .requestIdToken(token)
-                                .requestEmail()
-                                .build()
-                        val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                        launcher.launch(googleSignInClient.signInIntent)
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                    border = BorderStroke(2.dp, colorScheme.background),
-                    modifier =
-                    Modifier
-                        .fillMaxWidth(0.8f)
+            Button(
+                onClick = {
+                  val gso =
+                      GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                          .requestIdToken(token)
+                          .requestEmail()
+                          .build()
+                  val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                  launcher.launch(googleSignInClient.signInIntent)
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                border = BorderStroke(2.dp, colorScheme.background),
+                modifier =
+                    Modifier.fillMaxWidth(0.8f)
                         .height(50.dp * widthRatio)
                         .graphicsLayer(alpha = elementsAlpha)
                         .testTag("googleButton"),
-                    shape = RoundedCornerShape(10.dp),
-                    contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 0.dp)
-                    ) {
-                        Image(
-                            painter =
+                shape = RoundedCornerShape(10.dp),
+                contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+            ) {
+              Row(
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.Start,
+                  modifier = Modifier.fillMaxWidth().padding(start = 0.dp)) {
+                    Image(
+                        painter =
                             painterResource(
                                 id = com.arygm.quickfix.R.drawable.google,
                             ),
-                            contentDescription = "Google Logo",
-                            colorFilter = ColorFilter.tint(colorScheme.background),
-                            modifier = Modifier
-                                .size(30.dp)
-                                .offset(x = (-3).dp)
-                                .testTag("googleLogo")
-                        )
+                        contentDescription = "Google Logo",
+                        colorFilter = ColorFilter.tint(colorScheme.background),
+                        modifier = Modifier.size(30.dp).offset(x = (-3).dp).testTag("googleLogo"))
 
-                        Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
 
-                        // Button Text
-                        Text(
-                            text = "CONTINUE WITH GOOGLE",
-                            color = colorScheme.background,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontSize = MaterialTheme.typography.labelMedium.fontSize * widthRatio,
-                        )
-                    }
-
-                }
+                    // Button Text
+                    Text(
+                        text = "CONTINUE WITH GOOGLE",
+                        color = colorScheme.background,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontSize = MaterialTheme.typography.labelMedium.fontSize * widthRatio,
+                    )
+                  }
             }
-        }
+          }
     }
+  }
 }
