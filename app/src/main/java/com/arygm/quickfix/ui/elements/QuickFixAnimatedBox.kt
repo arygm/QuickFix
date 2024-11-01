@@ -23,13 +23,16 @@ fun QuickFixAnimatedBox(
     size: Dp = ANIMATED_BOX_SIZE,
     rotation: Float = ANIMATED_BOX_ROTATION,
     color: Color = colorScheme.primary,
+    widthRatio: Float = 1f,
+    heightRatio: Float = 1f,
 ) {
   Box(
       modifier =
-          Modifier.requiredSize(size)
+          Modifier.requiredSize(size * widthRatio, size * heightRatio)
               .offset(x = xOffset, y = yOffset)
               .graphicsLayer(rotationZ = rotation)
               .background(color)
               .zIndex(1f)
-              .testTag("AnimationBox"))
+              .testTag("AnimationBox")
+  )
 }

@@ -31,6 +31,7 @@ fun QuickFixButton(
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    widthRatio: Float = 1f,
 ) {
   Button(
       onClick = onClickAction,
@@ -49,7 +50,7 @@ fun QuickFixButton(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = horizontalArrangement,
         ) {
-          Text(text = buttonText, style = textStyle, color = textColor)
+          Text(text = buttonText, style = textStyle, color = textColor, fontSize = textStyle.fontSize * widthRatio)
         }
       }
 }
