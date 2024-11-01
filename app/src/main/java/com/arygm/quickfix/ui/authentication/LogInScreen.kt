@@ -234,7 +234,9 @@ fun LogInScreen(
 
                             QuickFixButton(
                                 buttonText = "Forgot your password?",
-                                onClickAction = { /* Navigate to forgor screen */},
+                                onClickAction = {
+                                  navigationActions.navigateTo(Screen.RESET_PASSWORD)
+                                },
                                 buttonColor = Color.Transparent,
                                 textColor = colorScheme.primary,
                                 textStyle = MaterialTheme.typography.headlineSmall,

@@ -139,6 +139,19 @@ class LogInScreenTest {
   }
 
   @Test
+  fun testForgotPasswordLinkNavigatesToResetPassword() {
+    composeTestRule.setContent {
+      LogInScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+    }
+
+    // Click the "Forgot your password?" link
+    composeTestRule.onNodeWithTag("forgetPasswordButtonText").performClick()
+
+    // Verify that the navigation to RESET_PASSWORD was triggered
+    Mockito.verify(navigationActions).navigateTo(Screen.RESET_PASSWORD)
+  }
+
+  @Test
   fun testBackButtonNavigatesBack() {
     composeTestRule.setContent {
       LogInScreen(navigationActions, profileViewModel, loggedInProfileViewModel)

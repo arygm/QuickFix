@@ -36,6 +36,7 @@ import com.arygm.quickfix.ui.DashboardScreen
 import com.arygm.quickfix.ui.SearchScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
+import com.arygm.quickfix.ui.authentication.ResetPasswordScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
@@ -88,7 +89,8 @@ fun QuickFixApp() {
           screen != Screen.PASSWORD &&
           screen != Screen.REGISTER &&
           screen != Screen.ACCOUNT_CONFIGURATION &&
-          screen != Screen.TO_WORKER
+          screen != Screen.TO_WORKER &&
+          screen != Screen.RESET_PASSWORD
     }
   }
 
@@ -149,6 +151,9 @@ fun QuickFixApp() {
                 }
                 composable(Screen.REGISTER) {
                   RegisterScreen(navigationActions, userViewModel, loggedInProfileViewModel)
+                }
+                composable(Screen.RESET_PASSWORD) {
+                  ResetPasswordScreen(navigationActions, userViewModel)
                 }
               }
               navigation(

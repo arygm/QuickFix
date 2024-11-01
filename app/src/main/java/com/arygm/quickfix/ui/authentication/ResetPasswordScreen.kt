@@ -37,7 +37,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
@@ -53,189 +52,161 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun ForgotPasswordScreen(
+fun ResetPasswordScreen(
     navigationActions: NavigationActions,
     userViewModel: ProfileViewModel,
-    loggedInProfileViewModel: LoggedInProfileViewModel
 ) {
-    var errorHasOccurred by remember { mutableStateOf(false) }
-    var emailError = false
+  var errorHasOccurred by remember { mutableStateOf(false) }
+  var emailError = false
 
-    var email by remember { mutableStateOf("") }
+  var email by remember { mutableStateOf("") }
 
-    var shrinkBox by remember { mutableStateOf(false) }
-    val boxOffsetX by
-    animateDpAsState(
-        targetValue = if (shrinkBox) BOX_OFFSET_X_SHRUNK else BOX_OFFSET_X_EXPANDED,
-        animationSpec = tween(durationMillis = BOX_COLLAPSE_SPEED),
-        label = "shrinkingBox"
-    )
+  var shrinkBox by remember { mutableStateOf(false) }
+  val boxOffsetX by
+      animateDpAsState(
+          targetValue = if (shrinkBox) BOX_OFFSET_X_SHRUNK else BOX_OFFSET_X_EXPANDED,
+          animationSpec = tween(durationMillis = BOX_COLLAPSE_SPEED),
+          label = "shrinkingBox")
 
-    val db = FirebaseAuth.getInstance()
-    val coroutineScope = rememberCoroutineScope()
+  val db = FirebaseAuth.getInstance()
+  val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) { shrinkBox = true }
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .testTag("LoginBox")) {
-        QuickFixAnimatedBox(boxOffsetX)
-        Scaffold(
-            modifier =
-            Modifier
-                .background(colorScheme.background)
+  LaunchedEffect(Unit) { shrinkBox = true }
+  Box(modifier = Modifier.fillMaxSize().testTag("LoginBox")) {
+    QuickFixAnimatedBox(boxOffsetX)
+    Scaffold(
+        modifier =
+            Modifier.background(colorScheme.background)
                 .fillMaxSize()
                 .testTag("ForgotPasswordScaffold"),
-            content = { dp ->
+        content = { dp ->
 
-                // Background and content are wrapped in a Box to control the layering
+          // Background and content are wrapped in a Box to control the layering
+          Box(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .testTag("ContentBox")
+                      .background(colorScheme.background)
+                      .padding(dp.calculateBottomPadding())) {
+
+                // TopAppBar below content (layered behind content)
                 Box(
-                    modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .testTag("ContentBox")
-                        .background(colorScheme.background)
-                        .padding(dp.calculateBottomPadding())
-                ) {
-
-                    // TopAppBar below content (layered behind content)
-                    Box(
-                        modifier = Modifier.zIndex(1f) // Lower zIndex so it's behind the content
+                    modifier = Modifier.zIndex(1f) // Lower zIndex so it's behind the content
                     ) {
+                      Image(
+                          painter =
+                              painterResource(id = com.arygm.quickfix.R.drawable.worker_image),
+                          contentDescription = null,
+                          contentScale = ContentScale.Crop,
+                          alignment = Alignment.TopStart,
+                          modifier = Modifier.fillMaxWidth().size(180.dp))
+
+                      Box(modifier = Modifier.fillMaxSize()) {
                         Image(
                             painter =
-                            painterResource(id = com.arygm.quickfix.R.drawable.worker_image),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            alignment = Alignment.TopStart,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .size(180.dp)
-                        )
-
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Image(
-                                painter =
                                 painterResource(
                                     id =
-                                    com.arygm.quickfix.R.drawable
-                                        .worker_image
-                                ), // Replace with your image resource
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .testTag("topBarLoginBackground")
-                            )
-                            QuickFixBackButtonTopBar(
-                                onBackClick = {
-                                    shrinkBox = false
-                                    coroutineScope.launch {
-                                        delay(BOX_COLLAPSE_SPEED.toLong())
-                                        navigationActions.goBack()
-                                    }
-                                },
-                                color = Color.Transparent
-                            )
-                        }
+                                        com.arygm.quickfix.R.drawable
+                                            .worker_image), // Replace with your image resource
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize().testTag("topBarLoginBackground"))
+                        QuickFixBackButtonTopBar(
+                            onBackClick = {
+                              shrinkBox = false
+                              coroutineScope.launch {
+                                delay(BOX_COLLAPSE_SPEED.toLong())
+                                navigationActions.goBack()
+                              }
+                            },
+                            color = Color.Transparent)
+                      }
                     }
 
-                    // Foreground content (on top of the TopAppBar)
-                    Box(
-                        modifier =
-                        Modifier
-                            .fillMaxWidth()
+                // Foreground content (on top of the TopAppBar)
+                Box(
+                    modifier =
+                        Modifier.fillMaxWidth()
                             .align(Alignment.BottomStart)
                             .zIndex(2f)
                             .background(
                                 colorScheme.background,
                                 shape =
-                                RoundedCornerShape(12.dp)
-                            ) // Ensure content is above TopAppBar
+                                    RoundedCornerShape(12.dp)) // Ensure content is above TopAppBar
                     ) {
-                        Box(
-                            modifier =
-                            Modifier
-                                .align(Alignment.BottomStart)
-                                .size(180.dp, 180.dp)
-                                .offset(x = (-150).dp, y = 64.dp)
-                                .graphicsLayer(rotationZ = 57f)
-                                .background(colorScheme.primary)
-                                .testTag("BoxDecoration")
-                        )
+                      Box(
+                          modifier =
+                              Modifier.align(Alignment.BottomStart)
+                                  .size(180.dp, 180.dp)
+                                  .offset(x = (-150).dp, y = 64.dp)
+                                  .graphicsLayer(rotationZ = 57f)
+                                  .background(colorScheme.primary)
+                                  .testTag("BoxDecoration"))
 
-                        Column(
-                            modifier =
-                            Modifier
-                                .align(Alignment.Center)
-                                .padding(16.dp)
-                                .zIndex(100f), // Ensure it's on top
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
+                      Column(
+                          modifier =
+                              Modifier.align(Alignment.Center)
+                                  .padding(16.dp)
+                                  .zIndex(100f), // Ensure it's on top
+                          horizontalAlignment = Alignment.CenterHorizontally,
+                          verticalArrangement = Arrangement.Center) {
                             Text(
                                 "Reset Password",
                                 style = MaterialTheme.typography.headlineLarge,
                                 color = colorScheme.primary,
-                                modifier = Modifier.testTag("WelcomeText")
-                            )
+                                modifier = Modifier.testTag("WelcomeText"))
 
                             Spacer(modifier = Modifier.padding(10.dp))
 
                             QuickFixTextFieldCustom(
                                 value = email,
                                 onValueChange = {
-                                    email = it
-                                    userViewModel.profileExists(email) { exists, profile ->
-                                        emailError =
-                                            if (exists && profile != null) {
-                                                !isValidEmail(it)
-                                            } else {
-                                                true
-                                            }
-                                    }
+                                  email = it
+                                  userViewModel.profileExists(email) { exists, profile ->
+                                    emailError =
+                                        if (exists) {
+                                          isValidEmail(it)
+                                        } else {
+                                          true
+                                        }
+                                  }
                                 },
                                 shape = RoundedCornerShape(12.dp),
                                 widthField = 360.dp,
                                 moveContentHorizontal = 10.dp,
-                                placeHolderText = "Username or Email",
+                                placeHolderText = "Email",
                                 isError =
-                                email.isNotEmpty() && (!isValidEmail(email) || emailError),
+                                    email.isNotEmpty() && (!isValidEmail(email) || emailError),
                                 errorText = "INVALID EMAIL",
                                 showError =
-                                email.isNotEmpty() && (!isValidEmail(email) || emailError),
-                                modifier = Modifier.testTag("inputEmail")
-                            )
+                                    email.isNotEmpty() && (!isValidEmail(email) || emailError),
+                                modifier = Modifier.testTag("inputEmail"))
+
+                            Spacer(modifier = Modifier.padding(10.dp))
 
                             QuickFixButton(
-                                buttonText = "RESET",
+                                buttonText = "RESET PASSWORD",
                                 onClickAction = {
-                                    db.sendPasswordResetEmail(email)
-                                        .addOnSuccessListener {
-                                            Log.d("ForgotPasswordScreen", "Email sent.")
-                                        }
-                                        .addOnFailureListener {
-                                            Log.d("ForgotPasswordScreen", "Email not sent.")
-                                            errorHasOccurred = true
-                                        }
-
+                                  db.sendPasswordResetEmail(email)
+                                      .addOnSuccessListener {
+                                        Log.d("ForgotPasswordScreen", "Email sent.")
+                                      }
+                                      .addOnFailureListener {
+                                        Log.d("ForgotPasswordScreen", "Email not sent.")
+                                        errorHasOccurred = true
+                                      }
                                 },
                                 buttonColor = colorScheme.primary,
                                 textColor = colorScheme.onPrimary,
                                 textStyle = MaterialTheme.typography.labelLarge,
                                 modifier =
-                                Modifier
-                                    .width(360.dp)
-                                    .height(55.dp)
-                                    .testTag("logInButton"),
-                                enabled = email.isNotEmpty() && !emailError
-                            )
+                                    Modifier.width(360.dp).height(55.dp).testTag("ResetButton"),
+                                enabled = email.isNotEmpty() && !emailError)
 
-                            Spacer(modifier = Modifier.padding(4.dp))
-
-
-                        }
+                            Spacer(modifier = Modifier.padding(100.dp))
+                          }
                     }
-                }
-            })
-    }
+              }
+        })
+  }
 }
