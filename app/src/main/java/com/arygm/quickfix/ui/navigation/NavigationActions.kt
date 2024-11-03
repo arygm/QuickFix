@@ -98,10 +98,7 @@ open class NavigationActions(
   open fun navigateTo(destination: TopLevelDestination) {
     currentScreen = routeToScreen(destination.route)
     navController.navigate(destination.route) {
-      popUpTo(navController.graph.findStartDestination().id) {
-        saveState = true
-        inclusive = true
-      }
+      popUpTo(navController.graph.findStartDestination().id) { saveState = true }
       launchSingleTop = true
       if (destination.route != Route.WELCOME) {
         restoreState = true
