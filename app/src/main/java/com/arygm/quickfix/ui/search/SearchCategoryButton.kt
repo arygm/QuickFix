@@ -57,7 +57,7 @@ fun SearchCategoryButton(
               Icon(
                   imageVector = icon,
                   contentDescription = null,
-                  tint = Color.Red,
+                  tint = colorScheme.primary,
                   modifier = Modifier.size(size).testTag("categoryIcon"))
 
               Spacer(modifier = Modifier.width(16.dp))
