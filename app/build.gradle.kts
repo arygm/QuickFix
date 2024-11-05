@@ -1,4 +1,3 @@
-import org.gradle.internal.classpath.Instrumented.systemProperty
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.util.Properties
@@ -16,6 +15,7 @@ android {
     buildFeatures {
         buildConfig = true
         compose = true
+        //noinspection DataBindingWithoutKapt
         dataBinding = true
     }
     namespace = "com.arygm.quickfix"
@@ -52,7 +52,6 @@ android {
             storePassword = System.getenv("KEYSTORE_PASSWORD") ?: localProperties.getProperty("KEYSTORE_PASSWORD")
             keyAlias = System.getenv("KEY_ALIAS") ?: localProperties.getProperty("KEY_ALIAS")
             keyPassword = System.getenv("KEY_PASSWORD") ?: localProperties.getProperty("KEY_PASSWORD")
-            storeType = "PKCS12" // Add this line if your keystore is PKCS12
         }
     }
 
@@ -66,15 +65,11 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
-            buildConfigField("boolean", "IS_TESTING", "false")
-            buildConfigField("String", "BUILD_TYPE", "\"DEBUG\"")
         }
 
         debug {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
-            buildConfigField("boolean", "IS_TESTING", "true")
-            buildConfigField("String", "BUILD_TYPE", "\"RELEASE\"")
         }
     }
 
@@ -279,4 +274,21 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
+}
+
+tasks.register("connectedCheckWithEmulators") {
+    doLast {
+        exec {
+            // Set the working directory to the root project directory
+            workingDir = rootProject.projectDir
+
+            // Run Firebase emulators and connectedCheck in a single command
+            commandLine = listOf(
+                "/bin/sh", "-c",
+                "firebase emulators:exec --debug --inspect-functions --project quickfix-1fd34 --import=./end2end-data --only firestore,auth './gradlew connectedCheck'"
+            )
+            standardOutput = System.out
+            errorOutput = System.err
+        }
+    }
 }
