@@ -73,6 +73,7 @@ class AccountRepositoryFirestore(private val db: FirebaseFirestore) : AccountRep
             val account = documentToAccount(document)
             onSuccess(Pair(true, account))
           } else {
+            Log.d("AccountRepositoryFirestore", "Account does not exist: null")
             onSuccess(Pair(false, null))
           }
         }
@@ -104,17 +105,24 @@ class AccountRepositoryFirestore(private val db: FirebaseFirestore) : AccountRep
       val uid = document.id
       val firstName = document.getString("firstName") ?: return null
       val lastName = document.getString("lastName") ?: return null
+      Log.d("AccountRepositoryFirestore", "lastName: $lastName")
       val email = document.getString("email") ?: return null
+      Log.d("AccountRepositoryFirestore", "email: $email")
       val birthDate = document.getTimestamp("birthDate") ?: return null
-      val isWorker = document.getBoolean("isWorker") ?: return null
+      Log.d("AccountRepositoryFirestore", "birthDate: $birthDate")
+      val isWorker = document.getBoolean("worker") ?: return null
+      Log.d("AccountRepositoryFirestore", "isWorker: $isWorker")
 
-      Account(
-          uid = uid,
-          firstName = firstName,
-          lastName = lastName,
-          email = email,
-          birthDate = birthDate,
-          isWorker = isWorker)
+      val account =
+          Account(
+              uid = uid,
+              firstName = firstName,
+              lastName = lastName,
+              email = email,
+              birthDate = birthDate,
+              isWorker = isWorker)
+      Log.d("AccountRepositoryFirestore", "account: $account")
+      account
     } catch (e: Exception) {
       Log.e("TodosRepositoryFirestore", "Error converting document to ToDo", e)
       null

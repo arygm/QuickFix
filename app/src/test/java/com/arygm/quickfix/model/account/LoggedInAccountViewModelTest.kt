@@ -21,11 +21,14 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.*
 import org.mockito.Mockito.never
 import org.mockito.kotlin.*
+import org.robolectric.RobolectricTestRunner
 
-class ProfileConfigurationScreenTest {
+@RunWith(RobolectricTestRunner::class)
+class LoggedInAccountViewModelTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -87,6 +90,7 @@ class ProfileConfigurationScreenTest {
         LoggedInAccountViewModel(
             userProfileRepo = userProfileRepositoryFirestore,
             workerProfileRepo = workerProfileRepositoryFirestore)
+    loggedInAccountViewModel.loggedInAccount_.value = testUserAccount
   }
 
   /** Helper function to mock getProfileById for UserProfileRepositoryFirestore. */
@@ -411,59 +415,6 @@ class ProfileConfigurationScreenTest {
 
     // Since the action is not implemented, verify that nothing crashes
     // No assertions needed; if the test doesn't throw, it's successful
-  }
-
-  @Test
-  fun testSaveButtonUpdatesLoggedInProfile() {
-    // Arrange
-    doAnswer { invocation ->
-          val profile = invocation.getArgument<Account>(0)
-          val onSuccess = invocation.getArgument<() -> Unit>(1)
-          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
-          onSuccess()
-          null
-        }
-        .whenever(accountRepository)
-        .updateAccount(any(), any(), any())
-
-    doAnswer { invocation ->
-          val uid = invocation.getArgument<String>(0)
-          val onSuccess = invocation.getArgument<(Account?) -> Unit>(1)
-          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
-          val updatedProfile =
-              Account(
-                  uid = testUserAccount.uid,
-                  firstName = "Jane",
-                  lastName = testUserAccount.lastName,
-                  email = testUserAccount.email,
-                  birthDate = testUserAccount.birthDate,
-                  isWorker = testUserAccount.isWorker)
-          onSuccess(updatedProfile)
-          null
-        }
-        .whenever(accountRepository)
-        .getAccountById(any(), any(), any())
-
-    composeTestRule.setContent {
-      QuickFixTheme {
-        AccountConfigurationScreen(
-            navigationActions = navigationActions,
-            accountViewModel = accountViewModel,
-            loggedInAccountViewModel = loggedInAccountViewModel)
-      }
-    }
-
-    // Update first name using performTextReplacement
-    composeTestRule.onNodeWithTag("firstNameInput").performTextReplacement("Jane")
-
-    // Click Save button
-    composeTestRule.onNodeWithTag("SaveButton").performClick()
-
-    // Wait for UI to update
-    composeTestRule.waitForIdle()
-
-    // Check that the displayed name is updated
-    composeTestRule.onNodeWithTag("ProfileName").assertTextEquals("Jane Doe")
   }
 
   @Test

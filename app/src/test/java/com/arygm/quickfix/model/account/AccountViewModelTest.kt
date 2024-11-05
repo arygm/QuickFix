@@ -462,7 +462,7 @@ class AccountViewModelTest {
     `when`(document1.getString("lastName")).thenReturn(account.lastName)
     `when`(document1.getString("email")).thenReturn(account.email)
     `when`(document1.getTimestamp("birthDate")).thenReturn(account.birthDate)
-    `when`(document1.getBoolean("isWorker")).thenReturn(account.isWorker)
+    `when`(document1.getBoolean("worker")).thenReturn(account.isWorker)
 
     // Mock data for second document
     `when`(document2.id).thenReturn(account2.uid)
@@ -470,7 +470,7 @@ class AccountViewModelTest {
     `when`(document2.getString("lastName")).thenReturn(account2.lastName)
     `when`(document2.getString("email")).thenReturn(account2.email)
     `when`(document2.getTimestamp("birthDate")).thenReturn(account2.birthDate)
-    `when`(document2.getBoolean("isWorker")).thenReturn(account2.isWorker)
+    `when`(document2.getBoolean("worker")).thenReturn(account2.isWorker)
 
     var callbackCalled = false
     var returnedAccounts: List<Account>? = null
