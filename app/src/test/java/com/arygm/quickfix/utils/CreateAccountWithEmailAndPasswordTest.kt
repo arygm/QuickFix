@@ -2,19 +2,21 @@ package com.arygm.quickfix.utils
 
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
-import com.arygm.quickfix.model.profile.Profile
+import com.arygm.quickfix.model.account.Account
+import com.arygm.quickfix.model.account.AccountRepositoryFirestore
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,10 +24,7 @@ import org.mockito.Mock
 import org.mockito.MockedStatic
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 
@@ -38,11 +37,15 @@ class CreateAccountWithEmailAndPasswordTest {
 
   @Mock private lateinit var authResult: AuthResult
 
-  @Mock private lateinit var profileRepository: UserProfileRepositoryFirestore
+  @Mock private lateinit var accountRepository: AccountRepositoryFirestore
 
-  @Mock private lateinit var loggedInProfileViewModel: LoggedInProfileViewModel
+  @Mock private lateinit var userProfileRepository: UserProfileRepositoryFirestore
 
+  @Mock private lateinit var workerProfileRepository: WorkerProfileRepositoryFirestore
+
+  private lateinit var accountViewModel: AccountViewModel
   private lateinit var profileViewModel: ProfileViewModel
+  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
 
   private lateinit var firebaseAuthMockedStatic: MockedStatic<FirebaseAuth>
 
@@ -51,21 +54,29 @@ class CreateAccountWithEmailAndPasswordTest {
     MockitoAnnotations.openMocks(this)
 
     // Initialize FirebaseApp if necessary
-    if (FirebaseApp.getApps(ApplicationProvider.getApplicationContext()).isEmpty()) {
-      FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
+    val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+    if (FirebaseApp.getApps(context).isEmpty()) {
+      FirebaseApp.initializeApp(context)
     }
 
     // Mock FirebaseAuth.getInstance()
     firebaseAuthMockedStatic = Mockito.mockStatic(FirebaseAuth::class.java)
     firebaseAuth = Mockito.mock(FirebaseAuth::class.java)
 
-    // Mock FirebaseAuth.getInstance() to return the mockFirebaseAuth
     firebaseAuthMockedStatic
         .`when`<FirebaseAuth> { FirebaseAuth.getInstance() }
         .thenReturn(firebaseAuth)
 
-    // Initialize profileViewModel with the mocked repository
-    profileViewModel = ProfileViewModel(profileRepository)
+    // Initialize accountViewModel and profileViewModel with the mocked repositories
+    accountViewModel = AccountViewModel(accountRepository)
+    profileViewModel = ProfileViewModel(userProfileRepository)
+
+    // Initialize loggedInAccountViewModel with the mocked repositories
+    loggedInAccountViewModel =
+        LoggedInAccountViewModel(userProfileRepository, workerProfileRepository)
+
+    // Mock FirebaseAuth.getInstance().currentUser
+    whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
   }
 
   @After
@@ -92,8 +103,15 @@ class CreateAccountWithEmailAndPasswordTest {
     whenever(firebaseUser.uid).thenReturn(uid)
     whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
 
-    // Mock ProfileRepository behavior to succeed
-    whenever(profileRepository.addProfile(any(), any(), any())).thenAnswer { invocation ->
+    // Mock UserProfileRepository behavior to succeed
+    whenever(userProfileRepository.addProfile(any(), any(), any())).thenAnswer { invocation ->
+      val onSuccessCallback = invocation.getArgument<() -> Unit>(1)
+      onSuccessCallback()
+      null
+    }
+
+    // Mock AccountRepository behavior to succeed
+    whenever(accountRepository.addAccount(any(), any(), any())).thenAnswer { invocation ->
       val onSuccessCallback = invocation.getArgument<() -> Unit>(1)
       onSuccessCallback()
       null
@@ -111,8 +129,9 @@ class CreateAccountWithEmailAndPasswordTest {
         email = email,
         password = password,
         birthDate = birthDate,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -126,14 +145,24 @@ class CreateAccountWithEmailAndPasswordTest {
     assertTrue(successCalled)
     assertFalse(failureCalled)
 
-    // Verify that the profile was added correctly
-    val profileCaptor = argumentCaptor<Profile>()
-    verify(profileRepository).addProfile(profileCaptor.capture(), any(), any())
-    val capturedProfile = profileCaptor.firstValue
-    assertEquals(uid, capturedProfile.uid)
-    assertEquals(firstName, capturedProfile.firstName)
-    assertEquals(lastName, capturedProfile.lastName)
-    assertEquals(email, capturedProfile.email)
+    // Verify that the user profile was added correctly
+    val userProfileCaptor = argumentCaptor<UserProfile>()
+    verify(userProfileRepository).addProfile(userProfileCaptor.capture(), any(), any())
+    val capturedUserProfile = userProfileCaptor.firstValue
+    assertEquals(uid, capturedUserProfile.uid)
+    // Additional checks can be added if necessary
+
+    // Verify that the account was added correctly
+    val accountCaptor = argumentCaptor<Account>()
+    verify(accountRepository).addAccount(accountCaptor.capture(), any(), any())
+    val capturedAccount = accountCaptor.firstValue
+    assertEquals(uid, capturedAccount.uid)
+    assertEquals(firstName, capturedAccount.firstName)
+    assertEquals(lastName, capturedAccount.lastName)
+    assertEquals(email, capturedAccount.email)
+
+    // Verify that the loggedInAccount was set
+    assertEquals(capturedAccount, loggedInAccountViewModel.loggedInAccount.value)
   }
 
   @Test
@@ -163,8 +192,9 @@ class CreateAccountWithEmailAndPasswordTest {
         email = email,
         password = password,
         birthDate = birthDate,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -198,8 +228,8 @@ class CreateAccountWithEmailAndPasswordTest {
     whenever(firebaseUser.uid).thenReturn(uid)
     whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
 
-    // Mock ProfileRepository behavior to fail
-    whenever(profileRepository.addProfile(any(), any(), any())).thenAnswer { invocation ->
+    // Mock UserProfileRepository behavior to fail
+    whenever(userProfileRepository.addProfile(any(), any(), any())).thenAnswer { invocation ->
       val onFailureCallback = invocation.getArgument<(Exception) -> Unit>(2)
       onFailureCallback(exception)
       null
@@ -217,8 +247,9 @@ class CreateAccountWithEmailAndPasswordTest {
         email = email,
         password = password,
         birthDate = birthDate,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -251,13 +282,6 @@ class CreateAccountWithEmailAndPasswordTest {
     whenever(firebaseUser.uid).thenReturn(uid)
     whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
 
-    // Mock ProfileRepository behavior to succeed
-    whenever(profileRepository.addProfile(any(), any(), any())).thenAnswer { invocation ->
-      val onSuccessCallback = invocation.getArgument<() -> Unit>(1)
-      onSuccessCallback()
-      null
-    }
-
     // Flags to check callbacks
     var successCalled = false
     var failureCalled = false
@@ -270,8 +294,9 @@ class CreateAccountWithEmailAndPasswordTest {
         email = email,
         password = password,
         birthDate = birthDate,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -304,6 +329,20 @@ class CreateAccountWithEmailAndPasswordTest {
     whenever(firebaseUser.uid).thenReturn(uid)
     whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
 
+    // Mock UserProfileRepository behavior to succeed
+    whenever(userProfileRepository.addProfile(any(), any(), any())).thenAnswer { invocation ->
+      val onSuccessCallback = invocation.getArgument<() -> Unit>(1)
+      onSuccessCallback()
+      null
+    }
+
+    // Mock AccountRepository behavior to succeed
+    whenever(accountRepository.addAccount(any(), any(), any())).thenAnswer { invocation ->
+      val onSuccessCallback = invocation.getArgument<() -> Unit>(1)
+      onSuccessCallback()
+      null
+    }
+
     // Invoke the function under test without callbacks
     createAccountWithEmailAndPassword(
         firebaseAuth = firebaseAuth,
@@ -312,8 +351,9 @@ class CreateAccountWithEmailAndPasswordTest {
         email = email,
         password = password,
         birthDate = birthDate,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
         onSuccess = {},
         onFailure = {})
 
@@ -334,10 +374,10 @@ class CreateAccountWithEmailAndPasswordTest {
     val email = "invalid-email"
     val password = "Password444"
     val birthDate = "08/08/1998"
+    val exception = Exception("Invalid email format")
 
     // Mock FirebaseAuth failure due to invalid email
     val authTaskCompletionSource = TaskCompletionSource<AuthResult>()
-    val exception = Exception("Invalid email format")
     whenever(firebaseAuth.createUserWithEmailAndPassword(any(), any()))
         .thenReturn(authTaskCompletionSource.task)
 
@@ -353,8 +393,9 @@ class CreateAccountWithEmailAndPasswordTest {
         email = email,
         password = password,
         birthDate = birthDate,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -396,8 +437,9 @@ class CreateAccountWithEmailAndPasswordTest {
         email = email,
         password = password,
         birthDate = birthDate,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 

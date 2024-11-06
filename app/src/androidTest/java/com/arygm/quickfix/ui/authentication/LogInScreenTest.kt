@@ -6,11 +6,14 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
-import com.arygm.quickfix.model.profile.ProfileRepository
-import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.account.AccountRepository
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.google.firebase.firestore.FirebaseFirestore
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -23,16 +26,24 @@ class LogInScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
-  private lateinit var profileRepository: ProfileRepository
-  private lateinit var profileViewModel: ProfileViewModel
-  private lateinit var loggedInProfileViewModel: LoggedInProfileViewModel
+  private lateinit var accountRepository: AccountRepository
+  private lateinit var userProfileRepo: UserProfileRepositoryFirestore
+  private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
+  private lateinit var accountViewModel: AccountViewModel
+  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
+  private lateinit var mockFirestore: FirebaseFirestore
 
   @Before
   fun setup() {
-    loggedInProfileViewModel = LoggedInProfileViewModel()
-    profileRepository = mock(ProfileRepository::class.java)
+    mockFirestore = mock(FirebaseFirestore::class.java)
+    accountRepository = mock(AccountRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
-    profileViewModel = ProfileViewModel(profileRepository)
+    userProfileRepo = UserProfileRepositoryFirestore(mockFirestore)
+    workerProfileRepo = WorkerProfileRepositoryFirestore(mockFirestore)
+    accountViewModel = AccountViewModel(accountRepository)
+    loggedInAccountViewModel =
+        LoggedInAccountViewModel(
+            userProfileRepo = userProfileRepo, workerProfileRepo = workerProfileRepo)
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.LOGIN)
   }
@@ -40,7 +51,7 @@ class LogInScreenTest {
   @Test
   fun testInitialUI() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
     }
 
     // Check that the scaffold and content boxes are displayed
@@ -75,7 +86,7 @@ class LogInScreenTest {
   @Test
   fun testLoginButtonEnabledWhenFieldsAreFilled() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
     }
 
     // Input valid email and password
@@ -89,7 +100,7 @@ class LogInScreenTest {
   @Test
   fun testInvalidEmailShowsError() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
     }
 
     // Input an invalid email
@@ -131,7 +142,7 @@ class LogInScreenTest {
   @Test
   fun testForgotPasswordLinkIsDisplayed() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
     }
 
     // Check that the forgot password text is displayed
@@ -141,7 +152,7 @@ class LogInScreenTest {
   @Test
   fun testBackButtonNavigatesBack() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
     }
 
     // Click the back button

@@ -54,7 +54,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
@@ -72,8 +73,9 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun RegisterScreen(
     navigationActions: NavigationActions,
+    accountViewModel: AccountViewModel,
+    loggedInAccountViewModel: LoggedInAccountViewModel,
     userViewModel: ProfileViewModel,
-    loggedInProfileViewModel: LoggedInProfileViewModel,
     firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(), // Injected dependency
     createAccountFunc:
         (
@@ -83,8 +85,9 @@ fun RegisterScreen(
             email: String,
             password: String,
             birthDate: String,
+            accountViewModel: AccountViewModel,
+            loggedInAccountViewModel: LoggedInAccountViewModel,
             userViewModel: ProfileViewModel,
-            loggedInProfileViewModel: LoggedInProfileViewModel,
             onSuccess: () -> Unit,
             onFailure: () -> Unit) -> Unit =
         ::createAccountWithEmailAndPassword // Default implementation
@@ -268,9 +271,9 @@ fun RegisterScreen(
                                       onValueChange = {
                                         email = it
                                         emailError = !isValidEmail(it)
-                                        userViewModel.profileExists(email) { exists, profile ->
+                                        accountViewModel.accountExists(email) { exists, account ->
                                           emailError =
-                                              if (exists) {
+                                              if (exists && account != null) {
                                                 true
                                               } else {
                                                 !isValidEmail(it)
@@ -459,8 +462,9 @@ fun RegisterScreen(
                                           email,
                                           password,
                                           birthDate,
+                                          accountViewModel,
+                                          loggedInAccountViewModel,
                                           userViewModel,
-                                          loggedInProfileViewModel,
                                           {
                                             navigationActions.navigateTo(TopLevelDestinations.HOME)
                                           },

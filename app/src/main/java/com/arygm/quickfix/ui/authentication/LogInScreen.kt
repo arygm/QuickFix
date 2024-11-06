@@ -48,8 +48,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
-import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -61,15 +61,15 @@ import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.isValidEmail
-import com.arygm.quickfix.utils.signInWithEmailAndFetchProfile
+import com.arygm.quickfix.utils.signInWithEmailAndFetchAccount
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun LogInScreen(
     navigationActions: NavigationActions,
-    userViewModel: ProfileViewModel,
-    loggedInProfileViewModel: LoggedInProfileViewModel
+    accountViewModel: AccountViewModel,
+    loggedInAccountViewModel: LoggedInAccountViewModel
 ) {
   var errorHasOccurred by remember { mutableStateOf(false) }
   var emailError = false
@@ -186,7 +186,7 @@ fun LogInScreen(
                                 value = email,
                                 onValueChange = {
                                   email = it
-                                  userViewModel.profileExists(email) { exists, profile ->
+                                  accountViewModel.accountExists(email) { exists, profile ->
                                     emailError =
                                         if (exists && profile != null) {
                                           !isValidEmail(it)
@@ -251,11 +251,11 @@ fun LogInScreen(
                                 buttonText = "LOGIN",
                                 onClickAction = {
                                   shrinkBox = false
-                                  signInWithEmailAndFetchProfile(
+                                  signInWithEmailAndFetchAccount(
                                       email = email,
                                       password = password,
-                                      userViewModel = userViewModel,
-                                      loggedInProfileViewModel = loggedInProfileViewModel,
+                                      accountViewModel = accountViewModel,
+                                      loggedInAccountViewModel = loggedInAccountViewModel,
                                       onResult = {
                                         if (it) {
                                           coroutineScope.launch {

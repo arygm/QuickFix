@@ -34,6 +34,7 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.kaspersky.kaspresso.flakysafety.*
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
@@ -49,22 +50,29 @@ class MainActivityTest : TestCase() {
 
   @Before
   fun setup() {
-    FirebaseApp.clearInstancesForTest()
-    FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
-
-    // Configure Firestore to use the emulator
     val firestore = FirebaseFirestore.getInstance()
     firestore.useEmulator("10.0.2.2", 8080)
+    FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099)
 
-    // Disable offline persistence
     firestore.firestoreSettings =
         FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build()
 
-    // Configure FirebaseAuth to use the emulator
-    FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099)
-
-    // Initialize the navigationActions mock
     navigationActions = Mockito.mock(NavigationActions::class.java)
+  }
+
+  @After
+  fun tearDown() {
+    FirebaseApp.clearInstancesForTest()
+    FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
+    val firestore = FirebaseFirestore.getInstance()
+    firestore.firestoreSettings =
+        FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(
+                true) // Set to true or false as needed for your production environment
+            .build()
+
+    // Reinitialize FirebaseAuth without the emulator
+    FirebaseAuth.getInstance().signOut()
   }
 
   @Test

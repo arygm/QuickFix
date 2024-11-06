@@ -1,12 +1,12 @@
 package com.arygm.quickfix.model.profile
 
 import android.util.Log
+import com.arygm.quickfix.model.Location.Location
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.GeoPoint
 
 class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRepository {
 
@@ -24,10 +24,10 @@ class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : Prof
     Log.d("ProfileRepositoryFirestore", "getProfiles")
     db.collection(collectionPath).get().addOnCompleteListener { task ->
       if (task.isSuccessful) {
-        val profiles =
+        val workerProfiles =
             task.result?.documents?.mapNotNull { document -> documentToWorker(document) }
-                ?: emptyList()
-        onSuccess(profiles)
+                ?: emptyList<WorkerProfile>()
+        onSuccess(workerProfiles)
       } else {
         task.exception?.let { e ->
           Log.e("WorkerProfileRepositoryFirestore", "Error getting documents", e)
@@ -37,33 +37,17 @@ class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : Prof
     }
   }
 
-  override fun filterWorkers(
-      hourlyRateThreshold: Double?,
-      fieldOfWork: String?,
-      onSuccess: (List<Profile>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    //        var query: Query = db.collection("worker_profiles")
-    //
-    //        query = query.whereEqualTo("isWorker", true)
-    //
-    //        fieldOfWork?.let { query = query.whereEqualTo("fieldOfWork", it) }
-    //
-    //        hourlyRateThreshold?.let { query = query.whereLessThan("hourlyRate", it) }
-    //
-    //        query
-    //            .get()
-    //            .addOnSuccessListener { querySnapshot ->
-    //                val workerProfiles =
-    //                    querySnapshot.documents.mapNotNull { it.toObject(Profile::class.java) }
-    //                onSuccess(workerProfiles)
-    //            }
-    //            .addOnFailureListener { exception -> onFailure(exception) }
-  }
-
   override fun addProfile(profile: Profile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    val workerProfile = profile as WorkerProfile
+    val data =
+        mapOf(
+            "uid" to workerProfile.uid,
+            "hourlyRate" to workerProfile.hourlyRate,
+            "description" to workerProfile.description,
+            "fieldOfWork" to workerProfile.fieldOfWork, // Convert to string
+            "location" to workerProfile.location?.toFirestoreMap())
     performFirestoreOperation(
-        db.collection(collectionPath).document(profile.uid).set(profile), onSuccess, onFailure)
+        db.collection(collectionPath).document(profile.uid).set(data), onSuccess, onFailure)
   }
 
   override fun updateProfile(
@@ -71,8 +55,16 @@ class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : Prof
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
+    val workerProfile = profile as WorkerProfile
+    val data =
+        mapOf(
+            "uid" to workerProfile.uid,
+            "hourlyRate" to workerProfile.hourlyRate,
+            "description" to workerProfile.description,
+            "fieldOfWork" to workerProfile.fieldOfWork,
+            "location" to workerProfile.location?.toFirestoreMap())
     performFirestoreOperation(
-        db.collection(collectionPath).document(profile.uid).set(profile), onSuccess, onFailure)
+        db.collection(collectionPath).document(profile.uid).set(data), onSuccess, onFailure)
   }
 
   override fun deleteProfileById(
@@ -82,29 +74,6 @@ class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : Prof
   ) {
     performFirestoreOperation(
         db.collection(collectionPath).document(id).delete(), onSuccess, onFailure)
-  }
-
-  override fun profileExists(
-      email: String,
-      onSuccess: (Pair<Boolean, Profile?>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    db.collection(collectionPath)
-        .whereEqualTo("email", email)
-        .get()
-        .addOnSuccessListener { querySnapshot ->
-          if (!querySnapshot.isEmpty) {
-            val document = querySnapshot.documents.first()
-            val profile = documentToWorker(document)
-            onSuccess(Pair(true, profile))
-          } else {
-            onSuccess(Pair(false, null))
-          }
-        }
-        .addOnFailureListener { exception ->
-          Log.e("WorkerProfileRepositoryFirestore", "Error checking if profile exists", exception)
-          onFailure(exception)
-        }
   }
 
   private fun performFirestoreOperation(
@@ -127,25 +96,23 @@ class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : Prof
   private fun documentToWorker(document: DocumentSnapshot): WorkerProfile? {
     return try {
       val uid = document.id
-      val firstName = document.getString("firstName") ?: return null
-      val lastName = document.getString("lastName") ?: return null
-      val email = document.getString("email") ?: return null
-      val birthDate = document.getTimestamp("birthDate") ?: return null
-      val description = document.getString("description") ?: ""
-      val location = document.getGeoPoint("location") ?: GeoPoint(0.0, 0.0)
-      val fieldOfWork = document.getString("fieldOfWork") ?: "return null"
-      val hourlyRate = document.getDouble("hourlyRate") ?: 0.0
-
+      val description = document.getString("description") ?: return null
+      val fieldOfWork = document.getString("fieldOfWork") ?: return null
+      val hourlyRate = document.getDouble("hourlyRate") ?: return null
+      val locationData = document.get("location") as? Map<*, *> ?: return null
+      val location =
+          locationData?.let {
+            Location(
+                latitude = it["latitude"] as? Double ?: 0.0,
+                longitude = it["longitude"] as? Double ?: 0.0,
+                name = it["name"] as? String ?: "")
+          }
       WorkerProfile(
           uid = uid,
-          firstName = firstName,
-          lastName = lastName,
-          email = email,
-          birthDate = birthDate,
           description = description,
-          location = location,
           fieldOfWork = fieldOfWork,
-          hourlyRate = hourlyRate)
+          hourlyRate = hourlyRate,
+          location = location)
     } catch (e: Exception) {
       Log.e("WorkerProfileRepositoryFirestore", "Error converting document to WorkerProfile", e)
       null
@@ -172,5 +139,45 @@ class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : Prof
           Log.e("WorkerProfileRepositoryFirestore", "Error fetching profile", exception)
           onFailure(exception)
         }
+  }
+
+  private fun String.toWorkerCategory(): WorkerCategory? {
+    return when (this) {
+      "ConstructionAndMaintenance.GeneralLaborer" ->
+          WorkerCategory.ConstructionAndMaintenance.GeneralLaborer
+      "ConstructionAndMaintenance.Mason" -> WorkerCategory.ConstructionAndMaintenance.Mason
+      "HomeImprovementAndRepair.Handyman" -> WorkerCategory.HomeImprovementAndRepair.Handyman
+      "HomeImprovementAndRepair.FlooringInstaller" ->
+          WorkerCategory.HomeImprovementAndRepair.FlooringInstaller
+      "MechanicalAndVehicleMaintenance.AutoMechanic" ->
+          WorkerCategory.MechanicalAndVehicleMaintenance.AutoMechanic
+      "MechanicalAndVehicleMaintenance.DieselMechanic" ->
+          WorkerCategory.MechanicalAndVehicleMaintenance.DieselMechanic
+      else -> null
+    }
+  }
+
+  private fun WorkerCategory.toFirestoreString(): String {
+    return when (this) {
+      is WorkerCategory.ConstructionAndMaintenance.GeneralLaborer ->
+          "ConstructionAndMaintenance.GeneralLaborer"
+      is WorkerCategory.ConstructionAndMaintenance.Mason -> "ConstructionAndMaintenance.Mason"
+      is WorkerCategory.HomeImprovementAndRepair.Handyman -> "HomeImprovementAndRepair.Handyman"
+      is WorkerCategory.HomeImprovementAndRepair.FlooringInstaller ->
+          "HomeImprovementAndRepair.FlooringInstaller"
+      is WorkerCategory.MechanicalAndVehicleMaintenance.AutoMechanic ->
+          "MechanicalAndVehicleMaintenance.AutoMechanic"
+      is WorkerCategory.MechanicalAndVehicleMaintenance.DieselMechanic ->
+          "MechanicalAndVehicleMaintenance.DieselMechanic"
+    }
+  }
+
+  private fun WorkerProfile.toFirestoreMap(): Map<String, Any?> {
+    return mapOf(
+        "uid" to this.uid,
+        "hourlyRate" to this.hourlyRate,
+        "description" to this.description,
+        "fieldOfWork" to this.fieldOfWork // Convert sealed class to string
+        )
   }
 }
