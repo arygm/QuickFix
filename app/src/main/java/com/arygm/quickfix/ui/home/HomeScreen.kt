@@ -34,6 +34,7 @@ import com.arygm.quickfix.ui.elements.UpcomingQuickFixes
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
+
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,6 +99,7 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+
                     .padding(padding)
                     .padding(vertical = 8.dp)
                     .testTag("homeContent"),

@@ -2,11 +2,16 @@ package com.arygm.quickfix.ui.profile
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import com.arygm.quickfix.model.account.Account
+import com.arygm.quickfix.model.account.AccountRepository
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.*
+import com.arygm.quickfix.ui.account.AccountConfigurationScreen
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Calendar
 import java.util.GregorianCalendar
 import org.junit.Assert.assertEquals
@@ -25,51 +30,56 @@ class ProfileConfigurationScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
-  private lateinit var userRepository: ProfileRepository
-  private lateinit var userViewModel: ProfileViewModel
-  private lateinit var workerViewModel: ProfileViewModel
-  private lateinit var loggedInProfileViewModel: LoggedInProfileViewModel
+  private lateinit var mockFirestore: FirebaseFirestore
+  private lateinit var accountRepository: AccountRepository
+  private lateinit var accountViewModel: AccountViewModel
+  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
+  private lateinit var userProfileRepositoryFirestore: ProfileRepository
+  private lateinit var workerProfileRepositoryFirestore: ProfileRepository
 
   private val testUserProfile =
-      UserProfile(
+      Account(
           uid = "testUid",
           firstName = "John",
           lastName = "Doe",
           birthDate = Timestamp.now(),
           email = "john.doe@example.com",
-          location = GeoPoint(0.0, 0.0),
           isWorker = false)
 
   @Before
   fun setup() {
+    mockFirestore = mock(FirebaseFirestore::class.java)
     navigationActions = mock(NavigationActions::class.java)
-    userRepository = mock(ProfileRepository::class.java)
-    userViewModel = ProfileViewModel(userRepository)
-    workerViewModel = mock(ProfileViewModel::class.java)
-    loggedInProfileViewModel = LoggedInProfileViewModel()
-    loggedInProfileViewModel.setLoggedInProfile(testUserProfile)
+    userProfileRepositoryFirestore = mock(ProfileRepository::class.java)
+    workerProfileRepositoryFirestore = mock(ProfileRepository::class.java)
+    accountRepository = mock(AccountRepository::class.java)
+    accountViewModel = AccountViewModel(accountRepository)
+    loggedInAccountViewModel =
+        LoggedInAccountViewModel(
+            userProfileRepo = userProfileRepositoryFirestore,
+            workerProfileRepo = workerProfileRepositoryFirestore)
+    loggedInAccountViewModel.loggedInAccount_.value = testUserProfile
   }
 
   @Test
   fun testUpdateFirstNameAndLastName() {
     // Arrange
     doAnswer { invocation ->
-          val profile = invocation.getArgument<Profile>(0)
+          val profile = invocation.getArgument<Account>(0)
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           onSuccess()
           null
         }
-        .whenever(userRepository)
-        .updateProfile(any(), any(), any())
+        .whenever(accountRepository)
+        .updateAccount(any(), any(), any())
 
     composeTestRule.setContent {
       QuickFixTheme {
-        ProfileConfigurationScreen(
+        AccountConfigurationScreen(
             navigationActions = navigationActions,
-            userViewModel = userViewModel,
-            workerViewModel = workerViewModel,
-            loggedInProfileViewModel = loggedInProfileViewModel)
+            accountViewModel = accountViewModel,
+            loggedInAccountViewModel = loggedInAccountViewModel)
       }
     }
 
@@ -81,8 +91,8 @@ class ProfileConfigurationScreenTest {
     composeTestRule.onNodeWithTag("SaveButton").performClick()
 
     // Verify that updateProfile was called with updated names
-    val profileCaptor = argumentCaptor<Profile>()
-    verify(userRepository).updateProfile(profileCaptor.capture(), any(), any())
+    val profileCaptor = argumentCaptor<Account>()
+    verify(accountRepository).updateAccount(profileCaptor.capture(), any(), any())
 
     val updatedProfile = profileCaptor.firstValue
     assertEquals("Jane", updatedProfile.firstName)
@@ -100,26 +110,25 @@ class ProfileConfigurationScreenTest {
           onSuccess(Pair(false, null))
           null
         }
-        .whenever(userRepository)
-        .profileExists(any(), any(), any())
+        .whenever(accountRepository)
+        .accountExists(any(), any(), any())
 
     doAnswer { invocation ->
-          val profile = invocation.getArgument<Profile>(0)
+          val profile = invocation.getArgument<Account>(0)
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           onSuccess()
           null
         }
-        .whenever(userRepository)
-        .updateProfile(any(), any(), any())
+        .whenever(accountRepository)
+        .updateAccount(any(), any(), any())
 
     composeTestRule.setContent {
       QuickFixTheme {
-        ProfileConfigurationScreen(
+        AccountConfigurationScreen(
             navigationActions = navigationActions,
-            userViewModel = userViewModel,
-            workerViewModel = workerViewModel,
-            loggedInProfileViewModel = loggedInProfileViewModel)
+            accountViewModel = accountViewModel,
+            loggedInAccountViewModel = loggedInAccountViewModel)
       }
     }
 
@@ -130,8 +139,8 @@ class ProfileConfigurationScreenTest {
     composeTestRule.onNodeWithTag("SaveButton").performClick()
 
     // Verify that updateProfile was called with updated email
-    val profileCaptor = argumentCaptor<Profile>()
-    verify(userRepository).updateProfile(profileCaptor.capture(), any(), any())
+    val profileCaptor = argumentCaptor<Account>()
+    verify(accountRepository).updateAccount(profileCaptor.capture(), any(), any())
 
     val updatedProfile = profileCaptor.firstValue
     assertEquals("jane.smith@example.com", updatedProfile.email)
@@ -141,11 +150,10 @@ class ProfileConfigurationScreenTest {
   fun testUpdateEmailWithInvalidEmailShowsError() {
     composeTestRule.setContent {
       QuickFixTheme {
-        ProfileConfigurationScreen(
+        AccountConfigurationScreen(
             navigationActions = navigationActions,
-            userViewModel = userViewModel, // Use real userViewModel
-            workerViewModel = workerViewModel,
-            loggedInProfileViewModel = loggedInProfileViewModel)
+            accountViewModel = accountViewModel,
+            loggedInAccountViewModel = loggedInAccountViewModel)
       }
     }
 
@@ -156,29 +164,28 @@ class ProfileConfigurationScreenTest {
     composeTestRule.onNodeWithTag("SaveButton").performClick()
 
     // Verify that updateProfile was not called due to invalid email
-    verify(userRepository, never()).updateProfile(any(), any(), any())
+    verify(accountRepository, never()).updateAccount(any(), any(), any())
   }
 
   @Test
   fun testUpdateBirthDateWithValidDate() {
     // Arrange
     doAnswer { invocation ->
-          val profile = invocation.getArgument<Profile>(0)
+          val profile = invocation.getArgument<Account>(0)
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           onSuccess()
           null
         }
-        .whenever(userRepository)
-        .updateProfile(any(), any(), any())
+        .whenever(accountRepository)
+        .updateAccount(any(), any(), any())
 
     composeTestRule.setContent {
       QuickFixTheme {
-        ProfileConfigurationScreen(
+        AccountConfigurationScreen(
             navigationActions = navigationActions,
-            userViewModel = userViewModel,
-            workerViewModel = workerViewModel,
-            loggedInProfileViewModel = loggedInProfileViewModel)
+            accountViewModel = accountViewModel,
+            loggedInAccountViewModel = loggedInAccountViewModel)
       }
     }
 
@@ -189,8 +196,8 @@ class ProfileConfigurationScreenTest {
     composeTestRule.onNodeWithTag("SaveButton").performClick()
 
     // Verify that updateProfile was called with updated birth date
-    val profileCaptor = argumentCaptor<Profile>()
-    verify(userRepository).updateProfile(profileCaptor.capture(), any(), any())
+    val profileCaptor = argumentCaptor<Account>()
+    verify(accountRepository).updateAccount(profileCaptor.capture(), any(), any())
 
     val updatedProfile = profileCaptor.firstValue
 
@@ -204,11 +211,10 @@ class ProfileConfigurationScreenTest {
   fun testUpdateBirthDateWithInvalidDateShowsToast() {
     composeTestRule.setContent {
       QuickFixTheme {
-        ProfileConfigurationScreen(
+        AccountConfigurationScreen(
             navigationActions = navigationActions,
-            userViewModel = userViewModel,
-            workerViewModel = workerViewModel,
-            loggedInProfileViewModel = loggedInProfileViewModel)
+            accountViewModel = accountViewModel,
+            loggedInAccountViewModel = loggedInAccountViewModel)
       }
     }
 
@@ -219,18 +225,17 @@ class ProfileConfigurationScreenTest {
     composeTestRule.onNodeWithTag("SaveButton").performClick()
 
     // Verify that updateProfile was not called due to invalid date
-    verify(userRepository, never()).updateProfile(any(), any(), any())
+    verify(accountRepository, never()).updateAccount(any(), any(), any())
   }
 
   @Test
   fun testChangePasswordButtonClick() {
     composeTestRule.setContent {
       QuickFixTheme {
-        ProfileConfigurationScreen(
+        AccountConfigurationScreen(
             navigationActions = navigationActions,
-            userViewModel = userViewModel,
-            workerViewModel = workerViewModel,
-            loggedInProfileViewModel = loggedInProfileViewModel)
+            accountViewModel = accountViewModel,
+            loggedInAccountViewModel = loggedInAccountViewModel)
       }
     }
 
@@ -244,41 +249,39 @@ class ProfileConfigurationScreenTest {
   fun testSaveButtonUpdatesLoggedInProfile() {
     // Arrange
     doAnswer { invocation ->
-          val profile = invocation.getArgument<Profile>(0)
+          val profile = invocation.getArgument<Account>(0)
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           onSuccess()
           null
         }
-        .whenever(userRepository)
-        .updateProfile(any(), any(), any())
+        .whenever(accountRepository)
+        .updateAccount(any(), any(), any())
 
     doAnswer { invocation ->
           val uid = invocation.getArgument<String>(0)
-          val onSuccess = invocation.getArgument<(Profile?) -> Unit>(1)
+          val onSuccess = invocation.getArgument<(Account?) -> Unit>(1)
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           val updatedProfile =
-              UserProfile(
+              Account(
                   uid = testUserProfile.uid,
                   firstName = "Jane",
                   lastName = testUserProfile.lastName,
                   email = testUserProfile.email,
                   birthDate = testUserProfile.birthDate,
-                  location = testUserProfile.location,
                   isWorker = testUserProfile.isWorker)
           onSuccess(updatedProfile)
           null
         }
-        .whenever(userRepository)
-        .getProfileById(any(), any(), any())
+        .whenever(accountRepository)
+        .getAccountById(any(), any(), any())
 
     composeTestRule.setContent {
       QuickFixTheme {
-        ProfileConfigurationScreen(
+        AccountConfigurationScreen(
             navigationActions = navigationActions,
-            userViewModel = userViewModel, // Use real userViewModel
-            workerViewModel = workerViewModel,
-            loggedInProfileViewModel = loggedInProfileViewModel)
+            accountViewModel = accountViewModel,
+            loggedInAccountViewModel = loggedInAccountViewModel)
       }
     }
 
@@ -292,29 +295,28 @@ class ProfileConfigurationScreenTest {
     composeTestRule.waitForIdle()
 
     // Check that the displayed name is updated
-    composeTestRule.onNodeWithTag("ProfileName").assertTextEquals("Jane Doe")
+    composeTestRule.onNodeWithTag("AccountName").assertTextEquals("Jane Doe")
   }
 
   @Test
   fun testSaveButtonNavigatesBack() {
     // Arrange
     doAnswer { invocation ->
-          val profile = invocation.getArgument<Profile>(0)
+          val profile = invocation.getArgument<Account>(0)
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           onSuccess()
           null
         }
-        .whenever(userRepository)
-        .updateProfile(any(), any(), any())
+        .whenever(accountRepository)
+        .updateAccount(any(), any(), any())
 
     composeTestRule.setContent {
       QuickFixTheme {
-        ProfileConfigurationScreen(
+        AccountConfigurationScreen(
             navigationActions = navigationActions,
-            userViewModel = userViewModel, // Use real userViewModel
-            workerViewModel = workerViewModel,
-            loggedInProfileViewModel = loggedInProfileViewModel)
+            accountViewModel = accountViewModel,
+            loggedInAccountViewModel = loggedInAccountViewModel)
       }
     }
 
@@ -330,30 +332,28 @@ class ProfileConfigurationScreenTest {
     // Arrange
     doAnswer { invocation ->
           val email = invocation.getArgument<String>(0)
-          val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
+          val onSuccess = invocation.getArgument<(Pair<Boolean, Account?>) -> Unit>(1)
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           val existingProfile =
-              UserProfile(
+              Account(
                   uid = "existingUid",
                   firstName = "Existing",
                   lastName = "User",
                   email = "existing@example.com",
                   birthDate = Timestamp.now(),
-                  location = GeoPoint(0.0, 0.0),
                   isWorker = false)
           onSuccess(Pair(true, existingProfile))
           null
         }
-        .whenever(userRepository)
-        .profileExists(any(), any(), any())
+        .whenever(accountRepository)
+        .accountExists(any(), any(), any())
 
     composeTestRule.setContent {
       QuickFixTheme {
-        ProfileConfigurationScreen(
+        AccountConfigurationScreen(
             navigationActions = navigationActions,
-            userViewModel = userViewModel, // Use real userViewModel
-            workerViewModel = workerViewModel,
-            loggedInProfileViewModel = loggedInProfileViewModel)
+            accountViewModel = accountViewModel,
+            loggedInAccountViewModel = loggedInAccountViewModel)
       }
     }
 
@@ -364,7 +364,7 @@ class ProfileConfigurationScreenTest {
     composeTestRule.onNodeWithTag("SaveButton").performClick()
 
     // Verify that updateProfile was not called
-    verify(userRepository, never()).updateProfile(any(), any(), any())
+    verify(accountRepository, never()).updateAccount(any(), any(), any())
   }
 
   @Test
@@ -372,11 +372,10 @@ class ProfileConfigurationScreenTest {
     // Set up the content
     composeTestRule.setContent {
       QuickFixTheme {
-        ProfileConfigurationScreen(
+        AccountConfigurationScreen(
             navigationActions = navigationActions,
-            userViewModel = userViewModel, // Use real userViewModel
-            workerViewModel = workerViewModel,
-            loggedInProfileViewModel = loggedInProfileViewModel)
+            accountViewModel = accountViewModel,
+            loggedInAccountViewModel = loggedInAccountViewModel)
       }
     }
 
@@ -387,11 +386,11 @@ class ProfileConfigurationScreenTest {
         .assertTextEquals("Account configuration")
 
     // Verify that the Profile Image is displayed
-    composeTestRule.onNodeWithTag("ProfileImage").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("AccountImage").assertIsDisplayed()
 
     // Verify that the Profile Card is displayed with the correct name
-    composeTestRule.onNodeWithTag("ProfileCard").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ProfileName").assertTextEquals("John Doe")
+    composeTestRule.onNodeWithTag("AccountCard").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("AccountName").assertTextEquals("John Doe")
 
     // Verify that the input fields are displayed
     composeTestRule.onNodeWithTag("firstNameInput").assertIsDisplayed()
