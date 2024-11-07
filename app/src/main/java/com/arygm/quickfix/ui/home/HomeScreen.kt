@@ -39,7 +39,6 @@ import com.arygm.quickfix.R
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
@@ -73,14 +72,12 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
             navigationIcon = {},
             actions = {
-              IconButton(
-                  onClick = { navigationActions.navigateTo(Screen.MESSAGES) },
-                  Modifier.testTag("MessagesButton")) {
-                    Icon(
-                        imageVector = Icons.Outlined.Email,
-                        contentDescription = "Messages",
-                        tint = colorScheme.background)
-                  }
+              IconButton(onClick = {}, Modifier.testTag("MessagesButton")) {
+                Icon(
+                    imageVector = Icons.Outlined.Email,
+                    contentDescription = "Messages",
+                    tint = colorScheme.background)
+              }
             })
       },
       content = { padding ->
