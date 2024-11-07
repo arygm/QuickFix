@@ -27,7 +27,8 @@ import kotlinx.coroutines.tasks.await
 
 @Composable
 fun rememberFirebaseAuthLauncher(
-    onAuthComplete: (AuthResult) -> Unit,
+    onAuthCompleteOne: (AuthResult) -> Unit,
+    onAuthCompleteTwo: (AuthResult) -> Unit,
     onAuthError: (ApiException) -> Unit,
     accountViewModel: AccountViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
@@ -48,7 +49,7 @@ fun rememberFirebaseAuthLauncher(
           accountViewModel.fetchUserAccount(it.uid) { existingAccount ->
             if (existingAccount != null) {
               loggedInAccountViewModel.setLoggedInAccount(existingAccount)
-              onAuthComplete(authResult)
+              onAuthCompleteOne(authResult)
             } else {
               // Extract user information from Google account
               val firstName = account.givenName ?: ""
@@ -75,7 +76,7 @@ fun rememberFirebaseAuthLauncher(
                         account,
                         onSuccess = {
                           loggedInAccountViewModel.setLoggedInAccount(account)
-                          onAuthComplete(authResult)
+                          onAuthCompleteTwo(authResult)
                         },
                         onFailure = { Log.e("Registration", "Failed to save account") })
                   },
