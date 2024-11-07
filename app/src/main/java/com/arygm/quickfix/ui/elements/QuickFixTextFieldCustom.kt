@@ -168,7 +168,7 @@ fun QuickFixTextFieldCustom(
               }
               if (showTrailingIcon() && value.isNotEmpty()) {
                 IconButton(
-                    onClick = { onValueChange("") },
+                    onClick = { if (onClick) onValueChange("") },
                     modifier =
                         Modifier.testTag(C.Tag.clear_button_text_field_custom)
                             .size(sizeIconGroup)
