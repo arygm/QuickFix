@@ -195,7 +195,7 @@ fun SearchOnBoarding(navigationActions: NavigationActions, isUser: Boolean) {
                               title = category.title,
                               description = category.description,
                               onClick = category.onClick,
-                              height = Dp(75 * heightRatio.value),
+                              height = Dp(82 * heightRatio.value),
                               size = (28.dp * sizeRatio.value))
                           Spacer(modifier = Modifier.height(10.dp))
                         }

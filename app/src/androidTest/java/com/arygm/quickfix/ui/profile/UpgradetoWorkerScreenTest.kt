@@ -2,11 +2,16 @@ package com.arygm.quickfix.ui.profile
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import com.arygm.quickfix.model.Location.Location
+import com.arygm.quickfix.model.account.Account
+import com.arygm.quickfix.model.account.AccountRepository
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.*
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.FirebaseFirestore
 import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -19,38 +24,42 @@ class BusinessScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
-  private lateinit var userViewModel: ProfileViewModel
+  private lateinit var mockFirestore: FirebaseFirestore
+  private lateinit var accountRepository: AccountRepository
+  private lateinit var accountViewModel: AccountViewModel
+  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
+  private lateinit var userProfileRepositoryFirestore: ProfileRepository
+  private lateinit var workerProfileRepositoryFirestore: ProfileRepository
   private lateinit var workerViewModel: ProfileViewModel
-  private lateinit var userRepository: ProfileRepository
-  private lateinit var workerRepository: ProfileRepository
-  private lateinit var loggedInProfileViewModel: LoggedInProfileViewModel
 
   private val testUserProfile =
-      UserProfile(
+      Account(
           uid = "testUid",
           firstName = "John",
           lastName = "Doe",
           birthDate = Timestamp.now(),
           email = "john.doe@example.com",
-          location = GeoPoint(0.0, 0.0),
           isWorker = false)
 
   @Before
   fun setup() {
     navigationActions = mock()
-    userRepository = mock()
-    workerRepository = mock()
-    userViewModel = ProfileViewModel(userRepository)
-    workerViewModel = ProfileViewModel(workerRepository)
-    loggedInProfileViewModel = LoggedInProfileViewModel()
-    loggedInProfileViewModel.setLoggedInProfile(testUserProfile)
+    userProfileRepositoryFirestore = mock()
+    workerProfileRepositoryFirestore = mock()
+    accountRepository = mock()
+    accountViewModel = AccountViewModel(accountRepository)
+    workerViewModel = ProfileViewModel(workerProfileRepositoryFirestore)
+    loggedInAccountViewModel =
+        LoggedInAccountViewModel(userProfileRepositoryFirestore, workerProfileRepositoryFirestore)
+    loggedInAccountViewModel.setLoggedInAccount(testUserProfile)
   }
 
   @Test
   fun testInitialUI() {
     composeTestRule.setContent {
       QuickFixTheme {
-        BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+        BusinessScreen(
+            navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
       }
     }
 
@@ -72,7 +81,8 @@ class BusinessScreenTest {
   fun testBackButtonNavigatesBack() {
     composeTestRule.setContent {
       QuickFixTheme {
-        BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+        BusinessScreen(
+            navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
       }
     }
 
@@ -84,7 +94,8 @@ class BusinessScreenTest {
   fun testOccupationDropdownFunctionality() {
     composeTestRule.setContent {
       QuickFixTheme {
-        BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+        BusinessScreen(
+            navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
       }
     }
 
@@ -105,7 +116,8 @@ class BusinessScreenTest {
   fun testValidateButtonWithEmptyFieldsShowsError() {
     composeTestRule.setContent {
       QuickFixTheme {
-        BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+        BusinessScreen(
+            navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
       }
     }
 
@@ -120,7 +132,8 @@ class BusinessScreenTest {
   fun testValidateButtonWithInvalidHourlyRateShowsError() {
     composeTestRule.setContent {
       QuickFixTheme {
-        BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+        BusinessScreen(
+            navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
       }
     }
 
@@ -142,20 +155,21 @@ class BusinessScreenTest {
           onSuccess()
           null
         }
-        .whenever(userRepository)
-        .updateProfile(any(), any(), any())
+        .whenever(accountRepository)
+        .updateAccount(any(), any(), any())
 
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()
           null
         }
-        .whenever(workerRepository)
+        .whenever(workerProfileRepositoryFirestore)
         .addProfile(any(), any(), any())
 
     composeTestRule.setContent {
       QuickFixTheme {
-        BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+        BusinessScreen(
+            navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
       }
     }
 
@@ -178,12 +192,13 @@ class BusinessScreenTest {
           onFailure(Exception("Failed to add profile"))
           null
         }
-        .whenever(workerRepository)
+        .whenever(workerProfileRepositoryFirestore)
         .addProfile(any(), any(), any())
 
     composeTestRule.setContent {
       QuickFixTheme {
-        BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+        BusinessScreen(
+            navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
       }
     }
 
@@ -203,7 +218,8 @@ class BusinessScreenTest {
   fun testDescriptionInputAcceptsMultiline() {
     composeTestRule.setContent {
       QuickFixTheme {
-        BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+        BusinessScreen(
+            navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
       }
     }
 
@@ -218,7 +234,8 @@ class BusinessScreenTest {
   fun testHourlyRateInputAllowsOnlyNumbers() {
     composeTestRule.setContent {
       QuickFixTheme {
-        BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+        BusinessScreen(
+            navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
       }
     }
 
@@ -232,7 +249,8 @@ class BusinessScreenTest {
   fun testDropdownMenuFiltersOccupations() {
     composeTestRule.setContent {
       QuickFixTheme {
-        BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+        BusinessScreen(
+            navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
       }
     }
 
@@ -251,7 +269,8 @@ class BusinessScreenTest {
   fun testErrorMessageDisappearsAfterCorrectInput() {
     composeTestRule.setContent {
       QuickFixTheme {
-        BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+        BusinessScreen(
+            navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
       }
     }
 
@@ -282,20 +301,21 @@ class BusinessScreenTest {
           onSuccess()
           null
         }
-        .whenever(userRepository)
-        .updateProfile(any(), any(), any())
+        .whenever(accountRepository)
+        .updateAccount(any(), any(), any())
 
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()
           null
         }
-        .whenever(workerRepository)
+        .whenever(workerProfileRepositoryFirestore)
         .addProfile(profileCaptor.capture(), any(), any())
 
     composeTestRule.setContent {
       QuickFixTheme {
-        BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+        BusinessScreen(
+            navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
       }
     }
 
@@ -311,42 +331,40 @@ class BusinessScreenTest {
     composeTestRule.waitForIdle()
 
     // Assert
-    Mockito.verify(workerRepository).addProfile(any(), any(), any())
+    Mockito.verify(workerProfileRepositoryFirestore).addProfile(any(), any(), any())
     val addedProfile = profileCaptor.firstValue as WorkerProfile
 
     assertEquals("testUid", addedProfile.uid)
-    assertEquals("John", addedProfile.firstName)
-    assertEquals("Doe", addedProfile.lastName)
-    assertEquals("john.doe@example.com", addedProfile.email)
     assertEquals("Plumber", addedProfile.fieldOfWork)
     assertEquals(50.0, addedProfile.hourlyRate)
     assertEquals("Experienced plumber", addedProfile.description)
-    assertEquals(GeoPoint(0.0, 0.0), addedProfile.location)
+    assertEquals(Location(0.0, 0.0, "default"), addedProfile.location)
   }
 
   @Test
   fun testUserProfileIsUpdatedWithIsWorkerTrue() {
     // Arrange
-    val userProfileCaptor = argumentCaptor<Profile>()
+    val userProfileCaptor = argumentCaptor<Account>()
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()
           null
         }
-        .whenever(userRepository)
-        .updateProfile(userProfileCaptor.capture(), any(), any())
+        .whenever(accountRepository)
+        .updateAccount(userProfileCaptor.capture(), any(), any())
 
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()
           null
         }
-        .whenever(workerRepository)
+        .whenever(workerProfileRepositoryFirestore)
         .addProfile(any(), any(), any())
 
     composeTestRule.setContent {
       QuickFixTheme {
-        BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+        BusinessScreen(
+            navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
       }
     }
 
@@ -365,8 +383,8 @@ class BusinessScreenTest {
 
     // Assert
     // Verify that the user profile was updated with isWorker = true
-    Mockito.verify(userRepository).updateProfile(any(), any(), any())
-    val updatedUserProfile = userProfileCaptor.firstValue as UserProfile
+    Mockito.verify(accountRepository).updateAccount(any(), any(), any())
+    val updatedUserProfile = userProfileCaptor.firstValue
 
     assertEquals("testUid", updatedUserProfile.uid)
     assertEquals("John", updatedUserProfile.firstName)

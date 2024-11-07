@@ -7,7 +7,6 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -32,7 +31,7 @@ class QuickFixTextFieldCustomTest : TestCase() {
 
   @Test
   fun testQuickFixTextFieldCustom() = run {
-      val text = mutableStateOf("")
+    val text = mutableStateOf("")
     // Step 1: Set up the content to test
     composeTestRule.setContent {
       QuickFixTextFieldCustom(

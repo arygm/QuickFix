@@ -39,8 +39,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.R
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
-import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.google.firebase.Firebase
@@ -50,12 +49,9 @@ import com.google.firebase.auth.auth
 @Composable
 fun ProfileScreen(
     navigationActions: NavigationActions,
-    isUser: Boolean = true,
-    userViewModel: ProfileViewModel,
-    workerViewModel: ProfileViewModel,
-    loggedInProfileViewModel: LoggedInProfileViewModel
+    loggedInAccountViewModel: LoggedInAccountViewModel
 ) {
-  val loggedInProfile by loggedInProfileViewModel.loggedInProfile.collectAsState()
+  val loggedInProfile by loggedInAccountViewModel.loggedInAccount.collectAsState()
   // List of options handled by the profile screen
   val options =
       listOf(
@@ -273,7 +269,7 @@ fun ProfileScreen(
               // Logout Button
               Button(
                   onClick = {
-                    loggedInProfileViewModel.logOut(Firebase.auth)
+                    loggedInAccountViewModel.logOut(Firebase.auth)
                     navigationActions.navigateTo(Screen.WELCOME)
                     Log.d("user", Firebase.auth.currentUser.toString())
                   },

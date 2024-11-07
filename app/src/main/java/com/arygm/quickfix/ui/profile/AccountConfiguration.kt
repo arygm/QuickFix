@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.profile
+package com.arygm.quickfix.ui.account
 
 import android.annotation.SuppressLint
 import android.widget.Toast
@@ -48,9 +48,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.R
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
-import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.account.Account
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.ui.authentication.CustomTextField
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -64,31 +64,29 @@ import java.util.GregorianCalendar
 @SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileConfigurationScreen(
+fun AccountConfigurationScreen(
     navigationActions: NavigationActions,
-    isUser: Boolean = true,
-    userViewModel: ProfileViewModel,
-    workerViewModel: ProfileViewModel,
-    loggedInProfileViewModel: LoggedInProfileViewModel
+    accountViewModel: AccountViewModel,
+    loggedInAccountViewModel: LoggedInAccountViewModel
 ) {
-  val loggedInProfile =
-      loggedInProfileViewModel.loggedInProfile.collectAsState().value
+  val loggedInAccount =
+      loggedInAccountViewModel.loggedInAccount.collectAsState().value
           ?: return Text(
-              text = "No profile currently selected. Should not happen",
+              text = "No account currently selected. Should not happen",
               color = colorScheme.primary)
 
-  var firstName by remember { mutableStateOf(loggedInProfile.firstName) }
-  var lastName by remember { mutableStateOf(loggedInProfile.lastName) }
-  var email by remember { mutableStateOf(loggedInProfile.email) }
+  var firstName by remember { mutableStateOf(loggedInAccount.firstName) }
+  var lastName by remember { mutableStateOf(loggedInAccount.lastName) }
+  var email by remember { mutableStateOf(loggedInAccount.email) }
 
   var emailError by remember { mutableStateOf(false) }
   var birthDateError by remember { mutableStateOf(false) }
 
   var birthDate by remember {
     mutableStateOf(
-        loggedInProfile.birthDate.let {
+        loggedInAccount.birthDate.let {
           val calendar = GregorianCalendar()
-          calendar.time = loggedInProfile.birthDate.toDate()
+          calendar.time = loggedInAccount.birthDate.toDate()
           return@let "${calendar.get(Calendar.DAY_OF_MONTH)}/${calendar.get(Calendar.MONTH) + 1}/${calendar.get(Calendar.YEAR)}"
         })
   }
@@ -125,7 +123,7 @@ fun ProfileConfigurationScreen(
             modifier = Modifier.fillMaxSize().fillMaxWidth().padding(padding),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
-              // Profile Image Placeholder
+              // Account Image Placeholder
               Icon(
                   imageVector = Icons.Default.AccountCircle,
                   contentDescription = "Account Circle Icon",
@@ -134,16 +132,16 @@ fun ProfileConfigurationScreen(
                       Modifier.size(100.dp)
                           .clip(CircleShape)
                           .border(2.dp, colorScheme.background, CircleShape)
-                          .testTag("ProfileImage"))
+                          .testTag("AccountImage"))
 
               Spacer(modifier = Modifier.height(16.dp))
 
-              // Profile Card
+              // Account Card
               Card(
                   modifier =
                       Modifier.fillMaxWidth(0.85f)
                           .align(Alignment.CenterHorizontally)
-                          .testTag("ProfileCard"),
+                          .testTag("AccountCard"),
                   shape = RoundedCornerShape(16.dp),
                   colors =
                       CardDefaults.cardColors(
@@ -155,19 +153,19 @@ fun ProfileConfigurationScreen(
                         modifier = Modifier.padding(7.dp)) {
                           Icon(
                               painter = painterResource(R.drawable.profilevector),
-                              contentDescription = "Profile Icon",
+                              contentDescription = "Account Icon",
                               tint = colorScheme.primary,
                               modifier = Modifier.size(24.dp))
                           Spacer(modifier = Modifier.width(65.dp))
 
                           val displayName =
-                              capitalizeName(loggedInProfile.firstName, loggedInProfile.lastName)
+                              capitalizeName(loggedInAccount.firstName, loggedInAccount.lastName)
 
                           Text(
                               text = displayName,
                               style = MaterialTheme.typography.bodyLarge,
                               color = colorScheme.onBackground,
-                              modifier = Modifier.testTag("ProfileName"))
+                              modifier = Modifier.testTag("AccountName"))
                         }
                   }
 
@@ -211,9 +209,9 @@ fun ProfileConfigurationScreen(
                           onValueChange = {
                             email = it
                             emailError = !isValidEmail(it)
-                            userViewModel.profileExists(email) { exists, profile ->
+                            accountViewModel.accountExists(email) { exists, account ->
                               emailError =
-                                  exists && profile != null && email != loggedInProfile.email
+                                  exists && account != null && email != loggedInAccount.email
                             }
                           },
                           placeHolderText = "Enter your email address",
@@ -281,7 +279,6 @@ fun ProfileConfigurationScreen(
 
               // Save button
               Button(
-                  enabled = !emailError,
                   onClick = {
                     val calendar = GregorianCalendar()
                     val parts = birthDate.split("/")
@@ -294,27 +291,21 @@ fun ProfileConfigurationScreen(
                             0,
                             0,
                             0)
-
-                        if (loggedInProfile is UserProfile) {
-                          userViewModel.updateProfile(
-                              UserProfile(
-                                  uid = loggedInProfile.uid,
-                                  firstName = firstName,
-                                  lastName = lastName,
-                                  email = email,
-                                  birthDate = Timestamp(calendar.time),
-                                  isWorker = loggedInProfile.isWorker),
-                              onSuccess = {
-                                userViewModel.fetchUserProfile(loggedInProfile.uid) { profile ->
-                                  loggedInProfileViewModel.setLoggedInProfile(profile!!)
-                                }
-                              },
-                              onFailure = {})
-                          navigationActions.goBack()
-                          return@Button
-                        } else {
-                          // TODO
-                        }
+                        accountViewModel.updateAccount(
+                            Account(
+                                uid = loggedInAccount.uid,
+                                firstName = firstName,
+                                lastName = lastName,
+                                email = email,
+                                birthDate = Timestamp(calendar.time)),
+                            onSuccess = {
+                              accountViewModel.fetchUserAccount(loggedInAccount.uid) { account ->
+                                loggedInAccountViewModel.setLoggedInAccount(account!!)
+                              }
+                            },
+                            onFailure = {})
+                        navigationActions.goBack()
+                        return@Button
                       } catch (_: NumberFormatException) {}
                     }
 
@@ -322,6 +313,7 @@ fun ProfileConfigurationScreen(
                             context, "Invalid format, date must be DD/MM/YYYY.", Toast.LENGTH_SHORT)
                         .show()
                   },
+                  enabled = !emailError && !birthDateError,
                   modifier =
                       Modifier.fillMaxWidth(0.8f).padding(horizontal = 16.dp).testTag("SaveButton"),
                   colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {

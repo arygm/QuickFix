@@ -42,6 +42,7 @@ object Screen {
   const val PROFILE = "Profile Screen"
   const val ACCOUNT_CONFIGURATION = "Account configuration Screen"
   const val TO_WORKER = "To Worker Screen"
+  const val GOOGLE_INFO = "Google Info Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
