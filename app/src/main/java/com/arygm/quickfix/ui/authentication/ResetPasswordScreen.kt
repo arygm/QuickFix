@@ -37,7 +37,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -54,7 +54,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ResetPasswordScreen(
     navigationActions: NavigationActions,
-    userViewModel: ProfileViewModel,
+    accountViewModel: AccountViewModel,
 ) {
   var errorHasOccurred by remember { mutableStateOf(false) }
   var emailError = false
@@ -162,7 +162,7 @@ fun ResetPasswordScreen(
                                 value = email,
                                 onValueChange = {
                                   email = it
-                                  userViewModel.profileExists(email) { exists, profile ->
+                                  accountViewModel.accountExists(email) { exists, _ ->
                                     emailError =
                                         if (exists) {
                                           isValidEmail(it)

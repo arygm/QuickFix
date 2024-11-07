@@ -92,7 +92,7 @@ fun QuickFixApp() {
           screen != Screen.ACCOUNT_CONFIGURATION &&
           screen != Screen.TO_WORKER &&
           screen != Screen.RESET_PASSWORD &&
-          screen != Screen.GOOGLE_INFO &&
+          screen != Screen.GOOGLE_INFO
     }
   }
 
@@ -158,7 +158,7 @@ fun QuickFixApp() {
                       navigationActions, loggedInAccountViewModel, accountViewModel, userViewModel)
                 }
                 composable(Screen.RESET_PASSWORD) {
-                  ResetPasswordScreen(navigationActions, userViewModel)
+                  ResetPasswordScreen(navigationActions, accountViewModel)
                 }
               }
 
