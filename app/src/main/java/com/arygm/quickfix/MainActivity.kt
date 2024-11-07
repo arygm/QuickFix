@@ -34,7 +34,6 @@ import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.DashboardScreen
-import com.arygm.quickfix.ui.SearchScreen
 import com.arygm.quickfix.ui.account.AccountConfigurationScreen
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
@@ -47,6 +46,7 @@ import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.profile.BusinessScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
+import com.arygm.quickfix.ui.search.SearchOnBoarding
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import kotlinx.coroutines.delay
 
@@ -231,6 +231,6 @@ fun SearchNavHost(innerPadding: PaddingValues, isUser: Boolean) {
       startDestination = Screen.SEARCH,
       modifier = Modifier.padding(innerPadding),
   ) {
-    composable(Screen.SEARCH) { SearchScreen(navigationActions, isUser) }
+    composable(Screen.SEARCH) { SearchOnBoarding(navigationActions, isUser) }
   }
 }
