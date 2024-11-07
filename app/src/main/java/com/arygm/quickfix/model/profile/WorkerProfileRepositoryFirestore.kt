@@ -7,6 +7,8 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import kotlin.math.cos
 
 class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRepository {
 
@@ -179,5 +181,49 @@ class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : Prof
         "description" to this.description,
         "fieldOfWork" to this.fieldOfWork // Convert sealed class to string
         )
+  }
+
+  fun filterWorkers(
+      hourlyRateThreshold: Double?,
+      fieldOfWork: String?,
+      location: Location?,
+      radiusInKm: Double?,
+      onSuccess: (List<WorkerProfile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    var query: Query = db.collection(collectionPath)
+
+    fieldOfWork?.let { query = query.whereEqualTo("fieldOfWork", it) }
+
+    hourlyRateThreshold?.let { query = query.whereLessThan("hourlyRate", it) }
+
+    if (location != null && radiusInKm != null) {
+      val earthRadius = 6371.0
+      val lat = location.latitude
+      val lon = location.longitude
+      val latDelta = radiusInKm / earthRadius
+      val lonDelta = radiusInKm / (earthRadius * cos(Math.toRadians(lat)))
+
+      val minLat = lat - Math.toDegrees(latDelta)
+      val maxLat = lat + Math.toDegrees(latDelta)
+      val minLon = lon - Math.toDegrees(lonDelta)
+      val maxLon = lon + Math.toDegrees(lonDelta)
+
+      // Add range filters for latitude and longitude
+      query =
+          query
+              .whereGreaterThanOrEqualTo("location.latitude", minLat)
+              .whereLessThanOrEqualTo("location.latitude", maxLat)
+              .whereGreaterThanOrEqualTo("location.longitude", minLon)
+              .whereLessThanOrEqualTo("location.longitude", maxLon)
+    }
+    query
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val workerProfiles =
+              querySnapshot.documents.mapNotNull { it.toObject(WorkerProfile::class.java) }
+          onSuccess(workerProfiles)
+        }
+        .addOnFailureListener { exception -> onFailure(exception) }
   }
 }

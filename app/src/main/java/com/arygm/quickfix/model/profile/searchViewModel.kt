@@ -1,8 +1,15 @@
 package com.arygm.quickfix.model.profile
 
-/*
+import androidx.lifecycle.ViewModel
+import com.arygm.quickfix.model.Location.Location
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
-class WorkerListViewModel(private val repository: ProfileRepositoryFirestore) : ViewModel() {
+class searchViewModel(private val repository: WorkerProfileRepositoryFirestore) : ViewModel() {
 
   private val _workerProfiles = MutableStateFlow<List<Profile>>(emptyList())
   val workerProfiles: StateFlow<List<Profile>> = _workerProfiles
@@ -13,19 +20,25 @@ class WorkerListViewModel(private val repository: ProfileRepositoryFirestore) : 
   fun filterWorkerProfiles(
       hourlyRateThreshold: Double? = null,
       fieldOfWork: String? = null,
-      userLat: Double? = null,
-      userLon: Double? = null,
+      location: Location? = null,
       maxDistanceInKm: Double? = null
   ) {
+    val userLat = location?.latitude
+    val userLon = location?.longitude
+
     repository.filterWorkers(
         hourlyRateThreshold,
         fieldOfWork,
+        location,
+        maxDistanceInKm,
         { profiles ->
           if (userLat != null && userLon != null && maxDistanceInKm != null) {
             val filteredProfiles =
                 profiles.filter { profile ->
-                  val workerLat = profile.location?.latitude ?: return@filter false
-                  val workerLon = profile.location.longitude
+                  val location =
+                      profile.location ?: return@filter false // Ensure location is non-null
+                  val workerLat = location.latitude
+                  val workerLon = location.longitude
                   val distance = calculateDistance(userLat, userLon, workerLat, workerLon)
                   distance <= maxDistanceInKm
                 }
@@ -50,5 +63,3 @@ class WorkerListViewModel(private val repository: ProfileRepositoryFirestore) : 
     return earthRadius * c
   }
 }
-
- */
