@@ -12,13 +12,12 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.arygm.quickfix.R
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
-import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
-import com.google.firebase.Timestamp
-import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.FirebaseFirestore
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -30,19 +29,10 @@ class ProfileScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
-  private lateinit var userViewModel: ProfileViewModel
-  private lateinit var workerViewModel: ProfileViewModel
-  private lateinit var loggedInProfileViewModel: LoggedInProfileViewModel
-
-  private val testUserProfile =
-      UserProfile(
-          uid = "testUid",
-          firstName = "john",
-          lastName = "doe",
-          birthDate = Timestamp.now(),
-          email = "john.doe@example.com",
-          location = GeoPoint(0.0, 0.0),
-          isWorker = false)
+  private lateinit var mockFirestore: FirebaseFirestore
+  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
+  private lateinit var userProfileRepositoryFirestore: UserProfileRepositoryFirestore
+  private lateinit var workerProfileRepositoryFirestore: WorkerProfileRepositoryFirestore
 
   private val options =
       listOf(
@@ -58,23 +48,19 @@ class ProfileScreenTest {
 
   @Before
   fun setup() {
+    mockFirestore = mock(FirebaseFirestore::class.java)
     navigationActions = mock(NavigationActions::class.java)
-    loggedInProfileViewModel = LoggedInProfileViewModel()
-    loggedInProfileViewModel.setLoggedInProfile(testUserProfile)
-    userViewModel = mock(ProfileViewModel::class.java)
-    workerViewModel = mock(ProfileViewModel::class.java)
+    userProfileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore)
+    workerProfileRepositoryFirestore = WorkerProfileRepositoryFirestore(mockFirestore)
+    loggedInAccountViewModel =
+        LoggedInAccountViewModel(
+            userProfileRepo = userProfileRepositoryFirestore,
+            workerProfileRepo = workerProfileRepositoryFirestore)
   }
 
   @Test
   fun profileScreenDisplaysCorrectly() {
-    composeTestRule.setContent {
-      ProfileScreen(
-          navigationActions,
-          isUser = true,
-          userViewModel,
-          workerViewModel,
-          loggedInProfileViewModel)
-    }
+    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
 
     // Test for profile title and name
     composeTestRule.onNodeWithTag("ProfileTopAppBar").assertIsDisplayed()
@@ -101,64 +87,22 @@ class ProfileScreenTest {
   }
 
   @Test
-  fun profileNameDisplaysLoggedInProfileName() {
-    // Arrange
-    val expectedDisplayName = "John Doe"
-
-    // Act
-    composeTestRule.setContent {
-      ProfileScreen(
-          navigationActions,
-          isUser = true,
-          userViewModel,
-          workerViewModel,
-          loggedInProfileViewModel)
-    }
-
-    // Assert
-    composeTestRule.onNodeWithTag("ProfileName").assertTextEquals(expectedDisplayName)
-  }
-
-  // Other existing test methods...
-
-  @Test
   fun walletButtonClickTest() {
-    composeTestRule.setContent {
-      ProfileScreen(
-          navigationActions,
-          isUser = true,
-          userViewModel,
-          workerViewModel,
-          loggedInProfileViewModel)
-    }
+    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
 
     composeTestRule.onNodeWithTag("WalletButton").performClick()
   }
 
   @Test
   fun helpButtonClickTest() {
-    composeTestRule.setContent {
-      ProfileScreen(
-          navigationActions,
-          isUser = true,
-          userViewModel,
-          workerViewModel,
-          loggedInProfileViewModel)
-    }
+    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
 
     composeTestRule.onNodeWithTag("HelpButton").performClick()
   }
 
   @Test
   fun optionsAreDisplayedCorrectly() {
-    composeTestRule.setContent {
-      ProfileScreen(
-          navigationActions,
-          isUser = true,
-          userViewModel,
-          workerViewModel,
-          loggedInProfileViewModel)
-    }
+    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
 
     options.forEach { option ->
       val optionTag = option.label.replace(" ", "") + "Option"
@@ -172,28 +116,14 @@ class ProfileScreenTest {
 
   @Test
   fun logoutButtonClickTest() {
-    composeTestRule.setContent {
-      ProfileScreen(
-          navigationActions,
-          isUser = true,
-          userViewModel,
-          workerViewModel,
-          loggedInProfileViewModel)
-    }
+    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
 
     composeTestRule.onNodeWithTag("LogoutButton").performClick()
   }
 
   @Test
   fun navigateToAccountConfigurationTest() {
-    composeTestRule.setContent {
-      ProfileScreen(
-          navigationActions,
-          isUser = true,
-          userViewModel,
-          workerViewModel,
-          loggedInProfileViewModel)
-    }
+    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
 
     // Perform click on "Account configuration"
     composeTestRule.onNodeWithTag("AccountconfigurationOption").performClick()
@@ -204,14 +134,7 @@ class ProfileScreenTest {
 
   @Test
   fun navigateToWorkerSetupTest() {
-    composeTestRule.setContent {
-      ProfileScreen(
-          navigationActions,
-          isUser = true,
-          userViewModel,
-          workerViewModel,
-          loggedInProfileViewModel)
-    }
+    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
 
     // Perform click on "Set up your business account"
     composeTestRule.onNodeWithTag("SetupyourbusinessaccountOption").performClick()

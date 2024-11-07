@@ -30,10 +30,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.DashboardScreen
 import com.arygm.quickfix.ui.SearchScreen
+import com.arygm.quickfix.ui.account.AccountConfigurationScreen
+import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
 import com.arygm.quickfix.ui.authentication.ResetPasswordScreen
@@ -44,7 +47,6 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.profile.BusinessScreen
-import com.arygm.quickfix.ui.profile.ProfileConfigurationScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import kotlinx.coroutines.delay
@@ -69,13 +71,13 @@ fun QuickFixApp() {
 
   val rootNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(rootNavController) }
-
   val userViewModel: ProfileViewModel =
       viewModel(key = "userViewModel", factory = ProfileViewModel.UserFactory)
-
   val workerViewModel: ProfileViewModel =
       viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
-  val loggedInProfileViewModel: LoggedInProfileViewModel = viewModel()
+  val loggedInAccountViewModel: LoggedInAccountViewModel =
+      viewModel(factory = LoggedInAccountViewModel.Factory)
+  val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
 
   val isUser = false // TODO: This variable needs to get its value after the authentication
   val screen by remember { navigationActions::currentScreen }
@@ -89,7 +91,8 @@ fun QuickFixApp() {
           screen != Screen.REGISTER &&
           screen != Screen.ACCOUNT_CONFIGURATION &&
           screen != Screen.TO_WORKER &&
-          screen != Screen.RESET_PASSWORD
+          screen != Screen.RESET_PASSWORD &&
+          screen != Screen.GOOGLE_INFO &&
     }
   }
 
@@ -140,13 +143,19 @@ fun QuickFixApp() {
                   route = Route.WELCOME,
               ) {
                 composable(Screen.WELCOME) {
-                  WelcomeScreen(navigationActions, userViewModel, loggedInProfileViewModel)
+                  WelcomeScreen(
+                      navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
                 }
                 composable(Screen.LOGIN) {
-                  LogInScreen(navigationActions, userViewModel, loggedInProfileViewModel)
+                  LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
                 }
                 composable(Screen.REGISTER) {
-                  RegisterScreen(navigationActions, userViewModel, loggedInProfileViewModel)
+                  RegisterScreen(
+                      navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+                }
+                composable(Screen.GOOGLE_INFO) {
+                  GoogleInfoScreen(
+                      navigationActions, loggedInAccountViewModel, accountViewModel, userViewModel)
                 }
                 composable(Screen.RESET_PASSWORD) {
                   ResetPasswordScreen(navigationActions, userViewModel)
@@ -161,7 +170,7 @@ fun QuickFixApp() {
 
               composable(Route.PROFILE) {
                 ProfileNavHost(
-                    innerPadding, isUser, userViewModel, workerViewModel, loggedInProfileViewModel)
+                    innerPadding, accountViewModel, loggedInAccountViewModel, workerViewModel)
               }
             }
       }
@@ -183,10 +192,9 @@ fun HomeNavHost(innerPadding: PaddingValues, isUser: Boolean) {
 @Composable
 fun ProfileNavHost(
     innerPadding: PaddingValues,
-    isUser: Boolean,
-    userViewModel: ProfileViewModel,
-    workerViewModel: ProfileViewModel,
-    loggedInProfileViewModel: LoggedInProfileViewModel
+    accountViewModel: AccountViewModel,
+    loggedInAccountViewModel: LoggedInAccountViewModel,
+    workerViewModel: ProfileViewModel
 ) {
   val profileNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(profileNavController) }
@@ -196,15 +204,13 @@ fun ProfileNavHost(
       modifier = Modifier.padding(innerPadding),
   ) {
     composable(Screen.PROFILE) {
-      ProfileScreen(
-          navigationActions, isUser, userViewModel, workerViewModel, loggedInProfileViewModel)
+      ProfileScreen(navigationActions, loggedInAccountViewModel = loggedInAccountViewModel)
     }
     composable(Screen.ACCOUNT_CONFIGURATION) {
-      ProfileConfigurationScreen(
-          navigationActions, isUser, userViewModel, workerViewModel, loggedInProfileViewModel)
+      AccountConfigurationScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
     }
     composable(Screen.TO_WORKER) {
-      BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+      BusinessScreen(navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
     }
   }
 }

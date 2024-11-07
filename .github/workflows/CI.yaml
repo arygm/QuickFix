@@ -104,7 +104,7 @@ jobs:
             # Verify Firebase CLI installation
             firebase --version
 
-            firebase emulators:exec --debug --inspect-functions --project quickfix-1fd34  --import=./end2end-data --only firestore,auth './gradlew connectedCheck --parallel --build-cache'
+            ./gradlew connectedCheckWithEmulators --parallel --build-cache
 
       - name: Upload Failing Test Report Log
         if: failure()
