@@ -17,14 +17,9 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.google.firebase.Timestamp
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
@@ -72,15 +67,6 @@ class GoogleInfoScreenTest {
 
     // Mock the navigation actions
     navigationActions = mock()
-
-    // Ensure that we're on the main thread
-    Dispatchers.setMain(Dispatchers.Unconfined)
-  }
-
-  @After
-  fun tearDown() {
-    // Reset the main dispatcher
-    Dispatchers.resetMain()
   }
 
   @Test
