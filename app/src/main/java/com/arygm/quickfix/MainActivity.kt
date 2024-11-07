@@ -35,6 +35,7 @@ import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.DashboardScreen
 import com.arygm.quickfix.ui.account.AccountConfigurationScreen
+import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
@@ -45,7 +46,7 @@ import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.profile.BusinessScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
-import com.arygm.quickfix.ui.search.QuickFixFinderScreen
+import com.arygm.quickfix.ui.search.SearchOnBoarding
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import kotlinx.coroutines.delay
 
@@ -87,7 +88,7 @@ fun QuickFixApp() {
           screen != Screen.INFO &&
           screen != Screen.PASSWORD &&
           screen != Screen.REGISTER &&
-          // screen != Screen.ACCOUNT_CONFIGURATION &&
+          screen != Screen.GOOGLE_INFO &&
           screen != Screen.TO_WORKER
     }
   }
@@ -148,6 +149,10 @@ fun QuickFixApp() {
                 composable(Screen.REGISTER) {
                   RegisterScreen(
                       navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+                }
+                composable(Screen.GOOGLE_INFO) {
+                  GoogleInfoScreen(
+                      navigationActions, loggedInAccountViewModel, accountViewModel, userViewModel)
                 }
               }
 
@@ -226,6 +231,6 @@ fun SearchNavHost(innerPadding: PaddingValues, isUser: Boolean) {
       startDestination = Screen.SEARCH,
       modifier = Modifier.padding(innerPadding),
   ) {
-    composable(Screen.SEARCH) { QuickFixFinderScreen(navigationActions, isUser) }
+    composable(Screen.SEARCH) { SearchOnBoarding(navigationActions, isUser) }
   }
 }
