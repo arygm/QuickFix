@@ -36,6 +36,7 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.DashboardScreen
 import com.arygm.quickfix.ui.SearchScreen
 import com.arygm.quickfix.ui.account.AccountConfigurationScreen
+import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
@@ -149,6 +150,10 @@ fun QuickFixApp() {
                   RegisterScreen(
                       navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
                 }
+                  composable(Screen.GOOGLE_INFO) {
+                      GoogleInfoScreen(
+                          navigationActions, loggedInAccountViewModel, accountViewModel, userViewModel)
+                  }
               }
 
               composable(Route.HOME) { HomeNavHost(innerPadding, isUser) }
