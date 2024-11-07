@@ -48,6 +48,7 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.ui.theme.ButtonPrimary
 import com.arygm.quickfix.utils.rememberFirebaseAuthLauncher
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -85,7 +86,7 @@ fun WelcomeScreen(
           },
           onAuthCompleteTwo = { result ->
             Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
-            navigationActions.navigateTo(Screen.GOOGLE_INFO)
+            navigationActions.navigateTo(TopLevelDestinations.HOME)
           },
           onAuthError = { Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}") },
           accountViewModel,
