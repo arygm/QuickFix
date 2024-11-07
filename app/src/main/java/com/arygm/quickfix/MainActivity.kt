@@ -88,7 +88,7 @@ fun QuickFixApp() {
           screen != Screen.INFO &&
           screen != Screen.PASSWORD &&
           screen != Screen.REGISTER &&
-          // screen != Screen.ACCOUNT_CONFIGURATION &&
+          screen != Screen.GOOGLE_INFO &&
           screen != Screen.TO_WORKER
     }
   }
