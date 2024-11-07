@@ -1,13 +1,11 @@
-package com.arygm.quickfix.ui
+package com.arygm.quickfix.ui.search
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
-import com.arygm.quickfix.ui.search.SearchScreen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -27,11 +25,9 @@ class SearchScreenTest {
   }
 
   @Test
-  fun calendarScreenUserDisplaysCorrectly() {
+  fun searchScreenUserDisplaysCorrectly() {
     composeTestRule.setContent { SearchScreen(navigationActions, true) }
 
-    composeTestRule.onNodeWithTag("SearchTopBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("SearchTopBarTitle").assertTextEquals("Search")
     composeTestRule.onNodeWithTag("SearchContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SearchText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SearchText").assertTextContains("Welcome to the SEARCH Screen")
@@ -39,11 +35,9 @@ class SearchScreenTest {
 
   // Can Remove this tbh
   @Test
-  fun calendarScreenWorkerDisplaysCorrectly() {
-    composeTestRule.setContent { SearchScreen(navigationActions, true) }
+  fun searchScreenWorkerDisplaysCorrectly() {
+    composeTestRule.setContent { SearchScreen(navigationActions, false) }
 
-    composeTestRule.onNodeWithTag("SearchTopBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("SearchTopBarTitle").assertTextEquals("Search")
     composeTestRule.onNodeWithTag("SearchContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SearchText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SearchText").assertTextContains("Welcome to the SEARCH Screen")

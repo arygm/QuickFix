@@ -20,6 +20,7 @@ fun SearchScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
   // Use Scaffold for the layout structure
   Scaffold(
       containerColor = colorScheme.background,
+      modifier = Modifier.testTag("SearchScreen"),
       content = { padding ->
         Column(
             modifier = Modifier.fillMaxSize().testTag("SearchContent"),
