@@ -150,10 +150,10 @@ fun QuickFixApp() {
                   RegisterScreen(
                       navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
                 }
-                  composable(Screen.GOOGLE_INFO) {
-                      GoogleInfoScreen(
-                          navigationActions, loggedInAccountViewModel, accountViewModel, userViewModel)
-                  }
+                composable(Screen.GOOGLE_INFO) {
+                  GoogleInfoScreen(
+                      navigationActions, loggedInAccountViewModel, accountViewModel, userViewModel)
+                }
               }
 
               composable(Route.HOME) { HomeNavHost(innerPadding, isUser) }
