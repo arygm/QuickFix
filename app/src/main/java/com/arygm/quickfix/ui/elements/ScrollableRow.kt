@@ -29,7 +29,7 @@ fun ServiceCard(service: Service, modifier: Modifier = Modifier, onClick: () -> 
           modifier
               .aspectRatio(0.9f) // Maintain a consistent aspect ratio for height
               // .fillMaxHeight()
-              .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp), clip = true)
+              .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp))
               .testTag("ServiceCard_${service.name}"),
       shape = RoundedCornerShape(8.dp),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -61,13 +61,17 @@ fun ServiceCard(service: Service, modifier: Modifier = Modifier, onClick: () -> 
 
 // PopularServicesRow composable with percentage-based card width and consistent padding
 @Composable
-fun PopularServicesRow(services: List<Service>, onServiceClick: (Service) -> Unit) {
+fun PopularServicesRow(
+    services: List<Service>,
+    onServiceClick: (Service) -> Unit,
+    modifier: Modifier = Modifier
+) {
   BoxWithConstraints {
     val cardWidth = maxWidth * 0.4f // 40% of the available width for each card
     val horizontalSpacing = maxWidth * 0.025f // 2.5% of the available width for spacing
 
     LazyRow(
-        modifier = Modifier.fillMaxSize().testTag("PopularServicesRow"),
+        modifier = modifier.fillMaxWidth().testTag("PopularServicesRow"),
         horizontalArrangement = Arrangement.spacedBy(horizontalSpacing),
         contentPadding = PaddingValues(start = horizontalSpacing, end = horizontalSpacing)) {
           items(services.size) { index ->
@@ -108,7 +112,8 @@ fun MainContent() {
             services = services,
             onServiceClick = { service ->
               // Action when a service is clicked
-            })
+            },
+            modifier = Modifier)
       }
 }
 
