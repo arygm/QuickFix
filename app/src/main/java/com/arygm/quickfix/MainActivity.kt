@@ -33,7 +33,6 @@ import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.RegistrationViewModel
 import com.arygm.quickfix.ui.DashboardScreen
-import com.arygm.quickfix.ui.SearchScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
@@ -45,6 +44,7 @@ import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.profile.BusinessScreen
 import com.arygm.quickfix.ui.profile.ProfileConfigurationScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
+import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import kotlinx.coroutines.delay
 
@@ -162,7 +162,7 @@ fun QuickFixApp() {
                   startDestination = Screen.SEARCH,
                   route = Route.SEARCH,
               ) {
-                composable(Screen.SEARCH) { SearchScreen(navigationActions, isUser) }
+                composable(Screen.SEARCH) { QuickFixFinderScreen(navigationActions, isUser) }
               }
               navigation(
                   startDestination = Screen.DASHBOARD,

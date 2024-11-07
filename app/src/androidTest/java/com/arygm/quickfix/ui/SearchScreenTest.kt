@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.search.SearchScreen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
