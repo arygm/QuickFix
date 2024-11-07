@@ -152,7 +152,7 @@ class LogInScreenTest {
   @Test
   fun testForgotPasswordLinkNavigatesToResetPassword() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
     }
 
     // Click the "Forgot your password?" link

@@ -6,8 +6,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import com.arygm.quickfix.model.profile.ProfileRepository
-import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.account.AccountRepository
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import org.junit.Before
@@ -22,21 +22,21 @@ class ResetPasswordScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
-  private lateinit var profileRepository: ProfileRepository
-  private lateinit var profileViewModel: ProfileViewModel
+  private lateinit var accountRepository: AccountRepository
+  private lateinit var accountViewModel: AccountViewModel
 
   @Before
   fun setup() {
-    profileRepository = mock(ProfileRepository::class.java)
+    accountRepository = mock(AccountRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
-    profileViewModel = ProfileViewModel(profileRepository)
+    accountViewModel = AccountViewModel(accountRepository)
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.RESET_PASSWORD)
   }
 
   @Test
   fun testInitialUI() {
-    composeTestRule.setContent { ResetPasswordScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent { ResetPasswordScreen(navigationActions, accountViewModel) }
 
     // Check that the scaffold and content boxes are displayed
     composeTestRule.onNodeWithTag("ForgotPasswordScaffold").assertIsDisplayed()
@@ -55,7 +55,7 @@ class ResetPasswordScreenTest {
 
   @Test
   fun testResetButtonEnabledWhenEmailIsValid() {
-    composeTestRule.setContent { ResetPasswordScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent { ResetPasswordScreen(navigationActions, accountViewModel) }
 
     // Input a valid email
     composeTestRule.onNodeWithTag("inputEmail").performTextInput("test@example.com")
@@ -66,7 +66,7 @@ class ResetPasswordScreenTest {
 
   @Test
   fun testBackButtonNavigatesBack() {
-    composeTestRule.setContent { ResetPasswordScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent { ResetPasswordScreen(navigationActions, accountViewModel) }
 
     // Click the back button
     composeTestRule.onNodeWithTag("goBackButton").performClick()
