@@ -1,6 +1,6 @@
 package com.arygm.quickfix.model.profile
 
-import com.arygm.quickfix.model.Location.Location
+import com.arygm.quickfix.model.location.Location
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue

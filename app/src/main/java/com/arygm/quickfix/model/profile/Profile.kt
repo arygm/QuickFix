@@ -1,6 +1,6 @@
 package com.arygm.quickfix.model.profile
 
-import com.arygm.quickfix.model.Location.Location
+import com.arygm.quickfix.model.location.Location
 
 open class Profile(
     val uid: String,

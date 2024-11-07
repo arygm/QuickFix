@@ -8,7 +8,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import com.arygm.quickfix.model.Location.Location
+import com.arygm.quickfix.model.location.Location
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel

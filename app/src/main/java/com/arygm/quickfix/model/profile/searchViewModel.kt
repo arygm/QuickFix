@@ -1,7 +1,7 @@
 package com.arygm.quickfix.model.profile
 
 import androidx.lifecycle.ViewModel
-import com.arygm.quickfix.model.Location.Location
+import com.arygm.quickfix.model.location.Location
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin

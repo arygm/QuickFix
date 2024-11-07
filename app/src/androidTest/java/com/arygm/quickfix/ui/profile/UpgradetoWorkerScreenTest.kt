@@ -2,7 +2,7 @@ package com.arygm.quickfix.ui.profile
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import com.arygm.quickfix.model.Location.Location
+import com.arygm.quickfix.model.location.Location
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel

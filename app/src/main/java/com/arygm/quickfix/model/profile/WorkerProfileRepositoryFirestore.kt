@@ -1,7 +1,7 @@
 package com.arygm.quickfix.model.profile
 
 import android.util.Log
-import com.arygm.quickfix.model.Location.Location
+import com.arygm.quickfix.model.location.Location
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
