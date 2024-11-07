@@ -1,6 +1,7 @@
 package com.arygm.quickfix.ui.elements
 
-// Import statements
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -42,19 +43,19 @@ class UpcomingQuickFixesTest {
     }
 
     // Verify initial state shows only first three items
-    composeTestRule.onAllNodesWithText("Name", substring = true).assertCountEquals(3)
+    composeTestRule.onAllNodesWithTagPrefix("QuickFixItem_").assertCountEquals(3)
 
     // Click on "Show All" button
-    composeTestRule.onNodeWithText("Show All").performClick()
+    composeTestRule.onNodeWithTag("ShowAllButton").performClick()
 
     // Verify all items are displayed
-    composeTestRule.onAllNodesWithText("Name", substring = true).assertCountEquals(5)
+    composeTestRule.onAllNodesWithTagPrefix("QuickFixItem_").assertCountEquals(5)
 
     // Click on "Show Less" button
-    composeTestRule.onNodeWithText("Show Less").performClick()
+    composeTestRule.onNodeWithTag("ShowAllButton").performClick()
 
     // Verify only three items are displayed again
-    composeTestRule.onAllNodesWithText("Name", substring = true).assertCountEquals(3)
+    composeTestRule.onAllNodesWithTagPrefix("QuickFixItem_").assertCountEquals(3)
   }
 
   @Test
@@ -69,9 +70,23 @@ class UpcomingQuickFixesTest {
     }
 
     // Perform click on the item
-    composeTestRule.onNodeWithText("Ramy").performClick()
+    composeTestRule.onNodeWithTag("QuickFixItem_Ramy").performClick()
 
     // Verify that the clicked item is correct
     assert(clickedItem == sampleData[0])
+  }
+
+  // Helper function to find nodes with tag prefix
+  private fun SemanticsNodeInteractionsProvider.onAllNodesWithTagPrefix(
+      tagPrefix: String
+  ): SemanticsNodeInteractionCollection {
+    return onAllNodes(hasTestTagPrefix(tagPrefix))
+  }
+
+  private fun hasTestTagPrefix(prefix: String): SemanticsMatcher {
+    return SemanticsMatcher("${SemanticsProperties.TestTag.name} starts with '$prefix'") {
+      val testTag = it.config.getOrNull(SemanticsProperties.TestTag)
+      testTag != null && testTag.startsWith(prefix)
+    }
   }
 }

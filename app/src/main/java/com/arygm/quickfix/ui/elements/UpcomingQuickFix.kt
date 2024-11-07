@@ -15,13 +15,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.testTag // Import for testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.R
-import com.arygm.quickfix.ui.theme.QuickFixTheme
 
 // Data class for QuickFix item
 data class QuickFix(val name: String, val taskDescription: String, val date: String)
@@ -42,15 +41,13 @@ fun UpcomingQuickFixes(
     Column(
         modifier =
             modifier
-                .fillMaxWidth() // Restrict width to 90% of the screen
+                .fillMaxWidth()
                 .padding(horizontalSpacing)
-                .shadow(5.dp, RoundedCornerShape(12.dp)) // Apply shadow to the entire Column
-                .background(
-                    MaterialTheme.colorScheme.surface,
-                    RoundedCornerShape(12.dp)), // Background with rounded corners
-        verticalArrangement = Arrangement.Top, // Align items to the top
-        horizontalAlignment = Alignment.Start // Align to the start to avoid centering issues
-        ) {
+                .shadow(5.dp, RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+                .testTag("UpcomingQuickFixesColumn"), // Added testTag
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start) {
           // Header with divider
           Row(
               modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
@@ -58,29 +55,29 @@ fun UpcomingQuickFixes(
               verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "Upcoming QuickFixes",
-                    color = MaterialTheme.colorScheme.onBackground, // Theme color for text
-                    style = MaterialTheme.typography.titleMedium, // Adjust typography for title
-                )
-                TextButton(onClick = { showAll = !showAll }) {
-                  Text(
-                      text = if (showAll) "Show Less" else "Show All",
-                      color = MaterialTheme.colorScheme.onSurface, // Primary color for "Show All"
-                      style = MaterialTheme.typography.bodyMedium, // Adjust typography
-                      fontWeight = FontWeight.SemiBold)
-                }
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.testTag("UpcomingQuickFixesTitle") // Added testTag
+                    )
+                TextButton(
+                    onClick = { showAll = !showAll },
+                    modifier = Modifier.testTag("ShowAllButton") // Added testTag
+                    ) {
+                      Text(
+                          text = if (showAll) "Show Less" else "Show All",
+                          color = MaterialTheme.colorScheme.onSurface,
+                          style = MaterialTheme.typography.bodyMedium,
+                          fontWeight = FontWeight.SemiBold)
+                    }
               }
           Divider(
-              color =
-                  MaterialTheme.colorScheme.onSurface.copy(
-                      alpha = 0.2f), // Theme color with opacity
+              color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
               thickness = 1.dp,
               modifier = Modifier.padding(horizontal = 0.dp))
 
           // List of QuickFix items
           LazyColumn(
-              modifier = Modifier.wrapContentHeight(), // Ensures it only grows downwards
-              verticalArrangement = Arrangement.Top // Keeps items anchored to the top
-              ) {
+              modifier = Modifier.wrapContentHeight(), verticalArrangement = Arrangement.Top) {
                 // Determine how many items to show based on showAll state
                 val itemsToShow = if (showAll) quickFixList else quickFixList.take(3)
 
@@ -101,44 +98,14 @@ fun UpcomingQuickFixes(
   }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewUupcomingQuickFixes() {
-  QuickFixTheme {
-    Surface(
-        modifier =
-            Modifier.fillMaxSize()
-                .background(MaterialTheme.colorScheme.background), // Set a consistent background
-        color = MaterialTheme.colorScheme.background) {
-          val sampleData =
-              listOf(
-                  QuickFix("Ramy", "Bathroom painting", "Sat, 12 Oct 2024"),
-                  QuickFix("Mehdi", "Laying kitchen tiles", "Sun, 13 Oct 2024"),
-                  QuickFix("Moha", "Toilet plumbing", "Mon, 14 Oct 2024"),
-                  QuickFix("Sara", "Fixing lighting", "Tue, 15 Oct 2024"),
-                  QuickFix("John", "Repairing fence", "Wed, 16 Oct 2024"))
-          Column(
-              modifier = Modifier.fillMaxSize(),
-              verticalArrangement = Arrangement.Top, // Keeps the content anchored at the top
-              horizontalAlignment =
-                  Alignment.CenterHorizontally // Centers content horizontally only
-              ) {
-                UpcomingQuickFixes(
-                    quickFixList = sampleData,
-                    onShowAllClick = { /* Handle Show All action */},
-                    onItemClick = { /* Handle item click action */})
-              }
-        }
-  }
-}
-
 @Composable
 fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
   Row(
       modifier =
-          Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).clickable {
-            onClick()
-          }, // Added clickable modifier
+          Modifier.fillMaxWidth()
+              .padding(horizontal = 12.dp, vertical = 8.dp)
+              .clickable { onClick() }
+              .testTag("QuickFixItem_${quickFix.name}"), // Added testTag
       verticalAlignment = Alignment.CenterVertically) {
         // Profile image placeholder
         Image(
@@ -147,10 +114,7 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
             modifier =
                 Modifier.size(40.dp)
                     .clip(CircleShape)
-                    .background(
-                        MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.1f)) // Use theme color with reduced opacity
-            )
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
 
         Spacer(modifier = Modifier.width(12.dp))
 
@@ -160,28 +124,27 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
           Row(verticalAlignment = Alignment.Bottom) {
             Text(
                 text = quickFix.name,
+                modifier = Modifier.testTag(quickFix.name), // Added testTag
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground, // Use theme color for text
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis)
-            Spacer(modifier = Modifier.width(4.dp)) // Adjusted space between name and description
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = ", ${quickFix.taskDescription}",
+                text = quickFix.taskDescription, // Removed leading comma for clarity
+                modifier = Modifier.testTag(quickFix.taskDescription), // Added testTag
                 style = MaterialTheme.typography.bodyMedium,
-                color =
-                    MaterialTheme.colorScheme.onBackground.copy(
-                        alpha = 0.7f), // Reduced opacity for description
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 maxLines = 1,
-                // modifier=Modifier.padding(1.5.dp),
                 overflow = TextOverflow.Ellipsis)
           }
           // Date text on a separate line
           Text(
               text = quickFix.date,
+              modifier = Modifier.testTag(quickFix.date), // Added testTag
               style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurface // Theme color with reduced opacity
-              )
+              color = MaterialTheme.colorScheme.onSurface)
         }
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -191,35 +154,12 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
             modifier =
                 Modifier.size(32.dp)
                     .clip(CircleShape)
-                    .background(
-                        MaterialTheme.colorScheme
-                            .secondary), // Circular background with slight opacity
+                    .background(MaterialTheme.colorScheme.secondary),
             contentAlignment = Alignment.Center) {
               Icon(
                   imageVector = Icons.Default.ArrowForward,
                   contentDescription = "Go to details",
-                  tint = MaterialTheme.colorScheme.onBackground // Primary color for the arrow
-                  )
+                  tint = MaterialTheme.colorScheme.onBackground)
             }
       }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewUpcomingQuickFixes() {
-  QuickFixTheme {
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-      val sampleData =
-          listOf(
-              QuickFix("Ramy", "Bathroom painting", "Sat, 12 Oct 2024"),
-              QuickFix("Mehdi", "Laying kitchen tiles", "Sun, 13 Oct 2024"),
-              QuickFix("Moha", "Toilet plumbing", "Mon, 14 Oct 2024"),
-              QuickFix("Sara", "Fixing lighting", "Tue, 15 Oct 2024"),
-              QuickFix("John", "Repairing fence", "Wed, 16 Oct 2024"))
-      UpcomingQuickFixes(
-          quickFixList = sampleData,
-          onShowAllClick = { /* Handle Show All action */},
-          onItemClick = { /* Handle item click action */})
-    }
-  }
 }
