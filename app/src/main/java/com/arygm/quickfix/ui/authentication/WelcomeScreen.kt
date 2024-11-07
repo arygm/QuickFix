@@ -80,9 +80,13 @@ fun WelcomeScreen(
 
   val launcher =
       rememberFirebaseAuthLauncher(
-          onAuthComplete = { result ->
+          onAuthCompleteOne = { result ->
             Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
             navigationActions.navigateTo(Screen.GOOGLE_INFO)
+          },
+          onAuthCompleteTwo = { result ->
+              Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
+              navigationActions.navigateTo(Screen.GOOGLE_INFO)
           },
           onAuthError = { Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}") },
           accountViewModel,
