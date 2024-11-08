@@ -33,7 +33,11 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QuickFixFinderScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
+fun QuickFixFinderScreen(
+    navigationActions: NavigationActions,
+    navigationActionsRoot: NavigationActions,
+    isUser: Boolean = true
+) {
   Scaffold(
       containerColor = colorScheme.background,
       topBar = {
@@ -79,7 +83,7 @@ fun QuickFixFinderScreen(navigationActions: NavigationActions, isUser: Boolean =
                   userScrollEnabled = false,
                   modifier = Modifier.testTag("quickFixSearchPager")) { page ->
                     when (page) {
-                      0 -> SearchOnBoarding(navigationActions, isUser)
+                      0 -> SearchOnBoarding(navigationActions, navigationActionsRoot, isUser)
                       1 -> AnnouncementScreen(navigationActions, isUser)
                       else -> Text("Should never happen !")
                     }

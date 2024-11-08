@@ -164,7 +164,7 @@ fun QuickFixApp() {
 
               composable(Route.HOME) { HomeNavHost(innerPadding, isUser) }
 
-              composable(Route.SEARCH) { SearchNavHost(innerPadding, isUser) }
+              composable(Route.SEARCH) { SearchNavHost(innerPadding, isUser, navigationActions) }
 
               composable(Route.DASHBOARD) { DashBoardNavHost(innerPadding, isUser) }
 
@@ -215,10 +215,11 @@ fun ProfileNavHost(
           navigationActionsRoot)
     }
     composable(Screen.ACCOUNT_CONFIGURATION) {
-      AccountConfigurationScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+      AccountConfigurationScreen(navigationActionsRoot, accountViewModel, loggedInAccountViewModel)
     }
     composable(Screen.TO_WORKER) {
-      BusinessScreen(navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
+      BusinessScreen(
+          navigationActionsRoot, accountViewModel, workerViewModel, loggedInAccountViewModel)
     }
   }
 }
@@ -237,7 +238,11 @@ fun DashBoardNavHost(innerPadding: PaddingValues, isUser: Boolean) {
 }
 
 @Composable
-fun SearchNavHost(innerPadding: PaddingValues, isUser: Boolean) {
+fun SearchNavHost(
+    innerPadding: PaddingValues,
+    isUser: Boolean,
+    navigationActionsRoot: NavigationActions
+) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
   NavHost(
@@ -245,6 +250,8 @@ fun SearchNavHost(innerPadding: PaddingValues, isUser: Boolean) {
       startDestination = Screen.SEARCH,
       modifier = Modifier.padding(innerPadding),
   ) {
-    composable(Screen.SEARCH) { QuickFixFinderScreen(navigationActions, isUser) }
+    composable(Screen.SEARCH) {
+      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser)
+    }
   }
 }

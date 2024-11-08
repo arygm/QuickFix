@@ -18,17 +18,21 @@ class QuickFixFinderScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
+  private lateinit var navigationActionsRoot: NavigationActions
 
   @Before
   fun setup() {
     navigationActions = mock(NavigationActions::class.java)
     `when`(navigationActions.currentRoute()).thenReturn(Screen.SEARCH)
+    navigationActionsRoot = mock(NavigationActions::class.java)
   }
 
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun quickFixFinderScreenUserDisplaysCorrectly() {
-    composeTestRule.setContent { QuickFixFinderScreen(navigationActions, isUser = true) }
+    composeTestRule.setContent {
+      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser = true)
+    }
 
     // Assert top bar is displayed
     composeTestRule.onNodeWithTag("QuickFixFinderTopBar").assertIsDisplayed()
@@ -57,7 +61,9 @@ class QuickFixFinderScreenTest {
 
   @Test
   fun quickFixFinderScreenWorkerDisplaysCorrectly() {
-    composeTestRule.setContent { QuickFixFinderScreen(navigationActions, isUser = false) }
+    composeTestRule.setContent {
+      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser = false)
+    }
 
     // Assert top bar is displayed
     composeTestRule.onNodeWithTag("QuickFixFinderTopBar").assertIsDisplayed()
@@ -86,11 +92,13 @@ class QuickFixFinderScreenTest {
 
   @Test
   fun tabSelectionChangesPagerContent() {
-    composeTestRule.setContent { QuickFixFinderScreen(navigationActions, isUser = true) }
+    composeTestRule.setContent {
+      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser = true)
+    }
 
     composeTestRule.waitForIdle()
     // Initially, SearchScreen should be displayed
-    composeTestRule.onNodeWithTag("SearchScreen").assertExists()
+    composeTestRule.onNodeWithTag("searchContent").assertExists()
 
     // Select the Announce tab and verify that AnnouncementScreen is displayed
     val title = "Announce"
