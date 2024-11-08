@@ -38,6 +38,7 @@ import com.arygm.quickfix.ui.account.AccountConfigurationScreen
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
+import com.arygm.quickfix.ui.authentication.ResetPasswordScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
@@ -88,8 +89,10 @@ fun QuickFixApp() {
           screen != Screen.INFO &&
           screen != Screen.PASSWORD &&
           screen != Screen.REGISTER &&
-          screen != Screen.GOOGLE_INFO &&
-          screen != Screen.TO_WORKER
+          screen != Screen.ACCOUNT_CONFIGURATION &&
+          screen != Screen.TO_WORKER &&
+          screen != Screen.RESET_PASSWORD &&
+          screen != Screen.GOOGLE_INFO
     }
   }
 
@@ -153,6 +156,9 @@ fun QuickFixApp() {
                 composable(Screen.GOOGLE_INFO) {
                   GoogleInfoScreen(
                       navigationActions, loggedInAccountViewModel, accountViewModel, userViewModel)
+                }
+                composable(Screen.RESET_PASSWORD) {
+                  ResetPasswordScreen(navigationActions, accountViewModel)
                 }
               }
 

@@ -26,6 +26,7 @@ object Route {
   const val PROFILE = "Profile"
   const val ACCOUNT_CONFIGURATION = "Account configuration"
   const val TO_WORKER = "To Worker"
+  const val RESET_PASSWORD = "Reset password"
 }
 
 object Screen {
@@ -42,6 +43,7 @@ object Screen {
   const val PROFILE = "Profile Screen"
   const val ACCOUNT_CONFIGURATION = "Account configuration Screen"
   const val TO_WORKER = "To Worker Screen"
+  const val RESET_PASSWORD = "Reset password Screen"
   const val GOOGLE_INFO = "Google Info Screen"
 }
 
