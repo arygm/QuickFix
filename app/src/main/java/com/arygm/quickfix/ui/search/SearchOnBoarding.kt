@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -52,7 +53,7 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 
 data class ExpandableCategory(
     val category: WorkerCategory,
-    var isExpanded: Boolean = false
+    val isExpanded: MutableState<Boolean> = mutableStateOf(false)
 )
 
 @Composable
@@ -152,7 +153,6 @@ fun SearchOnBoarding(navigationActions: NavigationActions, isUser: Boolean) {
                                 item = item,
                                 isExpanded = expandedStates[index],
                                 onExpandedChange = { expandedStates[index] = it},
-                              height = Dp(82 * heightRatio.value),
                               size = (28.dp * sizeRatio.value)
                             )
                           Spacer(modifier = Modifier.height(10.dp))

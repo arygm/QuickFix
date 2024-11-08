@@ -4,9 +4,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
+import com.arygm.quickfix.model.categories.painting.PaintingCategory
+import com.arygm.quickfix.model.categories.plumbing.PlumbingCategory
 
 // Define an enum for top-level worker categories
-enum class WorkerCategory(val categoryName: String, val icon: ImageVector, val description: String) {
+enum class WorkerCategory(override val displayName: String, val icon: ImageVector, val description: String) : Category {
     PAINTING(
         "Painting",
         Icons.Outlined.ImagesearchRoller,
@@ -47,4 +49,18 @@ enum class WorkerCategory(val categoryName: String, val icon: ImageVector, val d
         Icons.Outlined.LocalShipping,
         "Find professional movers to help with local or long-distance relocation tasks."
     );
+
+    fun getSubcategories(): List<Category> {
+        return when (this) {
+            PAINTING -> PaintingCategory.entries
+            PLUMBING -> PlumbingCategory.entries
+            GARDENING -> TODO()
+            ELECTRICAL_WORK -> TODO()
+            HANDYMAN -> TODO()
+            CLEANING -> TODO()
+            CARPENTRY -> TODO()
+            MOVING -> TODO()
+        }
+    }
 }
+
