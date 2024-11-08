@@ -38,6 +38,7 @@ import com.arygm.quickfix.ui.account.AccountConfigurationScreen
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
+import com.arygm.quickfix.ui.authentication.ResetPasswordScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
@@ -88,8 +89,10 @@ fun QuickFixApp() {
           screen != Screen.INFO &&
           screen != Screen.PASSWORD &&
           screen != Screen.REGISTER &&
-          screen != Screen.GOOGLE_INFO &&
-          screen != Screen.TO_WORKER
+          screen != Screen.ACCOUNT_CONFIGURATION &&
+          screen != Screen.TO_WORKER &&
+          screen != Screen.RESET_PASSWORD &&
+          screen != Screen.GOOGLE_INFO
     }
   }
 
@@ -154,6 +157,9 @@ fun QuickFixApp() {
                   GoogleInfoScreen(
                       navigationActions, loggedInAccountViewModel, accountViewModel, userViewModel)
                 }
+                composable(Screen.RESET_PASSWORD) {
+                  ResetPasswordScreen(navigationActions, accountViewModel)
+                }
               }
 
               composable(Route.HOME) { HomeNavHost(innerPadding, isUser) }
@@ -164,7 +170,11 @@ fun QuickFixApp() {
 
               composable(Route.PROFILE) {
                 ProfileNavHost(
-                    innerPadding, accountViewModel, loggedInAccountViewModel, workerViewModel)
+                    innerPadding,
+                    accountViewModel,
+                    loggedInAccountViewModel,
+                    workerViewModel,
+                    navigationActions)
               }
             }
       }
@@ -188,7 +198,8 @@ fun ProfileNavHost(
     innerPadding: PaddingValues,
     accountViewModel: AccountViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
-    workerViewModel: ProfileViewModel
+    workerViewModel: ProfileViewModel,
+    navigationActionsRoot: NavigationActions
 ) {
   val profileNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(profileNavController) }
@@ -198,7 +209,10 @@ fun ProfileNavHost(
       modifier = Modifier.padding(innerPadding),
   ) {
     composable(Screen.PROFILE) {
-      ProfileScreen(navigationActions, loggedInAccountViewModel = loggedInAccountViewModel)
+      ProfileScreen(
+          navigationActions,
+          loggedInAccountViewModel = loggedInAccountViewModel,
+          navigationActionsRoot)
     }
     composable(Screen.ACCOUNT_CONFIGURATION) {
       AccountConfigurationScreen(navigationActions, accountViewModel, loggedInAccountViewModel)

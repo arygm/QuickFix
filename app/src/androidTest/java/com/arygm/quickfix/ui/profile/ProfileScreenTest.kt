@@ -33,6 +33,7 @@ class ProfileScreenTest {
   private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
   private lateinit var userProfileRepositoryFirestore: UserProfileRepositoryFirestore
   private lateinit var workerProfileRepositoryFirestore: WorkerProfileRepositoryFirestore
+  private lateinit var navigationActionsRoot: NavigationActions
 
   private val options =
       listOf(
@@ -56,11 +57,14 @@ class ProfileScreenTest {
         LoggedInAccountViewModel(
             userProfileRepo = userProfileRepositoryFirestore,
             workerProfileRepo = workerProfileRepositoryFirestore)
+    navigationActionsRoot = mock(NavigationActions::class.java)
   }
 
   @Test
   fun profileScreenDisplaysCorrectly() {
-    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
+    composeTestRule.setContent {
+      ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot)
+    }
 
     // Test for profile title and name
     composeTestRule.onNodeWithTag("ProfileTopAppBar").assertIsDisplayed()
@@ -88,21 +92,27 @@ class ProfileScreenTest {
 
   @Test
   fun walletButtonClickTest() {
-    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
+    composeTestRule.setContent {
+      ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot)
+    }
 
     composeTestRule.onNodeWithTag("WalletButton").performClick()
   }
 
   @Test
   fun helpButtonClickTest() {
-    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
+    composeTestRule.setContent {
+      ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot)
+    }
 
     composeTestRule.onNodeWithTag("HelpButton").performClick()
   }
 
   @Test
   fun optionsAreDisplayedCorrectly() {
-    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
+    composeTestRule.setContent {
+      ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot)
+    }
 
     options.forEach { option ->
       val optionTag = option.label.replace(" ", "") + "Option"
@@ -116,14 +126,18 @@ class ProfileScreenTest {
 
   @Test
   fun logoutButtonClickTest() {
-    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
+    composeTestRule.setContent {
+      ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot)
+    }
 
     composeTestRule.onNodeWithTag("LogoutButton").performClick()
   }
 
   @Test
   fun navigateToAccountConfigurationTest() {
-    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
+    composeTestRule.setContent {
+      ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot)
+    }
 
     // Perform click on "Account configuration"
     composeTestRule.onNodeWithTag("AccountconfigurationOption").performClick()
@@ -134,7 +148,9 @@ class ProfileScreenTest {
 
   @Test
   fun navigateToWorkerSetupTest() {
-    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
+    composeTestRule.setContent {
+      ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot)
+    }
 
     // Perform click on "Set up your business account"
     composeTestRule.onNodeWithTag("SetupyourbusinessaccountOption").performClick()

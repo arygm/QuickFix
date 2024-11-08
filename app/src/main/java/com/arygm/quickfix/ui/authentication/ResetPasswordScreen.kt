@@ -8,23 +8,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
@@ -43,40 +35,31 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Screen
-import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.isValidEmail
-import com.arygm.quickfix.utils.signInWithEmailAndFetchAccount
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun LogInScreen(
+fun ResetPasswordScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel
 ) {
   var errorHasOccurred by remember { mutableStateOf(false) }
   var emailError = false
 
   var email by remember { mutableStateOf("") }
-  var password by remember { mutableStateOf("") }
-  var passwordVisible by remember { mutableStateOf(false) }
 
   var shrinkBox by remember { mutableStateOf(false) }
   val boxOffsetX by
@@ -85,8 +68,7 @@ fun LogInScreen(
           animationSpec = tween(durationMillis = BOX_COLLAPSE_SPEED),
           label = "shrinkingBox")
 
-  val filledForm = email.isNotEmpty() && password.isNotEmpty()
-
+  val db = FirebaseAuth.getInstance()
   val coroutineScope = rememberCoroutineScope()
 
   LaunchedEffect(Unit) { shrinkBox = true }
@@ -94,7 +76,9 @@ fun LogInScreen(
     QuickFixAnimatedBox(boxOffsetX)
     Scaffold(
         modifier =
-            Modifier.background(colorScheme.background).fillMaxSize().testTag("LoginScaffold"),
+            Modifier.background(colorScheme.background)
+                .fillMaxSize()
+                .testTag("ForgotPasswordScaffold"),
         content = { dp ->
 
           // Background and content are wrapped in a Box to control the layering
@@ -167,18 +151,10 @@ fun LogInScreen(
                           horizontalAlignment = Alignment.CenterHorizontally,
                           verticalArrangement = Arrangement.Center) {
                             Text(
-                                "Login",
+                                "Reset Password",
                                 style = MaterialTheme.typography.headlineLarge,
                                 color = colorScheme.primary,
                                 modifier = Modifier.testTag("WelcomeText"))
-
-                            Spacer(modifier = Modifier.padding(3.dp))
-
-                            Text(
-                                "Your perfect fix is just a click away!",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = colorScheme.onSecondaryContainer,
-                                modifier = Modifier.testTag("WelcomeTextBis"))
 
                             Spacer(modifier = Modifier.padding(10.dp))
 
@@ -186,10 +162,10 @@ fun LogInScreen(
                                 value = email,
                                 onValueChange = {
                                   email = it
-                                  accountViewModel.accountExists(email) { exists, profile ->
+                                  accountViewModel.accountExists(email) { exists, _ ->
                                     emailError =
-                                        if (exists && profile != null) {
-                                          !isValidEmail(it)
+                                        if (exists) {
+                                          isValidEmail(it)
                                         } else {
                                           true
                                         }
@@ -198,7 +174,7 @@ fun LogInScreen(
                                 shape = RoundedCornerShape(12.dp),
                                 widthField = 360.dp,
                                 moveContentHorizontal = 10.dp,
-                                placeHolderText = "Username or Email",
+                                placeHolderText = "Email",
                                 isError =
                                     email.isNotEmpty() && (!isValidEmail(email) || emailError),
                                 errorText = "INVALID EMAIL",
@@ -208,117 +184,26 @@ fun LogInScreen(
 
                             Spacer(modifier = Modifier.padding(10.dp))
 
-                            QuickFixTextFieldCustom(
-                                value = password,
-                                onValueChange = { password = it },
-                                placeHolderText = "Password",
-                                shape = RoundedCornerShape(12.dp),
-                                widthField = 360.dp,
-                                moveContentHorizontal = 10.dp,
-                                trailingIcon = {
-                                  val image =
-                                      if (passwordVisible) Icons.Filled.VisibilityOff
-                                      else Icons.Filled.Visibility
-                                  IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                    Icon(
-                                        imageVector = image,
-                                        contentDescription = null,
-                                        tint = colorScheme.primary)
-                                  }
-                                },
-                                visualTransformation =
-                                    if (passwordVisible) VisualTransformation.None
-                                    else PasswordVisualTransformation(),
-                                modifier = Modifier.testTag("inputPassword"))
-
-                            Spacer(modifier = Modifier.padding(4.dp))
-
                             QuickFixButton(
-                                buttonText = "Forgot your password?",
+                                buttonText = "RESET PASSWORD",
                                 onClickAction = {
-                                  navigationActions.navigateTo(Screen.RESET_PASSWORD)
-                                },
-                                buttonColor = Color.Transparent,
-                                textColor = colorScheme.primary,
-                                textStyle = MaterialTheme.typography.headlineSmall,
-                                horizontalArrangement = Arrangement.End,
-                                contentPadding = PaddingValues(0.dp),
-                                modifier =
-                                    Modifier.align(Alignment.End)
-                                        .testTag("forgetPasswordButtonText"))
-
-                            Spacer(modifier = Modifier.padding(7.dp))
-
-                            QuickFixButton(
-                                buttonText = "LOGIN",
-                                onClickAction = {
-                                  signInWithEmailAndFetchAccount(
-                                      email = email,
-                                      password = password,
-                                      accountViewModel = accountViewModel,
-                                      loggedInAccountViewModel = loggedInAccountViewModel,
-                                      onResult = {
-                                        if (it) {
-                                          coroutineScope.launch {
-                                            shrinkBox = false
-                                            delay(BOX_COLLAPSE_SPEED.toLong())
-                                            Log.d("LoginFlow", "Starting login with email: $email")
-                                            navigationActions.navigateTo(TopLevelDestinations.HOME)
-                                          }
-                                        } else {
-                                          Log.e("LogInScreen", "Error occurred while signing in")
-                                          Log.e(
-                                              "email don't exist",
-                                              "Error occurred while signing here's the email: $email")
-                                          errorHasOccurred = true
-                                        }
-                                      })
+                                  db.sendPasswordResetEmail(email)
+                                      .addOnSuccessListener {
+                                        Log.d("ForgotPasswordScreen", "Email sent.")
+                                      }
+                                      .addOnFailureListener {
+                                        Log.d("ForgotPasswordScreen", "Email not sent.")
+                                        errorHasOccurred = true
+                                      }
                                 },
                                 buttonColor = colorScheme.primary,
                                 textColor = colorScheme.onPrimary,
                                 textStyle = MaterialTheme.typography.labelLarge,
                                 modifier =
-                                    Modifier.width(360.dp).height(55.dp).testTag("logInButton"),
-                                enabled = filledForm && isValidEmail(email))
+                                    Modifier.width(360.dp).height(55.dp).testTag("ResetButton"),
+                                enabled = email.isNotEmpty() && !emailError)
 
-                            Spacer(modifier = Modifier.padding(4.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                              Text(
-                                  "Don't have an account ?",
-                                  style = MaterialTheme.typography.headlineSmall,
-                                  color = colorScheme.onSecondaryContainer,
-                                  modifier =
-                                      Modifier.padding(bottom = 8.dp)
-                                          .requiredWidth(200.dp)
-                                          .testTag("noAccountText"),
-                                  textAlign = TextAlign.End)
-
-                              QuickFixButton(
-                                  buttonText = "Create one !",
-                                  onClickAction = { navigationActions.navigateTo(Screen.REGISTER) },
-                                  buttonColor = Color.Transparent,
-                                  textColor = colorScheme.primary,
-                                  textStyle = MaterialTheme.typography.headlineSmall,
-                                  contentPadding = PaddingValues(4.dp),
-                                  horizontalArrangement = Arrangement.Start,
-                                  modifier = Modifier.testTag("clickableCreateAccount"))
-                            }
-
-                            if (errorHasOccurred) {
-                              Text(
-                                  "INVALID EMAIL OR PASSWORD, TRY AGAIN.",
-                                  style = MaterialTheme.typography.labelSmall,
-                                  color = colorScheme.error,
-                                  modifier = Modifier.padding(start = 3.dp).testTag("errorText"))
-                              Spacer(modifier = Modifier.padding(32.9.dp))
-                            } else {
-                              Spacer(modifier = Modifier.padding(40.dp))
-                            }
+                            Spacer(modifier = Modifier.padding(100.dp))
                           }
                     }
               }

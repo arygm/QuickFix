@@ -39,13 +39,19 @@ fun BottomNavigationMenu(
           // Add menu items using the tabList
           tabList.forEachIndexed { index, tab ->
             // Get the drawable resource from the ImageVector
-            val drawableId = convertImageVectorToDrawableId(tab.icon)
-            val model = MeowBottomNavigation.Model(index + 1, drawableId)
-            model.icon = drawableId // Set the icon of the model
+            val drawableId = tab.icon?.let { convertImageVectorToDrawableId(it) }
+            val model = drawableId?.let { MeowBottomNavigation.Model(index + 1, it) }
+            if (drawableId != null) {
+              if (model != null) {
+                model.icon = drawableId
+              }
+            } // Set the icon of the model
             if (BuildConfig
                 .DEBUG) { // when we'll want to generate the APK since it will be in release mode
               // normally this will not be executed
-              model.count = tab.route // Set the count of the model
+              if (model != null) {
+                model.count = tab.route
+              } // Set the count of the model
               countBackgroundColor = 0
             }
 
