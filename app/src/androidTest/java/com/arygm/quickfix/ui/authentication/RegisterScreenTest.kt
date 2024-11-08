@@ -9,17 +9,19 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
-import com.arygm.quickfix.model.profile.Profile
-import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.account.Account
+import com.arygm.quickfix.model.account.AccountRepository
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.FirebaseFirestore
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -35,24 +37,35 @@ class RegisterScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
-  private lateinit var profileRepository: ProfileRepository
-  private lateinit var profileViewModel: ProfileViewModel
+  private lateinit var mockFirestore: FirebaseFirestore
+  private lateinit var accountRepository: AccountRepository
+  private lateinit var accountViewModel: AccountViewModel
+  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
+  private lateinit var userProfileRepositoryFirestore: UserProfileRepositoryFirestore
+  private lateinit var workerProfileRepositoryFirestore: WorkerProfileRepositoryFirestore
+  private lateinit var userViewModel: ProfileViewModel
   private lateinit var navigationActions: NavigationActions
-  private lateinit var loggedInProfileViewModel: LoggedInProfileViewModel
 
   @Before
   fun setup() {
-    profileRepository = mock(ProfileRepository::class.java)
+    mockFirestore = mock(FirebaseFirestore::class.java)
     navigationActions = mock(NavigationActions::class.java)
-    profileViewModel = ProfileViewModel(profileRepository)
-    loggedInProfileViewModel = LoggedInProfileViewModel()
+    userProfileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore)
+    workerProfileRepositoryFirestore = WorkerProfileRepositoryFirestore(mockFirestore)
+    accountRepository = mock(AccountRepository::class.java)
+    accountViewModel = AccountViewModel(accountRepository)
+    userViewModel = ProfileViewModel(userProfileRepositoryFirestore)
+    loggedInAccountViewModel =
+        LoggedInAccountViewModel(
+            userProfileRepo = userProfileRepositoryFirestore,
+            workerProfileRepo = workerProfileRepositoryFirestore)
     `when`(navigationActions.currentRoute()).thenReturn(Screen.REGISTER)
   }
 
   @Test
   fun testInitialUI() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
     }
 
     // Check that the scaffold and content boxes are displayed
@@ -96,7 +109,7 @@ class RegisterScreenTest {
   @Test
   fun testInvalidEmailShowsError() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
     }
 
     // Input an invalid email
@@ -110,7 +123,7 @@ class RegisterScreenTest {
   @Test
   fun testInvalidDateShowsError() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
     }
 
     // Input an invalid birth date
@@ -124,7 +137,7 @@ class RegisterScreenTest {
   @Test
   fun testPasswordMismatch() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
     }
 
     // Enter different passwords
@@ -149,8 +162,9 @@ class RegisterScreenTest {
             _: String,
             _: String,
             _: String,
+            _: AccountViewModel,
+            _: LoggedInAccountViewModel,
             _: ProfileViewModel,
-            _: LoggedInProfileViewModel,
             onSuccess: () -> Unit,
             _: () -> Unit ->
           createAccountFuncCalled = true
@@ -158,17 +172,18 @@ class RegisterScreenTest {
     }
 
     // Mock the profileRepository.profileExists to return exists = false, profile = null
-    whenever(profileRepository.profileExists(eq(newEmail), any(), any())).thenAnswer { invocation ->
-      val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
+    whenever(accountRepository.accountExists(eq(newEmail), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<(Pair<Boolean, Account?>) -> Unit>(1)
       onSuccess(Pair(false, null))
       null
     }
 
     composeTestRule.setContent {
       RegisterScreen(
-          navigationActions = navigationActions,
-          userViewModel = profileViewModel,
-          loggedInProfileViewModel = loggedInProfileViewModel,
+          navigationActions,
+          accountViewModel,
+          loggedInAccountViewModel,
+          userViewModel,
           createAccountFunc = testCreateAccountFunc)
     }
 
@@ -198,7 +213,7 @@ class RegisterScreenTest {
   @Test
   fun testRegisterButtonDisabledWhenFormIncomplete() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
     }
 
     // Fill only partial inputs
@@ -217,7 +232,7 @@ class RegisterScreenTest {
   @Test
   fun testBackButtonNavigatesBack() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
     }
 
     // Click the back button
@@ -230,7 +245,7 @@ class RegisterScreenTest {
   @Test
   fun testLoginButtonNavigatesToLogin() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
     }
 
     // Click the "Login !" button
@@ -245,25 +260,25 @@ class RegisterScreenTest {
     // Arrange
     val existingEmail = "john.doe@example.com"
     val profile =
-        UserProfile(
+        Account(
             uid = "testUid",
             firstName = "John",
             lastName = "Doe",
             email = existingEmail,
             birthDate = Timestamp.now(),
-            location = GeoPoint(0.0, 0.0))
+            isWorker = false)
 
     // Mock the profileRepository.profileExists to return exists = true, profile != null
-    whenever(profileRepository.profileExists(eq(existingEmail), any(), any())).thenAnswer {
+    whenever(accountRepository.accountExists(eq(existingEmail), any(), any())).thenAnswer {
         invocation ->
-      val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
+      val onSuccess = invocation.getArgument<(Pair<Boolean, Account?>) -> Unit>(1)
       onSuccess(Pair(true, profile))
       null
     }
 
     // Act
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
     }
 
     composeTestRule.onNodeWithTag("emailInput").performTextInput(existingEmail)
@@ -291,15 +306,15 @@ class RegisterScreenTest {
     val newEmail = "new.user@example.com"
 
     // Mock the profileRepository.profileExists to return exists = false, profile = null
-    whenever(profileRepository.profileExists(eq(newEmail), any(), any())).thenAnswer { invocation ->
-      val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
+    whenever(accountRepository.accountExists(eq(newEmail), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<(Pair<Boolean, Account?>) -> Unit>(1)
       onSuccess(Pair(false, null))
       null
     }
 
     // Act
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, profileViewModel, loggedInProfileViewModel)
+      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
     }
 
     composeTestRule.onNodeWithTag("emailInput").performTextInput(newEmail)
@@ -335,8 +350,9 @@ class RegisterScreenTest {
             _: String,
             _: String,
             _: String,
+            _: AccountViewModel,
+            _: LoggedInAccountViewModel,
             _: ProfileViewModel,
-            _: LoggedInProfileViewModel,
             onSuccess: () -> Unit,
             _: () -> Unit ->
           createAccountFuncCalled = true
@@ -345,16 +361,17 @@ class RegisterScreenTest {
 
     composeTestRule.setContent {
       RegisterScreen(
-          navigationActions = navigationActions,
-          userViewModel = profileViewModel,
-          loggedInProfileViewModel = loggedInProfileViewModel,
+          navigationActions,
+          accountViewModel,
+          loggedInAccountViewModel,
+          userViewModel,
           createAccountFunc = testCreateAccountFunc)
     }
 
     // Mock the profileRepository.profileExists to return exists = false, profile = null
-    whenever(profileRepository.profileExists(eq(existingEmail), any(), any())).thenAnswer {
+    whenever(accountRepository.accountExists(eq(existingEmail), any(), any())).thenAnswer {
         invocation ->
-      val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
+      val onSuccess = invocation.getArgument<(Pair<Boolean, Account?>) -> Unit>(1)
       onSuccess(Pair(false, null))
       null
     }
@@ -387,8 +404,8 @@ class RegisterScreenTest {
     val newEmail = "example@gmail.com"
 
     // Mock the profileRepository.profileExists to return exists = false, profile = null
-    whenever(profileRepository.profileExists(eq(newEmail), any(), any())).thenAnswer { invocation ->
-      val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
+    whenever(accountRepository.accountExists(eq(newEmail), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<(Pair<Boolean, Account?>) -> Unit>(1)
       onSuccess(Pair(false, null))
       null
     }
@@ -402,8 +419,9 @@ class RegisterScreenTest {
             _: String,
             _: String,
             _: String,
+            _: AccountViewModel,
+            _: LoggedInAccountViewModel,
             _: ProfileViewModel,
-            _: LoggedInProfileViewModel,
             _: () -> Unit,
             onFailure: () -> Unit ->
           createAccountFuncCalled = true
@@ -412,9 +430,10 @@ class RegisterScreenTest {
 
     composeTestRule.setContent {
       RegisterScreen(
-          navigationActions = navigationActions,
-          userViewModel = profileViewModel,
-          loggedInProfileViewModel = loggedInProfileViewModel,
+          navigationActions,
+          accountViewModel,
+          loggedInAccountViewModel,
+          userViewModel,
           createAccountFunc = testCreateAccountFunc,
       )
     }

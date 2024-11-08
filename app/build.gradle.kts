@@ -12,6 +12,12 @@ plugins {
 }
 
 android {
+    buildFeatures {
+        buildConfig = true
+        compose = true
+        //noinspection DataBindingWithoutKapt
+        dataBinding = true
+    }
     namespace = "com.arygm.quickfix"
     compileSdk = 34
 
@@ -49,6 +55,8 @@ android {
         }
     }
 
+
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -69,10 +77,7 @@ android {
         jacocoVersion = "0.8.12"
     }
 
-    buildFeatures {
-        compose = true
-        dataBinding = true
-    }
+
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.15"
@@ -168,6 +173,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.espresso.core)
     implementation(libs.androidx.espresso.intents)
+    implementation(libs.mockk.android)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.mockk)
@@ -268,4 +274,21 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
+}
+
+tasks.register("connectedCheckWithEmulators") {
+    doLast {
+        exec {
+            // Set the working directory to the root project directory
+            workingDir = rootProject.projectDir
+
+            // Run Firebase emulators and connectedCheck in a single command
+            commandLine = listOf(
+                "/bin/sh", "-c",
+                "firebase emulators:exec --debug --inspect-functions --project quickfix-1fd34 --import=./end2end-data --only firestore,auth './gradlew connectedCheck'"
+            )
+            standardOutput = System.out
+            errorOutput = System.err
+        }
+    }
 }

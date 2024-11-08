@@ -26,6 +26,7 @@ object Route {
   const val PROFILE = "Profile"
   const val ACCOUNT_CONFIGURATION = "Account configuration"
   const val TO_WORKER = "To Worker"
+  const val RESET_PASSWORD = "Reset password"
 }
 
 object Screen {
@@ -42,11 +43,14 @@ object Screen {
   const val PROFILE = "Profile Screen"
   const val ACCOUNT_CONFIGURATION = "Account configuration Screen"
   const val TO_WORKER = "To Worker Screen"
+  const val RESET_PASSWORD = "Reset password Screen"
+  const val GOOGLE_INFO = "Google Info Screen"
 }
 
-data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
+data class TopLevelDestination(val route: String, val icon: ImageVector?, val textId: String)
 
 object TopLevelDestinations {
+  val WELCOME = TopLevelDestination(route = Route.WELCOME, icon = null, textId = "Welcome")
   val HOME = TopLevelDestination(route = Route.HOME, icon = Icons.Filled.Home, textId = "Home")
   val PROFILE =
       TopLevelDestination(
@@ -96,10 +100,7 @@ open class NavigationActions(
   open fun navigateTo(destination: TopLevelDestination) {
     currentScreen = routeToScreen(destination.route)
     navController.navigate(destination.route) {
-      popUpTo(navController.graph.findStartDestination().id) {
-        saveState = true
-        inclusive = true
-      }
+      popUpTo(navController.graph.findStartDestination().id) { saveState = true }
       launchSingleTop = true
       if (destination.route != Route.WELCOME) {
         restoreState = true

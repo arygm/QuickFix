@@ -48,27 +48,28 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
-import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.isValidEmail
-import com.arygm.quickfix.utils.signInWithEmailAndFetchProfile
+import com.arygm.quickfix.utils.signInWithEmailAndFetchAccount
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun LogInScreen(
     navigationActions: NavigationActions,
-    userViewModel: ProfileViewModel,
-    loggedInProfileViewModel: LoggedInProfileViewModel
+    accountViewModel: AccountViewModel,
+    loggedInAccountViewModel: LoggedInAccountViewModel
 ) {
   var errorHasOccurred by remember { mutableStateOf(false) }
   var emailError = false
@@ -185,7 +186,7 @@ fun LogInScreen(
                                 value = email,
                                 onValueChange = {
                                   email = it
-                                  userViewModel.profileExists(email) { exists, profile ->
+                                  accountViewModel.accountExists(email) { exists, profile ->
                                     emailError =
                                         if (exists && profile != null) {
                                           !isValidEmail(it)
@@ -234,7 +235,9 @@ fun LogInScreen(
 
                             QuickFixButton(
                                 buttonText = "Forgot your password?",
-                                onClickAction = { /* Navigate to forgor screen */},
+                                onClickAction = {
+                                  navigationActions.navigateTo(Screen.RESET_PASSWORD)
+                                },
                                 buttonColor = Color.Transparent,
                                 textColor = colorScheme.primary,
                                 textStyle = MaterialTheme.typography.headlineSmall,
@@ -249,20 +252,24 @@ fun LogInScreen(
                             QuickFixButton(
                                 buttonText = "LOGIN",
                                 onClickAction = {
-                                  shrinkBox = false
-                                  signInWithEmailAndFetchProfile(
+                                  signInWithEmailAndFetchAccount(
                                       email = email,
                                       password = password,
-                                      userViewModel = userViewModel,
-                                      loggedInProfileViewModel = loggedInProfileViewModel,
+                                      accountViewModel = accountViewModel,
+                                      loggedInAccountViewModel = loggedInAccountViewModel,
                                       onResult = {
                                         if (it) {
                                           coroutineScope.launch {
+                                            shrinkBox = false
                                             delay(BOX_COLLAPSE_SPEED.toLong())
-                                            navigationActions.navigateTo(Screen.HOME)
+                                            Log.d("LoginFlow", "Starting login with email: $email")
+                                            navigationActions.navigateTo(TopLevelDestinations.HOME)
                                           }
                                         } else {
                                           Log.e("LogInScreen", "Error occurred while signing in")
+                                          Log.e(
+                                              "email don't exist",
+                                              "Error occurred while signing here's the email: $email")
                                           errorHasOccurred = true
                                         }
                                       })
