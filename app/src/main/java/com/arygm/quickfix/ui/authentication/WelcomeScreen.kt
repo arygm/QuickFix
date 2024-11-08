@@ -82,11 +82,11 @@ fun WelcomeScreen(
       rememberFirebaseAuthLauncher(
           onAuthCompleteOne = { result ->
             Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
-            navigationActions.navigateTo(Screen.GOOGLE_INFO)
+            navigationActions.navigateTo(TopLevelDestinations.HOME)
           },
           onAuthCompleteTwo = { result ->
             Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
-            navigationActions.navigateTo(TopLevelDestinations.HOME)
+            navigationActions.navigateTo(Screen.GOOGLE_INFO)
           },
           onAuthError = { Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}") },
           accountViewModel,
