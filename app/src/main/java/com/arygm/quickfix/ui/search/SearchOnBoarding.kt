@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -31,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,76 +42,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.model.categories.WorkerCategory
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
+data class ExpandableCategory(
+    val category: WorkerCategory,
+    var isExpanded: Boolean = false
+)
+
 @Composable
 fun SearchOnBoarding(navigationActions: NavigationActions, isUser: Boolean) {
+    val itemCategories = remember { WorkerCategory.entries.toList().map {
+        category -> ExpandableCategory(category) }
+    }
+    val expandedStates = remember { mutableStateListOf(*BooleanArray(itemCategories.size) { false }.toTypedArray()) }
+    val listState = rememberLazyListState()
 
   var searchQuery by remember { mutableStateOf("") }
-
-  val searchCategories =
-      listOf(
-          SearchCategory(
-              icon = Icons.Outlined.ImagesearchRoller,
-              title = "Painting",
-              description = "Find skilled painters for residential or commercial projects.",
-              onClick = {
-                // Search Painters
-              }),
-          SearchCategory(
-              icon = Icons.Outlined.Plumbing,
-              title = "Plumbing",
-              description = "Connect with expert plumbers for repairs and installations.",
-              onClick = {
-                // Search Plumbers
-              }),
-          SearchCategory(
-              icon = Icons.Outlined.NaturePeople,
-              title = "Gardening",
-              description = "Hire professional gardeners for landscaping and maintenance.",
-              onClick = {
-                // Search Gardeners
-              }),
-          SearchCategory(
-              icon = Icons.Outlined.ElectricalServices,
-              title = "Electrical Work",
-              description = "Locate certified electricians for safe and efficient service.",
-              onClick = {
-                // Search Electricians
-              }),
-          SearchCategory(
-              icon = Icons.Outlined.Handyman,
-              title = "Handyman Services",
-              description = "Get help with various minor home repairs and tasks.",
-              onClick = {
-                // Search Handyman
-              }),
-          SearchCategory(
-              icon = Icons.Outlined.CleaningServices,
-              title = "Cleaning Services",
-              description = "Book reliable cleaners for home or office maintenance.",
-              onClick = {
-                // Search Cleaners
-              }),
-          SearchCategory(
-              icon = Icons.Outlined.Carpenter,
-              title = "Carpentry",
-              description = "Hire experienced carpenters for woodwork and construction tasks.",
-              onClick = {
-                // Search Carpenters
-              }),
-          SearchCategory(
-              icon = Icons.Outlined.LocalShipping,
-              title = "Moving Services",
-              description =
-                  "Find professional movers to help with local or long-distance relocation tasks.",
-              onClick = {
-                // Search Movers
-              }))
 
   BoxWithConstraints {
     val widthRatio = maxWidth / 411
@@ -188,15 +143,18 @@ fun SearchOnBoarding(navigationActions: NavigationActions, isUser: Boolean) {
                           color = colorScheme.onBackground,
                       )
                       Spacer(modifier = Modifier.height(4.dp))
-                      LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                        items(searchCategories) { category ->
-                          SearchCategoryButton(
-                              icon = category.icon,
-                              title = category.title,
-                              description = category.description,
-                              onClick = category.onClick,
+                      LazyColumn(
+                          modifier = Modifier.fillMaxWidth(),
+                          state = listState
+                          ) {
+                          itemsIndexed(itemCategories, key = { index, _ -> index }) { index, item ->
+                            ExpandableCategoryItem(
+                                item = item,
+                                isExpanded = expandedStates[index],
+                                onExpandedChange = { expandedStates[index] = it},
                               height = Dp(82 * heightRatio.value),
-                              size = (28.dp * sizeRatio.value))
+                              size = (28.dp * sizeRatio.value)
+                            )
                           Spacer(modifier = Modifier.height(10.dp))
                         }
                       }

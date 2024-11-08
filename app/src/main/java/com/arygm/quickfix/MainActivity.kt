@@ -176,8 +176,7 @@ fun HomeNavHost(innerPadding: PaddingValues, isUser: Boolean) {
   val navigationActions = remember { NavigationActions(homeNavController) }
   NavHost(
       navController = homeNavController,
-      startDestination = Screen.HOME,
-      modifier = Modifier.padding(innerPadding),
+      startDestination = Screen.HOME
   ) {
     composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
   }
@@ -194,8 +193,7 @@ fun ProfileNavHost(
   val navigationActions = remember { NavigationActions(profileNavController) }
   NavHost(
       navController = profileNavController,
-      startDestination = Screen.PROFILE,
-      modifier = Modifier.padding(innerPadding),
+      startDestination = Screen.PROFILE
   ) {
     composable(Screen.PROFILE) {
       ProfileScreen(navigationActions, loggedInAccountViewModel = loggedInAccountViewModel)
@@ -215,8 +213,7 @@ fun DashBoardNavHost(innerPadding: PaddingValues, isUser: Boolean) {
   val navigationActions = remember { NavigationActions(dashboardNavController) }
   NavHost(
       navController = dashboardNavController,
-      startDestination = Screen.DASHBOARD,
-      modifier = Modifier.padding(innerPadding),
+      startDestination = Screen.DASHBOARD
   ) {
     composable(Screen.DASHBOARD) { DashboardScreen(navigationActions, isUser) }
   }
@@ -228,8 +225,7 @@ fun SearchNavHost(innerPadding: PaddingValues, isUser: Boolean) {
   val navigationActions = remember { NavigationActions(searchNavController) }
   NavHost(
       navController = searchNavController,
-      startDestination = Screen.SEARCH,
-      modifier = Modifier.padding(innerPadding),
+      startDestination = Screen.SEARCH
   ) {
     composable(Screen.SEARCH) { SearchOnBoarding(navigationActions, isUser) }
   }
