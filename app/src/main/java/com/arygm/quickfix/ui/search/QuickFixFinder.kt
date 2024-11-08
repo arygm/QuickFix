@@ -79,7 +79,7 @@ fun QuickFixFinderScreen(navigationActions: NavigationActions, isUser: Boolean =
                   userScrollEnabled = false,
                   modifier = Modifier.testTag("quickFixSearchPager")) { page ->
                     when (page) {
-                      0 -> SearchScreen(navigationActions, isUser)
+                      0 -> SearchOnBoarding(navigationActions, isUser)
                       1 -> AnnouncementScreen(navigationActions, isUser)
                       else -> Text("Should never happen !")
                     }

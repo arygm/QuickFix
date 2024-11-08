@@ -119,6 +119,7 @@ fun SearchOnBoarding(navigationActions: NavigationActions, isUser: Boolean) {
     Scaffold(
         containerColor = colorScheme.background,
         topBar = {},
+        modifier = Modifier.testTag("SearchScreen"),
         content = { padding ->
           Column(
               modifier =

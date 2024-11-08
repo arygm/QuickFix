@@ -46,7 +46,7 @@ import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.profile.BusinessScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
-import com.arygm.quickfix.ui.search.SearchOnBoarding
+import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import kotlinx.coroutines.delay
 
@@ -231,6 +231,6 @@ fun SearchNavHost(innerPadding: PaddingValues, isUser: Boolean) {
       startDestination = Screen.SEARCH,
       modifier = Modifier.padding(innerPadding),
   ) {
-    composable(Screen.SEARCH) { SearchOnBoarding(navigationActions, isUser) }
+    composable(Screen.SEARCH) { QuickFixFinderScreen(navigationActions, isUser) }
   }
 }
