@@ -170,7 +170,11 @@ fun QuickFixApp() {
 
               composable(Route.PROFILE) {
                 ProfileNavHost(
-                    innerPadding, accountViewModel, loggedInAccountViewModel, workerViewModel)
+                    innerPadding,
+                    accountViewModel,
+                    loggedInAccountViewModel,
+                    workerViewModel,
+                    navigationActions)
               }
             }
       }
@@ -194,7 +198,8 @@ fun ProfileNavHost(
     innerPadding: PaddingValues,
     accountViewModel: AccountViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
-    workerViewModel: ProfileViewModel
+    workerViewModel: ProfileViewModel,
+    navigationActionsRoot: NavigationActions
 ) {
   val profileNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(profileNavController) }
@@ -204,7 +209,10 @@ fun ProfileNavHost(
       modifier = Modifier.padding(innerPadding),
   ) {
     composable(Screen.PROFILE) {
-      ProfileScreen(navigationActions, loggedInAccountViewModel = loggedInAccountViewModel)
+      ProfileScreen(
+          navigationActions,
+          loggedInAccountViewModel = loggedInAccountViewModel,
+          navigationActionsRoot)
     }
     composable(Screen.ACCOUNT_CONFIGURATION) {
       AccountConfigurationScreen(navigationActions, accountViewModel, loggedInAccountViewModel)

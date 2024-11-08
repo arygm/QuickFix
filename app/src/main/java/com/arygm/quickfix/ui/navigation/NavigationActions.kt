@@ -47,9 +47,10 @@ object Screen {
   const val GOOGLE_INFO = "Google Info Screen"
 }
 
-data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
+data class TopLevelDestination(val route: String, val icon: ImageVector?, val textId: String)
 
 object TopLevelDestinations {
+  val WELCOME = TopLevelDestination(route = Route.WELCOME, icon = null, textId = "Welcome")
   val HOME = TopLevelDestination(route = Route.HOME, icon = Icons.Filled.Home, textId = "Home")
   val PROFILE =
       TopLevelDestination(
