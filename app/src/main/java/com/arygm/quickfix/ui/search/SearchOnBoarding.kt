@@ -11,20 +11,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.outlined.Carpenter
-import androidx.compose.material.icons.outlined.CleaningServices
-import androidx.compose.material.icons.outlined.ElectricalServices
-import androidx.compose.material.icons.outlined.Handyman
-import androidx.compose.material.icons.outlined.ImagesearchRoller
-import androidx.compose.material.icons.outlined.LocalShipping
-import androidx.compose.material.icons.outlined.NaturePeople
-import androidx.compose.material.icons.outlined.Plumbing
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,7 +23,6 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -41,28 +31,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.categories.WorkerCategory
-import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
-data class ExpandableCategory(
-    val category: WorkerCategory,
-    val isExpanded: MutableState<Boolean> = mutableStateOf(false)
-)
-
 @Composable
 fun SearchOnBoarding(navigationActions: NavigationActions, isUser: Boolean) {
-    val itemCategories = remember { WorkerCategory.entries.toList().map {
-        category -> ExpandableCategory(category) }
-    }
-    val expandedStates = remember { mutableStateListOf(*BooleanArray(itemCategories.size) { false }.toTypedArray()) }
-    val listState = rememberLazyListState()
+  val itemCategories = remember { WorkerCategory.entries.toList() }
+  val expandedStates = remember {
+    mutableStateListOf(*BooleanArray(itemCategories.size) { false }.toTypedArray())
+  }
+  val listState = rememberLazyListState()
 
   var searchQuery by remember { mutableStateOf("") }
 
@@ -144,17 +127,13 @@ fun SearchOnBoarding(navigationActions: NavigationActions, isUser: Boolean) {
                           color = colorScheme.onBackground,
                       )
                       Spacer(modifier = Modifier.height(4.dp))
-                      LazyColumn(
-                          modifier = Modifier.fillMaxWidth(),
-                          state = listState
-                          ) {
-                          itemsIndexed(itemCategories, key = { index, _ -> index }) { index, item ->
-                            ExpandableCategoryItem(
-                                item = item,
-                                isExpanded = expandedStates[index],
-                                onExpandedChange = { expandedStates[index] = it},
-                              size = (28.dp * sizeRatio.value)
-                            )
+                      LazyColumn(modifier = Modifier.fillMaxWidth(), state = listState) {
+                        itemsIndexed(itemCategories, key = { index, _ -> index }) { index, item ->
+                          ExpandableCategoryItem(
+                              item = item,
+                              isExpanded = expandedStates[index],
+                              onExpandedChange = { expandedStates[index] = it },
+                          )
                           Spacer(modifier = Modifier.height(10.dp))
                         }
                       }

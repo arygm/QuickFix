@@ -16,5 +16,11 @@ object C {
     // Home Screen
     const val home_content = "homeContent"
     const val notification = "notification"
+
+    // ExpandableCategoryItem
+    const val expandableCategoryItem = "expandableCategoryItem"
+    const val subCategories = "subCategories"
+    const val enterSubCateIcon = "enterSubCateIcon"
+    const val subCategoryName = "subCategoryName"
   }
 }

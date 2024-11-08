@@ -102,7 +102,7 @@ fun QuickFixTextFieldCustom(
                         .border(1.dp, errorColor, shape)
                         .background(errorColor.copy(alpha = 0.2f))
                 else
-                    it.shadow(elevation = 2.dp, shape = CircleShape, clip = false)
+                    it.shadow(elevation = 2.dp, shape = shape, clip = false)
                         .clip(shape)
                         .background(MaterialTheme.colorScheme.surface)
               }
