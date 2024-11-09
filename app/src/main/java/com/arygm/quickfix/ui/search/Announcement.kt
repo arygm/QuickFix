@@ -64,6 +64,7 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
     Scaffold(
         containerColor = colorScheme.background,
         topBar = {},
+        modifier = Modifier.testTag("AnnouncementContent"),
         content = { padding ->
           Column(
               modifier =
