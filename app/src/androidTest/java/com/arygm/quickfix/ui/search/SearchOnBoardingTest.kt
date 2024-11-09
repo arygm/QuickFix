@@ -2,6 +2,7 @@ package com.arygm.quickfix.ui.search
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import com.arygm.quickfix.model.categories.WorkerCategory
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import org.junit.Before
 import org.junit.Rule
@@ -54,20 +55,8 @@ class SearchOnBoardingTest {
       SearchOnBoarding(navigationActions = navigationActions, isUser = true)
     }
 
-    // Verify each category title is displayed
-    val categories =
-        listOf(
-            "Painting",
-            "Plumbing",
-            "Gardening",
-            "Electrical Work",
-            "Handyman Services",
-            "Cleaning Services",
-            "Carpentry",
-            "Moving Services")
-
-    categories.forEach { categoryTitle ->
-      composeTestRule.onNodeWithText(categoryTitle).assertIsDisplayed()
+    WorkerCategory.entries.forEach { category ->
+      composeTestRule.onNodeWithText(category.displayName).assertIsDisplayed()
     }
   }
 
