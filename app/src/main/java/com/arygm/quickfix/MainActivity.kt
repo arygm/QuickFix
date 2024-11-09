@@ -215,11 +215,10 @@ fun ProfileNavHost(
           navigationActionsRoot)
     }
     composable(Screen.ACCOUNT_CONFIGURATION) {
-      AccountConfigurationScreen(navigationActionsRoot, accountViewModel, loggedInAccountViewModel)
+      AccountConfigurationScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
     }
     composable(Screen.TO_WORKER) {
-      BusinessScreen(
-          navigationActionsRoot, accountViewModel, workerViewModel, loggedInAccountViewModel)
+      BusinessScreen(navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
     }
   }
 }
