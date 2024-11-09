@@ -40,7 +40,11 @@ import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @Composable
-fun SearchOnBoarding(navigationActions: NavigationActions, isUser: Boolean) {
+fun SearchOnBoarding(
+    navigationActions: NavigationActions,
+    navigationActionsRoot: NavigationActions,
+    isUser: Boolean
+) {
   val itemCategories = remember { WorkerCategory.entries.toList() }
   val expandedStates = remember {
     mutableStateListOf(*BooleanArray(itemCategories.size) { false }.toTypedArray())
@@ -113,7 +117,7 @@ fun SearchOnBoarding(navigationActions: NavigationActions, isUser: Boolean) {
                           buttonOpacity = 1f,
                           textStyle = poppinsTypography.labelSmall,
                           onClickAction = {
-                            navigationActions.navigateTo(TopLevelDestinations.HOME)
+                            navigationActionsRoot.navigateTo(TopLevelDestinations.HOME)
                           },
                           contentPadding = PaddingValues(0.dp),
                       )

@@ -12,18 +12,20 @@ import org.mockito.Mockito.mock
 class SearchOnBoardingTest {
 
   private lateinit var navigationActions: NavigationActions
+  private lateinit var navigationActionsRoot: NavigationActions
 
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setup() {
     navigationActions = mock(NavigationActions::class.java)
+    navigationActionsRoot = mock(NavigationActions::class.java)
   }
 
   @Test
   fun searchOnBoarding_displaysSearchInput() {
     composeTestRule.setContent {
-      SearchOnBoarding(navigationActions = navigationActions, isUser = true)
+      SearchOnBoarding(navigationActions = navigationActions, navigationActionsRoot, isUser = true)
     }
 
     // Check that the search input field is displayed
@@ -37,7 +39,7 @@ class SearchOnBoardingTest {
   @Test
   fun searchOnBoarding_clearsTextOnTrailingIconClick() {
     composeTestRule.setContent {
-      SearchOnBoarding(navigationActions = navigationActions, isUser = true)
+      SearchOnBoarding(navigationActions = navigationActions, navigationActionsRoot, isUser = true)
     }
 
     // Input text into the search field
@@ -52,7 +54,7 @@ class SearchOnBoardingTest {
   @Test
   fun searchOnBoarding_displaysAllCategories() {
     composeTestRule.setContent {
-      SearchOnBoarding(navigationActions = navigationActions, isUser = true)
+      SearchOnBoarding(navigationActions = navigationActions, navigationActionsRoot, isUser = true)
     }
 
     WorkerCategory.entries.forEach { category ->
@@ -67,6 +69,7 @@ class SearchOnBoardingTest {
     composeTestRule.setContent {
       SearchOnBoarding(
           navigationActions = navigationActions,
+          navigationActionsRoot = navigationActionsRoot,
           isUser = true,
       )
     }

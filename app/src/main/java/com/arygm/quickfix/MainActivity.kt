@@ -47,7 +47,7 @@ import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.profile.BusinessScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
-import com.arygm.quickfix.ui.search.SearchOnBoarding
+import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import kotlinx.coroutines.delay
 
@@ -164,7 +164,7 @@ fun QuickFixApp() {
 
               composable(Route.HOME) { HomeNavHost(innerPadding, isUser) }
 
-              composable(Route.SEARCH) { SearchNavHost(innerPadding, isUser) }
+              composable(Route.SEARCH) { SearchNavHost(innerPadding, isUser, navigationActions) }
 
               composable(Route.DASHBOARD) { DashBoardNavHost(innerPadding, isUser) }
 
@@ -225,10 +225,20 @@ fun DashBoardNavHost(innerPadding: PaddingValues, isUser: Boolean) {
 }
 
 @Composable
-fun SearchNavHost(innerPadding: PaddingValues, isUser: Boolean) {
+fun SearchNavHost(
+    innerPadding: PaddingValues,
+    isUser: Boolean,
+    navigationActionsRoot: NavigationActions
+) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
-  NavHost(navController = searchNavController, startDestination = Screen.SEARCH) {
-    composable(Screen.SEARCH) { SearchOnBoarding(navigationActions, isUser) }
+  NavHost(
+      navController = searchNavController,
+      startDestination = Screen.SEARCH,
+      modifier = Modifier.padding(innerPadding),
+  ) {
+    composable(Screen.SEARCH) {
+      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser)
+    }
   }
 }
