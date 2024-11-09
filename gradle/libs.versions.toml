@@ -26,6 +26,7 @@ firebaseFirestore = "25.1.0"
 firebaseUiAuth = "8.0.0"
 playServicesAuth = "21.2.0"
 playServicesMaps = "19.0.0"
+playServicesLocation = "19.0.1"
 mapsCompose = "4.3.3"
 mapsComposeUtils = "4.3.0"
 navigationCommonKtx = "2.8.2"
@@ -78,6 +79,7 @@ firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "
 
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
 maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "mapsComposeUtils" }
 androidx-navigation-common-ktx = { group = "androidx.navigation", name = "navigation-common-ktx", version.ref = "navigationCommonKtx" }

@@ -1,5 +1,6 @@
 package com.arygm.quickfix
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -49,20 +50,56 @@ import com.arygm.quickfix.ui.profile.BusinessScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.search.SearchOnBoarding
 import com.arygm.quickfix.ui.theme.QuickFixTheme
+import com.arygm.quickfix.utils.LocationHelper
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContent {
-      QuickFixTheme {
-        // A surface container using the 'background' color from the theme
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          QuickFixApp()
+
+    private lateinit var locationHelper: LocationHelper
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        locationHelper = LocationHelper(this, this)
+
+        setContent {
+            QuickFixTheme {
+                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    QuickFixApp()
+                }
+            }
         }
-      }
+
+        // Check permissions and get location
+        if (locationHelper.checkPermissions()) {
+            locationHelper.getCurrentLocation { location ->
+                location?.let {
+                    // Handle location (e.g., update UI, save location data)
+                    Log.d("MainActivity", "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
+                }
+            }
+        } else {
+            locationHelper.requestPermissions()
+        }
     }
-  }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == LocationHelper.PERMISSION_REQUEST_ACCESS_LOCATION &&
+            grantResults.isNotEmpty() &&
+            grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
+            locationHelper.getCurrentLocation { location ->
+                location?.let {
+                    Log.d("MainActivity", "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
+                }
+            }
+        }
+    }
 }
 
 @Composable
