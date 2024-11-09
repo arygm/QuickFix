@@ -278,15 +278,29 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
 
 tasks.register("connectedCheckWithEmulators") {
     doLast {
+        val osName = System.getProperty("os.name").toLowerCase()
+        val isWindows = osName.contains("win")
+
         exec {
             // Set the working directory to the root project directory
             workingDir = rootProject.projectDir
 
-            // Run Firebase emulators and connectedCheck in a single command
-            commandLine = listOf(
-                "/bin/sh", "-c",
-                "firebase emulators:exec --debug --inspect-functions --project quickfix-1fd34 --import=./end2end-data --only firestore,auth './gradlew connectedCheck'"
-            )
+            if (isWindows) {
+                // Windows command with logging
+                println("Running on Windows")
+                commandLine = listOf(
+                    "cmd", "/c",
+                    "firebase emulators:exec --debug --inspect-functions --project quickfix-1fd34 --import=./end2end-data --only firestore,auth \"gradlew.bat connectedCheck\""
+                )
+            } else {
+                // Unix-like command (macOS, Linux)
+                println("Running on Unix-like OS")
+                commandLine = listOf(
+                    "/bin/sh", "-c",
+                    "firebase emulators:exec --debug --inspect-functions --project quickfix-1fd34 --import=./end2end-data --only firestore,auth './gradlew connectedCheck'"
+                )
+            }
+
             standardOutput = System.out
             errorOutput = System.err
         }
