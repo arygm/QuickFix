@@ -162,15 +162,14 @@ fun QuickFixApp() {
                 }
               }
 
-              composable(Route.HOME) { HomeNavHost(innerPadding, isUser) }
+              composable(Route.HOME) { HomeNavHost(isUser) }
 
-              composable(Route.SEARCH) { SearchNavHost(innerPadding, isUser, navigationActions) }
+              composable(Route.SEARCH) { SearchNavHost(isUser, navigationActions) }
 
-              composable(Route.DASHBOARD) { DashBoardNavHost(innerPadding, isUser) }
+              composable(Route.DASHBOARD) { DashBoardNavHost(isUser) }
 
               composable(Route.PROFILE) {
                 ProfileNavHost(
-                    innerPadding,
                     accountViewModel,
                     loggedInAccountViewModel,
                     workerViewModel,
@@ -181,7 +180,7 @@ fun QuickFixApp() {
 }
 
 @Composable
-fun HomeNavHost(innerPadding: PaddingValues, isUser: Boolean) {
+fun HomeNavHost(isUser: Boolean) {
   val homeNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(homeNavController) }
   NavHost(navController = homeNavController, startDestination = Screen.HOME) {
@@ -191,7 +190,6 @@ fun HomeNavHost(innerPadding: PaddingValues, isUser: Boolean) {
 
 @Composable
 fun ProfileNavHost(
-    innerPadding: PaddingValues,
     accountViewModel: AccountViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
     workerViewModel: ProfileViewModel,
@@ -216,7 +214,7 @@ fun ProfileNavHost(
 }
 
 @Composable
-fun DashBoardNavHost(innerPadding: PaddingValues, isUser: Boolean) {
+fun DashBoardNavHost(isUser: Boolean) {
   val dashboardNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(dashboardNavController) }
   NavHost(navController = dashboardNavController, startDestination = Screen.DASHBOARD) {
@@ -226,7 +224,6 @@ fun DashBoardNavHost(innerPadding: PaddingValues, isUser: Boolean) {
 
 @Composable
 fun SearchNavHost(
-    innerPadding: PaddingValues,
     isUser: Boolean,
     navigationActionsRoot: NavigationActions
 ) {
@@ -235,7 +232,6 @@ fun SearchNavHost(
   NavHost(
       navController = searchNavController,
       startDestination = Screen.SEARCH,
-      modifier = Modifier.padding(innerPadding),
   ) {
     composable(Screen.SEARCH) {
       QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser)

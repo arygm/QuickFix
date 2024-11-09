@@ -22,8 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,7 +39,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import org.w3c.dom.Text
 
 @Composable
 fun QuickFixTextFieldCustom(
@@ -83,107 +80,124 @@ fun QuickFixTextFieldCustom(
     label: @Composable (() -> Unit)? = {},
     onClick: Boolean = false
 ) {
-  val scrollState = rememberScrollState() // Scroll state for horizontal scrolling
-  // Launch a coroutine to scroll to the end of the text when typing
-  LaunchedEffect(TextFieldValue(value)) { scrollState.animateScrollTo(scrollState.maxValue) }
+    val scrollState = rememberScrollState() // Scroll state for horizontal scrolling
+    // Launch a coroutine to scroll to the end of the text when typing
+    LaunchedEffect(TextFieldValue(value)) { scrollState.animateScrollTo(scrollState.maxValue) }
 
-  if (showLabel) {
-    if (label != null) {
-      label()
-      Spacer(modifier = Modifier.padding(1.5.dp))
+    if (showLabel) {
+        if (label != null) {
+            label()
+            Spacer(modifier = Modifier.padding(1.5.dp))
+        }
     }
-  }
-  Box(
-      modifier =
-          Modifier.let {
+    Box(
+        modifier =
+        Modifier
+            .let {
                 if (isError)
-                    it.clip(shape)
+                    it
+                        .clip(shape)
                         .background(MaterialTheme.colorScheme.surface)
                         .border(1.dp, errorColor, shape)
                         .background(errorColor.copy(alpha = 0.2f))
                 else
-                    it.shadow(elevation = 2.dp, shape = shape, clip = false)
+                    it
+                        .shadow(elevation = 2.dp, shape = shape, clip = false)
                         .clip(shape)
                         .background(MaterialTheme.colorScheme.surface)
-              }
-              .size(width = widthField, height = heightField) // Set the width and height
-              .fillMaxWidth() // Fill the width of the container
-              .padding(start = moveContentHorizontal, top = moveContentTop, bottom = moveContentTop)
-              .clickable { onTextFieldClick() }
-              .testTag(C.Tag.main_container_text_field_custom), // Apply padding
-      contentAlignment = Alignment.Center) {
+            }
+            .size(width = widthField, height = heightField) // Set the width and height
+            .fillMaxWidth() // Fill the width of the container
+            .padding(start = moveContentHorizontal, top = moveContentTop, bottom = moveContentTop)
+            .clickable { onTextFieldClick() }
+            .testTag(C.Tag.main_container_text_field_custom), // Apply padding
+        contentAlignment = Alignment.Center) {
         Row(
             horizontalArrangement = Arrangement.Center, // Aligning icon and text horizontally
             verticalAlignment = Alignment.CenterVertically, // Aligning icon and text vertically
-            modifier = modifier.fillMaxWidth()) {
-              if (showLeadingIcon()) { // Conditionally show the leading icon
+            modifier = modifier.fillMaxWidth()
+        ) {
+            if (showLeadingIcon()) { // Conditionally show the leading icon
                 if (leadingIcon != null) {
-                  Icon(
-                      imageVector = leadingIcon,
-                      contentDescription = descriptionLeadIcon,
-                      tint = leadIconColor, // Icon color
-                      modifier =
-                          Modifier.size(sizeIconGroup) // Set icon size
-                              .padding(end = 8.dp)
-                              .testTag(C.Tag.icon_custom_text_field) // Space between icon and text
-                      )
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = descriptionLeadIcon,
+                        tint = leadIconColor, // Icon color
+                        modifier =
+                        Modifier
+                            .size(sizeIconGroup) // Set icon size
+                            .padding(end = 8.dp)
+                            .testTag(C.Tag.icon_custom_text_field) // Space between icon and text
+                    )
                 }
-              }
-              Spacer(
-                  modifier.padding(
-                      horizontal = spaceBetweenLeadIconText)) // Space between icon and text
-              Box(modifier = Modifier.weight(1f)) {
+            }
+            Spacer(
+                modifier.padding(
+                    horizontal = spaceBetweenLeadIconText
+                )
+            ) // Space between icon and text
+            Box(modifier = Modifier.weight(1f)) {
                 BasicTextField(
                     value = value,
                     onValueChange = { onValueChange(it) },
                     modifier =
-                        modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(scrollState) // Enable horizontal scrolling
-                            .focusable(true)
-                            .focusRequester(focusRequester)
-                            .testTag(
-                                C.Tag.text_field_custom) // Makes the text field take up remaining
-                    // space
-                    ,
+                    modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .testTag(
+                            C.Tag.text_field_custom
+                        )
+                        .focusable(true)
+                        .let {
+                            if (singleLine) {
+                                it.horizontalScroll(scrollState)
+                            } else it// Enable horizontal scrolling
+                        },
                     textStyle =
-                        textStyle.copy(
-                            color =
-                                if (isError) errorColor else textColor), // Text style with color
+                    textStyle.copy(
+                        color =
+                        if (isError) errorColor else textColor
+                    ), // Text style with color
                     singleLine = singleLine, // Keep the text on a single line
                     keyboardOptions = keyboardOptions,
                     visualTransformation = visualTransformation,
                 )
                 if (value.isEmpty()) {
-                  Text(
-                      modifier = Modifier.testTag(C.Tag.place_holder_text_field_custom),
-                      text = placeHolderText,
-                      style =
-                          textStyle.copy(
-                              color =
-                                  if (isError) errorColor
-                                  else placeHolderColor) // Placeholder text style
-                      )
+                    Text(
+                        modifier = Modifier.testTag(C.Tag.place_holder_text_field_custom),
+                        text = placeHolderText,
+                        style =
+                        textStyle.copy(
+                            color =
+                            if (isError) errorColor
+                            else placeHolderColor
+                        ) // Placeholder text style
+                    )
                 }
-              }
-              if (showTrailingIcon() && value.isNotEmpty()) {
+            }
+            if (showTrailingIcon() && value.isNotEmpty()) {
                 IconButton(
                     onClick = { if (onClick) onValueChange("") },
                     modifier =
-                        Modifier.testTag(C.Tag.clear_button_text_field_custom)
-                            .size(sizeIconGroup)
-                            .padding(end = 9.dp)
-                            .align(Alignment.CenterVertically)) {
-                      trailingIcon?.invoke()
-                    }
-              }
+                    Modifier
+                        .testTag(C.Tag.clear_button_text_field_custom)
+                        .size(sizeIconGroup)
+                        .padding(end = 9.dp)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    trailingIcon?.invoke()
+                }
             }
-      }
-  if (showError && isError) {
-    Text(
-        errorText,
-        color = MaterialTheme.colorScheme.error,
-        style = MaterialTheme.typography.bodySmall,
-        modifier = Modifier.padding(top = 4.dp, start = 3.dp).testTag("errorText"))
-  }
+        }
+    }
+    if (showError && isError) {
+        Text(
+            errorText,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier
+                .padding(top = 4.dp, start = 3.dp)
+                .testTag("errorText")
+        )
+    }
 }
