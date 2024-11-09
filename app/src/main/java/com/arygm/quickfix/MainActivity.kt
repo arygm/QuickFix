@@ -55,51 +55,50 @@ import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var locationHelper: LocationHelper
+  private lateinit var locationHelper: LocationHelper
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
 
-        locationHelper = LocationHelper(this, this)
+    locationHelper = LocationHelper(this, this)
 
-        setContent {
-            QuickFixTheme {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    QuickFixApp()
-                }
-            }
+    setContent {
+      QuickFixTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+          QuickFixApp()
         }
-
-        // Check permissions and get location
-        if (locationHelper.checkPermissions()) {
-            locationHelper.getCurrentLocation { location ->
-                location?.let {
-                    // Handle location (e.g., update UI, save location data)
-                    Log.d("MainActivity", "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
-                }
-            }
-        } else {
-            locationHelper.requestPermissions()
-        }
+      }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LocationHelper.PERMISSION_REQUEST_ACCESS_LOCATION &&
-            grantResults.isNotEmpty() &&
-            grantResults[0] == PackageManager.PERMISSION_GRANTED
-        ) {
-            locationHelper.getCurrentLocation { location ->
-                location?.let {
-                    Log.d("MainActivity", "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
-                }
-            }
+    // Check permissions and get location
+    if (locationHelper.checkPermissions()) {
+      locationHelper.getCurrentLocation { location ->
+        location?.let {
+          // Handle location (e.g., update UI, save location data)
+          Log.d("MainActivity", "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
         }
+      }
+    } else {
+      locationHelper.requestPermissions()
     }
+  }
+
+  override fun onRequestPermissionsResult(
+      requestCode: Int,
+      permissions: Array<String>,
+      grantResults: IntArray
+  ) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    if (requestCode == LocationHelper.PERMISSION_REQUEST_ACCESS_LOCATION &&
+        grantResults.isNotEmpty() &&
+        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+      locationHelper.getCurrentLocation { location ->
+        location?.let {
+          Log.d("MainActivity", "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
+        }
+      }
+    }
+  }
 }
 
 @Composable
