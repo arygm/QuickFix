@@ -9,7 +9,6 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -170,10 +169,7 @@ fun QuickFixApp() {
 
               composable(Route.PROFILE) {
                 ProfileNavHost(
-                    accountViewModel,
-                    loggedInAccountViewModel,
-                    workerViewModel,
-                    navigationActions)
+                    accountViewModel, loggedInAccountViewModel, workerViewModel, navigationActions)
               }
             }
       }
@@ -223,10 +219,7 @@ fun DashBoardNavHost(isUser: Boolean) {
 }
 
 @Composable
-fun SearchNavHost(
-    isUser: Boolean,
-    navigationActionsRoot: NavigationActions
-) {
+fun SearchNavHost(isUser: Boolean, navigationActionsRoot: NavigationActions) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
   NavHost(
