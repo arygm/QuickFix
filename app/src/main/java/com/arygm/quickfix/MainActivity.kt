@@ -184,11 +184,7 @@ fun QuickFixApp() {
 fun HomeNavHost(innerPadding: PaddingValues, isUser: Boolean) {
   val homeNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(homeNavController) }
-  NavHost(
-      navController = homeNavController,
-      startDestination = Screen.HOME,
-      modifier = Modifier.padding(innerPadding),
-  ) {
+  NavHost(navController = homeNavController, startDestination = Screen.HOME) {
     composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
   }
 }
@@ -203,11 +199,7 @@ fun ProfileNavHost(
 ) {
   val profileNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(profileNavController) }
-  NavHost(
-      navController = profileNavController,
-      startDestination = Screen.PROFILE,
-      modifier = Modifier.padding(innerPadding),
-  ) {
+  NavHost(navController = profileNavController, startDestination = Screen.PROFILE) {
     composable(Screen.PROFILE) {
       ProfileScreen(
           navigationActions,
@@ -227,11 +219,7 @@ fun ProfileNavHost(
 fun DashBoardNavHost(innerPadding: PaddingValues, isUser: Boolean) {
   val dashboardNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(dashboardNavController) }
-  NavHost(
-      navController = dashboardNavController,
-      startDestination = Screen.DASHBOARD,
-      modifier = Modifier.padding(innerPadding),
-  ) {
+  NavHost(navController = dashboardNavController, startDestination = Screen.DASHBOARD) {
     composable(Screen.DASHBOARD) { DashboardScreen(navigationActions, isUser) }
   }
 }

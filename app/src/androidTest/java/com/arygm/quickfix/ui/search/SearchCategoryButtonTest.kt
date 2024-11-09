@@ -1,13 +1,10 @@
 package com.arygm.quickfix.ui.search
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Build
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.model.categories.WorkerCategory
+import com.arygm.quickfix.ressources.C
 import org.junit.Rule
 import org.junit.Test
 
@@ -15,65 +12,87 @@ class SearchCategoryButtonTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
+  private val item = WorkerCategory.PAINTING
+
   @Test
   fun searchCategoryButton_displaysTitleAndDescription() {
+    val expandedState = mutableStateOf(false)
     composeTestRule.setContent {
-      SearchCategoryButton(
-          icon = Icons.Outlined.Build,
-          title = "Plumbing",
-          description = "Find plumbers for residential or commercial projects.",
-          backgroundColor = Color.White,
-          height = 75.dp,
-          size = 40.dp)
+      ExpandableCategoryItem(
+          item = item,
+          isExpanded = expandedState.value,
+          onExpandedChange = { expandedState.value = it },
+      )
     }
 
     // Check if title and description texts are displayed
-    composeTestRule.onNodeWithText("Plumbing").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithText("Find plumbers for residential or commercial projects.")
-        .assertIsDisplayed()
+    composeTestRule.onNodeWithText(item.displayName).assertIsDisplayed()
+    composeTestRule.onNodeWithText(item.description).assertIsDisplayed()
   }
 
   @Test
   fun searchCategoryButton_clickAction() {
     // Create a variable to track if the button was clicked
-    val clicked = mutableStateOf(false)
+    val expandedState = mutableStateOf(false)
 
     composeTestRule.setContent {
-      SearchCategoryButton(
-          icon = Icons.Outlined.Build,
-          title = "Plumbing",
-          description = "Find plumbers for residential or commercial projects.",
-          backgroundColor = Color.White,
-          height = 75.dp,
-          size = 40.dp,
-          onClick = { clicked.value = true })
+      ExpandableCategoryItem(
+          item = item,
+          isExpanded = expandedState.value,
+          onExpandedChange = { expandedState.value = it },
+      )
     }
 
     // Perform a click on the button
-    composeTestRule.onNodeWithText("Plumbing").performClick()
+    composeTestRule.onNodeWithTag(C.Tag.expandableCategoryItem).performClick()
 
     // Assert that the click action was triggered
-    assert(clicked.value)
+    assert(expandedState.value)
   }
 
   @Test
-  fun searchCategoryButton_checkBackgroundColor() {
-    val testBackgroundColor = Color.White
+  fun testExpandableCategoryItem_AnimatedVisibility() {
+    // Step 1: Control the clock to handle animations
+    composeTestRule.mainClock.autoAdvance = false
 
+    // Step 2: Set up the initial state
+    val isExpandedState = mutableStateOf(false)
+    val item = WorkerCategory.PAINTING // Replace with an appropriate WorkerCategory
     composeTestRule.setContent {
-      SearchCategoryButton(
-          icon = Icons.Outlined.Build,
-          title = "Plumbing",
-          description = "Find plumbers for residential or commercial projects.",
-          backgroundColor = testBackgroundColor,
-          height = 75.dp,
-          size = 40.dp)
+      // Provide LocalInspectionMode if you prefer to disable animations
+      // CompositionLocalProvider(LocalInspectionMode provides true) {
+      ExpandableCategoryItem(
+          item = item,
+          isExpanded = isExpandedState.value,
+          onExpandedChange = { isExpandedState.value = it },
+      )
+      // }
     }
 
-    // Use the test tag to check for the expected background color
+    // Step 3: Perform click to expand the item
+    composeTestRule.onNodeWithTag(C.Tag.expandableCategoryItem).performClick()
+
+    // Step 4: Advance the clock to allow animations to complete
+    composeTestRule.mainClock.advanceTimeBy(1000) // Adjust based on your animation duration
+    composeTestRule.waitForIdle()
+    // Optionally, check for a specific subcategory
+    val subCategoryName = "Residential Painting"
     composeTestRule
-        .onNodeWithTag("backgroundColorTag-${testBackgroundColor.toArgb()}")
-        .assertExists()
+        .onNodeWithTag("${C.Tag.subCategoryName}_$subCategoryName")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+
+    // Step 6: Perform click to collapse the item
+    composeTestRule.onNodeWithTag(C.Tag.expandableCategoryItem).performClick()
+
+    // Advance the clock again for the collapse animation
+    composeTestRule.mainClock.advanceTimeBy(1000)
+    composeTestRule.waitForIdle()
+
+    // Step 7: Assert that subcategories are no longer displayed
+    composeTestRule.onNodeWithTag(C.Tag.subCategories).assertDoesNotExist()
+
+    // Step 8: Restore the clock to auto-advance
+    composeTestRule.mainClock.autoAdvance = true
   }
 }
