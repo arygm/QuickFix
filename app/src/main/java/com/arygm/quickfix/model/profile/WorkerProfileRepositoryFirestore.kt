@@ -143,46 +143,6 @@ class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : Prof
         }
   }
 
-  private fun String.toWorkerCategory(): WorkerCategory? {
-    return when (this) {
-      "ConstructionAndMaintenance.GeneralLaborer" ->
-          WorkerCategory.ConstructionAndMaintenance.GeneralLaborer
-      "ConstructionAndMaintenance.Mason" -> WorkerCategory.ConstructionAndMaintenance.Mason
-      "HomeImprovementAndRepair.Handyman" -> WorkerCategory.HomeImprovementAndRepair.Handyman
-      "HomeImprovementAndRepair.FlooringInstaller" ->
-          WorkerCategory.HomeImprovementAndRepair.FlooringInstaller
-      "MechanicalAndVehicleMaintenance.AutoMechanic" ->
-          WorkerCategory.MechanicalAndVehicleMaintenance.AutoMechanic
-      "MechanicalAndVehicleMaintenance.DieselMechanic" ->
-          WorkerCategory.MechanicalAndVehicleMaintenance.DieselMechanic
-      else -> null
-    }
-  }
-
-  private fun WorkerCategory.toFirestoreString(): String {
-    return when (this) {
-      is WorkerCategory.ConstructionAndMaintenance.GeneralLaborer ->
-          "ConstructionAndMaintenance.GeneralLaborer"
-      is WorkerCategory.ConstructionAndMaintenance.Mason -> "ConstructionAndMaintenance.Mason"
-      is WorkerCategory.HomeImprovementAndRepair.Handyman -> "HomeImprovementAndRepair.Handyman"
-      is WorkerCategory.HomeImprovementAndRepair.FlooringInstaller ->
-          "HomeImprovementAndRepair.FlooringInstaller"
-      is WorkerCategory.MechanicalAndVehicleMaintenance.AutoMechanic ->
-          "MechanicalAndVehicleMaintenance.AutoMechanic"
-      is WorkerCategory.MechanicalAndVehicleMaintenance.DieselMechanic ->
-          "MechanicalAndVehicleMaintenance.DieselMechanic"
-    }
-  }
-
-  private fun WorkerProfile.toFirestoreMap(): Map<String, Any?> {
-    return mapOf(
-        "uid" to this.uid,
-        "hourlyRate" to this.hourlyRate,
-        "description" to this.description,
-        "fieldOfWork" to this.fieldOfWork // Convert sealed class to string
-        )
-  }
-
   fun filterWorkers(
       hourlyRateThreshold: Double?,
       fieldOfWork: String?,

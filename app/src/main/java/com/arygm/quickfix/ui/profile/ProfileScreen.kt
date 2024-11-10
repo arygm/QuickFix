@@ -42,6 +42,7 @@ import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -49,7 +50,8 @@ import com.google.firebase.auth.auth
 @Composable
 fun ProfileScreen(
     navigationActions: NavigationActions,
-    loggedInAccountViewModel: LoggedInAccountViewModel
+    loggedInAccountViewModel: LoggedInAccountViewModel,
+    navigationActionsRoot: NavigationActions
 ) {
   val loggedInProfile by loggedInAccountViewModel.loggedInAccount.collectAsState()
   // List of options handled by the profile screen
@@ -270,7 +272,7 @@ fun ProfileScreen(
               Button(
                   onClick = {
                     loggedInAccountViewModel.logOut(Firebase.auth)
-                    navigationActions.navigateTo(Screen.WELCOME)
+                    navigationActionsRoot.navigateTo(TopLevelDestinations.WELCOME)
                     Log.d("user", Firebase.auth.currentUser.toString())
                   },
                   modifier =

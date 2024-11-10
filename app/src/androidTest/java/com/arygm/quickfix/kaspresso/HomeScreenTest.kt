@@ -1,5 +1,6 @@
 package com.arygm.quickfix.kaspresso
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -51,6 +52,13 @@ class HomeScreenTest : TestCase() {
     // Step 4: Assert that the search bar has lost focus
     step("Assert the search bar has lost focus") {
       composeTestRule.onNodeWithTag("searchBar").assertIsNotFocused()
+    }
+    step("Verify Popular Services and Upcoming QuickFixes sections are displayed") {
+      // Verify Popular Services title is displayed
+      composeTestRule.onNodeWithTag("PopularServicesRow").assertIsDisplayed()
+
+      // Verify Upcoming QuickFixes title is displayed
+      composeTestRule.onNodeWithTag("UpcomingQuickFixes").assertIsDisplayed()
     }
   }
 }

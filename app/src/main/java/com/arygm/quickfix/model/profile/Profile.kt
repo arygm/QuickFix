@@ -59,23 +59,3 @@ class WorkerProfile(
     return listOf(super.hashCode(), fieldOfWork, hourlyRate, description, location).hashCode()
   }
 }
-
-sealed class WorkerCategory {
-  sealed class ConstructionAndMaintenance : WorkerCategory() {
-    object GeneralLaborer : ConstructionAndMaintenance()
-
-    object Mason : ConstructionAndMaintenance()
-  }
-
-  sealed class HomeImprovementAndRepair : WorkerCategory() {
-    object Handyman : HomeImprovementAndRepair()
-
-    object FlooringInstaller : HomeImprovementAndRepair()
-  }
-
-  sealed class MechanicalAndVehicleMaintenance : WorkerCategory() {
-    object AutoMechanic : MechanicalAndVehicleMaintenance()
-
-    object DieselMechanic : MechanicalAndVehicleMaintenance()
-  }
-}

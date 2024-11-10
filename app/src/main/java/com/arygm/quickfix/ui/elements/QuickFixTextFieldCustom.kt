@@ -22,8 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,7 +39,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import org.w3c.dom.Text
 
 @Composable
 fun QuickFixTextFieldCustom(
@@ -102,7 +99,7 @@ fun QuickFixTextFieldCustom(
                         .border(1.dp, errorColor, shape)
                         .background(errorColor.copy(alpha = 0.2f))
                 else
-                    it.shadow(elevation = 2.dp, shape = CircleShape, clip = false)
+                    it.shadow(elevation = 2.dp, shape = shape, clip = false)
                         .clip(shape)
                         .background(MaterialTheme.colorScheme.surface)
               }
@@ -139,13 +136,14 @@ fun QuickFixTextFieldCustom(
                     modifier =
                         modifier
                             .fillMaxWidth()
-                            .horizontalScroll(scrollState) // Enable horizontal scrolling
-                            .focusable(true)
                             .focusRequester(focusRequester)
-                            .testTag(
-                                C.Tag.text_field_custom) // Makes the text field take up remaining
-                    // space
-                    ,
+                            .testTag(C.Tag.text_field_custom)
+                            .focusable(true)
+                            .let {
+                              if (singleLine) {
+                                it.horizontalScroll(scrollState)
+                              } else it // Enable horizontal scrolling
+                            },
                     textStyle =
                         textStyle.copy(
                             color =

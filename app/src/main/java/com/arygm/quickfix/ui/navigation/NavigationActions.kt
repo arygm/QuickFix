@@ -12,7 +12,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.arygm.quickfix.utils.routeToScreen
-import com.arygm.quickfix.utils.screenToRoute
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 object Route {
   const val CALENDAR = "Calendar"
@@ -26,6 +28,7 @@ object Route {
   const val PROFILE = "Profile"
   const val ACCOUNT_CONFIGURATION = "Account configuration"
   const val TO_WORKER = "To Worker"
+  const val RESET_PASSWORD = "Reset password"
 }
 
 object Screen {
@@ -42,12 +45,14 @@ object Screen {
   const val PROFILE = "Profile Screen"
   const val ACCOUNT_CONFIGURATION = "Account configuration Screen"
   const val TO_WORKER = "To Worker Screen"
+  const val RESET_PASSWORD = "Reset password Screen"
   const val GOOGLE_INFO = "Google Info Screen"
 }
 
-data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
+data class TopLevelDestination(val route: String, val icon: ImageVector?, val textId: String)
 
 object TopLevelDestinations {
+  val WELCOME = TopLevelDestination(route = Route.WELCOME, icon = null, textId = "Welcome")
   val HOME = TopLevelDestination(route = Route.HOME, icon = Icons.Filled.Home, textId = "Home")
   val PROFILE =
       TopLevelDestination(
@@ -87,6 +92,10 @@ open class NavigationActions(
 ) {
   var currentScreen by mutableStateOf(Screen.WELCOME)
 
+  // Allows the synchronization between the navigationActions and the bottom bar
+  private val currentRoute_ = MutableStateFlow<String>(Route.HOME)
+  val currentRoute: StateFlow<String> = currentRoute_.asStateFlow()
+
   /**
    * Navigate to the specified [TopLevelDestination]
    *
@@ -103,6 +112,7 @@ open class NavigationActions(
         restoreState = true
       }
     }
+    currentRoute_.value = currentRoute()
   }
 
   /**
@@ -113,12 +123,14 @@ open class NavigationActions(
   open fun navigateTo(screen: String) {
     currentScreen = screen
     navController.navigate(screen)
+    currentRoute_.value = currentRoute()
   }
 
   /** Navigate back to the previous screen. */
   open fun goBack() {
     navController.popBackStack()
     currentScreen = routeToScreen(currentRoute())
+    currentRoute_.value = currentRoute()
   }
 
   /**
@@ -127,6 +139,6 @@ open class NavigationActions(
    * @return The current route
    */
   open fun currentRoute(): String {
-    return screenToRoute(navController.currentDestination?.route ?: "")
+    return navController.currentDestination?.route ?: ""
   }
 }
