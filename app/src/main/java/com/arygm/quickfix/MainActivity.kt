@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
@@ -69,7 +70,8 @@ class MainActivity : ComponentActivity() {
 fun QuickFixApp() {
 
   val rootNavController = rememberNavController()
-  val navigationActions = remember { NavigationActions(rootNavController) }
+  val navigationActionsRoot = remember { NavigationActions(rootNavController) }
+
   val userViewModel: ProfileViewModel =
       viewModel(key = "userViewModel", factory = ProfileViewModel.UserFactory)
   val workerViewModel: ProfileViewModel =
@@ -78,8 +80,14 @@ fun QuickFixApp() {
       viewModel(factory = LoggedInAccountViewModel.Factory)
   val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
 
+  // Initialized here because needed for the bottom bar
+  val profileNavController = rememberNavController()
+  val profileNavigationActions = remember { NavigationActions(profileNavController) }
+
   val isUser = false // TODO: This variable needs to get its value after the authentication
-  val screen by remember { navigationActions::currentScreen }
+  val screen by remember { navigationActionsRoot::currentScreen }
+  val screenInProfileNavHost by remember { profileNavigationActions::currentScreen }
+
   // Make `bottomBarVisible` reactive to changes in `screen`
   val shouldShowBottomBar by remember {
     derivedStateOf {
@@ -88,10 +96,10 @@ fun QuickFixApp() {
           screen != Screen.INFO &&
           screen != Screen.PASSWORD &&
           screen != Screen.REGISTER &&
-          screen != Screen.ACCOUNT_CONFIGURATION &&
-          screen != Screen.TO_WORKER &&
           screen != Screen.RESET_PASSWORD &&
-          screen != Screen.GOOGLE_INFO
+          screen != Screen.GOOGLE_INFO &&
+          screenInProfileNavHost != Screen.ACCOUNT_CONFIGURATION &&
+          screenInProfileNavHost != Screen.TO_WORKER
     }
   }
 
@@ -118,11 +126,11 @@ fun QuickFixApp() {
               BottomNavigationMenu(
                   onTabSelect = { selectedDestination ->
                     // Use this block to navigate based on the selected tab
-                    navigationActions.navigateTo(selectedDestination)
-                    Log.d("user", navigationActions.currentRoute())
+                    navigationActionsRoot.navigateTo(selectedDestination)
+                    Log.d("user", navigationActionsRoot.currentRoute())
                   },
-                  isUser = isUser // Pass the user type to determine the tabs
-                  )
+                  isUser = isUser, // Pass the user type to determine the tabs
+                  navigationActions = navigationActionsRoot)
             }
       }) { innerPadding ->
         NavHost(
@@ -143,33 +151,47 @@ fun QuickFixApp() {
               ) {
                 composable(Screen.WELCOME) {
                   WelcomeScreen(
-                      navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+                      navigationActionsRoot,
+                      accountViewModel,
+                      loggedInAccountViewModel,
+                      userViewModel)
                 }
                 composable(Screen.LOGIN) {
-                  LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+                  LogInScreen(navigationActionsRoot, accountViewModel, loggedInAccountViewModel)
                 }
                 composable(Screen.REGISTER) {
                   RegisterScreen(
-                      navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+                      navigationActionsRoot,
+                      accountViewModel,
+                      loggedInAccountViewModel,
+                      userViewModel)
                 }
                 composable(Screen.GOOGLE_INFO) {
                   GoogleInfoScreen(
-                      navigationActions, loggedInAccountViewModel, accountViewModel, userViewModel)
+                      navigationActionsRoot,
+                      loggedInAccountViewModel,
+                      accountViewModel,
+                      userViewModel)
                 }
                 composable(Screen.RESET_PASSWORD) {
-                  ResetPasswordScreen(navigationActions, accountViewModel)
+                  ResetPasswordScreen(navigationActionsRoot, accountViewModel)
                 }
               }
 
               composable(Route.HOME) { HomeNavHost(isUser) }
 
-              composable(Route.SEARCH) { SearchNavHost(isUser, navigationActions) }
+              composable(Route.SEARCH) { SearchNavHost(isUser, navigationActionsRoot) }
 
               composable(Route.DASHBOARD) { DashBoardNavHost(isUser) }
 
               composable(Route.PROFILE) {
                 ProfileNavHost(
-                    accountViewModel, loggedInAccountViewModel, workerViewModel, navigationActions)
+                    accountViewModel,
+                    loggedInAccountViewModel,
+                    workerViewModel,
+                    profileNavController,
+                    profileNavigationActions,
+                    navigationActionsRoot)
               }
             }
       }
@@ -189,22 +211,25 @@ fun ProfileNavHost(
     accountViewModel: AccountViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
     workerViewModel: ProfileViewModel,
-    navigationActionsRoot: NavigationActions
+    profileNavController: NavHostController,
+    profileNavigationActions: NavigationActions,
+    navigationActionsRoot: NavigationActions,
 ) {
-  val profileNavController = rememberNavController()
-  val navigationActions = remember { NavigationActions(profileNavController) }
+
   NavHost(navController = profileNavController, startDestination = Screen.PROFILE) {
     composable(Screen.PROFILE) {
       ProfileScreen(
-          navigationActions,
+          profileNavigationActions,
           loggedInAccountViewModel = loggedInAccountViewModel,
           navigationActionsRoot)
     }
     composable(Screen.ACCOUNT_CONFIGURATION) {
-      AccountConfigurationScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+      AccountConfigurationScreen(
+          profileNavigationActions, accountViewModel, loggedInAccountViewModel)
     }
     composable(Screen.TO_WORKER) {
-      BusinessScreen(navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
+      BusinessScreen(
+          profileNavigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
     }
   }
 }

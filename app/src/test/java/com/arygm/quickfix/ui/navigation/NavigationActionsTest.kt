@@ -45,9 +45,7 @@ class NavigationActionsTest {
   @Test
   fun currentRouteWorksWithDestination() {
     `when`(navHostController.currentDestination).thenReturn(navigationDestination)
-    // todo Look at the current route function after the milestone because it doesnt work the way it
-    // should
-    `when`(navigationDestination.route).thenReturn(Screen.HOME)
+    `when`(navigationDestination.route).thenReturn(Route.HOME)
 
     assertThat(navigationActions.currentRoute(), `is`(Route.HOME))
   }
