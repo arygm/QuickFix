@@ -32,96 +32,84 @@ fun QuickFixUploadImageSheet(
     onTakePhotoClick: () -> Unit,
     onChooseFromLibraryClick: () -> Unit
 ) {
-    if (showModalBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = onDismissRequest,
-            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-            modifier = Modifier.testTag("uploadImageSheet")
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+  if (showModalBottomSheet) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        modifier = Modifier.testTag("uploadImageSheet")) {
+          Column(
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+              horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     "Pictures",
                     style = MaterialTheme.typography.headlineLarge,
                     color = colorScheme.onBackground,
-                    modifier = Modifier.testTag("picturesText")
-                )
+                    modifier = Modifier.testTag("picturesText"))
                 Divider(
                     color = colorScheme.onSecondaryContainer,
                     thickness = 1.dp,
-                    modifier = Modifier.testTag("divider")
-                )
+                    modifier = Modifier.testTag("divider"))
 
                 // Option to take a photo
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            onTakePhotoClick()
-                            onDismissRequest()
-                        }
-                        .padding(vertical = 8.dp)
-                        .testTag("cameraRow"),
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .clickable {
+                              onTakePhotoClick()
+                              onDismissRequest()
+                            }
+                            .padding(vertical = 8.dp)
+                            .testTag("cameraRow"),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.camera),
-                        contentDescription = "Take a photo",
-                        tint = colorScheme.onBackground,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(120.dp))
-                    Text(
-                        "Take a photo",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = colorScheme.onBackground,
-                        modifier = Modifier
-                            .weight(1f)
-                            .align(Alignment.CenterVertically)
-                            .testTag("cameraText")
-                    )
-                }
+                    horizontalArrangement = Arrangement.Start) {
+                      Icon(
+                          painter = painterResource(id = R.drawable.camera),
+                          contentDescription = "Take a photo",
+                          tint = colorScheme.onBackground,
+                          modifier = Modifier.padding(start = 16.dp))
+                      Spacer(modifier = Modifier.width(120.dp))
+                      Text(
+                          "Take a photo",
+                          style = MaterialTheme.typography.headlineSmall,
+                          color = colorScheme.onBackground,
+                          modifier =
+                              Modifier.weight(1f)
+                                  .align(Alignment.CenterVertically)
+                                  .testTag("cameraText"))
+                    }
 
                 Divider(color = colorScheme.onSecondaryContainer, thickness = 1.dp)
 
                 // Option to choose from library
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            onChooseFromLibraryClick()
-                            onDismissRequest()
-                        }
-                        .padding(vertical = 8.dp)
-                        .testTag("libraryRow"),
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .clickable {
+                              onChooseFromLibraryClick()
+                              onDismissRequest()
+                            }
+                            .padding(vertical = 8.dp)
+                            .testTag("libraryRow"),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.upload_image),
-                        contentDescription = "Choose from library",
-                        tint = colorScheme.onBackground,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(108.dp))
-                    Text(
-                        "Choose from library",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = colorScheme.onBackground,
-                        modifier = Modifier
-                            .weight(1f)
-                            .align(Alignment.CenterVertically)
-                            .testTag("libraryText")
-                    )
-                }
+                    horizontalArrangement = Arrangement.Start) {
+                      Icon(
+                          painter = painterResource(id = R.drawable.upload_image),
+                          contentDescription = "Choose from library",
+                          tint = colorScheme.onBackground,
+                          modifier = Modifier.padding(start = 16.dp))
+                      Spacer(modifier = Modifier.width(108.dp))
+                      Text(
+                          "Choose from library",
+                          style = MaterialTheme.typography.headlineSmall,
+                          color = colorScheme.onBackground,
+                          modifier =
+                              Modifier.weight(1f)
+                                  .align(Alignment.CenterVertically)
+                                  .testTag("libraryText"))
+                    }
 
                 Divider(color = colorScheme.onSecondaryContainer, thickness = 1.dp)
-            }
+              }
         }
-    }
+  }
 }
