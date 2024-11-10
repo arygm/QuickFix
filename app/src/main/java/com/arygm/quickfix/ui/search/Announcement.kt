@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.search
 
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import androidx.compose.ui.zIndex
 import com.arygm.quickfix.R
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
+import com.arygm.quickfix.ui.elements.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.navigation.NavigationActions
 
 @Composable
@@ -55,6 +57,9 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
   var locationIsSelected by remember { mutableStateOf(true) } // TODO: add the implemented location
   var descriptionIsEmpty by remember { mutableStateOf(true) }
 
+  // State to control the visibility of the image upload sheet
+  var showUploadImageSheet by remember { mutableStateOf(false) }
+
   BoxWithConstraints {
     val widthRatio = maxWidth / 411
     val heightRatio = maxHeight / 860
@@ -68,18 +73,21 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
         content = { padding ->
           Column(
               modifier =
-                  Modifier.fillMaxWidth()
-                      .padding(padding)
-                      .padding(top = 30.dp)
-                      .align(Alignment.Center)
-                      .padding(16.dp)
-                      .zIndex(100f)
-                      .verticalScroll(rememberScrollState()),
+              Modifier
+                  .fillMaxWidth()
+                  .padding(padding)
+                  .padding(top = 30.dp)
+                  .align(Alignment.Center)
+                  .padding(16.dp)
+                  .zIndex(100f)
+                  .verticalScroll(rememberScrollState()),
               horizontalAlignment = Alignment.CenterHorizontally,
               verticalArrangement = Arrangement.Center,
           ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp),
             ) {
               QuickFixTextFieldCustom(
                   value = title,
@@ -100,14 +108,18 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
                         "Title *",
                         style = MaterialTheme.typography.headlineSmall,
                         color = colorScheme.onBackground,
-                        modifier = Modifier.padding(start = 3.dp).testTag("titleText"))
+                        modifier = Modifier
+                            .padding(start = 3.dp)
+                            .testTag("titleText"))
                   })
             }
 
             Spacer(modifier = Modifier.padding(6.dp))
 
             Column(
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp),
             ) {
               QuickFixTextFieldCustom(
                   value = category,
@@ -125,14 +137,18 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
                         "Category *",
                         style = MaterialTheme.typography.headlineSmall,
                         color = colorScheme.onBackground,
-                        modifier = Modifier.padding(start = 3.dp).testTag("categoryText"))
+                        modifier = Modifier
+                            .padding(start = 3.dp)
+                            .testTag("categoryText"))
                   })
             }
 
             Spacer(modifier = Modifier.padding(6.dp))
 
             Column(
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp),
             ) {
               QuickFixTextFieldCustom(
                   value = description,
@@ -153,7 +169,9 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
                         "Description *",
                         style = MaterialTheme.typography.headlineSmall,
                         color = colorScheme.onBackground,
-                        modifier = Modifier.padding(start = 3.dp).testTag("descriptionText"))
+                        modifier = Modifier
+                            .padding(start = 3.dp)
+                            .testTag("descriptionText"))
                   },
                   singleLine = false)
             }
@@ -161,7 +179,9 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
             Spacer(modifier = Modifier.padding(6.dp))
 
             Column(
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp),
             ) {
               QuickFixTextFieldCustom(
                   value = location,
@@ -179,7 +199,9 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
                         "Location *",
                         style = MaterialTheme.typography.headlineSmall,
                         color = colorScheme.onBackground,
-                        modifier = Modifier.padding(start = 3.dp).testTag("locationText"))
+                        modifier = Modifier
+                            .padding(start = 3.dp)
+                            .testTag("locationText"))
                   })
             }
 
@@ -194,10 +216,11 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
                 textColor = colorScheme.onBackground,
                 textStyle = MaterialTheme.typography.titleMedium,
                 modifier =
-                    Modifier.width(360.dp)
-                        .height(42.dp)
-                        .testTag("availabilityButton")
-                        .graphicsLayer(alpha = 1f),
+                Modifier
+                    .width(360.dp)
+                    .height(42.dp)
+                    .testTag("availabilityButton")
+                    .graphicsLayer(alpha = 1f),
                 iconId = R.drawable.calendar,
                 iconContentDescription = "availability",
                 iconColor = colorScheme.onBackground)
@@ -207,21 +230,25 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
             QuickFixButtonWithIcon(
                 buttonText = "Upload pictures",
                 onClickAction = {
-                  // TODO: Apply the backend of the pictures
+                    showUploadImageSheet = true
                 },
                 buttonColor = colorScheme.surface,
                 textColor = colorScheme.onBackground,
                 textStyle = MaterialTheme.typography.titleMedium,
                 modifier =
-                    Modifier.width(360.dp)
-                        .height(90.dp)
-                        .testTag("picturesButton")
-                        .graphicsLayer(alpha = 1f),
+                Modifier
+                    .width(360.dp)
+                    .height(90.dp)
+                    .testTag("picturesButton")
+                    .graphicsLayer(alpha = 1f),
                 iconId = R.drawable.upload_image,
                 iconContentDescription = "upload_image",
                 iconColor = colorScheme.onBackground)
             Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).padding(start = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .padding(start = 8.dp),
             ) {
               Text(
                   text = "* Mandatory fields",
@@ -233,7 +260,9 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
                           colorScheme.error
                       else colorScheme.onSecondaryContainer,
                   style = MaterialTheme.typography.bodySmall,
-                  modifier = Modifier.padding(start = 9.dp).testTag("mandatoryText"))
+                  modifier = Modifier
+                      .padding(start = 9.dp)
+                      .testTag("mandatoryText"))
             }
 
             QuickFixButton(
@@ -245,10 +274,11 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
                 textColor = colorScheme.onPrimary,
                 textStyle = MaterialTheme.typography.titleMedium,
                 modifier =
-                    Modifier.width(360.dp)
-                        .height(55.dp)
-                        .testTag("announcementButton")
-                        .graphicsLayer(alpha = 1f),
+                Modifier
+                    .width(360.dp)
+                    .height(55.dp)
+                    .testTag("announcementButton")
+                    .graphicsLayer(alpha = 1f),
                 enabled =
                     !titleIsEmpty &&
                         categoryIsSelected &&
@@ -256,6 +286,19 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
                         !descriptionIsEmpty)
           }
         })
+      // Upload Image Sheet
+      QuickFixUploadImageSheet(
+          showModalBottomSheet = showUploadImageSheet,
+          onDismissRequest = { showUploadImageSheet = false },
+          onTakePhotoClick = {
+              // TODO: Handle take photo action
+              showUploadImageSheet = false
+          },
+          onChooseFromLibraryClick = {
+              // TODO: choose from library action
+              showUploadImageSheet = false
+          }
+      )
   }
 }
 
@@ -279,16 +322,16 @@ fun QuickFixButtonWithIcon(
       onClick = onClickAction,
       colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
       modifier =
-          modifier
-              .fillMaxWidth(0.8f)
-              .height(50.dp)
-              .graphicsLayer(alpha = buttonOpacity)
-              .shadow(
-                  elevation = 2.dp,
-                  shape = RoundedCornerShape(10.dp), // Match the shape with the text field
-                  clip = false // Ensure the shadow is not clipped
-                  )
-              .clip(RoundedCornerShape(10.dp)), // Apply clipping to match the text field
+      modifier
+          .fillMaxWidth(0.8f)
+          .height(50.dp)
+          .graphicsLayer(alpha = buttonOpacity)
+          .shadow(
+              elevation = 2.dp,
+              shape = RoundedCornerShape(10.dp), // Match the shape with the text field
+              clip = false // Ensure the shadow is not clipped
+          )
+          .clip(RoundedCornerShape(10.dp)), // Apply clipping to match the text field
       shape = RoundedCornerShape(12.dp),
       contentPadding = contentPadding,
       enabled = enabled) {
