@@ -121,7 +121,8 @@ fun QuickFixApp() {
                     navigationActions.navigateTo(selectedDestination)
                     Log.d("user", navigationActions.currentRoute())
                   },
-                  isUser = isUser // Pass the user type to determine the tabs
+                  isUser = isUser, // Pass the user type to determine the tabs
+                  navigationActions = navigationActions
                   )
             }
       }) { innerPadding ->

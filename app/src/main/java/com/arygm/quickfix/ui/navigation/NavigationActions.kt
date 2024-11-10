@@ -11,8 +11,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.utils.routeToScreen
 import com.arygm.quickfix.utils.screenToRoute
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 object Route {
   const val CALENDAR = "Calendar"
@@ -90,6 +94,10 @@ open class NavigationActions(
 ) {
   var currentScreen by mutableStateOf(Screen.WELCOME)
 
+  // Allows the synchronization between the navigationActions and the bottom bar
+  private val currentRoute_ = MutableStateFlow<String>(Route.HOME)
+  val currentRoute: StateFlow<String> = currentRoute_.asStateFlow()
+
   /**
    * Navigate to the specified [TopLevelDestination]
    *
@@ -106,6 +114,7 @@ open class NavigationActions(
         restoreState = true
       }
     }
+    currentRoute_.value = currentRoute()
   }
 
   /**
@@ -116,12 +125,14 @@ open class NavigationActions(
   open fun navigateTo(screen: String) {
     currentScreen = screen
     navController.navigate(screen)
+    currentRoute_.value = currentRoute()
   }
 
   /** Navigate back to the previous screen. */
   open fun goBack() {
     navController.popBackStack()
     currentScreen = routeToScreen(currentRoute())
+    currentRoute_.value = currentRoute()
   }
 
   /**
@@ -130,6 +141,6 @@ open class NavigationActions(
    * @return The current route
    */
   open fun currentRoute(): String {
-    return screenToRoute(navController.currentDestination?.route ?: "")
+    return navController.currentDestination?.route ?: ""
   }
 }
