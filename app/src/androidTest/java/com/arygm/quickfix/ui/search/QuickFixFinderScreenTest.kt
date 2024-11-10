@@ -5,13 +5,19 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.navigation.TopLevelDestinations
+import com.arygm.quickfix.ui.navigation.getBottomBarId
+import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 
 class QuickFixFinderScreenTest {
@@ -104,5 +110,22 @@ class QuickFixFinderScreenTest {
     val title = "Announce"
     composeTestRule.onNodeWithTag("tab$title").performClick()
     composeTestRule.onNodeWithTag("AnnouncementContent").assertIsDisplayed()
+  }
+
+  @Test
+  fun cancelButtonNavigatesToHomeAndUpdatesBottomBar() {
+    composeTestRule.setContent {
+      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser = true)
+    }
+
+    // Click the "Cancel" button
+    composeTestRule.onNodeWithText("Cancel").performClick()
+
+    // Verify that the navigation action was triggered to the home screen
+    verify(navigationActionsRoot).navigateTo(TopLevelDestinations.HOME)
+
+    // As the bottom bar get updated only if the currentRoute is updated check that it has the right
+    // value
+    assertEquals(1, getBottomBarId(Route.HOME, true))
   }
 }
