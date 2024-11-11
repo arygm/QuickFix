@@ -25,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
@@ -86,7 +85,7 @@ fun QuickFixApp() {
 
   val isUser = false // TODO: This variable needs to get its value after the authentication
   val screen by remember { navigationActionsRoot::currentScreen }
-  val screenInProfileNavHost by remember { profileNavigationActions::currentScreen }
+  var screenInProfileNavHost by remember { mutableStateOf<String?>(null) }
 
   // Make `bottomBarVisible` reactive to changes in `screen`
   val shouldShowBottomBar by remember {
@@ -98,8 +97,9 @@ fun QuickFixApp() {
           screen != Screen.REGISTER &&
           screen != Screen.RESET_PASSWORD &&
           screen != Screen.GOOGLE_INFO &&
-          screenInProfileNavHost != Screen.ACCOUNT_CONFIGURATION &&
-          screenInProfileNavHost != Screen.TO_WORKER
+          screenInProfileNavHost?.let {
+            it != Screen.ACCOUNT_CONFIGURATION && it != Screen.TO_WORKER
+          } ?: true
     }
   }
 
@@ -189,9 +189,9 @@ fun QuickFixApp() {
                     accountViewModel,
                     loggedInAccountViewModel,
                     workerViewModel,
-                    profileNavController,
-                    profileNavigationActions,
-                    navigationActionsRoot)
+                    navigationActionsRoot) { currentScreen ->
+                      screenInProfileNavHost = currentScreen
+                    }
               }
             }
       }
@@ -211,11 +211,16 @@ fun ProfileNavHost(
     accountViewModel: AccountViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
     workerViewModel: ProfileViewModel,
-    profileNavController: NavHostController,
-    profileNavigationActions: NavigationActions,
     navigationActionsRoot: NavigationActions,
+    onScreenChange: (String) -> Unit
 ) {
 
+  val profileNavController = rememberNavController()
+  val profileNavigationActions = remember { NavigationActions(profileNavController) }
+
+  LaunchedEffect(profileNavigationActions.currentScreen) {
+    onScreenChange(profileNavigationActions.currentScreen)
+  }
   NavHost(navController = profileNavController, startDestination = Screen.PROFILE) {
     composable(Screen.PROFILE) {
       ProfileScreen(

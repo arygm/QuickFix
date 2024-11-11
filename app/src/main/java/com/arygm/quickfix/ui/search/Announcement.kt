@@ -40,6 +40,7 @@ import androidx.compose.ui.zIndex
 import com.arygm.quickfix.R
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
+import com.arygm.quickfix.ui.elements.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.navigation.NavigationActions
 
 @Composable
@@ -54,6 +55,9 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
   var categoryIsSelected by remember { mutableStateOf(true) } // TODO: add the different categories
   var locationIsSelected by remember { mutableStateOf(true) } // TODO: add the implemented location
   var descriptionIsEmpty by remember { mutableStateOf(true) }
+
+  // State to control the visibility of the image upload sheet
+  var showUploadImageSheet by remember { mutableStateOf(false) }
 
   BoxWithConstraints {
     val widthRatio = maxWidth / 411
@@ -206,9 +210,7 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
 
             QuickFixButtonWithIcon(
                 buttonText = "Upload pictures",
-                onClickAction = {
-                  // TODO: Apply the backend of the pictures
-                },
+                onClickAction = { showUploadImageSheet = true },
                 buttonColor = colorScheme.surface,
                 textColor = colorScheme.onBackground,
                 textStyle = MaterialTheme.typography.titleMedium,
@@ -255,6 +257,18 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
                         locationIsSelected &&
                         !descriptionIsEmpty)
           }
+        })
+    // Upload Image Sheet
+    QuickFixUploadImageSheet(
+        showModalBottomSheet = showUploadImageSheet,
+        onDismissRequest = { showUploadImageSheet = false },
+        onTakePhotoClick = {
+          // TODO: Handle take photo action
+          showUploadImageSheet = false
+        },
+        onChooseFromLibraryClick = {
+          // TODO: choose from library action
+          showUploadImageSheet = false
         })
   }
 }
