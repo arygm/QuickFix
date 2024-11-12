@@ -38,3 +38,5 @@ upload-keystore.jks
 
 # MacOS
 **/.DS_Store
+
+data_loader_service_account_key.json
