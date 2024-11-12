@@ -5,5 +5,5 @@ class Chat (
     val chatId: String,
     val workeruid: String,
     val useruid: String,
-    val messages: List<Message>
+    val messages: List<Message> = emptyList()
 )
