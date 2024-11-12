@@ -19,7 +19,7 @@ class ChatRepositoryFirestore(private val db: FirebaseFirestore) : ChatRepositor
         )
     }
 
-    override fun deleteChatById(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    override fun deleteChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
         performFirestoreOperation(
             chats.document(chat.chatId).delete(),
             onSuccess,
@@ -62,24 +62,6 @@ class ChatRepositoryFirestore(private val db: FirebaseFirestore) : ChatRepositor
             onSuccess,
             onFailure
         )
-    }
-
-    override fun getMessages(
-        chat: Chat,
-        onSuccess: (List<Message>) -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        FirebaseFirestore.getInstance().collection("chats").document(chat.chatId)
-            .collection("messages")
-            .orderBy("timestamp")
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val messages = snapshot.documents.mapNotNull { doc ->
-                    doc.toObject(Message::class.java)
-                }
-                onSuccess(messages)
-            }
-            .addOnFailureListener { exception -> onFailure(exception) }
     }
 
     override fun deleteMessage(
