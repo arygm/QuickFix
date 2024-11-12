@@ -2,7 +2,6 @@ package com.arygm.quickfix.model.account
 
 import android.util.Log
 import com.arygm.quickfix.utils.performFirestoreOperation
-import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
