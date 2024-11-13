@@ -35,11 +35,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.R
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -79,22 +76,6 @@ val listOfButtons =
             text = "Price Range",
         ),
     )
-
-class MockNavigationActions(navController: NavHostController) : NavigationActions(navController) {
-  override fun goBack() {
-    // Mock implementation
-  }
-}
-
-@Composable
-@Preview(showBackground = true)
-fun PreviewSearchWorkerResult() {
-  val navController = rememberNavController()
-  val mockNavigationActions = MockNavigationActions(navController)
-  SearchWorkerResult(navigationActions = mockNavigationActions)
-}
-
-val list = listOf("Button 1", "Button 2", "Button 3", "Button 4", "Button 5")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

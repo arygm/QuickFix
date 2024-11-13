@@ -15,10 +15,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arygm.quickfix.R
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.theme.poppinsFontFamily
 import com.arygm.quickfix.ui.theme.poppinsTypography
@@ -134,18 +132,4 @@ fun SearchWorkerProfileResult(
                   }
             }
       }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewSearchWorkerProfileResult() {
-  SearchWorkerProfileResult(
-      profileImage = R.drawable.placeholder_worker,
-      name = "Moha Abbes",
-      category = "Exterior Painter",
-      rating = 4.0f,
-      reviewCount = 160,
-      location = "Rennens",
-      price = "42",
-      onBookClick = { /* Handle book click in preview */})
 }

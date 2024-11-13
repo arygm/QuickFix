@@ -2,24 +2,29 @@ package com.arygm.quickfix.ui.search
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.arygm.quickfix.ui.navigation.NavigationActions
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 
 @RunWith(AndroidJUnit4::class)
 class SearchWorkerResultScreenTest {
 
+  private lateinit var navigationActions: NavigationActions
+
   @get:Rule val composeTestRule = createComposeRule()
+
+  @Before
+  fun setup() {
+    navigationActions = mock(NavigationActions::class.java)
+    composeTestRule.setContent { SearchWorkerResult(navigationActions = navigationActions) }
+  }
 
   @Test
   fun testTopAppBarIsDisplayed() {
-    composeTestRule.setContent {
-      val navController = rememberNavController()
-      val mockNavigationActions = MockNavigationActions(navController)
-      SearchWorkerResult(navigationActions = mockNavigationActions)
-    }
 
     composeTestRule.onNodeWithContentDescription("Back").assertExists().assertIsDisplayed()
 
@@ -28,12 +33,6 @@ class SearchWorkerResultScreenTest {
 
   @Test
   fun testTitleAndDescriptionAreDisplayed() {
-    composeTestRule.setContent {
-      val navController = rememberNavController()
-      val mockNavigationActions = MockNavigationActions(navController)
-      SearchWorkerResult(navigationActions = mockNavigationActions)
-    }
-
     composeTestRule.onNodeWithText("Sample Title").assertExists().assertIsDisplayed()
 
     composeTestRule
@@ -44,12 +43,6 @@ class SearchWorkerResultScreenTest {
 
   @Test
   fun testFilterButtonsAreDisplayed() {
-    composeTestRule.setContent {
-      val navController = rememberNavController()
-      val mockNavigationActions = MockNavigationActions(navController)
-      SearchWorkerResult(navigationActions = mockNavigationActions)
-    }
-
     // Target the LazyRow with the test tag "filter_buttons_row"
     val filterButtonsRow = composeTestRule.onNodeWithTag("filter_buttons_row")
 
@@ -68,12 +61,6 @@ class SearchWorkerResultScreenTest {
 
   @Test
   fun testProfileResultsAreDisplayed() {
-    composeTestRule.setContent {
-      val navController = rememberNavController()
-      val mockNavigationActions = MockNavigationActions(navController)
-      SearchWorkerResult(navigationActions = mockNavigationActions)
-    }
-
     // Target the LazyColumn with the test tag "worker_profiles_list"
     val workerProfilesList = composeTestRule.onNodeWithTag("worker_profiles_list")
 
