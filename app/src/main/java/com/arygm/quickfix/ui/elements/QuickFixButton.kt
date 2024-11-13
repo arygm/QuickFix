@@ -1,6 +1,5 @@
 package com.arygm.quickfix.ui.elements
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,14 +12,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -35,9 +31,6 @@ fun QuickFixButton(
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    height: Dp = 50.dp,
-    leadingIcon: ImageVector? = null,
-    trailingIcon: ImageVector? = null
 ) {
   Button(
       onClick = onClickAction,
@@ -45,7 +38,7 @@ fun QuickFixButton(
       modifier =
           modifier
               .fillMaxWidth(0.8f)
-              .height(height)
+              .height(50.dp)
               .padding(bottom = 8.dp)
               .graphicsLayer(alpha = buttonOpacity)
               .testTag("quickfixButton"),
@@ -55,21 +48,8 @@ fun QuickFixButton(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = horizontalArrangement,
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-          leadingIcon?.let {
-            Image(
-                imageVector = it,
-                contentDescription = "leading_icon",
-                modifier = Modifier.padding(end = 8.dp))
-          }
           Text(text = buttonText, style = textStyle, color = textColor)
-          trailingIcon?.let {
-            Image(
-                imageVector = it,
-                contentDescription = "trailing_icon",
-                modifier = Modifier.padding(start = 8.dp))
-          }
         }
       }
 }
