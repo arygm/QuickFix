@@ -60,14 +60,14 @@ fun QuickFixButton(
           leadingIcon?.let {
             Image(
                 imageVector = it,
-                contentDescription = null,
+                contentDescription = "leading_icon",
                 modifier = Modifier.padding(end = 8.dp))
           }
           Text(text = buttonText, style = textStyle, color = textColor)
           trailingIcon?.let {
             Image(
                 imageVector = it,
-                contentDescription = null,
+                contentDescription = "trailing_icon",
                 modifier = Modifier.padding(start = 8.dp))
           }
         }

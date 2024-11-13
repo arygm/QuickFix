@@ -1,11 +1,14 @@
 package com.arygm.quickfix.ui.elements
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import org.junit.Before
@@ -103,5 +106,54 @@ class QuickFixButtonTest {
 
     // Check if the button is enabled
     composeTestRule.onNodeWithTag("quickfixButton").assertIsEnabled()
+  }
+
+  @Test
+  fun quickFixButtonDisplaysLeadingIcon() {
+    composeTestRule.setContent {
+      QuickFixButton(
+          buttonText = buttonText,
+          onClickAction = onClickAction,
+          buttonColor = buttonColor,
+          textColor = textColor,
+          leadingIcon = Icons.Default.Star)
+    }
+
+    // Check that the leading icon is displayed
+    composeTestRule.onNodeWithContentDescription("leading_icon").assertExists().assertIsDisplayed()
+  }
+
+  @Test
+  fun quickFixButtonDisplaysTrailingIcon() {
+    composeTestRule.setContent {
+      QuickFixButton(
+          buttonText = buttonText,
+          onClickAction = onClickAction,
+          buttonColor = buttonColor,
+          textColor = textColor,
+          trailingIcon = Icons.Default.Star // Use a sample icon
+          )
+    }
+
+    // Check that the trailing icon is displayed
+    composeTestRule.onNodeWithContentDescription("trailing_icon").assertExists().assertIsDisplayed()
+  }
+
+  @Test
+  fun quickFixButtonDisplaysBothLeadingAndTrailingIcons() {
+    composeTestRule.setContent {
+      QuickFixButton(
+          buttonText = buttonText,
+          onClickAction = onClickAction,
+          buttonColor = buttonColor,
+          textColor = textColor,
+          leadingIcon = Icons.Default.Star,
+          trailingIcon = Icons.Default.Star)
+    }
+
+    // Check that both icons are displayed
+    composeTestRule.onNodeWithContentDescription("leading_icon").assertExists().assertIsDisplayed()
+
+    composeTestRule.onNodeWithContentDescription("trailing_icon").assertExists().assertIsDisplayed()
   }
 }

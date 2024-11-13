@@ -25,6 +25,7 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @Composable
 fun SearchWorkerProfileResult(
+    modifier: Modifier = Modifier,
     profileImage: Int,
     name: String,
     category: String,
@@ -36,7 +37,7 @@ fun SearchWorkerProfileResult(
 ) {
   Card(
       shape = RoundedCornerShape(8.dp),
-      modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 10.dp),
+      modifier = modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 10.dp),
       elevation = CardDefaults.cardElevation(10.dp),
       colors = CardDefaults.cardColors().copy(containerColor = colorScheme.surface)) {
         Row(
@@ -44,7 +45,7 @@ fun SearchWorkerProfileResult(
             verticalAlignment = Alignment.CenterVertically) {
               Image(
                   painter = painterResource(id = profileImage),
-                  contentDescription = null,
+                  contentDescription = "Profile image of $name, $category",
                   modifier = Modifier.clip(RoundedCornerShape(8.dp)).size(100.dp).aspectRatio(1f),
                   contentScale = ContentScale.FillBounds)
 

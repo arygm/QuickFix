@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -148,7 +149,8 @@ fun SearchWorkerResult(navigationActions: NavigationActions) {
                       Modifier.fillMaxWidth()
                           .padding(top = 20.dp, bottom = 10.dp)
                           .padding(horizontal = 10.dp)
-                          .wrapContentHeight(),
+                          .wrapContentHeight()
+                          .testTag("filter_buttons_row"),
                   verticalAlignment = Alignment.CenterVertically,
               ) {
                 items(1) {
@@ -171,23 +173,25 @@ fun SearchWorkerResult(navigationActions: NavigationActions) {
                   Spacer(modifier = Modifier.width(10.dp))
                 }
 
-                items(5) {
+                items(listOfButtons.size) { index ->
                   QuickFixButton(
-                      buttonText = listOfButtons[it].text,
-                      onClickAction = listOfButtons[it].onClick,
+                      buttonText = listOfButtons[index].text,
+                      onClickAction = listOfButtons[index].onClick,
                       buttonColor = colorScheme.surface,
                       textColor = colorScheme.onBackground,
                       textStyle = poppinsTypography.labelSmall.copy(fontWeight = FontWeight.Medium),
                       height = 40.dp,
-                      leadingIcon = listOfButtons[it].leadingIcon,
-                      trailingIcon = listOfButtons[it].trailingIcon,
-                      contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp))
+                      leadingIcon = listOfButtons[index].leadingIcon,
+                      trailingIcon = listOfButtons[index].trailingIcon,
+                      contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
+                      modifier = Modifier.testTag("filter_button_${listOfButtons[index].text}"))
                   Spacer(modifier = Modifier.width(10.dp))
                 }
               }
-              LazyColumn(modifier = Modifier.fillMaxWidth()) {
+              LazyColumn(modifier = Modifier.fillMaxWidth().testTag("worker_profiles_list")) {
                 items(10) {
                   SearchWorkerProfileResult(
+                      modifier = Modifier.testTag("worker_profile_result$it"),
                       profileImage = R.drawable.placeholder_worker,
                       name = "Moha Abbes",
                       category = "Exterior Painter",
@@ -196,7 +200,7 @@ fun SearchWorkerResult(navigationActions: NavigationActions) {
                       location = "Rennens",
                       price = "42",
                       onBookClick = { /* Handle book click in preview */})
-                  Spacer(modifier = Modifier.height(5.dp))
+                  Spacer(modifier = Modifier.height(3.dp))
                 }
               }
             }
