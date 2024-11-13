@@ -14,6 +14,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Carpenter
+import androidx.compose.material.icons.outlined.CleaningServices
+import androidx.compose.material.icons.outlined.ElectricalServices
+import androidx.compose.material.icons.outlined.Handyman
+import androidx.compose.material.icons.outlined.ImagesearchRoller
+import androidx.compose.material.icons.outlined.LocalShipping
+import androidx.compose.material.icons.outlined.NaturePeople
+import androidx.compose.material.icons.outlined.Plumbing
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
@@ -25,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -33,17 +42,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.model.categories.WorkerCategory
 import com.arygm.quickfix.model.categories.painting.PaintingCategory
+import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.theme.poppinsFontFamily
 
 @Composable
 fun ExpandableCategoryItem(
-    item: WorkerCategory,
+    item: Category,
     isExpanded: Boolean,
     backgroundColor: Color = colorScheme.surface,
     onExpandedChange: (Boolean) -> Unit,
 ) {
-  val subCategories = remember { PaintingCategory.entries.toList() }
+  val subCategories = remember { item.subcategories }
   val interactionSource = remember { MutableInteractionSource() }
   val rotationAngle by animateFloatAsState(targetValue = if (isExpanded) 180f else 0f, label = "")
 
@@ -62,18 +72,20 @@ fun ExpandableCategoryItem(
                     .background(backgroundColor),
             verticalAlignment = Alignment.CenterVertically) {
               // Icon
-              Icon(
-                  imageVector = item.icon,
-                  contentDescription = null,
-                  tint = colorScheme.primary,
-                  modifier = Modifier.testTag("categoryIcon"))
+            nameToIcon(item.name)?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    tint = colorScheme.primary,
+                    modifier = Modifier.testTag("categoryIcon"))
+            }
 
               Spacer(modifier = Modifier.width(10.dp))
 
               // Text Column
               Column(modifier = Modifier.weight(7f)) {
                 Text(
-                    text = item.displayName,
+                    text = item.name,
                     color = colorScheme.onBackground,
                     fontWeight = FontWeight.SemiBold,
                     fontFamily = poppinsFontFamily,
@@ -109,9 +121,9 @@ fun ExpandableCategoryItem(
                                     Modifier.weight(10f)
                                         .clickable {}
                                         .semantics {
-                                          testTag = "${C.Tag.subCategoryName}_${it.displayName}"
+                                          testTag = "${C.Tag.subCategoryName}_${it.name}"
                                         },
-                                text = it.displayName,
+                                text = it.name,
                                 color = colorScheme.onSecondary,
                                 fontWeight = FontWeight.Medium,
                                 fontFamily = poppinsFontFamily,
@@ -124,7 +136,7 @@ fun ExpandableCategoryItem(
                                     Modifier.weight(1f)
                                         .clickable {}
                                         .semantics {
-                                          testTag = "${C.Tag.enterSubCateIcon}_${it.displayName}"
+                                          testTag = "${C.Tag.enterSubCateIcon}_${it.name}"
                                         })
                             Spacer(modifier = Modifier.height(10.dp))
                           }
@@ -133,3 +145,19 @@ fun ExpandableCategoryItem(
             }
       }
 }
+
+
+private fun nameToIcon(displayName: String?): ImageVector? {
+        return when (displayName) {
+            "Painting" -> Icons.Outlined.ImagesearchRoller
+            "Plumbing" -> Icons.Outlined.Plumbing
+            "Gardening" -> Icons.Outlined.NaturePeople
+            "Electrical Work" -> Icons.Outlined.ElectricalServices
+            "Handyman Services" -> Icons.Outlined.Handyman
+            "Cleaning Services" -> Icons.Outlined.CleaningServices
+            "Carpentry" -> Icons.Outlined.Carpenter
+            "Moving Services" -> Icons.Outlined.LocalShipping
+            else -> null
+        }
+    }
+

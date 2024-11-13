@@ -33,6 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.DashboardScreen
 import com.arygm.quickfix.ui.account.AccountConfigurationScreen
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
@@ -78,6 +79,7 @@ fun QuickFixApp() {
   val loggedInAccountViewModel: LoggedInAccountViewModel =
       viewModel(factory = LoggedInAccountViewModel.Factory)
   val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
+    val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
 
   val isUser = false // TODO: This variable needs to get its value after the authentication
   val screen by remember { navigationActions::currentScreen }
@@ -164,7 +166,7 @@ fun QuickFixApp() {
 
               composable(Route.HOME) { HomeNavHost(innerPadding, isUser) }
 
-              composable(Route.SEARCH) { SearchNavHost(innerPadding, isUser) }
+              composable(Route.SEARCH) { SearchNavHost(innerPadding, isUser, searchViewModel) }
 
               composable(Route.DASHBOARD) { DashBoardNavHost(innerPadding, isUser) }
 
@@ -225,10 +227,10 @@ fun DashBoardNavHost(innerPadding: PaddingValues, isUser: Boolean) {
 }
 
 @Composable
-fun SearchNavHost(innerPadding: PaddingValues, isUser: Boolean) {
+fun SearchNavHost(innerPadding: PaddingValues, isUser: Boolean, searchViewModel: SearchViewModel) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
   NavHost(navController = searchNavController, startDestination = Screen.SEARCH) {
-    composable(Screen.SEARCH) { SearchOnBoarding(navigationActions, isUser) }
+    composable(Screen.SEARCH) { SearchOnBoarding(navigationActions, searchViewModel, isUser) }
   }
 }
