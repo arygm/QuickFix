@@ -9,7 +9,6 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -30,12 +29,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.DashboardScreen
-import com.arygm.quickfix.ui.SearchScreen
+import com.arygm.quickfix.ui.account.AccountConfigurationScreen
+import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
+import com.arygm.quickfix.ui.authentication.ResetPasswordScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
@@ -43,8 +45,8 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.profile.BusinessScreen
-import com.arygm.quickfix.ui.profile.ProfileConfigurationScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
+import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import kotlinx.coroutines.delay
 
@@ -67,17 +69,24 @@ class MainActivity : ComponentActivity() {
 fun QuickFixApp() {
 
   val rootNavController = rememberNavController()
-  val navigationActions = remember { NavigationActions(rootNavController) }
+  val navigationActionsRoot = remember { NavigationActions(rootNavController) }
 
   val userViewModel: ProfileViewModel =
       viewModel(key = "userViewModel", factory = ProfileViewModel.UserFactory)
-
   val workerViewModel: ProfileViewModel =
       viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
-  val loggedInProfileViewModel: LoggedInProfileViewModel = viewModel()
+  val loggedInAccountViewModel: LoggedInAccountViewModel =
+      viewModel(factory = LoggedInAccountViewModel.Factory)
+  val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
+
+  // Initialized here because needed for the bottom bar
+  val profileNavController = rememberNavController()
+  val profileNavigationActions = remember { NavigationActions(profileNavController) }
 
   val isUser = false // TODO: This variable needs to get its value after the authentication
-  val screen by remember { navigationActions::currentScreen }
+  val screen by remember { navigationActionsRoot::currentScreen }
+  var screenInProfileNavHost by remember { mutableStateOf<String?>(null) }
+
   // Make `bottomBarVisible` reactive to changes in `screen`
   val shouldShowBottomBar by remember {
     derivedStateOf {
@@ -86,8 +95,11 @@ fun QuickFixApp() {
           screen != Screen.INFO &&
           screen != Screen.PASSWORD &&
           screen != Screen.REGISTER &&
-          // screen != Screen.ACCOUNT_CONFIGURATION &&
-          screen != Screen.TO_WORKER
+          screen != Screen.RESET_PASSWORD &&
+          screen != Screen.GOOGLE_INFO &&
+          screenInProfileNavHost?.let {
+            it != Screen.ACCOUNT_CONFIGURATION && it != Screen.TO_WORKER
+          } ?: true
     }
   }
 
@@ -114,11 +126,11 @@ fun QuickFixApp() {
               BottomNavigationMenu(
                   onTabSelect = { selectedDestination ->
                     // Use this block to navigate based on the selected tab
-                    navigationActions.navigateTo(selectedDestination)
-                    Log.d("user", navigationActions.currentRoute())
+                    navigationActionsRoot.navigateTo(selectedDestination)
+                    Log.d("user", navigationActionsRoot.currentRoute())
                   },
-                  isUser = isUser // Pass the user type to determine the tabs
-                  )
+                  isUser = isUser, // Pass the user type to determine the tabs
+                  navigationActions = navigationActionsRoot)
             }
       }) { innerPadding ->
         NavHost(
@@ -138,94 +150,114 @@ fun QuickFixApp() {
                   route = Route.WELCOME,
               ) {
                 composable(Screen.WELCOME) {
-                  WelcomeScreen(navigationActions, userViewModel, loggedInProfileViewModel)
+                  WelcomeScreen(
+                      navigationActionsRoot,
+                      accountViewModel,
+                      loggedInAccountViewModel,
+                      userViewModel)
                 }
                 composable(Screen.LOGIN) {
-                  LogInScreen(navigationActions, userViewModel, loggedInProfileViewModel)
+                  LogInScreen(navigationActionsRoot, accountViewModel, loggedInAccountViewModel)
                 }
                 composable(Screen.REGISTER) {
-                  RegisterScreen(navigationActions, userViewModel, loggedInProfileViewModel)
+                  RegisterScreen(
+                      navigationActionsRoot,
+                      accountViewModel,
+                      loggedInAccountViewModel,
+                      userViewModel)
+                }
+                composable(Screen.GOOGLE_INFO) {
+                  GoogleInfoScreen(
+                      navigationActionsRoot,
+                      loggedInAccountViewModel,
+                      accountViewModel,
+                      userViewModel)
+                }
+                composable(Screen.RESET_PASSWORD) {
+                  ResetPasswordScreen(navigationActionsRoot, accountViewModel)
                 }
               }
 
-              composable(Route.HOME) { HomeNavHost(innerPadding, isUser) }
+              composable(Route.HOME) { HomeNavHost(isUser) }
 
-              composable(Route.SEARCH) { SearchNavHost(innerPadding, isUser) }
+              composable(Route.SEARCH) { SearchNavHost(isUser, navigationActionsRoot) }
 
-              composable(Route.DASHBOARD) { DashBoardNavHost(innerPadding, isUser) }
+              composable(Route.DASHBOARD) { DashBoardNavHost(isUser) }
 
               composable(Route.PROFILE) {
                 ProfileNavHost(
-                    innerPadding, isUser, userViewModel, workerViewModel, loggedInProfileViewModel)
+                    accountViewModel,
+                    loggedInAccountViewModel,
+                    workerViewModel,
+                    navigationActionsRoot) { currentScreen ->
+                      screenInProfileNavHost = currentScreen
+                    }
               }
             }
       }
 }
 
 @Composable
-fun HomeNavHost(innerPadding: PaddingValues, isUser: Boolean) {
+fun HomeNavHost(isUser: Boolean) {
   val homeNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(homeNavController) }
-  NavHost(
-      navController = homeNavController,
-      startDestination = Screen.HOME,
-      modifier = Modifier.padding(innerPadding),
-  ) {
+  NavHost(navController = homeNavController, startDestination = Screen.HOME) {
     composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
   }
 }
 
 @Composable
 fun ProfileNavHost(
-    innerPadding: PaddingValues,
-    isUser: Boolean,
-    userViewModel: ProfileViewModel,
+    accountViewModel: AccountViewModel,
+    loggedInAccountViewModel: LoggedInAccountViewModel,
     workerViewModel: ProfileViewModel,
-    loggedInProfileViewModel: LoggedInProfileViewModel
+    navigationActionsRoot: NavigationActions,
+    onScreenChange: (String) -> Unit
 ) {
+
   val profileNavController = rememberNavController()
-  val navigationActions = remember { NavigationActions(profileNavController) }
-  NavHost(
-      navController = profileNavController,
-      startDestination = Screen.PROFILE,
-      modifier = Modifier.padding(innerPadding),
-  ) {
+  val profileNavigationActions = remember { NavigationActions(profileNavController) }
+
+  LaunchedEffect(profileNavigationActions.currentScreen) {
+    onScreenChange(profileNavigationActions.currentScreen)
+  }
+  NavHost(navController = profileNavController, startDestination = Screen.PROFILE) {
     composable(Screen.PROFILE) {
       ProfileScreen(
-          navigationActions, isUser, userViewModel, workerViewModel, loggedInProfileViewModel)
+          profileNavigationActions,
+          loggedInAccountViewModel = loggedInAccountViewModel,
+          navigationActionsRoot)
     }
     composable(Screen.ACCOUNT_CONFIGURATION) {
-      ProfileConfigurationScreen(
-          navigationActions, isUser, userViewModel, workerViewModel, loggedInProfileViewModel)
+      AccountConfigurationScreen(
+          profileNavigationActions, accountViewModel, loggedInAccountViewModel)
     }
     composable(Screen.TO_WORKER) {
-      BusinessScreen(navigationActions, userViewModel, workerViewModel, loggedInProfileViewModel)
+      BusinessScreen(
+          profileNavigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
     }
   }
 }
 
 @Composable
-fun DashBoardNavHost(innerPadding: PaddingValues, isUser: Boolean) {
+fun DashBoardNavHost(isUser: Boolean) {
   val dashboardNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(dashboardNavController) }
-  NavHost(
-      navController = dashboardNavController,
-      startDestination = Screen.DASHBOARD,
-      modifier = Modifier.padding(innerPadding),
-  ) {
+  NavHost(navController = dashboardNavController, startDestination = Screen.DASHBOARD) {
     composable(Screen.DASHBOARD) { DashboardScreen(navigationActions, isUser) }
   }
 }
 
 @Composable
-fun SearchNavHost(innerPadding: PaddingValues, isUser: Boolean) {
+fun SearchNavHost(isUser: Boolean, navigationActionsRoot: NavigationActions) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
   NavHost(
       navController = searchNavController,
       startDestination = Screen.SEARCH,
-      modifier = Modifier.padding(innerPadding),
   ) {
-    composable(Screen.SEARCH) { SearchScreen(navigationActions, isUser) }
+    composable(Screen.SEARCH) {
+      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser)
+    }
   }
 }

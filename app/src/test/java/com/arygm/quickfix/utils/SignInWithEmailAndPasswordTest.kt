@@ -2,23 +2,20 @@ package com.arygm.quickfix.utils
 
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
-import com.arygm.quickfix.model.profile.Profile
-import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.account.Account
+import com.arygm.quickfix.model.account.AccountRepositoryFirestore
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.GeoPoint
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,27 +23,28 @@ import org.mockito.Mock
 import org.mockito.MockedStatic
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
 class SignInWithEmailAndPasswordTest {
+
   private lateinit var firebaseAuth: FirebaseAuth
 
   @Mock private lateinit var firebaseUser: FirebaseUser
 
   @Mock private lateinit var authResult: AuthResult
 
-  @Mock private lateinit var profileRepository: UserProfileRepositoryFirestore
+  @Mock private lateinit var accountRepository: AccountRepositoryFirestore
 
-  private lateinit var loggedInProfileViewModel: LoggedInProfileViewModel
+  @Mock private lateinit var userProfileRepo: UserProfileRepositoryFirestore
 
-  private lateinit var profileViewModel: ProfileViewModel
+  @Mock private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
+
+  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
+
+  private lateinit var accountViewModel: AccountViewModel
 
   private lateinit var firebaseAuthMockedStatic: MockedStatic<FirebaseAuth>
 
@@ -68,9 +66,9 @@ class SignInWithEmailAndPasswordTest {
         .`when`<FirebaseAuth> { FirebaseAuth.getInstance() }
         .thenReturn(firebaseAuth)
 
-    // Initialize profileViewModel with the mocked repository
-    profileViewModel = ProfileViewModel(profileRepository)
-    loggedInProfileViewModel = LoggedInProfileViewModel()
+    // Initialize accountViewModel with the mocked repository
+    accountViewModel = AccountViewModel(accountRepository)
+    loggedInAccountViewModel = LoggedInAccountViewModel(userProfileRepo, workerProfileRepo)
 
     // Mock FirebaseAuth.getInstance().currentUser
     whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
@@ -82,20 +80,20 @@ class SignInWithEmailAndPasswordTest {
   }
 
   @Test
-  fun testSignInSuccessAndProfileFetchSuccess() {
+  fun testSignInSuccessAndAccountFetchSuccess() {
     // Prepare test data
     val email = "john.doe@example.com"
     val password = "password123"
     val uid = "testUid"
 
-    val profile =
-        UserProfile(
+    val account =
+        Account(
             uid = uid,
             firstName = "John",
             lastName = "Doe",
             email = email,
             birthDate = Timestamp.now(),
-            location = GeoPoint(0.0, 0.0))
+            isWorker = false)
 
     // Mock FirebaseAuth behavior
     val signInTaskCompletionSource = TaskCompletionSource<AuthResult>()
@@ -105,10 +103,10 @@ class SignInWithEmailAndPasswordTest {
     whenever(firebaseUser.uid).thenReturn(uid)
     whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
 
-    // Mock profileRepository.getProfileById to return the profile
-    whenever(profileRepository.getProfileById(eq(uid), any(), any())).thenAnswer { invocation ->
-      val onSuccess = invocation.getArgument<(Profile?) -> Unit>(1)
-      onSuccess(profile)
+    // Mock accountRepository.getAccountById to return the account
+    whenever(accountRepository.getAccountById(eq(uid), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<(Account?) -> Unit>(1)
+      onSuccess(account)
       null
     }
 
@@ -117,11 +115,11 @@ class SignInWithEmailAndPasswordTest {
     var resultValue: Boolean? = null
 
     // Invoke the function under test
-    signInWithEmailAndFetchProfile(
+    signInWithEmailAndFetchAccount(
         email = email,
         password = password,
-        userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -137,11 +135,11 @@ class SignInWithEmailAndPasswordTest {
     assertTrue(onResultCalled)
     assertTrue(resultValue == true)
 
-    // Verify that the profile was fetched
-    verify(profileRepository).getProfileById(eq(uid), any(), any())
+    // Verify that the account was fetched
+    verify(accountRepository).getAccountById(eq(uid), any(), any())
 
-    // Verify that the loggedInProfile was set
-    assertEquals(profile, loggedInProfileViewModel.loggedInProfile.value)
+    // Verify that the loggedInAccount was set
+    assertEquals(account, loggedInAccountViewModel.loggedInAccount.value)
   }
 
   @Test
@@ -161,11 +159,11 @@ class SignInWithEmailAndPasswordTest {
     var resultValue: Boolean? = null
 
     // Invoke the function under test
-    signInWithEmailAndFetchProfile(
+    signInWithEmailAndFetchAccount(
         email = email,
         password = password,
-        userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -181,12 +179,12 @@ class SignInWithEmailAndPasswordTest {
     assertTrue(onResultCalled)
     assertFalse(resultValue == true)
 
-    // Verify that fetchUserProfile was never called
-    verify(profileRepository, never()).getProfileById(any(), any(), any())
+    // Verify that getAccountById was never called
+    verify(accountRepository, never()).getAccountById(any(), any(), any())
   }
 
   @Test
-  fun testSignInSuccessButFetchProfileReturnsNull() {
+  fun testSignInSuccessButFetchAccountReturnsNull() {
     // Prepare test data
     val email = "john.doe@example.com"
     val password = "password123"
@@ -200,9 +198,9 @@ class SignInWithEmailAndPasswordTest {
     whenever(firebaseUser.uid).thenReturn(uid)
     whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
 
-    // Mock profileRepository.getProfileById to return null
-    whenever(profileRepository.getProfileById(eq(uid), any(), any())).thenAnswer { invocation ->
-      val onSuccess = invocation.getArgument<(Profile?) -> Unit>(1)
+    // Mock accountRepository.getAccountById to return null
+    whenever(accountRepository.getAccountById(eq(uid), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<(Account?) -> Unit>(1)
       onSuccess(null)
       null
     }
@@ -212,11 +210,11 @@ class SignInWithEmailAndPasswordTest {
     var resultValue: Boolean? = null
 
     // Invoke the function under test
-    signInWithEmailAndFetchProfile(
+    signInWithEmailAndFetchAccount(
         email = email,
         password = password,
-        userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -232,8 +230,8 @@ class SignInWithEmailAndPasswordTest {
     assertTrue(onResultCalled)
     assertFalse(resultValue == true)
 
-    // Verify that loggedInProfile was not set
-    assertNull(loggedInProfileViewModel.loggedInProfile.value)
+    // Verify that loggedInAccount was not set
+    assertNull(loggedInAccountViewModel.loggedInAccount.value)
   }
 
   @Test
@@ -255,11 +253,11 @@ class SignInWithEmailAndPasswordTest {
     var resultValue: Boolean? = null
 
     // Invoke the function under test
-    signInWithEmailAndFetchProfile(
+    signInWithEmailAndFetchAccount(
         email = email,
         password = password,
-        userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -275,17 +273,17 @@ class SignInWithEmailAndPasswordTest {
     assertTrue(onResultCalled)
     assertFalse(resultValue == true)
 
-    // Verify that fetchUserProfile was not called
-    verify(profileRepository, never()).getProfileById(any(), any(), any())
+    // Verify that getAccountById was not called
+    verify(accountRepository, never()).getAccountById(any(), any(), any())
   }
 
   @Test
-  fun testFetchUserProfileFails() {
+  fun testFetchUserAccountFails() {
     // Prepare test data
     val email = "john.doe@example.com"
     val password = "password123"
     val uid = "testUid"
-    val exception = Exception("Profile fetch failed")
+    val exception = Exception("Account fetch failed")
 
     // Mock FirebaseAuth behavior
     val signInTaskCompletionSource = TaskCompletionSource<AuthResult>()
@@ -295,8 +293,8 @@ class SignInWithEmailAndPasswordTest {
     whenever(firebaseUser.uid).thenReturn(uid)
     whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
 
-    // Mock profileRepository.getProfileById to call onFailure
-    whenever(profileRepository.getProfileById(eq(uid), any(), any())).thenAnswer { invocation ->
+    // Mock accountRepository.getAccountById to call onFailure
+    whenever(accountRepository.getAccountById(eq(uid), any(), any())).thenAnswer { invocation ->
       val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
       onFailure(exception)
       null
@@ -307,11 +305,11 @@ class SignInWithEmailAndPasswordTest {
     var resultValue: Boolean? = null
 
     // Invoke the function under test
-    signInWithEmailAndFetchProfile(
+    signInWithEmailAndFetchAccount(
         email = email,
         password = password,
-        userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -327,8 +325,8 @@ class SignInWithEmailAndPasswordTest {
     assertTrue(onResultCalled)
     assertFalse(resultValue == true)
 
-    // Verify that loggedInProfile was not set
-    assertNull(loggedInProfileViewModel.loggedInProfile.value)
+    // Verify that loggedInAccount was not set
+    assertNull(loggedInAccountViewModel.loggedInAccount.value)
   }
 
   @Test
@@ -348,11 +346,11 @@ class SignInWithEmailAndPasswordTest {
     var resultValue: Boolean? = null
 
     // Invoke the function under test
-    signInWithEmailAndFetchProfile(
+    signInWithEmailAndFetchAccount(
         email = email,
         password = password,
-        userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -368,8 +366,8 @@ class SignInWithEmailAndPasswordTest {
     assertTrue(onResultCalled)
     assertFalse(resultValue == true)
 
-    // Verify that fetchUserProfile was never called
-    verify(profileRepository, never()).getProfileById(any(), any(), any())
+    // Verify that getAccountById was never called
+    verify(accountRepository, never()).getAccountById(any(), any(), any())
   }
 
   @Test
@@ -389,11 +387,11 @@ class SignInWithEmailAndPasswordTest {
     var resultValue: Boolean? = null
 
     // Invoke the function under test
-    signInWithEmailAndFetchProfile(
+    signInWithEmailAndFetchAccount(
         email = email,
         password = password,
-        userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -409,8 +407,8 @@ class SignInWithEmailAndPasswordTest {
     assertTrue(onResultCalled)
     assertFalse(resultValue == true)
 
-    // Verify that fetchUserProfile was never called
-    verify(profileRepository, never()).getProfileById(any(), any(), any())
+    // Verify that getAccountById was never called
+    verify(accountRepository, never()).getAccountById(any(), any(), any())
   }
 
   @Test
@@ -430,11 +428,11 @@ class SignInWithEmailAndPasswordTest {
     var resultValue: Boolean? = null
 
     // Invoke the function under test
-    signInWithEmailAndFetchProfile(
+    signInWithEmailAndFetchAccount(
         email = email,
         password = password,
-        userViewModel = profileViewModel,
-        loggedInProfileViewModel = loggedInProfileViewModel,
+        accountViewModel = accountViewModel,
+        loggedInAccountViewModel = loggedInAccountViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -450,7 +448,7 @@ class SignInWithEmailAndPasswordTest {
     assertTrue(onResultCalled)
     assertFalse(resultValue == true)
 
-    // Verify that fetchUserProfile was never called
-    verify(profileRepository, never()).getProfileById(any(), any(), any())
+    // Verify that getAccountById was never called
+    verify(accountRepository, never()).getAccountById(any(), any(), any())
   }
 }

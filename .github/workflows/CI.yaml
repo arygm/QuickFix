@@ -1,6 +1,5 @@
 name: QuickFix CI - Test Runner
 
-# Run the workflow when commits are pushed on main or when a PR is modified
 on:
   push:
     branches:
@@ -20,7 +19,7 @@ jobs:
     env:
       app_name: QuickFixDebug
       FIREBASE_PROJECT_ID: quickfix-1fd34  # Replace with your actual Firebase project ID
-      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}  # Add this line
+      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
     defaults:
       run:
@@ -35,10 +34,10 @@ jobs:
           fetch-depth: 0
 
       # Remove current Gradle cache
-      - name: Remove current gradle cache
+      - name: Remove current Gradle cache
         run: rm -rf ~/.gradle
 
-      - name: Enable KVM group perms
+      - name: Enable KVM group permissions
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
@@ -50,16 +49,11 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      # Setup Node.js and install Firebase CLI
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
+      # Install Firebase CLI using the curl method
       - name: Install Firebase CLI
-        run: npm install -g firebase-tools
+        run: curl -sL https://firebase.tools | bash
 
-      - name: Retrieve gradle cache
+      - name: Retrieve Gradle cache
         uses: actions/cache@v3
         with:
           path: |
@@ -86,7 +80,7 @@ jobs:
       - name: Assemble
         run: ./gradlew assembleDebug lint --parallel --build-cache
 
-      - name: Run tests
+      - name: Run unit tests
         run: ./gradlew check --parallel --build-cache
 
       - name: Run instrumentation tests
@@ -101,6 +95,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 1080x1920
           disable-animations: true
           script: |
+            set -ex
             adb logcat -c                             # Clear logs
             touch app/emulator.log                    # Create log file
             chmod 777 app/emulator.log                # Allow writing to log file
@@ -109,7 +104,8 @@ jobs:
             # Verify Firebase CLI installation
             firebase --version
 
-            firebase emulators:exec --debug --inspect-functions --project $FIREBASE_PROJECT_ID --import=./end2end-data --only firestore,auth './gradlew connectedCheck --parallel --build-cache'
+            ./gradlew connectedCheckWithEmulators --parallel --build-cache
+
       - name: Upload Failing Test Report Log
         if: failure()
         uses: actions/upload-artifact@v4
@@ -127,7 +123,7 @@ jobs:
           name: Coverage report
           path: app/build/reports/jacoco/jacocoTestReport
 
-      - name: Upload report to Sonar cloud
+      - name: Upload report to SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

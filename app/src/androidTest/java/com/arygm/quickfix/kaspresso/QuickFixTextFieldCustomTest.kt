@@ -5,6 +5,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -28,6 +31,7 @@ class QuickFixTextFieldCustomTest : TestCase() {
 
   @Test
   fun testQuickFixTextFieldCustom() = run {
+    val text = mutableStateOf("")
     // Step 1: Set up the content to test
     composeTestRule.setContent {
       QuickFixTextFieldCustom(
@@ -51,8 +55,8 @@ class QuickFixTextFieldCustomTest : TestCase() {
           moveContentTop = 0.dp,
           sizeIconGroup = 30.dp,
           spaceBetweenLeadIconText = 0.dp,
-          onValueChange = {},
-          value = "",
+          onValueChange = { newText -> text.value = newText },
+          value = text.value,
           onClick = true)
     }
     step("Test UI elements are displayed when text is empty") {

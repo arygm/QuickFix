@@ -31,25 +31,26 @@ import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.R
-import com.arygm.quickfix.model.profile.LoggedInProfileViewModel
+import com.arygm.quickfix.model.account.Account
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.location.Location
 import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import com.google.firebase.firestore.GeoPoint
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BusinessScreen(
     navigationActions: NavigationActions,
-    userViewModel: ProfileViewModel,
+    accountViewModel: AccountViewModel,
     workerViewModel: ProfileViewModel,
-    loggedInProfileViewModel: LoggedInProfileViewModel
+    loggedInAccountViewModel: LoggedInAccountViewModel
 ) {
   val context = LocalContext.current
-  val loggedInProfile by loggedInProfileViewModel.loggedInProfile.collectAsState()
+  val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
   var errorMessage by remember { mutableStateOf("") }
 
   // Variables d'état locales pour les détails de l'entreprise
@@ -131,7 +132,7 @@ fun BusinessScreen(
                           Spacer(modifier = Modifier.width(65.dp))
 
                           val displayName =
-                              capitalizeName(loggedInProfile?.firstName, loggedInProfile?.lastName)
+                              capitalizeName(loggedInAccount?.firstName, loggedInAccount?.lastName)
 
                           Text(
                               text = displayName,
@@ -291,20 +292,19 @@ fun BusinessScreen(
                           hourlyRateValue != 0.0 &&
                           location.isNotBlank()) {
 
-                        loggedInProfile?.let { profile ->
-                          userViewModel.updateProfile(
-                              profile =
-                                  UserProfile(
-                                      uid = profile.uid,
-                                      firstName = profile.firstName,
-                                      lastName = profile.lastName,
-                                      birthDate = profile.birthDate,
-                                      email = profile.email,
-                                      location = profile.location,
+                        loggedInAccount?.let { account ->
+                          accountViewModel.updateAccount(
+                              account =
+                                  Account(
+                                      uid = account.uid,
+                                      firstName = account.firstName,
+                                      lastName = account.lastName,
+                                      birthDate = account.birthDate,
+                                      email = account.email,
                                       isWorker = true),
                               onSuccess = {
-                                userViewModel.fetchUserProfile(profile.uid) { profile ->
-                                  loggedInProfileViewModel.setLoggedInProfile(profile!!)
+                                accountViewModel.fetchUserAccount(account.uid) { account ->
+                                  loggedInAccountViewModel.setLoggedInAccount(account!!)
                                 }
                               },
                               onFailure = {
@@ -315,14 +315,12 @@ fun BusinessScreen(
                           workerViewModel.addProfile(
                               profile =
                                   WorkerProfile(
-                                      uid = profile.uid,
-                                      firstName = profile.firstName,
-                                      lastName = profile.lastName,
-                                      birthDate = profile.birthDate,
-                                      email = profile.email,
-                                      location = GeoPoint(0.0, 0.0),
+                                      uid = account.uid,
+                                      location = Location(0.0, 0.0, "default"),
                                       description = description,
-                                      fieldOfWork = occupation,
+                                      fieldOfWork =
+                                          occupation, // we will have to rework the UI to let the
+                                      // user choose the category
                                       hourlyRate = hourlyRateValue),
                               onSuccess = {
                                 Toast.makeText(

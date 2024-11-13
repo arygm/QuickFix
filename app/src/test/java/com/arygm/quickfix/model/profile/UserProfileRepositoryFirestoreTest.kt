@@ -2,19 +2,16 @@ package com.arygm.quickfix.model.profile
 
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
+import com.arygm.quickfix.model.location.Location
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.GeoPoint
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.*
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.fail
 import org.junit.After
 import org.junit.Before
@@ -25,10 +22,7 @@ import org.mockito.MockedStatic
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.timeout
-import org.mockito.kotlin.verify
+import org.mockito.kotlin.*
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 
@@ -36,11 +30,17 @@ import org.robolectric.Shadows.shadowOf
 class UserProfileRepositoryFirestoreTest {
 
   @Mock private lateinit var mockFirestore: FirebaseFirestore
+
   @Mock private lateinit var mockDocumentReference: DocumentReference
+
   @Mock private lateinit var mockCollectionReference: CollectionReference
+
   @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
+
   @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
+
   @Mock private lateinit var mockProfileQuerySnapshot: QuerySnapshot
+
   @Mock private lateinit var mockQuery: Query
 
   private lateinit var mockFirebaseAuth: FirebaseAuth
@@ -48,14 +48,12 @@ class UserProfileRepositoryFirestoreTest {
 
   private lateinit var profileRepositoryFirestore: UserProfileRepositoryFirestore
 
-  private val profile =
-      UserProfile(
-          uid = "1",
-          firstName = "John",
-          lastName = "Doe",
-          email = "john.doe@example.com",
-          birthDate = Timestamp.now(),
-          location = GeoPoint(0.0, 0.0))
+  private val testLocations =
+      listOf(
+          Location(latitude = 0.0, longitude = 0.0, name = "Home"),
+          Location(latitude = 1.0, longitude = 1.0, name = "Work"))
+
+  private val userProfile = UserProfile(uid = "1", locations = testLocations)
 
   @Before
   fun setUp() {
@@ -75,45 +73,89 @@ class UserProfileRepositoryFirestoreTest {
 
     profileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore)
 
-    `when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
-    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
-    `when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
-    `when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
-    `when`(mockCollectionReference.whereEqualTo(any<String>(), any())).thenReturn(mockQuery)
+    whenever(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
+    whenever(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
+    whenever(mockCollectionReference.document()).thenReturn(mockDocumentReference)
+    whenever(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
+  }
 
-    `when`(mockQuery.whereEqualTo(any<String>(), any())).thenReturn(mockQuery)
-    `when`(mockQuery.whereLessThan(any<String>(), any())).thenReturn(mockQuery)
-    `when`(mockQuery.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
+  @After
+  fun tearDown() {
+    // Close the static mock
+    firebaseAuthMockedStatic.close()
   }
 
   @Test
   fun getProfiles_callsDocuments() {
-    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
-
-    `when`(mockProfileQuerySnapshot.documents).thenReturn(listOf())
+    whenever(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
+    whenever(mockProfileQuerySnapshot.documents).thenReturn(listOf())
 
     profileRepositoryFirestore.getProfiles(
         onSuccess = {}, onFailure = { fail("Failure callback should not be called") })
 
-    verify(timeout(100)) { (mockProfileQuerySnapshot).documents }
+    verify(mockCollectionReference).get()
   }
 
   @Test
   fun addProfile_shouldCallFirestoreCollection() {
-    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+    whenever(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
-    profileRepositoryFirestore.addProfile(profile, onSuccess = {}, onFailure = {})
+    profileRepositoryFirestore.addProfile(userProfile, onSuccess = {}, onFailure = {})
 
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).set(any())
+  }
+
+  @Test
+  fun addProfile_whenSuccess_callsOnSuccess() {
+    val taskCompletionSource = TaskCompletionSource<Void>()
+    whenever(mockDocumentReference.set(userProfile)).thenReturn(taskCompletionSource.task)
+
+    var callbackCalled = false
+
+    profileRepositoryFirestore.addProfile(
+        profile = userProfile,
+        onSuccess = { callbackCalled = true },
+        onFailure = { fail("Failure callback should not be called") })
+
+    taskCompletionSource.setResult(null)
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assert(callbackCalled)
+  }
+
+  @Test
+  fun addProfile_whenFailure_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<Void>()
+    whenever(mockDocumentReference.set(userProfile)).thenReturn(taskCompletionSource.task)
+
+    val exception = Exception("Test exception")
+    var callbackCalled = false
+    var returnedException: Exception? = null
+
+    profileRepositoryFirestore.addProfile(
+        profile = userProfile,
+        onSuccess = { fail("Success callback should not be called") },
+        onFailure = { e ->
+          callbackCalled = true
+          returnedException = e
+        })
+
+    taskCompletionSource.setException(exception)
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assert(callbackCalled)
+    assert(returnedException == exception)
   }
 
   @Test
   fun updateProfile_shouldCallFirestoreCollection() {
-    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+    whenever(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
-    profileRepositoryFirestore.updateProfile(profile, onSuccess = {}, onFailure = {})
+    profileRepositoryFirestore.updateProfile(userProfile, onSuccess = {}, onFailure = {})
 
     shadowOf(Looper.getMainLooper()).idle()
 
@@ -121,8 +163,52 @@ class UserProfileRepositoryFirestoreTest {
   }
 
   @Test
+  fun updateProfile_whenSuccess_callsOnSuccess() {
+    val taskCompletionSource = TaskCompletionSource<Void>()
+    whenever(mockDocumentReference.set(userProfile)).thenReturn(taskCompletionSource.task)
+
+    var callbackCalled = false
+
+    profileRepositoryFirestore.updateProfile(
+        profile = userProfile,
+        onSuccess = { callbackCalled = true },
+        onFailure = { fail("Failure callback should not be called") })
+
+    taskCompletionSource.setResult(null)
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assert(callbackCalled)
+  }
+
+  @Test
+  fun updateProfile_whenFailure_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<Void>()
+    whenever(mockDocumentReference.set(userProfile)).thenReturn(taskCompletionSource.task)
+
+    val exception = Exception("Test exception")
+    var callbackCalled = false
+    var returnedException: Exception? = null
+
+    profileRepositoryFirestore.updateProfile(
+        profile = userProfile,
+        onSuccess = { fail("Success callback should not be called") },
+        onFailure = { e ->
+          callbackCalled = true
+          returnedException = e
+        })
+
+    taskCompletionSource.setException(exception)
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assert(callbackCalled)
+    assert(returnedException == exception)
+  }
+
+  @Test
   fun deleteProfileById_shouldCallDocumentReferenceDelete() {
-    `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
+    whenever(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
 
     profileRepositoryFirestore.deleteProfileById("1", onSuccess = {}, onFailure = {})
 
@@ -132,31 +218,18 @@ class UserProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun profileExists_whenProfileExists_callsOnSuccessWithTrueAndProfile() {
-    val email = "john.doe@example.com"
-
-    `when`(mockQuery.get()).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
-    `when`(mockProfileQuerySnapshot.isEmpty).thenReturn(false)
-    `when`(mockProfileQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
-
-    `when`(mockDocumentSnapshot.id).thenReturn(profile.uid)
-    `when`(mockDocumentSnapshot.getString("firstName")).thenReturn(profile.firstName)
-    `when`(mockDocumentSnapshot.getString("lastName")).thenReturn(profile.lastName)
-    `when`(mockDocumentSnapshot.getString("email")).thenReturn(profile.email)
-    `when`(mockDocumentSnapshot.getTimestamp("birthDate")).thenReturn(profile.birthDate)
-    `when`(mockDocumentSnapshot.getGeoPoint("location")).thenReturn(profile.location)
-    `when`(mockDocumentSnapshot.getBoolean("isWorker")).thenReturn(profile.isWorker)
+  fun deleteProfileById_whenSuccess_callsOnSuccess() {
+    val taskCompletionSource = TaskCompletionSource<Void>()
+    whenever(mockDocumentReference.delete()).thenReturn(taskCompletionSource.task)
 
     var callbackCalled = false
 
-    profileRepositoryFirestore.profileExists(
-        email = email,
-        onSuccess = { (exists, foundProfile) ->
-          callbackCalled = true
-          assert(exists)
-          assert(foundProfile == profile)
-        },
+    profileRepositoryFirestore.deleteProfileById(
+        id = "1",
+        onSuccess = { callbackCalled = true },
         onFailure = { fail("Failure callback should not be called") })
+
+    taskCompletionSource.setResult(null)
 
     shadowOf(Looper.getMainLooper()).idle()
 
@@ -164,63 +237,44 @@ class UserProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun profileExists_whenProfileDoesNotExist_callsOnSuccessWithFalseAndNull() {
-    val email = "unknown@example.com"
+  fun deleteProfileById_whenFailure_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<Void>()
+    whenever(mockDocumentReference.delete()).thenReturn(taskCompletionSource.task)
 
-    `when`(mockQuery.get()).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
-    `when`(mockProfileQuerySnapshot.isEmpty).thenReturn(true)
-
-    var callbackCalled = false
-
-    profileRepositoryFirestore.profileExists(
-        email = email,
-        onSuccess = { (exists, foundProfile) ->
-          callbackCalled = true
-          assert(!exists)
-          assert(foundProfile == null)
-        },
-        onFailure = { fail("Failure callback should not be called") })
-
-    shadowOf(Looper.getMainLooper()).idle()
-
-    assert(callbackCalled)
-  }
-
-  @Test
-  fun profileExists_whenFailure_callsOnFailure() {
-    val email = "john.doe@example.com"
     val exception = Exception("Test exception")
+    var callbackCalled = false
+    var returnedException: Exception? = null
 
-    `when`(mockQuery.get()).thenReturn(Tasks.forException(exception))
-
-    var failureCallbackCalled = false
-
-    profileRepositoryFirestore.profileExists(
-        email = email,
+    profileRepositoryFirestore.deleteProfileById(
+        id = "1",
         onSuccess = { fail("Success callback should not be called") },
         onFailure = { e ->
-          failureCallbackCalled = true
-          assert(e == exception)
+          callbackCalled = true
+          returnedException = e
         })
+
+    taskCompletionSource.setException(exception)
 
     shadowOf(Looper.getMainLooper()).idle()
 
-    assert(failureCallbackCalled)
+    assert(callbackCalled)
+    assert(returnedException == exception)
   }
 
   @Test
   fun getProfileById_whenDocumentExists_callsOnSuccessWithProfile() {
     val uid = "1"
 
-    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
-    `when`(mockDocumentSnapshot.exists()).thenReturn(true)
-    `when`(mockDocumentSnapshot.id).thenReturn(profile.uid)
-    `when`(mockDocumentSnapshot.getString("firstName")).thenReturn(profile.firstName)
-    `when`(mockDocumentSnapshot.getString("lastName")).thenReturn(profile.lastName)
-    `when`(mockDocumentSnapshot.getString("email")).thenReturn(profile.email)
-    `when`(mockDocumentSnapshot.getTimestamp("birthDate")).thenReturn(profile.birthDate)
-    `when`(mockDocumentSnapshot.getGeoPoint("location")).thenReturn(profile.location)
-    `when`(mockDocumentSnapshot.getBoolean("isWorker")).thenReturn(profile.isWorker)
+    whenever(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    whenever(mockDocumentSnapshot.exists()).thenReturn(true)
+
+    // Mocking the data returned from Firestore
+    whenever(mockDocumentSnapshot.id).thenReturn(userProfile.uid)
+    whenever(mockDocumentSnapshot.get("locations"))
+        .thenReturn(
+            listOf(
+                mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "Home"),
+                mapOf("latitude" to 1.0, "longitude" to 1.0, "name" to "Work")))
 
     var callbackCalled = false
 
@@ -228,7 +282,7 @@ class UserProfileRepositoryFirestoreTest {
         uid = uid,
         onSuccess = { foundProfile ->
           callbackCalled = true
-          assert(foundProfile == profile)
+          assert(foundProfile == userProfile)
         },
         onFailure = { fail("Failure callback should not be called") })
 
@@ -241,8 +295,8 @@ class UserProfileRepositoryFirestoreTest {
   fun getProfileById_whenDocumentDoesNotExist_callsOnSuccessWithNull() {
     val uid = "nonexistent"
 
-    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
-    `when`(mockDocumentSnapshot.exists()).thenReturn(false)
+    whenever(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    whenever(mockDocumentSnapshot.exists()).thenReturn(false)
 
     var callbackCalled = false
 
@@ -264,7 +318,7 @@ class UserProfileRepositoryFirestoreTest {
     val uid = "1"
     val exception = Exception("Test exception")
 
-    `when`(mockDocumentReference.get()).thenReturn(Tasks.forException(exception))
+    whenever(mockDocumentReference.get()).thenReturn(Tasks.forException(exception))
 
     var failureCallbackCalled = false
 
@@ -281,88 +335,31 @@ class UserProfileRepositoryFirestoreTest {
     assert(failureCallbackCalled)
   }
 
-  @After
-  fun tearDown() {
-    // Close the static mock
-    firebaseAuthMockedStatic.close()
-  }
-
-  @Test
-  fun init_whenCurrentUserNotNull_callsOnSuccess() {
-    val authStateListenerCaptor = argumentCaptor<FirebaseAuth.AuthStateListener>()
-    val mockFirebaseUser = Mockito.mock(FirebaseUser::class.java)
-
-    Mockito.doNothing()
-        .`when`(mockFirebaseAuth)
-        .addAuthStateListener(authStateListenerCaptor.capture())
-    `when`(mockFirebaseAuth.currentUser).thenReturn(mockFirebaseUser)
-
-    var callbackCalled = false
-
-    profileRepositoryFirestore.init(onSuccess = { callbackCalled = true })
-
-    authStateListenerCaptor.firstValue.onAuthStateChanged(mockFirebaseAuth)
-
-    shadowOf(Looper.getMainLooper()).idle()
-
-    assert(callbackCalled)
-  }
-
-  @Test
-  fun init_whenCurrentUserIsNull_doesNotCallOnSuccess() {
-    val authStateListenerCaptor = argumentCaptor<FirebaseAuth.AuthStateListener>()
-
-    Mockito.doNothing()
-        .`when`(mockFirebaseAuth)
-        .addAuthStateListener(authStateListenerCaptor.capture())
-    `when`(mockFirebaseAuth.currentUser).thenReturn(null)
-
-    var callbackCalled = false
-
-    profileRepositoryFirestore.init(onSuccess = { callbackCalled = true })
-
-    authStateListenerCaptor.firstValue.onAuthStateChanged(mockFirebaseAuth)
-
-    shadowOf(Looper.getMainLooper()).idle()
-
-    assert(!callbackCalled)
-  }
-
   @Test
   fun getProfiles_whenSuccess_callsOnSuccessWithProfiles() {
     val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
+    whenever(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
 
     val document1 = Mockito.mock(DocumentSnapshot::class.java)
     val document2 = Mockito.mock(DocumentSnapshot::class.java)
 
-    val profile2 =
+    val userProfile2 =
         UserProfile(
-            uid = "2",
-            firstName = "Jane",
-            lastName = "Smith",
-            email = "jane.smith@example.com",
-            birthDate = Timestamp.now(),
-            location = GeoPoint(0.0, 0.0))
+            uid = "2", locations = listOf(Location(latitude = 2.0, longitude = 2.0, name = "Gym")))
 
     val documents = listOf(document1, document2)
-    `when`(mockProfileQuerySnapshot.documents).thenReturn(documents)
+    whenever(mockProfileQuerySnapshot.documents).thenReturn(documents)
 
-    `when`(document1.id).thenReturn(profile.uid)
-    `when`(document1.getString("firstName")).thenReturn(profile.firstName)
-    `when`(document1.getString("lastName")).thenReturn(profile.lastName)
-    `when`(document1.getString("email")).thenReturn(profile.email)
-    `when`(document1.getTimestamp("birthDate")).thenReturn(profile.birthDate)
-    `when`(document1.getGeoPoint("location")).thenReturn(profile.location)
-    `when`(document1.getBoolean("isWorker")).thenReturn(profile.isWorker)
+    whenever(document1.id).thenReturn(userProfile.uid)
+    whenever(document1.get("locations"))
+        .thenReturn(
+            listOf(
+                mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "Home"),
+                mapOf("latitude" to 1.0, "longitude" to 1.0, "name" to "Work")))
 
-    `when`(document2.id).thenReturn(profile2.uid)
-    `when`(document2.getString("firstName")).thenReturn(profile2.firstName)
-    `when`(document2.getString("lastName")).thenReturn(profile2.lastName)
-    `when`(document2.getString("email")).thenReturn(profile2.email)
-    `when`(document2.getTimestamp("birthDate")).thenReturn(profile2.birthDate)
-    `when`(document2.getGeoPoint("location")).thenReturn(profile2.location)
-    `when`(document2.getBoolean("isWorker")).thenReturn(profile2.isWorker)
+    whenever(document2.id).thenReturn(userProfile2.uid)
+    whenever(document2.get("locations"))
+        .thenReturn(listOf(mapOf("latitude" to 2.0, "longitude" to 2.0, "name" to "Gym")))
 
     var callbackCalled = false
     var returnedProfiles: List<Profile>? = null
@@ -381,14 +378,14 @@ class UserProfileRepositoryFirestoreTest {
     assert(callbackCalled)
     assert(returnedProfiles != null)
     assert(returnedProfiles!!.size == 2)
-    assert(returnedProfiles!![0] == profile)
-    assert(returnedProfiles!![1] == profile2)
+    assert(returnedProfiles!![0] == userProfile)
+    assert(returnedProfiles!![1] == userProfile2)
   }
 
   @Test
   fun getProfiles_whenFailure_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
+    whenever(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
 
     val exception = Exception("Test exception")
 
@@ -411,18 +408,18 @@ class UserProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun addProfile_whenSuccess_callsOnSuccess() {
-    val taskCompletionSource = TaskCompletionSource<Void>()
-    `when`(mockDocumentReference.set(profile)).thenReturn(taskCompletionSource.task)
+  fun init_whenCurrentUserNotNull_callsOnSuccess() {
+    val authStateListenerCaptor = argumentCaptor<FirebaseAuth.AuthStateListener>()
+    val mockFirebaseUser = Mockito.mock(FirebaseUser::class.java)
+
+    doNothing().whenever(mockFirebaseAuth).addAuthStateListener(authStateListenerCaptor.capture())
+    whenever(mockFirebaseAuth.currentUser).thenReturn(mockFirebaseUser)
 
     var callbackCalled = false
 
-    profileRepositoryFirestore.addProfile(
-        profile = profile,
-        onSuccess = { callbackCalled = true },
-        onFailure = { fail("Failure callback should not be called") })
+    profileRepositoryFirestore.init(onSuccess = { callbackCalled = true })
 
-    taskCompletionSource.setResult(null)
+    authStateListenerCaptor.firstValue.onAuthStateChanged(mockFirebaseAuth)
 
     shadowOf(Looper.getMainLooper()).idle()
 
@@ -430,84 +427,97 @@ class UserProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun addProfile_whenFailure_callsOnFailure() {
-    val taskCompletionSource = TaskCompletionSource<Void>()
-    `when`(mockDocumentReference.set(profile)).thenReturn(taskCompletionSource.task)
+  fun init_whenCurrentUserIsNull_doesNotCallOnSuccess() {
+    val authStateListenerCaptor = argumentCaptor<FirebaseAuth.AuthStateListener>()
 
-    val exception = Exception("Test exception")
+    doNothing().whenever(mockFirebaseAuth).addAuthStateListener(authStateListenerCaptor.capture())
+    whenever(mockFirebaseAuth.currentUser).thenReturn(null)
+
     var callbackCalled = false
-    var returnedException: Exception? = null
 
-    profileRepositoryFirestore.addProfile(
-        profile = profile,
-        onSuccess = { fail("Success callback should not be called") },
-        onFailure = { e ->
-          callbackCalled = true
-          returnedException = e
-        })
+    profileRepositoryFirestore.init(onSuccess = { callbackCalled = true })
 
-    taskCompletionSource.setException(exception)
+    authStateListenerCaptor.firstValue.onAuthStateChanged(mockFirebaseAuth)
 
     shadowOf(Looper.getMainLooper()).idle()
 
-    assert(callbackCalled)
-    assert(returnedException == exception)
+    assert(!callbackCalled)
   }
 
   @Test
-  fun documentToProfile_whenFieldsAreMissing_returnsNull() {
+  fun documentToUser_whenAllFieldsArePresent_returnsUserProfile() {
+    // Arrange
     val document = Mockito.mock(DocumentSnapshot::class.java)
-    `when`(document.id).thenReturn(profile.uid)
-    `when`(document.getString("lastName")).thenReturn(profile.lastName)
-    `when`(document.getString("email")).thenReturn(profile.email)
-    `when`(document.getTimestamp("birthDate")).thenReturn(profile.birthDate)
-    `when`(document.getGeoPoint("location")).thenReturn(profile.location)
-    `when`(document.getBoolean("isWorker")).thenReturn(profile.isWorker)
+    `when`(document.id).thenReturn(userProfile.uid)
+    `when`(document.get("locations"))
+        .thenReturn(
+            listOf(
+                mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "Home"),
+                mapOf("latitude" to 1.0, "longitude" to 1.0, "name" to "Work")))
 
-    val result = invokeDocumentToProfile(document)
+    // Act
+    val result = invokeDocumentToUser(document)
 
-    assert(result == null)
+    // Assert
+    assertNotNull(result)
+    assertEquals(userProfile, result)
   }
 
   @Test
-  fun documentToProfile_whenExceptionOccurs_returnsNull() {
+  fun documentToUser_whenLocationsAreMissing_returnsNull() {
+    // Arrange
     val document = Mockito.mock(DocumentSnapshot::class.java)
-    `when`(document.id).thenReturn(profile.uid)
-    `when`(document.getString("firstName")).thenThrow(RuntimeException("Test exception"))
-    `when`(document.getString("lastName")).thenReturn(profile.lastName)
-    `when`(document.getString("email")).thenReturn(profile.email)
-    `when`(document.getTimestamp("birthDate")).thenReturn(profile.birthDate)
-    `when`(document.getGeoPoint("location")).thenReturn(profile.location)
-    `when`(document.getBoolean("isWorker")).thenReturn(profile.isWorker)
+    `when`(document.id).thenReturn(userProfile.uid)
+    // "locations" field is missing
+    `when`(document.get("locations")).thenReturn(null)
 
-    val result = invokeDocumentToProfile(document)
+    // Act
+    val result = invokeDocumentToUser(document)
 
-    assert(result == null)
+    // Assert
+    assertNull(result)
   }
 
-  private fun invokeDocumentToProfile(document: DocumentSnapshot): Profile? {
+  @Test
+  fun documentToUser_whenLocationsHaveInvalidDataType_returnsNull() {
+    // Arrange
+    val document = Mockito.mock(DocumentSnapshot::class.java)
+    `when`(document.id).thenReturn(userProfile.uid)
+    // "locations" field has invalid data type (not a list of maps)
+    `when`(document.get("locations")).thenReturn("Invalid data type")
+
+    // Act
+    val result = invokeDocumentToUser(document)
+
+    // Assert
+    assertNull(result)
+  }
+
+  @Test
+  fun documentToUser_whenExceptionOccurs_returnsNull() {
+    // Arrange
+    val document = Mockito.mock(DocumentSnapshot::class.java)
+    `when`(document.id).thenReturn(userProfile.uid)
+    // Simulate an exception when accessing the "locations" field
+    `when`(document.get("locations")).thenThrow(RuntimeException("Test exception"))
+
+    // Act
+    val result = invokeDocumentToUser(document)
+
+    // Assert
+    assertNull(result)
+  }
+
+  // ----- Helper Method for Testing Private Method -----
+
+  /** Uses reflection to invoke the private `documentToUser` method. */
+  private fun invokeDocumentToUser(document: DocumentSnapshot): UserProfile? {
     val method =
         UserProfileRepositoryFirestore::class
             .java
             .getDeclaredMethod("documentToUser", DocumentSnapshot::class.java)
     method.isAccessible = true
-    return method.invoke(profileRepositoryFirestore, document) as Profile?
-  }
-
-  @Test
-  fun documentToProfile_whenInvalidDataType_returnsNull() {
-    val document = Mockito.mock(DocumentSnapshot::class.java)
-    `when`(document.id).thenReturn(profile.uid)
-    `when`(document.getString("firstName")).thenReturn(profile.firstName)
-    `when`(document.getString("lastName")).thenReturn(profile.lastName)
-    `when`(document.getString("email")).thenReturn(profile.email)
-    `when`(document.getTimestamp("birthDate")).thenReturn(null)
-    `when`(document.getGeoPoint("location")).thenReturn(profile.location)
-    `when`(document.getBoolean("isWorker")).thenReturn(profile.isWorker)
-
-    val result = invokeDocumentToProfile(document)
-
-    assert(result == null)
+    return method.invoke(profileRepositoryFirestore, document) as UserProfile?
   }
 
   //  @Test
