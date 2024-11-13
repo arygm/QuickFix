@@ -1,6 +1,6 @@
 package com.arygm.quickfix.model.profile
 
-import com.arygm.quickfix.model.Location.Location
+import com.arygm.quickfix.model.location.Location
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.`is`
