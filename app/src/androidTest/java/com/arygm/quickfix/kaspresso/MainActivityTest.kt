@@ -1,14 +1,12 @@
 package com.arygm.quickfix.kaspresso
 
+import android.os.Build
 import android.util.Log
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -18,12 +16,15 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToLog
-import androidx.compose.ui.unit.times
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.Until
 import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.kaspresso.screen.WelcomeScreen
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -31,11 +32,9 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.kaspersky.kaspresso.flakysafety.*
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen
 import org.junit.After
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -60,6 +59,16 @@ class MainActivityTest : TestCase() {
     navigationActions = Mockito.mock(NavigationActions::class.java)
   }
 
+  fun allowPermissionsIfNeeded() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+      // Wait up to 5 seconds for the dialog
+      if (device.wait(Until.hasObject(By.text("Only this time")), 5000)) {
+        device.findObject(By.text("Only this time")).click()
+      }
+    }
+  }
+
   @After
   fun tearDown() {
     FirebaseApp.clearInstancesForTest()
@@ -78,6 +87,13 @@ class MainActivityTest : TestCase() {
   @Test
   fun shouldNotBeAbleToReg() = run {
     step("Set up the WelcomeScreen and transit to the register") {
+      composeTestRule.activity
+
+      // Wait for the UI to settle
+      composeTestRule.waitForIdle()
+
+      // Attempt to grant permissions
+      allowPermissionsIfNeeded()
       // Retry the action until it works with a timeout of 10 seconds
       ComposeScreen.onComposeScreen<WelcomeScreen>(composeTestRule) {
         registerButton {
@@ -110,6 +126,13 @@ class MainActivityTest : TestCase() {
   @Test
   fun shouldBeAbleToLogin() = run {
     step("Set up the WelcomeScreen and transit to the register") {
+      composeTestRule.activity
+
+      // Wait for the UI to settle
+      composeTestRule.waitForIdle()
+
+      // Attempt to grant permissions
+      allowPermissionsIfNeeded()
       // Retry the action until it works with a timeout of 10 seconds
       ComposeScreen.onComposeScreen<WelcomeScreen>(composeTestRule) {
         loginButton {
