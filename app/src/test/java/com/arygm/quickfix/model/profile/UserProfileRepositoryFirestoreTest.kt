@@ -2,7 +2,7 @@ package com.arygm.quickfix.model.profile
 
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
-import com.arygm.quickfix.model.Location.Location
+import com.arygm.quickfix.model.locations.Location
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp

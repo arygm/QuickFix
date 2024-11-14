@@ -11,6 +11,11 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -24,18 +29,24 @@ import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 fun BottomNavigationMenu(
     onTabSelect: (TopLevelDestination) -> Unit,
     isUser: Boolean, // Boolean flag to determine the user type
+    navigationActions: NavigationActions
 ) {
 
   val colorScheme = colorScheme
+  val currentRoute by navigationActions.currentRoute.collectAsState()
 
   // Determine the tab list based on the user type
   val tabList: List<TopLevelDestination> =
       if (isUser) USER_TOP_LEVEL_DESTINATIONS else WORKER_TOP_LEVEL_DESTINATIONS
 
+  val bottomNavigation = remember { mutableStateOf<MeowBottomNavigation?>(null) }
+
   // Use AndroidView to integrate MeowBottomNavigation
   AndroidView(
       factory = { ctx ->
         MeowBottomNavigation(ctx).apply {
+          bottomNavigation.value = this
+
           // Add menu items using the tabList
           tabList.forEachIndexed { index, tab ->
             // Get the drawable resource from the ImageVector
@@ -65,10 +76,12 @@ fun BottomNavigationMenu(
           defaultIconColor =
               colorScheme.tertiaryContainer.toArgb() // Default icon color (unselected)
           selectedIconColor = colorScheme.surface.toArgb() // Selected icon color
+
           setOnShowListener { model ->
             // Handle item show event
             Log.d("MeowBottomNavigation", "Item shown: ${model.id}")
           }
+
           // Define actions on selecting a menu item
           setOnClickMenuListener { model ->
             val selectedTab = tabList.getOrNull(model.id - 1) // Find the corresponding tab
@@ -76,6 +89,7 @@ fun BottomNavigationMenu(
               onTabSelect(selectedTab)
             }
           }
+
           // Handle reselect event to avoid crash
           setOnReselectListener { model ->
             // Handle the event when the user clicks on the currently selected item
@@ -93,6 +107,11 @@ fun BottomNavigationMenu(
         }
       },
       modifier = Modifier.fillMaxWidth().testTag("BottomNavMenu"))
+
+  // LaunchedEffect allowing to update the bottom bar accordingly to navigationActions
+  LaunchedEffect(currentRoute) {
+    bottomNavigation.value?.show(getBottomBarId(currentRoute, isUser), true)
+  }
 }
 
 // Helper function to convert ImageVector to drawable resource ID

@@ -3,9 +3,9 @@ package com.arygm.quickfix.model.search
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.arygm.quickfix.model.Location.Location
 import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
+import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.google.firebase.Firebase

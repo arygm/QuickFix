@@ -18,12 +18,14 @@ class SearchOnBoardingTest {
   private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
   private lateinit var categoryRepo: CategoryRepositoryFirestore
   private lateinit var searchViewModel: SearchViewModel
+  private lateinit var navigationActionsRoot: NavigationActions
 
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setup() {
     navigationActions = mock(NavigationActions::class.java)
+    navigationActionsRoot = mock(NavigationActions::class.java)
     workerProfileRepo = mockk(relaxed = true)
     categoryRepo = mockk(relaxed = true)
     searchViewModel = SearchViewModel(workerProfileRepo, categoryRepo)
@@ -32,7 +34,11 @@ class SearchOnBoardingTest {
   @Test
   fun searchOnBoarding_displaysSearchInput() {
     composeTestRule.setContent {
-      SearchOnBoarding(navigationActions = navigationActions, searchViewModel, isUser = true)
+      SearchOnBoarding(
+          navigationActions = navigationActions,
+          navigationActionsRoot,
+          isUser = true,
+          searchViewModel)
     }
 
     // Check that the search input field is displayed
@@ -46,7 +52,11 @@ class SearchOnBoardingTest {
   @Test
   fun searchOnBoarding_clearsTextOnTrailingIconClick() {
     composeTestRule.setContent {
-      SearchOnBoarding(navigationActions = navigationActions, searchViewModel, isUser = true)
+      SearchOnBoarding(
+          navigationActions = navigationActions,
+          navigationActionsRoot,
+          isUser = true,
+          searchViewModel)
     }
 
     // Input text into the search field

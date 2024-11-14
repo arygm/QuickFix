@@ -44,8 +44,9 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 @Composable
 fun SearchOnBoarding(
     navigationActions: NavigationActions,
-    searchViewModel: SearchViewModel,
-    isUser: Boolean
+    navigationActionsRoot: NavigationActions,
+    isUser: Boolean,
+    searchViewModel: SearchViewModel
 ) {
   val categories = searchViewModel.categories.collectAsState().value
   Log.d("SearchOnBoarding", "Categories: $categories")
@@ -121,7 +122,7 @@ fun SearchOnBoarding(
                           buttonOpacity = 1f,
                           textStyle = poppinsTypography.labelSmall,
                           onClickAction = {
-                            navigationActions.navigateTo(TopLevelDestinations.HOME)
+                            navigationActionsRoot.navigateTo(TopLevelDestinations.HOME)
                           },
                           contentPadding = PaddingValues(0.dp),
                       )

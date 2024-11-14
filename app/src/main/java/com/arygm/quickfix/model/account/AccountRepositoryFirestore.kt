@@ -1,7 +1,7 @@
 package com.arygm.quickfix.model.account
 
 import android.util.Log
-import com.google.android.gms.tasks.Task
+import com.arygm.quickfix.utils.performFirestoreOperation
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -81,23 +81,6 @@ class AccountRepositoryFirestore(private val db: FirebaseFirestore) : AccountRep
           Log.e("AccountRepositoryFirestore", "Error checking if account exists", exception)
           onFailure(exception)
         }
-  }
-
-  private fun performFirestoreOperation(
-      task: Task<Void>,
-      onSuccess: () -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    task.addOnCompleteListener { result ->
-      if (result.isSuccessful) {
-        onSuccess()
-      } else {
-        result.exception?.let { e ->
-          Log.e("AccountRepositoryFirestore", "Error performing Firestore operation", e)
-          onFailure(e)
-        }
-      }
-    }
   }
 
   private fun documentToAccount(document: DocumentSnapshot): Account? {

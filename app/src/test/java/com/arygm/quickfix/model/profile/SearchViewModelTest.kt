@@ -1,7 +1,7 @@
 package com.arygm.quickfix.model.profile
 
-import com.arygm.quickfix.model.Location.Location
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
+import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.search.SearchViewModel
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
