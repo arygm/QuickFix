@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -52,6 +53,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.model.account.AccountViewModel
@@ -65,6 +67,7 @@ import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
+import com.arygm.quickfix.utils.ANIMATED_BOX_ROTATION
 import com.arygm.quickfix.utils.createAccountWithEmailAndPassword
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.isValidEmail
@@ -131,7 +134,7 @@ fun RegisterScreen(
 
   LaunchedEffect(Unit) { shrinkBox = true }
 
-  val focursManager = LocalFocusManager.current
+  val focusManager = LocalFocusManager.current
 
   val filledForm =
       firstName.isNotEmpty() &&
@@ -143,11 +146,13 @@ fun RegisterScreen(
           !noMatch &&
           repeatPassword.isNotEmpty() &&
           acceptTerms
-  Box(
+  BoxWithConstraints(
       modifier =
           Modifier.fillMaxSize().testTag("InfoBox").pointerInput(Unit) {
-            detectTapGestures(onTap = { focursManager.clearFocus() })
+            detectTapGestures(onTap = { focusManager.clearFocus() })
           }) {
+      val screenWidth = maxWidth
+        val screenHeight = maxHeight
         QuickFixAnimatedBox(boxOffsetX)
         Scaffold(
             modifier =
@@ -174,7 +179,7 @@ fun RegisterScreen(
                               contentDescription = null,
                               contentScale = ContentScale.Crop,
                               alignment = Alignment.TopStart,
-                              modifier = Modifier.fillMaxWidth().size(180.dp))
+                              modifier = Modifier.fillMaxWidth())
 
                           Box(modifier = Modifier.fillMaxSize()) {
                             Image(
@@ -205,19 +210,22 @@ fun RegisterScreen(
                                         RoundedCornerShape(
                                             12.dp)) // Ensure content is above TopAppBar
                         ) {
-                          Box(
-                              modifier =
-                                  Modifier.align(Alignment.BottomStart)
-                                      .size(180.dp, 180.dp)
-                                      .offset(x = (-150).dp, y = 64.dp)
-                                      .graphicsLayer(rotationZ = 57f)
-                                      .background(colorScheme.primary)
-                                      .testTag("BoxDecoration"))
-
+                        Box(
+                            modifier = Modifier
+                                .size(screenWidth * 0.5f) // Scale box size to be relative to screen size
+                                .align(Alignment.BottomStart)
+                                .offset(
+                                    x = -screenWidth * 0.4f, // Offset slightly left relative to screen width
+                                    y = screenHeight * 0.1f  // Offset slightly upward relative to screen height
+                                )
+                                .graphicsLayer(rotationZ = ANIMATED_BOX_ROTATION)
+                                .background(colorScheme.primary)
+                                .testTag("BoxDecoration")
+                        )
                           Column(
                               modifier =
                                   Modifier.align(Alignment.Center)
-                                      .padding(16.dp)
+                                      .padding(screenWidth * 0.05f)
                                       .zIndex(100f), // Ensure it's on top
                               horizontalAlignment = Alignment.CenterHorizontally,
                               verticalArrangement = Arrangement.Center) {
@@ -227,7 +235,7 @@ fun RegisterScreen(
                                     color = colorScheme.primary,
                                     modifier = Modifier.testTag("welcomeText"))
 
-                                Spacer(modifier = Modifier.padding(3.dp))
+                              Spacer(modifier = Modifier.height(screenHeight * 0.01f))
 
                                 Text(
                                     "Join QuickFix to connect with skilled workers!",
@@ -235,11 +243,11 @@ fun RegisterScreen(
                                     color = colorScheme.onSecondaryContainer,
                                     modifier = Modifier.testTag("welcomeTextBis"))
 
-                                Spacer(modifier = Modifier.padding(10.dp))
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
                                 Row(
                                     modifier =
-                                        Modifier.fillMaxWidth().height(55.dp).padding(start = 8.dp),
+                                        Modifier.fillMaxWidth().height(screenHeight * 0.07f).padding(start = screenWidth * 0.02f),
                                     horizontalArrangement = Arrangement.SpaceEvenly,
                                     verticalAlignment = Alignment.CenterVertically) {
                                       CustomTextField(
@@ -261,10 +269,10 @@ fun RegisterScreen(
                                           modifier = Modifier.testTag("lastNameInput"))
                                     }
 
-                                Spacer(modifier = Modifier.padding(6.dp))
+                              Spacer(modifier = Modifier.padding(screenHeight * 0.008f))
 
                                 Column(
-                                    modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
+                                    modifier = Modifier.fillMaxWidth().padding(start = screenWidth * 0.02f),
                                 ) {
                                   QuickFixTextFieldCustom(
                                       value = email,
@@ -286,9 +294,9 @@ fun RegisterScreen(
                                       isError = emailError,
                                       showError = emailError,
                                       errorText = "INVALID EMAIL",
-                                      moveContentHorizontal = 10.dp,
-                                      heightField = 42.dp,
-                                      widthField = 360.dp,
+                                      moveContentHorizontal = screenWidth * 0.02f,
+                                      heightField = screenHeight * 0.05f,
+                                      widthField = screenWidth * 0.85f,
                                       modifier = Modifier.testTag("emailInput"),
                                       showLabel = true,
                                       label = {
@@ -297,11 +305,11 @@ fun RegisterScreen(
                                             style = MaterialTheme.typography.headlineSmall,
                                             color = colorScheme.onBackground,
                                             modifier =
-                                                Modifier.padding(start = 3.dp).testTag("emailText"))
+                                                Modifier.padding(start = screenWidth * 0.01f).testTag("emailText"))
                                       })
                                 }
 
-                                Spacer(modifier = Modifier.padding(6.dp))
+                              Spacer(modifier = Modifier.padding(screenHeight * 0.008f))
 
                                 Column(
                                     modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
@@ -318,9 +326,9 @@ fun RegisterScreen(
                                       errorText = "INVALID DATE",
                                       isError = birthDateError,
                                       showError = birthDateError,
-                                      moveContentHorizontal = 10.dp,
-                                      heightField = 42.dp,
-                                      widthField = 360.dp,
+                                      moveContentHorizontal = screenWidth * 0.02f,
+                                      heightField = screenHeight * 0.05f,
+                                      widthField = screenWidth * 0.85f,
                                       shape = RoundedCornerShape(12.dp),
                                       modifier = Modifier.testTag("birthDateInput"),
                                       showLabel = true,
@@ -330,24 +338,24 @@ fun RegisterScreen(
                                             style = MaterialTheme.typography.headlineSmall,
                                             color = colorScheme.onBackground,
                                             modifier =
-                                                Modifier.padding(start = 3.dp)
+                                                Modifier.padding(screenWidth * 0.01f)
                                                     .testTag("birthDateText"))
                                       })
                                 }
 
-                                Spacer(modifier = Modifier.padding(6.dp))
+                              Spacer(modifier = Modifier.padding(screenHeight * 0.008f))
 
                                 Column(
-                                    modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
+                                    modifier = Modifier.fillMaxWidth().padding(start = screenWidth * 0.02f),
                                 ) {
                                   QuickFixTextFieldCustom(
                                       value = password,
                                       onValueChange = { password = it },
                                       placeHolderText = "Enter your password",
                                       placeHolderColor = colorScheme.onSecondaryContainer,
-                                      moveContentHorizontal = 10.dp,
-                                      heightField = 42.dp,
-                                      widthField = 360.dp,
+                                      moveContentHorizontal = screenWidth * 0.02f,
+                                      heightField = screenHeight * 0.05f,
+                                      widthField = screenWidth * 0.85f,
                                       shape = RoundedCornerShape(12.dp),
                                       trailingIcon = {
                                         val image =
@@ -375,20 +383,20 @@ fun RegisterScreen(
                                             style = MaterialTheme.typography.headlineSmall,
                                             color = colorScheme.onBackground,
                                             modifier =
-                                                Modifier.padding(start = 3.dp)
+                                                Modifier.padding(start = screenWidth * 0.01f)
                                                     .testTag("passwordText"))
                                       })
 
-                                  Spacer(modifier = Modifier.padding(6.dp))
+                                  Spacer(modifier = Modifier.padding(screenHeight * 0.008f))
 
                                   QuickFixTextFieldCustom(
                                       value = repeatPassword,
                                       onValueChange = { repeatPassword = it },
                                       placeHolderText = "Confirm password",
                                       placeHolderColor = colorScheme.onSecondaryContainer,
-                                      moveContentHorizontal = 10.dp,
-                                      heightField = 42.dp,
-                                      widthField = 360.dp,
+                                      moveContentHorizontal = screenWidth * 0.02f,
+                                      heightField = screenHeight * 0.05f,
+                                      widthField = screenWidth * 0.85f,
                                       shape = RoundedCornerShape(12.dp),
                                       trailingIcon = {
                                         val image =
@@ -413,16 +421,16 @@ fun RegisterScreen(
                                       modifier = Modifier.testTag("repeatPasswordInput"))
                                 }
 
-                                Spacer(modifier = Modifier.padding(3.dp))
+                                Spacer(modifier = Modifier.padding(screenHeight * 0.005f))
 
                                 Row(
                                     modifier =
                                         Modifier.fillMaxWidth()
-                                            .padding(horizontal = 8.dp)
+                                            .padding(horizontal = screenWidth * 0.02f)
                                             .testTag("passwordConditions"),
                                     horizontalArrangement = Arrangement.SpaceBetween) {
-                                      PasswordConditions(password, passwordConditions1)
-                                      PasswordConditions(password, passwordConditions2)
+                                      PasswordConditions(password, passwordConditions1, screenWidth, screenHeight)
+                                      PasswordConditions(password, passwordConditions2, screenWidth, screenHeight)
                                     }
 
                                 // Error message if passwords don't match
@@ -432,15 +440,15 @@ fun RegisterScreen(
                                       style = MaterialTheme.typography.bodySmall,
                                       color = colorScheme.error,
                                       modifier =
-                                          Modifier.padding(start = 3.dp).testTag("noMatchText"),
+                                          Modifier.padding(start = screenWidth * 0.02f).testTag("noMatchText"),
                                       textAlign = TextAlign.Start)
-                                  Spacer(modifier = Modifier.padding(8.dp))
+                                  Spacer(modifier = Modifier.padding(screenHeight * 0.005f))
                                 } else {
-                                  Spacer(modifier = Modifier.padding(12.dp))
+                                  Spacer(modifier = Modifier.padding(screenHeight * 0.01f))
                                 }
 
                                 QuickFixCheckBoxRow(
-                                    modifier = Modifier.padding(start = 6.dp),
+                                    modifier = Modifier.padding(start = screenWidth * 0.01f),
                                     checked = acceptTerms,
                                     onCheckedChange = { acceptTerms = it },
                                     label = "I'm at least 18 and agree to the following",
@@ -480,13 +488,13 @@ fun RegisterScreen(
                                     textColor = colorScheme.onPrimary,
                                     textStyle = MaterialTheme.typography.labelLarge,
                                     modifier =
-                                        Modifier.width(360.dp)
-                                            .height(55.dp)
+                                        Modifier.width(screenWidth * 0.85f)
+                                            .height(screenHeight * 0.07f)
                                             .testTag("registerButton")
                                             .graphicsLayer(alpha = 1f),
                                     enabled = filledForm && !emailError && !birthDateError)
 
-                                Spacer(modifier = Modifier.padding(4.dp))
+                                Spacer(modifier = Modifier.padding(screenHeight * 0.001f))
 
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -498,8 +506,8 @@ fun RegisterScreen(
                                       style = MaterialTheme.typography.headlineSmall,
                                       color = colorScheme.onSecondaryContainer,
                                       modifier =
-                                          Modifier.padding(bottom = 8.dp)
-                                              .requiredWidth(225.dp)
+                                          Modifier.padding(bottom = screenHeight * 0.01f)
+                                              .requiredWidth(screenWidth * 0.55f)
                                               .testTag("alreadyAccountText"),
                                       textAlign = TextAlign.End)
 
@@ -515,7 +523,7 @@ fun RegisterScreen(
                                       horizontalArrangement = Arrangement.Start,
                                       modifier = Modifier.testTag("clickableLoginButtonText"))
                                 }
-                                Spacer(modifier = Modifier.padding(bottom = 30.dp))
+                                Spacer(modifier = Modifier.padding(bottom = screenHeight * 0.02f))
                               }
                         }
                   }
@@ -524,8 +532,8 @@ fun RegisterScreen(
 }
 
 @Composable
-private fun PasswordConditions(password: String, listConditions: List<Pair<String, Boolean>>) {
-  Column(modifier = Modifier.padding(vertical = 8.dp)) {
+private fun PasswordConditions(password: String, listConditions: List<Pair<String, Boolean>>, screenWidth: Dp, screenHeight: Dp) {
+  Column(modifier = Modifier.padding(vertical = screenHeight * 0.005f)) {
     listConditions.forEach { (condition, met) ->
       Text(
           text = condition,
@@ -533,7 +541,7 @@ private fun PasswordConditions(password: String, listConditions: List<Pair<Strin
               if (met || password.isEmpty()) colorScheme.onSecondaryContainer
               else colorScheme.error,
           style = MaterialTheme.typography.bodySmall,
-          modifier = Modifier.padding(start = 3.dp))
+          modifier = Modifier.padding(start = screenWidth * 0.01f))
     }
   }
 }
