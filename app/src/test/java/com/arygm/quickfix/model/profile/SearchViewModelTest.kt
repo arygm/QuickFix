@@ -1,6 +1,8 @@
 package com.arygm.quickfix.model.profile
 
-import com.arygm.quickfix.model.location.Location
+import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
+import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.search.SearchViewModel
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
@@ -13,15 +15,17 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.anyOrNull
 
 class SearchViewModelTest {
-  private lateinit var viewModel: searchViewModel
+  private lateinit var viewModel: SearchViewModel
   private lateinit var mockRepository: WorkerProfileRepositoryFirestore
+  private lateinit var cateRepository: CategoryRepositoryFirestore
 
   @Before
   fun setUp() {
     // Mock the repository
     mockRepository = mock(WorkerProfileRepositoryFirestore::class.java)
+    cateRepository = mock(CategoryRepositoryFirestore::class.java)
     // Initialize the ViewModel with the mocked repository
-    viewModel = searchViewModel(mockRepository)
+    viewModel = SearchViewModel(mockRepository, cateRepository)
   }
 
   @Test
@@ -195,5 +199,26 @@ class SearchViewModelTest {
     val result = viewModel.workerProfiles.value
     assertEquals(1, result.size)
     assertEquals("worker_127", result[0].uid)
+  }
+
+  @Test
+  fun fetchCategoriesCallsOnFailure() {
+    // Arrange: Prepare an error message
+    val errorMessage = "Failed to fetch categories"
+
+    // Mock repository behavior for a failure response
+    doAnswer { invocation ->
+          val onFailure = invocation.arguments[1] as (Exception) -> Unit
+          onFailure(Exception(errorMessage)) // Simulate failure callback
+          null
+        }
+        .`when`(cateRepository)
+        .fetchCategories(anyOrNull(), anyOrNull())
+
+    // Act: Call ViewModel's function to fetch categories
+    viewModel.fetchCategories()
+
+    // Assert: Check that the ViewModel state is updated correctly on failure
+    assertTrue(viewModel.categories.value.isEmpty()) // The list should be empty
   }
 }

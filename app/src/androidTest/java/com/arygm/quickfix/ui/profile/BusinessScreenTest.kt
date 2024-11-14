@@ -6,7 +6,7 @@ import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
-import com.arygm.quickfix.model.location.Location
+import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.*
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.QuickFixTheme
