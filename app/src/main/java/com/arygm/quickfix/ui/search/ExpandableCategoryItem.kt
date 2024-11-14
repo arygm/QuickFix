@@ -41,7 +41,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.model.category.Category
+import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ressources.C
+import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.theme.poppinsFontFamily
 
 @Composable
@@ -50,6 +53,8 @@ fun ExpandableCategoryItem(
     isExpanded: Boolean,
     backgroundColor: Color = colorScheme.surface,
     onExpandedChange: (Boolean) -> Unit,
+    searchViewModel: SearchViewModel,
+    navigationActions: NavigationActions
 ) {
   val subCategories = remember { item.subcategories }
   val interactionSource = remember { MutableInteractionSource() }
@@ -117,9 +122,12 @@ fun ExpandableCategoryItem(
                             Text(
                                 modifier =
                                     Modifier.weight(10f)
-                                        .clickable {}
                                         .semantics {
                                           testTag = "${C.Tag.subCategoryName}_${it.name}"
+                                        }
+                                        .clickable {
+                                          searchViewModel.updateSearchQuery(it.name)
+                                          navigationActions.navigateTo(Screen.SEARCH_WORKER_RESULT)
                                         },
                                 text = it.name,
                                 color = colorScheme.onSecondary,

@@ -51,6 +51,7 @@ import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.profile.BusinessScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.search.QuickFixFinderScreen
+import com.arygm.quickfix.ui.search.SearchWorkerResult
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.utils.LocationHelper
 import kotlinx.coroutines.delay
@@ -224,7 +225,7 @@ fun QuickFixApp() {
               }
 
               composable(Route.SEARCH) {
-                SearchNavHost(isUser, navigationActionsRoot, searchViewModel)
+                SearchNavHost(isUser, navigationActionsRoot, searchViewModel, accountViewModel)
               }
 
               composable(Route.DASHBOARD) { DashBoardNavHost(isUser) }
@@ -313,7 +314,8 @@ fun DashBoardNavHost(isUser: Boolean) {
 fun SearchNavHost(
     isUser: Boolean,
     navigationActionsRoot: NavigationActions,
-    searchViewModel: SearchViewModel
+    searchViewModel: SearchViewModel,
+    accountViewModel: AccountViewModel
 ) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
@@ -323,6 +325,9 @@ fun SearchNavHost(
   ) {
     composable(Screen.SEARCH) {
       QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser, searchViewModel)
+    }
+    composable(Screen.SEARCH_WORKER_RESULT) {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
     }
   }
 }

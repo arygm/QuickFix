@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -27,11 +28,12 @@ fun SearchWorkerProfileResult(
     profileImage: Int,
     name: String,
     category: String,
-    rating: Float,
+    rating: Double,
     reviewCount: Int,
     location: String,
     price: String,
-    onBookClick: () -> Unit
+    onBookClick: () -> Unit,
+    distance: Int? = null
 ) {
   Card(
       shape = RoundedCornerShape(8.dp),
@@ -74,7 +76,7 @@ fun SearchWorkerProfileResult(
 
                   Text(
                       text = category,
-                      fontSize = 15.sp,
+                      fontSize = 12.sp,
                       fontWeight = FontWeight.SemiBold,
                       fontFamily = poppinsFontFamily,
                       color = colorScheme.onBackground)
@@ -93,7 +95,8 @@ fun SearchWorkerProfileResult(
                       fontSize = 19.sp,
                       fontWeight = FontWeight.Bold,
                       lineHeight = 20.sp,
-                      color = colorScheme.onBackground)
+                      color = colorScheme.onBackground,
+                      modifier = Modifier.testTag("price"))
                   Text(
                       text = "/Hour",
                       fontSize = 13.sp,
@@ -107,14 +110,20 @@ fun SearchWorkerProfileResult(
                   horizontalAlignment = Alignment.End,
                   verticalArrangement = Arrangement.SpaceBetween,
                   modifier = Modifier.weight(0.4f).height(100.dp).padding(end = 8.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                      Icon(
-                          imageVector = Icons.Default.LocationOn,
-                          contentDescription = "Location",
-                          tint = colorScheme.onSurface,
-                          modifier = Modifier.size(16.dp))
-                      Text(text = location, fontSize = 11.sp, color = Color.Gray)
+                    Column {
+                      Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "Location",
+                            tint = colorScheme.onSurface,
+                            modifier = Modifier.size(16.dp))
+                        Text(text = location, fontSize = 9.sp, color = Color.Gray)
+                      }
+                      distance?.let {
+                        Text(text = "$distance km away", fontSize = 9.sp, color = Color.Gray)
+                      }
                     }
+
                     Row(verticalAlignment = Alignment.Bottom) {
                       QuickFixButton(
                           onClickAction = onBookClick,

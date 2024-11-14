@@ -3,10 +3,11 @@ package com.arygm.quickfix.model.search
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.locations.Location
-import com.arygm.quickfix.model.profile.Profile
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -16,14 +17,18 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
-class SearchViewModel(
+open class SearchViewModel(
     private val workerProfileRepo: WorkerProfileRepositoryFirestore,
     private val categoryRepo: CategoryRepositoryFirestore
 ) : ViewModel() {
 
-  private val _workerProfiles = MutableStateFlow<List<Profile>>(emptyList())
-  val workerProfiles: StateFlow<List<Profile>> = _workerProfiles
+  private val _searchQuery = MutableStateFlow("")
+  val searchQuery: StateFlow<String> = _searchQuery
+
+  private val _workerProfiles = MutableStateFlow<List<WorkerProfile>>(emptyList())
+  val workerProfiles: StateFlow<List<WorkerProfile>> = _workerProfiles
 
   private val _errorMessage = MutableStateFlow<String?>(null)
   val errorMessage: StateFlow<String?> = _errorMessage
@@ -50,6 +55,21 @@ class SearchViewModel(
         }
   }
 
+  fun setSearchQuery(query: String) { // Used for test purposes
+    _searchQuery.value = query
+  }
+
+  fun setWorkerProfiles(workerProfiles: List<WorkerProfile>) { // Used for test purposes
+    _workerProfiles.value = workerProfiles
+  }
+
+  fun updateSearchQuery(query: String) {
+    viewModelScope.launch {
+      _searchQuery.value = query
+      filterWorkerProfiles(fieldOfWork = query)
+    }
+  }
+
   fun fetchCategories() {
     categoryRepo.fetchCategories(
         onSuccess = { categories -> _categories.value = categories as List<Category> },
@@ -57,6 +77,8 @@ class SearchViewModel(
   }
 
   fun filterWorkerProfiles(
+      rating: Double? = null,
+      reviews: List<String>? = emptyList(),
       hourlyRateThreshold: Double? = null,
       fieldOfWork: String? = null,
       location: Location? = null,
@@ -66,6 +88,8 @@ class SearchViewModel(
     val userLon = location?.longitude
 
     workerProfileRepo.filterWorkers(
+        rating,
+        reviews,
         hourlyRateThreshold,
         fieldOfWork,
         location,
@@ -89,7 +113,7 @@ class SearchViewModel(
         { error -> _errorMessage.value = error.message })
   }
 
-  private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+  fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
     val earthRadius = 6371.0 // Radius of the Earth in kilometers
     val dLat = Math.toRadians(lat2 - lat1)
     val dLon = Math.toRadians(lon2 - lon1)
