@@ -79,7 +79,7 @@ fun QuickFixApp() {
   val loggedInAccountViewModel: LoggedInAccountViewModel =
       viewModel(factory = LoggedInAccountViewModel.Factory)
   val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
-    val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
+  val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
 
   val isUser = false // TODO: This variable needs to get its value after the authentication
   val screen by remember { navigationActions::currentScreen }

@@ -40,8 +40,6 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arygm.quickfix.model.categories.WorkerCategory
-import com.arygm.quickfix.model.categories.painting.PaintingCategory
 import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.theme.poppinsFontFamily
@@ -72,13 +70,13 @@ fun ExpandableCategoryItem(
                     .background(backgroundColor),
             verticalAlignment = Alignment.CenterVertically) {
               // Icon
-            nameToIcon(item.name)?.let {
+              nameToIcon(item.name)?.let {
                 Icon(
                     imageVector = it,
                     contentDescription = null,
                     tint = colorScheme.primary,
                     modifier = Modifier.testTag("categoryIcon"))
-            }
+              }
 
               Spacer(modifier = Modifier.width(10.dp))
 
@@ -146,18 +144,16 @@ fun ExpandableCategoryItem(
       }
 }
 
-
 private fun nameToIcon(displayName: String?): ImageVector? {
-        return when (displayName) {
-            "Painting" -> Icons.Outlined.ImagesearchRoller
-            "Plumbing" -> Icons.Outlined.Plumbing
-            "Gardening" -> Icons.Outlined.NaturePeople
-            "Electrical Work" -> Icons.Outlined.ElectricalServices
-            "Handyman Services" -> Icons.Outlined.Handyman
-            "Cleaning Services" -> Icons.Outlined.CleaningServices
-            "Carpentry" -> Icons.Outlined.Carpenter
-            "Moving Services" -> Icons.Outlined.LocalShipping
-            else -> null
-        }
-    }
-
+  return when (displayName) {
+    "Painting" -> Icons.Outlined.ImagesearchRoller
+    "Plumbing" -> Icons.Outlined.Plumbing
+    "Gardening" -> Icons.Outlined.NaturePeople
+    "Electrical Work" -> Icons.Outlined.ElectricalServices
+    "Handyman Services" -> Icons.Outlined.Handyman
+    "Cleaning Services" -> Icons.Outlined.CleaningServices
+    "Carpentry" -> Icons.Outlined.Carpenter
+    "Moving Services" -> Icons.Outlined.LocalShipping
+    else -> null
+  }
+}

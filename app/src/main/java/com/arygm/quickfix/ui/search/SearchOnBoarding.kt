@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.search
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -33,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.arygm.quickfix.model.categories.WorkerCategory
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
@@ -42,8 +42,13 @@ import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @Composable
-fun SearchOnBoarding(navigationActions: NavigationActions, searchViewModel: SearchViewModel ,isUser: Boolean) {
-    val categories = searchViewModel.categories.collectAsState().value
+fun SearchOnBoarding(
+    navigationActions: NavigationActions,
+    searchViewModel: SearchViewModel,
+    isUser: Boolean
+) {
+  val categories = searchViewModel.categories.collectAsState().value
+  Log.d("SearchOnBoarding", "Categories: $categories")
   val itemCategories = remember { categories }
   val expandedStates = remember {
     mutableStateListOf(*BooleanArray(itemCategories.size) { false }.toTypedArray())

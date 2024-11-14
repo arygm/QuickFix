@@ -12,7 +12,9 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
@@ -26,6 +28,8 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.kaspresso.screen.WelcomeScreen
+import com.arygm.quickfix.model.category.Category
+import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -47,6 +51,27 @@ class MainActivityTest : TestCase() {
 
   private lateinit var navigationActions: NavigationActions
   @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+  private val item =
+      Category(
+          id = "painting",
+          name = "Painting",
+          description = "Find skilled painters for residential or commercial projects.",
+          subcategories =
+              listOf(
+                  Subcategory(
+                      id = "residential_painting",
+                      name = "Residential Painting",
+                      tags = listOf("Interior Painting", "Exterior Painting", "Cabinet Painting")),
+                  Subcategory(
+                      id = "commercial_painting",
+                      name = "Commercial Painting",
+                      tags = listOf("Office Buildings", "Retail Spaces")),
+                  Subcategory(
+                      id = "decorative_painting",
+                      name = "Decorative Painting",
+                      tags = listOf("Faux Finishes", "Murals")),
+              ))
 
   @Before
   fun setup() {
@@ -135,6 +160,18 @@ class MainActivityTest : TestCase() {
 
       onView(withText("Search")) // Match the TextView that has the text "Hello World"
           .perform(click())
+      composeTestRule.waitUntil("find the categories", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithText(item.name).fetchSemanticsNodes().isNotEmpty()
+      }
+      composeTestRule.onNodeWithText(item.name).assertIsDisplayed()
+      composeTestRule.onNodeWithText(item.name).performClick()
+      composeTestRule.waitUntil("find the categories", timeoutMillis = 20000) {
+        composeTestRule
+            .onAllNodesWithText(item.subcategories[0].name)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      }
+      composeTestRule.onNodeWithText(item.subcategories[0].name).performClick()
       onView(withText("Dashboard")) // Match the TextView that has the text "Hello World"
           .perform(click())
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
