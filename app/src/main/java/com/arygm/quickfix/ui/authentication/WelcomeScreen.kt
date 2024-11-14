@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -55,7 +56,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import kotlinx.coroutines.delay
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UseOfNonLambdaOffsetOverload")
 @Composable
 fun WelcomeScreen(
     navigationActions: NavigationActions,
@@ -114,56 +115,47 @@ fun WelcomeScreen(
     }
   }
 
-  Box(modifier = Modifier.fillMaxSize().testTag("welcomeBox")) {
+  BoxWithConstraints(modifier = Modifier.fillMaxSize().testTag("welcomeBox")) {
+    val screenHeight = maxHeight
+    val screenWidth = maxWidth
     Image(
         painter = painterResource(id = com.arygm.quickfix.R.drawable.worker_image),
         contentDescription = null,
         contentScale = ContentScale.Crop,
         alignment = Alignment.TopStart,
-        modifier = Modifier.fillMaxSize().testTag("workerBackground"))
+        modifier =
+            Modifier.requiredSize(screenWidth * 1.10f, screenHeight).testTag("workerBackground"))
 
     Box(
+        // Leaving as is as animations are tricky to fine-tune without breaking
         modifier =
             Modifier.align(Alignment.BottomStart)
                 .requiredSize(1700.dp)
-                .offset(x = boxOffsetX, y = 30.dp)
+                .offset(x = boxOffsetX, y = 70.dp)
                 .graphicsLayer(rotationZ = -28f)
                 .background(colorScheme.primary)
                 .testTag("boxDecoration1"))
-    Box(
-        modifier =
-            Modifier.align(Alignment.BottomStart)
-                .size(425.dp, 150.dp)
-                .background(colorScheme.primary)
-                .testTag("boxDecoration2"))
-
-    Image(
-        painter = painterResource(id = com.arygm.quickfix.R.drawable.quickfix),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        colorFilter = ColorFilter.tint(colorScheme.background),
-        modifier =
-            Modifier.align(Alignment.Center)
-                .offset(x = 0.dp, y = (-30).dp)
-                .size(width = 283.dp, height = 332.7.dp)
-                .graphicsLayer(rotationZ = 4.57f, alpha = elementsAlpha)
-                .testTag("quickFixLogo"))
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier =
-            Modifier.fillMaxSize()
-                .padding(top = 420.dp) // Adjust this to fine-tune the position below the logo
-        ) {
-          Spacer(modifier = Modifier.padding(60.dp))
+        verticalArrangement = Arrangement.Bottom,
+        modifier = Modifier.fillMaxSize().padding(bottom = screenHeight * 0.05f)) {
+          Image(
+              painter = painterResource(id = com.arygm.quickfix.R.drawable.quickfix),
+              contentDescription = null,
+              contentScale = ContentScale.Crop,
+              colorFilter = ColorFilter.tint(colorScheme.background),
+              modifier =
+                  Modifier.fillMaxWidth(0.7f)
+                      .graphicsLayer(rotationZ = 4.57f, alpha = elementsAlpha)
+                      .testTag("quickFixLogo"))
+
           // QuickFix Text
           Text(
               text = "QuickFix",
               style = MaterialTheme.typography.titleLarge,
               color = colorScheme.background,
               modifier =
-                  Modifier.padding(bottom = 24.dp) // Space between text and buttons
+                  Modifier.padding(bottom = screenHeight * 0.01f) // Space between text and buttons
                       .graphicsLayer(alpha = elementsAlpha)
                       .testTag("quickFixText"))
 
@@ -202,7 +194,7 @@ fun WelcomeScreen(
               border = BorderStroke(2.dp, colorScheme.background),
               modifier =
                   Modifier.fillMaxWidth(0.8f)
-                      .height(50.dp)
+                      .height(screenHeight * 0.054f)
                       .graphicsLayer(alpha = elementsAlpha)
                       .testTag("googleButton"),
               shape = RoundedCornerShape(10.dp)) {
@@ -219,7 +211,7 @@ fun WelcomeScreen(
                           colorFilter = ColorFilter.tint(colorScheme.background),
                           modifier = Modifier.size(30.dp).offset(x = (-3).dp).testTag("googleLogo"))
 
-                      Spacer(modifier = Modifier.width(16.dp))
+                      Spacer(modifier = Modifier.width(screenWidth * 0.04f))
 
                       // Button Text
                       Text(

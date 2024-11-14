@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,7 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,7 +44,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
@@ -52,6 +52,7 @@ import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
+import com.arygm.quickfix.utils.ANIMATED_BOX_ROTATION
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.stringToTimestamp
 import com.google.firebase.Firebase
@@ -86,7 +87,9 @@ fun GoogleInfoScreen(
 
   val filledForm = firstName.isNotEmpty() && lastName.isNotEmpty() && birthDate.isNotEmpty()
 
-  Box(modifier = Modifier.fillMaxSize().testTag("InfoBox")) {
+  BoxWithConstraints(modifier = Modifier.fillMaxSize().testTag("InfoBox")) {
+    val screenWidth = maxWidth
+    val screenHeight = maxHeight
     QuickFixAnimatedBox(boxOffsetX)
 
     Scaffold(
@@ -125,22 +128,31 @@ fun GoogleInfoScreen(
                       .testTag("contentBox")) {
                 Box(
                     modifier =
-                        Modifier.align(Alignment.BottomStart)
-                            .requiredSize(180.dp)
-                            .offset(x = (-150).dp, y = 64.dp)
-                            .graphicsLayer(rotationZ = -28f)
+                        Modifier.size(
+                                screenWidth * 0.5f) // Scale box size to be relative to screen size
+                            .align(Alignment.BottomStart)
+                            .offset(
+                                x =
+                                    -screenWidth *
+                                        0.4f, // Offset slightly left relative to screen width
+                                y =
+                                    screenHeight *
+                                        0.1f // Offset slightly upward relative to screen height
+                                )
+                            .graphicsLayer(rotationZ = ANIMATED_BOX_ROTATION)
                             .background(colorScheme.primary)
-                            .zIndex(0f)
                             .testTag("decorationBox"))
-
                 Column(
                     modifier =
                         Modifier.fillMaxSize()
-                            .padding(start = 24.dp)
+                            .padding(
+                                start =
+                                    screenWidth * 0.05f) // Relative padding based on screen width
                             .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Top) {
-                      Spacer(modifier = Modifier.padding(60.dp))
+                      Spacer(
+                          modifier = Modifier.height(screenHeight * 0.1f)) // Relative top padding
 
                       Text(
                           "WELCOME",
@@ -148,18 +160,24 @@ fun GoogleInfoScreen(
                           style = MaterialTheme.typography.headlineLarge,
                           modifier = Modifier.testTag("welcomeText"))
 
+                      Spacer(
+                          modifier =
+                              Modifier.height(screenHeight * 0.02f)) // Small vertical spacing
+
                       Row(
-                          modifier = Modifier.fillMaxWidth().padding(end = 18.dp),
-                          horizontalArrangement =
-                              Arrangement.SpaceBetween // This arranges them with space in between
-                          ) {
+                          modifier =
+                              Modifier.fillMaxWidth()
+                                  .padding(end = screenWidth * 0.05f), // Relative end padding
+                          horizontalArrangement = Arrangement.SpaceBetween) {
                             QuickFixTextField(
                                 value = firstName,
                                 onValueChange = { firstName = it },
                                 label = "FIRST NAME",
                                 modifier =
                                     Modifier.weight(1f)
-                                        .padding(end = 8.dp)
+                                        .padding(
+                                            end =
+                                                screenWidth * 0.02f) // Small padding between fields
                                         .testTag("firstNameInput"),
                             )
 
@@ -169,14 +187,17 @@ fun GoogleInfoScreen(
                                 label = "LAST NAME",
                                 modifier =
                                     Modifier.weight(1f)
-                                        .padding(end = 8.dp)
+                                        .padding(
+                                            start =
+                                                screenWidth * 0.02f) // Small padding between fields
                                         .testTag("lastNameInput"),
                             )
                           }
 
-                      Spacer(modifier = Modifier.padding(6.dp))
+                      Spacer(
+                          modifier =
+                              Modifier.height(screenHeight * 0.01f)) // Slight spacing below Row
 
-                      // Birth Date Field
                       QuickFixTextField(
                           value = birthDate,
                           onValueChange = {
@@ -185,14 +206,18 @@ fun GoogleInfoScreen(
                           },
                           label = "BIRTH DATE (DD/MM/YYYY)",
                           isError = birthDateError,
-                          modifier = Modifier.width(360.dp).testTag("birthDateInput"),
+                          modifier =
+                              Modifier.width(screenWidth * 0.9f) // Relative width for text field
+                                  .testTag("birthDateInput"),
                           singleLine = false,
                           errorText = "INVALID DATE",
                           showError = birthDateError)
 
-                      Spacer(modifier = Modifier.padding(10.dp))
+                      Spacer(
+                          modifier =
+                              Modifier.height(
+                                  screenHeight * 0.02f)) // Relative spacing before button
 
-                      // Button
                       Button(
                           onClick = {
                             shrinkBox = false
@@ -219,8 +244,13 @@ fun GoogleInfoScreen(
                                   Log.d("GoogleInfoScreen", "Failed to update account.")
                                 })
                           },
-                          modifier = Modifier.width(360.dp).height(48.dp).testTag("nextButton"),
-                          shape = RoundedCornerShape(10.dp),
+                          modifier =
+                              Modifier.width(screenWidth * 0.9f) // Relative width for button
+                                  .height(screenHeight * 0.06f) // Relative height for button
+                                  .testTag("nextButton"),
+                          shape =
+                              RoundedCornerShape(
+                                  screenWidth * 0.025f), // Relative corner radius for button shape
                           colors =
                               ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                           enabled = filledForm && !birthDateError) {

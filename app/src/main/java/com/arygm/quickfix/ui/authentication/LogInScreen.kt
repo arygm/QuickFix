@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -57,6 +57,7 @@ import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
+import com.arygm.quickfix.utils.ANIMATED_BOX_ROTATION
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
@@ -65,6 +66,7 @@ import com.arygm.quickfix.utils.signInWithEmailAndFetchAccount
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+// make relative
 @Composable
 fun LogInScreen(
     navigationActions: NavigationActions,
@@ -90,7 +92,10 @@ fun LogInScreen(
   val coroutineScope = rememberCoroutineScope()
 
   LaunchedEffect(Unit) { shrinkBox = true }
-  Box(modifier = Modifier.fillMaxSize().testTag("LoginBox")) {
+  BoxWithConstraints(modifier = Modifier.fillMaxSize().testTag("LoginBox")) {
+    val screenWidth = maxWidth
+    val screenHeight = maxHeight
+
     QuickFixAnimatedBox(boxOffsetX)
     Scaffold(
         modifier =
@@ -109,21 +114,10 @@ fun LogInScreen(
                 Box(
                     modifier = Modifier.zIndex(1f) // Lower zIndex so it's behind the content
                     ) {
-                      Image(
-                          painter =
-                              painterResource(id = com.arygm.quickfix.R.drawable.worker_image),
-                          contentDescription = null,
-                          contentScale = ContentScale.Crop,
-                          alignment = Alignment.TopStart,
-                          modifier = Modifier.fillMaxWidth().size(180.dp))
-
                       Box(modifier = Modifier.fillMaxSize()) {
                         Image(
                             painter =
-                                painterResource(
-                                    id =
-                                        com.arygm.quickfix.R.drawable
-                                            .worker_image), // Replace with your image resource
+                                painterResource(id = com.arygm.quickfix.R.drawable.worker_image),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize().testTag("topBarLoginBackground"))
@@ -152,18 +146,29 @@ fun LogInScreen(
                     ) {
                       Box(
                           modifier =
-                              Modifier.align(Alignment.BottomStart)
-                                  .size(180.dp, 180.dp)
-                                  .offset(x = (-150).dp, y = 64.dp)
-                                  .graphicsLayer(rotationZ = 57f)
+                              Modifier.size(
+                                      screenWidth *
+                                          0.5f) // Scale box size to be relative to screen size
+                                  .align(Alignment.BottomStart)
+                                  .offset(
+                                      x =
+                                          -screenWidth *
+                                              0.4f, // Offset slightly left relative to screen width
+                                      y =
+                                          screenHeight *
+                                              0.1f // Offset slightly upward relative to screen
+                                      // height
+                                      )
+                                  .graphicsLayer(rotationZ = ANIMATED_BOX_ROTATION)
                                   .background(colorScheme.primary)
                                   .testTag("BoxDecoration"))
 
                       Column(
                           modifier =
                               Modifier.align(Alignment.Center)
-                                  .padding(16.dp)
-                                  .zIndex(100f), // Ensure it's on top
+                                  .padding(
+                                      screenWidth * 0.05f) // Relative padding based on screen width
+                                  .zIndex(100f),
                           horizontalAlignment = Alignment.CenterHorizontally,
                           verticalArrangement = Arrangement.Center) {
                             Text(
@@ -172,7 +177,9 @@ fun LogInScreen(
                                 color = colorScheme.primary,
                                 modifier = Modifier.testTag("WelcomeText"))
 
-                            Spacer(modifier = Modifier.padding(3.dp))
+                            Spacer(
+                                modifier =
+                                    Modifier.height(screenHeight * 0.01f)) // Small vertical spacing
 
                             Text(
                                 "Your perfect fix is just a click away!",
@@ -180,7 +187,10 @@ fun LogInScreen(
                                 color = colorScheme.onSecondaryContainer,
                                 modifier = Modifier.testTag("WelcomeTextBis"))
 
-                            Spacer(modifier = Modifier.padding(10.dp))
+                            Spacer(
+                                modifier =
+                                    Modifier.height(
+                                        screenHeight * 0.02f)) // Slightly larger vertical spacing
 
                             QuickFixTextFieldCustom(
                                 value = email,
@@ -196,8 +206,10 @@ fun LogInScreen(
                                   }
                                 },
                                 shape = RoundedCornerShape(12.dp),
-                                widthField = 360.dp,
-                                moveContentHorizontal = 10.dp,
+                                widthField =
+                                    screenWidth * 0.9f, // Relative width for the text field
+                                moveContentHorizontal =
+                                    screenWidth * 0.02f, // Relative padding for content
                                 placeHolderText = "Username or Email",
                                 isError =
                                     email.isNotEmpty() && (!isValidEmail(email) || emailError),
@@ -206,15 +218,15 @@ fun LogInScreen(
                                     email.isNotEmpty() && (!isValidEmail(email) || emailError),
                                 modifier = Modifier.testTag("inputEmail"))
 
-                            Spacer(modifier = Modifier.padding(10.dp))
+                            Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
                             QuickFixTextFieldCustom(
                                 value = password,
                                 onValueChange = { password = it },
                                 placeHolderText = "Password",
                                 shape = RoundedCornerShape(12.dp),
-                                widthField = 360.dp,
-                                moveContentHorizontal = 10.dp,
+                                widthField = screenWidth * 0.9f,
+                                moveContentHorizontal = screenWidth * 0.02f,
                                 trailingIcon = {
                                   val image =
                                       if (passwordVisible) Icons.Filled.VisibilityOff
@@ -231,7 +243,7 @@ fun LogInScreen(
                                     else PasswordVisualTransformation(),
                                 modifier = Modifier.testTag("inputPassword"))
 
-                            Spacer(modifier = Modifier.padding(4.dp))
+                            Spacer(modifier = Modifier.height(screenHeight * 0.01f))
 
                             QuickFixButton(
                                 buttonText = "Forgot your password?",
@@ -247,7 +259,7 @@ fun LogInScreen(
                                     Modifier.align(Alignment.End)
                                         .testTag("forgetPasswordButtonText"))
 
-                            Spacer(modifier = Modifier.padding(7.dp))
+                            Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
                             QuickFixButton(
                                 buttonText = "LOGIN",
@@ -267,9 +279,6 @@ fun LogInScreen(
                                           }
                                         } else {
                                           Log.e("LogInScreen", "Error occurred while signing in")
-                                          Log.e(
-                                              "email don't exist",
-                                              "Error occurred while signing here's the email: $email")
                                           errorHasOccurred = true
                                         }
                                       })
@@ -278,33 +287,34 @@ fun LogInScreen(
                                 textColor = colorScheme.onPrimary,
                                 textStyle = MaterialTheme.typography.labelLarge,
                                 modifier =
-                                    Modifier.width(360.dp).height(55.dp).testTag("logInButton"),
+                                    Modifier.width(screenWidth * 0.9f)
+                                        .height(screenHeight * 0.06f)
+                                        .testTag("logInButton"),
                                 enabled = filledForm && isValidEmail(email))
 
-                            Spacer(modifier = Modifier.padding(4.dp))
+                            Spacer(modifier = Modifier.height(screenHeight * 0.01f))
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center,
+                                horizontalArrangement = Arrangement.End,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                               Text(
-                                  "Don't have an account ?",
+                                  "Don't have an account?",
                                   style = MaterialTheme.typography.headlineSmall,
                                   color = colorScheme.onSecondaryContainer,
                                   modifier =
-                                      Modifier.padding(bottom = 8.dp)
-                                          .requiredWidth(200.dp)
+                                      Modifier.padding(bottom = screenHeight * 0.01f)
                                           .testTag("noAccountText"),
                                   textAlign = TextAlign.End)
 
                               QuickFixButton(
-                                  buttonText = "Create one !",
+                                  buttonText = "Create one!",
                                   onClickAction = { navigationActions.navigateTo(Screen.REGISTER) },
                                   buttonColor = Color.Transparent,
                                   textColor = colorScheme.primary,
                                   textStyle = MaterialTheme.typography.headlineSmall,
-                                  contentPadding = PaddingValues(4.dp),
+                                  contentPadding = PaddingValues(screenWidth * 0.01f),
                                   horizontalArrangement = Arrangement.Start,
                                   modifier = Modifier.testTag("clickableCreateAccount"))
                             }
@@ -314,10 +324,12 @@ fun LogInScreen(
                                   "INVALID EMAIL OR PASSWORD, TRY AGAIN.",
                                   style = MaterialTheme.typography.labelSmall,
                                   color = colorScheme.error,
-                                  modifier = Modifier.padding(start = 3.dp).testTag("errorText"))
-                              Spacer(modifier = Modifier.padding(32.9.dp))
+                                  modifier =
+                                      Modifier.padding(start = screenWidth * 0.01f)
+                                          .testTag("errorText"))
+                              Spacer(modifier = Modifier.height(screenHeight * 0.04f))
                             } else {
-                              Spacer(modifier = Modifier.padding(40.dp))
+                              Spacer(modifier = Modifier.height(screenHeight * 0.05f))
                             }
                           }
                     }
