@@ -33,6 +33,7 @@ import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.Service
 import com.arygm.quickfix.ui.elements.UpcomingQuickFixes
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
@@ -78,12 +79,14 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
             navigationIcon = {},
             actions = {
-              IconButton(onClick = {}, Modifier.testTag("MessagesButton")) {
-                Icon(
-                    imageVector = Icons.Outlined.Email,
-                    contentDescription = "Messages",
-                    tint = colorScheme.background)
-              }
+              IconButton(
+                  onClick = { navigationActions.navigateTo(Screen.MESSAGES) },
+                  Modifier.testTag("MessagesButton")) {
+                    Icon(
+                        imageVector = Icons.Outlined.Email,
+                        contentDescription = "Messages",
+                        tint = colorScheme.background)
+                  }
             })
       },
       content = { padding ->
@@ -123,7 +126,7 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
                 Spacer(modifier = Modifier.width(20.dp))
 
                 IconButton(
-                    onClick = {},
+                    onClick = { navigationActions.navigateTo(Screen.MESSAGES) },
                     modifier =
                         Modifier.size(40.dp)
                             .clip(CircleShape)
