@@ -137,21 +137,26 @@ fun ResetPasswordScreen(
                                 shape =
                                     RoundedCornerShape(12.dp)) // Ensure content is above TopAppBar
                     ) {
-                    Box(
-                        modifier = Modifier
-                            .size(screenWidth * 0.5f) // Scale box size to be relative to screen size
-                            .align(Alignment.BottomStart)
-                            .offset(
-                                x = -screenWidth * 0.4f, // Offset slightly left relative to screen width
-                                y = screenHeight * 0.1f  // Offset slightly upward relative to screen height
-                            )
-                            .graphicsLayer(rotationZ = ANIMATED_BOX_ROTATION)
-                            .background(colorScheme.primary)
-                            .testTag("BoxDecoration")
-                    )
+                      Box(
+                          modifier =
+                              Modifier.size(
+                                      screenWidth *
+                                          0.5f) // Scale box size to be relative to screen size
+                                  .align(Alignment.BottomStart)
+                                  .offset(
+                                      x =
+                                          -screenWidth *
+                                              0.4f, // Offset slightly left relative to screen width
+                                      y =
+                                          screenHeight *
+                                              0.1f // Offset slightly upward relative to screen
+                                      // height
+                                      )
+                                  .graphicsLayer(rotationZ = ANIMATED_BOX_ROTATION)
+                                  .background(colorScheme.primary)
+                                  .testTag("BoxDecoration"))
 
-
-                    Column(
+                      Column(
                           modifier =
                               Modifier.align(Alignment.Center)
                                   .padding(screenWidth * 0.05f)
@@ -209,7 +214,9 @@ fun ResetPasswordScreen(
                                 textColor = colorScheme.onPrimary,
                                 textStyle = MaterialTheme.typography.labelLarge,
                                 modifier =
-                                    Modifier.width(screenWidth * 0.85f).height(screenHeight * 0.06f).testTag("ResetButton"),
+                                    Modifier.width(screenWidth * 0.85f)
+                                        .height(screenHeight * 0.06f)
+                                        .testTag("ResetButton"),
                                 enabled = email.isNotEmpty() && !emailError)
 
                             Spacer(modifier = Modifier.padding(screenHeight * 0.1f))

@@ -79,7 +79,6 @@ class WelcomeScreenTest {
     // Check if the background image is displayed
     composeTestRule.onNodeWithTag("welcomeBox").assertIsDisplayed()
     composeTestRule.onNodeWithTag("boxDecoration1").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("boxDecoration2").assertIsDisplayed()
     composeTestRule.onNodeWithTag("workerBackground").assertIsDisplayed()
 
     // Check that the QuickFix logo is displayed

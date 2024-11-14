@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -94,8 +93,8 @@ fun LogInScreen(
 
   LaunchedEffect(Unit) { shrinkBox = true }
   BoxWithConstraints(modifier = Modifier.fillMaxSize().testTag("LoginBox")) {
-      val screenWidth = maxWidth
-      val screenHeight = maxHeight
+    val screenWidth = maxWidth
+    val screenHeight = maxHeight
 
     QuickFixAnimatedBox(boxOffsetX)
     Scaffold(
@@ -118,10 +117,7 @@ fun LogInScreen(
                       Box(modifier = Modifier.fillMaxSize()) {
                         Image(
                             painter =
-                                painterResource(
-                                    id =
-                                        com.arygm.quickfix.R.drawable
-                                            .worker_image),
+                                painterResource(id = com.arygm.quickfix.R.drawable.worker_image),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize().testTag("topBarLoginBackground"))
@@ -148,174 +144,195 @@ fun LogInScreen(
                                 shape =
                                     RoundedCornerShape(12.dp)) // Ensure content is above TopAppBar
                     ) {
-                    Box(
-                        modifier = Modifier
-                            .size(screenWidth * 0.5f) // Scale box size to be relative to screen size
-                            .align(Alignment.BottomStart)
-                            .offset(
-                                x = -screenWidth * 0.4f, // Offset slightly left relative to screen width
-                                y = screenHeight * 0.1f  // Offset slightly upward relative to screen height
-                            )
-                            .graphicsLayer(rotationZ = ANIMATED_BOX_ROTATION)
-                            .background(colorScheme.primary)
-                            .testTag("BoxDecoration")
-                    )
+                      Box(
+                          modifier =
+                              Modifier.size(
+                                      screenWidth *
+                                          0.5f) // Scale box size to be relative to screen size
+                                  .align(Alignment.BottomStart)
+                                  .offset(
+                                      x =
+                                          -screenWidth *
+                                              0.4f, // Offset slightly left relative to screen width
+                                      y =
+                                          screenHeight *
+                                              0.1f // Offset slightly upward relative to screen
+                                      // height
+                                      )
+                                  .graphicsLayer(rotationZ = ANIMATED_BOX_ROTATION)
+                                  .background(colorScheme.primary)
+                                  .testTag("BoxDecoration"))
 
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(screenWidth * 0.05f) // Relative padding based on screen width
-                            .zIndex(100f),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            "Login",
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = colorScheme.primary,
-                            modifier = Modifier.testTag("WelcomeText")
-                        )
-
-                        Spacer(modifier = Modifier.height(screenHeight * 0.01f)) // Small vertical spacing
-
-                        Text(
-                            "Your perfect fix is just a click away!",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colorScheme.onSecondaryContainer,
-                            modifier = Modifier.testTag("WelcomeTextBis")
-                        )
-
-                        Spacer(modifier = Modifier.height(screenHeight * 0.02f)) // Slightly larger vertical spacing
-
-                        QuickFixTextFieldCustom(
-                            value = email,
-                            onValueChange = {
-                                email = it
-                                accountViewModel.accountExists(email) { exists, profile ->
-                                    emailError = if (exists && profile != null) {
-                                        !isValidEmail(it)
-                                    } else {
-                                        true
-                                    }
-                                }
-                            },
-                            shape = RoundedCornerShape(12.dp),
-                            widthField = screenWidth * 0.9f, // Relative width for the text field
-                            moveContentHorizontal = screenWidth * 0.02f, // Relative padding for content
-                            placeHolderText = "Username or Email",
-                            isError = email.isNotEmpty() && (!isValidEmail(email) || emailError),
-                            errorText = "INVALID EMAIL",
-                            showError = email.isNotEmpty() && (!isValidEmail(email) || emailError),
-                            modifier = Modifier.testTag("inputEmail")
-                        )
-
-                        Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-
-                        QuickFixTextFieldCustom(
-                            value = password,
-                            onValueChange = { password = it },
-                            placeHolderText = "Password",
-                            shape = RoundedCornerShape(12.dp),
-                            widthField = screenWidth * 0.9f,
-                            moveContentHorizontal = screenWidth * 0.02f,
-                            trailingIcon = {
-                                val image = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
-                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                    Icon(imageVector = image, contentDescription = null, tint = colorScheme.primary)
-                                }
-                            },
-                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                            modifier = Modifier.testTag("inputPassword")
-                        )
-
-                        Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-
-                        QuickFixButton(
-                            buttonText = "Forgot your password?",
-                            onClickAction = { navigationActions.navigateTo(Screen.RESET_PASSWORD) },
-                            buttonColor = Color.Transparent,
-                            textColor = colorScheme.primary,
-                            textStyle = MaterialTheme.typography.headlineSmall,
-                            horizontalArrangement = Arrangement.End,
-                            contentPadding = PaddingValues(0.dp),
-                            modifier = Modifier.align(Alignment.End).testTag("forgetPasswordButtonText")
-                        )
-
-                        Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-
-                        QuickFixButton(
-                            buttonText = "LOGIN",
-                            onClickAction = {
-                                signInWithEmailAndFetchAccount(
-                                    email = email,
-                                    password = password,
-                                    accountViewModel = accountViewModel,
-                                    loggedInAccountViewModel = loggedInAccountViewModel,
-                                    onResult = {
-                                        if (it) {
-                                            coroutineScope.launch {
-                                                shrinkBox = false
-                                                delay(BOX_COLLAPSE_SPEED.toLong())
-                                                Log.d("LoginFlow", "Starting login with email: $email")
-                                                navigationActions.navigateTo(TopLevelDestinations.HOME)
-                                            }
-                                        } else {
-                                            Log.e("LogInScreen", "Error occurred while signing in")
-                                            errorHasOccurred = true
-                                        }
-                                    }
-                                )
-                            },
-                            buttonColor = colorScheme.primary,
-                            textColor = colorScheme.onPrimary,
-                            textStyle = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.width(screenWidth * 0.9f).height(screenHeight * 0.06f).testTag("logInButton"),
-                            enabled = filledForm && isValidEmail(email)
-                        )
-
-                        Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
+                      Column(
+                          modifier =
+                              Modifier.align(Alignment.Center)
+                                  .padding(
+                                      screenWidth * 0.05f) // Relative padding based on screen width
+                                  .zIndex(100f),
+                          horizontalAlignment = Alignment.CenterHorizontally,
+                          verticalArrangement = Arrangement.Center) {
                             Text(
-                                "Don't have an account?",
-                                style = MaterialTheme.typography.headlineSmall,
+                                "Login",
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = colorScheme.primary,
+                                modifier = Modifier.testTag("WelcomeText"))
+
+                            Spacer(
+                                modifier =
+                                    Modifier.height(screenHeight * 0.01f)) // Small vertical spacing
+
+                            Text(
+                                "Your perfect fix is just a click away!",
+                                style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.onSecondaryContainer,
-                                modifier = Modifier
-                                    .padding(bottom = screenHeight * 0.01f)
-                                    .testTag("noAccountText"),
-                                textAlign = TextAlign.End
-                            )
+                                modifier = Modifier.testTag("WelcomeTextBis"))
+
+                            Spacer(
+                                modifier =
+                                    Modifier.height(
+                                        screenHeight * 0.02f)) // Slightly larger vertical spacing
+
+                            QuickFixTextFieldCustom(
+                                value = email,
+                                onValueChange = {
+                                  email = it
+                                  accountViewModel.accountExists(email) { exists, profile ->
+                                    emailError =
+                                        if (exists && profile != null) {
+                                          !isValidEmail(it)
+                                        } else {
+                                          true
+                                        }
+                                  }
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                widthField =
+                                    screenWidth * 0.9f, // Relative width for the text field
+                                moveContentHorizontal =
+                                    screenWidth * 0.02f, // Relative padding for content
+                                placeHolderText = "Username or Email",
+                                isError =
+                                    email.isNotEmpty() && (!isValidEmail(email) || emailError),
+                                errorText = "INVALID EMAIL",
+                                showError =
+                                    email.isNotEmpty() && (!isValidEmail(email) || emailError),
+                                modifier = Modifier.testTag("inputEmail"))
+
+                            Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                            QuickFixTextFieldCustom(
+                                value = password,
+                                onValueChange = { password = it },
+                                placeHolderText = "Password",
+                                shape = RoundedCornerShape(12.dp),
+                                widthField = screenWidth * 0.9f,
+                                moveContentHorizontal = screenWidth * 0.02f,
+                                trailingIcon = {
+                                  val image =
+                                      if (passwordVisible) Icons.Filled.VisibilityOff
+                                      else Icons.Filled.Visibility
+                                  IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Icon(
+                                        imageVector = image,
+                                        contentDescription = null,
+                                        tint = colorScheme.primary)
+                                  }
+                                },
+                                visualTransformation =
+                                    if (passwordVisible) VisualTransformation.None
+                                    else PasswordVisualTransformation(),
+                                modifier = Modifier.testTag("inputPassword"))
+
+                            Spacer(modifier = Modifier.height(screenHeight * 0.01f))
 
                             QuickFixButton(
-                                buttonText = "Create one!",
-                                onClickAction = { navigationActions.navigateTo(Screen.REGISTER) },
+                                buttonText = "Forgot your password?",
+                                onClickAction = {
+                                  navigationActions.navigateTo(Screen.RESET_PASSWORD)
+                                },
                                 buttonColor = Color.Transparent,
                                 textColor = colorScheme.primary,
                                 textStyle = MaterialTheme.typography.headlineSmall,
-                                contentPadding = PaddingValues(screenWidth * 0.01f),
-                                horizontalArrangement = Arrangement.Start,
-                                modifier = Modifier.testTag("clickableCreateAccount")
-                            )
-                        }
+                                horizontalArrangement = Arrangement.End,
+                                contentPadding = PaddingValues(0.dp),
+                                modifier =
+                                    Modifier.align(Alignment.End)
+                                        .testTag("forgetPasswordButtonText"))
 
-                        if (errorHasOccurred) {
-                            Text(
-                                "INVALID EMAIL OR PASSWORD, TRY AGAIN.",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = colorScheme.error,
-                                modifier = Modifier.padding(start = screenWidth * 0.01f).testTag("errorText")
-                            )
-                            Spacer(modifier = Modifier.height(screenHeight * 0.04f))
-                        } else {
-                            Spacer(modifier = Modifier.height(screenHeight * 0.05f))
-                        }
+                            Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                            QuickFixButton(
+                                buttonText = "LOGIN",
+                                onClickAction = {
+                                  signInWithEmailAndFetchAccount(
+                                      email = email,
+                                      password = password,
+                                      accountViewModel = accountViewModel,
+                                      loggedInAccountViewModel = loggedInAccountViewModel,
+                                      onResult = {
+                                        if (it) {
+                                          coroutineScope.launch {
+                                            shrinkBox = false
+                                            delay(BOX_COLLAPSE_SPEED.toLong())
+                                            Log.d("LoginFlow", "Starting login with email: $email")
+                                            navigationActions.navigateTo(TopLevelDestinations.HOME)
+                                          }
+                                        } else {
+                                          Log.e("LogInScreen", "Error occurred while signing in")
+                                          errorHasOccurred = true
+                                        }
+                                      })
+                                },
+                                buttonColor = colorScheme.primary,
+                                textColor = colorScheme.onPrimary,
+                                textStyle = MaterialTheme.typography.labelLarge,
+                                modifier =
+                                    Modifier.width(screenWidth * 0.9f)
+                                        .height(screenHeight * 0.06f)
+                                        .testTag("logInButton"),
+                                enabled = filledForm && isValidEmail(email))
+
+                            Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                              Text(
+                                  "Don't have an account?",
+                                  style = MaterialTheme.typography.headlineSmall,
+                                  color = colorScheme.onSecondaryContainer,
+                                  modifier =
+                                      Modifier.padding(bottom = screenHeight * 0.01f)
+                                          .testTag("noAccountText"),
+                                  textAlign = TextAlign.End)
+
+                              QuickFixButton(
+                                  buttonText = "Create one!",
+                                  onClickAction = { navigationActions.navigateTo(Screen.REGISTER) },
+                                  buttonColor = Color.Transparent,
+                                  textColor = colorScheme.primary,
+                                  textStyle = MaterialTheme.typography.headlineSmall,
+                                  contentPadding = PaddingValues(screenWidth * 0.01f),
+                                  horizontalArrangement = Arrangement.Start,
+                                  modifier = Modifier.testTag("clickableCreateAccount"))
+                            }
+
+                            if (errorHasOccurred) {
+                              Text(
+                                  "INVALID EMAIL OR PASSWORD, TRY AGAIN.",
+                                  style = MaterialTheme.typography.labelSmall,
+                                  color = colorScheme.error,
+                                  modifier =
+                                      Modifier.padding(start = screenWidth * 0.01f)
+                                          .testTag("errorText"))
+                              Spacer(modifier = Modifier.height(screenHeight * 0.04f))
+                            } else {
+                              Spacer(modifier = Modifier.height(screenHeight * 0.05f))
+                            }
+                          }
                     }
-
-                }
               }
         })
   }

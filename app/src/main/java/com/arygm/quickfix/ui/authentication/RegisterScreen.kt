@@ -151,7 +151,7 @@ fun RegisterScreen(
           Modifier.fillMaxSize().testTag("InfoBox").pointerInput(Unit) {
             detectTapGestures(onTap = { focusManager.clearFocus() })
           }) {
-      val screenWidth = maxWidth
+        val screenWidth = maxWidth
         val screenHeight = maxHeight
         QuickFixAnimatedBox(boxOffsetX)
         Scaffold(
@@ -210,18 +210,25 @@ fun RegisterScreen(
                                         RoundedCornerShape(
                                             12.dp)) // Ensure content is above TopAppBar
                         ) {
-                        Box(
-                            modifier = Modifier
-                                .size(screenWidth * 0.5f) // Scale box size to be relative to screen size
-                                .align(Alignment.BottomStart)
-                                .offset(
-                                    x = -screenWidth * 0.4f, // Offset slightly left relative to screen width
-                                    y = screenHeight * 0.1f  // Offset slightly upward relative to screen height
-                                )
-                                .graphicsLayer(rotationZ = ANIMATED_BOX_ROTATION)
-                                .background(colorScheme.primary)
-                                .testTag("BoxDecoration")
-                        )
+                          Box(
+                              modifier =
+                                  Modifier.size(
+                                          screenWidth *
+                                              0.5f) // Scale box size to be relative to screen size
+                                      .align(Alignment.BottomStart)
+                                      .offset(
+                                          x =
+                                              -screenWidth *
+                                                  0.4f, // Offset slightly left relative to screen
+                                          // width
+                                          y =
+                                              screenHeight *
+                                                  0.1f // Offset slightly upward relative to screen
+                                          // height
+                                          )
+                                      .graphicsLayer(rotationZ = ANIMATED_BOX_ROTATION)
+                                      .background(colorScheme.primary)
+                                      .testTag("BoxDecoration"))
                           Column(
                               modifier =
                                   Modifier.align(Alignment.Center)
@@ -235,7 +242,7 @@ fun RegisterScreen(
                                     color = colorScheme.primary,
                                     modifier = Modifier.testTag("welcomeText"))
 
-                              Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+                                Spacer(modifier = Modifier.height(screenHeight * 0.01f))
 
                                 Text(
                                     "Join QuickFix to connect with skilled workers!",
@@ -243,11 +250,13 @@ fun RegisterScreen(
                                     color = colorScheme.onSecondaryContainer,
                                     modifier = Modifier.testTag("welcomeTextBis"))
 
-                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+                                Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
                                 Row(
                                     modifier =
-                                        Modifier.fillMaxWidth().height(screenHeight * 0.07f).padding(start = screenWidth * 0.02f),
+                                        Modifier.fillMaxWidth()
+                                            .height(screenHeight * 0.07f)
+                                            .padding(start = screenWidth * 0.02f),
                                     horizontalArrangement = Arrangement.SpaceEvenly,
                                     verticalAlignment = Alignment.CenterVertically) {
                                       CustomTextField(
@@ -269,10 +278,12 @@ fun RegisterScreen(
                                           modifier = Modifier.testTag("lastNameInput"))
                                     }
 
-                              Spacer(modifier = Modifier.padding(screenHeight * 0.008f))
+                                Spacer(modifier = Modifier.padding(screenHeight * 0.008f))
 
                                 Column(
-                                    modifier = Modifier.fillMaxWidth().padding(start = screenWidth * 0.02f),
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                            .padding(start = screenWidth * 0.02f),
                                 ) {
                                   QuickFixTextFieldCustom(
                                       value = email,
@@ -305,11 +316,12 @@ fun RegisterScreen(
                                             style = MaterialTheme.typography.headlineSmall,
                                             color = colorScheme.onBackground,
                                             modifier =
-                                                Modifier.padding(start = screenWidth * 0.01f).testTag("emailText"))
+                                                Modifier.padding(start = screenWidth * 0.01f)
+                                                    .testTag("emailText"))
                                       })
                                 }
 
-                              Spacer(modifier = Modifier.padding(screenHeight * 0.008f))
+                                Spacer(modifier = Modifier.padding(screenHeight * 0.008f))
 
                                 Column(
                                     modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
@@ -343,10 +355,12 @@ fun RegisterScreen(
                                       })
                                 }
 
-                              Spacer(modifier = Modifier.padding(screenHeight * 0.008f))
+                                Spacer(modifier = Modifier.padding(screenHeight * 0.008f))
 
                                 Column(
-                                    modifier = Modifier.fillMaxWidth().padding(start = screenWidth * 0.02f),
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                            .padding(start = screenWidth * 0.02f),
                                 ) {
                                   QuickFixTextFieldCustom(
                                       value = password,
@@ -429,8 +443,10 @@ fun RegisterScreen(
                                             .padding(horizontal = screenWidth * 0.02f)
                                             .testTag("passwordConditions"),
                                     horizontalArrangement = Arrangement.SpaceBetween) {
-                                      PasswordConditions(password, passwordConditions1, screenWidth, screenHeight)
-                                      PasswordConditions(password, passwordConditions2, screenWidth, screenHeight)
+                                      PasswordConditions(
+                                          password, passwordConditions1, screenWidth, screenHeight)
+                                      PasswordConditions(
+                                          password, passwordConditions2, screenWidth, screenHeight)
                                     }
 
                                 // Error message if passwords don't match
@@ -440,7 +456,8 @@ fun RegisterScreen(
                                       style = MaterialTheme.typography.bodySmall,
                                       color = colorScheme.error,
                                       modifier =
-                                          Modifier.padding(start = screenWidth * 0.02f).testTag("noMatchText"),
+                                          Modifier.padding(start = screenWidth * 0.02f)
+                                              .testTag("noMatchText"),
                                       textAlign = TextAlign.Start)
                                   Spacer(modifier = Modifier.padding(screenHeight * 0.005f))
                                 } else {
@@ -532,7 +549,12 @@ fun RegisterScreen(
 }
 
 @Composable
-private fun PasswordConditions(password: String, listConditions: List<Pair<String, Boolean>>, screenWidth: Dp, screenHeight: Dp) {
+private fun PasswordConditions(
+    password: String,
+    listConditions: List<Pair<String, Boolean>>,
+    screenWidth: Dp,
+    screenHeight: Dp
+) {
   Column(modifier = Modifier.padding(vertical = screenHeight * 0.005f)) {
     listConditions.forEach { (condition, met) ->
       Text(
