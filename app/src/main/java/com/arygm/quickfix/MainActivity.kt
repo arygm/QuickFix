@@ -33,6 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.DashboardScreen
 import com.arygm.quickfix.ui.account.AccountConfigurationScreen
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
@@ -114,6 +115,7 @@ fun QuickFixApp() {
   val loggedInAccountViewModel: LoggedInAccountViewModel =
       viewModel(factory = LoggedInAccountViewModel.Factory)
   val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
+  val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
 
   // Initialized here because needed for the bottom bar
   val profileNavController = rememberNavController()
@@ -216,7 +218,9 @@ fun QuickFixApp() {
 
               composable(Route.HOME) { HomeNavHost(isUser) }
 
-              composable(Route.SEARCH) { SearchNavHost(isUser, navigationActionsRoot) }
+              composable(Route.SEARCH) {
+                SearchNavHost(isUser, navigationActionsRoot, searchViewModel)
+              }
 
               composable(Route.DASHBOARD) { DashBoardNavHost(isUser) }
 
@@ -285,7 +289,11 @@ fun DashBoardNavHost(isUser: Boolean) {
 }
 
 @Composable
-fun SearchNavHost(isUser: Boolean, navigationActionsRoot: NavigationActions) {
+fun SearchNavHost(
+    isUser: Boolean,
+    navigationActionsRoot: NavigationActions,
+    searchViewModel: SearchViewModel
+) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
   NavHost(
@@ -293,7 +301,7 @@ fun SearchNavHost(isUser: Boolean, navigationActionsRoot: NavigationActions) {
       startDestination = Screen.SEARCH,
   ) {
     composable(Screen.SEARCH) {
-      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser)
+      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser, searchViewModel)
     }
   }
 }

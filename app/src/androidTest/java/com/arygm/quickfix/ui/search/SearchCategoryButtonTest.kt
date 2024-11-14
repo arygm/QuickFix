@@ -3,7 +3,8 @@ package com.arygm.quickfix.ui.search
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import com.arygm.quickfix.model.categories.WorkerCategory
+import com.arygm.quickfix.model.category.Category
+import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.ressources.C
 import org.junit.Rule
 import org.junit.Test
@@ -12,7 +13,26 @@ class SearchCategoryButtonTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
-  private val item = WorkerCategory.PAINTING
+  private val item =
+      Category(
+          id = "painting",
+          name = "Painting",
+          description = "Find skilled painters for residential or commercial projects.",
+          subcategories =
+              listOf(
+                  Subcategory(
+                      id = "residential_painting",
+                      name = "Residential Painting",
+                      tags = listOf("Interior Painting", "Exterior Painting", "Cabinet Painting")),
+                  Subcategory(
+                      id = "commercial_painting",
+                      name = "Commercial Painting",
+                      tags = listOf("Office Buildings", "Retail Spaces")),
+                  Subcategory(
+                      id = "decorative_painting",
+                      name = "Decorative Painting",
+                      tags = listOf("Faux Finishes", "Murals")),
+              ))
 
   @Test
   fun searchCategoryButton_displaysTitleAndDescription() {
@@ -26,7 +46,7 @@ class SearchCategoryButtonTest {
     }
 
     // Check if title and description texts are displayed
-    composeTestRule.onNodeWithText(item.displayName).assertIsDisplayed()
+    composeTestRule.onNodeWithText(item.name).assertIsDisplayed()
     composeTestRule.onNodeWithText(item.description).assertIsDisplayed()
   }
 
@@ -57,7 +77,6 @@ class SearchCategoryButtonTest {
 
     // Step 2: Set up the initial state
     val isExpandedState = mutableStateOf(false)
-    val item = WorkerCategory.PAINTING // Replace with an appropriate WorkerCategory
     composeTestRule.setContent {
       // Provide LocalInspectionMode if you prefer to disable animations
       // CompositionLocalProvider(LocalInspectionMode provides true) {
