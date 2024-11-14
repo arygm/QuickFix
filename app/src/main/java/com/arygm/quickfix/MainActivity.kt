@@ -32,6 +32,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.DashboardScreen
@@ -41,6 +42,7 @@ import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
 import com.arygm.quickfix.ui.authentication.ResetPasswordScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
+import com.arygm.quickfix.ui.home.FakeMessageScreen
 import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -115,6 +117,7 @@ fun QuickFixApp() {
   val loggedInAccountViewModel: LoggedInAccountViewModel =
       viewModel(factory = LoggedInAccountViewModel.Factory)
   val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
+  val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory)
   val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
 
   // Initialized here because needed for the bottom bar
@@ -216,7 +219,9 @@ fun QuickFixApp() {
                 }
               }
 
-              composable(Route.HOME) { HomeNavHost(isUser) }
+              composable(Route.HOME) {
+                HomeNavHost(isUser) // , loggedInAccountViewModel, chatViewModel)
+              }
 
               composable(Route.SEARCH) {
                 SearchNavHost(isUser, navigationActionsRoot, searchViewModel)
@@ -238,11 +243,27 @@ fun QuickFixApp() {
 }
 
 @Composable
-fun HomeNavHost(isUser: Boolean) {
+fun HomeNavHost(
+    isUser: Boolean,
+    // loggedInAccountViewModel: LoggedInAccountViewModel,
+    // chatViewModel: ChatViewModel
+) {
   val homeNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(homeNavController) }
-  NavHost(navController = homeNavController, startDestination = Screen.HOME) {
+
+  NavHost(
+      navController = homeNavController,
+      startDestination = Screen.HOME,
+      route = Route.HOME,
+  ) {
     composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
+    // Add MessageScreen as a nested composable within Home
+    composable(Screen.MESSAGES) {
+      //  MessageScreen(
+      //      loggedInAccountViewModel = loggedInAccountViewModel, chatViewModel =
+      // chatViewModel,navigationActions)
+      FakeMessageScreen(navigationActions)
+    }
   }
 }
 
