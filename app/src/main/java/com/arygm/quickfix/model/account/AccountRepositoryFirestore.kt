@@ -7,7 +7,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
-class AccountRepositoryFirestore(private val db: FirebaseFirestore) : AccountRepository {
+open class AccountRepositoryFirestore(private val db: FirebaseFirestore) : AccountRepository {
 
   private val collectionPath = "accounts"
 

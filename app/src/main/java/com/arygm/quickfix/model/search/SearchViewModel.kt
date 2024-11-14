@@ -59,6 +59,10 @@ open class SearchViewModel(
     _searchQuery.value = query
   }
 
+  fun setWorkerProfiles(workerProfiles: List<WorkerProfile>) { // Used for test purposes
+    _workerProfiles.value = workerProfiles
+  }
+
   fun updateSearchQuery(query: String) {
     viewModelScope.launch {
       _searchQuery.value = query

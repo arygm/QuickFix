@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -94,7 +95,8 @@ fun SearchWorkerProfileResult(
                       fontSize = 19.sp,
                       fontWeight = FontWeight.Bold,
                       lineHeight = 20.sp,
-                      color = colorScheme.onBackground)
+                      color = colorScheme.onBackground,
+                      modifier = Modifier.testTag("price"))
                   Text(
                       text = "/Hour",
                       fontSize = 13.sp,
