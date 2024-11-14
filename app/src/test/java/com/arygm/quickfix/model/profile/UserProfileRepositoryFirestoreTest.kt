@@ -475,7 +475,7 @@ class UserProfileRepositoryFirestoreTest {
     val result = invokeDocumentToUser(document)
 
     // Assert
-    assertNull(result)
+    assertEquals(result!!.locations, emptyList<Location>())
   }
 
   @Test
@@ -490,7 +490,7 @@ class UserProfileRepositoryFirestoreTest {
     val result = invokeDocumentToUser(document)
 
     // Assert
-    assertNull(result)
+    assertEquals(result!!.locations, emptyList<Location>())
   }
 
   @Test

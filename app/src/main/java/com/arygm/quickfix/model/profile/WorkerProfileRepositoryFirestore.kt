@@ -101,7 +101,7 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
       val description = document.getString("description") ?: return null
       val fieldOfWork = document.getString("fieldOfWork") ?: return null
       val hourlyRate = document.getDouble("hourlyRate") ?: return null
-      val locationData = document.get("location") as? Map<*, *> ?: return null
+      val locationData = document.get("location") as? Map<String, Any> ?: emptyMap()
       val rating = document.getDouble("rating") ?: 0.0
       val reviews = document.get("reviews") as? List<*> ?: return null
       val location =

@@ -80,14 +80,14 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : Profil
   private fun documentToUser(document: DocumentSnapshot): UserProfile? {
     return try {
       val uid = document.id
-      val locationsData = document.get("locations") as? List<Map<String, Any>> ?: return null
+      val locationsData = document.get("locations") as? List<Map<String, Any>> ?: emptyList()
       val locations =
-          locationsData?.map { map ->
+          locationsData.map { map ->
             Location(
                 latitude = map["latitude"] as? Double ?: 0.0,
                 longitude = map["longitude"] as? Double ?: 0.0,
                 name = map["name"] as? String ?: "")
-          } ?: emptyList()
+          }
 
       UserProfile(uid = uid, locations = locations)
     } catch (e: Exception) {
