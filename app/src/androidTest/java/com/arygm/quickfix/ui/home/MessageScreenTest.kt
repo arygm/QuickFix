@@ -176,8 +176,6 @@ class MessageScreenTest {
     verify(chatRepository).sendMessage(any(), messageCaptor.capture(), any(), any())
     val sentMessage = messageCaptor.firstValue
     assertEquals(testMessageContent, sentMessage.content)
-
-
   }
 
   @Test
