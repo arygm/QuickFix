@@ -3,6 +3,10 @@ package com.arygm.quickfix.ui.search
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
+import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import org.junit.Before
 import org.junit.Rule
@@ -14,13 +18,23 @@ import org.mockito.Mockito.mock
 class SearchWorkerResultScreenTest {
 
   private lateinit var navigationActions: NavigationActions
+  private lateinit var searchViewModel: SearchViewModel
+  private lateinit var workerRepository: WorkerProfileRepositoryFirestore
+  private lateinit var categoryRepository: CategoryRepositoryFirestore
+  private lateinit var accountViewModel: AccountViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setup() {
     navigationActions = mock(NavigationActions::class.java)
-    composeTestRule.setContent { SearchWorkerResult(navigationActions = navigationActions) }
+    workerRepository = mock(WorkerProfileRepositoryFirestore::class.java)
+    categoryRepository = mock(CategoryRepositoryFirestore::class.java)
+    searchViewModel = SearchViewModel(workerRepository, categoryRepository)
+    accountViewModel = mock(AccountViewModel::class.java)
+    composeTestRule.setContent {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+    }
   }
 
   @Test
@@ -33,10 +47,15 @@ class SearchWorkerResultScreenTest {
 
   @Test
   fun testTitleAndDescriptionAreDisplayed() {
-    composeTestRule.onNodeWithText("Sample Title").assertExists().assertIsDisplayed()
+    searchViewModel.setSearchQuery("Construction Carpentry")
+    composeTestRule
+        .onNodeWithText(searchViewModel.searchQuery.value)
+        .assertExists()
+        .assertIsDisplayed()
 
     composeTestRule
-        .onNodeWithText("This is a sample description for the search result")
+        .onNodeWithText(
+            "This is a sample description for the ${searchViewModel.searchQuery.value} result")
         .assertExists()
         .assertIsDisplayed()
   }
@@ -65,7 +84,7 @@ class SearchWorkerResultScreenTest {
     val workerProfilesList = composeTestRule.onNodeWithTag("worker_profiles_list")
 
     // Scroll through the LazyColumn to load each item and verify it’s displayed
-    repeat(10) { index ->
+    repeat(searchViewModel.workerProfiles.value.size) { index ->
       // Scroll to the specific index in the LazyColumn
       workerProfilesList.performScrollToIndex(index)
 

@@ -98,7 +98,7 @@ fun SearchOnBoarding(
                           value = searchQuery, // Search query
                           onValueChange = {
                             searchQuery = it
-                            // @TODO: Implement search functionality
+                            searchViewModel.updateSearchQuery(it)
                           },
                           shape = CircleShape,
                           textStyle = poppinsTypography.bodyMedium,
@@ -142,6 +142,8 @@ fun SearchOnBoarding(
                               item = item,
                               isExpanded = expandedStates[index],
                               onExpandedChange = { expandedStates[index] = it },
+                              searchViewModel = searchViewModel,
+                              navigationActions = navigationActions,
                           )
                           Spacer(modifier = Modifier.height(10.dp))
                         }

@@ -8,7 +8,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 
-class CategoryRepositoryFirestore(private val db: FirebaseFirestore) : CategoryRepository {
+open class CategoryRepositoryFirestore(private val db: FirebaseFirestore) : CategoryRepository {
 
   private val collectionPath = "categories"
 

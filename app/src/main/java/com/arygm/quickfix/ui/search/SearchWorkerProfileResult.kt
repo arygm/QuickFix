@@ -27,11 +27,12 @@ fun SearchWorkerProfileResult(
     profileImage: Int,
     name: String,
     category: String,
-    rating: Float,
+    rating: Double,
     reviewCount: Int,
     location: String,
     price: String,
-    onBookClick: () -> Unit
+    onBookClick: () -> Unit,
+    distance: Int? = null
 ) {
   Card(
       shape = RoundedCornerShape(8.dp),
@@ -74,7 +75,7 @@ fun SearchWorkerProfileResult(
 
                   Text(
                       text = category,
-                      fontSize = 15.sp,
+                      fontSize = 12.sp,
                       fontWeight = FontWeight.SemiBold,
                       fontFamily = poppinsFontFamily,
                       color = colorScheme.onBackground)
@@ -107,14 +108,20 @@ fun SearchWorkerProfileResult(
                   horizontalAlignment = Alignment.End,
                   verticalArrangement = Arrangement.SpaceBetween,
                   modifier = Modifier.weight(0.4f).height(100.dp).padding(end = 8.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                      Icon(
-                          imageVector = Icons.Default.LocationOn,
-                          contentDescription = "Location",
-                          tint = colorScheme.onSurface,
-                          modifier = Modifier.size(16.dp))
-                      Text(text = location, fontSize = 11.sp, color = Color.Gray)
+                    Column {
+                      Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "Location",
+                            tint = colorScheme.onSurface,
+                            modifier = Modifier.size(16.dp))
+                        Text(text = location, fontSize = 9.sp, color = Color.Gray)
+                      }
+                      distance?.let {
+                        Text(text = "$distance km away", fontSize = 9.sp, color = Color.Gray)
+                      }
                     }
+
                     Row(verticalAlignment = Alignment.Bottom) {
                       QuickFixButton(
                           onClickAction = onBookClick,

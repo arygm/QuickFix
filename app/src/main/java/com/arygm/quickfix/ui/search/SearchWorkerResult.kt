@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.search
 
+import android.location.Location
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,18 +30,30 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.account.Account
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.utils.LocationHelper
 
 data class SearchFilterButtons(
     val onClick: () -> Unit,
@@ -79,7 +92,18 @@ val listOfButtons =
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchWorkerResult(navigationActions: NavigationActions) {
+fun SearchWorkerResult(
+    navigationActions: NavigationActions,
+    searchViewModel: SearchViewModel,
+    accountViewModel: AccountViewModel
+) {
+
+  val searchQuery by searchViewModel.searchQuery.collectAsState()
+  val workerProfiles by searchViewModel.workerProfiles.collectAsState()
+  var currentLocation by remember { mutableStateOf<Location?>(null) }
+
+  var locationHelper: LocationHelper = LocationHelper(LocalContext.current, MainActivity())
+
   Scaffold(
       topBar = {
         CenterAlignedTopAppBar(
@@ -110,14 +134,14 @@ fun SearchWorkerResult(navigationActions: NavigationActions) {
                   horizontalAlignment = Alignment.CenterHorizontally,
                   verticalArrangement = Arrangement.Top) {
                     Text(
-                        text = "Sample Title",
+                        text = searchQuery,
                         style = poppinsTypography.labelMedium,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.SemiBold,
                         textAlign = TextAlign.Center,
                     )
                     Text(
-                        text = "This is a sample description for the search result",
+                        text = "This is a sample description for the $searchQuery result",
                         style = poppinsTypography.labelSmall,
                         fontWeight = FontWeight.Medium,
                         fontSize = 12.sp,
@@ -170,17 +194,51 @@ fun SearchWorkerResult(navigationActions: NavigationActions) {
                 }
               }
               LazyColumn(modifier = Modifier.fillMaxWidth().testTag("worker_profiles_list")) {
-                items(10) {
-                  SearchWorkerProfileResult(
-                      modifier = Modifier.testTag("worker_profile_result$it"),
-                      profileImage = R.drawable.placeholder_worker,
-                      name = "Moha Abbes",
-                      category = "Exterior Painter",
-                      rating = 4.0f,
-                      reviewCount = 160,
-                      location = "Rennens",
-                      price = "42",
-                      onBookClick = { /* Handle book click in preview */})
+                items(workerProfiles.size) { index ->
+                  val profile = workerProfiles[index]
+                  var account by remember { mutableStateOf<Account?>(null) }
+                  var distance by remember { mutableStateOf<Int?>(null) }
+
+                  locationHelper.getCurrentLocation { location ->
+                    currentLocation = location
+                    location?.let {
+                      distance =
+                          profile.location
+                              ?.let { workerLocation ->
+                                searchViewModel.calculateDistance(
+                                    workerLocation.latitude,
+                                    workerLocation.longitude,
+                                    it.latitude,
+                                    it.longitude)
+                              }
+                              ?.toInt()
+                    }
+                  }
+
+                  LaunchedEffect(profile.uid) {
+                    accountViewModel.fetchUserAccount(profile.uid) { fetchedAccount: Account? ->
+                      account = fetchedAccount
+                    }
+                  }
+
+                  account?.let { acc ->
+                    (if (profile.location?.name.isNullOrEmpty()) "Unknown"
+                        else profile.location?.name)
+                        ?.let {
+                          SearchWorkerProfileResult(
+                              modifier = Modifier.testTag("worker_profile_result$index"),
+                              profileImage = R.drawable.placeholder_worker,
+                              name = "${acc.firstName} ${acc.lastName}",
+                              category = profile.fieldOfWork,
+                              rating = profile.rating,
+                              reviewCount = profile.reviews.size,
+                              location = it,
+                              price = profile.hourlyRate?.toString() ?: "N/A",
+                              onBookClick = { /* Handle book click in preview */},
+                              distance = distance,
+                          )
+                        }
+                  }
                   Spacer(modifier = Modifier.height(3.dp))
                 }
               }

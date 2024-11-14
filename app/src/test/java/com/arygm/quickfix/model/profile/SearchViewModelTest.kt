@@ -41,12 +41,20 @@ class SearchViewModelTest {
 
     // Mock repository behavior for a successful response
     doAnswer { invocation ->
-          val onSuccess = invocation.arguments[4] as (List<WorkerProfile>) -> Unit
+          val onSuccess = invocation.arguments[6] as (List<WorkerProfile>) -> Unit
           onSuccess(expectedProfiles) // Simulate success callback
           null
         }
         .`when`(mockRepository)
-        .filterWorkers(eq(30.0), isNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+        .filterWorkers(
+            anyOrNull(),
+            anyOrNull(),
+            eq(30.0),
+            isNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull())
 
     // Act: Call ViewModel's function to filter worker profiles
     viewModel.filterWorkerProfiles(hourlyRateThreshold = 30.0)
@@ -63,12 +71,20 @@ class SearchViewModelTest {
 
     // Mock repository behavior for a failure response
     doAnswer { invocation ->
-          val onFailure = invocation.arguments[5] as (Exception) -> Unit
+          val onFailure = invocation.arguments[7] as (Exception) -> Unit
           onFailure(Exception(errorMessage)) // Simulate failure callback
           null
         }
         .`when`(mockRepository)
-        .filterWorkers(eq(30.0), isNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+        .filterWorkers(
+            anyOrNull(),
+            anyOrNull(),
+            eq(30.0),
+            isNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull())
 
     // Act: Call ViewModel's function to filter worker profiles
     viewModel.filterWorkerProfiles(hourlyRateThreshold = 30.0)
@@ -91,13 +107,20 @@ class SearchViewModelTest {
 
     // Mock repository behavior for a successful response
     doAnswer { invocation ->
-          val onSuccess = invocation.arguments[4] as (List<WorkerProfile>) -> Unit
+          val onSuccess = invocation.arguments[6] as (List<WorkerProfile>) -> Unit
           onSuccess(expectedProfiles) // Simulate success callback
           null
         }
         .`when`(mockRepository)
         .filterWorkers(
-            isNull(), eq("Electrician"), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+            anyOrNull(),
+            anyOrNull(),
+            isNull(),
+            eq("Electrician"),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull())
 
     // Act: Call ViewModel's function to filter worker profiles by field of work
     viewModel.filterWorkerProfiles(fieldOfWork = "Electrician")
@@ -120,12 +143,20 @@ class SearchViewModelTest {
 
     // Mock repository behavior
     doAnswer { invocation ->
-          val onSuccess = invocation.arguments[4] as (List<WorkerProfile>) -> Unit
+          val onSuccess = invocation.arguments[6] as (List<WorkerProfile>) -> Unit
           onSuccess(profiles) // Simulate success callback
           null
         }
         .`when`(mockRepository)
-        .filterWorkers(isNull(), isNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+        .filterWorkers(
+            isNull(),
+            anyOrNull(),
+            isNull(),
+            isNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull())
 
     // Act: Filter profiles by distance (user's location vs worker's location)
     viewModel.filterWorkerProfiles(
@@ -150,12 +181,20 @@ class SearchViewModelTest {
 
     // Mock repository behavior for a successful response
     doAnswer { invocation ->
-          val onSuccess = invocation.arguments[4] as (List<WorkerProfile>) -> Unit
+          val onSuccess = invocation.arguments[6] as (List<WorkerProfile>) -> Unit
           onSuccess(profiles) // Simulate success callback
           null
         }
         .`when`(mockRepository)
-        .filterWorkers(isNull(), isNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+        .filterWorkers(
+            isNull(),
+            anyOrNull(),
+            isNull(),
+            isNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull())
 
     // Act: Call ViewModel's function with all null parameters
     viewModel.filterWorkerProfiles()
@@ -182,12 +221,20 @@ class SearchViewModelTest {
 
     // Mock repository behavior for a successful response
     doAnswer { invocation ->
-          val onSuccess = invocation.arguments[4] as (List<WorkerProfile>) -> Unit
+          val onSuccess = invocation.arguments[6] as (List<WorkerProfile>) -> Unit
           onSuccess(profiles) // Simulate success callback
           null
         }
         .`when`(mockRepository)
-        .filterWorkers(eq(50.0), isNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+        .filterWorkers(
+            isNull(),
+            anyOrNull(),
+            eq(50.0),
+            isNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull())
 
     // Act: Apply multiple filters
     viewModel.filterWorkerProfiles(
