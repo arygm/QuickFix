@@ -58,6 +58,7 @@ import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
+import com.arygm.quickfix.utils.ANIMATED_BOX_ROTATION
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
@@ -149,13 +150,13 @@ fun LogInScreen(
                     ) {
                     Box(
                         modifier = Modifier
-                            .size(screenWidth * 0.5f, screenWidth * 0.5f) // Scale box size to be relative to screen size
+                            .size(screenWidth * 0.5f) // Scale box size to be relative to screen size
                             .align(Alignment.BottomStart)
                             .offset(
                                 x = -screenWidth * 0.4f, // Offset slightly left relative to screen width
                                 y = screenHeight * 0.1f  // Offset slightly upward relative to screen height
                             )
-                            .graphicsLayer(rotationZ = -28f)
+                            .graphicsLayer(rotationZ = ANIMATED_BOX_ROTATION)
                             .background(colorScheme.primary)
                             .testTag("BoxDecoration")
                     )
