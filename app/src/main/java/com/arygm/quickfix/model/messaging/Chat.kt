@@ -1,6 +1,6 @@
 package com.arygm.quickfix.model.messaging
 
-class Chat(
+data class Chat(
     val chatId: String,
     val workeruid: String,
     val useruid: String,

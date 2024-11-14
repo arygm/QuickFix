@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -36,7 +37,8 @@ import kotlinx.coroutines.launch
 fun QuickFixFinderScreen(
     navigationActions: NavigationActions,
     navigationActionsRoot: NavigationActions,
-    isUser: Boolean = true
+    isUser: Boolean = true,
+    searchViewModel: SearchViewModel
 ) {
   Scaffold(
       containerColor = colorScheme.background,
@@ -83,7 +85,9 @@ fun QuickFixFinderScreen(
                   userScrollEnabled = false,
                   modifier = Modifier.testTag("quickFixSearchPager")) { page ->
                     when (page) {
-                      0 -> SearchOnBoarding(navigationActions, navigationActionsRoot, isUser)
+                      0 ->
+                          SearchOnBoarding(
+                              navigationActions, navigationActionsRoot, isUser, searchViewModel)
                       1 -> AnnouncementScreen(navigationActions, isUser)
                       else -> Text("Should never happen !")
                     }

@@ -1,5 +1,6 @@
 package com.arygm.quickfix
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -31,7 +32,9 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.DashboardScreen
 import com.arygm.quickfix.ui.account.AccountConfigurationScreen
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
@@ -39,6 +42,7 @@ import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
 import com.arygm.quickfix.ui.authentication.ResetPasswordScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
+import com.arygm.quickfix.ui.home.FakeMessageScreen
 import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -47,17 +51,53 @@ import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.profile.BusinessScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.search.QuickFixFinderScreen
+import com.arygm.quickfix.ui.search.SearchWorkerResult
 import com.arygm.quickfix.ui.theme.QuickFixTheme
+import com.arygm.quickfix.utils.LocationHelper
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
+
+  private lateinit var locationHelper: LocationHelper
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    locationHelper = LocationHelper(this, this)
+
     setContent {
       QuickFixTheme {
-        // A surface container using the 'background' color from the theme
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
           QuickFixApp()
+        }
+      }
+    }
+
+    // Check permissions and get location
+    if (locationHelper.checkPermissions()) {
+      locationHelper.getCurrentLocation { location ->
+        location?.let {
+          // Handle location (e.g., update UI, save location data)
+          Log.d("MainActivity", "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
+        }
+      }
+    } else {
+      locationHelper.requestPermissions()
+    }
+  }
+
+  override fun onRequestPermissionsResult(
+      requestCode: Int,
+      permissions: Array<String>,
+      grantResults: IntArray
+  ) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    if (requestCode == LocationHelper.PERMISSION_REQUEST_ACCESS_LOCATION &&
+        grantResults.isNotEmpty() &&
+        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+      locationHelper.getCurrentLocation { location ->
+        location?.let {
+          Log.d("MainActivity", "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
         }
       }
     }
@@ -78,6 +118,8 @@ fun QuickFixApp() {
   val loggedInAccountViewModel: LoggedInAccountViewModel =
       viewModel(factory = LoggedInAccountViewModel.Factory)
   val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
+  val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory)
+  val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
 
   // Initialized here because needed for the bottom bar
   val profileNavController = rememberNavController()
@@ -178,9 +220,13 @@ fun QuickFixApp() {
                 }
               }
 
-              composable(Route.HOME) { HomeNavHost(isUser) }
+              composable(Route.HOME) {
+                HomeNavHost(isUser) // , loggedInAccountViewModel, chatViewModel)
+              }
 
-              composable(Route.SEARCH) { SearchNavHost(isUser, navigationActionsRoot) }
+              composable(Route.SEARCH) {
+                SearchNavHost(isUser, navigationActionsRoot, searchViewModel, accountViewModel)
+              }
 
               composable(Route.DASHBOARD) { DashBoardNavHost(isUser) }
 
@@ -198,11 +244,27 @@ fun QuickFixApp() {
 }
 
 @Composable
-fun HomeNavHost(isUser: Boolean) {
+fun HomeNavHost(
+    isUser: Boolean,
+    // loggedInAccountViewModel: LoggedInAccountViewModel,
+    // chatViewModel: ChatViewModel
+) {
   val homeNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(homeNavController) }
-  NavHost(navController = homeNavController, startDestination = Screen.HOME) {
+
+  NavHost(
+      navController = homeNavController,
+      startDestination = Screen.HOME,
+      route = Route.HOME,
+  ) {
     composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
+    // Add MessageScreen as a nested composable within Home
+    composable(Screen.MESSAGES) {
+      //  MessageScreen(
+      //      loggedInAccountViewModel = loggedInAccountViewModel, chatViewModel =
+      // chatViewModel,navigationActions)
+      FakeMessageScreen(navigationActions)
+    }
   }
 }
 
@@ -249,7 +311,12 @@ fun DashBoardNavHost(isUser: Boolean) {
 }
 
 @Composable
-fun SearchNavHost(isUser: Boolean, navigationActionsRoot: NavigationActions) {
+fun SearchNavHost(
+    isUser: Boolean,
+    navigationActionsRoot: NavigationActions,
+    searchViewModel: SearchViewModel,
+    accountViewModel: AccountViewModel
+) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
   NavHost(
@@ -257,7 +324,10 @@ fun SearchNavHost(isUser: Boolean, navigationActionsRoot: NavigationActions) {
       startDestination = Screen.SEARCH,
   ) {
     composable(Screen.SEARCH) {
-      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser)
+      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser, searchViewModel)
+    }
+    composable(Screen.SEARCH_WORKER_RESULT) {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
     }
   }
 }

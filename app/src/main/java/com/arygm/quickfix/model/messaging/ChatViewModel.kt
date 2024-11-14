@@ -1,11 +1,15 @@
 package com.arygm.quickfix.model.messaging
 
 import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class ChatViewModel(private val repository: ChatRepository) {
+class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
 
   private val chats_ = MutableStateFlow<List<Chat>>(emptyList())
   val chats: StateFlow<List<Chat>> = chats_.asStateFlow()
@@ -14,6 +18,16 @@ class ChatViewModel(private val repository: ChatRepository) {
     repository.getChats(
         onSuccess = { chats_.value = it },
         onFailure = { e -> Log.e("ChatViewModel", "Failed to fetch chats: ${e.message}") })
+  }
+
+  companion object {
+    val Factory: ViewModelProvider.Factory =
+        object : ViewModelProvider.Factory {
+          @Suppress("UNCHECKED_CAST")
+          override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return ChatViewModel(ChatRepositoryFirestore(Firebase.firestore)) as T
+          }
+        }
   }
 
   fun addChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {

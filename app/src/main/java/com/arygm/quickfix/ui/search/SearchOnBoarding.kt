@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.search
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.arygm.quickfix.model.categories.WorkerCategory
+import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -43,9 +45,12 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 fun SearchOnBoarding(
     navigationActions: NavigationActions,
     navigationActionsRoot: NavigationActions,
-    isUser: Boolean
+    isUser: Boolean,
+    searchViewModel: SearchViewModel
 ) {
-  val itemCategories = remember { WorkerCategory.entries.toList() }
+  val categories = searchViewModel.categories.collectAsState().value
+  Log.d("SearchOnBoarding", "Categories: $categories")
+  val itemCategories = remember { categories }
   val expandedStates = remember {
     mutableStateListOf(*BooleanArray(itemCategories.size) { false }.toTypedArray())
   }
@@ -93,7 +98,7 @@ fun SearchOnBoarding(
                           value = searchQuery, // Search query
                           onValueChange = {
                             searchQuery = it
-                            // @TODO: Implement search functionality
+                            searchViewModel.updateSearchQuery(it)
                           },
                           shape = CircleShape,
                           textStyle = poppinsTypography.bodyMedium,
@@ -137,6 +142,8 @@ fun SearchOnBoarding(
                               item = item,
                               isExpanded = expandedStates[index],
                               onExpandedChange = { expandedStates[index] = it },
+                              searchViewModel = searchViewModel,
+                              navigationActions = navigationActions,
                           )
                           Spacer(modifier = Modifier.height(10.dp))
                         }

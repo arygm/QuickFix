@@ -3,30 +3,58 @@ package com.arygm.quickfix.ui.search
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import com.arygm.quickfix.model.categories.WorkerCategory
+import com.arygm.quickfix.model.category.Category
+import com.arygm.quickfix.model.category.Subcategory
+import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ressources.C
+import com.arygm.quickfix.ui.navigation.NavigationActions
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.Mockito.mock
 
 class SearchCategoryButtonTest {
 
   @get:Rule val composeTestRule = createComposeRule()
+  private lateinit var navigationActions: NavigationActions
+  private lateinit var searchViewModel: SearchViewModel
 
-  private val item = WorkerCategory.PAINTING
+  private val item =
+      Category(
+          id = "painting",
+          name = "Painting",
+          description = "Find skilled painters for residential or commercial projects.",
+          subcategories =
+              listOf(
+                  Subcategory(
+                      id = "residential_painting",
+                      name = "Residential Painting",
+                      tags = listOf("Interior Painting", "Exterior Painting", "Cabinet Painting")),
+                  Subcategory(
+                      id = "commercial_painting",
+                      name = "Commercial Painting",
+                      tags = listOf("Office Buildings", "Retail Spaces")),
+                  Subcategory(
+                      id = "decorative_painting",
+                      name = "Decorative Painting",
+                      tags = listOf("Faux Finishes", "Murals")),
+              ))
 
   @Test
   fun searchCategoryButton_displaysTitleAndDescription() {
     val expandedState = mutableStateOf(false)
+    navigationActions = mock(NavigationActions::class.java)
+    searchViewModel = mock(SearchViewModel::class.java)
     composeTestRule.setContent {
       ExpandableCategoryItem(
           item = item,
           isExpanded = expandedState.value,
           onExpandedChange = { expandedState.value = it },
-      )
+          navigationActions = navigationActions,
+          searchViewModel = searchViewModel)
     }
 
     // Check if title and description texts are displayed
-    composeTestRule.onNodeWithText(item.displayName).assertIsDisplayed()
+    composeTestRule.onNodeWithText(item.name).assertIsDisplayed()
     composeTestRule.onNodeWithText(item.description).assertIsDisplayed()
   }
 
@@ -34,13 +62,15 @@ class SearchCategoryButtonTest {
   fun searchCategoryButton_clickAction() {
     // Create a variable to track if the button was clicked
     val expandedState = mutableStateOf(false)
-
+    navigationActions = mock(NavigationActions::class.java)
+    searchViewModel = mock(SearchViewModel::class.java)
     composeTestRule.setContent {
       ExpandableCategoryItem(
           item = item,
           isExpanded = expandedState.value,
           onExpandedChange = { expandedState.value = it },
-      )
+          navigationActions = navigationActions,
+          searchViewModel = searchViewModel)
     }
 
     // Perform a click on the button
@@ -57,7 +87,8 @@ class SearchCategoryButtonTest {
 
     // Step 2: Set up the initial state
     val isExpandedState = mutableStateOf(false)
-    val item = WorkerCategory.PAINTING // Replace with an appropriate WorkerCategory
+    navigationActions = mock(NavigationActions::class.java)
+    searchViewModel = SearchViewModel(mock(), mock())
     composeTestRule.setContent {
       // Provide LocalInspectionMode if you prefer to disable animations
       // CompositionLocalProvider(LocalInspectionMode provides true) {
@@ -65,7 +96,8 @@ class SearchCategoryButtonTest {
           item = item,
           isExpanded = isExpandedState.value,
           onExpandedChange = { isExpandedState.value = it },
-      )
+          navigationActions = navigationActions,
+          searchViewModel = searchViewModel)
       // }
     }
 
@@ -81,9 +113,6 @@ class SearchCategoryButtonTest {
         .onNodeWithTag("${C.Tag.subCategoryName}_$subCategoryName")
         .assertIsDisplayed()
         .assertHasClickAction()
-
-    // Step 6: Perform click to collapse the item
-    composeTestRule.onNodeWithTag(C.Tag.expandableCategoryItem).performClick()
 
     // Advance the clock again for the collapse animation
     composeTestRule.mainClock.advanceTimeBy(1000)

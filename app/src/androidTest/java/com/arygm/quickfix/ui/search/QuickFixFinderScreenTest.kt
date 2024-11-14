@@ -7,11 +7,15 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
+import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.ui.navigation.getBottomBarId
+import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -25,19 +29,25 @@ class QuickFixFinderScreenTest {
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var navigationActionsRoot: NavigationActions
+  private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
+  private lateinit var categoryRepo: CategoryRepositoryFirestore
+  private lateinit var searchViewModel: SearchViewModel
 
   @Before
   fun setup() {
     navigationActions = mock(NavigationActions::class.java)
     `when`(navigationActions.currentRoute()).thenReturn(Screen.SEARCH)
     navigationActionsRoot = mock(NavigationActions::class.java)
+    workerProfileRepo = mockk(relaxed = true)
+    categoryRepo = mockk(relaxed = true)
+    searchViewModel = SearchViewModel(workerProfileRepo, categoryRepo)
   }
 
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun quickFixFinderScreenUserDisplaysCorrectly() {
     composeTestRule.setContent {
-      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser = true)
+      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser = true, searchViewModel)
     }
 
     // Assert top bar is displayed
@@ -68,7 +78,8 @@ class QuickFixFinderScreenTest {
   @Test
   fun quickFixFinderScreenWorkerDisplaysCorrectly() {
     composeTestRule.setContent {
-      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser = false)
+      QuickFixFinderScreen(
+          navigationActions, navigationActionsRoot, isUser = false, searchViewModel)
     }
 
     // Assert top bar is displayed
@@ -99,7 +110,7 @@ class QuickFixFinderScreenTest {
   @Test
   fun tabSelectionChangesPagerContent() {
     composeTestRule.setContent {
-      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser = true)
+      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser = true, searchViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -115,7 +126,7 @@ class QuickFixFinderScreenTest {
   @Test
   fun cancelButtonNavigatesToHomeAndUpdatesBottomBar() {
     composeTestRule.setContent {
-      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser = true)
+      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser = true, searchViewModel)
     }
 
     // Click the "Cancel" button

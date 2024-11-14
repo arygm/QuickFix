@@ -47,6 +47,7 @@ object Screen {
   const val TO_WORKER = "To Worker Screen"
   const val RESET_PASSWORD = "Reset password Screen"
   const val GOOGLE_INFO = "Google Info Screen"
+  const val SEARCH_WORKER_RESULT = "Search Worker Result Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector?, val textId: String)

@@ -1,7 +1,7 @@
 package com.arygm.quickfix.model.profile
 
 import android.util.Log
-import com.arygm.quickfix.model.location.Location
+import com.arygm.quickfix.model.locations.Location
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -10,7 +10,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlin.math.cos
 
-class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRepository {
+open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRepository {
 
   private val collectionPath = "workers"
 
@@ -101,15 +101,19 @@ class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : Prof
       val description = document.getString("description") ?: return null
       val fieldOfWork = document.getString("fieldOfWork") ?: return null
       val hourlyRate = document.getDouble("hourlyRate") ?: return null
-      val locationData = document.get("location") as? Map<*, *> ?: return null
+      val locationData = document.get("location") as? Map<String, Any> ?: emptyMap()
+      val rating = document.getDouble("rating") ?: 0.0
+      val reviews = document.get("reviews") as? List<*> ?: return null
       val location =
-          locationData?.let {
+          locationData.let {
             Location(
                 latitude = it["latitude"] as? Double ?: 0.0,
                 longitude = it["longitude"] as? Double ?: 0.0,
                 name = it["name"] as? String ?: "")
           }
       WorkerProfile(
+          rating = rating,
+          reviews = reviews.mapNotNull { it as? String },
           uid = uid,
           description = description,
           fieldOfWork = fieldOfWork,
@@ -144,6 +148,8 @@ class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : Prof
   }
 
   fun filterWorkers(
+      rating: Double?,
+      reviews: List<String>?,
       hourlyRateThreshold: Double?,
       fieldOfWork: String?,
       location: Location?,
@@ -152,6 +158,9 @@ class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : Prof
       onFailure: (Exception) -> Unit
   ) {
     var query: Query = db.collection(collectionPath)
+
+    rating?.let { query = query.whereEqualTo("rating", it) }
+    reviews?.takeIf { it.isNotEmpty() }?.let { query = query.whereArrayContainsAny("reviews", it) }
 
     fieldOfWork?.let { query = query.whereEqualTo("fieldOfWork", it) }
 

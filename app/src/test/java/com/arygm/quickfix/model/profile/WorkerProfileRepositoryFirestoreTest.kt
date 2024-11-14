@@ -2,7 +2,7 @@ package com.arygm.quickfix.model.profile
 
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
-import com.arygm.quickfix.model.location.Location
+import com.arygm.quickfix.model.locations.Location
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -285,6 +285,8 @@ class WorkerProfileRepositoryFirestoreTest {
 
     // Mocking the data returned from Firestore
     `when`(mockDocumentSnapshot.id).thenReturn(profile.uid)
+    `when`(mockDocumentSnapshot.getString("rating")).thenReturn(profile.rating.toString())
+    `when`(mockDocumentSnapshot.get("reviews")).thenReturn(profile.reviews)
     `when`(mockDocumentSnapshot.getString("description")).thenReturn(profile.description)
     `when`(mockDocumentSnapshot.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
     `when`(mockDocumentSnapshot.getDouble("hourlyRate")).thenReturn(profile.hourlyRate)
@@ -374,6 +376,8 @@ class WorkerProfileRepositoryFirestoreTest {
 
     // Mock data for first document
     `when`(document1.id).thenReturn(profile.uid)
+    `when`(document1.getString("rating")).thenReturn(profile.rating.toString())
+    `when`(document1.get("reviews")).thenReturn(profile.reviews)
     `when`(document1.getString("description")).thenReturn(profile.description)
     `when`(document1.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
     `when`(document1.getDouble("hourlyRate")).thenReturn(profile.hourlyRate)
@@ -386,6 +390,8 @@ class WorkerProfileRepositoryFirestoreTest {
 
     // Mock data for second document
     `when`(document2.id).thenReturn(profile2.uid)
+    `when`(document2.getString("rating")).thenReturn(profile.rating.toString())
+    `when`(document2.get("reviews")).thenReturn(profile.reviews)
     `when`(document2.getString("description")).thenReturn(profile2.description)
     `when`(document2.getString("fieldOfWork")).thenReturn(profile2.fieldOfWork)
     `when`(document2.getDouble("hourlyRate")).thenReturn(profile2.hourlyRate)
@@ -447,6 +453,8 @@ class WorkerProfileRepositoryFirestoreTest {
     // Arrange
     val document = mock(DocumentSnapshot::class.java)
     `when`(document.id).thenReturn(profile.uid)
+    `when`(document.getString("rating")).thenReturn(profile.rating.toString())
+    `when`(document.get("reviews")).thenReturn(profile.reviews)
     `when`(document.getString("description")).thenReturn(profile.description)
     `when`(document.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
     `when`(document.getDouble("hourlyRate")).thenReturn(profile.hourlyRate)
@@ -595,6 +603,8 @@ class WorkerProfileRepositoryFirestoreTest {
     var returnedProfiles: List<WorkerProfile>? = null
 
     profileRepositoryFirestore.filterWorkers(
+        rating = null,
+        reviews = null,
         fieldOfWork = "Plumber",
         hourlyRateThreshold = null,
         location = null,
@@ -636,6 +646,8 @@ class WorkerProfileRepositoryFirestoreTest {
     var returnedProfiles: List<WorkerProfile>? = null
 
     profileRepositoryFirestore.filterWorkers(
+        rating = null,
+        reviews = null,
         hourlyRateThreshold = 30.0,
         fieldOfWork = null,
         location = null,
@@ -680,6 +692,8 @@ class WorkerProfileRepositoryFirestoreTest {
     var returnedProfiles: List<WorkerProfile>? = null
 
     profileRepositoryFirestore.filterWorkers(
+        rating = null,
+        reviews = null,
         hourlyRateThreshold = 30.0,
         fieldOfWork = "Plumber",
         location = null,
@@ -743,6 +757,8 @@ class WorkerProfileRepositoryFirestoreTest {
     var returnedProfiles: List<WorkerProfile>? = null
 
     profileRepositoryFirestore.filterWorkers(
+        rating = null,
+        reviews = null,
         hourlyRateThreshold = null,
         fieldOfWork = null,
         location = location,
@@ -784,6 +800,8 @@ class WorkerProfileRepositoryFirestoreTest {
     var returnedException: Exception? = null
 
     profileRepositoryFirestore.filterWorkers(
+        rating = null,
+        reviews = null,
         hourlyRateThreshold = 30.0,
         fieldOfWork = "Plumber",
         location = null,

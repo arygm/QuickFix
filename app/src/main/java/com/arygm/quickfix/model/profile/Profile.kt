@@ -1,6 +1,6 @@
 package com.arygm.quickfix.model.profile
 
-import com.arygm.quickfix.model.location.Location
+import com.arygm.quickfix.model.locations.Location
 
 open class Profile(
     val uid: String,
@@ -37,12 +37,14 @@ class UserProfile(
 }
 
 class WorkerProfile(
+    val rating: Double = 0.0,
+    val reviews: List<String> = emptyList(),
     val fieldOfWork: String = "",
     val hourlyRate: Double? = null,
     val description: String = "",
-    val location: Location?,
+    val location: Location? = null,
     // quickFixes: List<String>,
-    uid: String
+    uid: String = ""
 ) : Profile(uid) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -52,10 +54,13 @@ class WorkerProfile(
     return fieldOfWork == other.fieldOfWork &&
         hourlyRate == other.hourlyRate &&
         description == other.description &&
-        location == other.location
+        location == other.location &&
+        rating == other.rating &&
+        reviews == other.reviews
   }
 
   override fun hashCode(): Int {
-    return listOf(super.hashCode(), fieldOfWork, hourlyRate, description, location).hashCode()
+    return listOf(super.hashCode(), fieldOfWork, hourlyRate, description, location, rating, reviews)
+        .hashCode()
   }
 }
