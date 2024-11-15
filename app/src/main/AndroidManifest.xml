@@ -21,7 +21,8 @@
             android:name="com.arygm.quickfix.MainActivity"
             android:exported="true"
             android:label="@string/title_activity_main"
-            android:theme="@style/Theme.SampleApp">
+            android:theme="@style/Theme.SampleApp"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
