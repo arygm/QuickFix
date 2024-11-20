@@ -19,12 +19,19 @@ class LoggedInAccountViewModel(
     private val workerProfileRepo: ProfileRepository
 ) : ViewModel() {
 
+  enum class Mode {
+    USER,
+    WORKER
+  }
+
   val loggedInAccount_ = MutableStateFlow<Account?>(null)
   val loggedInAccount: StateFlow<Account?> = loggedInAccount_.asStateFlow()
   val userProfile_ = MutableStateFlow<UserProfile?>(null)
   val userProfile: StateFlow<UserProfile?> = userProfile_.asStateFlow()
   val workerProfile_ = MutableStateFlow<WorkerProfile?>(null)
   val workerProfile: StateFlow<WorkerProfile?> = workerProfile_.asStateFlow()
+  val mode_ = MutableStateFlow<Mode>(Mode.USER)
+  val mode: StateFlow<Mode> = mode_.asStateFlow()
 
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -58,5 +65,13 @@ class LoggedInAccountViewModel(
     userProfile_.value = null
     workerProfile_.value = null
     com.arygm.quickfix.utils.logOut(firebaseAuth)
+  }
+
+  fun switch_mode() {
+    if (mode_.value == Mode.USER) {
+      mode_.value = Mode.WORKER
+    } else {
+      mode_.value = Mode.USER
+    }
   }
 }

@@ -521,4 +521,47 @@ class LoggedInAccountViewModelTest {
     composeTestRule.onNodeWithTag("ChangePasswordButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SaveButton").assertIsDisplayed()
   }
+
+  @Test
+  fun defaultModeShouldBeUser() {
+    // Assert the default mode is USER
+    assertEquals(LoggedInAccountViewModel.Mode.USER, loggedInAccountViewModel.mode.value)
+  }
+
+  @Test
+  fun switchModeFromUserToWorker() {
+    // Act: Call switch_mode once
+    loggedInAccountViewModel.switch_mode()
+
+    // Assert: Mode should now be WORKER
+    assertEquals(LoggedInAccountViewModel.Mode.WORKER, loggedInAccountViewModel.mode.value)
+  }
+
+  @Test
+  fun switchModeFromWorkerToUser() {
+    // Arrange: Set mode to WORKER first
+    loggedInAccountViewModel.switch_mode()
+    assertEquals(LoggedInAccountViewModel.Mode.WORKER, loggedInAccountViewModel.mode.value)
+
+    // Act: Call switch_mode again
+    loggedInAccountViewModel.switch_mode()
+
+    // Assert: Mode should now be USER
+    assertEquals(LoggedInAccountViewModel.Mode.USER, loggedInAccountViewModel.mode.value)
+  }
+
+  @Test
+  fun multipleModeSwitches() {
+    // Act & Assert: Call switch_mode multiple times and verify the mode alternates
+    assertEquals(LoggedInAccountViewModel.Mode.USER, loggedInAccountViewModel.mode.value)
+
+    loggedInAccountViewModel.switch_mode()
+    assertEquals(LoggedInAccountViewModel.Mode.WORKER, loggedInAccountViewModel.mode.value)
+
+    loggedInAccountViewModel.switch_mode()
+    assertEquals(LoggedInAccountViewModel.Mode.USER, loggedInAccountViewModel.mode.value)
+
+    loggedInAccountViewModel.switch_mode()
+    assertEquals(LoggedInAccountViewModel.Mode.WORKER, loggedInAccountViewModel.mode.value)
+  }
 }
