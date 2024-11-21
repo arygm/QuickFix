@@ -8,48 +8,37 @@ import kotlinx.coroutines.flow.asStateFlow
 import okhttp3.OkHttpClient
 
 class LocationViewModel(val repository: LocationRepository) : ViewModel() {
-    // State to manage the search query
-    private val query_ = MutableStateFlow("")
-    val query: StateFlow<String> = query_.asStateFlow()
+  // State to manage the search query
+  private val query_ = MutableStateFlow("")
+  val query: StateFlow<String> = query_.asStateFlow()
 
-    // State for search results
-    private val locations_ = MutableStateFlow<List<Location>>(emptyList())
-    val locationSuggestions: StateFlow<List<Location>> = locations_.asStateFlow()
+  // State for search results
+  private val locations_ = MutableStateFlow<List<Location>>(emptyList())
+  val locationSuggestions: StateFlow<List<Location>> = locations_.asStateFlow()
 
-    // State for errors
-    private val error_ = MutableStateFlow<Exception?>(null)
-    val error: StateFlow<Exception?> = error_.asStateFlow()
+  // State for errors
+  private val error_ = MutableStateFlow<Exception?>(null)
+  val error: StateFlow<Exception?> = error_.asStateFlow()
 
-    // Method to set the search query
-    fun setQuery(query: String) {
-        // Update the query state
-        query_.value = query
+  fun setQuery(query: String) {
+    query_.value = query
+    locations_.value = emptyList()
+    error_.value = null
 
-        // Reset results and error before performing a new search
-        locations_.value = emptyList()
-        error_.value = null
+    repository.search(
+        query,
+        onSuccess = { results -> locations_.value = results },
+        onFailure = { exception -> error_.value = exception })
+  }
 
-        // Call the repository to perform the search
-        repository.search(
-            query,
-            onSuccess = { results ->
-                // Update results on success
-                locations_.value = results
-            },
-            onFailure = { exception ->
-                // Update error on failure
-                error_.value = exception
-            })
-    }
-
-    // Create a factory for the ViewModel
-    companion object {
-        val Factory: ViewModelProvider.Factory =
-            object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return LocationViewModel(NominatimLocationRepository(OkHttpClient())) as T
-                }
-            }
-    }
+  // Create a factory for the ViewModel
+  companion object {
+    val Factory: ViewModelProvider.Factory =
+        object : ViewModelProvider.Factory {
+          @Suppress("UNCHECKED_CAST")
+          override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return LocationViewModel(NominatimLocationRepository(OkHttpClient())) as T
+          }
+        }
+  }
 }
