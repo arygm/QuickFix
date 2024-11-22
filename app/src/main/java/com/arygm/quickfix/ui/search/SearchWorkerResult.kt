@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,11 +21,13 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.WorkspacePremium
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -51,6 +54,7 @@ import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
+import com.arygm.quickfix.ui.elements.QuickFixSlidingWindow
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.LocationHelper
@@ -97,42 +101,60 @@ fun SearchWorkerResult(
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel
 ) {
+    var isWindowVisible by remember { mutableStateOf(false) }
+    val searchQuery by searchViewModel.searchQuery.collectAsState()
+    val workerProfiles by searchViewModel.workerProfiles.collectAsState()
+    var currentLocation by remember { mutableStateOf<Location?>(null) }
 
-  val searchQuery by searchViewModel.searchQuery.collectAsState()
-  val workerProfiles by searchViewModel.workerProfiles.collectAsState()
-  var currentLocation by remember { mutableStateOf<Location?>(null) }
+    val locationHelper: LocationHelper = LocationHelper(LocalContext.current, MainActivity())
 
-  var locationHelper: LocationHelper = LocationHelper(LocalContext.current, MainActivity())
-
-  Scaffold(
-      topBar = {
-        CenterAlignedTopAppBar(
-            title = {},
-            navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-              }
-            },
-            actions = {
-              IconButton(onClick = { /* Handle search */}) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    tint = colorScheme.onBackground)
-              }
-            },
-            colors =
-                TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = colorScheme.background),
-        )
-      }) { paddingValues ->
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              Column(
-                  modifier = Modifier.fillMaxWidth(),
-                  horizontalAlignment = Alignment.CenterHorizontally,
-                  verticalArrangement = Arrangement.Top) {
+    // Wrap everything in a Box to allow overlay
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Scaffold containing the main UI elements
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = "Search Results",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { navigationActions.goBack() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { /* Handle search */ }) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search",
+                                tint = colorScheme.onBackground
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = colorScheme.background
+                    ),
+                )
+            }
+        ) { paddingValues ->
+            // Main content inside the Scaffold
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(paddingValues),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
+                ) {
                     Text(
                         text = searchQuery,
                         style = poppinsTypography.labelMedium,
@@ -148,100 +170,107 @@ fun SearchWorkerResult(
                         color = colorScheme.onSurface,
                         textAlign = TextAlign.Center,
                     )
-                  }
-              LazyRow(
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(top = 20.dp, bottom = 10.dp)
-                          .padding(horizontal = 10.dp)
-                          .wrapContentHeight()
-                          .testTag("filter_buttons_row"),
-                  verticalAlignment = Alignment.CenterVertically,
-              ) {
-                items(1) {
-                  Box(modifier = Modifier.height(40.dp)) {
-                    IconButton(
-                        onClick = { /* Goes to all filter screen */},
-                        modifier = Modifier.padding(bottom = 8.dp),
-                        content = {
-                          Icon(
-                              imageVector = Icons.Default.Tune,
-                              contentDescription = "Filter",
-                              tint = colorScheme.onBackground,
-                          )
-                        },
-                        colors =
-                            IconButtonDefaults.iconButtonColors()
-                                .copy(containerColor = colorScheme.surface),
-                    )
-                  }
-                  Spacer(modifier = Modifier.width(10.dp))
                 }
 
-                items(listOfButtons.size) { index ->
-                  QuickFixButton(
-                      buttonText = listOfButtons[index].text,
-                      onClickAction = listOfButtons[index].onClick,
-                      buttonColor = colorScheme.surface,
-                      textColor = colorScheme.onBackground,
-                      textStyle = poppinsTypography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                      height = 40.dp,
-                      leadingIcon = listOfButtons[index].leadingIcon,
-                      trailingIcon = listOfButtons[index].trailingIcon,
-                      contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
-                      modifier = Modifier.testTag("filter_button_${listOfButtons[index].text}"))
-                  Spacer(modifier = Modifier.width(10.dp))
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp, bottom = 10.dp)
+                        .padding(horizontal = 10.dp)
+                        .wrapContentHeight()
+                        .testTag("filter_buttons_row"),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    items(listOfButtons.size) { index ->
+                        QuickFixButton(
+                            buttonText = listOfButtons[index].text,
+                            onClickAction = listOfButtons[index].onClick,
+                            buttonColor = colorScheme.surface,
+                            textColor = colorScheme.onBackground,
+                            textStyle = poppinsTypography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                            height = 40.dp,
+                            leadingIcon = listOfButtons[index].leadingIcon,
+                            trailingIcon = listOfButtons[index].trailingIcon,
+                            contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
+                            modifier = Modifier.testTag("filter_button_${listOfButtons[index].text}")
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                    }
                 }
-              }
-              LazyColumn(modifier = Modifier.fillMaxWidth().testTag("worker_profiles_list")) {
-                items(workerProfiles.size) { index ->
-                  val profile = workerProfiles[index]
-                  var account by remember { mutableStateOf<Account?>(null) }
-                  var distance by remember { mutableStateOf<Int?>(null) }
 
-                  locationHelper.getCurrentLocation { location ->
-                    currentLocation = location
-                    location?.let {
-                      distance =
-                          profile.location
-                              ?.let { workerLocation ->
-                                searchViewModel.calculateDistance(
-                                    workerLocation.latitude,
-                                    workerLocation.longitude,
-                                    it.latitude,
-                                    it.longitude)
-                              }
-                              ?.toInt()
-                    }
-                  }
+                LazyColumn(modifier = Modifier.fillMaxWidth().testTag("worker_profiles_list")) {
+                    items(workerProfiles.size) { index ->
+                        val profile = workerProfiles[index]
+                        var account by remember { mutableStateOf<Account?>(null) }
+                        var distance by remember { mutableStateOf<Int?>(null) }
 
-                  LaunchedEffect(profile.uid) {
-                    accountViewModel.fetchUserAccount(profile.uid) { fetchedAccount: Account? ->
-                      account = fetchedAccount
-                    }
-                  }
-
-                  account?.let { acc ->
-                    (if (profile.location?.name.isNullOrEmpty()) "Unknown"
-                        else profile.location?.name)
-                        ?.let {
-                          SearchWorkerProfileResult(
-                              modifier = Modifier.testTag("worker_profile_result$index"),
-                              profileImage = R.drawable.placeholder_worker,
-                              name = "${acc.firstName} ${acc.lastName}",
-                              category = profile.fieldOfWork,
-                              rating = profile.rating,
-                              reviewCount = profile.reviews.size,
-                              location = it,
-                              price = profile.hourlyRate?.toString() ?: "N/A",
-                              onBookClick = { /* Handle book click in preview */},
-                              distance = distance,
-                          )
+                        locationHelper.getCurrentLocation { location ->
+                            currentLocation = location
+                            location?.let {
+                                distance = profile.location
+                                    ?.let { workerLocation ->
+                                        searchViewModel.calculateDistance(
+                                            workerLocation.latitude,
+                                            workerLocation.longitude,
+                                            it.latitude,
+                                            it.longitude
+                                        )
+                                    }
+                                    ?.toInt()
+                            }
                         }
-                  }
-                  Spacer(modifier = Modifier.height(3.dp))
+
+                        LaunchedEffect(profile.uid) {
+                            accountViewModel.fetchUserAccount(profile.uid) { fetchedAccount: Account? ->
+                                account = fetchedAccount
+                            }
+                        }
+
+                        account?.let { acc ->
+                            val locationName = if (profile.location?.name.isNullOrEmpty()) "Unknown"
+                            else profile.location?.name
+
+                            locationName?.let {
+                                SearchWorkerProfileResult(
+                                    modifier = Modifier.testTag("worker_profile_result$index"),
+                                    profileImage = R.drawable.placeholder_worker,
+                                    name = "${acc.firstName} ${acc.lastName}",
+                                    category = profile.fieldOfWork,
+                                    rating = profile.rating,
+                                    reviewCount = profile.reviews.size,
+                                    location = it,
+                                    price = profile.hourlyRate?.toString() ?: "N/A",
+                                    onBookClick = { isWindowVisible = true },
+                                    distance = distance,
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(3.dp))
+                    }
                 }
-              }
             }
-      }
+        }
+
+        // Sliding Window placed after the Scaffold to ensure it appears on top
+        if (isWindowVisible) {
+            QuickFixSlidingWindow(
+                isVisible = isWindowVisible,
+                onDismiss = { isWindowVisible = false }
+            ) {
+                // Content of the sliding window
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("This is a sliding window!", style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { isWindowVisible = false }) {
+                        Text("Close")
+                    }
+                }
+            }
+        }
+    }
 }
