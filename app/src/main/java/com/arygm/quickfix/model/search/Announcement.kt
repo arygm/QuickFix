@@ -7,6 +7,8 @@ import java.time.LocalDateTime
 data class AvailabilitySlot(val start: LocalDateTime, val end: LocalDateTime)
 
 data class Announcement(
+    val announcementId: String,
+    val userId: String,
     val title: String,
     val category: Category,
     val description: String,

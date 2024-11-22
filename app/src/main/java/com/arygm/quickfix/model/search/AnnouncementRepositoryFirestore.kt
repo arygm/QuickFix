@@ -1,16 +1,23 @@
 package com.arygm.quickfix.model.search
 
-class AnnouncementRepositoryFirestore : AnnouncementRepository {
+import android.graphics.Bitmap
+import com.arygm.quickfix.utils.performFirestoreOperation
+import com.google.firebase.firestore.FirebaseFirestore
+
+class AnnouncementRepositoryFirestore(private val db: FirebaseFirestore) : AnnouncementRepository {
+
+  private val collectionPath = "announcements"
 
   override fun getNewUid(): String {
-    TODO("Not yet implemented")
+    return db.collection(collectionPath).document().id
   }
 
   override fun init(onSuccess: () -> Unit) {
-    TODO("Not yet implemented")
+    onSuccess()
   }
 
   override fun getAnnouncements(
+      userId: String,
       onSuccess: (List<Announcement>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
@@ -22,6 +29,18 @@ class AnnouncementRepositoryFirestore : AnnouncementRepository {
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
+    performFirestoreOperation(
+        db.collection(collectionPath).document(announcement.announcementId).set(announcement),
+        onSuccess,
+        onFailure)
+  }
+
+  override fun uploadAnnouncementImages(
+      announcementId: String,
+      bitmaps: List<Bitmap>,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
     TODO("Not yet implemented")
   }
 
@@ -30,7 +49,10 @@ class AnnouncementRepositoryFirestore : AnnouncementRepository {
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    TODO("Not yet implemented")
+    performFirestoreOperation(
+        db.collection(collectionPath).document(announcement.announcementId).set(announcement),
+        onSuccess,
+        onFailure)
   }
 
   override fun deleteAnnouncementById(
@@ -38,6 +60,7 @@ class AnnouncementRepositoryFirestore : AnnouncementRepository {
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    TODO("Not yet implemented")
+    performFirestoreOperation(
+        db.collection(collectionPath).document(id).delete(), onSuccess, onFailure)
   }
 }
