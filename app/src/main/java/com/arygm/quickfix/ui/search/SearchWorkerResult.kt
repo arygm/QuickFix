@@ -1,12 +1,14 @@
 package com.arygm.quickfix.ui.search
 
 import android.location.Location
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -37,7 +39,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,7 +60,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -67,7 +67,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.MainActivity
@@ -199,7 +198,10 @@ fun SearchWorkerResult(
     val locationHelper: LocationHelper = LocationHelper(LocalContext.current, MainActivity())
 
     // Wrap everything in a Box to allow overlay
-    Box(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val screenHeight = maxHeight
+        val screenWidth = maxWidth
+        Log.d("Screen Dimensions", "Height: $screenHeight, Width: $screenWidth")
         // Scaffold containing the main UI elements
         Scaffold(
             topBar = {
@@ -265,8 +267,8 @@ fun SearchWorkerResult(
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 20.dp, bottom = 10.dp)
-                        .padding(horizontal = 10.dp)
+                        .padding(top = screenHeight * 0.02f, bottom = screenHeight * 0.01f)
+                        .padding(horizontal = screenWidth * 0.02f)
                         .wrapContentHeight()
                         .testTag("filter_buttons_row"),
                     verticalAlignment = Alignment.CenterVertically,
@@ -278,19 +280,24 @@ fun SearchWorkerResult(
                             buttonColor = colorScheme.surface,
                             textColor = colorScheme.onBackground,
                             textStyle = poppinsTypography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                            height = 40.dp,
+                            height = screenHeight * 0.05f,
                             leadingIcon = listOfButtons[index].leadingIcon,
                             trailingIcon = listOfButtons[index].trailingIcon,
-                            contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
+                            contentPadding = PaddingValues(
+                                vertical = 0.dp,
+                                horizontal = screenWidth * 0.02f
+                            ),
                             modifier = Modifier.testTag("filter_button_${listOfButtons[index].text}")
                         )
-                        Spacer(modifier = Modifier.width(10.dp))
+                        Spacer(modifier = Modifier.width(screenHeight * 0.01f))
                     }
                 }
 
-                LazyColumn(modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("worker_profiles_list")) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("worker_profiles_list")
+                ) {
                     items(workerProfiles.size) { index ->
                         val profile = workerProfiles[index]
                         var account by remember { mutableStateOf<Account?>(null) }
@@ -337,7 +344,7 @@ fun SearchWorkerResult(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(3.dp))
+                        Spacer(modifier = Modifier.height(screenHeight * 0.004f))
                     }
                 }
             }
@@ -351,16 +358,18 @@ fun SearchWorkerResult(
                 // Content of the sliding window
                 Column(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp))
+                        .clip(RoundedCornerShape(topStart = 25f, bottomStart = 25f))
                         .fillMaxWidth()
                         .background(colorScheme.background)
+                        .testTag("sliding_window_content")
 
                 ) {
                     // Top Bar
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(180.dp) // Adjusted height to accommodate profile picture overlap
+                            .height(screenHeight * 0.23f) // Adjusted height to accommodate profile picture overlap
+                            .testTag("sliding_window_top_bar")
                     ) {
                         // Banner Image
                         Image(
@@ -368,7 +377,8 @@ fun SearchWorkerResult(
                             contentDescription = "Banner",
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(150.dp),
+                                .height(screenHeight * 0.2f)
+                                .testTag("sliding_window_banner_image"),
                             contentScale = ContentScale.Crop
                         )
 
@@ -378,11 +388,12 @@ fun SearchWorkerResult(
                             buttonColor = colorScheme.surface,
                             textColor = colorScheme.onBackground,
                             textStyle = MaterialTheme.typography.labelMedium,
-                            contentPadding = PaddingValues(horizontal = 4.dp),
+                            contentPadding = PaddingValues(horizontal = screenWidth * 0.01f),
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
-                                .width(100.dp)
-                                .offset(x = (-16).dp), // Negative offset to position correctly,
+                                .width(screenWidth * 0.25f)
+                                .offset(x = -(screenWidth * 0.04f))
+                                .testTag("sliding_window_save_button"), // Negative offset to position correctly,
                             leadingIcon = if (saved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder
                         )
 
@@ -392,10 +403,11 @@ fun SearchWorkerResult(
                             painter = painterResource(id = profilePicture),
                             contentDescription = "Profile Picture",
                             modifier = Modifier
-                                .size(80.dp)
+                                .size(screenHeight * 0.1f)
                                 .align(Alignment.BottomStart)
-                                .offset(x = 16.dp)
-                                .clip(CircleShape),
+                                .offset(x = screenWidth * 0.04f)
+                                .clip(CircleShape)
+                                .testTag("sliding_window_profile_picture"),
                             // Negative offset to position correctly
                             contentScale = ContentScale.Crop
                         )
@@ -405,17 +417,20 @@ fun SearchWorkerResult(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
+                            .padding(horizontal = screenWidth * 0.04f)
+                            .testTag("sliding_window_worker_additional_info")
                     ) {
                         Text(
                             text = workerCategory,
                             style = MaterialTheme.typography.headlineLarge,
-                            color = colorScheme.onBackground
+                            color = colorScheme.onBackground,
+                            modifier = Modifier.testTag("sliding_window_worker_category")
                         )
                         Text(
                             text = workerAddress,
                             style = MaterialTheme.typography.headlineSmall,
-                            color = colorScheme.onBackground
+                            color = colorScheme.onBackground,
+                            modifier = Modifier.testTag("sliding_window_worker_address")
                         )
                     }
 
@@ -425,9 +440,10 @@ fun SearchWorkerResult(
                             .fillMaxWidth()
                             .verticalScroll(rememberScrollState())
                             .background(colorScheme.surface)
+                            .testTag("sliding_window_scrollable_content")
 
                     ) {
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
                         // Description with "Show more" functionality
                         var showFullDescription by remember { mutableStateOf(false) }
@@ -442,7 +458,8 @@ fun SearchWorkerResult(
                             text = descriptionText,
                             style = MaterialTheme.typography.bodySmall,
                             color = colorScheme.onSurface,
-                            modifier = Modifier.padding(horizontal = 16.dp)
+                            modifier = Modifier.padding(horizontal = screenWidth * 0.04f)
+                                .testTag("sliding_window_description")
                         )
 
                         if (description.length > 100) {
@@ -450,109 +467,117 @@ fun SearchWorkerResult(
                                 text = if (showFullDescription) "Show less" else "Show more",
                                 style = MaterialTheme.typography.bodySmall.copy(color = colorScheme.primary),
                                 modifier = Modifier
-                                    .padding(horizontal = 16.dp)
+                                    .padding(horizontal = screenWidth * 0.04f)
                                     .clickable { showFullDescription = !showFullDescription }
+                                    .testTag("sliding_window_description_show_more_button")
                             )
                         }
 
                         // Delimiter between description and services
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
                         HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
+                            modifier = Modifier.padding(horizontal = screenWidth * 0.04f)
+                                .testTag("sliding_window_horizontal_divider_1"),
                             thickness = 1.dp,
                             color = colorScheme.onSurface.copy(alpha = 0.2f)
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
                         // Services Section
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
+                                .padding(horizontal = screenWidth * 0.04f)
+                                .testTag("sliding_window_services_row")
                         ) {
                             // Included Services
                             Column(
                                 modifier = Modifier.weight(1f)
+                                    .testTag("sliding_window_included_services_column")
                             ) {
                                 Text(
                                     text = "Included Services",
                                     style = MaterialTheme.typography.headlineMedium,
                                     color = colorScheme.onBackground
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(screenHeight * 0.01f))
                                 includedServices.forEach { service ->
                                     Text(
                                         text = "• $service",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = colorScheme.onSurface,
-                                        modifier = Modifier.padding(bottom = 4.dp)
+                                        modifier = Modifier.padding(bottom = screenHeight * 0.005f)
                                     )
                                 }
                             }
 
-                            Spacer(modifier = Modifier.width(16.dp))
+                            Spacer(modifier = Modifier.width(screenWidth * 0.02f))
 
                             // Add-On Services
                             Column(
                                 modifier = Modifier.weight(1f)
+                                    .testTag("sliding_window_addon_services_column")
                             ) {
                                 Text(
                                     text = "Add-On Services",
                                     style = MaterialTheme.typography.headlineMedium,
                                     color = colorScheme.primary
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(screenHeight * 0.01f))
                                 addonServices.forEach { service ->
                                     Text(
                                         text = "• $service",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = colorScheme.primary,
-                                        modifier = Modifier.padding(bottom = 4.dp)
+                                        modifier = Modifier.padding(bottom = screenHeight * 0.005f)
                                     )
                                 }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(screenHeight * 0.03f))
 
                         // Continue Button with Rate/HR
                         QuickFixButton(
-                            buttonText = "Continue (CHF$rate/Hour)",
+                            buttonText = "Continue",
                             onClickAction = { /* Handle continue */ },
                             buttonColor = colorScheme.primary,
                             textColor = colorScheme.onPrimary,
                             textStyle = MaterialTheme.typography.labelMedium,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
+                                .padding(horizontal = screenWidth * 0.04f)
+                                .testTag("sliding_window_continue_button")
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
                         HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
+                            modifier = Modifier.padding(horizontal = screenWidth * 0.04f)
+                                .testTag("sliding_window_horizontal_divider_2"),
                             thickness = 1.dp,
-                            color = colorScheme.onSurface.copy(alpha = 0.2f)
+                            color = colorScheme.onSurface.copy(alpha = 0.2f),
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
                         // Tags Section
                         Text(
                             text = "Tags",
                             style = MaterialTheme.typography.headlineMedium,
                             color = colorScheme.onBackground,
-                            modifier = Modifier.padding(horizontal = 16.dp)
+                            modifier = Modifier.padding(horizontal = screenWidth * 0.04f)
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(screenHeight * 0.01f))
 
                         // Display tags using FlowRow for wrapping
                         FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(screenWidth * 0.02f),
+                            verticalArrangement = Arrangement.spacedBy(screenHeight * 0.01f),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
+                                .padding(horizontal = screenWidth * 0.04f)
+                                .testTag("sliding_window_tags_flow_row"),
                         ) {
                             tags.forEach { tag ->
                                 Text(
@@ -565,32 +590,33 @@ fun SearchWorkerResult(
                                             color = colorScheme.primary,
                                             shape = MaterialTheme.shapes.small
                                         )
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                        .padding(horizontal = screenWidth * 0.02f, vertical = screenHeight * 0.005f)
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
                         HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
+                            modifier = Modifier.padding(horizontal = screenWidth * 0.04f)
+                                .testTag("sliding_window_horizontal_divider_3"),
                             thickness = 1.dp,
                             color = colorScheme.onSurface.copy(alpha = 0.2f)
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
                         Text(
                             text = "Reviews",
                             style = MaterialTheme.typography.headlineMedium,
                             color = colorScheme.onBackground,
-                            modifier = Modifier.padding(horizontal = 16.dp)
+                            modifier = Modifier.padding(horizontal = screenWidth * 0.04f)
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(screenHeight * 0.01f))
 
                         // Star Rating Row
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 16.dp)
+                            modifier = Modifier.padding(horizontal = screenWidth * 0.04f).testTag("sliding_window_star_rating_row")
                         ) {
                             val filledStars = workerRating.toInt()
                             val unfilledStars = 5 - filledStars
@@ -609,11 +635,12 @@ fun SearchWorkerResult(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(screenHeight * 0.01f))
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
+                                .padding(horizontal = screenWidth * 0.04f)
+                                .testTag("sliding_window_reviews_row")
                         ) {
                             itemsIndexed(reviews) { index, review ->
                                 var isExpanded by remember { mutableStateOf(false) }
@@ -625,14 +652,14 @@ fun SearchWorkerResult(
 
                                 Box(
                                     modifier = Modifier
-                                        .padding(end = 8.dp)
-                                        .width(250.dp)
-                                        .clip(RoundedCornerShape(16.dp))
+                                        .padding(end = screenWidth * 0.02f)
+                                        .width(screenWidth * 0.6f)
+                                        .clip(RoundedCornerShape(25f))
                                         .background(colorScheme.background)
                                 ) {
                                     Column(
                                         modifier = Modifier
-                                            .padding(16.dp)
+                                            .padding(screenWidth * 0.02f)
                                     ) {
                                         Text(
                                             text = displayText,
@@ -647,7 +674,7 @@ fun SearchWorkerResult(
                                                 ),
                                                 modifier = Modifier
                                                     .clickable { isExpanded = !isExpanded }
-                                                    .padding(top = 8.dp)
+                                                    .padding(top = screenHeight * 0.01f)
                                             )
                                         }
                                     }
@@ -655,11 +682,10 @@ fun SearchWorkerResult(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(screenHeight * 0.02f))
                     }
                 }
             }
         }
     }
 }
-
