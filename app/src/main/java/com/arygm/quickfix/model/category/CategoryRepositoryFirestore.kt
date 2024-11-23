@@ -64,7 +64,16 @@ open class CategoryRepositoryFirestore(private val db: FirebaseFirestore) : Cate
     val id = document.id
     val name = document.getString("name") ?: return null
     val tags = document.get("tags") as? List<String> ?: emptyList()
+    val setServices = document.get("setService") as? List<String> ?: emptyList()
+    val scaleData = document.get("scale") as? Map<*,*>
+    val scale =
+      scaleData?.let{
+        Scale(
+            longScale = it["longScale"] as? String ?: "",
+            shortScale = it["shortScale"] as? String ?: ""
+        )
+      }
 
-    return Subcategory(id = id, name = name, tags = tags)
+    return Subcategory(id = id, name = name, tags = tags, scale = scale, setServices = setServices,)
   }
 }
