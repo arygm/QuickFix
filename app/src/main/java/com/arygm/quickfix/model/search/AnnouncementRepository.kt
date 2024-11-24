@@ -7,7 +7,7 @@ interface AnnouncementRepository {
 
   fun init(onSuccess: () -> Unit)
 
-  fun getAnnouncements(
+  fun getAnnouncementsForUser(
       userId: String,
       onSuccess: (List<Announcement>) -> Unit,
       onFailure: (Exception) -> Unit
@@ -28,5 +28,10 @@ interface AnnouncementRepository {
       onFailure: (Exception) -> Unit
   )
 
-  fun deleteAnnouncementById(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+  fun deleteAnnouncementById(
+      userId: String,
+      announcementId: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 }
