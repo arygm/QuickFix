@@ -17,7 +17,7 @@ class NominatimLocationRepository(val client: OkHttpClient) : LocationRepository
             .url(url)
             .header(
                 "User-Agent", "QuickFix/1.0 (daferyassine52@gmail.com)") // Set a proper User-Agent
-            .header("Referer", "https://QuickFix.com") // Optionally add a Referer
+            .header("Referer", "https://quickfix.com") // Optionally add a Referer
             .build()
     client
         .newCall(request)
