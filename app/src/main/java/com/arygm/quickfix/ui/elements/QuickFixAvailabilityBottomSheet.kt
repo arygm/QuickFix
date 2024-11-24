@@ -1,6 +1,5 @@
 package com.arygm.quickfix.ui.elements
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,8 +15,6 @@ import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,14 +31,21 @@ import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QuickFixAvailabilityBottomSheet(showModalBottomSheet: Boolean, onDismissRequest: () -> Unit) {
+fun QuickFixAvailabilityBottomSheet(
+    showModalBottomSheet: Boolean,
+    onDismissRequest: () -> Unit,
+    onOkClick: (List<LocalDate>, Int, Int) -> Unit
+) {
   if (showModalBottomSheet) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         modifier = Modifier.testTag("availabilityBottomSheet")) {
           Column(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(horizontal = 16.dp, vertical = 8.dp)
+                      .testTag("bottomSheetColumn"),
               horizontalAlignment = Alignment.CenterHorizontally) {
                 val currentTime = Calendar.getInstance()
                 // State for the TimePicker
@@ -52,9 +56,6 @@ fun QuickFixAvailabilityBottomSheet(showModalBottomSheet: Boolean, onDismissRequ
                         is24Hour = true // Set to false for 12-hour clock
                         )
                 QuickFixTimePicker(timePickerState)
-                var selectedHour = 0
-                var selectedMinute = 0
-                var selectedDates by remember { mutableStateOf<List<LocalDate>>(listOf()) }
                 MyAppTheme {
                   CalendarView(
                       useCaseState =
@@ -68,11 +69,10 @@ fun QuickFixAvailabilityBottomSheet(showModalBottomSheet: Boolean, onDismissRequ
                           ),
                       selection =
                           CalendarSelection.Dates { newDates ->
-                            selectedDates = newDates
-                            selectedHour = timePickerState.hour
-                            selectedMinute = timePickerState.minute
-                            Log.d("Hi", "$selectedHour:$selectedMinute")
-                            Log.d("yo", (selectedDates).toString())
+                            onOkClick(newDates, timePickerState.hour, timePickerState.minute)
+                            //                            Log.d("Hi",
+                            // "$selectedHour:$selectedMinute")
+                            //                            Log.d("yo", (selectedDates).toString())
                           })
                 }
               }
@@ -84,7 +84,7 @@ fun QuickFixAvailabilityBottomSheet(showModalBottomSheet: Boolean, onDismissRequ
 @Composable
 fun QuickFixTimePicker(timePickerState: TimePickerState) {
   Column(
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
+      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("timePickerColumn"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         // Title
         Text("Enter time", style = MaterialTheme.typography.bodyMedium)
@@ -92,6 +92,6 @@ fun QuickFixTimePicker(timePickerState: TimePickerState) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // TimeInput for selecting time
-        TimeInput(state = timePickerState)
+        TimeInput(state = timePickerState, modifier = Modifier.testTag("timeInput"))
       }
 }
