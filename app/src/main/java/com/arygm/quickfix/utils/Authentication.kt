@@ -68,7 +68,10 @@ fun rememberFirebaseAuthLauncher(
 
               val defaultLocation = Location(0.0, 0.0, "defaultLocation")
               val defaultUserProfile =
-                  UserProfile(uid = it.uid, locations = listOf(defaultLocation))
+                  UserProfile(
+                      uid = it.uid,
+                      locations = listOf(defaultLocation),
+                      announcements = emptyList())
               userViewModel.addProfile(
                   defaultUserProfile,
                   onSuccess = {
@@ -157,7 +160,9 @@ fun createAccountWithEmailAndPassword(
           onFailure()
         }
         val defaultLocation = Location(0.0, 0.0, "defaultLocation")
-        val defaultUserProfile = UserProfile(uid = it.uid, locations = listOf(defaultLocation))
+        val defaultUserProfile =
+            UserProfile(
+                uid = it.uid, locations = listOf(defaultLocation), announcements = emptyList())
         userViewModel.addProfile(
             defaultUserProfile,
             onSuccess = {

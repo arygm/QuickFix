@@ -7,8 +7,10 @@ interface AnnouncementRepository {
 
   fun init(onSuccess: () -> Unit)
 
+  fun getAnnouncements(onSuccess: (List<Announcement>) -> Unit, onFailure: (Exception) -> Unit)
+
   fun getAnnouncementsForUser(
-      userId: String,
+      announcements: List<String>,
       onSuccess: (List<Announcement>) -> Unit,
       onFailure: (Exception) -> Unit
   )

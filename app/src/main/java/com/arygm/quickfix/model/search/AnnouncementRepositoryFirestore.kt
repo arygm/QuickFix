@@ -5,6 +5,7 @@ import android.util.Log
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.utils.performFirestoreOperation
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.LocalDateTime
 
@@ -20,23 +21,49 @@ class AnnouncementRepositoryFirestore(private val db: FirebaseFirestore) : Annou
     onSuccess()
   }
 
-  override fun getAnnouncementsForUser(
-      userId: String,
+  override fun getAnnouncements(
       onSuccess: (List<Announcement>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    Log.d("TodosRepositoryFirestore", "getAnnouncements for userId: $userId")
-    db.collection(collectionPath)
-        .document(userId) // Access the document for the specified userId
-        .collection(collectionPath) // Access the announcements subCollection for the userId
+    db.collection(collectionPath).get().addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val announcements =
+            task.result?.mapNotNull { document -> documentToAnnouncement(document) } ?: emptyList()
+        onSuccess(announcements)
+      } else {
+        task.exception?.let { e ->
+          Log.e("TodosRepositoryFirestore", "Error getting documents", e)
+          onFailure(e)
+        }
+      }
+    }
+  }
+
+  override fun getAnnouncementsForUser(
+      announcements: List<String>,
+      onSuccess: (List<Announcement>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    Log.d("TodosRepositoryFirestore", "getAnnouncements for IDs: $announcements")
+
+    if (announcements.isEmpty()) {
+      Log.d("TodosRepositoryFirestore", "No announcement IDs provided")
+      onSuccess(emptyList())
+      return
+    }
+
+    // Query the "announcements" collection with the provided IDs
+    db.collection(collectionPath) // Access the main announcements collection
+        .whereIn(FieldPath.documentId(), announcements) // Filter by IDs
         .get()
         .addOnCompleteListener { task ->
           if (task.isSuccessful) {
-            val announcements =
+            val fetchedAnnouncements =
                 task.result?.mapNotNull { document ->
+                  Log.d("Mapping", "Trying to map announcement with ID: ${document.id}")
                   documentToAnnouncement(document) // Convert document to Announcement object
                 } ?: emptyList()
-            onSuccess(announcements)
+            onSuccess(fetchedAnnouncements)
           } else {
             task.exception?.let { e ->
               Log.e("TodosRepositoryFirestore", "Error getting announcements", e)
@@ -51,13 +78,10 @@ class AnnouncementRepositoryFirestore(private val db: FirebaseFirestore) : Annou
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    val userId = announcement.userId
     val announcementId = announcement.announcementId
 
-    val userDocRef = db.collection(collectionPath).document(userId)
-    val announcementSubCollectionRef =
-        userDocRef.collection(collectionPath).document(announcementId)
-    performFirestoreOperation(announcementSubCollectionRef.set(announcement), onSuccess, onFailure)
+    val announcementDocRef = db.collection(collectionPath).document(announcementId)
+    performFirestoreOperation(announcementDocRef.set(announcement), onSuccess, onFailure)
   }
 
   override fun uploadAnnouncementImages(
@@ -74,13 +98,10 @@ class AnnouncementRepositoryFirestore(private val db: FirebaseFirestore) : Annou
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    val userId = announcement.userId
     val announcementId = announcement.announcementId
 
-    val userDocRef = db.collection(collectionPath).document(userId)
-    val announcementSubCollectionRef =
-        userDocRef.collection(collectionPath).document(announcementId)
-    performFirestoreOperation(announcementSubCollectionRef.set(announcement), onSuccess, onFailure)
+    val announcementDocRef = db.collection(collectionPath).document(announcementId)
+    performFirestoreOperation(announcementDocRef.set(announcement), onSuccess, onFailure)
   }
 
   override fun deleteAnnouncementById(
@@ -89,10 +110,8 @@ class AnnouncementRepositoryFirestore(private val db: FirebaseFirestore) : Annou
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    val userDocRef = db.collection(collectionPath).document(userId)
-    val announcementSubCollectionRef =
-        userDocRef.collection(collectionPath).document(announcementId)
-    performFirestoreOperation(announcementSubCollectionRef.delete(), onSuccess, onFailure)
+    val announcementDocRef = db.collection(collectionPath).document(announcementId)
+    performFirestoreOperation(announcementDocRef.delete(), onSuccess, onFailure)
   }
 
   /**

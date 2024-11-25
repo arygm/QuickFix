@@ -58,7 +58,8 @@ class LoggedInAccountViewModelTest {
           locations =
               listOf(
                   Location(latitude = 0.0, longitude = 0.0, name = "Home"),
-                  Location(latitude = 1.0, longitude = 1.0, name = "Work"))
+                  Location(latitude = 1.0, longitude = 1.0, name = "Work")),
+          announcements = emptyList()
           // Initialize other fields as necessary
           )
 
@@ -204,7 +205,8 @@ class LoggedInAccountViewModelTest {
         UserProfile(
             uid = "2",
             locations =
-                listOf(Location(latitude = 34.0522, longitude = -118.2437, name = "Los Angeles"))
+                listOf(Location(latitude = 34.0522, longitude = -118.2437, name = "Los Angeles")),
+            announcements = emptyList()
             // Initialize other fields as necessary
             )
     mockUserProfileRepository(user2.uid, userProfile2)

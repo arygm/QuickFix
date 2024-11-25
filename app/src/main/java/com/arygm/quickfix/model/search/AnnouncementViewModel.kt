@@ -14,6 +14,9 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   private val announcementsForUser_ = MutableStateFlow<List<Announcement>>(emptyList())
   val announcementsForUser: StateFlow<List<Announcement>> = announcementsForUser_.asStateFlow()
 
+  private val announcements_ = MutableStateFlow<List<Announcement>>(emptyList())
+  val announcements: StateFlow<List<Announcement>> = announcements_.asStateFlow()
+
   // create factory
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -34,15 +37,29 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
     return repository.getNewUid()
   }
 
+  /** Gets all announcements documents. */
+  fun getAnnouncements() {
+    repository.getAnnouncements(
+        onSuccess = { allAnnouncements ->
+          announcements_.value = allAnnouncements // Update all announcements
+          if (announcementsForUser_.value.isNotEmpty()) {
+            val userId = announcementsForUser_.value.first().userId
+            announcementsForUser_.value =
+                allAnnouncements.filter {
+                  it.userId == userId
+                } // Filter and update user-specific announcements
+          }
+        },
+        onFailure = { e -> Log.e("Failed to fetch all announcements", e.toString()) })
+  }
+
   /** Gets all announcements documents for a certain user. */
-  fun getAnnouncementsForUser(userId: String) {
+  fun getAnnouncementsForUser(announcements: List<String>) {
     repository.getAnnouncementsForUser(
-        userId = userId,
+        announcements = announcements,
         onSuccess = { announcementsForUser_.value = it },
         onFailure = { e ->
-          Log.e(
-              "AnnouncementViewModel",
-              "Failed to fetch announcements for user ${userId}: ${e.message}")
+          Log.e("AnnouncementViewModel", "Failed to fetch announcements for user: ${e.message}")
         })
   }
 
@@ -54,7 +71,7 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   fun announce(announcement: Announcement) {
     repository.announce(
         announcement = announcement,
-        onSuccess = { getAnnouncementsForUser(announcement.userId) },
+        onSuccess = { getAnnouncements() },
         onFailure = { e ->
           Log.e(
               "AnnouncementViewModel",
@@ -70,7 +87,7 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   fun updateAnnouncement(announcement: Announcement) {
     repository.updateAnnouncement(
         announcement = announcement,
-        onSuccess = { getAnnouncementsForUser(announcement.userId) },
+        onSuccess = { getAnnouncements() },
         onFailure = { e ->
           Log.e(
               "AnnouncementViewModel",
@@ -88,7 +105,7 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
     repository.deleteAnnouncementById(
         userId = userId,
         announcementId = announcementId,
-        onSuccess = { getAnnouncementsForUser(userId) },
+        onSuccess = { getAnnouncements() },
         onFailure = { e ->
           Log.e("AnnouncementViewModel", "User $userId failed to delete announcement: ${e.message}")
         })

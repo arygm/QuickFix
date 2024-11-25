@@ -21,7 +21,9 @@ open class Profile(
 class UserProfile(
     val locations: List<Location>,
     uid: String,
+    val announcements: List<String> // Each string correspond to an announcement id.
     // quickFixes: List<String>, // String of uid that will represents the uid of the QuickFixes
+
 ) : Profile(uid) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
