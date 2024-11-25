@@ -259,6 +259,8 @@ fun AnnouncementScreen(
             QuickFixButton(
                 buttonText = "Post your announcement",
                 onClickAction = {
+
+                  // Make the announcement
                   val announcement =
                       Announcement(
                           announcementId = announcementViewModel.getNewUid(),
@@ -271,6 +273,7 @@ fun AnnouncementScreen(
                           quickFixImages = emptyList())
                   announcementViewModel.announce(announcement)
 
+                  // Update the user profile with the new announcement
                   val currentUserProfile = loggedInAccountViewModel.userProfile.value
                   if (currentUserProfile != null) {
                     val announcementList =
