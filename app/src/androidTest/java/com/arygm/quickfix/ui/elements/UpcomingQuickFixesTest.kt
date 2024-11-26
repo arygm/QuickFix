@@ -23,7 +23,7 @@ class UpcomingQuickFixesTest {
             QuickFix("Moha", "Toilet plumbing", "Mon, 14 Oct 2024"))
 
     composeTestRule.setContent {
-      UpcomingQuickFixes(quickFixList = sampleData, onShowAllClick = {}, onItemClick = {})
+      QuickFixesWidget(quickFixList = sampleData, onShowAllClick = {}, onItemClick = {})
     }
 
     // Verify that the first three items are displayed
@@ -39,7 +39,7 @@ class UpcomingQuickFixesTest {
     val sampleData = List(5) { index -> QuickFix("Name $index", "Task $index", "Date $index") }
 
     composeTestRule.setContent {
-      UpcomingQuickFixes(quickFixList = sampleData, onShowAllClick = {}, onItemClick = {})
+      QuickFixesWidget(quickFixList = sampleData, onShowAllClick = {}, onItemClick = {})
     }
 
     // Verify initial state shows only first three items
@@ -65,7 +65,7 @@ class UpcomingQuickFixesTest {
     var clickedItem: QuickFix? = null
 
     composeTestRule.setContent {
-      UpcomingQuickFixes(
+      QuickFixesWidget(
           quickFixList = sampleData, onShowAllClick = {}, onItemClick = { clickedItem = it })
     }
 
