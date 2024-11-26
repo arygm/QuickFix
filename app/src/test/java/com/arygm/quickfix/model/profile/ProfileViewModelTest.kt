@@ -22,7 +22,10 @@ class ProfileViewModelTest {
   private lateinit var profileViewModel: ProfileViewModel
 
   private val profile =
-      UserProfile(uid = "1", locations = listOf(Location(0.0, 0.0, "testLocation")))
+      UserProfile(
+          uid = "1",
+          locations = listOf(Location(0.0, 0.0, "testLocation")),
+          announcements = emptyList())
 
   @Before
   fun setUp() {

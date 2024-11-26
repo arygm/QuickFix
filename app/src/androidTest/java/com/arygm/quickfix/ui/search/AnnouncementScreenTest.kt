@@ -11,6 +11,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
 
 class AnnouncementScreenTest {
 
@@ -25,7 +26,7 @@ class AnnouncementScreenTest {
 
   @Test
   fun announcementScreenDisplaysCorrectly() {
-    composeTestRule.setContent { AnnouncementScreen(navigationActions) }
+    composeTestRule.setContent { AnnouncementScreen(navigationActions = navigationActions) }
 
     // Check that each labeled component in the screen is displayed
     composeTestRule.onNodeWithTag("titleInput").assertIsDisplayed()
@@ -39,7 +40,7 @@ class AnnouncementScreenTest {
 
   @Test
   fun textFieldDisplaysCorrectPlaceholdersAndLabels() {
-    composeTestRule.setContent { AnnouncementScreen(navigationActions) }
+    composeTestRule.setContent { AnnouncementScreen(navigationActions = navigationActions) }
 
     // Check each placeholder text and labels in text fields
     composeTestRule.onNodeWithTag("titleText").assertTextEquals("Title *")
@@ -50,7 +51,7 @@ class AnnouncementScreenTest {
 
   @Test
   fun titleInputAcceptsText() {
-    composeTestRule.setContent { AnnouncementScreen(navigationActions) }
+    composeTestRule.setContent { AnnouncementScreen(navigationActions = navigationActions) }
 
     // Enter text in the title input and verify it
     val titleText = "My QuickFix Title"
@@ -60,7 +61,7 @@ class AnnouncementScreenTest {
 
   @Test
   fun categoryInputAcceptsText() {
-    composeTestRule.setContent { AnnouncementScreen(navigationActions) }
+    composeTestRule.setContent { AnnouncementScreen(navigationActions = navigationActions) }
 
     // Enter text in the category input and verify it
     val categoryText = "ResidentialPainting"
@@ -70,7 +71,7 @@ class AnnouncementScreenTest {
 
   @Test
   fun descriptionInputAcceptsText() {
-    composeTestRule.setContent { AnnouncementScreen(navigationActions) }
+    composeTestRule.setContent { AnnouncementScreen(navigationActions = navigationActions) }
 
     // Enter text in the description input and verify it
     val descriptionText = "Detailed description"
@@ -80,7 +81,7 @@ class AnnouncementScreenTest {
 
   @Test
   fun locationInputAcceptsText() {
-    composeTestRule.setContent { AnnouncementScreen(navigationActions) }
+    composeTestRule.setContent { AnnouncementScreen(navigationActions = navigationActions) }
 
     // Enter text in the location input and verify it
     val locationText = "Lausanne Switzerland"
@@ -90,7 +91,7 @@ class AnnouncementScreenTest {
 
   @Test
   fun availabilityButtonClickable() {
-    composeTestRule.setContent { AnnouncementScreen(navigationActions) }
+    composeTestRule.setContent { AnnouncementScreen(navigationActions = navigationActions) }
 
     // Perform click on the availability button and check if it's displayed
     composeTestRule.onNodeWithTag("availabilityButton").performClick().assertIsDisplayed()
@@ -98,7 +99,7 @@ class AnnouncementScreenTest {
 
   @Test
   fun picturesButtonClickable() {
-    composeTestRule.setContent { AnnouncementScreen(navigationActions) }
+    composeTestRule.setContent { AnnouncementScreen(navigationActions = navigationActions) }
 
     // Perform click on the pictures button and check if it's displayed
     composeTestRule.onNodeWithTag("picturesButton").performClick().assertIsDisplayed()
@@ -106,14 +107,14 @@ class AnnouncementScreenTest {
 
   @Test
   fun mandatoryFieldsMessageDisplaysCorrectly() {
-    composeTestRule.setContent { AnnouncementScreen(navigationActions) }
+    composeTestRule.setContent { AnnouncementScreen(navigationActions = navigationActions) }
 
     composeTestRule.onNodeWithTag("mandatoryText").assertTextEquals("* Mandatory fields")
   }
 
   @Test
   fun announcementButtonEnabledWhenAllFieldsAreValid() {
-    composeTestRule.setContent { AnnouncementScreen(navigationActions) }
+    composeTestRule.setContent { AnnouncementScreen(navigationActions = navigationActions) }
 
     // Enter valid text in all fields to enable the announcement button
     composeTestRule.onNodeWithTag("titleInput").performTextInput("QuickFix Title")
@@ -123,5 +124,15 @@ class AnnouncementScreenTest {
 
     // Check if the "Post your announcement" button is enabled
     composeTestRule.onNodeWithTag("announcementButton").assertIsDisplayed().performClick()
+  }
+
+  @Test
+  fun uploadImageButtonOpensImageSheet() {
+    composeTestRule.setContent { AnnouncementScreen(navigationActions = navigationActions) }
+
+    // Click the upload pictures button
+    composeTestRule.onNodeWithTag("picturesButton").performClick()
+
+    composeTestRule.onNodeWithTag("uploadImageSheet").assertIsDisplayed()
   }
 }
