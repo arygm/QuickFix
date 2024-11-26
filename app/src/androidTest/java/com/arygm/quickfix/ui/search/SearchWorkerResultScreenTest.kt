@@ -16,13 +16,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class SearchWorkerResultScreenTest {
@@ -34,8 +33,7 @@ class SearchWorkerResultScreenTest {
   private lateinit var accountViewModel: AccountViewModel
   private lateinit var accountRepository: AccountRepositoryFirestore
 
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setup() {
@@ -53,37 +51,39 @@ class SearchWorkerResultScreenTest {
     accountViewModel = AccountViewModel(accountRepository)
 
     // Provide test data to searchViewModel
-    searchViewModel._workerProfiles.value = listOf(
-      WorkerProfile(
-        uid = "test_uid_1",
-        hourlyRate = 1.0,
-        reviews = listOf("I hate writing tests"),
-        fieldOfWork = "Carpentry",
-        rating = 3.0,
-        description = "I hate my job",
-        location = Location(40.7128, -74.0060)
-      ),
-    )
+    searchViewModel._workerProfiles.value =
+        listOf(
+            WorkerProfile(
+                uid = "test_uid_1",
+                hourlyRate = 1.0,
+                reviews = listOf("I hate writing tests"),
+                fieldOfWork = "Carpentry",
+                rating = 3.0,
+                description = "I hate my job",
+                location = Location(40.7128, -74.0060)),
+        )
 
     // Mock the getAccountById method to always return a test Account
     doAnswer { invocation ->
-      val uid = invocation.arguments[0] as String
-      val onSuccess = invocation.arguments[1] as (Account?) -> Unit
-      val onFailure = invocation.arguments[2] as (Exception) -> Unit
+          val uid = invocation.arguments[0] as String
+          val onSuccess = invocation.arguments[1] as (Account?) -> Unit
+          val onFailure = invocation.arguments[2] as (Exception) -> Unit
 
-      // Create a test Account object  import org.mockito.ArgumentMatchers.anyString
-      val testAccount = Account(
-        uid = uid,
-        firstName = "TestFirstName",
-        lastName = "TestLastName",
-        email = "test@example.com",
-        birthDate = com.google.firebase.Timestamp.now(),
-        isWorker = true,
-        activeChats = emptyList()
-      )
-      onSuccess(testAccount)
-      null
-    }.`when`(accountRepository).getAccountById(anyString(), any(), any())
+          // Create a test Account object  import org.mockito.ArgumentMatchers.anyString
+          val testAccount =
+              Account(
+                  uid = uid,
+                  firstName = "TestFirstName",
+                  lastName = "TestLastName",
+                  email = "test@example.com",
+                  birthDate = com.google.firebase.Timestamp.now(),
+                  isWorker = true,
+                  activeChats = emptyList())
+          onSuccess(testAccount)
+          null
+        }
+        .`when`(accountRepository)
+        .getAccountById(anyString(), any(), any())
   }
 
   @Test
@@ -111,9 +111,9 @@ class SearchWorkerResultScreenTest {
 
     // Check if the description with the query text is displayed
     composeTestRule
-      .onNodeWithText("This is a sample description for the Construction Carpentry result")
-      .assertExists()
-      .assertIsDisplayed()
+        .onNodeWithText("This is a sample description for the Construction Carpentry result")
+        .assertExists()
+        .assertIsDisplayed()
   }
 
   @Test
@@ -129,10 +129,10 @@ class SearchWorkerResultScreenTest {
       // Scroll to each button and check if it's displayed with a click action
       filterButtonsRow.performScrollToIndex(index)
       composeTestRule
-        .onNodeWithTag("filter_button_${button.text}")
-        .assertExists()
-        .assertIsDisplayed()
-        .assertHasClickAction()
+          .onNodeWithTag("filter_button_${button.text}")
+          .assertExists()
+          .assertIsDisplayed()
+          .assertHasClickAction()
     }
   }
 
@@ -144,10 +144,10 @@ class SearchWorkerResultScreenTest {
     }
     // Verify that the filter icon button is displayed and has a click action
     composeTestRule
-      .onNodeWithContentDescription("Filter")
-      .assertExists()
-      .assertIsDisplayed()
-      .assertHasClickAction()
+        .onNodeWithContentDescription("Filter")
+        .assertExists()
+        .assertIsDisplayed()
+        .assertHasClickAction()
   }
 
   @Test
@@ -162,9 +162,9 @@ class SearchWorkerResultScreenTest {
     repeat(searchViewModel.workerProfiles.value.size) { index ->
       workerProfilesList.performScrollToIndex(index)
       composeTestRule
-        .onNodeWithTag("worker_profile_result$index")
-        .assertExists()
-        .assertIsDisplayed()
+          .onNodeWithTag("worker_profile_result$index")
+          .assertExists()
+          .assertIsDisplayed()
     }
   }
 
@@ -331,21 +331,16 @@ class SearchWorkerResultScreenTest {
     composeTestRule.waitForIdle()
 
     // Scroll to ensure the item is composed
-    composeTestRule.onNodeWithTag("worker_profiles_list")
-      .performScrollToIndex(0)
+    composeTestRule.onNodeWithTag("worker_profiles_list").performScrollToIndex(0)
 
     // Click on the "Book" button
-    composeTestRule.onNodeWithTag("book_button")
-      .assertExists()
-      .performClick()
+    composeTestRule.onNodeWithTag("book_button").assertExists().performClick()
 
     // Wait for the sliding window to appear
     composeTestRule.waitForIdle()
 
     // Check that the sliding window content is displayed
-    composeTestRule.onNodeWithTag("sliding_window_content")
-      .assertExists()
-      .assertIsDisplayed()
+    composeTestRule.onNodeWithTag("sliding_window_content").assertExists().assertIsDisplayed()
   }
 
   @Test
@@ -359,17 +354,13 @@ class SearchWorkerResultScreenTest {
     composeTestRule.waitForIdle()
 
     // Click on the "Book" button of the first item
-    composeTestRule.onAllNodesWithTag("book_button")[0]
-      .assertExists()
-      .performClick()
+    composeTestRule.onAllNodesWithTag("book_button")[0].assertExists().performClick()
 
     // Wait for the sliding window to appear
     composeTestRule.waitForIdle()
 
     // Verify the banner image is displayed
-    composeTestRule.onNodeWithTag("sliding_window_banner_image")
-      .assertExists()
-      .assertIsDisplayed()
+    composeTestRule.onNodeWithTag("sliding_window_banner_image").assertExists().assertIsDisplayed()
   }
 
   @Test
@@ -383,17 +374,16 @@ class SearchWorkerResultScreenTest {
     composeTestRule.waitForIdle()
 
     // Click on the "Book" button of the first item
-    composeTestRule.onAllNodesWithTag("book_button")[0]
-      .assertExists()
-      .performClick()
+    composeTestRule.onAllNodesWithTag("book_button")[0].assertExists().performClick()
 
     // Wait for the sliding window to appear
     composeTestRule.waitForIdle()
 
     // Verify the profile picture is displayed
-    composeTestRule.onNodeWithTag("sliding_window_profile_picture")
-      .assertExists()
-      .assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("sliding_window_profile_picture")
+        .assertExists()
+        .assertIsDisplayed()
   }
 
   @Test
@@ -407,24 +397,24 @@ class SearchWorkerResultScreenTest {
     composeTestRule.waitForIdle()
 
     // Click on the "Book" button of the first item
-    composeTestRule.onAllNodesWithTag("book_button")[0]
-      .assertExists()
-      .performClick()
+    composeTestRule.onAllNodesWithTag("book_button")[0].assertExists().performClick()
 
     // Wait for the sliding window to appear
     composeTestRule.waitForIdle()
 
     // Verify the worker category is displayed
-    composeTestRule.onNodeWithTag("sliding_window_worker_category")
-      .assertExists()
-      .assertIsDisplayed()
-      .assertTextContains("Exterior Painter") // Replace with expected category
+    composeTestRule
+        .onNodeWithTag("sliding_window_worker_category")
+        .assertExists()
+        .assertIsDisplayed()
+        .assertTextContains("Exterior Painter") // Replace with expected category
 
     // Verify the worker address is displayed
-    composeTestRule.onNodeWithTag("sliding_window_worker_address")
-      .assertExists()
-      .assertIsDisplayed()
-      .assertTextContains("Ecublens, VD") // Replace with expected address
+    composeTestRule
+        .onNodeWithTag("sliding_window_worker_address")
+        .assertExists()
+        .assertIsDisplayed()
+        .assertTextContains("Ecublens, VD") // Replace with expected address
   }
 
   @Test
@@ -438,32 +428,29 @@ class SearchWorkerResultScreenTest {
     composeTestRule.waitForIdle()
 
     // Click on the "Book" button of the first item
-    composeTestRule.onAllNodesWithTag("book_button")[0]
-      .assertExists()
-      .performClick()
+    composeTestRule.onAllNodesWithTag("book_button")[0].assertExists().performClick()
 
     // Wait for the sliding window to appear
     composeTestRule.waitForIdle()
 
     // Verify the included services section is displayed
-    composeTestRule.onNodeWithTag("sliding_window_included_services_column")
-      .assertExists()
-      .assertIsDisplayed()
-
-    // Check for each included service
-    val includedServices = listOf(
-      "Initial Consultation",
-      "Basic Surface Preparation",
-      "Priming of Surfaces",
-      "High-Quality Paint Application",
-      "Two Coats of Paint",
-      "Professional Cleanup"
-    )
-
-    includedServices.forEach { service ->
-      composeTestRule.onNodeWithText("• $service")
+    composeTestRule
+        .onNodeWithTag("sliding_window_included_services_column")
         .assertExists()
         .assertIsDisplayed()
+
+    // Check for each included service
+    val includedServices =
+        listOf(
+            "Initial Consultation",
+            "Basic Surface Preparation",
+            "Priming of Surfaces",
+            "High-Quality Paint Application",
+            "Two Coats of Paint",
+            "Professional Cleanup")
+
+    includedServices.forEach { service ->
+      composeTestRule.onNodeWithText("• $service").assertExists().assertIsDisplayed()
     }
   }
 
@@ -478,31 +465,28 @@ class SearchWorkerResultScreenTest {
     composeTestRule.waitForIdle()
 
     // Click on the "Book" button of the first item
-    composeTestRule.onAllNodesWithTag("book_button")[0]
-      .assertExists()
-      .performClick()
+    composeTestRule.onAllNodesWithTag("book_button")[0].assertExists().performClick()
 
     // Wait for the sliding window to appear
     composeTestRule.waitForIdle()
 
     // Verify the add-on services section is displayed
-    composeTestRule.onNodeWithTag("sliding_window_addon_services_column")
-      .assertExists()
-      .assertIsDisplayed()
-
-    // Check for each add-on service
-    val addOnServices = listOf(
-      "Detailed Color Consultation",
-      "Premium paint Upgrade",
-      "Extensive Surface Preparation",
-      "Extra Coats for added Durability",
-      "Power Washing and Deep Cleaning"
-    )
-
-    addOnServices.forEach { service ->
-      composeTestRule.onNodeWithText("• $service")
+    composeTestRule
+        .onNodeWithTag("sliding_window_addon_services_column")
         .assertExists()
         .assertIsDisplayed()
+
+    // Check for each add-on service
+    val addOnServices =
+        listOf(
+            "Detailed Color Consultation",
+            "Premium paint Upgrade",
+            "Extensive Surface Preparation",
+            "Extra Coats for added Durability",
+            "Power Washing and Deep Cleaning")
+
+    addOnServices.forEach { service ->
+      composeTestRule.onNodeWithText("• $service").assertExists().assertIsDisplayed()
     }
   }
 
@@ -517,18 +501,17 @@ class SearchWorkerResultScreenTest {
     composeTestRule.waitForIdle()
 
     // Click on the "Book" button of the first item
-    composeTestRule.onAllNodesWithTag("book_button")[0]
-      .assertExists()
-      .performClick()
+    composeTestRule.onAllNodesWithTag("book_button")[0].assertExists().performClick()
 
     // Wait for the sliding window to appear
     composeTestRule.waitForIdle()
 
     // Verify the "Continue" button is displayed and clickable
-    composeTestRule.onNodeWithTag("sliding_window_continue_button")
-      .assertExists()
-      .assertIsDisplayed()
-      .assertHasClickAction()
+    composeTestRule
+        .onNodeWithTag("sliding_window_continue_button")
+        .assertExists()
+        .assertIsDisplayed()
+        .assertHasClickAction()
   }
 
   @Test
@@ -542,34 +525,25 @@ class SearchWorkerResultScreenTest {
     composeTestRule.waitForIdle()
 
     // Click on the "Book" button of the first item
-    composeTestRule.onAllNodesWithTag("book_button")[0]
-      .assertExists()
-      .performClick()
+    composeTestRule.onAllNodesWithTag("book_button")[0].assertExists().performClick()
 
     // Wait for the sliding window to appear
     composeTestRule.waitForIdle()
 
     // Verify the tags section is displayed
-    composeTestRule.onNodeWithTag("sliding_window_tags_flow_row")
-      .assertExists()
-      .assertIsDisplayed()
+    composeTestRule.onNodeWithTag("sliding_window_tags_flow_row").assertExists().assertIsDisplayed()
 
     // Check for each tag
-    val tags = listOf(
-      "Exterior Painting",
-      "Interior Painting",
-      "Cabinet Painting",
-      "Licensed & Insured",
-      "Local Worker"
-    )
+    val tags =
+        listOf(
+            "Exterior Painting",
+            "Interior Painting",
+            "Cabinet Painting",
+            "Licensed & Insured",
+            "Local Worker")
 
-    tags.forEach { tag ->
-      composeTestRule.onNodeWithText(tag)
-        .assertExists()
-        .assertIsDisplayed()
-    }
+    tags.forEach { tag -> composeTestRule.onNodeWithText(tag).assertExists().assertIsDisplayed() }
   }
-
 
   @Test
   fun testSaveButtonTogglesBetweenSaveAndSaved() {
@@ -582,46 +556,42 @@ class SearchWorkerResultScreenTest {
     composeTestRule.waitForIdle()
 
     // Click on the "Book" button of the first item
-    composeTestRule.onAllNodesWithTag("book_button")[0]
-      .assertExists()
-      .performClick()
+    composeTestRule.onAllNodesWithTag("book_button")[0].assertExists().performClick()
 
     // Wait for the sliding window to appear
     composeTestRule.waitForIdle()
 
     // Verify the "save" button is displayed
-    composeTestRule.onNodeWithTag("sliding_window_save_button")
-      .assertExists()
-      .assertIsDisplayed()
-      .assertTextContains("save")
+    composeTestRule
+        .onNodeWithTag("sliding_window_save_button")
+        .assertExists()
+        .assertIsDisplayed()
+        .assertTextContains("save")
 
     // Click on the "save" button
-    composeTestRule.onNodeWithTag("sliding_window_save_button")
-      .performClick()
+    composeTestRule.onNodeWithTag("sliding_window_save_button").performClick()
 
     // Wait for the UI to update
     composeTestRule.waitForIdle()
 
     // Verify the button text changes to "saved"
-    composeTestRule.onNodeWithTag("sliding_window_save_button")
-      .assertExists()
-      .assertIsDisplayed()
-      .assertTextContains("saved")
+    composeTestRule
+        .onNodeWithTag("sliding_window_save_button")
+        .assertExists()
+        .assertIsDisplayed()
+        .assertTextContains("saved")
 
     // Click again to toggle back to "save"
-    composeTestRule.onNodeWithTag("sliding_window_save_button")
-      .performClick()
+    composeTestRule.onNodeWithTag("sliding_window_save_button").performClick()
 
     // Wait for the UI to update
     composeTestRule.waitForIdle()
 
     // Verify the button text changes back to "save"
-    composeTestRule.onNodeWithTag("sliding_window_save_button")
-      .assertExists()
-      .assertIsDisplayed()
-      .assertTextContains("save")
+    composeTestRule
+        .onNodeWithTag("sliding_window_save_button")
+        .assertExists()
+        .assertIsDisplayed()
+        .assertTextContains("save")
   }
-
-
-
 }
