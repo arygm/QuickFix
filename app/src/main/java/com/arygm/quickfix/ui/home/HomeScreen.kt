@@ -30,8 +30,8 @@ import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.elements.PopularServicesRow
 import com.arygm.quickfix.ui.elements.QuickFix
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
+import com.arygm.quickfix.ui.elements.QuickFixesWidget
 import com.arygm.quickfix.ui.elements.Service
-import com.arygm.quickfix.ui.elements.UpcomingQuickFixes
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
@@ -162,7 +162,8 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
                       Modifier.fillMaxWidth()
                           .weight(1.5f) // Flexible space, larger than the PopularServicesRow
                   ) {
-                    UpcomingQuickFixes(
+                    QuickFixesWidget(
+                        status = "Upcoming",
                         quickFixList = quickFixes,
                         onShowAllClick = { /* Handle Show All Click */},
                         onItemClick = { /* Handle QuickFix Item Click */},
