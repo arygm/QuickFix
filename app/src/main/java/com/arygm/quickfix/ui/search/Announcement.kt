@@ -54,15 +54,17 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 fun AnnouncementScreen(
     announcementViewModel: AnnouncementViewModel =
         viewModel(factory = AnnouncementViewModel.Factory),
-    loggedInAccountViewModel: LoggedInAccountViewModel,
-    profileViewModel: ProfileViewModel,
+    loggedInAccountViewModel: LoggedInAccountViewModel =
+        viewModel(factory = LoggedInAccountViewModel.Factory),
+    profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
     navigationActions: NavigationActions,
-    navigationActionsRoot: NavigationActions,
     isUser: Boolean = true
 ) {
 
   val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
-  val userId = loggedInAccount?.uid ?: return
+  val userId =
+      loggedInAccount?.uid
+          ?: "Should not happen" // If no user is logged, no announcement can be made
 
   var title by remember { mutableStateOf("") }
   var category by remember { mutableStateOf("") }
