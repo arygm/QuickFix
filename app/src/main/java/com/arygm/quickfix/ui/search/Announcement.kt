@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,14 +38,33 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.search.Announcement
+import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.navigation.NavigationActions
 
 @Composable
-fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
+fun AnnouncementScreen(
+    announcementViewModel: AnnouncementViewModel =
+        viewModel(factory = AnnouncementViewModel.Factory),
+    loggedInAccountViewModel: LoggedInAccountViewModel =
+        viewModel(factory = LoggedInAccountViewModel.Factory),
+    profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
+    navigationActions: NavigationActions,
+    isUser: Boolean = true
+) {
+
+  val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
+  val userId =
+      loggedInAccount?.uid
+          ?: "Should not happen" // If no user is logged, no announcement can be made
 
   var title by remember { mutableStateOf("") }
   var category by remember { mutableStateOf("") }
@@ -241,7 +261,42 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
             QuickFixButton(
                 buttonText = "Post your announcement",
                 onClickAction = {
-                  // TODO: Apply the backend of the announcement creation
+
+                  // Make the announcement
+                  val announcement =
+                      Announcement(
+                          announcementId = announcementViewModel.getNewUid(),
+                          userId = userId,
+                          title = title,
+                          category = category, // replace by the category type
+                          description = description,
+                          location = null,
+                          availability = emptyList(),
+                          quickFixImages = emptyList())
+                  announcementViewModel.announce(announcement)
+
+                  // Update the user profile with the new announcement
+                  val currentUserProfile = loggedInAccountViewModel.userProfile.value
+                  if (currentUserProfile != null) {
+                    val announcementList =
+                        currentUserProfile.announcements + announcement.announcementId
+
+                    profileViewModel.updateProfile(
+                        UserProfile(
+                            currentUserProfile.locations, currentUserProfile.uid, announcementList),
+                        {},
+                        {})
+                  }
+
+                  // Reset all parameters after making an announcement
+                  title = ""
+                  category = ""
+                  description = ""
+                  location = ""
+                  titleIsEmpty = true
+                  categoryIsSelected = false
+                  locationIsSelected = false
+                  descriptionIsEmpty = true
                 },
                 buttonColor = colorScheme.primary,
                 textColor = colorScheme.onPrimary,

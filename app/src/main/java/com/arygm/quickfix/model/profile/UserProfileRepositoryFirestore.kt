@@ -88,8 +88,8 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : Profil
                 longitude = map["longitude"] as? Double ?: 0.0,
                 name = map["name"] as? String ?: "")
           }
-
-      UserProfile(uid = uid, locations = locations)
+      val announcements = document.get("announcements") as? List<String> ?: emptyList()
+      UserProfile(uid = uid, locations = locations, announcements = announcements)
     } catch (e: Exception) {
       Log.e("UserProfileRepositoryFirestore", "Error converting document to UserProfile", e)
       null
