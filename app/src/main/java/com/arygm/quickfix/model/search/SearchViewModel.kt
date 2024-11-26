@@ -27,7 +27,7 @@ open class SearchViewModel(
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery
 
-  private val _workerProfiles = MutableStateFlow<List<WorkerProfile>>(emptyList())
+  val _workerProfiles = MutableStateFlow<List<WorkerProfile>>(emptyList())
   val workerProfiles: StateFlow<List<WorkerProfile>> = _workerProfiles
 
   private val _errorMessage = MutableStateFlow<String?>(null)

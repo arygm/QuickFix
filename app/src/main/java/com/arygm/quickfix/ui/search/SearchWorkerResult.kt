@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.StarOutline
@@ -45,6 +46,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
@@ -273,6 +275,26 @@ fun SearchWorkerResult(
                         .testTag("filter_buttons_row"),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    items(1) {
+                        Box(modifier = Modifier.height(screenHeight * 0.05f)) {
+                            IconButton(
+                                onClick = { /* Goes to all filter screen */},
+                                modifier = Modifier.padding(bottom = screenHeight * 0.01f),
+                                content = {
+                                    Icon(
+                                        imageVector = Icons.Default.Tune,
+                                        contentDescription = "Filter",
+                                        tint = colorScheme.onBackground,
+                                    )
+                                },
+                                colors =
+                                IconButtonDefaults.iconButtonColors()
+                                    .copy(containerColor = colorScheme.surface),
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                    }
+
                     items(listOfButtons.size) { index ->
                         QuickFixButton(
                             buttonText = listOfButtons[index].text,
