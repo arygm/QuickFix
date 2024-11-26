@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
@@ -34,7 +35,9 @@ fun QuickFixSlidingWindow(
     onDismiss: () -> Unit,
     content: @Composable () -> Unit
 ) {
-  BoxWithConstraints {
+  BoxWithConstraints(
+      modifier = Modifier.testTag("QuickFixSlidingWindow"),
+  ) {
     val density = LocalDensity.current
     val screenWidthPx = constraints.maxWidth.toFloat()
     val screenWidthDp = with(density) { constraints.maxWidth.toDp() }
@@ -78,6 +81,7 @@ fun QuickFixSlidingWindow(
         Box(
             modifier =
                 Modifier.fillMaxHeight()
+                    .testTag("QuickFixSlidingWindowContent")
                     .width(windowWidthDp)
                     .offset {
                       IntOffset(x = (animatableOffsetX.value + dragOffsetX).roundToInt(), y = 0)

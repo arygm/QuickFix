@@ -396,7 +396,7 @@ fun SearchWorkerResult(
                                 .offset(x = -(screenWidth * 0.04f))
                                 .testTag(
                                     "sliding_window_save_button"), // Negative offset to position
-                                                                   // correctly,
+                        // correctly,
                         leadingIcon =
                             if (saved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder)
 
