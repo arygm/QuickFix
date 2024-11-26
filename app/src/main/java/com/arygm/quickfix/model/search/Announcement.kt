@@ -1,9 +1,9 @@
 package com.arygm.quickfix.model.search
 
 import com.arygm.quickfix.model.locations.Location
-import java.time.LocalDateTime
+import com.google.firebase.Timestamp
 
-data class AvailabilitySlot(val start: LocalDateTime, val end: LocalDateTime)
+data class AvailabilitySlot(val start: Timestamp, val end: Timestamp)
 
 data class Announcement(
     val announcementId: String,

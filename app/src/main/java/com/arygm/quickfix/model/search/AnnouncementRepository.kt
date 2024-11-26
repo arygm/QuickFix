@@ -31,7 +31,6 @@ interface AnnouncementRepository {
   )
 
   fun deleteAnnouncementById(
-      userId: String,
       announcementId: String,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit

@@ -42,13 +42,6 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
     repository.getAnnouncements(
         onSuccess = { allAnnouncements ->
           announcements_.value = allAnnouncements // Update all announcements
-          if (announcementsForUser_.value.isNotEmpty()) {
-            val userId = announcementsForUser_.value.first().userId
-            announcementsForUser_.value =
-                allAnnouncements.filter {
-                  it.userId == userId
-                } // Filter and update user-specific announcements
-          }
         },
         onFailure = { e -> Log.e("Failed to fetch all announcements", e.toString()) })
   }
@@ -71,7 +64,7 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   fun announce(announcement: Announcement) {
     repository.announce(
         announcement = announcement,
-        onSuccess = { getAnnouncements() },
+        onSuccess = { announcementsForUser_.value += announcement },
         onFailure = { e ->
           Log.e(
               "AnnouncementViewModel",
@@ -87,7 +80,12 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   fun updateAnnouncement(announcement: Announcement) {
     repository.updateAnnouncement(
         announcement = announcement,
-        onSuccess = { getAnnouncements() },
+        onSuccess = {
+          announcementsForUser_.value =
+              announcementsForUser_.value
+                  .filter { it.announcementId != announcement.announcementId }
+                  .plus(announcement)
+        },
         onFailure = { e ->
           Log.e(
               "AnnouncementViewModel",
@@ -103,9 +101,11 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
    */
   fun deleteAnnouncementById(userId: String, announcementId: String) {
     repository.deleteAnnouncementById(
-        userId = userId,
         announcementId = announcementId,
-        onSuccess = { getAnnouncements() },
+        onSuccess = { // Remove the announcement with the matching ID from the list
+          announcementsForUser_.value =
+              announcementsForUser_.value.filter { it.announcementId != announcementId }
+        },
         onFailure = { e ->
           Log.e("AnnouncementViewModel", "User $userId failed to delete announcement: ${e.message}")
         })

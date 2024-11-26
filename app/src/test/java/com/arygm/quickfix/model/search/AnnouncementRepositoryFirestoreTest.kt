@@ -6,13 +6,13 @@ import com.arygm.quickfix.model.locations.Location
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
-import java.time.LocalDateTime
 import junit.framework.TestCase.fail
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -49,6 +49,8 @@ class AnnouncementRepositoryFirestoreTest {
 
   private lateinit var announcementRepositoryFirestore: AnnouncementRepositoryFirestore
 
+  private val timestamp = Timestamp.now()
+
   private val announcement1 =
       Announcement(
           announcementId = "announcement1",
@@ -57,11 +59,7 @@ class AnnouncementRepositoryFirestoreTest {
           category = "Test Category",
           description = "Test Description",
           location = Location(37.7749, -122.4194, "San Francisco"),
-          availability =
-              listOf(
-                  AvailabilitySlot(
-                      start = LocalDateTime.parse("2024-11-24T10:00:00"),
-                      end = LocalDateTime.parse("2024-11-24T14:00:00"))),
+          availability = listOf(AvailabilitySlot(start = timestamp, end = timestamp)),
           quickFixImages = listOf("image1.jpg", "image2.jpg"))
   private val announcement2 =
       Announcement(
@@ -71,11 +69,7 @@ class AnnouncementRepositoryFirestoreTest {
           category = "Test Category",
           description = "Test Description",
           location = Location(37.7749, -122.4194, "San Francisco"),
-          availability =
-              listOf(
-                  AvailabilitySlot(
-                      start = LocalDateTime.parse("2024-11-24T10:00:00"),
-                      end = LocalDateTime.parse("2024-11-24T14:00:00"))),
+          availability = listOf(AvailabilitySlot(start = timestamp, end = timestamp)),
           quickFixImages = listOf("image1.jpg", "image2.jpg"))
 
   @Before
@@ -284,7 +278,6 @@ class AnnouncementRepositoryFirestoreTest {
     var callbackCalled = false
 
     announcementRepositoryFirestore.deleteAnnouncementById(
-        userId = userId,
         announcementId = announcementId,
         onSuccess = { callbackCalled = true },
         onFailure = { fail("Failure callback should not be called") })
@@ -303,7 +296,6 @@ class AnnouncementRepositoryFirestoreTest {
     var failureCallbackCalled = false
 
     announcementRepositoryFirestore.deleteAnnouncementById(
-        userId = userId,
         announcementId = announcementId,
         onSuccess = { fail("Success callback should not be called") },
         onFailure = { e ->
@@ -333,8 +325,11 @@ class AnnouncementRepositoryFirestoreTest {
     whenever(document.getString("description")).thenReturn("Test Description")
     whenever(document.get("location"))
         .thenReturn(mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "Test Location"))
+
+    val startTimestamp = Timestamp.now() // Mock a valid Timestamp
+    val endTimestamp = Timestamp.now()
     whenever(document.get("availability"))
-        .thenReturn(listOf(mapOf("start" to "2024-11-25T00:00", "end" to "2024-11-25T01:00")))
+        .thenReturn(listOf(mapOf("start" to startTimestamp, "end" to endTimestamp)))
     whenever(document.get("quickFixImages")).thenReturn(listOf("image1", "image2"))
 
     val result = invokeDocumentToAnnouncement(document)
@@ -347,8 +342,8 @@ class AnnouncementRepositoryFirestoreTest {
     assertEquals("Test Description", result.description)
     assertEquals(Location(0.0, 0.0, "Test Location"), result.location)
     assertEquals(1, result.availability.size)
-    assertEquals("2024-11-25T00:00", result.availability[0].start.toString())
-    assertEquals("2024-11-25T01:00", result.availability[0].end.toString())
+    assertEquals(startTimestamp, result.availability[0].start)
+    assertEquals(endTimestamp, result.availability[0].end)
     assertEquals(listOf("image1", "image2"), result.quickFixImages)
   }
 

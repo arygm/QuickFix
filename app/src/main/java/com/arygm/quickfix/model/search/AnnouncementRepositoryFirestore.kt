@@ -4,10 +4,10 @@ import android.graphics.Bitmap
 import android.util.Log
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.utils.performFirestoreOperation
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
-import java.time.LocalDateTime
 
 class AnnouncementRepositoryFirestore(private val db: FirebaseFirestore) : AnnouncementRepository {
 
@@ -105,7 +105,6 @@ class AnnouncementRepositoryFirestore(private val db: FirebaseFirestore) : Annou
   }
 
   override fun deleteAnnouncementById(
-      userId: String,
       announcementId: String,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
@@ -129,6 +128,7 @@ class AnnouncementRepositoryFirestore(private val db: FirebaseFirestore) : Annou
           document.getString("category") ?: return null // Replace with Category type if needed
       val description = document.getString("description") ?: return null
 
+      // Parse location
       val locationData = document.get("location") as? Map<*, *>
       val location =
           locationData?.let {
@@ -138,13 +138,14 @@ class AnnouncementRepositoryFirestore(private val db: FirebaseFirestore) : Annou
                 name = it["name"] as? String ?: "")
           }
 
+      // Parse availability
       val availabilityData = document.get("availability") as? List<Map<*, *>>
       val availability =
           availabilityData?.mapNotNull { slot ->
-            val start = slot["start"] as? String
-            val end = slot["end"] as? String
+            val start = slot["start"] as? Timestamp
+            val end = slot["end"] as? Timestamp
             if (start != null && end != null) {
-              AvailabilitySlot(start = LocalDateTime.parse(start), end = LocalDateTime.parse(end))
+              AvailabilitySlot(start = start, end = end)
             } else null
           } ?: emptyList()
 
