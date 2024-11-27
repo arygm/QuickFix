@@ -136,7 +136,8 @@ fun SearchWorkerProfileResult(
                           buttonColor = colorScheme.primary,
                           textColor = colorScheme.onPrimary,
                           contentPadding = PaddingValues(0.dp),
-                          height = 30.dp)
+                          height = 30.dp,
+                          modifier = Modifier.testTag("book_button"))
                     }
                   }
             }
