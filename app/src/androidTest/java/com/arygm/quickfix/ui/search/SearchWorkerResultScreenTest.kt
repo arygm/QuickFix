@@ -178,7 +178,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithContentDescription("Back").performClick()
     verify(navigationActions).goBack()
   }
-  
+
   @Test
   fun testSlidingWindowAppearsOnBookClick() {
     // Set up the content
