@@ -14,9 +14,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.Help
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Phone
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Work
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -24,7 +27,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -34,271 +36,198 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
-import com.arygm.quickfix.ui.navigation.TopLevelDestinations
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     navigationActions: NavigationActions,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
-    navigationActionsRoot: NavigationActions
+    loggedInAccountViewModel: LoggedInAccountViewModel
 ) {
-  val loggedInProfile by loggedInAccountViewModel.loggedInAccount.collectAsState()
-  // List of options handled by the profile screen
-  val options =
-      listOf(
-          OptionItem("Settings", IconType.Vector(Icons.Outlined.Settings)) {},
-          OptionItem("Activity", IconType.Resource(R.drawable.dashboardvector)) {},
-          OptionItem("Set up your business account", IconType.Resource(R.drawable.workvector)) {
-            navigationActions.navigateTo(Screen.TO_WORKER)
-          },
-          OptionItem("Account configuration", IconType.Resource(R.drawable.accountsettingsvector)) {
-            navigationActions.navigateTo(Screen.ACCOUNT_CONFIGURATION)
-          },
-          OptionItem("Workers network", IconType.Vector(Icons.Outlined.Phone)) {},
-          OptionItem("Legal", IconType.Vector(Icons.Outlined.Info)) {})
+    val loggedInProfile by loggedInAccountViewModel.loggedInAccount.collectAsState()
+    val displayName = loggedInProfile?.let { capitalizeName(it.firstName, it.lastName) } ?: "Loading..."
+    val email = loggedInProfile?.email ?: "Loading..."
 
-  Scaffold(
-      containerColor = colorScheme.background,
-      topBar = {
-        TopAppBar(
-            title = {
-              Column(modifier = Modifier.fillMaxWidth().padding(8.dp).testTag("ProfileTopAppBar")) {
-                // "Profile" Title
-                Text(
-                    text = "Profile",
-                    color = colorScheme.primary,
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier.padding(bottom = 8.dp).testTag("ProfileTitle"))
-
-                // Profile Card
-                Card(
-                    modifier =
-                        Modifier.fillMaxWidth(0.85f)
-                            .align(Alignment.CenterHorizontally)
-                            .testTag("ProfileCard"),
-                    shape = RoundedCornerShape(16.dp),
-                    colors =
-                        CardDefaults.cardColors(
-                            containerColor = colorScheme.surface,
-                            contentColor = colorScheme.onSurface),
-                    elevation = CardDefaults.cardElevation(4.dp)) {
-                      Row(
-                          verticalAlignment = Alignment.CenterVertically,
-                          modifier = Modifier.padding(7.dp)) {
-                            Icon(
-                                painter = painterResource(R.drawable.profilevector),
-                                contentDescription = "Profile Icon",
-                                tint = colorScheme.primary,
-                                modifier = Modifier.size(24.dp))
-                            Spacer(modifier = Modifier.width(65.dp))
-
-                            val displayName =
-                                if (loggedInProfile != null) {
-                                  capitalizeName(
-                                      loggedInProfile?.firstName, loggedInProfile?.lastName)
-                                } else {
-                                  "Loading..." // Isn't supposed to happen
-                                }
-                            Text(
-                                text = displayName,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = colorScheme.onBackground,
-                                modifier = Modifier.testTag("ProfileName"))
-                          }
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = displayName,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(
+                            text = email,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontSize = 10.sp
+                        )
                     }
-              }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
-            modifier = Modifier.height(110.dp))
-      },
-      content = { padding ->
-        Column(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .padding(
-                        top = padding.calculateTopPadding(),
-                        bottom = padding.calculateBottomPadding())
+                },
+                actions = {
+                    Icon(
+                        painter = painterResource(R.drawable.placeholder_worker),
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier
+                            .size(64.dp)  // Increased size to prevent cropping
+                            .clip(RoundedCornerShape(50))
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+            )
+        },
+        content = { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(padding)
                     .padding(horizontal = 16.dp)
                     .verticalScroll(rememberScrollState())
-                    .testTag("ProfileContent")) {
-              Column(modifier = Modifier.fillMaxWidth().padding(bottom = 0.dp)) {
-                // Upcoming Activities Placeholder
+                    .testTag("ProfileContent")
+            ) {
+                Spacer(modifier = Modifier.height(26.dp))
+
+                // Balance Section
                 Card(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .testTag("UpcomingActivitiesCard"),
-                    shape = RoundedCornerShape(8.dp),
-                    colors =
-                        CardDefaults.cardColors(
-                            containerColor = colorScheme.surface,
-                            contentColor = colorScheme.onBackground),
-                    elevation = CardDefaults.cardElevation(4.dp)) {
-                      Text(
-                          text =
-                              "This isn’t developed yet; but it can display upcoming activities for both a user and worker",
-                          modifier = Modifier.padding(16.dp).testTag("UpcomingActivitiesText"),
-                          style = MaterialTheme.typography.bodyMedium)
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Current balance",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "CHF 12,000.90",
+                            style = MaterialTheme.typography.headlineLarge,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(
+                            onClick = { /* Add funds action */ },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Text(
+                                text = "+ Add funds",
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
-
-                // Wallet and Help Row
-                Row(
-                    modifier =
-                        Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("WalletHelpRow"),
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                      Button(
-                          onClick = { /* Wallet click action */},
-                          modifier = Modifier.weight(1f).height(80.dp).testTag("WalletButton"),
-                          colors =
-                              ButtonDefaults.buttonColors(containerColor = colorScheme.surface),
-                          shape = RoundedCornerShape(8.dp),
-                          elevation = ButtonDefaults.buttonElevation(4.dp)) {
-                            Column(
-                                horizontalAlignment = Alignment.Start,
-                                verticalArrangement = Arrangement.Center,
-                                modifier = Modifier.fillMaxWidth()) {
-                                  Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.wallletvector),
-                                        contentDescription = "Wallet Icon",
-                                        modifier = Modifier.size(30.dp),
-                                        tint = colorScheme.primary)
-                                    Spacer(modifier = Modifier.width(35.dp))
-                                    Column {
-                                      Text(
-                                          text = "Wallet",
-                                          color = colorScheme.onBackground,
-                                          style = MaterialTheme.typography.bodyLarge,
-                                          modifier = Modifier.testTag("WalletText"))
-                                      Text(
-                                          text = "___ CHF",
-                                          color = colorScheme.onBackground,
-                                          style = MaterialTheme.typography.bodyMedium,
-                                          modifier = Modifier.testTag("WalletAmountText"))
-                                    }
-                                  }
-                                }
-                          }
-
-                      Spacer(modifier = Modifier.width(16.dp))
-
-                      // Help Button
-                      Button(
-                          onClick = { /* Help click action */},
-                          modifier = Modifier.weight(1f).height(80.dp).testTag("HelpButton"),
-                          colors =
-                              ButtonDefaults.buttonColors(containerColor = colorScheme.surface),
-                          shape = RoundedCornerShape(8.dp),
-                          elevation = ButtonDefaults.buttonElevation(4.dp)) {
-                            Column(
-                                horizontalAlignment = Alignment.Start,
-                                verticalArrangement = Arrangement.Center,
-                                modifier = Modifier.fillMaxWidth()) {
-                                  Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.helpvector),
-                                        contentDescription = "Help Icon",
-                                        modifier = Modifier.size(30.dp),
-                                        tint = colorScheme.primary)
-                                    Spacer(modifier = Modifier.width(35.dp))
-                                    Text(
-                                        text = "Help",
-                                        color = colorScheme.onBackground,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        modifier = Modifier.testTag("HelpText"))
-                                  }
-                                }
-                          }
-                    }
-              }
-
-              Column(modifier = Modifier.fillMaxWidth()) {
-                options.forEach { option ->
-                  Card(
-                      modifier =
-                          Modifier.fillMaxWidth()
-                              .height(65.dp)
-                              .padding(vertical = 4.dp)
-                              .testTag(option.label.replace(" ", "") + "Option"),
-                      shape = RoundedCornerShape(8.dp),
-                      colors =
-                          CardDefaults.cardColors(
-                              containerColor = colorScheme.surface,
-                              contentColor = colorScheme.onBackground),
-                      elevation = CardDefaults.cardElevation(4.dp),
-                      onClick = option.onClick) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically) {
-                              when (val icon = option.icon) {
-                                is IconType.Resource -> {
-                                  Icon(
-                                      painter = painterResource(icon.resId),
-                                      contentDescription = "${option.label} Icon",
-                                      modifier = Modifier.size(24.dp),
-                                      tint = colorScheme.primary)
-                                }
-                                is IconType.Vector -> {
-                                  Icon(
-                                      imageVector = icon.imageVector,
-                                      contentDescription = "${option.label} Icon",
-                                      modifier = Modifier.size(24.dp),
-                                      tint = colorScheme.primary)
-                                }
-                              }
-                              Spacer(modifier = Modifier.width(16.dp))
-                              Text(
-                                  text = option.label,
-                                  style = MaterialTheme.typography.titleSmall,
-                                  modifier =
-                                      Modifier.testTag(option.label.replace(" ", "") + "Text"))
-                            }
-                      }
                 }
-              }
 
-              // Logout Button
-              Button(
-                  onClick = {
-                    loggedInAccountViewModel.logOut(Firebase.auth)
-                    navigationActionsRoot.navigateTo(TopLevelDestinations.WELCOME)
-                    Log.d("user", Firebase.auth.currentUser.toString())
-                  },
-                  modifier =
-                      Modifier.fillMaxWidth().padding(vertical = 16.dp).testTag("LogoutButton"),
-                  colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Personal Settings Section
+                Text(
+                    text = "Personal Settings",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                SettingsItem(icon = Icons.Outlined.Person, label = "My Account") { /* Action */ }
+                SettingsItem(icon = Icons.Outlined.Settings, label = "Preferences") { /* Action */ }
+                SettingsItem(icon = Icons.Outlined.Favorite, label = "Saved lists") { /* Action */ }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Resources Section
+                Text(
+                    text = "Resources",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                SettingsItem(icon = Icons.Outlined.Help, label = "Support") { /* Action */ }
+                SettingsItem(icon = Icons.Outlined.Info, label = "Legal") { /* Action */ }
+                SettingsItem(icon = Icons.Outlined.Work, label = "Become a Worker") { /* Action */ }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Logout Button
+                Button(
+                    onClick = {
+                        loggedInAccountViewModel.logOut(Firebase.auth)
+                        navigationActions.navigateTo(Screen.WELCOME)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
                     Text(
                         text = "Log out",
-                        color = colorScheme.onPrimary,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.testTag("LogoutText"))
-                  }
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
             }
-      },
-  )
+        }
+    )
 }
 
-sealed class IconType {
-  data class Resource(val resId: Int) : IconType()
-
-  data class Vector(val imageVector: ImageVector) : IconType()
+@Composable
+fun SettingsItem(icon: ImageVector, label: String, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = "$label Icon",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
 }
-
-data class OptionItem(val label: String, val icon: IconType, val onClick: () -> Unit)
 
 private fun capitalizeName(firstName: String?, lastName: String?): String {
-  val capitalizedFirstName = firstName?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""
-  val capitalizedLastName = lastName?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""
-  return "$capitalizedFirstName $capitalizedLastName".trim()
+    val capitalizedFirstName = firstName?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""
+    val capitalizedLastName = lastName?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""
+    return "$capitalizedFirstName $capitalizedLastName".trim()
 }
