@@ -1,6 +1,5 @@
 package com.arygm.quickfix.ui.elements
 
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -12,7 +11,7 @@ import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 
-class QuickFixUploadImageSheetTest {
+class QuickFixUploadImageTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -27,7 +26,6 @@ class QuickFixUploadImageSheetTest {
     onChooseFromLibraryClick = mock()
   }
 
-  @OptIn(ExperimentalTestApi::class)
   @Test
   fun quickFixUploadImageSheet_displaysCorrectly() {
     composeTestRule.setContent {
