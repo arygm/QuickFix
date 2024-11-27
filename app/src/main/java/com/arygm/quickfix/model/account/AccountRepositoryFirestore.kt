@@ -107,7 +107,7 @@ open class AccountRepositoryFirestore(private val db: FirebaseFirestore) : Accou
       Log.d("AccountRepositoryFirestore", "account: $account")
       account
     } catch (e: Exception) {
-      Log.e("TodosRepositoryFirestore", "Error converting document to ToDo", e)
+      Log.e("AccountRepositoryFirestore", "Error converting document to Account", e)
       null
     }
   }
