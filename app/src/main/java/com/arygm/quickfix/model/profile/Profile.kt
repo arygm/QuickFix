@@ -43,7 +43,6 @@ class UserProfile(
 class WorkerProfile(
     val rating: Double = 0.0,
     val fieldOfWork: String = "",
-    val hourlyRate: Double? = null,
     val description: String = "",
     val location: Location? = null,
     quickFixes: List<String> = emptyList(),
@@ -51,7 +50,8 @@ class WorkerProfile(
     val addOnServices : List<AddOnService> = emptyList<AddOnService>(),
     val reviews : ArrayDeque<Review> = ArrayDeque<Review>(),
     val profilePicture: String = "",
-    val price : Double = 0.0,
+    val price : Double = 130.0,
+    val displayName: String = "",
     uid: String = ""
 ) : Profile(uid, quickFixes) {
   override fun equals(other: Any?): Boolean {
@@ -60,7 +60,6 @@ class WorkerProfile(
     if (!super.equals(other)) return false
 
     return fieldOfWork == other.fieldOfWork &&
-        hourlyRate == other.hourlyRate &&
         description == other.description &&
         location == other.location &&
         rating == other.rating &&
@@ -68,7 +67,7 @@ class WorkerProfile(
   }
 
   override fun hashCode(): Int {
-    return listOf(super.hashCode(), fieldOfWork, hourlyRate, description, location, rating, reviews)
+    return listOf(super.hashCode(), fieldOfWork, description, location, rating, reviews)
         .hashCode()
   }
 }

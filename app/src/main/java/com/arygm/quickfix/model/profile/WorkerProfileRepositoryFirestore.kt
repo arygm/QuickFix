@@ -44,7 +44,6 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
     val data =
         mapOf(
             "uid" to workerProfile.uid,
-            "hourlyRate" to workerProfile.hourlyRate,
             "description" to workerProfile.description,
             "fieldOfWork" to workerProfile.fieldOfWork, // Convert to string
             "location" to workerProfile.location?.toFirestoreMap())
@@ -61,7 +60,6 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
     val data =
         mapOf(
             "uid" to workerProfile.uid,
-            "hourlyRate" to workerProfile.hourlyRate,
             "description" to workerProfile.description,
             "fieldOfWork" to workerProfile.fieldOfWork,
             "location" to workerProfile.location?.toFirestoreMap())
@@ -100,10 +98,8 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
       val uid = document.id
       val description = document.getString("description") ?: return null
       val fieldOfWork = document.getString("fieldOfWork") ?: return null
-      val hourlyRate = document.getDouble("hourlyRate") ?: return null
       val locationData = document.get("location") as? Map<String, Any> ?: emptyMap()
       val rating = document.getDouble("rating") ?: 0.0
-      val reviews = document.get("reviews") as? List<*> ?: return null
       val location =
           locationData.let {
             Location(
@@ -111,14 +107,14 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
                 longitude = it["longitude"] as? Double ?: 0.0,
                 name = it["name"] as? String ?: "")
           }
+        val price = document.getDouble("price") ?: 0.0
       WorkerProfile(
           rating = rating,
-          reviews = reviews.mapNotNull { it as? String },
           uid = uid,
           description = description,
           fieldOfWork = fieldOfWork,
-          hourlyRate = hourlyRate,
-          location = location)
+          location = location,
+          price = price)
     } catch (e: Exception) {
       Log.e("WorkerProfileRepositoryFirestore", "Error converting document to WorkerProfile", e)
       null
@@ -190,7 +186,7 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
         .get()
         .addOnSuccessListener { querySnapshot ->
           val workerProfiles =
-              querySnapshot.documents.mapNotNull { it.toObject(WorkerProfile::class.java) }
+              querySnapshot.documents.mapNotNull { documentToWorker(it)}
           onSuccess(workerProfiles)
         }
         .addOnFailureListener { exception -> onFailure(exception) }

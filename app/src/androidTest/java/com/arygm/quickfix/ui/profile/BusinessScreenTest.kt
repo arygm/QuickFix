@@ -8,7 +8,9 @@ import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.*
+import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
@@ -64,17 +66,9 @@ class BusinessScreenTest {
     }
 
     // Check UI elements are displayed
-    composeTestRule.onNodeWithTag("BusinessAccountTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Business Account").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ProfileCard").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ProfileName").assertIsDisplayed()
-    composeTestRule.onNodeWithText("John Doe").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("occupationInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("descriptionInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("hourlyRateInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("locationInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("validateButton").assertIsDisplayed().assertIsEnabled()
+    composeTestRule.onNodeWithTag(C.Tag.upgradeToWorkerScaffold).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(C.Tag.upgradeToWorkerTopBar).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(C.Tag.upgradeToWorkerPager).assertIsDisplayed()
   }
 
   @Test
@@ -336,7 +330,6 @@ class BusinessScreenTest {
 
     assertEquals("testUid", addedProfile.uid)
     assertEquals("Plumber", addedProfile.fieldOfWork)
-    assertEquals(50.0, addedProfile.hourlyRate)
     assertEquals("Experienced plumber", addedProfile.description)
     assertEquals(Location(0.0, 0.0, "default"), addedProfile.location)
   }
@@ -393,4 +386,6 @@ class BusinessScreenTest {
     assertEquals(true, updatedUserProfile.isWorker)
     // You can also verify other fields if necessary
   }
+
+
 }

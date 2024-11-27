@@ -22,5 +22,10 @@ object C {
     const val subCategories = "subCategories"
     const val enterSubCateIcon = "enterSubCateIcon"
     const val subCategoryName = "subCategoryName"
+
+    //UpgradeToWorker Screen
+    const val upgradeToWorkerPager = "upgradeToWorkerPager"
+    const val upgradeToWorkerTopBar = "upgradeToWorkerTopBar"
+    const val upgradeToWorkerScaffold = "upgradeToWorkerScaffold"
   }
 }

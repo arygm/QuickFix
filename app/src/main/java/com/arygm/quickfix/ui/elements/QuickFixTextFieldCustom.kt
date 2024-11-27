@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.elements
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +36,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.ressources.C
@@ -78,34 +80,81 @@ fun QuickFixTextFieldCustom(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     showLabel: Boolean = false,
     label: @Composable (() -> Unit)? = {},
-    onClick: Boolean = false
+    onClick: Boolean = false,
+    borderThickness: Dp = 1.dp,
+    hasShadow: Boolean = true,
+    borderColor: Color = Color.Transparent,
+    showCharCounter: Boolean = false,
+    maxChar: Int = Int.MAX_VALUE,
+    charCounterTextStyle: TextStyle = MaterialTheme.typography.bodySmall,
+    charCounterColor: Color = MaterialTheme.colorScheme.onBackground,
+    charCounterErrorColor: Color = errorColor,
+    moveCounter : Dp = 0.dp,
 ) {
   val scrollState = rememberScrollState() // Scroll state for horizontal scrolling
   // Launch a coroutine to scroll to the end of the text when typing
   LaunchedEffect(TextFieldValue(value)) { scrollState.animateScrollTo(scrollState.maxValue) }
 
-  if (showLabel) {
-    if (label != null) {
-      label()
-      Spacer(modifier = Modifier.padding(1.5.dp))
+    val charCount = value.length
+
+    // **Enforce maximum character limit**
+    val updatedValue = if (charCount <= maxChar) value else value.substring(0, maxChar)
+
+    // **Update the onValueChange to enforce character limit**
+    val onValueChangeWithLimit: (String) -> Unit = {
+        if (it.length <= maxChar) {
+            onValueChange(it)
+        }
     }
-  }
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(end = moveCounter)
+    ) {
+        if (showLabel) {
+            if (label != null) {
+                label()
+            }
+        }
+        if (showCharCounter) {
+            val counterColor = if (charCount > maxChar) charCounterErrorColor else charCounterColor
+            Text(
+                text = "$charCount / $maxChar",
+                color = counterColor,
+                style = charCounterTextStyle,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 3.dp)
+                    .testTag("charCounterText"),
+                textAlign = TextAlign.End
+            )
+        }
+    }
+    Spacer(modifier = Modifier.padding(1.5.dp))
   Box(
       modifier =
           Modifier.let {
                 if (isError)
                     it.clip(shape)
                         .background(MaterialTheme.colorScheme.surface)
-                        .border(1.dp, errorColor, shape)
+                        .border(borderThickness, errorColor, shape)
                         .background(errorColor.copy(alpha = 0.2f))
-                else
-                    it.shadow(elevation = 2.dp, shape = shape, clip = false)
-                        .clip(shape)
-                        .background(MaterialTheme.colorScheme.surface)
+                else {
+                    if (hasShadow)
+                        it.shadow(elevation = 2.dp, shape = shape, clip = false).clip(shape)
+                            .background(MaterialTheme.colorScheme.surface).border(
+                                borderThickness,
+                                borderColor,
+                                shape)
+                    else
+                        it.clip(shape)
+                            .background(MaterialTheme.colorScheme.surface).border(
+                                borderThickness,
+                                borderColor,
+                                shape)
+                }
               }
               .size(width = widthField, height = heightField) // Set the width and height
               .fillMaxWidth() // Fill the width of the container
-              .padding(start = moveContentHorizontal, top = moveContentTop, bottom = moveContentTop)
+              .padding(start = moveContentHorizontal, top = moveContentBottom, bottom = moveContentTop)
               .clickable { onTextFieldClick() }
               .testTag(C.Tag.main_container_text_field_custom), // Apply padding
       contentAlignment = Alignment.Center) {
@@ -131,8 +180,8 @@ fun QuickFixTextFieldCustom(
                       horizontal = spaceBetweenLeadIconText)) // Space between icon and text
               Box(modifier = Modifier.weight(1f)) {
                 BasicTextField(
-                    value = value,
-                    onValueChange = { onValueChange(it) },
+                    value = updatedValue,
+                    onValueChange = onValueChangeWithLimit ,
                     modifier =
                         modifier
                             .fillMaxWidth()
@@ -153,6 +202,7 @@ fun QuickFixTextFieldCustom(
                     visualTransformation = visualTransformation,
                 )
                 if (value.isEmpty()) {
+                    Log.d("QuickFixTextFieldCustom", "placeHolderText: $placeHolderText")
                   Text(
                       modifier = Modifier.testTag(C.Tag.place_holder_text_field_custom),
                       text = placeHolderText,
@@ -160,7 +210,8 @@ fun QuickFixTextFieldCustom(
                           textStyle.copy(
                               color =
                                   if (isError) errorColor
-                                  else placeHolderColor) // Placeholder text style
+                                  else placeHolderColor), // Placeholder text style
+                        textAlign = TextAlign.Start // Align the placeholder text to the start
                       )
                 }
               }

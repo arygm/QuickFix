@@ -29,6 +29,8 @@ fun QuickFixButton(
     onClickAction: () -> Unit,
     buttonColor: Color,
     buttonOpacity: Float = 1f,
+    buttonColorDisabled: Color = MaterialTheme.colorScheme.background,
+    textColorDisabled: Color = MaterialTheme.colorScheme.onSecondaryContainer,
     textColor: Color,
     textStyle: TextStyle = MaterialTheme.typography.labelMedium,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.Center,
@@ -41,7 +43,12 @@ fun QuickFixButton(
 ) {
   Button(
       onClick = onClickAction,
-      colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
+      colors = ButtonDefaults.buttonColors(
+              containerColor = buttonColor,             // Background when enabled
+              contentColor = textColor,              // Text color when enabled
+              disabledContainerColor = buttonColorDisabled,     // Background when disabled
+              disabledContentColor = textColorDisabled
+      ),
       modifier =
           modifier
               .fillMaxWidth(0.8f)
@@ -63,7 +70,7 @@ fun QuickFixButton(
                 contentDescription = "leading_icon",
                 modifier = Modifier.padding(end = 8.dp))
           }
-          Text(text = buttonText, style = textStyle, color = textColor)
+          Text(text = buttonText, style = textStyle)
           trailingIcon?.let {
             Image(
                 imageVector = it,
