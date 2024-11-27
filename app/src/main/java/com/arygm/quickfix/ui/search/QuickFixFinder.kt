@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
@@ -45,6 +46,7 @@ fun QuickFixFinderScreen(
     profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
     loggedInAccountViewModel: LoggedInAccountViewModel =
         viewModel(factory = LoggedInAccountViewModel.Factory),
+    accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
     searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory),
     announcementViewModel: AnnouncementViewModel =
         viewModel(factory = AnnouncementViewModel.Factory)
@@ -102,6 +104,7 @@ fun QuickFixFinderScreen(
                               announcementViewModel,
                               loggedInAccountViewModel,
                               profileViewModel,
+                              accountViewModel,
                               navigationActions,
                               isUser)
                       else -> Text("Should never happen !")

@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.search
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
@@ -57,6 +59,7 @@ fun AnnouncementScreen(
     loggedInAccountViewModel: LoggedInAccountViewModel =
         viewModel(factory = LoggedInAccountViewModel.Factory),
     profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
+    accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
     navigationActions: NavigationActions,
     isUser: Boolean = true
 ) {
@@ -276,16 +279,22 @@ fun AnnouncementScreen(
                   announcementViewModel.announce(announcement)
 
                   // Update the user profile with the new announcement
-                  val currentUserProfile = loggedInAccountViewModel.userProfile.value
-                  if (currentUserProfile != null) {
-                    val announcementList =
-                        currentUserProfile.announcements + announcement.announcementId
 
-                    profileViewModel.updateProfile(
-                        UserProfile(
-                            currentUserProfile.locations, currentUserProfile.uid, announcementList),
-                        {},
-                        {})
+                  profileViewModel.fetchUserProfile(userId) { profile ->
+                    if (profile is UserProfile) {
+                      val announcementList = profile.announcements + announcement.announcementId
+
+                      profileViewModel.updateProfile(
+                          UserProfile(profile.locations, profile.uid, announcementList),
+                          {
+                            accountViewModel.fetchUserAccount(profile.uid) { account ->
+                              loggedInAccountViewModel.setLoggedInAccount(account!!)
+                            }
+                          },
+                          {})
+                    } else {
+                      Log.e("Wrong profile", "Should be a user profile")
+                    }
                   }
 
                   // Reset all parameters after making an announcement
@@ -294,8 +303,8 @@ fun AnnouncementScreen(
                   description = ""
                   location = ""
                   titleIsEmpty = true
-                  categoryIsSelected = false
-                  locationIsSelected = false
+                  // categoryIsSelected = false
+                  // locationIsSelected = false
                   descriptionIsEmpty = true
                 },
                 buttonColor = colorScheme.primary,
