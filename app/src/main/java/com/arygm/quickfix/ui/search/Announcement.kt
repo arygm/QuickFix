@@ -37,7 +37,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.arygm.quickfix.R
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.QuickFixUploadImageSheet
@@ -190,55 +189,55 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
             Spacer(modifier = Modifier.padding(10.dp))
 
             /*QuickFixButtonWithIcon(
-                buttonText = "Availability",
-                onClickAction = {
-                  // TODO: Apply the backend of the pictures
-                },
-                buttonColor = colorScheme.surface,
-                textColor = colorScheme.onBackground,
-                textStyle = MaterialTheme.typography.titleMedium,
-                modifier =
-                    Modifier.width(360.dp)
-                        .height(42.dp)
-                        .testTag("availabilityButton")
-                        .graphicsLayer(alpha = 1f),
-                iconId = R.drawable.calendar,
-                iconContentDescription = "availability",
-                iconColor = colorScheme.onBackground)
-*/
+                            buttonText = "Availability",
+                            onClickAction = {
+                              // TODO: Apply the backend of the pictures
+                            },
+                            buttonColor = colorScheme.surface,
+                            textColor = colorScheme.onBackground,
+                            textStyle = MaterialTheme.typography.titleMedium,
+                            modifier =
+                                Modifier.width(360.dp)
+                                    .height(42.dp)
+                                    .testTag("availabilityButton")
+                                    .graphicsLayer(alpha = 1f),
+                            iconId = R.drawable.calendar,
+                            iconContentDescription = "availability",
+                            iconColor = colorScheme.onBackground)
+            */
             Spacer(modifier = Modifier.padding(10.dp))
-/*
-            QuickFixButtonWithIcon(
-                buttonText = "Upload pictures",
-                onClickAction = { showUploadImageSheet = true },
-                buttonColor = colorScheme.surface,
-                textColor = colorScheme.onBackground,
-                textStyle = MaterialTheme.typography.titleMedium,
-                modifier =
-                    Modifier.width(360.dp)
-                        .height(90.dp)
-                        .testTag("picturesButton")
-                        .graphicsLayer(alpha = 1f),
-                iconId = R.drawable.upload_image,
-                iconContentDescription = "upload_image",
-                iconColor = colorScheme.onBackground)
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).padding(start = 8.dp),
-            ) {
-              Text(
-                  text = "* Mandatory fields",
-                  color =
-                      if (titleIsEmpty ||
-                          !categoryIsSelected ||
-                          !locationIsSelected ||
-                          descriptionIsEmpty)
-                          colorScheme.error
-                      else colorScheme.onSecondaryContainer,
-                  style = MaterialTheme.typography.bodySmall,
-                  modifier = Modifier.padding(start = 9.dp).testTag("mandatoryText"))
-            }
+            /*
+                       QuickFixButtonWithIcon(
+                           buttonText = "Upload pictures",
+                           onClickAction = { showUploadImageSheet = true },
+                           buttonColor = colorScheme.surface,
+                           textColor = colorScheme.onBackground,
+                           textStyle = MaterialTheme.typography.titleMedium,
+                           modifier =
+                               Modifier.width(360.dp)
+                                   .height(90.dp)
+                                   .testTag("picturesButton")
+                                   .graphicsLayer(alpha = 1f),
+                           iconId = R.drawable.upload_image,
+                           iconContentDescription = "upload_image",
+                           iconColor = colorScheme.onBackground)
+                       Row(
+                           modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).padding(start = 8.dp),
+                       ) {
+                         Text(
+                             text = "* Mandatory fields",
+                             color =
+                                 if (titleIsEmpty ||
+                                     !categoryIsSelected ||
+                                     !locationIsSelected ||
+                                     descriptionIsEmpty)
+                                     colorScheme.error
+                                 else colorScheme.onSecondaryContainer,
+                             style = MaterialTheme.typography.bodySmall,
+                             modifier = Modifier.padding(start = 9.dp).testTag("mandatoryText"))
+                       }
 
- */
+            */
 
             QuickFixButton(
                 buttonText = "Post your announcement",
