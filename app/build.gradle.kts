@@ -164,6 +164,7 @@ dependencies {
 
     implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.security.crypto)
     testImplementation(libs.json)
 
 

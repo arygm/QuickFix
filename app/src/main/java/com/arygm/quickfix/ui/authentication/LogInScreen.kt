@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -48,6 +49,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
@@ -90,25 +93,39 @@ fun LogInScreen(
   val filledForm = email.isNotEmpty() && password.isNotEmpty()
 
   val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val sharedPreferences = EncryptedSharedPreferences.create(
+        "auth_prefs",
+        MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
+        context,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
 
   LaunchedEffect(Unit) { shrinkBox = true }
-  BoxWithConstraints(modifier = Modifier.fillMaxSize().testTag("LoginBox")) {
+  BoxWithConstraints(modifier = Modifier
+      .fillMaxSize()
+      .testTag("LoginBox")) {
     val screenWidth = maxWidth
     val screenHeight = maxHeight
 
     QuickFixAnimatedBox(boxOffsetX)
     Scaffold(
         modifier =
-            Modifier.background(colorScheme.background).fillMaxSize().testTag("LoginScaffold"),
+        Modifier
+            .background(colorScheme.background)
+            .fillMaxSize()
+            .testTag("LoginScaffold"),
         content = { dp ->
 
           // Background and content are wrapped in a Box to control the layering
           Box(
               modifier =
-                  Modifier.fillMaxSize()
-                      .testTag("ContentBox")
-                      .background(colorScheme.background)
-                      .padding(dp.calculateBottomPadding())) {
+              Modifier
+                  .fillMaxSize()
+                  .testTag("ContentBox")
+                  .background(colorScheme.background)
+                  .padding(dp.calculateBottomPadding())) {
 
                 // TopAppBar below content (layered behind content)
                 Box(
@@ -120,7 +137,9 @@ fun LogInScreen(
                                 painterResource(id = com.arygm.quickfix.R.drawable.worker_image),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize().testTag("topBarLoginBackground"))
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .testTag("topBarLoginBackground"))
                         QuickFixBackButtonTopBar(
                             onBackClick = {
                               shrinkBox = false
@@ -136,39 +155,45 @@ fun LogInScreen(
                 // Foreground content (on top of the TopAppBar)
                 Box(
                     modifier =
-                        Modifier.fillMaxWidth()
-                            .align(Alignment.BottomStart)
-                            .zIndex(2f)
-                            .background(
-                                colorScheme.background,
-                                shape =
-                                    RoundedCornerShape(12.dp)) // Ensure content is above TopAppBar
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomStart)
+                        .zIndex(2f)
+                        .background(
+                            colorScheme.background,
+                            shape =
+                            RoundedCornerShape(12.dp)
+                        ) // Ensure content is above TopAppBar
                     ) {
                       Box(
                           modifier =
-                              Modifier.size(
-                                      screenWidth *
-                                          0.5f) // Scale box size to be relative to screen size
-                                  .align(Alignment.BottomStart)
-                                  .offset(
-                                      x =
-                                          -screenWidth *
-                                              0.4f, // Offset slightly left relative to screen width
-                                      y =
-                                          screenHeight *
-                                              0.1f // Offset slightly upward relative to screen
-                                      // height
-                                      )
-                                  .graphicsLayer(rotationZ = ANIMATED_BOX_ROTATION)
-                                  .background(colorScheme.primary)
-                                  .testTag("BoxDecoration"))
+                          Modifier
+                              .size(
+                                  screenWidth *
+                                          0.5f
+                              ) // Scale box size to be relative to screen size
+                              .align(Alignment.BottomStart)
+                              .offset(
+                                  x =
+                                  -screenWidth *
+                                          0.4f, // Offset slightly left relative to screen width
+                                  y =
+                                  screenHeight *
+                                          0.1f // Offset slightly upward relative to screen
+                                  // height
+                              )
+                              .graphicsLayer(rotationZ = ANIMATED_BOX_ROTATION)
+                              .background(colorScheme.primary)
+                              .testTag("BoxDecoration"))
 
                       Column(
                           modifier =
-                              Modifier.align(Alignment.Center)
-                                  .padding(
-                                      screenWidth * 0.05f) // Relative padding based on screen width
-                                  .zIndex(100f),
+                          Modifier
+                              .align(Alignment.Center)
+                              .padding(
+                                  screenWidth * 0.05f
+                              ) // Relative padding based on screen width
+                              .zIndex(100f),
                           horizontalAlignment = Alignment.CenterHorizontally,
                           verticalArrangement = Arrangement.Center) {
                             Text(
@@ -256,8 +281,9 @@ fun LogInScreen(
                                 horizontalArrangement = Arrangement.End,
                                 contentPadding = PaddingValues(0.dp),
                                 modifier =
-                                    Modifier.align(Alignment.End)
-                                        .testTag("forgetPasswordButtonText"))
+                                Modifier
+                                    .align(Alignment.End)
+                                    .testTag("forgetPasswordButtonText"))
 
                             Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
@@ -272,6 +298,11 @@ fun LogInScreen(
                                       onResult = {
                                         if (it) {
                                           coroutineScope.launch {
+                                              with(sharedPreferences.edit()) {
+                                                  putString("user_email", email)
+                                                  putString("user_password", password)
+                                                  apply()
+                                              }
                                             shrinkBox = false
                                             delay(BOX_COLLAPSE_SPEED.toLong())
                                             Log.d("LoginFlow", "Starting login with email: $email")
@@ -287,9 +318,10 @@ fun LogInScreen(
                                 textColor = colorScheme.onPrimary,
                                 textStyle = MaterialTheme.typography.labelLarge,
                                 modifier =
-                                    Modifier.width(screenWidth * 0.9f)
-                                        .height(screenHeight * 0.06f)
-                                        .testTag("logInButton"),
+                                Modifier
+                                    .width(screenWidth * 0.9f)
+                                    .height(screenHeight * 0.06f)
+                                    .testTag("logInButton"),
                                 enabled = filledForm && isValidEmail(email))
 
                             Spacer(modifier = Modifier.height(screenHeight * 0.01f))
@@ -304,8 +336,9 @@ fun LogInScreen(
                                   style = MaterialTheme.typography.headlineSmall,
                                   color = colorScheme.onSecondaryContainer,
                                   modifier =
-                                      Modifier.padding(bottom = screenHeight * 0.01f)
-                                          .testTag("noAccountText"),
+                                  Modifier
+                                      .padding(bottom = screenHeight * 0.01f)
+                                      .testTag("noAccountText"),
                                   textAlign = TextAlign.End)
 
                               QuickFixButton(
@@ -325,8 +358,9 @@ fun LogInScreen(
                                   style = MaterialTheme.typography.labelSmall,
                                   color = colorScheme.error,
                                   modifier =
-                                      Modifier.padding(start = screenWidth * 0.01f)
-                                          .testTag("errorText"))
+                                  Modifier
+                                      .padding(start = screenWidth * 0.01f)
+                                      .testTag("errorText"))
                               Spacer(modifier = Modifier.height(screenHeight * 0.04f))
                             } else {
                               Spacer(modifier = Modifier.height(screenHeight * 0.05f))
