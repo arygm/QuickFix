@@ -35,9 +35,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -54,6 +57,14 @@ fun ProfileScreen(
     navigationActionsRoot: NavigationActions
 ) {
   val loggedInProfile by loggedInAccountViewModel.loggedInAccount.collectAsState()
+    val context = LocalContext.current
+    val sharedPreferences = EncryptedSharedPreferences.create(
+        "auth_prefs",
+        MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
+        context,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
   // List of options handled by the profile screen
   val options =
       listOf(
@@ -271,6 +282,10 @@ fun ProfileScreen(
               // Logout Button
               Button(
                   onClick = {
+                      with(sharedPreferences.edit()) {
+                          clear()
+                          apply()
+                      }
                     loggedInAccountViewModel.logOut(Firebase.auth)
                     navigationActionsRoot.navigateTo(TopLevelDestinations.WELCOME)
                     Log.d("user", Firebase.auth.currentUser.toString())
