@@ -32,6 +32,7 @@ class ProfileScreenTest {
   private lateinit var navigationActionsRoot: NavigationActions
   private lateinit var firebaseAuth: FirebaseAuth
 
+
   @Before
   fun setup() {
     // Mock dependencies
@@ -55,7 +56,7 @@ class ProfileScreenTest {
 
   @Test
   fun profileScreenDisplaysCorrectly() {
-    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
+    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot) }
 
     // Assert components are displayed
     composeTestRule.onNodeWithTag("ProfileContent").assertIsDisplayed()
@@ -71,7 +72,7 @@ class ProfileScreenTest {
 
   @Test
   fun logoutButtonClickNavigatesCorrectly() {
-    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
+    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot) }
 
     // Perform click on logout button
     composeTestRule.onNodeWithTag("LogoutButton").performClick()
@@ -82,7 +83,7 @@ class ProfileScreenTest {
 
   @Test
   fun settingsOptionsAreDisplayedCorrectly() {
-    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
+    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot) }
 
     // Verify settings options
     val settingsOptions = listOf("My Account", "Preferences", "Saved lists")
@@ -93,7 +94,7 @@ class ProfileScreenTest {
 
   @Test
   fun resourcesOptionsAreDisplayedCorrectly() {
-    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel) }
+    composeTestRule.setContent { ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot) }
 
     // Verify resources options
     val resourcesOptions = listOf("Support", "Legal", "Become a Worker")
