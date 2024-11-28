@@ -62,273 +62,222 @@ fun ProfileScreen(
     loggedInAccountViewModel: LoggedInAccountViewModel,
     navigationActionsRoot: NavigationActions,
 ) {
-    val loggedInProfile by loggedInAccountViewModel.loggedInAccount.collectAsState()
-    val displayName =
-        loggedInProfile?.let { capitalizeName(it.firstName, it.lastName) } ?: "Loading..."
-    val email = loggedInProfile?.email ?: "Loading..."
+  val loggedInProfile by loggedInAccountViewModel.loggedInAccount.collectAsState()
+  val displayName =
+      loggedInProfile?.let { capitalizeName(it.firstName, it.lastName) } ?: "Loading..."
+  val email = loggedInProfile?.email ?: "Loading..."
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column(
-                        modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .testTag("ProfileTopAppBar"),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = displayName,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 32.sp,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.testTag("ProfileDisplayName")
-                        )
-                        Text(
-                            text = email,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 10.sp,
-                            modifier = Modifier.testTag("ProfileEmail")
-                        )
-                    }
-                },
-                modifier = Modifier.height(100.dp),
-                actions = {
-                    Box(
-                        modifier =
-                        Modifier
-                            .padding(end = 16.dp, top = 16.dp)
-                            .size(72.dp)
-                            .testTag("ProfilePicture")
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.placeholder_worker),
-                            contentDescription = "Profile Picture",
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(50)),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                },
-                colors =
+  Scaffold(
+      containerColor = MaterialTheme.colorScheme.background,
+      topBar = {
+        TopAppBar(
+            title = {
+              Column(
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .padding(horizontal = 16.dp)
+                          .testTag("ProfileTopAppBar"),
+                  horizontalAlignment = Alignment.Start) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = displayName,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 32.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.testTag("ProfileDisplayName"))
+                    Text(
+                        text = email,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 10.sp,
+                        modifier = Modifier.testTag("ProfileEmail"))
+                  }
+            },
+            modifier = Modifier.height(100.dp),
+            actions = {
+              Box(
+                  modifier =
+                      Modifier.padding(end = 16.dp, top = 16.dp)
+                          .size(72.dp)
+                          .testTag("ProfilePicture")) {
+                    Image(
+                        painter = painterResource(id = R.drawable.placeholder_worker),
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(50)),
+                        contentScale = ContentScale.Crop)
+                  }
+            },
+            colors =
                 TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
-            )
-        },
-        content = { padding ->
-            Column(
-                modifier =
-                Modifier
-                    .fillMaxWidth()
+                    containerColor = MaterialTheme.colorScheme.background))
+      },
+      content = { padding ->
+        Column(
+            modifier =
+                Modifier.fillMaxWidth()
                     .padding(padding)
                     .padding(horizontal = 16.dp)
                     .verticalScroll(rememberScrollState())
-                    .testTag("ProfileContent")
-            ) {
-                Spacer(modifier = Modifier.height(26.dp))
+                    .testTag("ProfileContent")) {
+              Spacer(modifier = Modifier.height(26.dp))
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("BalanceCard"),
-                    shape = RoundedCornerShape(16.dp),
-                    colors =
-                    CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
+              Card(
+                  modifier = Modifier.fillMaxWidth().testTag("BalanceCard"),
+                  shape = RoundedCornerShape(16.dp),
+                  colors =
+                      CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)) {
                     Column(
-                        modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.Start
-                    ) {
-                        Text(
-                            text = "Current balance",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.Start) {
+                          Text(
+                              text = "Current balance",
+                              style = MaterialTheme.typography.bodyMedium,
+                              color = MaterialTheme.colorScheme.onPrimary)
+                          Spacer(modifier = Modifier.height(8.dp))
+                          Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = "CHF 12,000.90",
                                 style = MaterialTheme.typography.headlineLarge,
                                 color = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.weight(1f)
-                            )
+                                modifier = Modifier.weight(1f))
                             Button(
-                                onClick = { /* View transactions action */ },
+                                onClick = { /* View transactions action */},
                                 colors = ButtonDefaults.buttonColors(),
-                                modifier = Modifier.testTag("ViewTransactionsButton")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
-                                    contentDescription = "Info Icon",
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(32.dp)
+                                modifier = Modifier.testTag("ViewTransactionsButton")) {
+                                  Icon(
+                                      imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
+                                      contentDescription = "Info Icon",
+                                      tint = MaterialTheme.colorScheme.onPrimary,
+                                      modifier = Modifier.size(32.dp))
+                                }
+                          }
+                          Spacer(modifier = Modifier.height(12.dp))
+                          Button(
+                              onClick = { /* Add funds action */},
+                              colors =
+                                  ButtonDefaults.buttonColors(
+                                      containerColor = MaterialTheme.colorScheme.onPrimary),
+                              modifier = Modifier.testTag("AddFundsButton")) {
+                                Text(
+                                    text = "+ Add funds",
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    style =
+                                        MaterialTheme.typography.bodyMedium.copy(
+                                            fontWeight = FontWeight.Bold),
                                 )
-                            }
+                              }
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Button(
-                            onClick = { /* Add funds action */ },
-                            colors =
-                            ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.onPrimary
-                            ),
-                            modifier = Modifier.testTag("AddFundsButton")
-                        ) {
-                            Text(
-                                text = "+ Add funds",
-                                color = MaterialTheme.colorScheme.onBackground,
-                                style =
-                                MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                            )
-                        }
-                    }
-                }
+                  }
 
-                Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = "Personal Settings",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.testTag("PersonalSettingsHeader")
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+              Text(
+                  text = "Personal Settings",
+                  style = MaterialTheme.typography.titleMedium,
+                  color = MaterialTheme.colorScheme.onBackground,
+                  modifier = Modifier.testTag("PersonalSettingsHeader"))
+              Spacer(modifier = Modifier.height(8.dp))
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("PersonalSettingsCard"),
-                    shape = RoundedCornerShape(16.dp),
-                    colors =
-                    CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                ) {
+              Card(
+                  modifier = Modifier.fillMaxWidth().testTag("PersonalSettingsCard"),
+                  shape = RoundedCornerShape(16.dp),
+                  colors =
+                      CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                     Column {
-                        SettingsItem(
-                            icon = Icons.Outlined.Person, label = "My Account"
-                        ) { /* Action */ }
-                        HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
-                        SettingsItem(
-                            icon = Icons.Outlined.Settings, label = "Preferences"
-                        ) { /* Action */ }
-                        HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
-                        SettingsItem(
-                            icon = Icons.Outlined.FavoriteBorder,
-                            label = "Saved lists"
-                        ) { /* Action */ }
+                      SettingsItem(
+                          icon = Icons.Outlined.Person, label = "My Account") { /* Action */}
+                      HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
+                      SettingsItem(
+                          icon = Icons.Outlined.Settings, label = "Preferences") { /* Action */}
+                      HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
+                      SettingsItem(
+                          icon = Icons.Outlined.FavoriteBorder,
+                          label = "Saved lists") { /* Action */}
                     }
-                }
+                  }
 
-                Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = "Resources",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.testTag("ResourcesHeader")
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+              Text(
+                  text = "Resources",
+                  style = MaterialTheme.typography.titleMedium,
+                  color = MaterialTheme.colorScheme.onBackground,
+                  modifier = Modifier.testTag("ResourcesHeader"))
+              Spacer(modifier = Modifier.height(8.dp))
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("ResourcesCard"),
-                    shape = RoundedCornerShape(16.dp),
-                    colors =
-                    CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                ) {
+              Card(
+                  modifier = Modifier.fillMaxWidth().testTag("ResourcesCard"),
+                  shape = RoundedCornerShape(16.dp),
+                  colors =
+                      CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                     Column {
-                        SettingsItem(
-                            icon = Icons.AutoMirrored.Outlined.HelpOutline,
-                            label = "Support"
-                        ) { /* Action */ }
-                        HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
-                        SettingsItem(icon = Icons.Outlined.Info, label = "Legal") { /* Action */ }
-                        HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
-                        SettingsItem(
-                            icon = Icons.Outlined.WorkOutline,
-                            label = "Become a Worker"
-                        ) { /* Action */ }
+                      SettingsItem(
+                          icon = Icons.AutoMirrored.Outlined.HelpOutline,
+                          label = "Support") { /* Action */}
+                      HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
+                      SettingsItem(icon = Icons.Outlined.Info, label = "Legal") { /* Action */}
+                      HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
+                      SettingsItem(
+                          icon = Icons.Outlined.WorkOutline,
+                          label = "Become a Worker") { /* Action */}
                     }
-                }
+                  }
 
-                Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(16.dp))
 
-                Button(
-                    onClick = {
-                        loggedInAccountViewModel.logOut(Firebase.auth)
-                        navigationActions.navigateTo(Screen.WELCOME)
-                    },
-                    shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground),
-                    colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    modifier = Modifier.testTag("LogoutButton")
-                ) {
+              Button(
+                  onClick = {
+                    loggedInAccountViewModel.logOut(Firebase.auth)
+                    navigationActions.navigateTo(Screen.WELCOME)
+                  },
+                  shape = RoundedCornerShape(10.dp),
+                  border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground),
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = MaterialTheme.colorScheme.onPrimary),
+                  modifier = Modifier.testTag("LogoutButton")) {
                     Text(
                         text = "Log out",
                         color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.testTag("LogoutText")
-                    )
-                }
+                        modifier = Modifier.testTag("LogoutText"))
+                  }
             }
-        })
+      })
 }
 
 @Composable
 fun SettingsItem(icon: ImageVector, label: String, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag(label.replace(" ", "") + "Option"),
-        shape = RoundedCornerShape(0.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        onClick = onClick
-    ) {
+  Card(
+      modifier = Modifier.fillMaxWidth().testTag(label.replace(" ", "") + "Option"),
+      shape = RoundedCornerShape(0.dp),
+      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+      onClick = onClick) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = "$label Icon",
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .weight(1f)
-                    .testTag(label.replace(" ", "") + "Text")
-            )
-            Icon(
-                imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
-                contentDescription = "Forward Icon",
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(16.dp)
-            )
-        }
-    }
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+              Icon(
+                  imageVector = icon,
+                  contentDescription = "$label Icon",
+                  tint = MaterialTheme.colorScheme.onSurface,
+                  modifier = Modifier.size(24.dp))
+              Spacer(modifier = Modifier.width(16.dp))
+              Text(
+                  text = label,
+                  style = MaterialTheme.typography.bodyLarge,
+                  color = MaterialTheme.colorScheme.onBackground,
+                  modifier = Modifier.weight(1f).testTag(label.replace(" ", "") + "Text"))
+              Icon(
+                  imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
+                  contentDescription = "Forward Icon",
+                  tint = MaterialTheme.colorScheme.onSurface,
+                  modifier = Modifier.size(16.dp))
+            }
+      }
 }
 
 private fun capitalizeName(firstName: String?, lastName: String?): String {
-    val capitalizedFirstName = firstName?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""
-    val capitalizedLastName = lastName?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""
-    return "$capitalizedFirstName $capitalizedLastName".trim()
+  val capitalizedFirstName = firstName?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""
+  val capitalizedLastName = lastName?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""
+  return "$capitalizedFirstName $capitalizedLastName".trim()
 }
