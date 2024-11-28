@@ -66,7 +66,6 @@ fun SearchOnBoarding(
     // Use Scaffold for the layout structure
     Scaffold(
         containerColor = colorScheme.background,
-        topBar = {},
         content = { padding ->
           Column(
               modifier =

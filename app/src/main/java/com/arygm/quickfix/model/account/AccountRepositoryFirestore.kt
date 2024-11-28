@@ -123,6 +123,7 @@ open class AccountRepositoryFirestore(private val db: FirebaseFirestore) : Accou
         .addOnSuccessListener { document ->
           if (document.exists()) {
             val account = documentToAccount(document)
+            Log.d("AccountRepositoryFirestore", "account: $account")
             onSuccess(account)
           } else {
             onSuccess(null)

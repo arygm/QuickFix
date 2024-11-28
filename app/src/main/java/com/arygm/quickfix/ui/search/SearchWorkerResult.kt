@@ -343,7 +343,7 @@ fun SearchWorkerResult(
                             rating = profile.rating,
                             reviewCount = profile.reviews.size,
                             location = it,
-                            price = profile.hourlyRate?.toString() ?: "N/A",
+                            price = profile.price.toString(),
                             onBookClick = { isWindowVisible = true },
                             distance = distance,
                         )

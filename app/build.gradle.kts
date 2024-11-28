@@ -161,6 +161,8 @@ configurations.configureEach {
 }
 
 dependencies {
+    implementation(libs.coil.compose)
+    implementation(libs.accompanist.permissions)
 
     implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization.json)

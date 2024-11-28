@@ -55,8 +55,7 @@ class SearchWorkerResultScreenTest {
         listOf(
             WorkerProfile(
                 uid = "test_uid_1",
-                hourlyRate = 1.0,
-                reviews = listOf("I hate writing tests"),
+                price = 1.0,
                 fieldOfWork = "Carpentry",
                 rating = 3.0,
                 description = "I hate my job",

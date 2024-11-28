@@ -222,6 +222,7 @@ fun LogInScreen(
 
                             QuickFixTextFieldCustom(
                                 value = password,
+                                modifier = Modifier.testTag("inputPassword"),
                                 onValueChange = { password = it },
                                 placeHolderText = "Password",
                                 shape = RoundedCornerShape(12.dp),
@@ -241,7 +242,7 @@ fun LogInScreen(
                                 visualTransformation =
                                     if (passwordVisible) VisualTransformation.None
                                     else PasswordVisualTransformation(),
-                                modifier = Modifier.testTag("inputPassword"))
+                            )
 
                             Spacer(modifier = Modifier.height(screenHeight * 0.01f))
 

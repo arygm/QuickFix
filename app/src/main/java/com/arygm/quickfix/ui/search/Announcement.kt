@@ -283,7 +283,7 @@ fun AnnouncementScreen(
 
                     profileViewModel.updateProfile(
                         UserProfile(
-                            currentUserProfile.locations, currentUserProfile.uid, announcementList),
+                            currentUserProfile.locations, announcementList, currentUserProfile.uid),
                         {},
                         {})
                   }

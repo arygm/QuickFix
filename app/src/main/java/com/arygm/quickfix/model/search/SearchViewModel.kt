@@ -79,7 +79,7 @@ open class SearchViewModel(
   fun filterWorkerProfiles(
       rating: Double? = null,
       reviews: List<String>? = emptyList(),
-      hourlyRateThreshold: Double? = null,
+      price: Double? = null,
       fieldOfWork: String? = null,
       location: Location? = null,
       maxDistanceInKm: Double? = null
@@ -90,7 +90,7 @@ open class SearchViewModel(
     workerProfileRepo.filterWorkers(
         rating,
         reviews,
-        hourlyRateThreshold,
+        price,
         fieldOfWork,
         location,
         maxDistanceInKm,
