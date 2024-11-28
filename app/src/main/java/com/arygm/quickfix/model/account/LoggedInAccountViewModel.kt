@@ -68,10 +68,6 @@ class LoggedInAccountViewModel(
   }
 
   fun switch_mode() {
-    if (mode_.value == Mode.USER) {
-      mode_.value = Mode.WORKER
-    } else {
-      mode_.value = Mode.USER
-    }
+      mode_.value = Mode.entries.toTypedArray()[(mode_.value.ordinal + 1) % Mode.entries.size]
   }
 }
