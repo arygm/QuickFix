@@ -48,8 +48,8 @@ import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
-import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
+import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.search.SearchWorkerResult
 import com.arygm.quickfix.ui.theme.QuickFixTheme
@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       QuickFixTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            QuickFixApp()
+          QuickFixApp()
         }
       }
     }

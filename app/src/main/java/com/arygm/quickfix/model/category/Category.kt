@@ -15,7 +15,4 @@ data class Category(
     val subcategories: List<Subcategory> = emptyList()
 )
 
-data class Scale(
-    val longScale : String,
-    val shortScale : String
-)
+data class Scale(val longScale: String, val shortScale: String)

@@ -1,6 +1,5 @@
 package com.arygm.quickfix.model.profile
 
-import androidx.collection.emptyIntSet
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
@@ -25,7 +24,8 @@ open class Profile(
 class UserProfile(
     val locations: List<Location>,
     uid: String,
-    quickFixes: List<String> = emptyList(), // String of uid that will represents the uid of the QuickFixes
+    quickFixes: List<String> =
+        emptyList(), // String of uid that will represents the uid of the QuickFixes
 ) : Profile(uid, quickFixes) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -46,11 +46,11 @@ class WorkerProfile(
     val description: String = "",
     val location: Location? = null,
     quickFixes: List<String> = emptyList(),
-    val includedServices : List<IncludedService> = emptyList<IncludedService>(),
-    val addOnServices : List<AddOnService> = emptyList<AddOnService>(),
-    val reviews : ArrayDeque<Review> = ArrayDeque<Review>(),
+    val includedServices: List<IncludedService> = emptyList<IncludedService>(),
+    val addOnServices: List<AddOnService> = emptyList<AddOnService>(),
+    val reviews: ArrayDeque<Review> = ArrayDeque<Review>(),
     val profilePicture: String = "",
-    val price : Double = 130.0,
+    val price: Double = 130.0,
     val displayName: String = "",
     uid: String = ""
 ) : Profile(uid, quickFixes) {
@@ -67,7 +67,6 @@ class WorkerProfile(
   }
 
   override fun hashCode(): Int {
-    return listOf(super.hashCode(), fieldOfWork, description, location, rating, reviews)
-        .hashCode()
+    return listOf(super.hashCode(), fieldOfWork, description, location, rating, reviews).hashCode()
   }
 }

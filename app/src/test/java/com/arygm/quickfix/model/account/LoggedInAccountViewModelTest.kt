@@ -75,7 +75,7 @@ class LoggedInAccountViewModelTest {
       WorkerProfile(
           uid = "workerUid",
           fieldOfWork = "Plumbing",
-          hourlyRate = 30.0,
+          price = 30.0,
           description = "Experienced plumber",
           location = Location(latitude = 40.7128, longitude = -74.0060, name = "New York"))
 

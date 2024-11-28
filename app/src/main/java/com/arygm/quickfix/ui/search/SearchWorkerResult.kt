@@ -1,6 +1,7 @@
 package com.arygm.quickfix.ui.search
 
 import android.location.Location
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -195,6 +196,7 @@ fun SearchWorkerResult(
               }
               LazyColumn(modifier = Modifier.fillMaxWidth().testTag("worker_profiles_list")) {
                 items(workerProfiles.size) { index ->
+                  Log.d("SearchWorkerResult", "workerProfiles: ${workerProfiles[0]}")
                   val profile = workerProfiles[index]
                   var account by remember { mutableStateOf<Account?>(null) }
                   var distance by remember { mutableStateOf<Int?>(null) }
@@ -220,8 +222,9 @@ fun SearchWorkerResult(
                       account = fetchedAccount
                     }
                   }
-
+                  Log.d("SearchWorkerResult", "account: ${account}")
                   account?.let { acc ->
+                    Log.d("SearchWorkerResult", "location: ${profile.location}")
                     (if (profile.location?.name.isNullOrEmpty()) "Unknown"
                         else profile.location?.name)
                         ?.let {

@@ -98,7 +98,8 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
       val uid = document.id
       val description = document.getString("description") ?: return null
       val fieldOfWork = document.getString("fieldOfWork") ?: return null
-      val locationData = document.get("location") as? Map<String, Any> ?: emptyMap()
+      val locationData = document.get("location") as? Map<String, Any> ?: return null
+      val price = document.getDouble("price") ?: 0.0
       val rating = document.getDouble("rating") ?: 0.0
       val location =
           locationData.let {
@@ -107,14 +108,14 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
                 longitude = it["longitude"] as? Double ?: 0.0,
                 name = it["name"] as? String ?: "")
           }
-        val price = document.getDouble("price") ?: 0.0
       WorkerProfile(
           rating = rating,
           uid = uid,
+          price = price,
           description = description,
           fieldOfWork = fieldOfWork,
           location = location,
-          price = price)
+      )
     } catch (e: Exception) {
       Log.e("WorkerProfileRepositoryFirestore", "Error converting document to WorkerProfile", e)
       null
@@ -146,7 +147,7 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
   fun filterWorkers(
       rating: Double?,
       reviews: List<String>?,
-      hourlyRateThreshold: Double?,
+      price: Double?,
       fieldOfWork: String?,
       location: Location?,
       radiusInKm: Double?,
@@ -160,7 +161,7 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
 
     fieldOfWork?.let { query = query.whereEqualTo("fieldOfWork", it) }
 
-    hourlyRateThreshold?.let { query = query.whereLessThan("hourlyRate", it) }
+    price?.let { query = query.whereLessThan("price", it) }
 
     if (location != null && radiusInKm != null) {
       val earthRadius = 6371.0
@@ -185,8 +186,10 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
     query
         .get()
         .addOnSuccessListener { querySnapshot ->
-          val workerProfiles =
-              querySnapshot.documents.mapNotNull { documentToWorker(it)}
+          Log.d(
+              "WorkerProfileRepositoryFirestore",
+              "Successfully fetched worker profiles : ${querySnapshot.documents.size}")
+          val workerProfiles = querySnapshot.documents.mapNotNull { documentToWorker(it) }
           onSuccess(workerProfiles)
         }
         .addOnFailureListener { exception -> onFailure(exception) }

@@ -53,88 +53,88 @@ class MainActivityTest : TestCase() {
   private lateinit var navigationActions: NavigationActions
   @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
 
-    private val item = Category(
-        id = "painting",
-        name = "Painting",
-        description = "Find skilled painters for residential or commercial projects.",
-        subcategories = listOf(
-            Subcategory(
-                id = "residential_painting",
-                name = "Residential Painting",
-                tags = listOf("Interior Painting", "Exterior Painting", "Cabinet Painting"),
-                scale = Scale(
-                    longScale = "Prices are displayed relative to the cost of painting a 20 m² room.",
-                    shortScale = "20 m² room equivalent"
-                ),
-                setServices = listOf(
-                    "Surface Preparation",
-                    "Interior Painting",
-                    "Exterior Painting",
-                    "Cabinet Painting",
-                    "Trim and Baseboard Painting",
-                    "Wallpaper Removal",
-                    "Deck and Fence Painting",
-                    "Popcorn Ceiling Removal",
-                    "Pressure Washing",
-                    "Garage Floor Painting",
-                    "Sealing and Caulking",
-                    "Color Consultation",
-                    "Minor Repairs",
-                    "Clean-Up"
-                )
-            ),
-            Subcategory(
-                id = "commercial_painting",
-                name = "Commercial Painting",
-                tags = listOf("Office Buildings", "Retail Spaces"),
-                scale = Scale(
-                    longScale = "Prices are displayed relative to the cost of painting a 100 m² commercial space.",
-                    shortScale = "100 m² commercial space equivalent"
-                ),
-                setServices = listOf(
-                    "Surface Preparation",
-                    "Interior Commercial Painting",
-                    "Exterior Commercial Painting",
-                    "Specialty Coatings",
-                    "Epoxy Floor Coatings",
-                    "Line Striping and Markings",
-                    "Power Washing",
-                    "Graffiti Removal",
-                    "Metal Structure Painting",
-                    "Parking Lot Painting",
-                    "Safety Painting",
-                    "Color Branding",
-                    "Clean-Up"
-                )
-            ),
-            Subcategory(
-                id = "decorative_painting",
-                name = "Decorative Painting",
-                tags = listOf("Faux Finishes", "Murals"),
-                scale = Scale(
-                    longScale = "Prices are displayed relative to the cost of painting a 20 m² room.",
-                    shortScale = "20 m² room equivalent"
-                ),
-                setServices = listOf(
-                    "Decorative Painting",
-                    "Faux Finishes",
-                    "Murals",
-                    "Accent Walls",
-                    "Textured Painting",
-                    "Stenciling",
-                    "Color Washing",
-                    "Rag Rolling",
-                    "Sponging",
-                    "Venetian Plaster",
-                    "Glazing",
-                    "Metallic Finishes",
-                    "Surface Preparation",
-                    "Color Consultation",
-                    "Clean-Up"
-                )
-            )
-        )
-    )
+  private val item =
+      Category(
+          id = "painting",
+          name = "Painting",
+          description = "Find skilled painters for residential or commercial projects.",
+          subcategories =
+              listOf(
+                  Subcategory(
+                      id = "residential_painting",
+                      name = "Residential Painting",
+                      tags = listOf("Interior Painting", "Exterior Painting", "Cabinet Painting"),
+                      scale =
+                          Scale(
+                              longScale =
+                                  "Prices are displayed relative to the cost of painting a 20 m² room.",
+                              shortScale = "20 m² room equivalent"),
+                      setServices =
+                          listOf(
+                              "Surface Preparation",
+                              "Interior Painting",
+                              "Exterior Painting",
+                              "Cabinet Painting",
+                              "Trim and Baseboard Painting",
+                              "Wallpaper Removal",
+                              "Deck and Fence Painting",
+                              "Popcorn Ceiling Removal",
+                              "Pressure Washing",
+                              "Garage Floor Painting",
+                              "Sealing and Caulking",
+                              "Color Consultation",
+                              "Minor Repairs",
+                              "Clean-Up")),
+                  Subcategory(
+                      id = "commercial_painting",
+                      name = "Commercial Painting",
+                      tags = listOf("Office Buildings", "Retail Spaces"),
+                      scale =
+                          Scale(
+                              longScale =
+                                  "Prices are displayed relative to the cost of painting a 100 m² commercial space.",
+                              shortScale = "100 m² commercial space equivalent"),
+                      setServices =
+                          listOf(
+                              "Surface Preparation",
+                              "Interior Commercial Painting",
+                              "Exterior Commercial Painting",
+                              "Specialty Coatings",
+                              "Epoxy Floor Coatings",
+                              "Line Striping and Markings",
+                              "Power Washing",
+                              "Graffiti Removal",
+                              "Metal Structure Painting",
+                              "Parking Lot Painting",
+                              "Safety Painting",
+                              "Color Branding",
+                              "Clean-Up")),
+                  Subcategory(
+                      id = "decorative_painting",
+                      name = "Decorative Painting",
+                      tags = listOf("Faux Finishes", "Murals"),
+                      scale =
+                          Scale(
+                              longScale =
+                                  "Prices are displayed relative to the cost of painting a 20 m² room.",
+                              shortScale = "20 m² room equivalent"),
+                      setServices =
+                          listOf(
+                              "Decorative Painting",
+                              "Faux Finishes",
+                              "Murals",
+                              "Accent Walls",
+                              "Textured Painting",
+                              "Stenciling",
+                              "Color Washing",
+                              "Rag Rolling",
+                              "Sponging",
+                              "Venetian Plaster",
+                              "Glazing",
+                              "Metallic Finishes",
+                              "Surface Preparation",
+                              "Color Consultation",
+                              "Clean-Up"))))
 
   @Before
   fun setup() {

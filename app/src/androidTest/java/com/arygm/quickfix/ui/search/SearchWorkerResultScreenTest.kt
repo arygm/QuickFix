@@ -147,7 +147,7 @@ class SearchWorkerResultScreenTest {
       }
 
       // Check hourly rate if it exists
-      profile.hourlyRate?.toString()?.let {
+      profile.price.toString().let {
         composeTestRule.onNodeWithText("$it/hr").assertExists().assertIsDisplayed()
       }
     }

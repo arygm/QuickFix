@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -103,6 +104,7 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
                   modifier = Modifier.fillMaxWidth(),
               ) {
                 Spacer(modifier = Modifier.width(10.dp))
+                Log.d("QuickFixTextFieldCustomHomeScreen", "DISPLAYED")
                 QuickFixTextFieldCustom(
                     modifier = Modifier.semantics { testTag = "searchBar" },
                     showLeadingIcon = { true },
@@ -121,7 +123,8 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
                     widthField = 330.dp, // unchanged width
                     heightField = 40.dp, // unchanged height
                     onValueChange = {},
-                    value = "")
+                    value = "",
+                    debug = "homescreen")
 
                 Spacer(modifier = Modifier.width(20.dp))
 

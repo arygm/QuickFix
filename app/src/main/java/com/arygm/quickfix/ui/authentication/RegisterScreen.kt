@@ -432,8 +432,7 @@ fun RegisterScreen(
                                           KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                                       visualTransformation =
                                           if (repeatPasswordVisible) VisualTransformation.None
-                                          else PasswordVisualTransformation()
-                                  )
+                                          else PasswordVisualTransformation())
                                 }
 
                                 Spacer(modifier = Modifier.padding(screenHeight * 0.005f))

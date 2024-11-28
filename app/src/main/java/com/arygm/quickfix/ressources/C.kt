@@ -23,9 +23,27 @@ object C {
     const val enterSubCateIcon = "enterSubCateIcon"
     const val subCategoryName = "subCategoryName"
 
-    //UpgradeToWorker Screen
+    // UpgradeToWorker Screen
     const val upgradeToWorkerPager = "upgradeToWorkerPager"
     const val upgradeToWorkerTopBar = "upgradeToWorkerTopBar"
     const val upgradeToWorkerScaffold = "upgradeToWorkerScaffold"
+    const val upgradeToWorkerPersonalInfo = "upgradeToWorkerPersonalInfo"
+
+    // PersonalInfoScreen
+    const val personalInfoScreendisplayNameField = "displayNameField"
+    const val personalInfoScreendescriptionField = "descriptionField"
+    const val personalInfoScreencancelButton = "cancelButton"
+    const val personalInfoScreencontinueButton = "continueButton"
+    const val personalInfoScreenSectionDescription = "sectionDescription"
+    const val personalInfoScreenSectionTitle = "sectionTitle"
+    const val personalInfoScreenprofilePictureField = "profilePictureField"
+    const val personalInfoScreenprofilePictureBackground = "profilePictureBackground"
+    const val personalInfoScreenprofilePicture = "profilePicture"
+    const val personalInfoScreenBannerPictureBackground = "bannerPictureBackground"
+    const val personalInfoScreenBannerPictureField = "bannerPictureField"
+    const val personalInfoScreenBannerPicture = "bannerPicture"
+    const val personalInfoScreenBannerPlaceHolder = "bannerPlaceHolder"
+    const val personalInfoScreenProfilePlaceHolder = "profilePlaceHolder"
+    const val cameraBottomSheet = "cameraBottomSheet"
   }
 }

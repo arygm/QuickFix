@@ -43,12 +43,12 @@ fun QuickFixButton(
 ) {
   Button(
       onClick = onClickAction,
-      colors = ButtonDefaults.buttonColors(
-              containerColor = buttonColor,             // Background when enabled
-              contentColor = textColor,              // Text color when enabled
-              disabledContainerColor = buttonColorDisabled,     // Background when disabled
-              disabledContentColor = textColorDisabled
-      ),
+      colors =
+          ButtonDefaults.buttonColors(
+              containerColor = buttonColor, // Background when enabled
+              contentColor = textColor, // Text color when enabled
+              disabledContainerColor = buttonColorDisabled, // Background when disabled
+              disabledContentColor = textColorDisabled),
       modifier =
           modifier
               .fillMaxWidth(0.8f)
