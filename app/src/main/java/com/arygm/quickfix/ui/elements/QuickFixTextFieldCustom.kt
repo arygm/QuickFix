@@ -155,8 +155,8 @@ fun QuickFixTextFieldCustom(
                 .padding(
                     start = moveContentHorizontal, top = moveContentBottom, bottom = moveContentTop)
                 .clickable { onTextFieldClick() }
-                .testTag(C.Tag.main_container_text_field_custom), // Apply padding
-        contentAlignment = Alignment.Center) {
+                .testTag(C.Tag.main_container_text_field_custom),
+        contentAlignment = if (singleLine) Alignment.Center else Alignment.TopStart) {
           Row(
               horizontalArrangement = Arrangement.Center, // Aligning icon and text horizontally
               verticalAlignment = Alignment.CenterVertically, // Aligning icon and text vertically
@@ -195,26 +195,31 @@ fun QuickFixTextFieldCustom(
                               },
                       textStyle =
                           textStyle.copy(
-                              color =
-                                  if (isError) errorColor else textColor), // Text style with color
-                      singleLine = singleLine, // Keep the text on a single line
+                              color = if (isError) errorColor else textColor,
+                          ),
+                      singleLine = singleLine,
                       keyboardOptions = keyboardOptions,
                       visualTransformation = visualTransformation,
-                  )
-                  if (value.isEmpty()) {
-                    Log.d("QuickFixTextFieldCustom", "placeHolderText: $placeHolderText")
-                    Text(
-                        modifier = Modifier.testTag(C.Tag.place_holder_text_field_custom),
-                        text = placeHolderText,
-                        style =
-                            textStyle.copy(
-                                color =
-                                    if (isError) errorColor
-                                    else placeHolderColor), // Placeholder text style
-                        textAlign = TextAlign.Start // Align the placeholder text to the start
-                        )
-                  }
+                      decorationBox = { innerTextField ->
+                        Box(
+                            Modifier.fillMaxWidth().let {
+                              if (!singleLine) it.padding(8.dp) else it
+                            }, // Adjust padding if needed for alignment
+                            contentAlignment = Alignment.CenterStart) {
+                              if (value.isEmpty()) {
+                                Text(
+                                    text = placeHolderText,
+                                    style =
+                                        textStyle.copy(
+                                            color = if (isError) errorColor else placeHolderColor),
+                                    modifier =
+                                        Modifier.testTag(C.Tag.place_holder_text_field_custom))
+                              }
+                              innerTextField() // The actual input text field
+                        }
+                      })
                 }
+
                 if (showTrailingIcon() && value.isNotEmpty()) {
                   IconButton(
                       onClick = { if (onClick) onValueChange("") },

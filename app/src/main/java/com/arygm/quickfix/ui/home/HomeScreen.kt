@@ -61,7 +61,7 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
       modifier =
           Modifier.pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
               .testTag("HomeScreen"),
-      containerColor = MaterialTheme.colorScheme.background,
+      containerColor = colorScheme.background,
       topBar = {
         TopAppBar(
             title = {
@@ -182,7 +182,7 @@ fun PreviewHomeScreen() {
   QuickFixTheme {
     val navController = rememberNavController()
     val navigationActions = remember { NavigationActions(navController) }
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) {
       HomeScreen(navigationActions)
     }
   }
