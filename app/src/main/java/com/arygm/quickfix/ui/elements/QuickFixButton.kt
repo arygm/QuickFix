@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.elements
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,6 +33,7 @@ fun QuickFixButton(
     buttonColorDisabled: Color = MaterialTheme.colorScheme.background,
     textColorDisabled: Color = MaterialTheme.colorScheme.onSecondaryContainer,
     textColor: Color,
+    border: BorderStroke? = null,
     textStyle: TextStyle = MaterialTheme.typography.labelMedium,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.Center,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
@@ -58,6 +60,7 @@ fun QuickFixButton(
               .testTag("quickfixButton"),
       shape = RoundedCornerShape(10.dp),
       contentPadding = contentPadding,
+      border = border,
       enabled = enabled) {
         Row(
             modifier = Modifier.fillMaxWidth(),
