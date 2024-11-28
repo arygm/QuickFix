@@ -189,7 +189,7 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
 
             Spacer(modifier = Modifier.padding(10.dp))
 
-            QuickFixButtonWithIcon(
+            /*QuickFixButtonWithIcon(
                 buttonText = "Availability",
                 onClickAction = {
                   // TODO: Apply the backend of the pictures
@@ -205,9 +205,9 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
                 iconId = R.drawable.calendar,
                 iconContentDescription = "availability",
                 iconColor = colorScheme.onBackground)
-
+*/
             Spacer(modifier = Modifier.padding(10.dp))
-
+/*
             QuickFixButtonWithIcon(
                 buttonText = "Upload pictures",
                 onClickAction = { showUploadImageSheet = true },
@@ -237,6 +237,8 @@ fun AnnouncementScreen(navigationActions: NavigationActions, isUser: Boolean = t
                   style = MaterialTheme.typography.bodySmall,
                   modifier = Modifier.padding(start = 9.dp).testTag("mandatoryText"))
             }
+
+ */
 
             QuickFixButton(
                 buttonText = "Post your announcement",
