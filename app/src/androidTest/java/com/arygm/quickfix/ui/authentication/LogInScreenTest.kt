@@ -114,32 +114,6 @@ class LogInScreenTest {
   }
 
   @Test
-  fun testErrorMessageShownOnInvalidLogin() {
-    /*
-     * This test relied on the fact a button click on login would simply change the state.
-     * it is not valid without the proper backend logic
-     */
-
-    /*
-    composeTestRule.setContent { LogInScreen(navigationActions) }
-
-    // Input an invalid email and password
-    composeTestRule.onNodeWithTag("inputEmail").performTextInput("invalid@example.com")
-    composeTestRule.onNodeWithTag("inputPassword").performTextInput("wrongpassword")
-
-    // Click the login button
-    composeTestRule.onNodeWithTag("logInButton").performClick()
-
-    // Check that the error message is displayed
-    composeTestRule.onNodeWithTag("errorText").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("errorText")
-        .assertTextEquals("INVALID EMAIL OR PASSWORD, TRY AGAIN.")
-
-     */
-  }
-
-  @Test
   fun testForgotPasswordLinkIsDisplayed() {
     composeTestRule.setContent {
       LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)

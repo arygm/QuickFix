@@ -286,6 +286,7 @@ fun RegisterScreen(
                                             .padding(start = screenWidth * 0.02f),
                                 ) {
                                   QuickFixTextFieldCustom(
+                                      modifier = Modifier.testTag("emailInput"),
                                       value = email,
                                       onValueChange = {
                                         email = it
@@ -300,15 +301,14 @@ fun RegisterScreen(
                                         }
                                       },
                                       placeHolderText = "Enter your email address",
-                                      placeHolderColor = colorScheme.onSecondaryContainer,
                                       shape = RoundedCornerShape(12.dp),
-                                      isError = emailError,
-                                      showError = emailError,
-                                      errorText = "INVALID EMAIL",
-                                      moveContentHorizontal = screenWidth * 0.02f,
-                                      heightField = screenHeight * 0.05f,
+                                      placeHolderColor = colorScheme.onSecondaryContainer,
                                       widthField = screenWidth * 0.85f,
-                                      modifier = Modifier.testTag("emailInput"),
+                                      heightField = screenHeight * 0.05f,
+                                      moveContentHorizontal = screenWidth * 0.02f,
+                                      isError = emailError,
+                                      errorText = "INVALID EMAIL",
+                                      showError = emailError,
                                       showLabel = true,
                                       label = {
                                         Text(
@@ -327,22 +327,22 @@ fun RegisterScreen(
                                     modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
                                 ) {
                                   QuickFixTextFieldCustom(
+                                      modifier = Modifier.testTag("birthDateInput"),
                                       value = birthDate,
+                                      singleLine = false,
                                       onValueChange = {
                                         birthDate = it
                                         birthDateError = !isValidDate(it)
                                       },
                                       placeHolderText = "Enter your birthdate (DD/MM/YYYY)",
-                                      placeHolderColor = colorScheme.onSecondaryContainer,
-                                      singleLine = false,
-                                      errorText = "INVALID DATE",
-                                      isError = birthDateError,
-                                      showError = birthDateError,
-                                      moveContentHorizontal = screenWidth * 0.02f,
-                                      heightField = screenHeight * 0.05f,
-                                      widthField = screenWidth * 0.85f,
                                       shape = RoundedCornerShape(12.dp),
-                                      modifier = Modifier.testTag("birthDateInput"),
+                                      placeHolderColor = colorScheme.onSecondaryContainer,
+                                      widthField = screenWidth * 0.85f,
+                                      heightField = screenHeight * 0.05f,
+                                      moveContentHorizontal = screenWidth * 0.02f,
+                                      isError = birthDateError,
+                                      errorText = "INVALID DATE",
+                                      showError = birthDateError,
                                       showLabel = true,
                                       label = {
                                         Text(
@@ -363,14 +363,10 @@ fun RegisterScreen(
                                             .padding(start = screenWidth * 0.02f),
                                 ) {
                                   QuickFixTextFieldCustom(
+                                      modifier = Modifier.testTag("passwordInput"),
                                       value = password,
                                       onValueChange = { password = it },
-                                      placeHolderText = "Enter your password",
-                                      placeHolderColor = colorScheme.onSecondaryContainer,
-                                      moveContentHorizontal = screenWidth * 0.02f,
-                                      heightField = screenHeight * 0.05f,
-                                      widthField = screenWidth * 0.85f,
-                                      shape = RoundedCornerShape(12.dp),
+                                      showTrailingIcon = { password.isNotEmpty() },
                                       trailingIcon = {
                                         val image =
                                             if (passwordVisible) Icons.Filled.VisibilityOff
@@ -383,13 +379,17 @@ fun RegisterScreen(
                                                   tint = colorScheme.primary)
                                             }
                                       },
-                                      showTrailingIcon = { password.isNotEmpty() },
+                                      placeHolderText = "Enter your password",
+                                      shape = RoundedCornerShape(12.dp),
+                                      placeHolderColor = colorScheme.onSecondaryContainer,
+                                      widthField = screenWidth * 0.85f,
+                                      heightField = screenHeight * 0.05f,
+                                      moveContentHorizontal = screenWidth * 0.02f,
+                                      keyboardOptions =
+                                          KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                                       visualTransformation =
                                           if (passwordVisible) VisualTransformation.None
                                           else PasswordVisualTransformation(),
-                                      keyboardOptions =
-                                          KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                                      modifier = Modifier.testTag("passwordInput"),
                                       showLabel = true,
                                       label = {
                                         Text(
@@ -404,14 +404,10 @@ fun RegisterScreen(
                                   Spacer(modifier = Modifier.padding(screenHeight * 0.008f))
 
                                   QuickFixTextFieldCustom(
+                                      modifier = Modifier.testTag("repeatPasswordInput"),
                                       value = repeatPassword,
                                       onValueChange = { repeatPassword = it },
-                                      placeHolderText = "Confirm password",
-                                      placeHolderColor = colorScheme.onSecondaryContainer,
-                                      moveContentHorizontal = screenWidth * 0.02f,
-                                      heightField = screenHeight * 0.05f,
-                                      widthField = screenWidth * 0.85f,
-                                      shape = RoundedCornerShape(12.dp),
+                                      showTrailingIcon = { repeatPassword.isNotEmpty() },
                                       trailingIcon = {
                                         val image =
                                             if (repeatPasswordVisible) Icons.Filled.VisibilityOff
@@ -426,13 +422,17 @@ fun RegisterScreen(
                                                   tint = colorScheme.primary)
                                             }
                                       },
-                                      showTrailingIcon = { repeatPassword.isNotEmpty() },
-                                      visualTransformation =
-                                          if (repeatPasswordVisible) VisualTransformation.None
-                                          else PasswordVisualTransformation(),
+                                      placeHolderText = "Confirm password",
+                                      shape = RoundedCornerShape(12.dp),
+                                      placeHolderColor = colorScheme.onSecondaryContainer,
+                                      widthField = screenWidth * 0.85f,
+                                      heightField = screenHeight * 0.05f,
+                                      moveContentHorizontal = screenWidth * 0.02f,
                                       keyboardOptions =
                                           KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                                      modifier = Modifier.testTag("repeatPasswordInput"))
+                                      visualTransformation =
+                                          if (repeatPasswordVisible) VisualTransformation.None
+                                          else PasswordVisualTransformation())
                                 }
 
                                 Spacer(modifier = Modifier.padding(screenHeight * 0.005f))
@@ -587,21 +587,21 @@ fun CustomTextField(
 ) {
   Column(modifier = columnModifier.padding(end = 12.dp)) {
     QuickFixTextFieldCustom(
+        modifier = modifier,
         value = value,
         onValueChange = onValueChange,
+        showTrailingIcon = showTrailingIcon,
+        trailingIcon = trailingIcon,
         placeHolderText = placeHolderText,
-        placeHolderColor = placeHolderColor,
         shape = RoundedCornerShape(12.dp),
-        moveContentHorizontal = 10.dp,
+        placeHolderColor = placeHolderColor,
         heightField = 42.dp,
+        moveContentHorizontal = 10.dp,
         isError = isError,
-        showError = showError,
         errorText = errorText,
+        showError = showError,
         keyboardOptions = keyboardOptions,
         visualTransformation = visualTransformation,
-        trailingIcon = trailingIcon,
-        showTrailingIcon = showTrailingIcon,
-        modifier = modifier,
         showLabel = true,
         label = {
           Text(

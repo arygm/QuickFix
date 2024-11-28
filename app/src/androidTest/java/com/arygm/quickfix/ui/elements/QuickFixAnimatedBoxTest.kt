@@ -50,9 +50,6 @@ class QuickFixAnimatedBoxTest {
 
     // Check if the node exists and is displayed
     node.assertIsDisplayed()
-
-    // You could also check offsets, size, and other parameters with custom assertions
-    // Example: Assert properties if needed
   }
 
   @Test
@@ -63,7 +60,5 @@ class QuickFixAnimatedBoxTest {
     }
 
     composeTestRule.onNodeWithTag("AnimationBox").assertIsDisplayed()
-
-    // Additional custom checks for rotation, color, etc., if necessary
   }
 }

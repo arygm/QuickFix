@@ -4,10 +4,17 @@ from dataclasses import dataclass
 from typing import List
 
 @dataclass
+class Scale:
+    longScale: str
+    shortScale: str
+
+@dataclass
 class Subcategory:
     id: str
     name: str
     tags: List[str]
+    scale: Scale
+    setService: List[str]
 
 @dataclass
 class Category:
@@ -37,7 +44,12 @@ def upload_data(db, categories: List[Category]):
             subcategory_ref = category_ref.collection('subcategories').document(subcategory.id)
             subcategory_data = {
                 'name': subcategory.name,
-                'tags': subcategory.tags
+                'tags': subcategory.tags,
+                'scale': {
+                      'longScale': subcategory.scale.longScale,
+                      'shortScale': subcategory.scale.shortScale
+                },
+                'setService': subcategory.setService
             }
             subcategory_ref.set(subcategory_data)
 
@@ -46,7 +58,6 @@ def upload_data(db, categories: List[Category]):
 def main():
     db = initialize_firestore()
 
-    # Define your categories, subcategories, and tags
     categories = [
         Category(
             id="painting",
@@ -56,17 +67,77 @@ def main():
                 Subcategory(
                     id="residential_painting",
                     name="Residential Painting",
-                    tags=["Interior Painting", "Exterior Painting", "Cabinet Painting"]
+                    tags=["Interior Painting", "Exterior Painting", "Cabinet Painting"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of painting a 20 m² room.",
+                        shortScale="20 m² room equivalent"
+                    ),
+                    setService=[
+                        "Surface Preparation",
+                        "Interior Painting",
+                        "Exterior Painting",
+                        "Cabinet Painting",
+                        "Trim and Baseboard Painting",
+                        "Wallpaper Removal",
+                        "Deck and Fence Painting",
+                        "Popcorn Ceiling Removal",
+                        "Pressure Washing",
+                        "Garage Floor Painting",
+                        "Sealing and Caulking",
+                        "Color Consultation",
+                        "Minor Repairs",
+                        "Clean-Up"
+                    ]
                 ),
                 Subcategory(
                     id="commercial_painting",
                     name="Commercial Painting",
-                    tags=["Office Buildings", "Retail Spaces"]
+                    tags=["Office Buildings", "Retail Spaces"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of painting a 100 m² commercial space.",
+                        shortScale="100 m² commercial space equivalent"
+                    ),
+                    setService=[
+                        "Surface Preparation",
+                        "Interior Commercial Painting",
+                        "Exterior Commercial Painting",
+                        "Specialty Coatings",
+                        "Epoxy Floor Coatings",
+                        "Line Striping and Markings",
+                        "Power Washing",
+                        "Graffiti Removal",
+                        "Metal Structure Painting",
+                        "Parking Lot Painting",
+                        "Safety Painting",
+                        "Color Branding",
+                        "Clean-Up"
+                    ]
                 ),
                 Subcategory(
                     id="decorative_painting",
                     name="Decorative Painting",
-                    tags=["Faux Finishes", "Murals"]
+                    tags=["Faux Finishes", "Murals"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of painting a 20 m² room.",
+                        shortScale="20 m² room equivalent"
+                    ),
+                    setService=[
+                        "Decorative Painting",
+                        "Faux Finishes",
+                        "Murals",
+                        "Accent Walls",
+                        "Textured Painting",
+                        "Stenciling",
+                        "Color Washing",
+                        "Rag Rolling",
+                        "Sponging",
+                        "Venetian Plaster",
+                        "Glazing",
+                        "Metallic Finishes",
+                        "Surface Preparation",
+                        "Color Consultation",
+                        "Clean-Up"
+                    ]
                 ),
                 # Add more subcategories as needed
             ]
@@ -79,17 +150,58 @@ def main():
                 Subcategory(
                     id="residential_plumbing",
                     name="Residential Plumbing",
-                    tags=["Leak Repair", "Pipe Installation", "Water Heater Repair"]
+                    tags=["Leak Repair", "Pipe Installation", "Water Heater Repair"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of fixing a standard household leak.",
+                        shortScale="Standard leak repair equivalent"
+                    ),
+                    setService=[
+                        "Leak Detection and Repair",
+                        "Pipe Installation and Replacement",
+                        "Water Heater Installation and Repair",
+                        "Drain Cleaning",
+                        "Toilet Repair and Installation",
+                        "Faucet and Fixture Installation",
+                        "Garbage Disposal Repair",
+                        "Sewer Line Repair",
+                        "Sump Pump Installation",
+                        "Bathroom Remodeling",
+                        "Emergency Plumbing Services",
+                        "Water Filtration Systems",
+                        "Backflow Prevention",
+                        "Septic Tank Maintenance",
+                        "Clean-Up"
+                    ]
                 ),
                 Subcategory(
                     id="commercial_plumbing",
                     name="Commercial Plumbing",
-                    tags=["Sewer Systems", "Gas Line Installation"]
+                    tags=["Sewer Systems", "Gas Line Installation"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of servicing a commercial plumbing system.",
+                        shortScale="Commercial plumbing service equivalent"
+                    ),
+                    setService=[
+                        "Commercial Pipe Installation",
+                        "Sewer System Maintenance",
+                        "Gas Line Installation and Repair",
+                        "Hydro Jetting",
+                        "Grease Trap Installation",
+                        "Boiler System Installation",
+                        "Sprinkler System Installation",
+                        "Backflow Services",
+                        "Water Main Installation",
+                        "Commercial Water Heater Services",
+                        "Emergency Plumbing Services",
+                        "Fixture Installation",
+                        "Plumbing System Design",
+                        "Preventive Maintenance",
+                        "Clean-Up"
+                    ]
                 ),
                 # Add more subcategories as needed
             ]
         ),
-        # Add other categories similarly
         Category(
             id="gardening",
             name="Gardening",
@@ -98,12 +210,55 @@ def main():
                 Subcategory(
                     id="landscaping",
                     name="Landscaping",
-                    tags=["Garden Design", "Lawn Installation"]
+                    tags=["Garden Design", "Lawn Installation"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of designing a small garden area.",
+                        shortScale="Small garden design equivalent"
+                    ),
+                    setService=[
+                        "Garden Design",
+                        "Lawn Installation",
+                        "Hardscaping",
+                        "Irrigation System Installation",
+                        "Planting and Transplanting",
+                        "Soil Preparation",
+                        "Landscape Lighting",
+                        "Water Features Installation",
+                        "Patio and Deck Construction",
+                        "Retaining Walls",
+                        "Mulching",
+                        "Seasonal Planting",
+                        "Tree and Shrub Planting",
+                        "Pathways and Walkways",
+                        "Clean-Up"
+                    ]
                 ),
                 Subcategory(
                     id="maintenance",
                     name="Maintenance",
-                    tags=["Weed Control", "Hedge Trimming"]
+                    tags=["Weed Control", "Hedge Trimming"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of monthly garden maintenance.",
+                        shortScale="Monthly maintenance equivalent"
+                    ),
+                    setService=[
+                        "Lawn Mowing",
+                        "Weed Control",
+                        "Hedge Trimming",
+                        "Pruning and Deadheading",
+                        "Fertilization",
+                        "Pest and Disease Control",
+                        "Leaf Removal",
+                        "Garden Clean-Up",
+                        "Seasonal Maintenance",
+                        "Irrigation System Maintenance",
+                        "Tree Trimming",
+                        "Soil Testing",
+                        "Composting",
+                        "Garden Waste Removal",
+                        "Mulching",
+                        "Clean-Up"
+                    ]
                 ),
             ]
         ),
@@ -115,12 +270,54 @@ def main():
                 Subcategory(
                     id="residential_electrical",
                     name="Residential Electrical Services",
-                    tags=["Wiring", "Lighting Installation"]
+                    tags=["Wiring", "Lighting Installation"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of installing standard home wiring.",
+                        shortScale="Standard wiring installation equivalent"
+                    ),
+                    setService=[
+                        "Wiring and Rewiring",
+                        "Lighting Installation",
+                        "Ceiling Fan Installation",
+                        "Electrical Panel Upgrades",
+                        "Outlet and Switch Installation",
+                        "Home Automation Systems",
+                        "Smoke Detector Installation",
+                        "Surge Protection",
+                        "Electrical Inspections",
+                        "Landscape Lighting",
+                        "Backup Generator Installation",
+                        "Troubleshooting and Repairs",
+                        "Electric Vehicle Charger Installation",
+                        "Security System Installation",
+                        "Clean-Up"
+                    ]
                 ),
                 Subcategory(
                     id="commercial_electrical",
                     name="Commercial Electrical Services",
-                    tags=["Industrial Equipment", "Security Systems"]
+                    tags=["Industrial Equipment", "Security Systems"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of installing commercial electrical systems.",
+                        shortScale="Commercial electrical service equivalent"
+                    ),
+                    setService=[
+                        "Industrial Equipment Wiring",
+                        "Security and Alarm Systems",
+                        "Data and Communication Lines",
+                        "Energy Efficient Lighting",
+                        "Electrical Maintenance",
+                        "Emergency Lighting Systems",
+                        "Transformer Installation",
+                        "Electrical System Design",
+                        "HVAC Wiring",
+                        "Backup Generator Systems",
+                        "Compliance Upgrades",
+                        "Motor Control Systems",
+                        "Building Automation",
+                        "Panel Installation and Upgrades",
+                        "Clean-Up"
+                    ]
                 ),
             ]
         ),
@@ -132,12 +329,54 @@ def main():
                 Subcategory(
                     id="general_repairs",
                     name="General Repairs",
-                    tags=["Furniture Assembly", "Fixture Replacement"]
+                    tags=["Furniture Assembly", "Fixture Replacement"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of a standard home repair task.",
+                        shortScale="Standard repair equivalent"
+                    ),
+                    setService=[
+                        "Furniture Assembly",
+                        "Fixture Replacement",
+                        "Drywall Repair",
+                        "Door and Window Repair",
+                        "Shelving Installation",
+                        "Minor Carpentry",
+                        "Picture Hanging",
+                        "Caulking",
+                        "Tile Repair",
+                        "Minor Plumbing Repairs",
+                        "Gutter Repair",
+                        "Fence Repair",
+                        "Lock Replacement",
+                        "Hardware Installation",
+                        "Clean-Up"
+                    ]
                 ),
                 Subcategory(
                     id="home_maintenance",
                     name="Home Maintenance",
-                    tags=["Gutter Cleaning", "Pressure Washing"]
+                    tags=["Gutter Cleaning", "Pressure Washing"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of a standard maintenance task.",
+                        shortScale="Standard maintenance equivalent"
+                    ),
+                    setService=[
+                        "Gutter Cleaning",
+                        "Pressure Washing",
+                        "Deck Staining",
+                        "Grout Cleaning",
+                        "Air Filter Replacement",
+                        "Smoke Detector Testing",
+                        "Seasonal Maintenance",
+                        "Window Cleaning",
+                        "Exterior Maintenance",
+                        "Yard Work Assistance",
+                        "Weatherproofing",
+                        "Insulation Installation",
+                        "Appliance Maintenance",
+                        "Garage Organization",
+                        "Clean-Up"
+                    ]
                 ),
             ]
         ),
@@ -149,12 +388,54 @@ def main():
                 Subcategory(
                     id="residential_cleaning",
                     name="Residential Cleaning",
-                    tags=["Regular Cleaning", "Deep Cleaning"]
+                    tags=["Regular Cleaning", "Deep Cleaning"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of cleaning a standard 3-bedroom house.",
+                        shortScale="Standard house cleaning equivalent"
+                    ),
+                    setService=[
+                        "Regular Cleaning",
+                        "Deep Cleaning",
+                        "Move-In/Move-Out Cleaning",
+                        "Post-Construction Cleaning",
+                        "Appliance Cleaning",
+                        "Carpet Cleaning",
+                        "Window Cleaning",
+                        "Upholstery Cleaning",
+                        "Floor Polishing",
+                        "Bathroom Sanitization",
+                        "Kitchen Cleaning",
+                        "Organization Services",
+                        "Green Cleaning",
+                        "Laundry Services",
+                        "Clean-Up"
+                    ]
                 ),
                 Subcategory(
                     id="commercial_cleaning",
                     name="Commercial Cleaning",
-                    tags=["Office Cleaning", "Window Cleaning"]
+                    tags=["Office Cleaning", "Window Cleaning"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of cleaning a standard office space.",
+                        shortScale="Standard office cleaning equivalent"
+                    ),
+                    setService=[
+                        "Office Cleaning",
+                        "Janitorial Services",
+                        "Window Cleaning",
+                        "Carpet and Floor Maintenance",
+                        "Restroom Sanitization",
+                        "Trash Removal",
+                        "Surface Disinfection",
+                        "Event Cleanup",
+                        "High-Rise Window Cleaning",
+                        "Industrial Cleaning",
+                        "Medical Facility Cleaning",
+                        "Restaurant Cleaning",
+                        "Warehouse Cleaning",
+                        "Eco-Friendly Cleaning",
+                        "Clean-Up"
+                    ]
                 ),
             ]
         ),
@@ -166,12 +447,54 @@ def main():
                 Subcategory(
                     id="furniture_carpentry",
                     name="Furniture Carpentry",
-                    tags=["Custom Furniture", "Restoration"]
+                    tags=["Custom Furniture", "Restoration"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of crafting a custom piece of furniture.",
+                        shortScale="Custom furniture equivalent"
+                    ),
+                    setService=[
+                        "Custom Furniture Design",
+                        "Furniture Restoration",
+                        "Cabinet Making",
+                        "Shelving Units",
+                        "Built-In Closets",
+                        "Table and Chair Construction",
+                        "Antique Repair",
+                        "Wood Finishing and Staining",
+                        "Upholstery Services",
+                        "Furniture Assembly",
+                        "Outdoor Furniture",
+                        "Furniture Modification",
+                        "Wood Carving",
+                        "Veneer Work",
+                        "Clean-Up"
+                    ]
                 ),
                 Subcategory(
                     id="construction_carpentry",
                     name="Construction Carpentry",
-                    tags=["Framing", "Deck Building"]
+                    tags=["Framing", "Deck Building"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of framing a standard room.",
+                        shortScale="Standard room framing equivalent"
+                    ),
+                    setService=[
+                        "Framing",
+                        "Deck Building",
+                        "Door and Window Installation",
+                        "Siding Installation",
+                        "Roofing Support",
+                        "Floor Installation",
+                        "Staircase Construction",
+                        "Trim and Molding Installation",
+                        "Gazebo and Pergola Construction",
+                        "Drywall Installation",
+                        "Basement Finishing",
+                        "Renovations and Additions",
+                        "Demolition and Removal",
+                        "Insulation Installation",
+                        "Clean-Up"
+                    ]
                 ),
             ]
         ),
@@ -183,12 +506,54 @@ def main():
                 Subcategory(
                     id="local_moving",
                     name="Local Moving",
-                    tags=["Home Moves", "Office Moves"]
+                    tags=["Home Moves", "Office Moves"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of moving a standard 2-bedroom apartment locally.",
+                        shortScale="Standard local move equivalent"
+                    ),
+                    setService=[
+                        "Home Moving",
+                        "Office Moving",
+                        "Packing and Unpacking",
+                        "Furniture Disassembly and Reassembly",
+                        "Loading and Unloading",
+                        "Specialty Item Moving (e.g., pianos, artwork)",
+                        "Temporary Storage Solutions",
+                        "Packing Materials Supply",
+                        "Moving Insurance",
+                        "In-Home Moves (rearranging furniture)",
+                        "Appliance Moving",
+                        "Vehicle Transportation",
+                        "Cleaning Services Post-Move",
+                        "Eco-Friendly Moving Options",
+                        "Clean-Up"
+                    ]
                 ),
                 Subcategory(
                     id="long_distance_moving",
                     name="Long Distance Moving",
-                    tags=["Interstate Moves", "International Moves"]
+                    tags=["Interstate Moves", "International Moves"],
+                    scale=Scale(
+                        longScale="Prices are displayed relative to the cost of moving a standard household across states.",
+                        shortScale="Standard long-distance move equivalent"
+                    ),
+                    setService=[
+                        "Interstate Moving",
+                        "International Moving",
+                        "Customs Clearance Assistance",
+                        "Secure Packaging for Long Hauls",
+                        "Vehicle Shipping",
+                        "Storage-in-Transit Services",
+                        "Shipment Tracking",
+                        "Pet Relocation Services",
+                        "Insurance and Valuation Coverage",
+                        "Special Handling for Fragile Items",
+                        "Unpacking and Setup",
+                        "Documentation Assistance",
+                        "Air and Sea Freight Options",
+                        "Consultation and Planning",
+                        "Clean-Up"
+                    ]
                 ),
             ]
         ),

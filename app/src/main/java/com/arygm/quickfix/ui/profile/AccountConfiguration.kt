@@ -234,6 +234,7 @@ fun AccountConfigurationScreen(
 
                     Column(modifier = Modifier.fillMaxWidth().padding(start = 8.dp)) {
                       QuickFixTextFieldCustom(
+                          modifier = Modifier.testTag("birthDateInput"),
                           value = birthDate,
                           onValueChange = {
                             birthDate = it
@@ -242,9 +243,8 @@ fun AccountConfigurationScreen(
                           placeHolderText = "Enter your birthdate (DD/MM/YYYY)",
                           placeHolderColor = colorScheme.onSecondaryContainer,
                           isError = birthDateError,
-                          showError = birthDateError,
                           errorText = "INVALID DATE",
-                          modifier = Modifier.testTag("birthDateInput"),
+                          showError = birthDateError,
                           showLabel = true,
                           label = {
                             Text(

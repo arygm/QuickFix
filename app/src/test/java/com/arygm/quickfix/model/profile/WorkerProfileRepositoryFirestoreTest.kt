@@ -44,7 +44,7 @@ class WorkerProfileRepositoryFirestoreTest {
       WorkerProfile(
           uid = "1",
           fieldOfWork = "Plumber",
-          hourlyRate = 50.0,
+          price = 50.0,
           description = "Experienced plumber with 10 years in the field.",
           location = Location(latitude = 37.7749, longitude = -122.4194, name = "Home"))
 
@@ -52,7 +52,7 @@ class WorkerProfileRepositoryFirestoreTest {
       WorkerProfile(
           uid = "2",
           fieldOfWork = "Electrician",
-          hourlyRate = 60.0,
+          price = 60.0,
           description = "Certified electrician specializing in residential projects.",
           location = Location(latitude = 34.0522, longitude = -118.2437, name = "Work"))
 
@@ -289,7 +289,7 @@ class WorkerProfileRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.get("reviews")).thenReturn(profile.reviews)
     `when`(mockDocumentSnapshot.getString("description")).thenReturn(profile.description)
     `when`(mockDocumentSnapshot.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
-    `when`(mockDocumentSnapshot.getDouble("hourlyRate")).thenReturn(profile.hourlyRate)
+    `when`(mockDocumentSnapshot.getDouble("price")).thenReturn(profile.price)
     `when`(mockDocumentSnapshot.get("location"))
         .thenReturn(
             mapOf(
@@ -380,7 +380,7 @@ class WorkerProfileRepositoryFirestoreTest {
     `when`(document1.get("reviews")).thenReturn(profile.reviews)
     `when`(document1.getString("description")).thenReturn(profile.description)
     `when`(document1.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
-    `when`(document1.getDouble("hourlyRate")).thenReturn(profile.hourlyRate)
+    `when`(document1.getDouble("price")).thenReturn(profile.price)
     `when`(document1.get("location"))
         .thenReturn(
             mapOf(
@@ -394,7 +394,7 @@ class WorkerProfileRepositoryFirestoreTest {
     `when`(document2.get("reviews")).thenReturn(profile.reviews)
     `when`(document2.getString("description")).thenReturn(profile2.description)
     `when`(document2.getString("fieldOfWork")).thenReturn(profile2.fieldOfWork)
-    `when`(document2.getDouble("hourlyRate")).thenReturn(profile2.hourlyRate)
+    `when`(document2.getDouble("price")).thenReturn(profile2.price)
     `when`(document2.get("location"))
         .thenReturn(
             mapOf(
@@ -457,7 +457,7 @@ class WorkerProfileRepositoryFirestoreTest {
     `when`(document.get("reviews")).thenReturn(profile.reviews)
     `when`(document.getString("description")).thenReturn(profile.description)
     `when`(document.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
-    `when`(document.getDouble("hourlyRate")).thenReturn(profile.hourlyRate)
+    `when`(document.getDouble("price")).thenReturn(profile.price)
     `when`(document.get("location"))
         .thenReturn(
             mapOf(
@@ -478,10 +478,10 @@ class WorkerProfileRepositoryFirestoreTest {
     // Arrange
     val document = mock(DocumentSnapshot::class.java)
     `when`(document.id).thenReturn(profile.uid)
-    // Missing "description", "fieldOfWork", "hourlyRate"
+    // Missing "description", "fieldOfWork", "price"
     `when`(document.getString("description")).thenReturn(null)
     `when`(document.getString("fieldOfWork")).thenReturn(null)
-    `when`(document.getDouble("hourlyRate")).thenReturn(null)
+    `when`(document.getDouble("price")).thenReturn(null)
     `when`(document.get("location"))
         .thenReturn(
             mapOf(
@@ -503,7 +503,7 @@ class WorkerProfileRepositoryFirestoreTest {
     `when`(document.id).thenReturn(profile.uid)
     `when`(document.getString("description")).thenReturn(profile.description)
     `when`(document.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
-    `when`(document.getDouble("hourlyRate")).thenReturn(profile.hourlyRate)
+    `when`(document.getDouble("price")).thenReturn(profile.price)
     // "location" field has invalid data type (not a map)
     `when`(document.get("location")).thenReturn("Invalid data type")
 
@@ -596,8 +596,22 @@ class WorkerProfileRepositoryFirestoreTest {
     `when`(mockQueryAfterFieldOfWork.get()).thenReturn(taskCompletionSource.task)
 
     // Mock query result to return one worker profile
+    // Mock query result to return one worker profile
     `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
-    `when`(mockDocumentSnapshot.toObject(WorkerProfile::class.java)).thenReturn(profile)
+
+    // Mock data for first document
+    `when`(mockDocumentSnapshot.id).thenReturn(profile.uid)
+    `when`(mockDocumentSnapshot.getString("rating")).thenReturn(profile.rating.toString())
+    `when`(mockDocumentSnapshot.get("reviews")).thenReturn(profile.reviews)
+    `when`(mockDocumentSnapshot.getString("description")).thenReturn(profile.description)
+    `when`(mockDocumentSnapshot.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
+    `when`(mockDocumentSnapshot.getDouble("price")).thenReturn(profile.price)
+    `when`(mockDocumentSnapshot.get("location"))
+        .thenReturn(
+            mapOf(
+                "latitude" to profile.location!!.latitude,
+                "longitude" to profile.location!!.longitude,
+                "name" to profile.location!!.name))
 
     var callbackCalled = false
     var returnedProfiles: List<WorkerProfile>? = null
@@ -606,7 +620,7 @@ class WorkerProfileRepositoryFirestoreTest {
         rating = null,
         reviews = null,
         fieldOfWork = "Plumber",
-        hourlyRateThreshold = null,
+        price = null,
         location = null,
         radiusInKm = null,
         onSuccess = { profiles ->
@@ -632,15 +646,29 @@ class WorkerProfileRepositoryFirestoreTest {
     val mockQueryAfterHourlyRate = mock(Query::class.java)
 
     // Mock method chaining
-    `when`(mockCollectionReference.whereLessThan(eq("hourlyRate"), eq(30.0)))
+    `when`(mockCollectionReference.whereLessThan(eq("price"), eq(30.0)))
         .thenReturn(mockQueryAfterHourlyRate)
 
     val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
     `when`(mockQueryAfterHourlyRate.get()).thenReturn(taskCompletionSource.task)
 
     // Mock query result to return one worker profile
+    // Mock query result to return one worker profile
     `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
-    `when`(mockDocumentSnapshot.toObject(WorkerProfile::class.java)).thenReturn(profile)
+
+    // Mock data for first document
+    `when`(mockDocumentSnapshot.id).thenReturn(profile.uid)
+    `when`(mockDocumentSnapshot.getString("rating")).thenReturn(profile.rating.toString())
+    `when`(mockDocumentSnapshot.get("reviews")).thenReturn(profile.reviews)
+    `when`(mockDocumentSnapshot.getString("description")).thenReturn(profile.description)
+    `when`(mockDocumentSnapshot.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
+    `when`(mockDocumentSnapshot.getDouble("price")).thenReturn(profile.price)
+    `when`(mockDocumentSnapshot.get("location"))
+        .thenReturn(
+            mapOf(
+                "latitude" to profile.location!!.latitude,
+                "longitude" to profile.location!!.longitude,
+                "name" to profile.location!!.name))
 
     var callbackCalled = false
     var returnedProfiles: List<WorkerProfile>? = null
@@ -648,7 +676,7 @@ class WorkerProfileRepositoryFirestoreTest {
     profileRepositoryFirestore.filterWorkers(
         rating = null,
         reviews = null,
-        hourlyRateThreshold = 30.0,
+        price = 30.0,
         fieldOfWork = null,
         location = null,
         radiusInKm = null,
@@ -678,7 +706,7 @@ class WorkerProfileRepositoryFirestoreTest {
     // Mock method chaining
     `when`(mockCollectionReference.whereEqualTo(eq("fieldOfWork"), eq("Plumber")))
         .thenReturn(mockQueryAfterFieldOfWork)
-    `when`(mockQueryAfterFieldOfWork.whereLessThan(eq("hourlyRate"), eq(30.0)))
+    `when`(mockQueryAfterFieldOfWork.whereLessThan(eq("price"), eq(30.0)))
         .thenReturn(mockQueryAfterHourlyRate)
 
     val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
@@ -686,7 +714,20 @@ class WorkerProfileRepositoryFirestoreTest {
 
     // Mock query result to return one worker profile
     `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
-    `when`(mockDocumentSnapshot.toObject(WorkerProfile::class.java)).thenReturn(profile)
+
+    // Mock data for first document
+    `when`(mockDocumentSnapshot.id).thenReturn(profile.uid)
+    `when`(mockDocumentSnapshot.getString("rating")).thenReturn(profile.rating.toString())
+    `when`(mockDocumentSnapshot.get("reviews")).thenReturn(profile.reviews)
+    `when`(mockDocumentSnapshot.getString("description")).thenReturn(profile.description)
+    `when`(mockDocumentSnapshot.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
+    `when`(mockDocumentSnapshot.getDouble("price")).thenReturn(profile.price)
+    `when`(mockDocumentSnapshot.get("location"))
+        .thenReturn(
+            mapOf(
+                "latitude" to profile.location!!.latitude,
+                "longitude" to profile.location!!.longitude,
+                "name" to profile.location!!.name))
 
     var callbackCalled = false
     var returnedProfiles: List<WorkerProfile>? = null
@@ -694,7 +735,7 @@ class WorkerProfileRepositoryFirestoreTest {
     profileRepositoryFirestore.filterWorkers(
         rating = null,
         reviews = null,
-        hourlyRateThreshold = 30.0,
+        price = 30.0,
         fieldOfWork = "Plumber",
         location = null,
         radiusInKm = null,
@@ -751,7 +792,19 @@ class WorkerProfileRepositoryFirestoreTest {
 
     // Mock query result to return one worker profile
     `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
-    `when`(mockDocumentSnapshot.toObject(WorkerProfile::class.java)).thenReturn(profile)
+
+    // Mock data for first document
+    `when`(mockDocumentSnapshot.id).thenReturn(profile.uid)
+    `when`(mockDocumentSnapshot.getString("rating")).thenReturn(profile.rating.toString())
+    `when`(mockDocumentSnapshot.get("reviews")).thenReturn(profile.reviews)
+    `when`(mockDocumentSnapshot.getString("description")).thenReturn(profile.description)
+    `when`(mockDocumentSnapshot.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
+    `when`(mockDocumentSnapshot.get("location"))
+        .thenReturn(
+            mapOf(
+                "latitude" to location.latitude,
+                "longitude" to location.longitude,
+                "name" to location.name))
 
     var callbackCalled = false
     var returnedProfiles: List<WorkerProfile>? = null
@@ -759,7 +812,7 @@ class WorkerProfileRepositoryFirestoreTest {
     profileRepositoryFirestore.filterWorkers(
         rating = null,
         reviews = null,
-        hourlyRateThreshold = null,
+        price = null,
         fieldOfWork = null,
         location = location,
         radiusInKm = 50.0,
@@ -789,7 +842,7 @@ class WorkerProfileRepositoryFirestoreTest {
     // Mock method chaining
     `when`(mockCollectionReference.whereEqualTo(eq("fieldOfWork"), eq("Plumber")))
         .thenReturn(mockQueryAfterFieldOfWork)
-    `when`(mockQueryAfterFieldOfWork.whereLessThan(eq("hourlyRate"), eq(30.0)))
+    `when`(mockQueryAfterFieldOfWork.whereLessThan(eq("price"), eq(30.0)))
         .thenReturn(mockQueryAfterHourlyRate)
 
     val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
@@ -802,7 +855,7 @@ class WorkerProfileRepositoryFirestoreTest {
     profileRepositoryFirestore.filterWorkers(
         rating = null,
         reviews = null,
-        hourlyRateThreshold = 30.0,
+        price = 30.0,
         fieldOfWork = "Plumber",
         location = null,
         radiusInKm = null,

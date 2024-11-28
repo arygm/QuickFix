@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.elements
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,7 +30,10 @@ fun QuickFixButton(
     onClickAction: () -> Unit,
     buttonColor: Color,
     buttonOpacity: Float = 1f,
+    buttonColorDisabled: Color = MaterialTheme.colorScheme.background,
+    textColorDisabled: Color = MaterialTheme.colorScheme.onSecondaryContainer,
     textColor: Color,
+    border: BorderStroke? = null,
     textStyle: TextStyle = MaterialTheme.typography.labelMedium,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.Center,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
@@ -41,7 +45,12 @@ fun QuickFixButton(
 ) {
   Button(
       onClick = onClickAction,
-      colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
+      colors =
+          ButtonDefaults.buttonColors(
+              containerColor = buttonColor, // Background when enabled
+              contentColor = textColor, // Text color when enabled
+              disabledContainerColor = buttonColorDisabled, // Background when disabled
+              disabledContentColor = textColorDisabled),
       modifier =
           modifier
               .fillMaxWidth(0.8f)
@@ -51,6 +60,7 @@ fun QuickFixButton(
               .testTag("quickfixButton"),
       shape = RoundedCornerShape(10.dp),
       contentPadding = contentPadding,
+      border = border,
       enabled = enabled) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -63,7 +73,7 @@ fun QuickFixButton(
                 contentDescription = "leading_icon",
                 modifier = Modifier.padding(end = 8.dp))
           }
-          Text(text = buttonText, style = textStyle, color = textColor)
+          Text(text = buttonText, style = textStyle)
           trailingIcon?.let {
             Image(
                 imageVector = it,

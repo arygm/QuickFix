@@ -34,22 +34,23 @@ import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
-import com.arygm.quickfix.ui.DashboardScreen
 import com.arygm.quickfix.ui.account.AccountConfigurationScreen
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
 import com.arygm.quickfix.ui.authentication.ResetPasswordScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
+import com.arygm.quickfix.ui.dashboard.DashboardScreen
 import com.arygm.quickfix.ui.home.FakeMessageScreen
 import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
-import com.arygm.quickfix.ui.profile.BusinessScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
+import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.search.SearchWorkerResult
 import com.arygm.quickfix.ui.theme.QuickFixTheme
@@ -120,6 +121,8 @@ fun QuickFixApp() {
   val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
   val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory)
   val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
+  val announcementViewModel: AnnouncementViewModel =
+      viewModel(factory = AnnouncementViewModel.Factory)
 
   // Initialized here because needed for the bottom bar
   val profileNavController = rememberNavController()
@@ -225,7 +228,14 @@ fun QuickFixApp() {
               }
 
               composable(Route.SEARCH) {
-                SearchNavHost(isUser, navigationActionsRoot, searchViewModel, accountViewModel)
+                SearchNavHost(
+                    isUser,
+                    navigationActionsRoot,
+                    searchViewModel,
+                    userViewModel,
+                    loggedInAccountViewModel,
+                    accountViewModel,
+                    announcementViewModel)
               }
 
               composable(Route.DASHBOARD) { DashBoardNavHost(isUser) }
@@ -315,7 +325,10 @@ fun SearchNavHost(
     isUser: Boolean,
     navigationActionsRoot: NavigationActions,
     searchViewModel: SearchViewModel,
-    accountViewModel: AccountViewModel
+    profileViewModel: ProfileViewModel,
+    loggedInAccountViewModel: LoggedInAccountViewModel,
+    accountViewModel: AccountViewModel,
+    announcementViewModel: AnnouncementViewModel
 ) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
@@ -324,7 +337,14 @@ fun SearchNavHost(
       startDestination = Screen.SEARCH,
   ) {
     composable(Screen.SEARCH) {
-      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser, searchViewModel)
+      QuickFixFinderScreen(
+          navigationActions,
+          navigationActionsRoot,
+          isUser,
+          profileViewModel,
+          loggedInAccountViewModel,
+          searchViewModel,
+          announcementViewModel)
     }
     composable(Screen.SEARCH_WORKER_RESULT) {
       SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)

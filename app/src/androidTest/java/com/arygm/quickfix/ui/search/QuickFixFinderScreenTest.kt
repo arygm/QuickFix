@@ -47,7 +47,11 @@ class QuickFixFinderScreenTest {
   @Test
   fun quickFixFinderScreenUserDisplaysCorrectly() {
     composeTestRule.setContent {
-      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser = true, searchViewModel)
+      QuickFixFinderScreen(
+          navigationActions,
+          navigationActionsRoot,
+          isUser = true,
+          searchViewModel = searchViewModel)
     }
 
     // Assert top bar is displayed
@@ -79,7 +83,10 @@ class QuickFixFinderScreenTest {
   fun quickFixFinderScreenWorkerDisplaysCorrectly() {
     composeTestRule.setContent {
       QuickFixFinderScreen(
-          navigationActions, navigationActionsRoot, isUser = false, searchViewModel)
+          navigationActions,
+          navigationActionsRoot,
+          isUser = false,
+          searchViewModel = searchViewModel)
     }
 
     // Assert top bar is displayed
@@ -110,7 +117,11 @@ class QuickFixFinderScreenTest {
   @Test
   fun tabSelectionChangesPagerContent() {
     composeTestRule.setContent {
-      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser = true, searchViewModel)
+      QuickFixFinderScreen(
+          navigationActions,
+          navigationActionsRoot,
+          isUser = true,
+          searchViewModel = searchViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -126,7 +137,11 @@ class QuickFixFinderScreenTest {
   @Test
   fun cancelButtonNavigatesToHomeAndUpdatesBottomBar() {
     composeTestRule.setContent {
-      QuickFixFinderScreen(navigationActions, navigationActionsRoot, isUser = true, searchViewModel)
+      QuickFixFinderScreen(
+          navigationActions,
+          navigationActionsRoot,
+          isUser = true,
+          searchViewModel = searchViewModel)
     }
 
     // Click the "Cancel" button
