@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.profile
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -52,6 +53,7 @@ import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
@@ -184,8 +186,9 @@ fun ProfileScreen(
                   colors =
                       CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                     Column {
-                      SettingsItem(
-                          icon = Icons.Outlined.Person, label = "My Account") { /* Action */}
+                      SettingsItem(icon = Icons.Outlined.Person, label = "My Account") {
+                        navigationActions.navigateTo(Screen.ACCOUNT_CONFIGURATION)
+                      }
                       HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
                       SettingsItem(
                           icon = Icons.Outlined.Settings, label = "Preferences") { /* Action */}
@@ -217,9 +220,9 @@ fun ProfileScreen(
                       HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
                       SettingsItem(icon = Icons.Outlined.Info, label = "Legal") { /* Action */}
                       HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
-                      SettingsItem(
-                          icon = Icons.Outlined.WorkOutline,
-                          label = "Become a Worker") { /* Action */}
+                      SettingsItem(icon = Icons.Outlined.WorkOutline, label = "Become a Worker") {
+                        navigationActions.navigateTo(Screen.TO_WORKER)
+                      }
                     }
                   }
 
@@ -228,7 +231,8 @@ fun ProfileScreen(
               Button(
                   onClick = {
                     loggedInAccountViewModel.logOut(Firebase.auth)
-                    navigationActions.navigateTo(Screen.WELCOME)
+                    navigationActionsRoot.navigateTo(TopLevelDestinations.WELCOME)
+                    Log.d("user", Firebase.auth.currentUser.toString())
                   },
                   shape = RoundedCornerShape(10.dp),
                   border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground),
