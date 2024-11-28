@@ -43,6 +43,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
@@ -52,6 +54,7 @@ import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.ui.theme.ButtonPrimary
 import com.arygm.quickfix.utils.rememberFirebaseAuthLauncher
+import com.arygm.quickfix.utils.signInWithEmailAndFetchAccount
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import kotlinx.coroutines.delay
@@ -64,163 +67,237 @@ fun WelcomeScreen(
     loggedInAccountViewModel: LoggedInAccountViewModel,
     userViewModel: ProfileViewModel
 ) {
-  val colorScheme = MaterialTheme.colorScheme
 
-  var fadeOut by remember { mutableStateOf(true) }
-  var expandBox by remember { mutableStateOf(true) }
-  var startAnimation by remember { mutableStateOf(false) }
-  var targetScreen by remember { mutableStateOf("") }
+    val colorScheme = MaterialTheme.colorScheme
 
-  val elementsAlpha by
-      animateFloatAsState(targetValue = if (fadeOut) 0f else 1f, label = "elementsFade")
+    var fadeOut by remember { mutableStateOf(true) }
+    var expandBox by remember { mutableStateOf(true) }
+    var startAnimation by remember { mutableStateOf(false) }
+    var targetScreen by remember { mutableStateOf("") }
 
-  val boxOffsetX by
-      animateDpAsState(targetValue = if (expandBox) 0.dp else (-890).dp, label = "moveBoxX")
 
-  val context = LocalContext.current
+    val elementsAlpha by
+    animateFloatAsState(targetValue = if (fadeOut) 0f else 1f, label = "elementsFade")
 
-  val launcher =
-      rememberFirebaseAuthLauncher(
-          onAuthCompleteOne = { result ->
-            Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
-            navigationActions.navigateTo(TopLevelDestinations.HOME)
-          },
-          onAuthCompleteTwo = { result ->
-            Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
-            navigationActions.navigateTo(Screen.GOOGLE_INFO)
-          },
-          onAuthError = { Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}") },
-          accountViewModel,
-          loggedInAccountViewModel = loggedInAccountViewModel,
-          userViewModel = userViewModel)
+    val boxOffsetX by
+    animateDpAsState(targetValue = if (expandBox) 0.dp else (-890).dp, label = "moveBoxX")
 
-  val token = stringResource(com.arygm.quickfix.R.string.default_web_client_id)
+    val context = LocalContext.current
 
-  LaunchedEffect(Unit) {
-    expandBox = false // Start expanding the box
-    delay(200) // Wait for box to fully shrink
-    fadeOut = false // Start fade-out animation
-    delay(300) // Wait for fade-out to complete
-    // Navigate to RegistrationScreen
-  }
-  // Animation sequence when the Register button is clicked
-  @Composable
-  if (startAnimation) {
-    LaunchedEffect(Unit) {
-      fadeOut = true // Start fade-out animation
-      delay(300) // Wait for fade-out to complete
-      expandBox = true // Start expanding the box
-      delay(500) // Wait for box to fully shrink
-      navigationActions.navigateTo(targetScreen) // Navigate to RegistrationScreen
+    val launcher =
+        rememberFirebaseAuthLauncher(
+            onAuthCompleteOne = { result ->
+                Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
+                navigationActions.navigateTo(TopLevelDestinations.HOME)
+            },
+            onAuthCompleteTwo = { result ->
+                Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
+                navigationActions.navigateTo(Screen.GOOGLE_INFO)
+            },
+            onAuthError = { Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}") },
+            accountViewModel,
+            loggedInAccountViewModel = loggedInAccountViewModel,
+            userViewModel = userViewModel
+        )
+
+    val token = stringResource(com.arygm.quickfix.R.string.default_web_client_id)
+    val gso =
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(token)
+            .requestEmail()
+            .build()
+    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+    val sharedPreferences = EncryptedSharedPreferences.create(
+        "auth_prefs",
+        MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
+        context,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
+
+    fun fastForwardSignIn() {
+        val account = GoogleSignIn.getLastSignedInAccount(context)
+        if (account != null) {
+            launcher.launch(googleSignInClient.signInIntent)
+        } else {
+            val storedEmail = sharedPreferences.getString("user_email", null)
+            val storedPassword = sharedPreferences.getString("user_password", null)
+
+            if (storedEmail != null && storedPassword != null) {
+                signInWithEmailAndFetchAccount(
+                    email = storedEmail,
+                    password = storedPassword,
+                    accountViewModel = accountViewModel,
+                    loggedInAccountViewModel = loggedInAccountViewModel,
+                    onResult = {
+                        if (it) {
+                            Log.d(
+                                "WelcomeScreen",
+                                "found stored credentials, logging in to $storedEmail"
+                            )
+                            navigationActions.navigateTo(TopLevelDestinations.HOME)
+                        } else {
+                            Log.e("WelcomeScreen", "Error occurred while fast forwarding sign in")
+                        }
+                    }
+                )
+            }
+        }
+
     }
-  }
 
-  BoxWithConstraints(modifier = Modifier.fillMaxSize().testTag("welcomeBox")) {
-    val screenHeight = maxHeight
-    val screenWidth = maxWidth
-    Image(
-        painter = painterResource(id = com.arygm.quickfix.R.drawable.worker_image),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        alignment = Alignment.TopStart,
-        modifier =
-            Modifier.requiredSize(screenWidth * 1.10f, screenHeight).testTag("workerBackground"))
+    LaunchedEffect(Unit) {
+        fastForwardSignIn()
+        expandBox = false // Start expanding the box
+        delay(200) // Wait for box to fully shrink
+        fadeOut = false // Start fade-out animation
+        delay(300) // Wait for fade-out to complete
+        // Navigate to RegistrationScreen
+    }
+    // Animation sequence when the Register button is clicked
+    @Composable
+    if (startAnimation) {
+        LaunchedEffect(Unit) {
+            fadeOut = true // Start fade-out animation
+            delay(300) // Wait for fade-out to complete
+            expandBox = true // Start expanding the box
+            delay(500) // Wait for box to fully shrink
+            navigationActions.navigateTo(targetScreen) // Navigate to RegistrationScreen
+        }
+    }
 
-    Box(
-        // Leaving as is as animations are tricky to fine-tune without breaking
-        modifier =
-            Modifier.align(Alignment.BottomStart)
+    BoxWithConstraints(modifier = Modifier
+        .fillMaxSize()
+        .testTag("welcomeBox")) {
+        val screenHeight = maxHeight
+        val screenWidth = maxWidth
+        Image(
+            painter = painterResource(id = com.arygm.quickfix.R.drawable.worker_image),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.TopStart,
+            modifier =
+            Modifier
+                .requiredSize(screenWidth * 1.10f, screenHeight)
+                .testTag("workerBackground")
+        )
+
+        Box(
+            // Leaving as is as animations are tricky to fine-tune without breaking
+            modifier =
+            Modifier
+                .align(Alignment.BottomStart)
                 .requiredSize(1700.dp)
                 .offset(x = boxOffsetX, y = 70.dp)
                 .graphicsLayer(rotationZ = -28f)
                 .background(colorScheme.primary)
-                .testTag("boxDecoration1"))
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom,
-        modifier = Modifier.fillMaxSize().padding(bottom = screenHeight * 0.05f)) {
-          Image(
-              painter = painterResource(id = com.arygm.quickfix.R.drawable.quickfix),
-              contentDescription = null,
-              contentScale = ContentScale.Crop,
-              colorFilter = ColorFilter.tint(colorScheme.background),
-              modifier =
-                  Modifier.fillMaxWidth(0.7f)
-                      .graphicsLayer(rotationZ = 4.57f, alpha = elementsAlpha)
-                      .testTag("quickFixLogo"))
+                .testTag("boxDecoration1")
+        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = screenHeight * 0.05f)
+        ) {
+            Image(
+                painter = painterResource(id = com.arygm.quickfix.R.drawable.quickfix),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                colorFilter = ColorFilter.tint(colorScheme.background),
+                modifier =
+                Modifier
+                    .fillMaxWidth(0.7f)
+                    .graphicsLayer(rotationZ = 4.57f, alpha = elementsAlpha)
+                    .testTag("quickFixLogo")
+            )
 
-          // QuickFix Text
-          Text(
-              text = "QuickFix",
-              style = MaterialTheme.typography.titleLarge,
-              color = colorScheme.background,
-              modifier =
-                  Modifier.padding(bottom = screenHeight * 0.01f) // Space between text and buttons
-                      .graphicsLayer(alpha = elementsAlpha)
-                      .testTag("quickFixText"))
+            // QuickFix Text
+            Text(
+                text = "QuickFix",
+                style = MaterialTheme.typography.titleLarge,
+                color = colorScheme.background,
+                modifier =
+                Modifier
+                    .padding(bottom = screenHeight * 0.01f) // Space between text and buttons
+                    .graphicsLayer(alpha = elementsAlpha)
+                    .testTag("quickFixText")
+            )
 
-          QuickFixButton(
-              buttonText = "LOG IN TO QUICKFIX",
-              onClickAction = {
-                targetScreen = Screen.LOGIN
-                startAnimation = true
-              },
-              buttonColor = MaterialTheme.colorScheme.tertiary,
-              modifier = Modifier.graphicsLayer(alpha = elementsAlpha).testTag("logInButton"),
-              textColor = colorScheme.background)
+            QuickFixButton(
+                buttonText = "LOG IN TO QUICKFIX",
+                onClickAction = {
+                    targetScreen = Screen.LOGIN
+                    startAnimation = true
+                },
+                buttonColor = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier
+                    .graphicsLayer(alpha = elementsAlpha)
+                    .testTag("logInButton"),
+                textColor = colorScheme.background
+            )
 
-          QuickFixButton(
-              buttonText = "REGISTER TO QUICKFIX",
-              onClickAction = {
-                targetScreen = Screen.REGISTER
-                startAnimation = true
-              },
-              buttonColor = colorScheme.background,
-              modifier =
-                  Modifier.graphicsLayer(alpha = elementsAlpha).testTag("RegistrationButton"),
-              textColor = ButtonPrimary)
+            QuickFixButton(
+                buttonText = "REGISTER TO QUICKFIX",
+                onClickAction = {
+                    targetScreen = Screen.REGISTER
+                    startAnimation = true
+                },
+                buttonColor = colorScheme.background,
+                modifier =
+                Modifier
+                    .graphicsLayer(alpha = elementsAlpha)
+                    .testTag("RegistrationButton"),
+                textColor = ButtonPrimary
+            )
 
-          Button(
-              onClick = {
-                val gso =
-                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(token)
-                        .requestEmail()
-                        .build()
-                val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                launcher.launch(googleSignInClient.signInIntent)
-              },
-              colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-              border = BorderStroke(2.dp, colorScheme.background),
-              modifier =
-                  Modifier.fillMaxWidth(0.8f)
-                      .height(screenHeight * 0.054f)
-                      .graphicsLayer(alpha = elementsAlpha)
-                      .testTag("googleButton"),
-              shape = RoundedCornerShape(10.dp)) {
+            Button(
+                onClick = {
+                    launcher.launch(googleSignInClient.signInIntent)
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                border = BorderStroke(2.dp, colorScheme.background),
+                modifier =
+                Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(screenHeight * 0.054f)
+                    .graphicsLayer(alpha = elementsAlpha)
+                    .testTag("googleButton"),
+                shape = RoundedCornerShape(10.dp)
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start,
-                    modifier = Modifier.fillMaxWidth().padding(start = 0.dp)) {
-                      Image(
-                          painter =
-                              painterResource(
-                                  id = com.arygm.quickfix.R.drawable.google,
-                              ),
-                          contentDescription = "Google Logo",
-                          colorFilter = ColorFilter.tint(colorScheme.background),
-                          modifier = Modifier.size(30.dp).offset(x = (-3).dp).testTag("googleLogo"))
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 0.dp)
+                ) {
+                    Image(
+                        painter =
+                        painterResource(
+                            id = com.arygm.quickfix.R.drawable.google,
+                        ),
+                        contentDescription = "Google Logo",
+                        colorFilter = ColorFilter.tint(colorScheme.background),
+                        modifier = Modifier
+                            .size(30.dp)
+                            .offset(x = (-3).dp)
+                            .testTag("googleLogo")
+                    )
 
-                      Spacer(modifier = Modifier.width(screenWidth * 0.04f))
+                    Spacer(modifier = Modifier.width(screenWidth * 0.04f))
 
-                      // Button Text
-                      Text(
-                          text = "CONTINUE WITH GOOGLE",
-                          color = colorScheme.background,
-                          style = MaterialTheme.typography.labelMedium,
-                      )
-                    }
-              }
+                    // Button Text
+                    Text(
+                        text = "CONTINUE WITH GOOGLE",
+                        color = colorScheme.background,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
+            }
         }
-  }
+    }
+
+
 }
+
