@@ -1,6 +1,7 @@
 package com.arygm.quickfix.utils
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -139,6 +140,7 @@ fun createAccountWithEmailAndPassword(
     accountViewModel: AccountViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
     userViewModel: ProfileViewModel,
+    sharedPreferences: SharedPreferences,
     onSuccess: () -> Unit,
     onFailure: () -> Unit
 ) {
@@ -170,6 +172,11 @@ fun createAccountWithEmailAndPassword(
                 accountViewModel.addAccount(
                     createdAccount,
                     onSuccess = {
+                        with(sharedPreferences.edit()) {
+                            putString("user_email", email)
+                            putString("user_password", password)
+                            apply()
+                        }
                       loggedInAccountViewModel.setLoggedInAccount(createdAccount)
                       onSuccess()
                     },

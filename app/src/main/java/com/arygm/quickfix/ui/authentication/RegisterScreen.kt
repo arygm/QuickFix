@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.authentication
 
+import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -56,6 +57,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
@@ -72,6 +75,7 @@ import com.arygm.quickfix.utils.createAccountWithEmailAndPassword
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.isValidEmail
 import com.google.firebase.auth.FirebaseAuth
+import kotlin.reflect.KFunction12
 
 @Composable
 fun RegisterScreen(
@@ -81,18 +85,7 @@ fun RegisterScreen(
     userViewModel: ProfileViewModel,
     firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(), // Injected dependency
     createAccountFunc:
-        (
-            firebaseAuth: FirebaseAuth,
-            firstName: String,
-            lastName: String,
-            email: String,
-            password: String,
-            birthDate: String,
-            accountViewModel: AccountViewModel,
-            loggedInAccountViewModel: LoggedInAccountViewModel,
-            userViewModel: ProfileViewModel,
-            onSuccess: () -> Unit,
-            onFailure: () -> Unit) -> Unit =
+    KFunction12<FirebaseAuth, String, String, String, String, String, AccountViewModel, LoggedInAccountViewModel, ProfileViewModel, SharedPreferences, () -> Unit, () -> Unit, Unit> =
         ::createAccountWithEmailAndPassword // Default implementation
 ) {
   val context = LocalContext.current
@@ -111,7 +104,16 @@ fun RegisterScreen(
   var repeatPasswordVisible by remember { mutableStateOf(false) }
   var repeatPassword by remember { mutableStateOf("") }
 
-  val noMatch by remember {
+    val sharedPreferences = EncryptedSharedPreferences.create(
+        "auth_prefs",
+        MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
+        context,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
+
+
+    val noMatch by remember {
     derivedStateOf { password != repeatPassword && repeatPassword.isNotEmpty() }
   }
 
@@ -490,6 +492,7 @@ fun RegisterScreen(
                                           accountViewModel,
                                           loggedInAccountViewModel,
                                           userViewModel,
+                                          sharedPreferences,
                                           {
                                             navigationActions.navigateTo(TopLevelDestinations.HOME)
                                           },
