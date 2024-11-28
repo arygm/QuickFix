@@ -163,6 +163,12 @@ configurations.configureEach {
 dependencies {
     implementation(libs.coil.compose)
     implementation(libs.accompanist.permissions)
+
+    implementation(libs.okhttp)
+    implementation(libs.kotlinx.serialization.json)
+    testImplementation(libs.json)
+
+
     implementation(libs.androidx.core.ktx)
     implementation(files("libs/meow-bottom-navigation-java-1.2.0.aar"))
     implementation(libs.androidx.appcompat)

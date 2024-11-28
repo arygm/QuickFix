@@ -53,7 +53,8 @@ class UserProfileRepositoryFirestoreTest {
           Location(latitude = 0.0, longitude = 0.0, name = "Home"),
           Location(latitude = 1.0, longitude = 1.0, name = "Work"))
 
-  private val userProfile = UserProfile(uid = "1", locations = testLocations)
+  private val userProfile =
+      UserProfile(uid = "1", locations = testLocations, announcements = emptyList())
 
   @Before
   fun setUp() {
@@ -345,7 +346,9 @@ class UserProfileRepositoryFirestoreTest {
 
     val userProfile2 =
         UserProfile(
-            uid = "2", locations = listOf(Location(latitude = 2.0, longitude = 2.0, name = "Gym")))
+            uid = "2",
+            locations = listOf(Location(latitude = 2.0, longitude = 2.0, name = "Gym")),
+            announcements = emptyList())
 
     val documents = listOf(document1, document2)
     whenever(mockProfileQuerySnapshot.documents).thenReturn(documents)
