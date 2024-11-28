@@ -105,19 +105,19 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
               .clickable { onClick() }
               .testTag("QuickFixItem_${quickFix.name}"), // Added testTag
       verticalAlignment = Alignment.CenterVertically) {
-        // Profile image placeholder
-        Image(
-            painter = painterResource(id = R.drawable.profile), // Replace with an actual drawable
-            contentDescription = "Profile Picture",
-            modifier =
-                Modifier.size(40.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
-
-        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(0.15f)) {
+          // Profile image placeholder
+          Image(
+              painter = painterResource(id = R.drawable.profile), // Replace with an actual drawable
+              contentDescription = "Profile Picture",
+              modifier =
+                  Modifier.size(40.dp)
+                      .clip(CircleShape)
+                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+        }
 
         // Text information
-        Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(0.7f)) {
           // Row for name and task description on the same line
           Row(verticalAlignment = Alignment.Bottom) {
             Text(
@@ -150,19 +150,22 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
               color = MaterialTheme.colorScheme.onSurface)
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
-
-        // Arrow icon with a circular background
-        Box(
-            modifier =
-                Modifier.size(32.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondary),
-            contentAlignment = Alignment.Center) {
-              Icon(
-                  imageVector = Icons.Default.ArrowForward,
-                  contentDescription = "Go to details",
-                  tint = MaterialTheme.colorScheme.onBackground)
-            }
+        Column(
+            modifier = Modifier.weight(0.15f),
+            horizontalAlignment = Alignment.End,
+        ) {
+          // Arrow icon with a circular background
+          Box(
+              modifier =
+                  Modifier.size(32.dp)
+                      .clip(CircleShape)
+                      .background(MaterialTheme.colorScheme.secondary),
+              contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.ArrowForward,
+                    contentDescription = "Go to details",
+                    tint = MaterialTheme.colorScheme.onBackground)
+              }
+        }
       }
 }

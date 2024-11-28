@@ -84,9 +84,7 @@ fun MessagesWidget(
                     }
               }
           HorizontalDivider(
-              modifier = Modifier.padding(horizontal = 0.dp),
-              thickness = 1.dp,
-              color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+              thickness = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
 
           val itemsToShow = if (showAll) messageList else messageList.take(itemsToShowDefault)
           messageList.take(itemsToShow.size).forEachIndexed { index, message ->
@@ -113,22 +111,22 @@ fun MessageItem(messageSneakPeak: MessageSneakPeak, onClick: () -> Unit) {
               .clickable { onClick() }
               .testTag("MessageItem_${messageSneakPeak.name}"), // Added testTag
       verticalAlignment = Alignment.CenterVertically) {
-        // Profile image placeholder
-        Image(
-            painter =
-                painterResource(
-                    id = R.drawable.placeholder_worker), // Replace with an actual drawable
-            contentDescription = "Profile Picture",
-            contentScale = ContentScale.Crop,
-            modifier =
-                Modifier.size(50.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
-
-        Spacer(modifier = Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(0.15f)) {
+          // Profile image placeholder
+          Image(
+              painter =
+                  painterResource(
+                      id = R.drawable.placeholder_worker), // Replace with an actual drawable
+              contentDescription = "Profile Picture",
+              contentScale = ContentScale.Crop,
+              modifier =
+                  Modifier.size(40.dp)
+                      .clip(CircleShape)
+                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+        }
 
         // Text information
-        Column(modifier = Modifier.weight(0.8f)) {
+        Column(modifier = Modifier.weight(0.7f)) {
           // Row for name and task description on the same line
           Row(verticalAlignment = Alignment.Bottom) {
             Text(
@@ -160,7 +158,7 @@ fun MessageItem(messageSneakPeak: MessageSneakPeak, onClick: () -> Unit) {
 
         Spacer(modifier = Modifier.width(8.dp))
         Column(
-            modifier = Modifier.weight(0.2f).align(Alignment.Top),
+            modifier = Modifier.weight(0.15f).align(Alignment.Top),
             verticalArrangement = Arrangement.SpaceBetween) {
               Text(
                   text = messageSneakPeak.date,

@@ -87,7 +87,7 @@ fun DashboardScreen(navigationActions: NavigationActions, isUser: Boolean = true
 
   val billList =
       quickFixes.map {
-        BillSneakPeak(it.name, it.taskDescription, it.date, Random.nextInt(10, 10000))
+        BillSneakPeak(it.name, it.taskDescription, it.date, Random.nextDouble(10.00, 10000.00))
       }
 
   Scaffold(
@@ -143,14 +143,15 @@ fun DashboardScreen(navigationActions: NavigationActions, isUser: Boolean = true
                       )
                     }
                   }
-                  when (quickFixFilterButtons.firstOrNull { it.isSelected }?.title) {
+                  val buttonTitle = quickFixFilterButtons.firstOrNull { it.isSelected }?.title
+                  when (buttonTitle) {
                     "Upcoming" ->
                         QuickFixesWidget(
                             status = "Upcoming",
                             quickFixList = quickFixes,
                             onShowAllClick = { /* Handle Show All Click */},
                             onItemClick = { /* Handle QuickFix Item Click */},
-                            modifier = Modifier.testTag("UpcomingQuickFixes"),
+                            modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                             itemsToShowDefault = 3,
                         )
                     "Canceled" -> {
@@ -159,7 +160,7 @@ fun DashboardScreen(navigationActions: NavigationActions, isUser: Boolean = true
                           quickFixList = quickFixes,
                           onShowAllClick = { /* Handle Show All Click */},
                           onItemClick = { /* Handle QuickFix Item Click */},
-                          modifier = Modifier.testTag("UpcomingQuickFixes"),
+                          modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
                       )
                     }
@@ -169,7 +170,7 @@ fun DashboardScreen(navigationActions: NavigationActions, isUser: Boolean = true
                           quickFixList = quickFixes,
                           onShowAllClick = { /* Handle Show All Click */},
                           onItemClick = { /* Handle QuickFix Item Click */},
-                          modifier = Modifier.testTag("UpcomingQuickFixes"),
+                          modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
                       )
                     }
@@ -179,16 +180,16 @@ fun DashboardScreen(navigationActions: NavigationActions, isUser: Boolean = true
                           quickFixList = quickFixes,
                           onShowAllClick = { /* Handle Show All Click */},
                           onItemClick = { /* Handle QuickFix Item Click */},
-                          modifier = Modifier.testTag("UpcomingQuickFixes"),
+                          modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
                       )
                     }
-                    else -> {
+                    "All" -> {
                       QuickFixesWidget(
                           quickFixList = quickFixes,
                           onShowAllClick = { /* Handle Show All Click */},
                           onItemClick = { /* Handle QuickFix Item Click */},
-                          modifier = Modifier.testTag("UpcomingQuickFixes"),
+                          modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
                       )
                     }

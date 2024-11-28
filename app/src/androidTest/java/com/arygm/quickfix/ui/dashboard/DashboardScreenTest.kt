@@ -55,7 +55,7 @@ class DashboardScreenTest {
 
     // Verify that the widget updates based on the selected filter
     composeTestRule.onNodeWithText("Canceled").performClick()
-    composeTestRule.onNodeWithTag("UpcomingQuickFixes").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("CanceledQuickFixes").assertIsDisplayed()
   }
 
   @Test

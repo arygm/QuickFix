@@ -13,10 +13,10 @@ class BillsWidgetTests {
   fun billSample_displaysDefaultNumberOfItems() {
     val testBills =
         listOf(
-            BillSneakPeak("Bill 1", "Task 1", "2023-11-26", 100),
-            BillSneakPeak("Bill 2", "Task 2", "2023-11-27", 200),
-            BillSneakPeak("Bill 3", "Task 3", "2023-11-28", 300),
-            BillSneakPeak("Bill 4", "Task 4", "2023-11-29", 400))
+            BillSneakPeak("Bill 1", "Task 1", "2023-11-26", 100.0),
+            BillSneakPeak("Bill 2", "Task 2", "2023-11-27", 200.0),
+            BillSneakPeak("Bill 3", "Task 3", "2023-11-28", 300.0),
+            BillSneakPeak("Bill 4", "Task 4", "2023-11-29", 400.0))
 
     composeTestRule.setContent {
       BillsWidget(
@@ -36,10 +36,10 @@ class BillsWidgetTests {
   fun billSample_displaysAllItems_whenShowAllClicked() {
     val testBills =
         listOf(
-            BillSneakPeak("Bill 1", "Task 1", "2023-11-26", 100),
-            BillSneakPeak("Bill 2", "Task 2", "2023-11-27", 200),
-            BillSneakPeak("Bill 3", "Task 3", "2023-11-28", 300),
-            BillSneakPeak("Bill 4", "Task 4", "2023-11-29", 400))
+            BillSneakPeak("Bill 1", "Task 1", "2023-11-26", 100.0),
+            BillSneakPeak("Bill 2", "Task 2", "2023-11-27", 200.0),
+            BillSneakPeak("Bill 3", "Task 3", "2023-11-28", 300.0),
+            BillSneakPeak("Bill 4", "Task 4", "2023-11-29", 400.0))
 
     composeTestRule.setContent {
       BillsWidget(

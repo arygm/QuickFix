@@ -17,13 +17,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.ui.theme.poppinsFontFamily
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import java.text.NumberFormat
+import java.util.Locale
 
 // Data class for QuickFix item
 data class BillSneakPeak(
     val name: String,
     val taskDescription: String,
     val date: String,
-    val price: Int
+    val price: Double
 )
 
 @Composable
@@ -139,14 +141,19 @@ fun BillItem(billSneakPeak: BillSneakPeak, onClick: () -> Unit) {
               fontWeight = FontWeight.Normal,
               color = MaterialTheme.colorScheme.onSurface)
         }
-
         Column(
             modifier = Modifier.weight(0.3f).padding(end = 8.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.End) {
               // Price information
               Text(
-                  text = "$${billSneakPeak.price}",
+                  text =
+                      NumberFormat.getCurrencyInstance(Locale.getDefault())
+                          .apply {
+                            maximumFractionDigits = 2
+                            minimumIntegerDigits = 2
+                          }
+                          .format(billSneakPeak.price),
                   modifier = Modifier.testTag("BillPrice_${billSneakPeak.price}"),
                   color = MaterialTheme.colorScheme.primary,
                   fontFamily = poppinsFontFamily,
