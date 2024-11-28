@@ -64,10 +64,12 @@ fun ProfileScreen(
     loggedInAccountViewModel: LoggedInAccountViewModel,
     navigationActionsRoot: NavigationActions,
 ) {
-  val loggedInProfile by loggedInAccountViewModel.loggedInAccount.collectAsState()
+  val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
+  val loggedInProfile by loggedInAccountViewModel.userProfile.collectAsState()
   val displayName =
-      loggedInProfile?.let { capitalizeName(it.firstName, it.lastName) } ?: "Loading..."
-  val email = loggedInProfile?.email ?: "Loading..."
+      loggedInAccount?.let { capitalizeName(it.firstName, it.lastName) } ?: "Loading..."
+  val email = loggedInAccount?.email ?: "Loading..."
+  val wallet = loggedInProfile?.wallet ?: "Loading..."
 
   Scaffold(
       containerColor = MaterialTheme.colorScheme.background,
@@ -138,7 +140,7 @@ fun ProfileScreen(
                           Spacer(modifier = Modifier.height(8.dp))
                           Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "CHF 12,000.90",
+                                text = "$wallet",
                                 style = MaterialTheme.typography.headlineLarge,
                                 color = MaterialTheme.colorScheme.onPrimary,
                                 modifier = Modifier.weight(1f))
