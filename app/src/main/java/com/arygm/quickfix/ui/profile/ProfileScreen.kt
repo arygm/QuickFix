@@ -188,16 +188,22 @@ fun ProfileScreen(
                   colors =
                       CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                     Column() {
-                      SettingsItem(icon = Icons.Outlined.Person, label = "My Account", testTag = "AccountconfigurationOption") {
-                        navigationActions.navigateTo(Screen.ACCOUNT_CONFIGURATION)
-                      }
+                      SettingsItem(
+                          icon = Icons.Outlined.Person,
+                          label = "My Account",
+                          testTag = "AccountconfigurationOption") {
+                            navigationActions.navigateTo(Screen.ACCOUNT_CONFIGURATION)
+                          }
                       HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
                       SettingsItem(
-                      icon = Icons.Outlined.Settings, label = "Preferences", testTag = "") { /* Action */}
+                          icon = Icons.Outlined.Settings,
+                          label = "Preferences",
+                          testTag = "") { /* Action */}
                       HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
                       SettingsItem(
                           icon = Icons.Outlined.FavoriteBorder,
-                          label = "Saved lists", testTag = "") { /* Action */}
+                          label = "Saved lists",
+                          testTag = "") { /* Action */}
                     }
                   }
 
@@ -218,13 +224,18 @@ fun ProfileScreen(
                     Column(Modifier.testTag("SetupyourbusinessaccountOption")) {
                       SettingsItem(
                           icon = Icons.AutoMirrored.Outlined.HelpOutline,
-                          label = "Support", testTag = "") { /* Action */}
+                          label = "Support",
+                          testTag = "") { /* Action */}
                       HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
-                      SettingsItem(icon = Icons.Outlined.Info, label = "Legal", testTag = "") { /* Action */}
+                      SettingsItem(
+                          icon = Icons.Outlined.Info, label = "Legal", testTag = "") { /* Action */}
                       HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
-                      SettingsItem(icon = Icons.Outlined.WorkOutline, label = "Become a Worker", testTag = "SetupyourbusinessaccountOption") {
-                        navigationActions.navigateTo(Screen.TO_WORKER)
-                      }
+                      SettingsItem(
+                          icon = Icons.Outlined.WorkOutline,
+                          label = "Become a Worker",
+                          testTag = "SetupyourbusinessaccountOption") {
+                            navigationActions.navigateTo(Screen.TO_WORKER)
+                          }
                     }
                   }
 
@@ -253,7 +264,12 @@ fun ProfileScreen(
 }
 
 @Composable
-fun SettingsItem(icon: ImageVector, label: String, testTag: String, onClick: () -> Unit,) {
+fun SettingsItem(
+    icon: ImageVector,
+    label: String,
+    testTag: String,
+    onClick: () -> Unit,
+) {
   Card(
       modifier = Modifier.fillMaxWidth().testTag(testTag),
       shape = RoundedCornerShape(0.dp),
