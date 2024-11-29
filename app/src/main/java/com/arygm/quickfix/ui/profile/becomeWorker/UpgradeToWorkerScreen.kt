@@ -20,18 +20,23 @@ import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.dataFields.AddOnService
+import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.profile.becomeWorker.views.personal.PersonalInfoScreen
+import com.arygm.quickfix.ui.profile.becomeWorker.views.professional.ProfessionalInfoScreen
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BusinessScreen(
+    /*
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
     workerProfileViewModel: ProfileViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel
+     */
 ) {
   val pagerState = rememberPagerState(pageCount = { 3 })
   val focusManager = LocalFocusManager.current
@@ -41,6 +46,11 @@ fun BusinessScreen(
   val imagePathBP = remember { mutableStateOf("") }
   var displayNameError by remember { mutableStateOf(false) }
   var descriptionError by remember { mutableStateOf(false) }
+    val price = remember { mutableStateOf("") }
+    val fieldOfWork = remember { mutableStateOf("") }
+    val includedServices = remember { mutableStateOf(listOf<IncludedService>()) }
+    val addOnServices = remember { mutableStateOf(listOf<AddOnService>()) }
+    val tags = remember { mutableStateOf(listOf<String>()) }
   Scaffold(
       modifier =
           Modifier.pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
@@ -58,7 +68,8 @@ fun BusinessScreen(
             },
             navigationIcon = {
               IconButton(
-                  onClick = { navigationActions.goBack() },
+                  onClick = { //navigationActions.goBack()
+                       },
                   modifier = Modifier.testTag("goBackButton")) {
                     Icon(
                         Icons.Outlined.ArrowBack,
@@ -91,7 +102,14 @@ fun BusinessScreen(
                         onDescriptionErrorChange = { descriptionError = it })
                   }
                   1 -> {
-
+                        ProfessionalInfoScreen(
+                        pagerState,
+                        price,
+                        fieldOfWork,
+                        includedServices,
+                        addOnServices,
+                        tags
+                        )
                   }
                   2 -> {
 

@@ -21,7 +21,6 @@ import kotlinx.coroutines.launch
 
 open class SearchViewModel(
     private val workerProfileRepo: WorkerProfileRepositoryFirestore,
-    private val categoryRepo: CategoryRepositoryFirestore
 ) : ViewModel() {
 
   private val _searchQuery = MutableStateFlow("")
@@ -41,8 +40,7 @@ open class SearchViewModel(
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return SearchViewModel(
-                WorkerProfileRepositoryFirestore(firestoreInstance),
-                CategoryRepositoryFirestore(firestoreInstance))
+                WorkerProfileRepositoryFirestore(firestoreInstance))
                 as T
           }
         }
