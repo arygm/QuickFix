@@ -187,7 +187,7 @@ fun ProfileScreen(
                   shape = RoundedCornerShape(16.dp),
                   colors =
                       CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-                    Column() {
+                    Column {
                       SettingsItem(
                           icon = Icons.Outlined.Person,
                           label = "My Account",
@@ -198,12 +198,12 @@ fun ProfileScreen(
                       SettingsItem(
                           icon = Icons.Outlined.Settings,
                           label = "Preferences",
-                          testTag = "") { /* Action */}
+                          testTag = "Preferences") { /* Action */}
                       HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
                       SettingsItem(
                           icon = Icons.Outlined.FavoriteBorder,
                           label = "Saved lists",
-                          testTag = "") { /* Action */}
+                          testTag = "SavedLists") { /* Action */}
                     }
                   }
 
@@ -221,14 +221,14 @@ fun ProfileScreen(
                   shape = RoundedCornerShape(16.dp),
                   colors =
                       CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-                    Column(Modifier.testTag("SetupyourbusinessaccountOption")) {
+                    Column {
                       SettingsItem(
                           icon = Icons.AutoMirrored.Outlined.HelpOutline,
                           label = "Support",
-                          testTag = "") { /* Action */}
+                          testTag = "Support") { /* Action */}
                       HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
                       SettingsItem(
-                          icon = Icons.Outlined.Info, label = "Legal", testTag = "") { /* Action */}
+                          icon = Icons.Outlined.Info, label = "Legal", testTag = "Legal") { /* Action */}
                       HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
                       SettingsItem(
                           icon = Icons.Outlined.WorkOutline,

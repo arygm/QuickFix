@@ -91,9 +91,9 @@ class ProfileScreenTest {
     }
 
     // Verify settings options
-    val settingsOptions = listOf("My Account", "Preferences", "Saved lists")
+    val settingsOptions = listOf("AccountconfigurationOption", "Preferences", "SavedLists")
     settingsOptions.forEach { label ->
-      composeTestRule.onNodeWithTag(label.replace(" ", "") + "Option").assertIsDisplayed()
+      composeTestRule.onNodeWithTag(label).assertIsDisplayed()
     }
   }
 
@@ -104,9 +104,9 @@ class ProfileScreenTest {
     }
 
     // Verify resources options
-    val resourcesOptions = listOf("Support", "Legal", "Become a Worker")
+    val resourcesOptions = listOf("Support", "Legal", "SetupyourbusinessaccountOption")
     resourcesOptions.forEach { label ->
-      composeTestRule.onNodeWithTag(label.replace(" ", "") + "Option").assertIsDisplayed()
+      composeTestRule.onNodeWithTag(label).assertIsDisplayed()
     }
   }
 }
