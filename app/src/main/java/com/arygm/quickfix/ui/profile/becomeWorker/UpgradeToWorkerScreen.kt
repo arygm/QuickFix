@@ -90,8 +90,12 @@ fun BusinessScreen(
                         descriptionError = descriptionError,
                         onDescriptionErrorChange = { descriptionError = it })
                   }
-                  1 -> {}
-                  2 -> {}
+                  1 -> {
+
+                  }
+                  2 -> {
+
+                  }
                 }
               }
         }

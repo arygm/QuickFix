@@ -32,6 +32,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
@@ -123,6 +124,7 @@ fun QuickFixApp() {
   val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
   val announcementViewModel: AnnouncementViewModel =
       viewModel(factory = AnnouncementViewModel.Factory)
+    val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
 
   // Initialized here because needed for the bottom bar
   val profileNavController = rememberNavController()
@@ -235,7 +237,8 @@ fun QuickFixApp() {
                     userViewModel,
                     loggedInAccountViewModel,
                     accountViewModel,
-                    announcementViewModel)
+                    announcementViewModel,
+                    categoryViewModel)
               }
 
               composable(Route.DASHBOARD) { DashBoardNavHost(isUser) }
@@ -328,7 +331,8 @@ fun SearchNavHost(
     profileViewModel: ProfileViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
     accountViewModel: AccountViewModel,
-    announcementViewModel: AnnouncementViewModel
+    announcementViewModel: AnnouncementViewModel,
+    categoryViewModel: CategoryViewModel
 ) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
@@ -344,7 +348,8 @@ fun SearchNavHost(
           profileViewModel,
           loggedInAccountViewModel,
           searchViewModel,
-          announcementViewModel)
+          announcementViewModel,
+          categoryViewModel)
     }
     composable(Screen.SEARCH_WORKER_RESULT) {
       SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)

@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -47,7 +48,8 @@ fun QuickFixFinderScreen(
         viewModel(factory = LoggedInAccountViewModel.Factory),
     searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory),
     announcementViewModel: AnnouncementViewModel =
-        viewModel(factory = AnnouncementViewModel.Factory)
+        viewModel(factory = AnnouncementViewModel.Factory),
+    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
 ) {
   Scaffold(
       containerColor = colorScheme.background,
@@ -96,7 +98,7 @@ fun QuickFixFinderScreen(
                     when (page) {
                       0 ->
                           SearchOnBoarding(
-                              navigationActions, navigationActionsRoot, isUser, searchViewModel)
+                              navigationActions, navigationActionsRoot, isUser, searchViewModel, categoryViewModel)
                       1 ->
                           AnnouncementScreen(
                               announcementViewModel,

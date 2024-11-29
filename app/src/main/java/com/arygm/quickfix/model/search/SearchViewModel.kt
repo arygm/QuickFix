@@ -33,13 +33,6 @@ open class SearchViewModel(
   private val _errorMessage = MutableStateFlow<String?>(null)
   val errorMessage: StateFlow<String?> = _errorMessage
 
-  private val _categories = MutableStateFlow<List<Category>>(emptyList())
-  val categories: StateFlow<List<Category>> = _categories
-
-  init {
-    categoryRepo.init { fetchCategories() }
-  }
-
   companion object {
     private val firestoreInstance by lazy { Firebase.firestore } // Singleton Firestore instance
 
@@ -68,12 +61,6 @@ open class SearchViewModel(
       _searchQuery.value = query
       filterWorkerProfiles(fieldOfWork = query)
     }
-  }
-
-  fun fetchCategories() {
-    categoryRepo.fetchCategories(
-        onSuccess = { categories -> _categories.value = categories as List<Category> },
-        onFailure = { e -> Log.e("SearchViewModel", "Failed to fetch categories: ${e.message}") })
   }
 
   fun filterWorkerProfiles(
