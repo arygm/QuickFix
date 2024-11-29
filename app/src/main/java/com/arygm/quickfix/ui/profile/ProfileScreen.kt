@@ -228,7 +228,9 @@ fun ProfileScreen(
                           testTag = "Support") { /* Action */}
                       HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
                       SettingsItem(
-                          icon = Icons.Outlined.Info, label = "Legal", testTag = "Legal") { /* Action */}
+                          icon = Icons.Outlined.Info,
+                          label = "Legal",
+                          testTag = "Legal") { /* Action */}
                       HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
                       SettingsItem(
                           icon = Icons.Outlined.WorkOutline,

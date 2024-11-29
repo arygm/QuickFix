@@ -92,9 +92,7 @@ class ProfileScreenTest {
 
     // Verify settings options
     val settingsOptions = listOf("AccountconfigurationOption", "Preferences", "SavedLists")
-    settingsOptions.forEach { label ->
-      composeTestRule.onNodeWithTag(label).assertIsDisplayed()
-    }
+    settingsOptions.forEach { label -> composeTestRule.onNodeWithTag(label).assertIsDisplayed() }
   }
 
   @Test
@@ -105,8 +103,6 @@ class ProfileScreenTest {
 
     // Verify resources options
     val resourcesOptions = listOf("Support", "Legal", "SetupyourbusinessaccountOption")
-    resourcesOptions.forEach { label ->
-      composeTestRule.onNodeWithTag(label).assertIsDisplayed()
-    }
+    resourcesOptions.forEach { label -> composeTestRule.onNodeWithTag(label).assertIsDisplayed() }
   }
 }
