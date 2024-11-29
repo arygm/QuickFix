@@ -1,5 +1,6 @@
 [versions]
 agp = "8.6.1"
+calendar = "1.2.0"
 databindingRuntime = "8.7.0"
 kotlin = "1.9.25"
 coreKtx = "1.13.1"
@@ -51,6 +52,7 @@ coil = "2.4.0"
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-databinding-runtime = { module = "androidx.databinding:databinding-runtime", version.ref = "databindingRuntime" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+calendar = { module = "com.maxkeppeler.sheets-compose-dialogs:calendar", version.ref = "calendar" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 json = { module = "org.json:json", version.ref = "json" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }

@@ -4,20 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,12 +22,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -39,9 +33,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
+import com.arygm.quickfix.ui.elements.QuickFixCheckedListElement
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.utils.MyAppTheme
+import com.maxkeppeker.sheets.core.models.base.Header
+import com.maxkeppeker.sheets.core.models.base.IconSource
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.calendar.CalendarView
+import com.maxkeppeler.sheets.calendar.models.CalendarConfig
+import com.maxkeppeler.sheets.calendar.models.CalendarSelection
+import com.maxkeppeler.sheets.calendar.models.CalendarStyle
+import java.time.LocalDate
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun QuickFixFirstStep() {
@@ -63,7 +68,8 @@ fun QuickFixFirstStep() {
     mutableStateListOf(*Array(listAddOnServices.size) { false })
   }
 
-  var quickNote = remember { mutableStateOf("") }
+  var quickNote by remember { mutableStateOf("") }
+  val selectedDates = remember { mutableStateOf<List<LocalDate>>(emptyList()) }
 
   BoxWithConstraints(
       modifier =
@@ -73,7 +79,6 @@ fun QuickFixFirstStep() {
         val widthRatio = maxWidth / 411
         val heightRatio = maxHeight / 860
         val sizeRatio = minOf(widthRatio, heightRatio)
-
         LazyColumn(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
           item {
             QuickFixTextFieldCustom(
@@ -117,7 +122,7 @@ fun QuickFixFirstStep() {
           }
 
           items(listServices.size) { index ->
-            ListServices(listServices, checkedStatesServices, index)
+            QuickFixCheckedListElement(listServices, checkedStatesServices, index)
           }
 
           item {
@@ -130,7 +135,7 @@ fun QuickFixFirstStep() {
           }
 
           items(listAddOnServices.size) { index ->
-            ListServices(listAddOnServices, checkedStatesAddOnServices, index)
+            QuickFixCheckedListElement(listAddOnServices, checkedStatesAddOnServices, index)
           }
 
           item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -139,8 +144,8 @@ fun QuickFixFirstStep() {
             QuickFixTextFieldCustom(
                 heightField = 150.dp,
                 widthField = 400.dp * widthRatio.value,
-                value = quickNote.value,
-                onValueChange = { quickNote.value = it },
+                value = quickNote,
+                onValueChange = { quickNote = it },
                 shape = RoundedCornerShape(8.dp),
                 showLabel = true,
                 label =
@@ -180,55 +185,61 @@ fun QuickFixFirstStep() {
             )
           }
 
-          item {}
+          item {
+            MyAppTheme {
+              Box(
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .height(280.dp) // Set a specific height to avoid infinite constraints
+                  ) {
+                    CalendarView(
+                        useCaseState =
+                            rememberUseCaseState(
+                                visible = true, onCloseRequest = { /* Handle close request */}),
+                        config =
+                            CalendarConfig(
+                                yearSelection = true,
+                                monthSelection = true,
+                                style = CalendarStyle.WEEK),
+                        selection =
+                            CalendarSelection.Dates { newDates -> selectedDates.value = newDates },
+                        header =
+                            Header.Default(
+                                title = "Date and time",
+                                icon = IconSource(Icons.Default.CalendarMonth),
+                            ),
+                    )
+                  }
+            }
+          }
+
+          item {
+            MyAppTheme {
+              Box(
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .height(300.dp) // Set a specific height to avoid infinite constraints
+                  ) {
+                    CalendarView(
+                        useCaseState =
+                            rememberUseCaseState(
+                                visible = true, onCloseRequest = { /* Handle close request */}),
+                        config =
+                            CalendarConfig(
+                                yearSelection = true,
+                                monthSelection = true,
+                                style = CalendarStyle.WEEK),
+                        selection =
+                            CalendarSelection.Dates { newDates -> selectedDates.value = newDates },
+                        header =
+                            Header.Default(
+                                title = "Date and time",
+                                icon = IconSource(Icons.Default.CalendarMonth),
+                            ),
+                    )
+                  }
+            }
+          }
         }
       }
-}
-
-@Composable
-private fun ListServices(
-    listServices: List<String>,
-    checkedStatesServices: SnapshotStateList<Boolean>,
-    index: Int,
-) {
-  Row(
-      verticalAlignment = Alignment.CenterVertically,
-      modifier =
-          Modifier.toggleable(
-                  value = checkedStatesServices[index],
-                  onValueChange = { checkedStatesServices[index] = it },
-                  role = Role.RadioButton // Role as a RadioButton
-                  )
-              .padding(vertical = 3.dp)) {
-        Box(
-            modifier =
-                Modifier.size(24.dp) // Set the size of the RadioButton explicitly
-                    .align(Alignment.CenterVertically) // Align it vertically in the Row
-            ) {
-              RadioButton(
-                  selected = checkedStatesServices[index],
-                  onClick = {
-                    checkedStatesServices[index] = !checkedStatesServices[index]
-                  }, // Handle toggle
-                  modifier =
-                      Modifier.size(
-                          24.dp), // Set the size directly to remove extra padding of RadioButton
-                  colors =
-                      RadioButtonDefaults.colors(
-                          selectedColor = colorScheme.primary,
-                          unselectedColor = colorScheme.tertiaryContainer))
-            }
-        Spacer(modifier = Modifier.width(8.dp)) // Add space between RadioButton and Text
-        Text(
-            text = listServices[index],
-            style = poppinsTypography.labelSmall,
-            fontWeight = FontWeight.Medium,
-            color = colorScheme.onSurface)
-      }
-  if (index < listServices.size - 1) {
-    HorizontalDivider(
-        color = colorScheme.background,
-        thickness = 1.5.dp,
-        modifier = Modifier.padding(start = 32.dp))
-  }
 }
