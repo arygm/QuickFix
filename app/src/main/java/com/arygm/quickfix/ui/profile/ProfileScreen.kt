@@ -65,11 +65,11 @@ fun ProfileScreen(
     navigationActionsRoot: NavigationActions,
 ) {
   val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
-  val loggedInProfile by loggedInAccountViewModel.userProfile.collectAsState()
+    val loggedInProfile by loggedInAccountViewModel.userProfile.collectAsState()
   val displayName =
       loggedInAccount?.let { capitalizeName(it.firstName, it.lastName) } ?: "Loading..."
   val email = loggedInAccount?.email ?: "Loading..."
-  val wallet = loggedInProfile?.wallet ?: "Loading..."
+    val wallet = loggedInProfile?.wallet ?: "Loading..."
 
   Scaffold(
       containerColor = MaterialTheme.colorScheme.background,
@@ -187,7 +187,7 @@ fun ProfileScreen(
                   shape = RoundedCornerShape(16.dp),
                   colors =
                       CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-                    Column {
+                    Column(Modifier.testTag("AccountconfigurationOption")) {
                       SettingsItem(icon = Icons.Outlined.Person, label = "My Account") {
                         navigationActions.navigateTo(Screen.ACCOUNT_CONFIGURATION)
                       }
