@@ -215,7 +215,7 @@ fun ProfileScreen(
                   shape = RoundedCornerShape(16.dp),
                   colors =
                       CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-                    Column {
+                    Column(Modifier.testTag("SetupyourbusinessaccountOption")) {
                       SettingsItem(
                           icon = Icons.AutoMirrored.Outlined.HelpOutline,
                           label = "Support") { /* Action */}
