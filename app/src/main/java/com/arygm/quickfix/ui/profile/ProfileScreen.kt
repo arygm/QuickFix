@@ -65,11 +65,11 @@ fun ProfileScreen(
     navigationActionsRoot: NavigationActions,
 ) {
   val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
-    val loggedInProfile by loggedInAccountViewModel.userProfile.collectAsState()
+  val loggedInProfile by loggedInAccountViewModel.userProfile.collectAsState()
   val displayName =
       loggedInAccount?.let { capitalizeName(it.firstName, it.lastName) } ?: "Loading..."
   val email = loggedInAccount?.email ?: "Loading..."
-    val wallet = loggedInProfile?.wallet ?: "Loading..."
+  val wallet = loggedInProfile?.wallet ?: "Loading..."
 
   Scaffold(
       containerColor = MaterialTheme.colorScheme.background,
