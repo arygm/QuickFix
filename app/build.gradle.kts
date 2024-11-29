@@ -245,6 +245,8 @@ dependencies {
     testImplementation(libs.mockito.kotlin)
     globalTestImplementation(libs.mockito.kotlin)
     androidTestImplementation(libs.mockito.android)
+
+    implementation("com.maxkeppeler.sheets-compose-dialogs:calendar:1.2.0")
 }
 
 tasks.withType<Test> {
