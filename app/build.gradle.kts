@@ -161,6 +161,14 @@ configurations.configureEach {
 }
 
 dependencies {
+    implementation(libs.coil.compose)
+    implementation(libs.accompanist.permissions)
+
+    implementation(libs.okhttp)
+    implementation(libs.kotlinx.serialization.json)
+    testImplementation(libs.json)
+
+
     implementation(libs.androidx.core.ktx)
     implementation(files("libs/meow-bottom-navigation-java-1.2.0.aar"))
     implementation(libs.androidx.appcompat)
@@ -238,6 +246,8 @@ dependencies {
     testImplementation(libs.mockito.kotlin)
     globalTestImplementation(libs.mockito.kotlin)
     androidTestImplementation(libs.mockito.android)
+
+    implementation("com.maxkeppeler.sheets-compose-dialogs:calendar:1.2.0")
 }
 
 tasks.withType<Test> {

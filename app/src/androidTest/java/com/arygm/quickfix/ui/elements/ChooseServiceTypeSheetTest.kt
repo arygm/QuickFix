@@ -1,6 +1,5 @@
 package com.arygm.quickfix.ui.elements
 
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -30,7 +29,6 @@ class ChooseServiceTypeSheetTest {
     onResetClick = mock()
   }
 
-  @OptIn(ExperimentalTestApi::class)
   @Test
   fun chooseServiceTypeSheet_displaysCorrectly() {
     val serviceTypes = listOf("Exterior Painter", "Interior Painter")

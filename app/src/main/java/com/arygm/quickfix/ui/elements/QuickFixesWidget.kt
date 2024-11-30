@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -20,17 +19,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.R
+import com.arygm.quickfix.ui.theme.poppinsTypography
 
 // Data class for QuickFix item
 data class QuickFix(val name: String, val taskDescription: String, val date: String)
 
 @Composable
-fun UpcomingQuickFixes(
+fun QuickFixesWidget(
+    status: String = "All",
     quickFixList: List<QuickFix>,
     onShowAllClick: () -> Unit,
     onItemClick: (QuickFix) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    itemsToShowDefault: Int = 3
 ) {
   var showAll by remember { mutableStateOf(false) } // Toggle for showing all items
   BoxWithConstraints {
@@ -43,21 +46,24 @@ fun UpcomingQuickFixes(
             modifier
                 .fillMaxWidth()
                 .padding(horizontalSpacing)
-                .shadow(5.dp, RoundedCornerShape(12.dp))
+                .shadow(5.dp, RoundedCornerShape(20.dp))
                 .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
                 .testTag("UpcomingQuickFixesColumn"), // Added testTag
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start) {
           // Header with divider
           Row(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
               horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Upcoming QuickFixes",
+                    text = "$status QuickFixes",
                     color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.testTag("UpcomingQuickFixesTitle") // Added testTag
+                    style = poppinsTypography.headlineMedium,
+                    fontSize = 19.sp,
+                    modifier =
+                        Modifier.testTag("UpcomingQuickFixesTitle")
+                            .padding(horizontal = 8.dp) // Added testTag
                     )
                 TextButton(
                     onClick = { showAll = !showAll },
@@ -70,30 +76,22 @@ fun UpcomingQuickFixes(
                           fontWeight = FontWeight.SemiBold)
                     }
               }
-          Divider(
-              color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+          HorizontalDivider(
+              modifier = Modifier.padding(horizontal = 0.dp),
               thickness = 1.dp,
-              modifier = Modifier.padding(horizontal = 0.dp))
+              color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
 
-          // List of QuickFix items
-          LazyColumn(
-              modifier = Modifier.wrapContentHeight(), verticalArrangement = Arrangement.Top) {
-                // Determine how many items to show based on showAll state
-                val itemsToShow = if (showAll) quickFixList else quickFixList.take(3)
-
-                items(itemsToShow.size) { index ->
-                  val quickFix = itemsToShow[index]
-                  QuickFixItem(quickFix = quickFix, onClick = { onItemClick(quickFix) })
-
-                  // Divider between items
-                  if (index < itemsToShow.size - 1) {
-                    Divider(
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
-                        thickness = 1.dp,
-                        modifier = Modifier.fillMaxWidth())
-                  }
-                }
-              }
+          val itemsToShow = if (showAll) quickFixList else quickFixList.take(itemsToShowDefault)
+          quickFixList.take(itemsToShow.size).forEachIndexed { index, quickFix ->
+            QuickFixItem(quickFix = quickFix, onClick = { onItemClick(quickFix) })
+            // Divider between items
+            if (index < itemsToShow.size - 1) {
+              HorizontalDivider(
+                  modifier = Modifier.fillMaxWidth(),
+                  thickness = 1.dp,
+                  color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+            }
+          }
         }
   }
 }
@@ -107,35 +105,38 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
               .clickable { onClick() }
               .testTag("QuickFixItem_${quickFix.name}"), // Added testTag
       verticalAlignment = Alignment.CenterVertically) {
-        // Profile image placeholder
-        Image(
-            painter = painterResource(id = R.drawable.profile), // Replace with an actual drawable
-            contentDescription = "Profile Picture",
-            modifier =
-                Modifier.size(40.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
-
-        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(0.15f)) {
+          // Profile image placeholder
+          Image(
+              painter = painterResource(id = R.drawable.profile), // Replace with an actual drawable
+              contentDescription = "Profile Picture",
+              modifier =
+                  Modifier.size(40.dp)
+                      .clip(CircleShape)
+                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+        }
 
         // Text information
-        Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(0.7f)) {
           // Row for name and task description on the same line
           Row(verticalAlignment = Alignment.Bottom) {
             Text(
                 text = quickFix.name,
                 modifier = Modifier.testTag(quickFix.name), // Added testTag
-                style = MaterialTheme.typography.bodyMedium,
+                style = poppinsTypography.bodyMedium,
+                fontSize = 15.sp,
                 color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis)
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = quickFix.taskDescription, // Removed leading comma for clarity
                 modifier = Modifier.testTag(quickFix.taskDescription), // Added testTag
-                style = MaterialTheme.typography.bodyMedium,
+                style = poppinsTypography.bodyMedium,
+                fontSize = 15.sp,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                fontWeight = FontWeight.Normal,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis)
           }
@@ -143,23 +144,28 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
           Text(
               text = quickFix.date,
               modifier = Modifier.testTag(quickFix.date), // Added testTag
-              style = MaterialTheme.typography.bodySmall,
+              style = poppinsTypography.bodyMedium,
+              fontSize = 15.sp,
+              fontWeight = FontWeight.Normal,
               color = MaterialTheme.colorScheme.onSurface)
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
-
-        // Arrow icon with a circular background
-        Box(
-            modifier =
-                Modifier.size(32.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondary),
-            contentAlignment = Alignment.Center) {
-              Icon(
-                  imageVector = Icons.Default.ArrowForward,
-                  contentDescription = "Go to details",
-                  tint = MaterialTheme.colorScheme.onBackground)
-            }
+        Column(
+            modifier = Modifier.weight(0.15f),
+            horizontalAlignment = Alignment.End,
+        ) {
+          // Arrow icon with a circular background
+          Box(
+              modifier =
+                  Modifier.size(32.dp)
+                      .clip(CircleShape)
+                      .background(MaterialTheme.colorScheme.secondary),
+              contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.ArrowForward,
+                    contentDescription = "Go to details",
+                    tint = MaterialTheme.colorScheme.onBackground)
+              }
+        }
       }
 }

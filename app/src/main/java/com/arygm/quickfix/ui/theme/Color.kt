@@ -14,10 +14,10 @@ val ButtonQuaternary = Color.White // Fourth button color
 /* Text */
 val TextPrimary = Color(0xFF000000)
 val TextSecondary = Color(0xFF7B7B7B)
-val TextDisabled = Color(0xFFB2B2B2)
+val TextDisabled = Color(0xB2B2B2B2)
 
 /* Background */
-val BackgroundPrimary = Color(0xFFF2F2F2)
+val BackgroundPrimary = Color(0xF2ECECEC)
 val BackgroundSecondary = Color(0xFFFFFFFF)
 
 /* Login */

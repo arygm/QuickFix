@@ -27,7 +27,7 @@ open class SearchViewModel(
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery
 
-  private val _workerProfiles = MutableStateFlow<List<WorkerProfile>>(emptyList())
+  val _workerProfiles = MutableStateFlow<List<WorkerProfile>>(emptyList())
   val workerProfiles: StateFlow<List<WorkerProfile>> = _workerProfiles
 
   private val _errorMessage = MutableStateFlow<String?>(null)
@@ -79,7 +79,7 @@ open class SearchViewModel(
   fun filterWorkerProfiles(
       rating: Double? = null,
       reviews: List<String>? = emptyList(),
-      hourlyRateThreshold: Double? = null,
+      price: Double? = null,
       fieldOfWork: String? = null,
       location: Location? = null,
       maxDistanceInKm: Double? = null
@@ -90,7 +90,7 @@ open class SearchViewModel(
     workerProfileRepo.filterWorkers(
         rating,
         reviews,
-        hourlyRateThreshold,
+        price,
         fieldOfWork,
         location,
         maxDistanceInKm,

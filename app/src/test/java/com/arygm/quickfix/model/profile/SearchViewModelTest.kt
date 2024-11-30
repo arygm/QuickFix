@@ -35,7 +35,7 @@ class SearchViewModelTest {
         listOf(
             WorkerProfile(
                 uid = "worker_123",
-                hourlyRate = 25.0,
+                price = 25.0,
                 fieldOfWork = "Plumber",
                 location = Location(46.0, 6.0, "Test Location")))
 
@@ -57,7 +57,7 @@ class SearchViewModelTest {
             anyOrNull())
 
     // Act: Call ViewModel's function to filter worker profiles
-    viewModel.filterWorkerProfiles(hourlyRateThreshold = 30.0)
+    viewModel.filterWorkerProfiles(price = 30.0)
 
     // Assert: Check that the ViewModel state is updated correctly
     assertEquals(expectedProfiles, viewModel.workerProfiles.value)
@@ -87,7 +87,7 @@ class SearchViewModelTest {
             anyOrNull())
 
     // Act: Call ViewModel's function to filter worker profiles
-    viewModel.filterWorkerProfiles(hourlyRateThreshold = 30.0)
+    viewModel.filterWorkerProfiles(price = 30.0)
 
     // Assert: Check that the ViewModel state is updated correctly on failure
     assertTrue(viewModel.workerProfiles.value.isEmpty()) // The list should be empty
@@ -101,7 +101,7 @@ class SearchViewModelTest {
         listOf(
             WorkerProfile(
                 uid = "worker_124",
-                hourlyRate = 40.0,
+                price = 40.0,
                 fieldOfWork = "Electrician",
                 location = Location(46.0, 7.0, "Another Test Location")))
 
@@ -137,7 +137,7 @@ class SearchViewModelTest {
         listOf(
             WorkerProfile(
                 uid = "worker_125",
-                hourlyRate = 30.0,
+                price = 30.0,
                 fieldOfWork = "Handyman",
                 location = Location(46.5, 6.6, "Nearby Location")))
 
@@ -175,7 +175,7 @@ class SearchViewModelTest {
         listOf(
             WorkerProfile(
                 uid = "worker_126",
-                hourlyRate = 20.0,
+                price = 20.0,
                 fieldOfWork = "Gardening",
                 location = Location(45.5, 6.0, "Far Away Location")))
 
@@ -210,12 +210,12 @@ class SearchViewModelTest {
         listOf(
             WorkerProfile(
                 uid = "worker_127",
-                hourlyRate = 45.0,
+                price = 45.0,
                 fieldOfWork = "Journalist",
                 location = Location(47.0, 8.0, "Metropolis")),
             WorkerProfile(
                 uid = "worker_128",
-                hourlyRate = 80.0,
+                price = 80.0,
                 fieldOfWork = "CEO",
                 location = Location(40.0, -74.0, "Gotham City")))
 
@@ -238,9 +238,7 @@ class SearchViewModelTest {
 
     // Act: Apply multiple filters
     viewModel.filterWorkerProfiles(
-        hourlyRateThreshold = 50.0,
-        location = Location(46.0, 6.0, "User Location"),
-        maxDistanceInKm = 500.0)
+        price = 50.0, location = Location(46.0, 6.0, "User Location"), maxDistanceInKm = 500.0)
 
     // Assert: Only "worker_127" should match the filters
     val result = viewModel.workerProfiles.value
