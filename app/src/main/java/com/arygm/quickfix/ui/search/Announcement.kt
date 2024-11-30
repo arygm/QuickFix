@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.search
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -25,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,7 +51,7 @@ import com.arygm.quickfix.model.search.Announcement
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
-import com.arygm.quickfix.ui.elements.QuickFixUploadImageSheet
+import com.arygm.quickfix.ui.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.navigation.NavigationActions
 
 @Composable
@@ -73,6 +75,7 @@ fun AnnouncementScreen(
   var category by remember { mutableStateOf("") }
   var location by remember { mutableStateOf("") }
   var description by remember { mutableStateOf("") }
+  var addedImages = remember { mutableStateListOf<Bitmap>() }
 
   var titleIsEmpty by remember { mutableStateOf(true) }
   var categoryIsSelected by remember { mutableStateOf(true) } // TODO: add the different categories
