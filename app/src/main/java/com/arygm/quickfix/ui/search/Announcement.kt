@@ -1,6 +1,5 @@
 package com.arygm.quickfix.ui.search
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -18,11 +17,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,11 +50,12 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.search.Announcement
 import com.arygm.quickfix.model.search.AnnouncementViewModel
+import com.arygm.quickfix.ui.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
-import com.arygm.quickfix.ui.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.navigation.NavigationActions
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnnouncementScreen(
     announcementViewModel: AnnouncementViewModel =
@@ -75,15 +77,16 @@ fun AnnouncementScreen(
   var category by remember { mutableStateOf("") }
   var location by remember { mutableStateOf("") }
   var description by remember { mutableStateOf("") }
-  var addedImages = remember { mutableStateListOf<Bitmap>() }
 
   var titleIsEmpty by remember { mutableStateOf(true) }
   var categoryIsSelected by remember { mutableStateOf(true) } // TODO: add the different categories
   var locationIsSelected by remember { mutableStateOf(true) } // TODO: add the implemented location
   var descriptionIsEmpty by remember { mutableStateOf(true) }
+  var addedImages = remember { mutableStateListOf<String>() }
 
   // State to control the visibility of the image upload sheet
   var showUploadImageSheet by remember { mutableStateOf(false) }
+  val sheetState = rememberModalBottomSheetState()
 
   BoxWithConstraints {
     val widthRatio = maxWidth / 411
@@ -288,7 +291,7 @@ fun AnnouncementScreen(
                       val announcementList = profile.announcements + announcement.announcementId
 
                       profileViewModel.updateProfile(
-                          UserProfile(profile.locations, announcementList, profile.uid ),
+                          UserProfile(profile.locations, announcementList, profile.uid),
                           {
                             accountViewModel.fetchUserAccount(profile.uid) { account ->
                               loggedInAccountViewModel.setLoggedInAccount(account!!)
@@ -327,16 +330,11 @@ fun AnnouncementScreen(
         })
     // Upload Image Sheet
     QuickFixUploadImageSheet(
+        sheetState = sheetState,
         showModalBottomSheet = showUploadImageSheet,
         onDismissRequest = { showUploadImageSheet = false },
-        onTakePhotoClick = {
-          // TODO: Handle take photo action
-          showUploadImageSheet = false
-        },
-        onChooseFromLibraryClick = {
-          // TODO: choose from library action
-          showUploadImageSheet = false
-        })
+        onShowBottomSheetChange = { showUploadImageSheet = it },
+        onActionRequest = { value -> addedImages.add(value) })
   }
 }
 

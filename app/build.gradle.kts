@@ -182,7 +182,6 @@ dependencies {
     implementation(libs.androidx.espresso.core)
     implementation(libs.androidx.espresso.intents)
     implementation(libs.mockk.android)
-    implementation(libs.androidx.camera.view)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.mockk)

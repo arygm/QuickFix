@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.arygm.quickfix.ressources.C
+import com.arygm.quickfix.ui.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.theme.poppinsTypography
@@ -280,26 +281,25 @@ fun PersonalInfoScreen(
                 }
           }
         }
-        if (showBottomSheetPP || showBottomSheetBP) {
-          CameraBottomSheet(
-              Modifier.semantics { testTag = C.Tag.cameraBottomSheet },
-              sheetState = sheetState,
-              onDismissRequest = {
-                if (showBottomSheetPP) showBottomSheetPP = false else showBottomSheetBP = false
-              },
-              onShowBottomSheetChange = {
-                if (showBottomSheetPP) showBottomSheetPP = it else showBottomSheetBP = it
-              },
-              onActionRequest = { value ->
-                if (showBottomSheetPP) {
-                  imagePathPP.value = value
-                  Log.d("imagePathPP", imagePathPP.value)
-                } else {
-                  imagePathBP.value = value
-                  Log.d("imagePathBP", imagePathBP.value)
-                }
-              })
-        }
+        QuickFixUploadImageSheet(
+            sheetState = sheetState,
+            showModalBottomSheet = showBottomSheetPP || showBottomSheetBP,
+            onDismissRequest = {
+              if (showBottomSheetPP) showBottomSheetPP = false else showBottomSheetBP = false
+            },
+            onShowBottomSheetChange = {
+              if (showBottomSheetPP) showBottomSheetPP = it else showBottomSheetBP = it
+            },
+            onActionRequest = { value ->
+              if (showBottomSheetPP) {
+                imagePathPP.value = value
+                Log.d("imagePathPP", imagePathPP.value)
+              } else {
+                imagePathBP.value = value
+                Log.d("imagePathBP", imagePathBP.value)
+              }
+            })
+
         Spacer(modifier = Modifier.height(17.dp))
         QuickFixTextFieldCustom(
             modifier = Modifier.semantics { testTag = C.Tag.personalInfoScreendescriptionField },
