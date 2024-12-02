@@ -63,7 +63,7 @@ fun LocationSearchCustomScreen(
                 QuickFixTextFieldCustom(
                     value = locationQuery,
                     onValueChange = { locationViewModel.setQuery(it) },
-                    placeHolderText = "Entrer une adresse ou un lieu",
+                    placeHolderText = "Enter a location",
                     showLeadingIcon = { true },
                     leadingIcon = Icons.Default.ArrowBack,
                     descriptionLeadIcon = "Retour",
@@ -138,7 +138,7 @@ fun LocationSearchCustomScreen(
                                     if (currentLocation != null) {
                                       val userLocation =
                                           Location(
-                                              name = "Ma position actuelle",
+                                              name = "Position",
                                               latitude = currentLocation.latitude,
                                               longitude = currentLocation.longitude)
                                       Log.e(
@@ -157,7 +157,7 @@ fun LocationSearchCustomScreen(
                           MyIcon(screenWidth)
 
                           Text(
-                              text = "Utiliser ma position actuelle",
+                              text = "Use my current position",
                               style = MaterialTheme.typography.bodyLarge,
                               color = MaterialTheme.colorScheme.onBackground,
                               modifier = Modifier.padding(start = 8.dp))
@@ -169,7 +169,7 @@ fun LocationSearchCustomScreen(
                         modifier = Modifier.fillMaxSize().padding(16.dp),
                         contentAlignment = Alignment.Center) {
                           Text(
-                              text = "Aucun résultat trouvé",
+                              text = "No results found",
                               style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
                               color = MaterialTheme.colorScheme.onBackground,
                               modifier = Modifier.testTag("no_results_message"))
