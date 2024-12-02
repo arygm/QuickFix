@@ -1,5 +1,7 @@
 package com.arygm.quickfix.ui.navigation
 
+import androidx.lifecycle.SavedStateHandle
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
@@ -19,12 +21,18 @@ class NavigationActionsTest {
   private lateinit var navigationDestination: NavDestination
   private lateinit var navHostController: NavHostController
   private lateinit var navigationActions: NavigationActions
+  private lateinit var previousBackStackEntry: NavBackStackEntry
+  private lateinit var currentBackStackEntry: NavBackStackEntry
+  private lateinit var savedStateHandle: SavedStateHandle
 
   @Before
   fun setUp() {
     navigationDestination = mock(NavDestination::class.java)
     navHostController = mock(NavHostController::class.java)
     navigationActions = NavigationActions(navHostController)
+    previousBackStackEntry = mock(NavBackStackEntry::class.java)
+    currentBackStackEntry = mock(NavBackStackEntry::class.java)
+    savedStateHandle = mock(SavedStateHandle::class.java)
   }
 
   @Test
@@ -78,5 +86,56 @@ class NavigationActionsTest {
   fun `test unknown route returns -1`() {
     assertEquals(-1, getBottomBarId("unknown_route", true))
     assertEquals(-1, getBottomBarId("unknown_route", false))
+  }
+
+  @Test
+  fun saveToBackStackCallsController() {
+    val key = "testKey"
+    val value = "testValue"
+
+    `when`(navHostController.previousBackStackEntry).thenReturn(previousBackStackEntry)
+    `when`(previousBackStackEntry.savedStateHandle).thenReturn(savedStateHandle)
+
+    navigationActions.saveToBackStack(key, value)
+
+    verify(savedStateHandle).set(key, value)
+  }
+
+  @Test
+  fun getFromBackStackReturnsCorrectValue() {
+    val key = "testKey"
+    val expectedValue = "testValue"
+
+    `when`(navHostController.currentBackStackEntry).thenReturn(currentBackStackEntry)
+    `when`(currentBackStackEntry.savedStateHandle).thenReturn(savedStateHandle)
+    `when`(savedStateHandle.get<Any>(key)).thenReturn(expectedValue)
+
+    val result = navigationActions.getFromBackStack(key)
+    assertEquals(expectedValue, result)
+  }
+
+  @Test
+  fun saveToCurBackStackSetsValueCorrectly() {
+    val key = "testKey"
+    val value = "testValue"
+
+    `when`(navHostController.currentBackStackEntry).thenReturn(currentBackStackEntry)
+    `when`(currentBackStackEntry.savedStateHandle).thenReturn(savedStateHandle)
+
+    navigationActions.saveToCurBackStack(key, value)
+
+    verify(savedStateHandle).set(key, value)
+  }
+
+  @Test
+  fun saveToCurBackStackRemovesValueWhenNull() {
+    val key = "testKey"
+
+    `when`(navHostController.currentBackStackEntry).thenReturn(currentBackStackEntry)
+    `when`(currentBackStackEntry.savedStateHandle).thenReturn(savedStateHandle)
+
+    navigationActions.saveToCurBackStack(key, null)
+
+    verify(savedStateHandle).remove<Any>(key)
   }
 }
