@@ -41,10 +41,8 @@ class LocationSearchCustomScreenTest {
           navigationActions = navigationActions, locationViewModel = locationViewModel)
     }
 
-    // Vérifie que le champ de recherche est affiché avec le placeholder
     composeTestRule.onNodeWithTag("input_search_field").assertExists().assertIsDisplayed()
 
-    // Vérifie que l'option "Utiliser ma position actuelle" est affichée
     composeTestRule.onNodeWithTag("use_current_location").assertExists().assertIsDisplayed()
   }
 
@@ -77,13 +75,10 @@ class LocationSearchCustomScreenTest {
           navigationActions = navigationActions, locationViewModel = locationViewModel)
     }
 
-    // Saisissez du texte dans le champ de recherche en utilisant le tag
     composeTestRule.onNodeWithTag("input_search_field").performTextInput(testQuery)
 
-    // Attendre que les suggestions soient mises à jour
     composeTestRule.waitForIdle()
 
-    // Vérifier que les suggestions sont affichées
     composeTestRule.onNodeWithText("Paris, France").assertExists().assertIsDisplayed()
     composeTestRule.onNodeWithText("Paris, Texas, USA").assertExists().assertIsDisplayed()
   }
@@ -109,23 +104,19 @@ class LocationSearchCustomScreenTest {
           navigationActions = navigationActions, locationViewModel = locationViewModel)
     }
 
-    // Simulez la saisie de texte pour déclencher la recherche
     composeTestRule.onNodeWithTag("input_search_field").performTextInput("Any Query")
 
-    // Attendre la recomposition et les opérations asynchrones
     composeTestRule.waitForIdle()
 
-    // Cliquez sur la suggestion
     composeTestRule.onNodeWithText("Paris, France").assertExists().performClick()
 
-    // Vérifiez que saveToBackStack et goBack ont été appelés
     verify(navigationActions).saveToBackStack("selectedLocation", testLocation)
     verify(navigationActions).goBack()
   }
 
   @Test
   fun testErrorMessageIsDisplayedWhenErrorOccurs() {
-    val testErrorMessage = "Aucun résultat trouvé"
+    val testErrorMessage = "No results found"
 
     // Mock the repository to trigger an error
     doAnswer { invocation ->
@@ -142,13 +133,10 @@ class LocationSearchCustomScreenTest {
           navigationActions = navigationActions, locationViewModel = locationViewModel)
     }
 
-    // Saisissez du texte dans le champ de recherche pour déclencher la recherche
     composeTestRule.onNodeWithTag("input_search_field").performTextInput("Some Query")
 
-    // Attendre la recomposition et les opérations asynchrones
     composeTestRule.waitForIdle()
 
-    // Vérifier que le message d'erreur est affiché
     composeTestRule
         .onNodeWithTag("no_results_message")
         .assertExists()
@@ -173,13 +161,10 @@ class LocationSearchCustomScreenTest {
           navigationActions = navigationActions, locationViewModel = locationViewModel)
     }
 
-    // Saisissez du texte dans le champ de recherche pour déclencher la recherche
     composeTestRule.onNodeWithTag("input_search_field").performTextInput("Unknown Place")
 
-    // Attendre la recomposition et les opérations asynchrones
     composeTestRule.waitForIdle()
 
-    // Vérifier que le message "Aucun résultat trouvé" est affiché
     composeTestRule.onNodeWithTag("no_results_message").assertExists().assertIsDisplayed()
   }
 
