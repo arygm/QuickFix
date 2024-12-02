@@ -91,7 +91,8 @@ fun QuickFixTextFieldCustom(
     charCounterColor: Color = MaterialTheme.colorScheme.onBackground,
     charCounterErrorColor: Color = errorColor,
     moveCounter: Dp = 0.dp,
-    debug: String = ""
+    debug: String = "",
+    clickableTestTag: String = C.Tag.main_container_text_field_custom
 ) {
   val scrollState = rememberScrollState() // Scroll state for horizontal scrolling
   // Launch a coroutine to scroll to the end of the text when typing
@@ -155,7 +156,7 @@ fun QuickFixTextFieldCustom(
                 .padding(
                     start = moveContentHorizontal, top = moveContentBottom, bottom = moveContentTop)
                 .clickable { onTextFieldClick() }
-                .testTag(C.Tag.main_container_text_field_custom), // Apply padding
+                .testTag(clickableTestTag), // Apply padding
         contentAlignment = Alignment.Center) {
           Row(
               horizontalArrangement = Arrangement.Center, // Aligning icon and text horizontally
