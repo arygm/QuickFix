@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.navigation
 
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
@@ -48,6 +49,7 @@ object Screen {
   const val RESET_PASSWORD = "Reset password Screen"
   const val GOOGLE_INFO = "Google Info Screen"
   const val SEARCH_WORKER_RESULT = "Search Worker Result Screen"
+  const val DISPLAY_UPLOADED_IMAGES = "Displayed images Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector?, val textId: String)
@@ -123,6 +125,7 @@ open class NavigationActions(
    */
   open fun navigateTo(screen: String) {
     currentScreen = screen
+    Log.d("currentScreen", currentScreen)
     navController.navigate(screen)
     currentRoute_.value = currentRoute()
   }

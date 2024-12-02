@@ -42,6 +42,7 @@ import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
 import com.arygm.quickfix.ui.authentication.ResetPasswordScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
+import com.arygm.quickfix.ui.camera.QuickFixDisplayImages
 import com.arygm.quickfix.ui.dashboard.DashboardScreen
 import com.arygm.quickfix.ui.home.FakeMessageScreen
 import com.arygm.quickfix.ui.home.HomeScreen
@@ -128,9 +129,10 @@ fun QuickFixApp() {
   val profileNavController = rememberNavController()
   val profileNavigationActions = remember { NavigationActions(profileNavController) }
 
-  val isUser = false // TODO: This variable needs to get its value after the authentication
+  val isUser = true // TODO: This variable needs to get its value after the authentication
   val screen by remember { navigationActionsRoot::currentScreen }
   var screenInProfileNavHost by remember { mutableStateOf<String?>(null) }
+  var screenInSearchNavHost by remember { mutableStateOf<String?>(null) }
 
   // Make `bottomBarVisible` reactive to changes in `screen`
   val shouldShowBottomBar by remember {
@@ -142,6 +144,7 @@ fun QuickFixApp() {
           screen != Screen.REGISTER &&
           screen != Screen.RESET_PASSWORD &&
           screen != Screen.GOOGLE_INFO &&
+          screenInSearchNavHost?.let { it != Screen.DISPLAY_UPLOADED_IMAGES } ?: true &&
           screenInProfileNavHost?.let {
             it != Screen.ACCOUNT_CONFIGURATION && it != Screen.TO_WORKER
           } ?: true
@@ -235,7 +238,9 @@ fun QuickFixApp() {
                     userViewModel,
                     loggedInAccountViewModel,
                     accountViewModel,
-                    announcementViewModel)
+                    announcementViewModel) { currentScreen ->
+                      screenInSearchNavHost = currentScreen // Mise à jour de l'écran actif
+                }
               }
 
               composable(Route.DASHBOARD) { DashBoardNavHost(isUser) }
@@ -328,10 +333,14 @@ fun SearchNavHost(
     profileViewModel: ProfileViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
     accountViewModel: AccountViewModel,
-    announcementViewModel: AnnouncementViewModel
+    announcementViewModel: AnnouncementViewModel,
+    onScreenChange: (String) -> Unit
 ) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
+  LaunchedEffect(navigationActions.currentScreen) {
+    onScreenChange(navigationActions.currentScreen)
+  }
   NavHost(
       navController = searchNavController,
       startDestination = Screen.SEARCH,
@@ -346,6 +355,9 @@ fun SearchNavHost(
           accountViewModel,
           searchViewModel,
           announcementViewModel)
+    }
+    composable(Screen.DISPLAY_UPLOADED_IMAGES) {
+      QuickFixDisplayImages(isUser, navigationActions, announcementViewModel)
     }
     composable(Screen.SEARCH_WORKER_RESULT) {
       SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)

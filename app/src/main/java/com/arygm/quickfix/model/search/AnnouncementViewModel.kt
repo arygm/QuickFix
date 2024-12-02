@@ -17,6 +17,9 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   private val announcements_ = MutableStateFlow<List<Announcement>>(emptyList())
   val announcements: StateFlow<List<Announcement>> = announcements_.asStateFlow()
 
+  private val uploadedImages_ = MutableStateFlow<List<String>>(emptyList())
+  val uploadedImages: StateFlow<List<String>> = uploadedImages_.asStateFlow()
+
   // create factory
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -109,5 +112,28 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
         onFailure = { e ->
           Log.e("AnnouncementViewModel", "User $userId failed to delete announcement: ${e.message}")
         })
+  }
+
+  /**
+   * Adds a new image to the list of uploaded images.
+   *
+   * @param imageUrl The URL of the image to be added.
+   */
+  fun addUploadedImage(imageUrl: String) {
+    uploadedImages_.value += imageUrl
+  }
+
+  /**
+   * Deletes a list of images from the list of uploaded images.
+   *
+   * @param imageUrls The list of image URLs to be removed.
+   */
+  fun deleteUploadedImages(imageUrls: List<String>) {
+    uploadedImages_.value = uploadedImages_.value.filterNot { it in imageUrls }
+  }
+
+  /** Clears the entire list of uploaded images. */
+  fun clearUploadedImages() {
+    uploadedImages_.value = emptyList()
   }
 }
