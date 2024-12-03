@@ -96,6 +96,7 @@ fun QuickFixTextFieldCustom(
     charCounterErrorColor: Color = errorColor,
     moveCounter: Dp = 0.dp,
     debug: String = "",
+    clickableTestTag: String = C.Tag.main_container_text_field_custom,
     isTextField: Boolean = true,
     columnModifier: Modifier = Modifier,
     alwaysShowTrailingIcon: Boolean = false,
@@ -173,8 +174,8 @@ fun QuickFixTextFieldCustom(
                 .fillMaxWidth() // Fill the width of the container
                 .padding(
                     start = moveContentHorizontal, top = moveContentBottom, bottom = moveContentTop)
-                .clickable(enabled = !isTextField && enabled) { onTextFieldClick() }
-                .testTag(C.Tag.main_container_text_field_custom), // Apply padding
+                .testTag(clickableTestTag) // Apply padding
+                .clickable(enabled = !isTextField && enabled) { onTextFieldClick() },
         contentAlignment = Alignment.Center) {
           Row(
               horizontalArrangement = Arrangement.Center, // Aligning icon and text horizontally

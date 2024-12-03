@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.sonar)
     alias(libs.plugins.gms)
     id("jacoco")
+    id ("kotlin-parcelize")
 }
 
 android {
@@ -167,6 +168,8 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.json)
+    implementation(libs.gson)
+
 
 
     implementation(libs.androidx.core.ktx)

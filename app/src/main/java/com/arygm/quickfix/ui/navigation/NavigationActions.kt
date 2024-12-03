@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.navigation
 
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
@@ -48,6 +49,7 @@ object Screen {
   const val RESET_PASSWORD = "Reset password Screen"
   const val GOOGLE_INFO = "Google Info Screen"
   const val SEARCH_WORKER_RESULT = "Search Worker Result Screen"
+  const val SEARCH_LOCATION = "SEARCH_Location Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector?, val textId: String)
@@ -141,5 +143,29 @@ open class NavigationActions(
    */
   open fun currentRoute(): String {
     return navController.currentDestination?.route ?: ""
+  }
+
+  open fun saveToBackStack(key: String, value: Any) {
+    navController.previousBackStackEntry?.savedStateHandle?.set(key, value)
+  }
+
+  open fun saveToCurBackStack(key: String, value: Any?) {
+    val currentEntry = navController.currentBackStackEntry
+    if (currentEntry == null) {
+      Log.e("saveToBackStack", "No currentBackStackEntry available")
+      return
+    }
+
+    if (value == null) {
+      currentEntry.savedStateHandle.remove<Any>(key)
+      Log.e("saveToBackStack", "Removed key: $key")
+    } else {
+      currentEntry.savedStateHandle.set(key, value)
+      Log.e("saveToBackStack", "Saved key: $key with value: $value")
+    }
+  }
+
+  open fun getFromBackStack(key: String): Any? {
+    return navController.currentBackStackEntry?.savedStateHandle?.get<Any>(key)
   }
 }
