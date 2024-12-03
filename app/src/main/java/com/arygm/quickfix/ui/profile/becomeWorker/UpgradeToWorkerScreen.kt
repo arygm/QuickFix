@@ -69,8 +69,7 @@ fun BusinessScreen(
             },
             navigationIcon = {
               IconButton(
-                  onClick = { // navigationActions.goBack()
-                  },
+                  onClick = { navigationActions.goBack() },
                   modifier = Modifier.testTag("goBackButton")) {
                     Icon(
                         Icons.Outlined.ArrowBack,
