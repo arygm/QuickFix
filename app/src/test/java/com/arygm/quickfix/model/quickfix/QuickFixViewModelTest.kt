@@ -2,8 +2,8 @@ package com.arygm.quickfix.model.quickfix
 
 import com.arygm.quickfix.model.bill.BillField
 import com.arygm.quickfix.model.locations.Location
-import com.arygm.quickfix.model.service.AddOnService
-import com.arygm.quickfix.model.service.IncludedService
+import com.arygm.quickfix.model.profile.dataFields.AddOnService
+import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.google.firebase.Timestamp
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

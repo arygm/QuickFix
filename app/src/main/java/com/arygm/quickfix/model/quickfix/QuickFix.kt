@@ -2,7 +2,7 @@ package com.arygm.quickfix.model.quickfix
 
 import com.arygm.quickfix.model.bill.BillField
 import com.arygm.quickfix.model.locations.Location
-import com.arygm.quickfix.model.service.Service
+import com.arygm.quickfix.model.profile.dataFields.Service
 import com.google.firebase.Timestamp
 
 data class QuickFix(

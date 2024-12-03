@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -22,6 +23,7 @@ class SearchOnBoardingTest {
   private lateinit var categoryRepo: CategoryRepositoryFirestore
   private lateinit var searchViewModel: SearchViewModel
   private lateinit var accountViewModel: AccountViewModel
+  private lateinit var categoryViewModel: CategoryViewModel
   private lateinit var navigationActionsRoot: NavigationActions
 
   @get:Rule val composeTestRule = createComposeRule()
@@ -32,7 +34,8 @@ class SearchOnBoardingTest {
     navigationActionsRoot = mock(NavigationActions::class.java)
     workerProfileRepo = mockk(relaxed = true)
     categoryRepo = mockk(relaxed = true)
-    searchViewModel = SearchViewModel(workerProfileRepo, categoryRepo)
+    searchViewModel = SearchViewModel(workerProfileRepo)
+    categoryViewModel = CategoryViewModel(categoryRepo)
     accountViewModel = mockk(relaxed = true)
   }
 
@@ -45,6 +48,8 @@ class SearchOnBoardingTest {
           isUser = true,
           searchViewModel,
           accountViewModel)
+          searchViewModel,
+          categoryViewModel)
     }
 
     // Check that the search input field is displayed
@@ -63,7 +68,8 @@ class SearchOnBoardingTest {
           navigationActionsRoot,
           isUser = true,
           searchViewModel,
-          accountViewModel)
+          accountViewModel,
+          categoryViewModel)
     }
 
     // Input text into the search field

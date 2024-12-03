@@ -32,6 +32,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
@@ -125,6 +126,7 @@ fun QuickFixApp() {
   val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
   val announcementViewModel: AnnouncementViewModel =
       viewModel(factory = AnnouncementViewModel.Factory)
+  val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
 
   // Initialized here because needed for the bottom bar
   val profileNavController = rememberNavController()
@@ -238,9 +240,11 @@ fun QuickFixApp() {
                     userViewModel,
                     loggedInAccountViewModel,
                     accountViewModel,
-                    announcementViewModel) { currentScreen ->
+                    announcementViewModel,
+                    { currentScreen ->
                       screenInSearchNavHost = currentScreen // Mise à jour de l'écran actif
-                }
+                    },
+                    categoryViewModel)
               }
 
               composable(Route.DASHBOARD) { DashBoardNavHost(isUser) }
@@ -250,9 +254,9 @@ fun QuickFixApp() {
                     accountViewModel,
                     loggedInAccountViewModel,
                     workerViewModel,
-                    navigationActionsRoot) { currentScreen ->
-                      screenInProfileNavHost = currentScreen
-                    }
+                    navigationActionsRoot,
+                    onScreenChange = { currentScreen -> screenInProfileNavHost = currentScreen },
+                    categoryViewModel)
               }
             }
       }
@@ -289,7 +293,8 @@ fun ProfileNavHost(
     loggedInAccountViewModel: LoggedInAccountViewModel,
     workerViewModel: ProfileViewModel,
     navigationActionsRoot: NavigationActions,
-    onScreenChange: (String) -> Unit
+    onScreenChange: (String) -> Unit,
+    categoryViewModel: CategoryViewModel
 ) {
 
   val profileNavController = rememberNavController()
@@ -311,7 +316,11 @@ fun ProfileNavHost(
     }
     composable(Screen.TO_WORKER) {
       BusinessScreen(
-          profileNavigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
+          profileNavigationActions,
+          accountViewModel,
+          workerViewModel,
+          loggedInAccountViewModel,
+          categoryViewModel)
     }
   }
 }
@@ -334,7 +343,8 @@ fun SearchNavHost(
     loggedInAccountViewModel: LoggedInAccountViewModel,
     accountViewModel: AccountViewModel,
     announcementViewModel: AnnouncementViewModel,
-    onScreenChange: (String) -> Unit
+    onScreenChange: (String) -> Unit,
+    categoryViewModel: CategoryViewModel
 ) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
@@ -354,6 +364,8 @@ fun SearchNavHost(
           profileViewModel,
           loggedInAccountViewModel,
           searchViewModel,
+          announcementViewModel,
+          categoryViewModel)
             accountViewModel,
           announcementViewModel)
     }

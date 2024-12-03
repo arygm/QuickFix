@@ -54,7 +54,8 @@ class WorkerProfile(
     val profilePicture: String = "",
     val price: Double = 130.0,
     val displayName: String = "",
-    uid: String = ""
+    uid: String = "",
+    val tags: List<String> = emptyList(),
 ) : Profile(uid, quickFixes) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
