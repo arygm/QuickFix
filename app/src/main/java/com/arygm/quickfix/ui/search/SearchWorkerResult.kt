@@ -75,12 +75,15 @@ import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.search.SearchViewModel
+import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixSlidingWindow
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.LocationHelper
+import java.time.LocalDate
 
 data class SearchFilterButtons(
     val onClick: () -> Unit,
@@ -89,34 +92,6 @@ data class SearchFilterButtons(
     val trailingIcon: ImageVector? = null,
 )
 
-val listOfButtons =
-    listOf(
-        SearchFilterButtons(
-            onClick = { /* Handle click */},
-            text = "Location",
-        ),
-        SearchFilterButtons(
-            onClick = { /* Handle click */},
-            text = "Service Type",
-            trailingIcon = Icons.Default.KeyboardArrowDown,
-        ),
-        SearchFilterButtons(
-            onClick = { /* Handle click */},
-            text = "Availability",
-            leadingIcon = Icons.Default.CalendarMonth,
-            trailingIcon = Icons.Default.KeyboardArrowDown,
-        ),
-        SearchFilterButtons(
-            onClick = { /* Handle click */},
-            text = "Highest Rating",
-            leadingIcon = Icons.Default.WorkspacePremium,
-        ),
-        SearchFilterButtons(
-            onClick = { /* Handle click */},
-            text = "Price Range",
-        ),
-    )
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SearchWorkerResult(
@@ -124,6 +99,35 @@ fun SearchWorkerResult(
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel
 ) {
+  var showAvailabilityBottomSheet by remember { mutableStateOf(false) }
+
+  val listOfButtons =
+      listOf(
+          SearchFilterButtons(
+              onClick = { /* Handle click */},
+              text = "Location",
+          ),
+          SearchFilterButtons(
+              onClick = { /* Handle click */},
+              text = "Service Type",
+              trailingIcon = Icons.Default.KeyboardArrowDown,
+          ),
+          SearchFilterButtons(
+              onClick = { showAvailabilityBottomSheet = true },
+              text = "Availability",
+              leadingIcon = Icons.Default.CalendarMonth,
+              trailingIcon = Icons.Default.KeyboardArrowDown,
+          ),
+          SearchFilterButtons(
+              onClick = { /* Handle click */},
+              text = "Highest Rating",
+              leadingIcon = Icons.Default.WorkspacePremium,
+          ),
+          SearchFilterButtons(
+              onClick = { /* Handle click */},
+              text = "Price Range",
+          ),
+      )
 
   // ==========================================================================//
   // ============ TODO: REMOVE NO-DATA WHEN BACKEND IS IMPLEMENTED ============//
@@ -194,6 +198,7 @@ fun SearchWorkerResult(
   val searchQuery by searchViewModel.searchQuery.collectAsState()
   val workerProfiles by searchViewModel.workerProfiles.collectAsState()
   var currentLocation by remember { mutableStateOf<Location?>(null) }
+  var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
 
   val locationHelper: LocationHelper = LocationHelper(LocalContext.current, MainActivity())
 
@@ -302,8 +307,8 @@ fun SearchWorkerResult(
                 }
 
                 LazyColumn(modifier = Modifier.fillMaxWidth().testTag("worker_profiles_list")) {
-                  items(workerProfiles.size) { index ->
-                    val profile = workerProfiles[index]
+                  items(filteredWorkerProfiles.size) { index ->
+                    val profile = filteredWorkerProfiles[index]
                     var account by remember { mutableStateOf<Account?>(null) }
                     var distance by remember { mutableStateOf<Int?>(null) }
 
@@ -353,6 +358,14 @@ fun SearchWorkerResult(
                   }
                 }
               }
+        }
+
+    QuickFixAvailabilityBottomSheet(
+        showAvailabilityBottomSheet, onDismissRequest = { showAvailabilityBottomSheet = false }) {
+            days,
+            hour,
+            minute ->
+          filteredWorkerProfiles = filterWorkersByAvailability(workerProfiles, days, hour, minute)
         }
 
     if (isWindowVisible) {
@@ -671,4 +684,24 @@ fun SearchWorkerResult(
       }
     }
   }
+}
+
+fun filterWorkersByAvailability(
+    workers: List<WorkerProfile>,
+    selectedDays: List<LocalDate>,
+    selectedHour: Int,
+    selectedMinute: Int
+): List<WorkerProfile> {
+  return workers
+      .filter { worker ->
+        val workingStart = worker.workingHours.first
+        val workingEnd = worker.workingHours.second
+
+        // Check if the selected time is within the worker's working hours
+        (selectedHour > workingStart.hour ||
+            (selectedHour == workingStart.hour && selectedMinute >= workingStart.minute)) &&
+            (selectedHour < workingEnd.hour ||
+                (selectedHour == workingEnd.hour && selectedMinute <= workingEnd.minute))
+      }
+      .filter { worker -> selectedDays.none { day -> worker.unavailability_list.contains(day) } }
 }
