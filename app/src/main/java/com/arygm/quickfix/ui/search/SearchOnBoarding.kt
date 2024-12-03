@@ -202,8 +202,7 @@ fun ProfileContent(
     profiles: List<WorkerProfile>, // Assuming WorkerProfile is your model class
     listState: LazyListState,
     searchViewModel: SearchViewModel,
-    accountViewModel: AccountViewModel,
-    navigationActions: NavigationActions
+    accountViewModel: AccountViewModel, navigationActions: NavigationActions
 ) {
     // Column for wrapping the list
     Column(
@@ -241,7 +240,7 @@ fun ProfileContent(
                                     workerLocation.longitude,
                                     it.latitude,
                                     it.longitude
-                                )?.toInt()
+                                ).toInt()
                             }
                     }
                 }

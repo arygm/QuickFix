@@ -1,8 +1,11 @@
 package com.arygm.quickfix.ui.search
 
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -18,6 +21,7 @@ class SearchOnBoardingTest {
   private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
   private lateinit var categoryRepo: CategoryRepositoryFirestore
   private lateinit var searchViewModel: SearchViewModel
+  private lateinit var accountViewModel: AccountViewModel
   private lateinit var navigationActionsRoot: NavigationActions
 
   @get:Rule val composeTestRule = createComposeRule()
@@ -29,6 +33,7 @@ class SearchOnBoardingTest {
     workerProfileRepo = mockk(relaxed = true)
     categoryRepo = mockk(relaxed = true)
     searchViewModel = SearchViewModel(workerProfileRepo, categoryRepo)
+    accountViewModel = mockk(relaxed = true)
   }
 
   @Test
@@ -38,7 +43,8 @@ class SearchOnBoardingTest {
           navigationActions = navigationActions,
           navigationActionsRoot,
           isUser = true,
-          searchViewModel)
+          searchViewModel,
+          accountViewModel)
     }
 
     // Check that the search input field is displayed
@@ -56,7 +62,8 @@ class SearchOnBoardingTest {
           navigationActions = navigationActions,
           navigationActionsRoot,
           isUser = true,
-          searchViewModel)
+          searchViewModel,
+          accountViewModel)
     }
 
     // Input text into the search field
@@ -67,4 +74,26 @@ class SearchOnBoardingTest {
     composeTestRule.onNodeWithTag("clearSearchQueryIcon").performClick()
     searchInput.assertTextEquals("") // Verify the text is cleared
   }
+
+    @Test
+    fun searchOnBoarding_switchesFromCategoriesToProfiles() {
+        composeTestRule.setContent {
+            SearchOnBoarding(
+                navigationActions = navigationActions,
+                navigationActionsRoot = navigationActionsRoot,
+                isUser = true,
+                searchViewModel = searchViewModel,
+                accountViewModel = accountViewModel
+            )
+        }
+
+        // Verify initial state (Categories are displayed)
+        composeTestRule.onNodeWithText("Categories").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("searchContent").performTextInput("Painter")
+
+        // Verify state after query input (Categories disappear, Profiles appear)
+        composeTestRule.onNodeWithText("Categories").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Profiles").assertIsDisplayed()
+    }
+
 }
