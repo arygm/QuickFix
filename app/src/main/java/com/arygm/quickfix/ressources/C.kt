@@ -30,20 +30,29 @@ object C {
     const val upgradeToWorkerPersonalInfo = "upgradeToWorkerPersonalInfo"
 
     // PersonalInfoScreen
-    const val personalInfoScreendisplayNameField = "displayNameField"
-    const val personalInfoScreendescriptionField = "descriptionField"
-    const val personalInfoScreencancelButton = "cancelButton"
-    const val personalInfoScreencontinueButton = "continueButton"
-    const val personalInfoScreenSectionDescription = "sectionDescription"
-    const val personalInfoScreenSectionTitle = "sectionTitle"
-    const val personalInfoScreenprofilePictureField = "profilePictureField"
-    const val personalInfoScreenprofilePictureBackground = "profilePictureBackground"
-    const val personalInfoScreenprofilePicture = "profilePicture"
-    const val personalInfoScreenBannerPictureBackground = "bannerPictureBackground"
-    const val personalInfoScreenBannerPictureField = "bannerPictureField"
-    const val personalInfoScreenBannerPicture = "bannerPicture"
-    const val personalInfoScreenBannerPlaceHolder = "bannerPlaceHolder"
-    const val personalInfoScreenProfilePlaceHolder = "profilePlaceHolder"
-    const val cameraBottomSheet = "cameraBottomSheet"
+    const val personalInfoScreendisplayNameField = "personalInfoScreen_displayNameField"
+    const val personalInfoScreendescriptionField = "personalInfoScreen_descriptionField"
+    const val personalInfoScreencancelButton = "personalInfoScreen_cancelButton"
+    const val personalInfoScreencontinueButton = "personalInfoScreen_continueButton"
+    const val personalInfoScreenSectionDescription = "personalInfoScreen_sectionDescription"
+    const val personalInfoScreenSectionTitle = "personalInfoScreen_sectionTitle"
+    const val personalInfoScreenprofilePictureField = "personalInfoScreen_profilePictureField"
+    const val personalInfoScreenprofilePictureBackground =
+        "personalInfoScreen_profilePictureBackground"
+    const val personalInfoScreenprofilePicture = "personalInfoScreen_profilePicture"
+    const val personalInfoScreenBannerPictureBackground =
+        "personalInfoScreen_bannerPictureBackground"
+    const val personalInfoScreenBannerPictureField = "personalInfoScreen_bannerPictureField"
+    const val personalInfoScreenBannerPicture = "personalInfoScreen_bannerPicture"
+    const val cameraBottomSheet = "personalInfoScreen_cameraBottomSheet"
+
+    // ProfessionalInfoScreen
+    const val professionalInfoScreenSectionTitle = "professionalInfoScreen_sectionTitle"
+    const val professionalInfoScreenSectionDescription = "professionalInfoScreen_sectionDescription"
+    const val professionalInfoScreenCategoryField = "professionalInfoScreen_categoryField"
+    const val professionalInfoScreenSubcategoryField = "professionalInfoScreen_subcategoryField"
+    const val professionalInfoScreenSubcategoryDropdownMenu =
+        "professionalInfoScreen_dropDownSubcate"
+    const val professionalInfoScreenCategoryDropdownMenu = "professionalInfoScreen_dropDownCate"
   }
 }
