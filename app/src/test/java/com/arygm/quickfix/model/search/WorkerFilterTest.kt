@@ -19,8 +19,7 @@ class WorkerFilterTest {
   @Before
   fun setup() {
     workerProfileRepo = mock(WorkerProfileRepositoryFirestore::class.java)
-    categoryRepo = mock(CategoryRepositoryFirestore::class.java)
-    searchViewModel = SearchViewModel(workerProfileRepo, categoryRepo)
+    searchViewModel = SearchViewModel(workerProfileRepo)
   }
 
   @Test
