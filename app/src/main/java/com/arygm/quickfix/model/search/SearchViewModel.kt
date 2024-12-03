@@ -1,11 +1,8 @@
 package com.arygm.quickfix.model.search
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.arygm.quickfix.model.category.Category
-import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
@@ -22,7 +19,6 @@ import kotlinx.coroutines.launch
 
 open class SearchViewModel(
     private val workerProfileRepo: WorkerProfileRepositoryFirestore,
-    private val categoryRepo: CategoryRepositoryFirestore
 ) : ViewModel() {
 
   private val _searchQuery = MutableStateFlow("")
@@ -34,13 +30,6 @@ open class SearchViewModel(
   private val _errorMessage = MutableStateFlow<String?>(null)
   val errorMessage: StateFlow<String?> = _errorMessage
 
-  private val _categories = MutableStateFlow<List<Category>>(emptyList())
-  val categories: StateFlow<List<Category>> = _categories
-
-  init {
-    categoryRepo.init { fetchCategories() }
-  }
-
   companion object {
     private val firestoreInstance by lazy { Firebase.firestore } // Singleton Firestore instance
 
@@ -48,10 +37,7 @@ open class SearchViewModel(
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return SearchViewModel(
-                WorkerProfileRepositoryFirestore(firestoreInstance),
-                CategoryRepositoryFirestore(firestoreInstance))
-                as T
+            return SearchViewModel(WorkerProfileRepositoryFirestore(firestoreInstance)) as T
           }
         }
   }
@@ -69,12 +55,6 @@ open class SearchViewModel(
       _searchQuery.value = query
       filterWorkerProfiles(fieldOfWork = query)
     }
-  }
-
-  fun fetchCategories() {
-    categoryRepo.fetchCategories(
-        onSuccess = { categories -> _categories.value = categories as List<Category> },
-        onFailure = { e -> Log.e("SearchViewModel", "Failed to fetch categories: ${e.message}") })
   }
 
   fun filterWorkerProfiles(

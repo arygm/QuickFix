@@ -66,7 +66,7 @@ class SearchWorkerResultScreenTest {
     accountRepository = mock(AccountRepositoryFirestore::class.java)
 
     // Initialize ViewModels with mocked repositories
-    searchViewModel = SearchViewModel(workerRepository, categoryRepository)
+    searchViewModel = SearchViewModel(workerRepository)
     accountViewModel = AccountViewModel(accountRepository)
 
     // Provide test data to searchViewModel

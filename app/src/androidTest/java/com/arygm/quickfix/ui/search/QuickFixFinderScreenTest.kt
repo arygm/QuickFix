@@ -40,7 +40,7 @@ class QuickFixFinderScreenTest {
     navigationActionsRoot = mock(NavigationActions::class.java)
     workerProfileRepo = mockk(relaxed = true)
     categoryRepo = mockk(relaxed = true)
-    searchViewModel = SearchViewModel(workerProfileRepo, categoryRepo)
+    searchViewModel = SearchViewModel(workerProfileRepo)
   }
 
   @OptIn(ExperimentalTestApi::class)
