@@ -1,8 +1,12 @@
 package com.arygm.quickfix.ui.search
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.category.Scale
 import com.arygm.quickfix.model.category.Subcategory

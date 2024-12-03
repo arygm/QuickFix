@@ -26,6 +26,7 @@ class AnnouncementViewModelTest {
   private val testDispatcher = UnconfinedTestDispatcher()
 
   private val timestamp = Timestamp.now()
+
   // Test data
   private val announcement1 =
       Announcement(
