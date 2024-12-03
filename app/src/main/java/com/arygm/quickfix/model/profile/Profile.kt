@@ -58,7 +58,8 @@ class WorkerProfile(
     val displayName: String = "",
     val unavailability_list: List<LocalDate> = emptyList<LocalDate>(),
     val workingHours: Pair<LocalTime, LocalTime> = Pair(LocalTime.now(), LocalTime.now()),
-    uid: String = ""
+    uid: String = "",
+    val tags: List<String> = emptyList(),
 ) : Profile(uid, quickFixes) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
