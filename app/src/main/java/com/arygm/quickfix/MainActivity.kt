@@ -354,6 +354,7 @@ fun SearchNavHost(
           profileViewModel,
           loggedInAccountViewModel,
           searchViewModel,
+            accountViewModel,
           announcementViewModel)
     }
     composable(Screen.SEARCH_WORKER_RESULT) {
