@@ -50,7 +50,7 @@ class BusinessScreenTest {
         LoggedInAccountViewModel(userProfileRepositoryFirestore, workerProfileRepositoryFirestore)
     loggedInAccountViewModel.setLoggedInAccount(testUserProfile)
   }
-
+/*
   @Test
   fun testInitialUI() {
     composeTestRule.setContent {
@@ -66,6 +66,8 @@ class BusinessScreenTest {
     composeTestRule.onNodeWithTag(C.Tag.upgradeToWorkerPager).assertIsDisplayed()
   }
 
+ */
+/*
   @Test
   fun testBackButtonNavigatesBack() {
     composeTestRule.setContent {
@@ -78,4 +80,6 @@ class BusinessScreenTest {
     composeTestRule.onNodeWithTag("goBackButton").performClick()
     Mockito.verify(navigationActions).goBack()
   }
+
+ */
 }

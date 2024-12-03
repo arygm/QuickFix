@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       QuickFixTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          BusinessScreen()
+          QuickFixApp()
         }
       }
     }
@@ -308,11 +308,8 @@ fun ProfileNavHost(
           profileNavigationActions, accountViewModel, loggedInAccountViewModel)
     }
     composable(Screen.TO_WORKER) {
-        /*
       BusinessScreen(
           profileNavigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
-
-         */
     }
   }
 }

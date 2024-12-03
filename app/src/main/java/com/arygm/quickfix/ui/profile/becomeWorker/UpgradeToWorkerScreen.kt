@@ -31,14 +31,12 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BusinessScreen(
-    /*
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
     workerProfileViewModel: ProfileViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel
-     */
 ) {
-  val pagerState = rememberPagerState(pageCount = { 3 })
+    val pagerState = rememberPagerState(pageCount = { 3 })
   val focusManager = LocalFocusManager.current
   val displayName = remember { mutableStateOf("") }
   val description = remember { mutableStateOf("") }
@@ -82,11 +80,10 @@ fun BusinessScreen(
       },
       containerColor = colorScheme.surface,
       content = { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
           HorizontalPager(
               state = pagerState,
               modifier =
-                  Modifier.weight(0.9f).semantics { testTag = C.Tag.upgradeToWorkerPager }) { page
+                  Modifier.padding(innerPadding).fillMaxSize().semantics { testTag = C.Tag.upgradeToWorkerPager }) { page
                 ->
                 when (page) {
                   0 -> {
@@ -116,6 +113,6 @@ fun BusinessScreen(
                   }
                 }
               }
-        }
+
       })
 }

@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
@@ -42,6 +46,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import net.bytebuddy.asm.Advice.AssignReturned.ExceptionHandler.Factory.Enabled
 
 @Composable
 fun QuickFixTextFieldCustom(
@@ -91,7 +96,16 @@ fun QuickFixTextFieldCustom(
     charCounterColor: Color = MaterialTheme.colorScheme.onBackground,
     charCounterErrorColor: Color = errorColor,
     moveCounter: Dp = 0.dp,
-    debug: String = ""
+    debug: String = "",
+    isTextField: Boolean = true,
+    columnModifier: Modifier = Modifier,
+    alwaysShowTrailingIcon : Boolean = false,
+    moveTrailingIconLeft: Dp = 9.dp,
+    enabled: Boolean = true,
+    minHeight: Dp = 40.dp,
+    maxHeight: Dp = Dp.Unspecified,
+    maxLines: Int = Int.MAX_VALUE,
+    heightInEnabled : Boolean = false
 ) {
   val scrollState = rememberScrollState() // Scroll state for horizontal scrolling
   // Launch a coroutine to scroll to the end of the text when typing
@@ -108,7 +122,9 @@ fun QuickFixTextFieldCustom(
       onValueChange(it)
     }
   }
-  Column {
+  Column (
+        modifier = columnModifier
+  ){
     if (showLabel || showCharCounter) {
       Row(modifier = Modifier.padding(end = moveCounter)) {
         if (showLabel) {
@@ -150,17 +166,25 @@ fun QuickFixTextFieldCustom(
                     }
                   }
                 }
-                .size(width = widthField, height = heightField) // Set the width and height
+                .width(widthField).then(
+                    if (heightInEnabled) {
+                        Modifier
+                            .defaultMinSize(minHeight = minHeight)
+                            .heightIn(max = maxHeight)
+                    } else {
+                        Modifier.height(heightField)
+                    }
+                )
                 .fillMaxWidth() // Fill the width of the container
                 .padding(
                     start = moveContentHorizontal, top = moveContentBottom, bottom = moveContentTop)
-                .clickable { onTextFieldClick() }
+                .clickable(enabled = !isTextField && enabled) { onTextFieldClick() }
                 .testTag(C.Tag.main_container_text_field_custom), // Apply padding
         contentAlignment = Alignment.Center) {
           Row(
               horizontalArrangement = Arrangement.Center, // Aligning icon and text horizontally
               verticalAlignment = Alignment.CenterVertically, // Aligning icon and text vertically
-              modifier = modifier.fillMaxWidth()) {
+              modifier = Modifier.fillMaxWidth()) {
                 if (showLeadingIcon()) { // Conditionally show the leading icon
                   if (leadingIcon != null) {
                     Icon(
@@ -187,7 +211,7 @@ fun QuickFixTextFieldCustom(
                               .fillMaxWidth()
                               .focusRequester(focusRequester)
                               .testTag(C.Tag.text_field_custom)
-                              .focusable(true)
+                              .focusable(isTextField && enabled)
                               .let {
                                 if (singleLine) {
                                   it.horizontalScroll(scrollState)
@@ -200,6 +224,8 @@ fun QuickFixTextFieldCustom(
                       singleLine = singleLine, // Keep the text on a single line
                       keyboardOptions = keyboardOptions,
                       visualTransformation = visualTransformation,
+                      enabled = isTextField && enabled,
+                      maxLines = maxLines
                   )
                   if (value.isEmpty()) {
                     Log.d("QuickFixTextFieldCustom", "placeHolderText: $placeHolderText")
@@ -215,13 +241,13 @@ fun QuickFixTextFieldCustom(
                         )
                   }
                 }
-                if (showTrailingIcon() && value.isNotEmpty()) {
+                if ((showTrailingIcon() && value.isNotEmpty()) || alwaysShowTrailingIcon) {
                   IconButton(
                       onClick = { if (onClick) onValueChange("") },
                       modifier =
                           Modifier.testTag(C.Tag.clear_button_text_field_custom)
                               .size(sizeIconGroup)
-                              .padding(end = 9.dp)
+                              .padding(end = moveTrailingIconLeft)
                               .align(Alignment.CenterVertically)) {
                         trailingIcon?.invoke()
                       }

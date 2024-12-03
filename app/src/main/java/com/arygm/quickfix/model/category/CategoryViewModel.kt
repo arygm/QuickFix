@@ -30,6 +30,7 @@ open class CategoryViewModel(private val categoryRepositoryFirestore: CategoryRe
 
     init {
         categoryRepositoryFirestore.init {
+            Log.d("CategoryViewModel", "CategoryRepositoryFirestore initialized")
             getCategories()
         }
     }
