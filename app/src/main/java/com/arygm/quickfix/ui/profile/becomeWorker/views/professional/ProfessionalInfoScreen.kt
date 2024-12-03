@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,9 +45,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.model.category.Category
+import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.ressources.C
+import com.arygm.quickfix.ui.elements.QuickFixCheckedListElement
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
@@ -62,7 +65,7 @@ fun ProfessionalInfoScreen(
     categories: List<Category>,
 ) {
   var selectedCategory by remember { mutableStateOf(Category()) }
-  var selectedSubcategory by remember { mutableStateOf("") }
+  var selectedSubcategory by remember { mutableStateOf(Subcategory()) }
   var expandedDropDownCategory by remember { mutableStateOf(false) }
   var expandedDropDownSubcategory by remember { mutableStateOf(false) }
   BoxWithConstraints {
@@ -173,7 +176,7 @@ fun ProfessionalInfoScreen(
                         text = { Text(text = category.name, style = categoryTextStyle) },
                         onClick = {
                           selectedCategory = category
-                          selectedSubcategory = ""
+                          selectedSubcategory = Subcategory()
                           expandedDropDownCategory = false
                         },
                         modifier = Modifier.height(30.dp * heightRatio.value))
@@ -198,7 +201,7 @@ fun ProfessionalInfoScreen(
                     Modifier.semantics { testTag = C.Tag.professionalInfoScreenSubcategoryField },
                 heightField = 27.dp,
                 widthField = 380.dp * widthRatio.value,
-                value = selectedSubcategory,
+                value = selectedSubcategory.name,
                 onValueChange = {},
                 shape = RoundedCornerShape(8.dp),
                 hasShadow = false,
@@ -234,7 +237,7 @@ fun ProfessionalInfoScreen(
                     DropdownMenuItem(
                         text = { Text(text = subcategory.name, style = categoryTextStyle) },
                         onClick = {
-                          selectedSubcategory = subcategory.name
+                          selectedSubcategory = subcategory
                           expandedDropDownSubcategory = false
                         },
                         modifier = Modifier.height(30.dp * heightRatio.value))
@@ -243,8 +246,39 @@ fun ProfessionalInfoScreen(
           }
         }
       }
-
-      item { Row { Column(modifier = Modifier.weight(1f), content = {}) } }
+      if(selectedCategory.name.isNotEmpty() && selectedSubcategory.name.isNotEmpty()) {
+          item {
+              val listServices = selectedSubcategory.setServices
+              val checkedStatesServices = remember {
+                  mutableStateListOf(*List(listServices.size) { false }.toTypedArray())
+              }
+              val half = (listServices.size + 1) / 2
+              val leftIndices = 0 until half
+              val rightIndices = half until listServices.size
+              Row(modifier = Modifier.fillMaxWidth()) {
+                  // Left Column
+                  Column(modifier = Modifier.weight(1f)) {
+                      leftIndices.forEach { index ->
+                          QuickFixCheckedListElement(
+                              listServices = listServices,
+                              checkedStatesServices = checkedStatesServices,
+                              index = index
+                          )
+                      }
+                  }
+                  // Right Column
+                  Column(modifier = Modifier.weight(1f)) {
+                      rightIndices.forEach { index ->
+                          QuickFixCheckedListElement(
+                              listServices = listServices,
+                              checkedStatesServices = checkedStatesServices,
+                              index = index
+                          )
+                      }
+                  }
+              }
+          }
+      }
     }
   }
 }
