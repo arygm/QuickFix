@@ -11,6 +11,7 @@ import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import java.time.LocalDate
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -124,5 +125,25 @@ open class SearchViewModel(
 
     val c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return earthRadius * c
+  }
+
+  fun filterWorkersByAvailability(
+      workers: List<WorkerProfile>,
+      selectedDays: List<LocalDate>,
+      selectedHour: Int,
+      selectedMinute: Int
+  ): List<WorkerProfile> {
+    return workers
+        .filter { worker ->
+          val workingStart = worker.workingHours.first
+          val workingEnd = worker.workingHours.second
+
+          // Check if the selected time is within the worker's working hours
+          (selectedHour > workingStart.hour ||
+              (selectedHour == workingStart.hour && selectedMinute >= workingStart.minute)) &&
+              (selectedHour < workingEnd.hour ||
+                  (selectedHour == workingEnd.hour && selectedMinute <= workingEnd.minute))
+        }
+        .filter { worker -> selectedDays.none { day -> worker.unavailability_list.contains(day) } }
   }
 }

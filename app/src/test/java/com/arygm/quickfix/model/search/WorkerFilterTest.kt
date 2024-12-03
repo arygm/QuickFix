@@ -1,13 +1,27 @@
 package com.arygm.quickfix.model.search
 
+import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfile
-import com.arygm.quickfix.ui.search.filterWorkersByAvailability
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import java.time.LocalDate
 import java.time.LocalTime
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito.mock
 
 class WorkerFilterTest {
+
+  private lateinit var searchViewModel: SearchViewModel
+  private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
+  private lateinit var categoryRepo: CategoryRepositoryFirestore
+
+  @Before
+  fun setup() {
+    workerProfileRepo = mock(WorkerProfileRepositoryFirestore::class.java)
+    categoryRepo = mock(CategoryRepositoryFirestore::class.java)
+    searchViewModel = SearchViewModel(workerProfileRepo, categoryRepo)
+  }
 
   @Test
   fun `worker is available within working hours and not on unavailable days`() {
@@ -26,7 +40,9 @@ class WorkerFilterTest {
     val selectedHour = 10
     val selectedMinute = 0
 
-    val result = filterWorkersByAvailability(workers, selectedDays, selectedHour, selectedMinute)
+    val result =
+        searchViewModel.filterWorkersByAvailability(
+            workers, selectedDays, selectedHour, selectedMinute)
 
     assertEquals(2, result.size)
     assertEquals("worker1", result[0].uid)
@@ -47,7 +63,9 @@ class WorkerFilterTest {
     val selectedHour = 10
     val selectedMinute = 0
 
-    val result = filterWorkersByAvailability(workers, selectedDays, selectedHour, selectedMinute)
+    val result =
+        searchViewModel.filterWorkersByAvailability(
+            workers, selectedDays, selectedHour, selectedMinute)
 
     assertEquals(0, result.size) // Worker should be excluded
   }
@@ -65,7 +83,9 @@ class WorkerFilterTest {
     val selectedHour = 8
     val selectedMinute = 30 // Before start time
 
-    val result = filterWorkersByAvailability(workers, selectedDays, selectedHour, selectedMinute)
+    val result =
+        searchViewModel.filterWorkersByAvailability(
+            workers, selectedDays, selectedHour, selectedMinute)
 
     assertEquals(0, result.size) // Worker should be excluded
   }
@@ -83,7 +103,9 @@ class WorkerFilterTest {
     val selectedHour = 17
     val selectedMinute = 30 // After end time
 
-    val result = filterWorkersByAvailability(workers, selectedDays, selectedHour, selectedMinute)
+    val result =
+        searchViewModel.filterWorkersByAvailability(
+            workers, selectedDays, selectedHour, selectedMinute)
 
     assertEquals(0, result.size) // Worker should be excluded
   }
@@ -100,11 +122,11 @@ class WorkerFilterTest {
     val selectedDays = listOf(LocalDate.of(2023, 12, 3))
 
     // Test for start time
-    var result = filterWorkersByAvailability(workers, selectedDays, 8, 30)
+    var result = searchViewModel.filterWorkersByAvailability(workers, selectedDays, 8, 30)
     assertEquals(1, result.size) // Worker should be included
 
     // Test for end time
-    result = filterWorkersByAvailability(workers, selectedDays, 17, 0)
+    result = searchViewModel.filterWorkersByAvailability(workers, selectedDays, 17, 0)
     assertEquals(1, result.size) // Worker should be included
   }
 
@@ -129,7 +151,9 @@ class WorkerFilterTest {
     val selectedHour = 9
     val selectedMinute = 30
 
-    val result = filterWorkersByAvailability(workers, selectedDays, selectedHour, selectedMinute)
+    val result =
+        searchViewModel.filterWorkersByAvailability(
+            workers, selectedDays, selectedHour, selectedMinute)
 
     assertEquals(2, result.size) // Only two workers should be included
     assertEquals("worker1", result[0].uid)

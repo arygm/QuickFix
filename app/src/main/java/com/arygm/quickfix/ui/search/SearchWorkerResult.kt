@@ -75,7 +75,6 @@ import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -83,7 +82,6 @@ import com.arygm.quickfix.ui.elements.QuickFixSlidingWindow
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.LocationHelper
-import java.time.LocalDate
 
 data class SearchFilterButtons(
     val onClick: () -> Unit,
@@ -365,7 +363,8 @@ fun SearchWorkerResult(
             days,
             hour,
             minute ->
-          filteredWorkerProfiles = filterWorkersByAvailability(workerProfiles, days, hour, minute)
+          filteredWorkerProfiles =
+              searchViewModel.filterWorkersByAvailability(workerProfiles, days, hour, minute)
         }
 
     if (isWindowVisible) {
@@ -684,24 +683,4 @@ fun SearchWorkerResult(
       }
     }
   }
-}
-
-fun filterWorkersByAvailability(
-    workers: List<WorkerProfile>,
-    selectedDays: List<LocalDate>,
-    selectedHour: Int,
-    selectedMinute: Int
-): List<WorkerProfile> {
-  return workers
-      .filter { worker ->
-        val workingStart = worker.workingHours.first
-        val workingEnd = worker.workingHours.second
-
-        // Check if the selected time is within the worker's working hours
-        (selectedHour > workingStart.hour ||
-            (selectedHour == workingStart.hour && selectedMinute >= workingStart.minute)) &&
-            (selectedHour < workingEnd.hour ||
-                (selectedHour == workingEnd.hour && selectedMinute <= workingEnd.minute))
-      }
-      .filter { worker -> selectedDays.none { day -> worker.unavailability_list.contains(day) } }
 }
