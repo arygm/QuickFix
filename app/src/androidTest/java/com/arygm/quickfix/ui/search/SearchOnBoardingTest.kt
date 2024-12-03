@@ -42,8 +42,7 @@ class SearchOnBoardingTest {
           navigationActionsRoot,
           isUser = true,
           searchViewModel,
-            categoryViewModel
-        )
+          categoryViewModel)
     }
 
     // Check that the search input field is displayed

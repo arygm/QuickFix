@@ -138,8 +138,7 @@ fun PersonalInfoScreen(
             placeHolderText = "Ex. Moha A.",
             isError = displayNameError,
             errorText = "That’s too short. Your display name must be at least 3 characters.",
-            showError = displayNameError
-        )
+            showError = displayNameError)
         Spacer(modifier = Modifier.height(17.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
           Column(
@@ -346,8 +345,7 @@ fun PersonalInfoScreen(
             isError = descriptionError,
             errorText = "Please enter at least 150 characters",
             showError = descriptionError,
-            singleLine = true
-        )
+            singleLine = true)
       }
       Row(
           modifier =

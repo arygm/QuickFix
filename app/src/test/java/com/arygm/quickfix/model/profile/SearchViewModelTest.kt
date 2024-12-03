@@ -25,7 +25,7 @@ class SearchViewModelTest {
     mockRepository = mock(WorkerProfileRepositoryFirestore::class.java)
     cateRepository = mock(CategoryRepositoryFirestore::class.java)
     // Initialize the ViewModel with the mocked repository
-    viewModel = SearchViewModel(mockRepository, cateRepository)
+    viewModel = SearchViewModel(mockRepository)
   }
 
   @Test

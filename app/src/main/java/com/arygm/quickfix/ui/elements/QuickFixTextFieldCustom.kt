@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import net.bytebuddy.asm.Advice.AssignReturned.ExceptionHandler.Factory.Enabled
 
 @Composable
 fun QuickFixTextFieldCustom(
@@ -99,13 +98,13 @@ fun QuickFixTextFieldCustom(
     debug: String = "",
     isTextField: Boolean = true,
     columnModifier: Modifier = Modifier,
-    alwaysShowTrailingIcon : Boolean = false,
+    alwaysShowTrailingIcon: Boolean = false,
     moveTrailingIconLeft: Dp = 9.dp,
     enabled: Boolean = true,
     minHeight: Dp = 40.dp,
     maxHeight: Dp = Dp.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
-    heightInEnabled : Boolean = false
+    heightInEnabled: Boolean = false
 ) {
   val scrollState = rememberScrollState() // Scroll state for horizontal scrolling
   // Launch a coroutine to scroll to the end of the text when typing
@@ -122,9 +121,7 @@ fun QuickFixTextFieldCustom(
       onValueChange(it)
     }
   }
-  Column (
-        modifier = columnModifier
-  ){
+  Column(modifier = columnModifier) {
     if (showLabel || showCharCounter) {
       Row(modifier = Modifier.padding(end = moveCounter)) {
         if (showLabel) {
@@ -166,15 +163,13 @@ fun QuickFixTextFieldCustom(
                     }
                   }
                 }
-                .width(widthField).then(
+                .width(widthField)
+                .then(
                     if (heightInEnabled) {
-                        Modifier
-                            .defaultMinSize(minHeight = minHeight)
-                            .heightIn(max = maxHeight)
+                      Modifier.defaultMinSize(minHeight = minHeight).heightIn(max = maxHeight)
                     } else {
-                        Modifier.height(heightField)
-                    }
-                )
+                      Modifier.height(heightField)
+                    })
                 .fillMaxWidth() // Fill the width of the container
                 .padding(
                     start = moveContentHorizontal, top = moveContentBottom, bottom = moveContentTop)
@@ -200,7 +195,7 @@ fun QuickFixTextFieldCustom(
                   }
                 }
                 Spacer(
-                    modifier.padding(
+                    Modifier.padding(
                         horizontal = spaceBetweenLeadIconText)) // Space between icon and text
                 Box(modifier = Modifier.weight(1f)) {
                   BasicTextField(
@@ -225,8 +220,7 @@ fun QuickFixTextFieldCustom(
                       keyboardOptions = keyboardOptions,
                       visualTransformation = visualTransformation,
                       enabled = isTextField && enabled,
-                      maxLines = maxLines
-                  )
+                      maxLines = maxLines)
                   if (value.isEmpty()) {
                     Log.d("QuickFixTextFieldCustom", "placeHolderText: $placeHolderText")
                     Text(

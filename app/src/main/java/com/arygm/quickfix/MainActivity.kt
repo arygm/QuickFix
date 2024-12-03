@@ -124,7 +124,7 @@ fun QuickFixApp() {
   val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
   val announcementViewModel: AnnouncementViewModel =
       viewModel(factory = AnnouncementViewModel.Factory)
-    val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
+  val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
 
   // Initialized here because needed for the bottom bar
   val profileNavController = rememberNavController()
@@ -248,9 +248,9 @@ fun QuickFixApp() {
                     accountViewModel,
                     loggedInAccountViewModel,
                     workerViewModel,
-                    navigationActionsRoot) { currentScreen ->
-                      screenInProfileNavHost = currentScreen
-                    }
+                    navigationActionsRoot,
+                    onScreenChange = { currentScreen -> screenInProfileNavHost = currentScreen },
+                    categoryViewModel)
               }
             }
       }
@@ -287,7 +287,8 @@ fun ProfileNavHost(
     loggedInAccountViewModel: LoggedInAccountViewModel,
     workerViewModel: ProfileViewModel,
     navigationActionsRoot: NavigationActions,
-    onScreenChange: (String) -> Unit
+    onScreenChange: (String) -> Unit,
+    categoryViewModel: CategoryViewModel
 ) {
 
   val profileNavController = rememberNavController()
@@ -309,7 +310,11 @@ fun ProfileNavHost(
     }
     composable(Screen.TO_WORKER) {
       BusinessScreen(
-          profileNavigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
+          profileNavigationActions,
+          accountViewModel,
+          workerViewModel,
+          loggedInAccountViewModel,
+          categoryViewModel)
     }
   }
 }

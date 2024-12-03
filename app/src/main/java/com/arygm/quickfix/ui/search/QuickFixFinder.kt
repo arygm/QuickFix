@@ -98,7 +98,11 @@ fun QuickFixFinderScreen(
                     when (page) {
                       0 ->
                           SearchOnBoarding(
-                              navigationActions, navigationActionsRoot, isUser, searchViewModel, categoryViewModel)
+                              navigationActions,
+                              navigationActionsRoot,
+                              isUser,
+                              searchViewModel,
+                              categoryViewModel)
                       1 ->
                           AnnouncementScreen(
                               announcementViewModel,

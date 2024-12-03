@@ -1,11 +1,8 @@
 package com.arygm.quickfix.model.search
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.arygm.quickfix.model.category.Category
-import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
@@ -39,9 +36,7 @@ open class SearchViewModel(
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return SearchViewModel(
-                WorkerProfileRepositoryFirestore(firestoreInstance))
-                as T
+            return SearchViewModel(WorkerProfileRepositoryFirestore(firestoreInstance)) as T
           }
         }
   }
