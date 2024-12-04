@@ -8,6 +8,8 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import java.time.LocalDate
+import java.time.LocalTime
 import kotlin.math.cos
 
 open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRepository {
@@ -108,6 +110,11 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
                 longitude = it["longitude"] as? Double ?: 0.0,
                 name = it["name"] as? String ?: "")
           }
+      val unavailability_list =
+          document.get("unavailability_list") as? List<LocalDate> ?: emptyList<LocalDate>()
+      val workingHours =
+          document.get("workingHours") as? Pair<LocalTime, LocalTime>
+              ?: Pair(LocalTime.now(), LocalTime.now())
       WorkerProfile(
           rating = rating,
           uid = uid,
@@ -115,7 +122,8 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
           description = description,
           fieldOfWork = fieldOfWork,
           location = location,
-      )
+          unavailability_list = unavailability_list,
+          workingHours = workingHours)
     } catch (e: Exception) {
       Log.e("WorkerProfileRepositoryFirestore", "Error converting document to WorkerProfile", e)
       null
