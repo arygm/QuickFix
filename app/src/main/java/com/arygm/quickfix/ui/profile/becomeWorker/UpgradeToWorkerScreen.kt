@@ -32,10 +32,14 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.dataFields.AddOnService
+import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.profile.becomeWorker.views.personal.PersonalInfoScreen
+import com.arygm.quickfix.ui.profile.becomeWorker.views.professional.ProfessionalInfoScreen
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,8 +48,10 @@ fun BusinessScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
     workerProfileViewModel: ProfileViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel
+    loggedInAccountViewModel: LoggedInAccountViewModel,
+    categoryViewModel: CategoryViewModel
 ) {
+  val categories = categoryViewModel.categories.collectAsState().value
   val pagerState = rememberPagerState(pageCount = { 3 })
   val focusManager = LocalFocusManager.current
   val displayName = remember { mutableStateOf("") }
@@ -54,6 +60,11 @@ fun BusinessScreen(
   val imagePathBP = remember { mutableStateOf("") }
   var displayNameError by remember { mutableStateOf(false) }
   var descriptionError by remember { mutableStateOf(false) }
+  val price = remember { mutableStateOf("") }
+  val fieldOfWork = remember { mutableStateOf("") }
+  val includedServices = remember { mutableStateOf(listOf<IncludedService>()) }
+  val addOnServices = remember { mutableStateOf(listOf<AddOnService>()) }
+  val tags = remember { mutableStateOf(listOf<String>()) }
   Scaffold(
       modifier =
           Modifier.pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
@@ -84,29 +95,37 @@ fun BusinessScreen(
       },
       containerColor = colorScheme.surface,
       content = { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-          HorizontalPager(
-              state = pagerState,
-              modifier =
-                  Modifier.weight(0.9f).semantics { testTag = C.Tag.upgradeToWorkerPager }) { page
-                ->
-                when (page) {
-                  0 -> {
-                    PersonalInfoScreen(
-                        pagerState,
-                        displayName,
-                        description,
-                        imagePathPP,
-                        imagePathBP,
-                        displayNameError = displayNameError,
-                        onDisplayNameErrorChange = { displayNameError = it },
-                        descriptionError = descriptionError,
-                        onDescriptionErrorChange = { descriptionError = it })
-                  }
-                  1 -> {}
-                  2 -> {}
+        HorizontalPager(
+            state = pagerState,
+            modifier =
+                Modifier.padding(innerPadding).fillMaxSize().semantics {
+                  testTag = C.Tag.upgradeToWorkerPager
+                }) { page ->
+              when (page) {
+                0 -> {
+                  PersonalInfoScreen(
+                      pagerState,
+                      displayName,
+                      description,
+                      imagePathPP,
+                      imagePathBP,
+                      displayNameError = displayNameError,
+                      onDisplayNameErrorChange = { displayNameError = it },
+                      descriptionError = descriptionError,
+                      onDescriptionErrorChange = { descriptionError = it })
                 }
+                1 -> {
+                  ProfessionalInfoScreen(
+                      pagerState,
+                      price,
+                      fieldOfWork,
+                      includedServices,
+                      addOnServices,
+                      tags,
+                      categories)
+                }
+                2 -> {}
               }
-        }
+            }
       })
 }
