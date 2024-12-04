@@ -1,6 +1,8 @@
 package com.arygm.quickfix.ui.elements
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -26,45 +28,65 @@ fun QuickFixCheckedListElement(
     listServices: List<String>,
     checkedStatesServices: SnapshotStateList<Boolean>,
     index: Int,
+    modifier: Modifier = Modifier,
+    radioButtonAlignment: Alignment.Vertical = Alignment.CenterVertically,
+    displayHorizontalDivider : Boolean = true,
+    canSelect : Boolean = true,
+    maxAchieved : Boolean = false
 ) {
-  Row(
-      verticalAlignment = Alignment.CenterVertically,
-      modifier =
-          Modifier.toggleable(
-                  value = checkedStatesServices[index],
-                  onValueChange = { checkedStatesServices[index] = it },
-                  role = Role.RadioButton // Role as a RadioButton
-                  )
-              .padding(vertical = 3.dp)) {
-        Box(
+    Column {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier =
-                Modifier.size(24.dp) // Set the size of the RadioButton explicitly
-                    .align(Alignment.CenterVertically) // Align it vertically in the Row
-            ) {
-              RadioButton(
-                  selected = checkedStatesServices[index],
-                  onClick = {
-                    checkedStatesServices[index] = !checkedStatesServices[index]
-                  }, // Handle toggle
-                  modifier =
-                      Modifier.size(
-                          24.dp), // Set the size directly to remove extra padding of RadioButton
-                  colors =
-                      RadioButtonDefaults.colors(
-                          selectedColor = colorScheme.primary,
-                          unselectedColor = colorScheme.tertiaryContainer))
+            if (canSelect && !(maxAchieved && !checkedStatesServices[index])) {
+                modifier.toggleable(
+                    value = checkedStatesServices[index],
+                    onValueChange = { checkedStatesServices[index] = it },
+                    role = Role.RadioButton // Role as a RadioButton
+                )
+            } else {
+                modifier // No toggleable when canSelect is false
             }
-        Spacer(modifier = Modifier.width(8.dp)) // Add space between RadioButton and Text
-        Text(
-            text = listServices[index],
-            style = poppinsTypography.labelSmall,
-            fontWeight = FontWeight.Medium,
-            color = colorScheme.onSurface)
-      }
-  if (index < listServices.size - 1) {
-    HorizontalDivider(
-        color = colorScheme.background,
-        thickness = 1.5.dp,
-        modifier = Modifier.padding(start = 32.dp))
-  }
+                .padding(vertical = 3.dp)
+        ) {
+            Box(
+                modifier =
+                Modifier.size(24.dp) // Set the size of the RadioButton explicitly
+                    .align(radioButtonAlignment) // Align it vertically in the Row
+            ) {
+                RadioButton(
+                    enabled = canSelect && !(maxAchieved && !checkedStatesServices[index]),
+                    selected = checkedStatesServices[index],
+                    onClick = {
+                        Log.d("QuickFixCheckedListElement", "onClick: $index ${checkedStatesServices[index]}")
+                        checkedStatesServices[index] = !checkedStatesServices[index]
+
+                    }, // Handle toggle
+                    modifier =
+                    Modifier.size(
+                        24.dp
+                    ), // Set the size directly to remove extra padding of RadioButton
+                    colors =
+                    RadioButtonDefaults.colors(
+                        selectedColor = colorScheme.primary,
+                        unselectedColor = colorScheme.tertiaryContainer
+                    )
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp)) // Add space between RadioButton and Text
+            Text(
+                text = listServices[index],
+                style = poppinsTypography.labelSmall,
+                fontWeight = FontWeight.Medium,
+                color = colorScheme.onSurface
+            )
+        }
+        if (index < listServices.size - 1 && displayHorizontalDivider) {
+            HorizontalDivider(
+                color = colorScheme.background,
+                thickness = 1.5.dp,
+                modifier = Modifier.padding(start = 32.dp)
+            )
+        }
+    }
 }
