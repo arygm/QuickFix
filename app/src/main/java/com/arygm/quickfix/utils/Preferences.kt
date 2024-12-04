@@ -17,9 +17,9 @@ val EMAIL_KEY = stringPreferencesKey("email")
 val DATE_OF_BIRTH_KEY = stringPreferencesKey("date_of_birth")
 val IS_WORKER_KEY = booleanPreferencesKey("is_worker")
 
-fun setAccountPreferences(preferencesViewModel: PreferencesViewModel, account: Account) {
+fun setAccountPreferences(preferencesViewModel: PreferencesViewModel, account: Account, signIn: Boolean = true) {
     CoroutineScope(Dispatchers.IO).launch {
-        preferencesViewModel.savePreference(IS_SIGN_IN_KEY, true)
+        preferencesViewModel.savePreference(IS_SIGN_IN_KEY, signIn)
         preferencesViewModel.savePreference(USER_ID_KEY, account.uid)
         preferencesViewModel.savePreference(FIRST_NAME_KEY, account.firstName)
         preferencesViewModel.savePreference(LAST_NAME_KEY, account.lastName)

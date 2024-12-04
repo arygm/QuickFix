@@ -8,7 +8,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesRepository
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -23,131 +24,133 @@ import org.mockito.Mockito.`when`
 
 class LogInScreenTest {
 
-  @get:Rule val composeTestRule = createComposeRule()
+    @get:Rule
+    val composeTestRule = createComposeRule()
 
-  private lateinit var navigationActions: NavigationActions
-  private lateinit var accountRepository: AccountRepository
-  private lateinit var userProfileRepo: UserProfileRepositoryFirestore
-  private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
-  private lateinit var accountViewModel: AccountViewModel
-  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
-  private lateinit var mockFirestore: FirebaseFirestore
+    private lateinit var navigationActions: NavigationActions
+    private lateinit var accountRepository: AccountRepository
+    private lateinit var userProfileRepo: UserProfileRepositoryFirestore
+    private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
+    private lateinit var accountViewModel: AccountViewModel
+    private lateinit var mockFirestore: FirebaseFirestore
+    private lateinit var preferencesRepository: PreferencesRepository
+    private lateinit var preferencesViewModel: PreferencesViewModel
 
-  @Before
-  fun setup() {
-    mockFirestore = mock(FirebaseFirestore::class.java)
-    accountRepository = mock(AccountRepository::class.java)
-    navigationActions = mock(NavigationActions::class.java)
-    userProfileRepo = UserProfileRepositoryFirestore(mockFirestore)
-    workerProfileRepo = WorkerProfileRepositoryFirestore(mockFirestore)
-    accountViewModel = AccountViewModel(accountRepository)
-    loggedInAccountViewModel =
-        LoggedInAccountViewModel(
-            userProfileRepo = userProfileRepo, workerProfileRepo = workerProfileRepo)
+    @Before
+    fun setup() {
+        mockFirestore = mock(FirebaseFirestore::class.java)
+        accountRepository = mock(AccountRepository::class.java)
+        navigationActions = mock(NavigationActions::class.java)
+        userProfileRepo = UserProfileRepositoryFirestore(mockFirestore)
+        workerProfileRepo = WorkerProfileRepositoryFirestore(mockFirestore)
+        accountViewModel = AccountViewModel(accountRepository)
+        preferencesRepository = mock(PreferencesRepository::class.java)
+        preferencesViewModel = PreferencesViewModel(preferencesRepository)
 
-    `when`(navigationActions.currentRoute()).thenReturn(Screen.LOGIN)
-  }
 
-  @Test
-  fun testInitialUI() {
-    composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+        `when`(navigationActions.currentRoute()).thenReturn(Screen.LOGIN)
     }
 
-    // Check that the scaffold and content boxes are displayed
-    composeTestRule.onNodeWithTag("LoginScaffold").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ContentBox").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("AnimationBox").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("BoxDecoration").assertIsDisplayed()
+    @Test
+    fun testInitialUI() {
+        composeTestRule.setContent {
+            LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
+        }
 
-    // Check that the "Login" text is displayed
-    composeTestRule.onNodeWithTag("WelcomeText").assertIsDisplayed()
+        // Check that the scaffold and content boxes are displayed
+        composeTestRule.onNodeWithTag("LoginScaffold").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("ContentBox").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("AnimationBox").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("BoxDecoration").assertIsDisplayed()
 
-    // Check that the "Your perfect fix is just a click away" text is displayed
-    composeTestRule.onNodeWithTag("WelcomeTextBis").assertIsDisplayed()
+        // Check that the "Login" text is displayed
+        composeTestRule.onNodeWithTag("WelcomeText").assertIsDisplayed()
 
-    // Check that the email and password fields are empty initially
-    composeTestRule.onNodeWithTag("inputEmail").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("inputPassword").assertIsDisplayed()
+        // Check that the "Your perfect fix is just a click away" text is displayed
+        composeTestRule.onNodeWithTag("WelcomeTextBis").assertIsDisplayed()
 
-    // Check that the login button is displayed
-    composeTestRule.onNodeWithTag("logInButton").assertIsDisplayed()
+        // Check that the email and password fields are empty initially
+        composeTestRule.onNodeWithTag("inputEmail").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("inputPassword").assertIsDisplayed()
 
-    // Check that the forgot password texts are displayed
-    composeTestRule.onNodeWithTag("forgetPasswordButtonText").assertIsDisplayed()
+        // Check that the login button is displayed
+        composeTestRule.onNodeWithTag("logInButton").assertIsDisplayed()
 
-    // Check that the "Don't have an account?" text is displayed
-    composeTestRule.onNodeWithTag("noAccountText").assertIsDisplayed()
+        // Check that the forgot password texts are displayed
+        composeTestRule.onNodeWithTag("forgetPasswordButtonText").assertIsDisplayed()
 
-    // Check that the "Create One" text is displayed
-    composeTestRule.onNodeWithTag("clickableCreateAccount").assertIsDisplayed()
-  }
+        // Check that the "Don't have an account?" text is displayed
+        composeTestRule.onNodeWithTag("noAccountText").assertIsDisplayed()
 
-  @Test
-  fun testLoginButtonEnabledWhenFieldsAreFilled() {
-    composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+        // Check that the "Create One" text is displayed
+        composeTestRule.onNodeWithTag("clickableCreateAccount").assertIsDisplayed()
     }
 
-    // Input valid email and password
-    composeTestRule.onNodeWithTag("inputEmail").performTextInput("test@example.com")
-    composeTestRule.onNodeWithTag("inputPassword").performTextInput("password123")
+    @Test
+    fun testLoginButtonEnabledWhenFieldsAreFilled() {
+        composeTestRule.setContent {
+            LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
+        }
 
-    // Click the login button
-    composeTestRule.onNodeWithTag("logInButton").performClick()
-  }
+        // Input valid email and password
+        composeTestRule.onNodeWithTag("inputEmail").performTextInput("test@example.com")
+        composeTestRule.onNodeWithTag("inputPassword").performTextInput("password123")
 
-  @Test
-  fun testInvalidEmailShowsError() {
-    composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+        // Click the login button
+        composeTestRule.onNodeWithTag("logInButton").performClick()
     }
 
-    // Input an invalid email
-    composeTestRule.onNodeWithTag("inputEmail").performTextInput("invalidemail")
+    @Test
+    fun testInvalidEmailShowsError() {
+        composeTestRule.setContent {
+            LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
+        }
 
-    // Click the login button
-    composeTestRule.onNodeWithTag("logInButton").assertIsNotEnabled()
+        // Input an invalid email
+        composeTestRule.onNodeWithTag("inputEmail").performTextInput("invalidemail")
 
-    // Check that the email error is displayed
-    composeTestRule.onNodeWithTag("errorText").assertIsDisplayed()
-  }
+        // Click the login button
+        composeTestRule.onNodeWithTag("logInButton").assertIsNotEnabled()
 
-  @Test
-  fun testForgotPasswordLinkIsDisplayed() {
-    composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+        // Check that the email error is displayed
+        composeTestRule.onNodeWithTag("errorText").assertIsDisplayed()
     }
 
-    // Check that the forgot password text is displayed
-    composeTestRule.onNodeWithTag("forgetPasswordButtonText").assertIsDisplayed()
-  }
+    @Test
+    fun testForgotPasswordLinkIsDisplayed() {
+        composeTestRule.setContent {
+            LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
+        }
 
-  @Test
-  fun testForgotPasswordLinkNavigatesToResetPassword() {
-    composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+        // Check that the forgot password text is displayed
+        composeTestRule.onNodeWithTag("forgetPasswordButtonText").assertIsDisplayed()
     }
 
-    // Click the "Forgot your password?" link
-    composeTestRule.onNodeWithTag("forgetPasswordButtonText").performClick()
+    @Test
+    fun testForgotPasswordLinkNavigatesToResetPassword() {
+        composeTestRule.setContent {
+            LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
+        }
 
-    // Verify that the navigation to RESET_PASSWORD was triggered
-    Mockito.verify(navigationActions).navigateTo(Screen.RESET_PASSWORD)
-  }
+        // Click the "Forgot your password?" link
+        composeTestRule.onNodeWithTag("forgetPasswordButtonText").performClick()
 
-  @Test
-  fun testBackButtonNavigatesBack() {
-    composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+        // Verify that the navigation to RESET_PASSWORD was triggered
+        Mockito.verify(navigationActions).navigateTo(Screen.RESET_PASSWORD)
     }
 
-    // Click the back button
-    composeTestRule.onNodeWithTag("goBackButton").performClick()
+    @Test
+    fun testBackButtonNavigatesBack() {
+        composeTestRule.setContent {
+            LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
+        }
 
-    composeTestRule.mainClock.advanceTimeBy(500L)
+        // Click the back button
+        composeTestRule.onNodeWithTag("goBackButton").performClick()
 
-    // Verify that the navigation action was triggered
-    Mockito.verify(navigationActions).goBack()
-  }
+        composeTestRule.mainClock.advanceTimeBy(500L)
+
+        // Verify that the navigation action was triggered
+        Mockito.verify(navigationActions).goBack()
+    }
 }

@@ -5,7 +5,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesRepository
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.google.android.gms.tasks.TaskCompletionSource
@@ -42,9 +43,11 @@ class SignInWithEmailAndPasswordTest {
 
   @Mock private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
 
-  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
+  @Mock private lateinit var preferencesRepository: PreferencesRepository
 
   private lateinit var accountViewModel: AccountViewModel
+
+  private lateinit var preferencesViewModel: PreferencesViewModel
 
   private lateinit var firebaseAuthMockedStatic: MockedStatic<FirebaseAuth>
 
@@ -68,7 +71,7 @@ class SignInWithEmailAndPasswordTest {
 
     // Initialize accountViewModel with the mocked repository
     accountViewModel = AccountViewModel(accountRepository)
-    loggedInAccountViewModel = LoggedInAccountViewModel(userProfileRepo, workerProfileRepo)
+    preferencesViewModel = PreferencesViewModel(preferencesRepository)
 
     // Mock FirebaseAuth.getInstance().currentUser
     whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
@@ -119,7 +122,7 @@ class SignInWithEmailAndPasswordTest {
         email = email,
         password = password,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
+        preferencesViewModel = preferencesViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -137,9 +140,6 @@ class SignInWithEmailAndPasswordTest {
 
     // Verify that the account was fetched
     verify(accountRepository).getAccountById(eq(uid), any(), any())
-
-    // Verify that the loggedInAccount was set
-    assertEquals(account, loggedInAccountViewModel.loggedInAccount.value)
   }
 
   @Test
@@ -163,7 +163,7 @@ class SignInWithEmailAndPasswordTest {
         email = email,
         password = password,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
+        preferencesViewModel = preferencesViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -214,7 +214,7 @@ class SignInWithEmailAndPasswordTest {
         email = email,
         password = password,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
+        preferencesViewModel = preferencesViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -229,9 +229,6 @@ class SignInWithEmailAndPasswordTest {
     // Assertions
     assertTrue(onResultCalled)
     assertFalse(resultValue == true)
-
-    // Verify that loggedInAccount was not set
-    assertNull(loggedInAccountViewModel.loggedInAccount.value)
   }
 
   @Test
@@ -257,7 +254,7 @@ class SignInWithEmailAndPasswordTest {
         email = email,
         password = password,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
+        preferencesViewModel = preferencesViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -309,7 +306,7 @@ class SignInWithEmailAndPasswordTest {
         email = email,
         password = password,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
+        preferencesViewModel = preferencesViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -324,9 +321,6 @@ class SignInWithEmailAndPasswordTest {
     // Assertions
     assertTrue(onResultCalled)
     assertFalse(resultValue == true)
-
-    // Verify that loggedInAccount was not set
-    assertNull(loggedInAccountViewModel.loggedInAccount.value)
   }
 
   @Test
@@ -350,7 +344,7 @@ class SignInWithEmailAndPasswordTest {
         email = email,
         password = password,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
+        preferencesViewModel = preferencesViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -391,7 +385,7 @@ class SignInWithEmailAndPasswordTest {
         email = email,
         password = password,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
+        preferencesViewModel = preferencesViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result
@@ -432,7 +426,7 @@ class SignInWithEmailAndPasswordTest {
         email = email,
         password = password,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
+        preferencesViewModel = preferencesViewModel,
         onResult = { result ->
           onResultCalled = true
           resultValue = result

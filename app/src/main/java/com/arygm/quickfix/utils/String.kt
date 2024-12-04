@@ -62,13 +62,11 @@ fun stringToTimestamp(date: String): Timestamp? {
   return Timestamp(calendar.time)
 }
 
-fun timestampToString(timestamp: Timestamp, pattern: String = "dd-MM-yyyy"): String {
+fun timestampToString(timestamp: Timestamp, pattern: String = "dd/MM/yyyy"): String {
   Log.d("DateConversion", "Converting timestamp: $timestamp")
   val date = timestamp.toDate() // Converts Firebase Timestamp to a Java Date object
   val formatter = SimpleDateFormat(pattern, Locale.getDefault()) // Format the Date
-  val ret = formatter.format(date)
-  Log.d("DateConversion", "Converted date: $ret")
-  return ret
+  return formatter.format(date)
 }
 
 fun splitDate(date: String): Triple<Int, Int, Int> {

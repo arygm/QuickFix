@@ -7,6 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
@@ -22,8 +23,6 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -68,7 +67,7 @@ fun rememberFirebaseAuthLauncher(
                                     email = email,
                                     birthDate = Timestamp.now()
                                 )
-                            setAccountPreferences(preferencesViewModel, newAccount)
+                            setAccountPreferences(preferencesViewModel, newAccount, false)
                             val defaultLocation = Location(0.0, 0.0, "defaultLocation")
                             val defaultUserProfile =
                                 UserProfile(
