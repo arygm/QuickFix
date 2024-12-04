@@ -34,7 +34,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,7 +45,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
@@ -55,135 +53,165 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.utils.ANIMATED_BOX_ROTATION
 import com.arygm.quickfix.utils.isValidDate
+import com.arygm.quickfix.utils.setAccountPreferences
 import com.arygm.quickfix.utils.stringToTimestamp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun GoogleInfoScreen(
     navigationActions: NavigationActions,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
     accountViewModel: AccountViewModel,
     userViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel
 ) {
 
-  val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+    var birthDate by remember { mutableStateOf("") }
+    var uid by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    preferencesViewModel.loadPreference(
+        key = com.arygm.quickfix.utils.USER_ID_KEY
+    ) {
+        uid = it ?: ""
+    }
+    preferencesViewModel.loadPreference(
+        key = com.arygm.quickfix.utils.EMAIL_KEY
+    ) {
+        email = it ?: ""
+    }
 
-  var firstName by remember { mutableStateOf("") }
-  var lastName by remember { mutableStateOf("") }
-  var birthDate by remember { mutableStateOf("") }
+    var birthDateError by remember { mutableStateOf(false) }
 
-  var birthDateError by remember { mutableStateOf(false) }
+    var shrinkBox by remember { mutableStateOf(false) }
+    val boxOffsetX by
+    animateDpAsState(
+        targetValue = if (shrinkBox) 1285.dp else 0.dp,
+        animationSpec = tween(durationMillis = 300),
+        label = "shrinkingBox"
+    )
 
-  var shrinkBox by remember { mutableStateOf(false) }
-  val boxOffsetX by
-      animateDpAsState(
-          targetValue = if (shrinkBox) 1285.dp else 0.dp,
-          animationSpec = tween(durationMillis = 300),
-          label = "shrinkingBox")
+    LaunchedEffect(Unit) { shrinkBox = true }
 
-  LaunchedEffect(Unit) { shrinkBox = true }
+    val filledForm = firstName.isNotEmpty() && lastName.isNotEmpty() && birthDate.isNotEmpty()
 
-  val filledForm = firstName.isNotEmpty() && lastName.isNotEmpty() && birthDate.isNotEmpty()
+    BoxWithConstraints(modifier = Modifier
+        .fillMaxSize()
+        .testTag("InfoBox")) {
+        val screenWidth = maxWidth
+        val screenHeight = maxHeight
+        QuickFixAnimatedBox(boxOffsetX)
 
-  BoxWithConstraints(modifier = Modifier.fillMaxSize().testTag("InfoBox")) {
-    val screenWidth = maxWidth
-    val screenHeight = maxHeight
-    QuickFixAnimatedBox(boxOffsetX)
-
-    Scaffold(
-        modifier = Modifier.background(colorScheme.background).testTag("InfoScaffold"),
-        topBar = {
-          TopAppBar(
-              title = { Text("") },
-              navigationIcon = {
-                QuickFixBackButton(
-                    onClick = {
-                      shrinkBox = false
-                      accountViewModel.deleteAccountById(loggedInAccount!!.uid)
-                      userViewModel.deleteProfileById(loggedInAccount!!.uid)
-                      Firebase.auth.currentUser?.delete()?.addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                          navigationActions.goBack()
-                        } else {
-                          Log.e(
-                              "GoogleInfoScreen",
-                              "Failed to delete Firebase user: ${task.exception}")
-                        }
-                      }
+        Scaffold(
+            modifier = Modifier
+                .background(colorScheme.background)
+                .testTag("InfoScaffold"),
+            topBar = {
+                TopAppBar(
+                    title = { Text("") },
+                    navigationIcon = {
+                        QuickFixBackButton(
+                            onClick = {
+                                shrinkBox = false
+                                accountViewModel.deleteAccountById(uid)
+                                userViewModel.deleteProfileById(uid)
+                                Firebase.auth.currentUser?.delete()?.addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        navigationActions.goBack()
+                                    } else {
+                                        Log.e(
+                                            "GoogleInfoScreen",
+                                            "Failed to delete Firebase user: ${task.exception}"
+                                        )
+                                    }
+                                }
+                            },
+                            color = colorScheme.primary,
+                            modifier = Modifier.testTag("goBackButton")
+                        )
                     },
-                    color = colorScheme.primary,
-                    modifier = Modifier.testTag("goBackButton"))
-              },
-              colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
-        },
-        content = { pd ->
-          Box(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .background(colorScheme.background)
-                      .padding(pd)
-                      .imePadding()
-                      .testTag("contentBox")) {
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background)
+                )
+            },
+            content = { pd ->
                 Box(
                     modifier =
-                        Modifier.size(
-                                screenWidth * 0.5f) // Scale box size to be relative to screen size
+                    Modifier
+                        .fillMaxSize()
+                        .background(colorScheme.background)
+                        .padding(pd)
+                        .imePadding()
+                        .testTag("contentBox")
+                ) {
+                    Box(
+                        modifier =
+                        Modifier
+                            .size(
+                                screenWidth * 0.5f
+                            ) // Scale box size to be relative to screen size
                             .align(Alignment.BottomStart)
                             .offset(
                                 x =
-                                    -screenWidth *
+                                -screenWidth *
                                         0.4f, // Offset slightly left relative to screen width
                                 y =
-                                    screenHeight *
+                                screenHeight *
                                         0.1f // Offset slightly upward relative to screen height
-                                )
+                            )
                             .graphicsLayer(rotationZ = ANIMATED_BOX_ROTATION)
                             .background(colorScheme.primary)
-                            .testTag("decorationBox"))
-                Column(
-                    modifier =
-                        Modifier.fillMaxSize()
+                            .testTag("decorationBox")
+                    )
+                    Column(
+                        modifier =
+                        Modifier
+                            .fillMaxSize()
                             .padding(
                                 start =
-                                    screenWidth * 0.05f) // Relative padding based on screen width
+                                screenWidth * 0.05f
+                            ) // Relative padding based on screen width
                             .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Top) {
-                      Spacer(
-                          modifier = Modifier.height(screenHeight * 0.1f)) // Relative top padding
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        Spacer(
+                            modifier = Modifier.height(screenHeight * 0.1f)
+                        ) // Relative top padding
 
-                      Text(
-                          "WELCOME",
-                          color = colorScheme.primary,
-                          style = MaterialTheme.typography.headlineLarge,
-                          modifier = Modifier.testTag("welcomeText"))
+                        Text(
+                            "WELCOME",
+                            color = colorScheme.primary,
+                            style = MaterialTheme.typography.headlineLarge,
+                            modifier = Modifier.testTag("welcomeText")
+                        )
 
-                      Spacer(
-                          modifier =
-                              Modifier.height(screenHeight * 0.02f)) // Small vertical spacing
+                        Spacer(
+                            modifier =
+                            Modifier.height(screenHeight * 0.02f)
+                        ) // Small vertical spacing
 
-                      Row(
-                          modifier =
-                              Modifier.fillMaxWidth()
-                                  .padding(end = screenWidth * 0.05f), // Relative end padding
-                          horizontalArrangement = Arrangement.SpaceBetween) {
+                        Row(
+                            modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(end = screenWidth * 0.05f), // Relative end padding
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
                             QuickFixTextField(
                                 value = firstName,
                                 onValueChange = { firstName = it },
                                 label = "FIRST NAME",
                                 modifier =
-                                    Modifier.weight(1f)
-                                        .padding(
-                                            end =
-                                                screenWidth * 0.02f) // Small padding between fields
-                                        .testTag("firstNameInput"),
+                                Modifier
+                                    .weight(1f)
+                                    .padding(
+                                        end =
+                                        screenWidth * 0.02f
+                                    ) // Small padding between fields
+                                    .testTag("firstNameInput"),
                             )
 
                             QuickFixTextField(
@@ -191,108 +219,88 @@ fun GoogleInfoScreen(
                                 onValueChange = { lastName = it },
                                 label = "LAST NAME",
                                 modifier =
-                                    Modifier.weight(1f)
-                                        .padding(
-                                            start =
-                                                screenWidth * 0.02f) // Small padding between fields
-                                        .testTag("lastNameInput"),
+                                Modifier
+                                    .weight(1f)
+                                    .padding(
+                                        start =
+                                        screenWidth * 0.02f
+                                    ) // Small padding between fields
+                                    .testTag("lastNameInput"),
                             )
-                          }
+                        }
 
-                      Spacer(
-                          modifier =
-                              Modifier.height(screenHeight * 0.01f)) // Slight spacing below Row
+                        Spacer(
+                            modifier =
+                            Modifier.height(screenHeight * 0.01f)
+                        ) // Slight spacing below Row
 
-                      QuickFixTextField(
-                          value = birthDate,
-                          onValueChange = {
-                            birthDate = it
-                            birthDateError = !isValidDate(it)
-                          },
-                          label = "BIRTH DATE (DD/MM/YYYY)",
-                          isError = birthDateError,
-                          modifier =
-                              Modifier.width(screenWidth * 0.9f) // Relative width for text field
-                                  .testTag("birthDateInput"),
-                          singleLine = false,
-                          errorText = "INVALID DATE",
-                          showError = birthDateError)
+                        QuickFixTextField(
+                            value = birthDate,
+                            onValueChange = {
+                                birthDate = it
+                                birthDateError = !isValidDate(it)
+                            },
+                            label = "BIRTH DATE (DD/MM/YYYY)",
+                            isError = birthDateError,
+                            modifier =
+                            Modifier
+                                .width(screenWidth * 0.9f) // Relative width for text field
+                                .testTag("birthDateInput"),
+                            singleLine = false,
+                            errorText = "INVALID DATE",
+                            showError = birthDateError
+                        )
 
-                      Spacer(
-                          modifier =
-                              Modifier.height(
-                                  screenHeight * 0.02f)) // Relative spacing before button
+                        Spacer(
+                            modifier =
+                            Modifier.height(
+                                screenHeight * 0.02f
+                            )
+                        ) // Relative spacing before button
 
-                      Button(
-                          onClick = {
-                            shrinkBox = false
-                            accountViewModel.updateAccount(
-                                Account(
-                                    loggedInAccount!!.uid,
+                        Button(
+                            onClick = {
+                                val newAccount = Account(
+                                    uid,
                                     firstName,
                                     lastName,
-                                    loggedInAccount!!.email,
+                                    email,
                                     stringToTimestamp(birthDate)!!,
-                                    loggedInAccount!!.isWorker),
-                                onSuccess = {
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        preferencesViewModel.savePreference(
-                                            key = com.arygm.quickfix.utils.IS_SIGN_IN_KEY,
-                                            value = true
-                                        )
-                                        preferencesViewModel.savePreference(
-                                            key = com.arygm.quickfix.utils.EMAIL_KEY,
-                                            value = loggedInAccount!!.email
-                                        )
-                                        preferencesViewModel.savePreference(
-                                            key = com.arygm.quickfix.utils.USER_ID_KEY,
-                                            value = loggedInAccount!!.uid
-                                        )
-                                        preferencesViewModel.savePreference(
-                                            key = com.arygm.quickfix.utils.FIRST_NAME_KEY,
-                                            value = firstName
-                                        )
-                                        preferencesViewModel.savePreference(
-                                            key = com.arygm.quickfix.utils.LAST_NAME_KEY,
-                                            value = lastName
-                                        )
-                                        preferencesViewModel.savePreference(
-                                            key = com.arygm.quickfix.utils.DATE_OF_BIRTH_KEY,
-                                            value = birthDate
-                                        )
-                                    }
-                                  loggedInAccountViewModel.setLoggedInAccount(
-                                      Account(
-                                          loggedInAccount!!.uid,
-                                          firstName,
-                                          lastName,
-                                          loggedInAccount!!.email,
-                                          stringToTimestamp(birthDate)!!,
-                                          loggedInAccount!!.isWorker)
-                                  )
-                                  navigationActions.navigateTo(TopLevelDestinations.HOME)
-                                },
-                                onFailure = {
-                                  Log.d("GoogleInfoScreen", "Failed to update account.")
-                                })
-                          },
-                          modifier =
-                              Modifier.width(screenWidth * 0.9f) // Relative width for button
-                                  .height(screenHeight * 0.06f) // Relative height for button
-                                  .testTag("nextButton"),
-                          shape =
-                              RoundedCornerShape(
-                                  screenWidth * 0.025f), // Relative corner radius for button shape
-                          colors =
-                              ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-                          enabled = filledForm && !birthDateError) {
+                                    false // default to non-worker account
+                                )
+                                shrinkBox = false
+                                accountViewModel.updateAccount(
+
+                                    newAccount,
+                                    onSuccess = {
+                                        setAccountPreferences(preferencesViewModel, newAccount)
+                                        navigationActions.navigateTo(TopLevelDestinations.HOME)
+                                    },
+                                    onFailure = {
+                                        Log.d("GoogleInfoScreen", "Failed to update account.")
+                                    })
+                            },
+                            modifier =
+                            Modifier
+                                .width(screenWidth * 0.9f) // Relative width for button
+                                .height(screenHeight * 0.06f) // Relative height for button
+                                .testTag("nextButton"),
+                            shape =
+                            RoundedCornerShape(
+                                screenWidth * 0.025f
+                            ), // Relative corner radius for button shape
+                            colors =
+                            ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+                            enabled = filledForm && !birthDateError
+                        ) {
                             Text(
                                 "NEXT",
                                 style = MaterialTheme.typography.labelLarge,
-                                color = colorScheme.background)
-                          }
+                                color = colorScheme.background
+                            )
+                        }
                     }
-              }
-        })
-  }
+                }
+            })
+    }
 }

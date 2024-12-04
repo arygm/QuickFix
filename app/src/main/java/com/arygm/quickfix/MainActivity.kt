@@ -213,7 +213,6 @@ fun QuickFixApp() {
                   WelcomeScreen(
                       navigationActionsRoot,
                       accountViewModel,
-                      loggedInAccountViewModel,
                       userViewModel,
                       preferencesViewModel)
                 }
@@ -228,14 +227,12 @@ fun QuickFixApp() {
                   RegisterScreen(
                       navigationActionsRoot,
                       accountViewModel,
-                      loggedInAccountViewModel,
                       userViewModel,
                       preferencesViewModel)
                 }
                 composable(Screen.GOOGLE_INFO) {
                   GoogleInfoScreen(
                       navigationActionsRoot,
-                      loggedInAccountViewModel,
                       accountViewModel,
                       userViewModel,
                       preferencesViewModel

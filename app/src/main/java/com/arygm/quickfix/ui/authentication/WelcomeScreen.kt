@@ -44,7 +44,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -53,20 +52,15 @@ import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.ui.theme.ButtonPrimary
 import com.arygm.quickfix.utils.rememberFirebaseAuthLauncher
-import com.arygm.quickfix.utils.timestampToString
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UseOfNonLambdaOffsetOverload")
 @Composable
 fun WelcomeScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
     userViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel
 ) {
