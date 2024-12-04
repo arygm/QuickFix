@@ -1,5 +1,6 @@
 package com.arygm.quickfix
 
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -27,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -62,6 +64,8 @@ import com.arygm.quickfix.ui.search.SearchWorkerResult
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.utils.LocationHelper
 import kotlinx.coroutines.delay
+
+val Context.dataStore by preferencesDataStore(name = "quickfix_preferences")
 
 class MainActivity : ComponentActivity() {
 
@@ -130,7 +134,8 @@ fun QuickFixApp() {
   val announcementViewModel: AnnouncementViewModel =
       viewModel(factory = AnnouncementViewModel.Factory)
   val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
-    val preferencesViewModel: PreferencesViewModel = viewModel(factory = PreferencesViewModel.Factory(LocalContext.current))
+
+    val preferencesViewModel: PreferencesViewModel = viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
 
 
 

@@ -5,6 +5,7 @@ datastorePreferencesCore = "1.1.1"
 kotlin = "1.9.25"
 coreKtx = "1.13.1"
 gms = "4.4.2"
+kotlinxCoroutinesTest = "1.6.4"
 ktfmt = "0.17.0"
 json = "20240303"
 junit = "4.13.2"
@@ -58,6 +59,7 @@ androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-p
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 json = { module = "org.json:json", version.ref = "json" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
