@@ -54,7 +54,6 @@ class SearchOnBoardingTest {
       SearchOnBoarding(
           navigationActions = navigationActions,
           navigationActionsRoot,
-          isUser = true,
           searchViewModel,
           accountViewModel,
           categoryViewModel)
@@ -74,7 +73,6 @@ class SearchOnBoardingTest {
       SearchOnBoarding(
           navigationActions = navigationActions,
           navigationActionsRoot,
-          isUser = true,
           searchViewModel,
           accountViewModel,
           categoryViewModel)
@@ -95,7 +93,6 @@ class SearchOnBoardingTest {
       SearchOnBoarding(
           navigationActions = navigationActions,
           navigationActionsRoot = navigationActionsRoot,
-          isUser = true,
           searchViewModel = searchViewModel,
           accountViewModel = accountViewModel,
           categoryViewModel = categoryViewModel)
@@ -164,7 +161,9 @@ class SearchOnBoardingTest {
           listState = rememberLazyListState(),
           searchViewModel = searchViewModel,
           accountViewModel = accountViewModel,
-          navigationActions = navigationActions)
+          widthRatio = 0.8f,
+          heightRatio = 0.8f,
+      )
     }
 
     // Advance the clock to allow coroutines to complete

@@ -56,7 +56,6 @@ import com.arygm.quickfix.utils.LocationHelper
 fun SearchOnBoarding(
     navigationActions: NavigationActions,
     navigationActionsRoot: NavigationActions,
-    isUser: Boolean,
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
     categoryViewModel: CategoryViewModel
@@ -73,8 +72,8 @@ fun SearchOnBoarding(
   var searchQuery by remember { mutableStateOf("") }
 
   BoxWithConstraints {
-    val widthRatio = maxWidth / 411
-    val heightRatio = maxHeight / 860
+    val widthRatio = maxWidth.value / 411f
+    val heightRatio = maxHeight.value / 860f
     val sizeRatio = minOf(widthRatio, heightRatio)
 
     // Use Scaffold for the layout structure
@@ -85,11 +84,11 @@ fun SearchOnBoarding(
               modifier =
                   Modifier.fillMaxWidth()
                       .padding(padding)
-                      .padding(top = 40.dp)
-                      .padding(horizontal = 10.dp),
+                      .padding(top = 40.dp * heightRatio)
+                      .padding(horizontal = 10.dp * widthRatio),
               horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp * heightRatio),
                     horizontalArrangement = Arrangement.Center) {
                       QuickFixTextFieldCustom(
                           modifier = Modifier.testTag("searchContent"),
@@ -118,22 +117,22 @@ fun SearchOnBoarding(
                           textColor = colorScheme.onBackground,
                           placeHolderColor = colorScheme.onBackground,
                           leadIconColor = colorScheme.onBackground,
-                          widthField = 320.dp * widthRatio.value,
-                          heightField = 40.dp,
-                          moveContentHorizontal = 10.dp,
+                          widthField = 300.dp * widthRatio,
+                          heightField = 40.dp * heightRatio,
+                          moveContentHorizontal = 10.dp * widthRatio,
                           moveContentBottom = 0.dp,
                           moveContentTop = 0.dp,
-                          sizeIconGroup = 30.dp,
+                          sizeIconGroup = 30.dp * sizeRatio,
                           spaceBetweenLeadIconText = 0.dp,
                           onClick = true,
                       )
-                      Spacer(modifier = Modifier.width(10.dp))
+                      Spacer(modifier = Modifier.width(10.dp * widthRatio))
                       QuickFixButton(
                           buttonText = "Cancel",
-                          textColor = colorScheme.onSecondaryContainer,
+                          textColor = colorScheme.onBackground,
                           buttonColor = colorScheme.background,
                           buttonOpacity = 1f,
-                          textStyle = poppinsTypography.labelSmall,
+                          textStyle = poppinsTypography.bodyMedium,
                           onClickAction = {
                             navigationActionsRoot.navigateTo(TopLevelDestinations.HOME)
                           },
@@ -143,20 +142,24 @@ fun SearchOnBoarding(
                 if (searchQuery.isEmpty()) {
                   // Show Categories
                   CategoryContent(
-                      categories = categories,
                       navigationActions = navigationActions,
                       searchViewModel = searchViewModel,
                       listState = listState,
                       expandedStates = expandedStates,
-                      itemCategories = itemCategories)
+                      itemCategories = itemCategories,
+                      widthRatio = widthRatio,
+                      heightRatio = heightRatio,
+                  )
                 } else {
                   // Show Profiles
                   ProfileContent(
                       profiles = profiles,
-                      navigationActions = navigationActions,
                       searchViewModel = searchViewModel,
                       accountViewModel = accountViewModel,
-                      listState = listState)
+                      listState = listState,
+                      widthRatio = widthRatio,
+                      heightRatio = heightRatio,
+                  )
                 }
               }
         })
@@ -165,22 +168,23 @@ fun SearchOnBoarding(
 
 @Composable
 fun CategoryContent(
-    categories: List<Category>,
     navigationActions: NavigationActions,
     searchViewModel: SearchViewModel,
     listState: LazyListState,
     expandedStates: MutableList<Boolean>,
-    itemCategories: List<Category>
+    itemCategories: List<Category>,
+    widthRatio: Float,
+    heightRatio: Float,
 ) {
   Column(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp * widthRatio),
       horizontalAlignment = Alignment.Start) {
         Text(
             text = "Categories",
             style = poppinsTypography.labelLarge,
             color = colorScheme.onBackground,
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(4.dp * heightRatio))
         LazyColumn(modifier = Modifier.fillMaxWidth(), state = listState) {
           itemsIndexed(itemCategories, key = { index, _ -> index }) { index, item ->
             ExpandableCategoryItem(
@@ -190,7 +194,7 @@ fun CategoryContent(
                 searchViewModel = searchViewModel,
                 navigationActions = navigationActions,
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(10.dp * heightRatio))
           }
         }
       }
@@ -202,11 +206,12 @@ fun ProfileContent(
     listState: LazyListState,
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
-    navigationActions: NavigationActions
+    widthRatio: Float,
+    heightRatio: Float,
 ) {
   // Column for wrapping the list
   Column(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp * widthRatio),
       horizontalAlignment = Alignment.Start) {
         // Title: "Profiles"
         Text(
@@ -214,7 +219,7 @@ fun ProfileContent(
             style = poppinsTypography.labelLarge,
             color = colorScheme.onBackground,
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(4.dp * heightRatio))
 
         // LazyColumn for displaying profiles
         LazyColumn(modifier = Modifier.fillMaxWidth(), state = listState) {
@@ -251,7 +256,7 @@ fun ProfileContent(
             account?.let { acc ->
               SearchWorkerProfileResult(
                   modifier =
-                      Modifier.padding(vertical = 10.dp)
+                      Modifier.padding(vertical = 10.dp * heightRatio)
                           .fillMaxWidth()
                           .testTag("worker_profile_result_$index"),
                   profileImage = R.drawable.placeholder_worker, // Replace with actual image
@@ -267,7 +272,7 @@ fun ProfileContent(
                   })
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(10.dp * heightRatio))
           }
         }
       }

@@ -102,7 +102,6 @@ fun QuickFixFinderScreen(
                           SearchOnBoarding(
                               navigationActions,
                               navigationActionsRoot,
-                              isUser,
                               searchViewModel,
                               accountViewModel,
                               categoryViewModel)
