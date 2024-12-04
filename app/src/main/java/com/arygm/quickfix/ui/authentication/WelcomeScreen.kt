@@ -129,6 +129,16 @@ fun WelcomeScreen(
 
   val token = stringResource(com.arygm.quickfix.R.string.default_web_client_id)
 
+    // fast forward to home screen if user is already signed in
+    LaunchedEffect(Unit) {
+        preferencesViewModel.loadPreference(com.arygm.quickfix.utils.IS_SIGN_IN_KEY) {
+            if (it == true) { // Ensure the value is `true` before navigating
+                navigationActions.navigateTo(TopLevelDestinations.HOME)
+            } else {
+                Log.d("SignInScreen", "User is not signed in or preference not set")
+            }
+        }
+    }
   LaunchedEffect(Unit) {
     expandBox = false // Start expanding the box
     delay(200) // Wait for box to fully shrink

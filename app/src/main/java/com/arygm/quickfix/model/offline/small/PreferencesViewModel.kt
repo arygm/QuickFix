@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
@@ -15,7 +16,7 @@ class PreferencesViewModel(
 ) : ViewModel() {
 
     private val _preferenceValue = MutableStateFlow<Any?>(null)
-    val preferenceValue: StateFlow<Any?> get() = _preferenceValue
+    val preferenceValue: StateFlow<Any?> = _preferenceValue.asStateFlow()
 
     companion object {
         fun Factory(context: Context): ViewModelProvider.Factory {
@@ -29,16 +30,11 @@ class PreferencesViewModel(
         }
     }
 
-    fun <T> loadPreference(key: Preferences.Key<T>) {
+    fun <T> loadPreference(key: Preferences.Key<T>, onLoaded: (T?) -> Unit) {
         viewModelScope.launch {
-            repository.getPreferenceByKey(key)
-                .catch {
-                    // Handle exceptions (e.g., log or show error message)
-                    _preferenceValue.value = null
-                }
-                .collect { value ->
-                    _preferenceValue.value = value
-                }
+            repository.getPreferenceByKey(key).collect { value ->
+                onLoaded(value)
+            }
         }
     }
 

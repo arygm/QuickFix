@@ -326,7 +326,6 @@ fun ProfileNavHost(
           profileNavigationActions,
           loggedInAccountViewModel = loggedInAccountViewModel,
           navigationActionsRoot,
-          preferencesViewModel
       )
     }
     composable(Screen.ACCOUNT_CONFIGURATION) {
@@ -334,7 +333,6 @@ fun ProfileNavHost(
           profileNavigationActions,
           accountViewModel,
           loggedInAccountViewModel,
-          preferencesViewModel
       )
     }
     composable(Screen.TO_WORKER) {
@@ -344,7 +342,6 @@ fun ProfileNavHost(
           workerViewModel,
           loggedInAccountViewModel,
           categoryViewModel,
-          preferencesViewModel
       )
     }
   }
