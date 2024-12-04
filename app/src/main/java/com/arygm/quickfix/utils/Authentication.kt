@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
@@ -34,102 +33,113 @@ fun rememberFirebaseAuthLauncher(
     onAuthCompleteTwo: (AuthResult) -> Unit,
     onAuthError: (ApiException) -> Unit,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
     userViewModel: ProfileViewModel,
+    preferencesViewModel: PreferencesViewModel
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
-  val scope = rememberCoroutineScope()
-  return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-      result ->
-    val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-    try {
-      val account = task.getResult(ApiException::class.java)!!
-      val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-      scope.launch {
-        val authResult = Firebase.auth.signInWithCredential(credential).await()
-        val user = Firebase.auth.currentUser
+    val scope = rememberCoroutineScope()
 
-        user?.let {
-          accountViewModel.fetchUserAccount(it.uid) { existingAccount ->
-            if (existingAccount != null) {
-              loggedInAccountViewModel.setLoggedInAccount(existingAccount)
-              onAuthCompleteOne(authResult)
-            } else {
-              // Extract user information from Google account
-              val firstName = account.givenName ?: ""
-              val lastName = account.familyName ?: ""
-              val email = account.email ?: ""
-              val uid = user.uid
+    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)!!
+            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+            scope.launch {
+                val authResult = Firebase.auth.signInWithCredential(credential).await()
+                val user = Firebase.auth.currentUser
 
-              // Create a new Account object
-              val account =
-                  Account(
-                      uid = uid,
-                      firstName = firstName,
-                      lastName = lastName,
-                      email = email,
-                      birthDate = Timestamp.now())
+                user?.let {
+                    accountViewModel.fetchUserAccount(it.uid) { existingAccount ->
+                        if (existingAccount != null) {
+                            setAccountPreferences(preferencesViewModel, existingAccount)
+                            onAuthCompleteOne(authResult)
+                        } else {
+                            // Extract user information from Google account
+                            val firstName = account.givenName ?: ""
+                            val lastName = account.familyName ?: ""
+                            val email = account.email ?: ""
+                            val uid = user.uid
 
-              val defaultLocation = Location(0.0, 0.0, "defaultLocation")
-              val defaultUserProfile =
-                  UserProfile(
-                      uid = it.uid,
-                      locations = listOf(defaultLocation),
-                      announcements = emptyList())
-              userViewModel.addProfile(
-                  defaultUserProfile,
-                  onSuccess = {
-                    accountViewModel.addAccount(
-                        account,
-                        onSuccess = {
-                          loggedInAccountViewModel.setLoggedInAccount(account)
-                          onAuthCompleteTwo(authResult)
-                        },
-                        onFailure = { Log.e("Registration", "Failed to save account") })
-                  },
-                  onFailure = { Log.e("Registration", "Failed to create User Profile") })
+                            // Create a new Account object
+                            val newAccount =
+                                Account(
+                                    uid = uid,
+                                    firstName = firstName,
+                                    lastName = lastName,
+                                    email = email,
+                                    birthDate = Timestamp.now()
+                                )
+                            setAccountPreferences(preferencesViewModel, newAccount)
+                            val defaultLocation = Location(0.0, 0.0, "defaultLocation")
+                            val defaultUserProfile =
+                                UserProfile(
+                                    uid = it.uid,
+                                    locations = listOf(defaultLocation),
+                                    announcements = emptyList()
+                                )
+                            userViewModel.addProfile(
+                                defaultUserProfile,
+                                onSuccess = {
+                                    accountViewModel.addAccount(
+                                        newAccount,
+                                        onSuccess = {
+                                            onAuthCompleteTwo(authResult)
+                                        },
+                                        onFailure = {
+                                            Log.e(
+                                                "Registration",
+                                                "Failed to save account"
+                                            )
+                                        })
+                                },
+                                onFailure = {
+                                    Log.e(
+                                        "Registration",
+                                        "Failed to create User Profile"
+                                    )
+                                })
+                        }
+                    }
+                } ?: run { Log.e("Google SignIn", "User Null After Sign In") }
             }
-          }
-        } ?: run { Log.e("Google SignIn", "User Null After Sign In") }
-      }
-    } catch (e: ApiException) {
-      onAuthError(e)
+        } catch (e: ApiException) {
+            onAuthError(e)
+        }
     }
-  }
 }
 
 fun signInWithEmailAndFetchAccount(
     email: String,
     password: String,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
+    preferencesViewModel: PreferencesViewModel,
     onResult: (Boolean) -> Unit
 ) {
-  FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
-      task ->
-    if (task.isSuccessful) {
-      val user = FirebaseAuth.getInstance().currentUser
-      user?.let {
-        accountViewModel.fetchUserAccount(
-            it.uid,
-            onResult = { account ->
-              if (account != null) {
-                loggedInAccountViewModel.setLoggedInAccount(account)
-                onResult(true)
-              } else {
+    FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val user = FirebaseAuth.getInstance().currentUser
+                user?.let {
+                    accountViewModel.fetchUserAccount(
+                        it.uid,
+                        onResult = { account ->
+                            if (account != null) {
+                                setAccountPreferences(preferencesViewModel, account)
+                                onResult(true)
+                            } else {
+                                Log.e("Login Screen", "Error Logging in Account.")
+                                onResult(false)
+                            }
+                        })
+                }
+                    ?: run {
+                        Log.e("Login Screen", "Error Logging in Account.")
+                        onResult(false)
+                    }
+            } else {
                 Log.e("Login Screen", "Error Logging in Account.")
                 onResult(false)
-              }
-            })
-      }
-          ?: run {
-            Log.e("Login Screen", "Error Logging in Account.")
-            onResult(false)
-          }
-    } else {
-      Log.e("Login Screen", "Error Logging in Account.")
-      onResult(false)
-    }
-  }
+            }
+        }
 }
 
 fun createAccountWithEmailAndPassword(
@@ -140,91 +150,68 @@ fun createAccountWithEmailAndPassword(
     password: String,
     birthDate: String,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
     userViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
     onSuccess: () -> Unit,
     onFailure: () -> Unit
 ) {
-  firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-    if (task.isSuccessful) {
-      val user = FirebaseAuth.getInstance().currentUser
-      user?.let {
-        val account =
-            stringToTimestamp(birthDate)?.let { birthTimestamp ->
-              Account(
-                  uid = it.uid,
-                  firstName = firstName,
-                  lastName = lastName,
-                  email = email,
-                  birthDate = birthTimestamp)
-            }
-        if (account == null) {
-          Log.e("Registration", "Invalid BirthDate.")
-          onFailure()
-        }
-        val defaultLocation = Location(0.0, 0.0, "defaultLocation")
-        val defaultUserProfile =
-            UserProfile(
-                uid = it.uid, locations = listOf(defaultLocation), announcements = emptyList())
-        userViewModel.addProfile(
-            defaultUserProfile,
-            onSuccess = {
-              account?.let { createdAccount ->
-                accountViewModel.addAccount(
-                    createdAccount,
+    firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+            val user = FirebaseAuth.getInstance().currentUser
+            user?.let {
+                val account =
+                    stringToTimestamp(birthDate)?.let { birthTimestamp ->
+                        Account(
+                            uid = it.uid,
+                            firstName = firstName,
+                            lastName = lastName,
+                            email = email,
+                            birthDate = birthTimestamp
+                        )
+                    }
+                if (account == null) {
+                    Log.e("Registration", "Invalid BirthDate.")
+                    onFailure()
+                }
+                val defaultLocation = Location(0.0, 0.0, "defaultLocation")
+                val defaultUserProfile =
+                    UserProfile(
+                        uid = it.uid,
+                        locations = listOf(defaultLocation),
+                        announcements = emptyList()
+                    )
+                userViewModel.addProfile(
+                    defaultUserProfile,
                     onSuccess = {
-                        CoroutineScope(Dispatchers.IO).launch {
-                          preferencesViewModel.savePreference(
-                              key = IS_SIGN_IN_KEY,
-                                value = true
-                          )
-                            preferencesViewModel.savePreference(
-                                key = EMAIL_KEY,
-                                value = email
-                            )
-                            preferencesViewModel.savePreference(
-                                key = USER_ID_KEY,
-                                value = createdAccount.uid
-                            )
-                            preferencesViewModel.savePreference(
-                                key = FIRST_NAME_KEY,
-                                value = createdAccount.firstName
-                            )
-                            preferencesViewModel.savePreference(
-                                key = LAST_NAME_KEY,
-                                value = createdAccount.lastName
-                            )
-                            preferencesViewModel.savePreference(
-                                key = DATE_OF_BIRTH_KEY,
-                                value = birthDate
-                            )
+                        account?.let { createdAccount ->
+                            accountViewModel.addAccount(
+                                createdAccount,
+                                onSuccess = {
+                                    setAccountPreferences(preferencesViewModel, createdAccount)
+                                    onSuccess()
+                                },
+                                onFailure = {
+                                    Log.e("Registration", "Failed to save account")
+                                    onFailure()
+                                })
                         }
-                      loggedInAccountViewModel.setLoggedInAccount(createdAccount)
-                      onSuccess()
                     },
                     onFailure = {
-                      Log.e("Registration", "Failed to save account")
-                      onFailure()
+                        Log.e("Registration", "Failed to create User Profile")
+                        onFailure()
                     })
-              }
-            },
-            onFailure = {
-              Log.e("Registration", "Failed to create User Profile")
-              onFailure()
-            })
-      }
-          ?: run {
-            Log.e("Registration", "Failed to create account")
+            }
+                ?: run {
+                    Log.e("Registration", "Failed to create account")
+                    onFailure()
+                }
+        } else {
+            Log.e("Registration", "Error creating account: ${task.exception?.message}")
             onFailure()
-          }
-    } else {
-      Log.e("Registration", "Error creating account: ${task.exception?.message}")
-      onFailure()
+        }
     }
-  }
 }
 
 fun logOut(firebaseAuth: FirebaseAuth) {
-  firebaseAuth.signOut()
+    firebaseAuth.signOut()
 }

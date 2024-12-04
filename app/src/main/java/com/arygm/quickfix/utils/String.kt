@@ -3,8 +3,11 @@ package com.arygm.quickfix.utils
 import android.util.Log
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.GregorianCalendar
+import java.util.Locale
 import java.util.regex.Pattern
 
 fun isValidEmail(email: String): Boolean {
@@ -42,7 +45,7 @@ fun isValidDate(date: String): Boolean {
   return day in 1..daysInMonth
 }
 
-fun stringToTimestamp(date: String): com.google.firebase.Timestamp? {
+fun stringToTimestamp(date: String): Timestamp? {
   // First validate the date format and value using isValidDate
   if (!isValidDate(date)) {
     Log.e("DateConversion", "Invalid date format or value: $date")
@@ -56,7 +59,16 @@ fun stringToTimestamp(date: String): com.google.firebase.Timestamp? {
         set(Calendar.SECOND, 0)
         set(Calendar.MILLISECOND, 0)
       }
-  return com.google.firebase.Timestamp(calendar.time)
+  return Timestamp(calendar.time)
+}
+
+fun timestampToString(timestamp: Timestamp, pattern: String = "dd-MM-yyyy"): String {
+  Log.d("DateConversion", "Converting timestamp: $timestamp")
+  val date = timestamp.toDate() // Converts Firebase Timestamp to a Java Date object
+  val formatter = SimpleDateFormat(pattern, Locale.getDefault()) // Format the Date
+  val ret = formatter.format(date)
+  Log.d("DateConversion", "Converted date: $ret")
+  return ret
 }
 
 fun splitDate(date: String): Triple<Int, Int, Int> {

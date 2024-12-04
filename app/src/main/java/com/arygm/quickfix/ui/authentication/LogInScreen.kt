@@ -64,6 +64,7 @@ import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.isValidEmail
 import com.arygm.quickfix.utils.signInWithEmailAndFetchAccount
+import com.arygm.quickfix.utils.timestampToString
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -72,7 +73,6 @@ import kotlinx.coroutines.launch
 fun LogInScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
     preferencesViewModel: PreferencesViewModel
 ) {
   var errorHasOccurred by remember { mutableStateOf(false) }
@@ -271,36 +271,10 @@ fun LogInScreen(
                                       email = email,
                                       password = password,
                                       accountViewModel = accountViewModel,
-                                      loggedInAccountViewModel = loggedInAccountViewModel,
+                                      preferencesViewModel = preferencesViewModel,
                                       onResult = {
                                         if (it) {
-                                          coroutineScope.launch {
-                                              preferencesViewModel.savePreference(
-                                                  key = com.arygm.quickfix.utils.IS_SIGN_IN_KEY,
-                                                  value = true
-                                              )
-                                              preferencesViewModel.savePreference(
-                                                  key = com.arygm.quickfix.utils.EMAIL_KEY,
-                                                  value = email
-                                              )
-                                              loggedInAccountViewModel.loggedInAccount.value?.let { it1 ->
-                                                  preferencesViewModel.savePreference(
-                                                      key = com.arygm.quickfix.utils.FIRST_NAME_KEY,
-                                                      value = it1.firstName
-                                                  )
-                                                  preferencesViewModel.savePreference(
-                                                      key = com.arygm.quickfix.utils.LAST_NAME_KEY,
-                                                      value = it1.lastName
-                                                  )
-                                                  preferencesViewModel.savePreference(
-                                                      key = com.arygm.quickfix.utils.DATE_OF_BIRTH_KEY,
-                                                      value = it1.birthDate.toString()
-                                                  )
-                                                  preferencesViewModel.savePreference(
-                                                      key = com.arygm.quickfix.utils.USER_ID_KEY,
-                                                      value = it1.uid
-                                                  )
-                                              }
+                                            coroutineScope.launch {
                                             shrinkBox = false
                                             delay(BOX_COLLAPSE_SPEED.toLong())
                                             Log.d("LoginFlow", "Starting login with email: $email")

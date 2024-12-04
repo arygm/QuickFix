@@ -27,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -43,7 +42,7 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
-import com.arygm.quickfix.ui.account.AccountConfigurationScreen
+import com.arygm.quickfix.ui.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
@@ -222,7 +221,6 @@ fun QuickFixApp() {
                   LogInScreen(
                       navigationActionsRoot,
                       accountViewModel,
-                      loggedInAccountViewModel,
                       preferencesViewModel
                   )
                 }
@@ -329,15 +327,15 @@ fun ProfileNavHost(
     composable(Screen.PROFILE) {
       ProfileScreen(
           profileNavigationActions,
-          loggedInAccountViewModel = loggedInAccountViewModel,
           navigationActionsRoot,
+          preferencesViewModel
       )
     }
     composable(Screen.ACCOUNT_CONFIGURATION) {
       AccountConfigurationScreen(
           profileNavigationActions,
           accountViewModel,
-          loggedInAccountViewModel,
+          preferencesViewModel
       )
     }
     composable(Screen.TO_WORKER) {

@@ -78,7 +78,6 @@ import com.google.firebase.auth.FirebaseAuth
 fun RegisterScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
     userViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
     firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(), // Injected dependency
@@ -91,7 +90,6 @@ fun RegisterScreen(
         password: String,
         birthDate: String,
         accountViewModel: AccountViewModel,
-        loggedInAccountViewModel: LoggedInAccountViewModel,
         userViewModel: ProfileViewModel,
         preferencesViewModel: PreferencesViewModel,
         onSuccess: () -> Unit,
@@ -491,7 +489,6 @@ fun RegisterScreen(
                                           password,
                                           birthDate,
                                           accountViewModel,
-                                          loggedInAccountViewModel,
                                           userViewModel,
                                             preferencesViewModel,
                                           {
