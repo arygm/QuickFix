@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,12 +37,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.Category
+import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -62,7 +61,7 @@ fun SearchOnBoarding(
     accountViewModel: AccountViewModel,
     categoryViewModel: CategoryViewModel
 ) {
-    val profiles = searchViewModel.workerProfiles.collectAsState().value
+  val profiles = searchViewModel.workerProfiles.collectAsState().value
   val categories = categoryViewModel.categories.collectAsState().value
   Log.d("SearchOnBoarding", "Categories: $categories")
   val itemCategories = remember { categories }
@@ -141,26 +140,24 @@ fun SearchOnBoarding(
                           contentPadding = PaddingValues(0.dp),
                       )
                     }
-                      if (searchQuery.isEmpty()) {
-                          // Show Categories
-                          CategoryContent(
-                              categories = categories,
-                              navigationActions = navigationActions,
-                              searchViewModel = searchViewModel,
-                              listState = listState,
-                                expandedStates = expandedStates,
-                                itemCategories = itemCategories
-                          )
-                      } else {
-                          // Show Profiles
-                          ProfileContent(
-                              profiles = profiles,
-                              navigationActions = navigationActions,
-                                searchViewModel = searchViewModel,
-                                accountViewModel = accountViewModel,
-                                listState = listState
-                          )
-                      }
+                if (searchQuery.isEmpty()) {
+                  // Show Categories
+                  CategoryContent(
+                      categories = categories,
+                      navigationActions = navigationActions,
+                      searchViewModel = searchViewModel,
+                      listState = listState,
+                      expandedStates = expandedStates,
+                      itemCategories = itemCategories)
+                } else {
+                  // Show Profiles
+                  ProfileContent(
+                      profiles = profiles,
+                      navigationActions = navigationActions,
+                      searchViewModel = searchViewModel,
+                      accountViewModel = accountViewModel,
+                      listState = listState)
+                }
               }
         })
   }
@@ -175,9 +172,9 @@ fun CategoryContent(
     expandedStates: MutableList<Boolean>,
     itemCategories: List<Category>
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
-        horizontalAlignment = Alignment.Start) {
+  Column(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+      horizontalAlignment = Alignment.Start) {
         Text(
             text = "Categories",
             style = poppinsTypography.labelLarge,
@@ -185,18 +182,18 @@ fun CategoryContent(
         )
         Spacer(modifier = Modifier.height(4.dp))
         LazyColumn(modifier = Modifier.fillMaxWidth(), state = listState) {
-            itemsIndexed(itemCategories, key = { index, _ -> index }) { index, item ->
-                ExpandableCategoryItem(
-                    item = item,
-                    isExpanded = expandedStates[index],
-                    onExpandedChange = { expandedStates[index] = it },
-                    searchViewModel = searchViewModel,
-                    navigationActions = navigationActions,
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-            }
+          itemsIndexed(itemCategories, key = { index, _ -> index }) { index, item ->
+            ExpandableCategoryItem(
+                item = item,
+                isExpanded = expandedStates[index],
+                onExpandedChange = { expandedStates[index] = it },
+                searchViewModel = searchViewModel,
+                navigationActions = navigationActions,
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+          }
         }
-    }
+      }
 }
 
 @Composable
@@ -204,79 +201,74 @@ fun ProfileContent(
     profiles: List<WorkerProfile>, // Assuming WorkerProfile is your model class
     listState: LazyListState,
     searchViewModel: SearchViewModel,
-    accountViewModel: AccountViewModel, navigationActions: NavigationActions
+    accountViewModel: AccountViewModel,
+    navigationActions: NavigationActions
 ) {
-    // Column for wrapping the list
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 10.dp),
-        horizontalAlignment = Alignment.Start
-    ) {
+  // Column for wrapping the list
+  Column(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+      horizontalAlignment = Alignment.Start) {
         // Title: "Profiles"
         Text(
             text = "Profiles",
             style = poppinsTypography.labelLarge,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = colorScheme.onBackground,
         )
         Spacer(modifier = Modifier.height(4.dp))
 
         // LazyColumn for displaying profiles
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-            state = listState
-        ) {
-            items(profiles.size) { index ->
-                val profile = profiles[index]
-                var account by remember { mutableStateOf<Account?>(null) }
-                var distance by remember { mutableStateOf<Int?>(null) }
+        LazyColumn(modifier = Modifier.fillMaxWidth(), state = listState) {
+          items(profiles.size) { index ->
+            val profile = profiles[index]
+            var account by remember { mutableStateOf<Account?>(null) }
+            var distance by remember { mutableStateOf<Int?>(null) }
 
-                // Get user's current location and calculate distance
-                val locationHelper = LocationHelper(LocalContext.current, MainActivity())
-                locationHelper.getCurrentLocation { location ->
-                    location?.let {
-                        distance =
-                            profile.location?.let { workerLocation ->
-                                searchViewModel.calculateDistance(
-                                    workerLocation.latitude,
-                                    workerLocation.longitude,
-                                    it.latitude,
-                                    it.longitude
-                                ).toInt()
-                            }
+            // Get user's current location and calculate distance
+            val locationHelper = LocationHelper(LocalContext.current, MainActivity())
+            locationHelper.getCurrentLocation { location ->
+              location?.let {
+                distance =
+                    profile.location?.let { workerLocation ->
+                      searchViewModel
+                          .calculateDistance(
+                              workerLocation.latitude,
+                              workerLocation.longitude,
+                              it.latitude,
+                              it.longitude)
+                          .toInt()
                     }
-                }
-
-                // Fetch user account details
-                LaunchedEffect(profile.uid) {
-                    accountViewModel.fetchUserAccount(profile.uid) { fetchedAccount ->
-                        account = fetchedAccount
-                    }
-                }
-
-                // Render profile card if account data is available
-                account?.let { acc ->
-                    SearchWorkerProfileResult(
-                        modifier = Modifier
-                            .padding(vertical = 10.dp)
-                            .fillMaxWidth()
-                            .testTag("worker_profile_result_$index"),
-                        profileImage = R.drawable.placeholder_worker, // Replace with actual image
-                        name = "${acc.firstName} ${acc.lastName}",
-                        category = profile.fieldOfWork,
-                        rating = profile.rating,
-                        reviewCount = profile.reviews.size,
-                        location = profile.location?.name ?: "Unknown",
-                        price = profile.price.toString(),
-                        distance = distance,
-                        onBookClick = {
-                            // Handle book action
-                        }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
+              }
             }
+
+            // Fetch user account details
+            LaunchedEffect(profile.uid) {
+              accountViewModel.fetchUserAccount(profile.uid) { fetchedAccount ->
+                account = fetchedAccount
+              }
+            }
+
+            // Render profile card if account data is available
+            account?.let { acc ->
+              SearchWorkerProfileResult(
+                  modifier =
+                      Modifier.padding(vertical = 10.dp)
+                          .fillMaxWidth()
+                          .testTag("worker_profile_result_$index"),
+                  profileImage = R.drawable.placeholder_worker, // Replace with actual image
+                  name = "${acc.firstName} ${acc.lastName}",
+                  category = profile.fieldOfWork,
+                  rating = profile.rating,
+                  reviewCount = profile.reviews.size,
+                  location = profile.location?.name ?: "Unknown",
+                  price = profile.price.toString(),
+                  distance = distance,
+                  onBookClick = {
+                    // Handle book action
+                  })
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+          }
         }
-    }
+      }
 }
