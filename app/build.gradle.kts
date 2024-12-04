@@ -185,6 +185,7 @@ dependencies {
     implementation(libs.androidx.espresso.core)
     implementation(libs.androidx.espresso.intents)
     implementation(libs.mockk.android)
+    implementation(libs.androidx.datastore.preferences)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.mockk)
