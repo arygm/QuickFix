@@ -4,8 +4,8 @@ import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.arygm.quickfix.model.bill.BillField
 import com.arygm.quickfix.model.locations.Location
-import com.arygm.quickfix.model.service.AddOnService
-import com.arygm.quickfix.model.service.IncludedService
+import com.arygm.quickfix.model.profile.dataFields.AddOnService
+import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp

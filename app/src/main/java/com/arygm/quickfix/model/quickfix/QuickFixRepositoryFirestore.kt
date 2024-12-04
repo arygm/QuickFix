@@ -3,8 +3,8 @@ package com.arygm.quickfix.model.quickfix
 import android.util.Log
 import com.arygm.quickfix.model.bill.BillField
 import com.arygm.quickfix.model.locations.Location
-import com.arygm.quickfix.model.service.AddOnService
-import com.arygm.quickfix.model.service.IncludedService
+import com.arygm.quickfix.model.profile.dataFields.AddOnService
+import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.utils.performFirestoreOperation
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp

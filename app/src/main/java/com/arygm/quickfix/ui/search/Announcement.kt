@@ -1,6 +1,10 @@
 package com.arygm.quickfix.ui.search
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,10 +26,12 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,11 +42,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.search.Announcement
@@ -49,6 +57,7 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Screen
 
 @Composable
 fun AnnouncementScreen(
@@ -66,18 +75,34 @@ fun AnnouncementScreen(
       loggedInAccount?.uid
           ?: "Should not happen" // If no user is logged, no announcement can be made
 
-  var title by remember { mutableStateOf("") }
-  var category by remember { mutableStateOf("") }
-  var location by remember { mutableStateOf("") }
-  var description by remember { mutableStateOf("") }
+  var title by rememberSaveable { mutableStateOf("") }
+  var category by rememberSaveable { mutableStateOf("") }
+  // var location by remember { mutableStateOf("") }
+  var location by remember { mutableStateOf<Location?>(null) }
+  var description by rememberSaveable { mutableStateOf("") }
 
-  var titleIsEmpty by remember { mutableStateOf(true) }
-  var categoryIsSelected by remember { mutableStateOf(true) } // TODO: add the different categories
-  var locationIsSelected by remember { mutableStateOf(true) } // TODO: add the implemented location
-  var descriptionIsEmpty by remember { mutableStateOf(true) }
+  var titleIsEmpty by rememberSaveable { mutableStateOf(true) }
+  var categoryIsSelected by rememberSaveable {
+    mutableStateOf(true)
+  } // TODO: add the different categories
+  var locationIsSelected by rememberSaveable {
+    mutableStateOf(false)
+  } // TODO: add the implemented location
+  var descriptionIsEmpty by rememberSaveable { mutableStateOf(true) }
 
   // State to control the visibility of the image upload sheet
-  var showUploadImageSheet by remember { mutableStateOf(false) }
+  var showUploadImageSheet by rememberSaveable { mutableStateOf(false) }
+  LaunchedEffect(Unit) {
+    val selectedLocation = navigationActions.getFromBackStack("selectedLocation") as? Location
+
+    if (selectedLocation != null) {
+      location = selectedLocation
+      locationIsSelected = true
+    } else {
+      location = null
+      locationIsSelected = false
+    }
+  }
 
   BoxWithConstraints {
     val widthRatio = maxWidth / 411
@@ -187,26 +212,35 @@ fun AnnouncementScreen(
             Column(
                 modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
             ) {
-              QuickFixTextFieldCustom(
-                  value = location,
-                  onValueChange = { location = it },
-                  placeHolderText = "Enter the location",
-                  placeHolderColor = colorScheme.onSecondaryContainer,
-                  shape = RoundedCornerShape(12.dp),
-                  moveContentHorizontal = 10.dp,
-                  heightField = 42.dp,
-                  widthField = 360.dp,
-                  modifier = Modifier.testTag("locationInput"),
-                  showLabel = true,
-                  label = {
+              Text(
+                  text = "Location *",
+                  modifier = Modifier.testTag("locationText").padding(start = 3.dp),
+                  style = MaterialTheme.typography.headlineSmall,
+                  color = MaterialTheme.colorScheme.onBackground,
+                  textAlign = TextAlign.Start)
+              Box(
+                  modifier =
+                      Modifier.testTag("locationInput")
+                          .shadow(elevation = 2.dp, shape = RoundedCornerShape(12.dp), clip = false)
+                          .clip(RoundedCornerShape(12.dp))
+                          .background(MaterialTheme.colorScheme.surface)
+                          .border(1.dp, Color.Transparent, RoundedCornerShape(12.dp))
+                          .width(360.dp)
+                          .height(42.dp)
+                          .clickable { navigationActions.navigateTo(Screen.SEARCH_LOCATION) }
+                          .padding(horizontal = 16.dp),
+                  contentAlignment = Alignment.CenterStart) {
                     Text(
-                        "Location *",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = colorScheme.onBackground,
-                        modifier = Modifier.padding(start = 3.dp).testTag("locationText"))
-                  })
+                        text = location?.name ?: "Location",
+                        color =
+                            if (location == null)
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            else MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodyLarge,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                  }
             }
-
             Spacer(modifier = Modifier.padding(10.dp))
 
             QuickFixButtonWithIcon(
@@ -270,7 +304,7 @@ fun AnnouncementScreen(
                           title = title,
                           category = category, // replace by the category type
                           description = description,
-                          location = null,
+                          location = location!!,
                           availability = emptyList(),
                           quickFixImages = emptyList())
                   announcementViewModel.announce(announcement)
@@ -295,11 +329,12 @@ fun AnnouncementScreen(
                   title = ""
                   category = ""
                   description = ""
-                  location = ""
+                  location = null
                   titleIsEmpty = true
-                  categoryIsSelected = false
+                  categoryIsSelected = true // TODO: add the different categories
                   locationIsSelected = false
                   descriptionIsEmpty = true
+                  navigationActions.saveToCurBackStack("selectedLocation", null)
                 },
                 buttonColor = colorScheme.primary,
                 textColor = colorScheme.onPrimary,
