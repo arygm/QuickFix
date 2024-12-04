@@ -62,7 +62,6 @@ class StringTest {
     assertEquals("2023-01-01 12:00:00", result)
   }
 
-
   @Test
   fun `test valid email addresses`() {
     assertTrue(isValidEmail("test@example.com"))

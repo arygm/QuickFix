@@ -44,11 +44,11 @@ class CreateAccountWithEmailAndPasswordTest {
 
   @Mock private lateinit var workerProfileRepository: WorkerProfileRepositoryFirestore
 
-    @Mock private lateinit var preferencesRepository: PreferencesRepositoryDataStore
+  @Mock private lateinit var preferencesRepository: PreferencesRepositoryDataStore
 
   private lateinit var accountViewModel: AccountViewModel
   private lateinit var profileViewModel: ProfileViewModel
-    private lateinit var preferencesViewModel: PreferencesViewModel
+  private lateinit var preferencesViewModel: PreferencesViewModel
 
   private lateinit var firebaseAuthMockedStatic: MockedStatic<FirebaseAuth>
 
@@ -73,7 +73,6 @@ class CreateAccountWithEmailAndPasswordTest {
     // Initialize accountViewModel and profileViewModel with the mocked repositories
     accountViewModel = AccountViewModel(accountRepository)
     profileViewModel = ProfileViewModel(userProfileRepository)
-
 
     // Initialize preferencesViewModel with the mocked repository
     preferencesViewModel = PreferencesViewModel(preferencesRepository)
@@ -163,7 +162,6 @@ class CreateAccountWithEmailAndPasswordTest {
     assertEquals(firstName, capturedAccount.firstName)
     assertEquals(lastName, capturedAccount.lastName)
     assertEquals(email, capturedAccount.email)
-
   }
 
   @Test

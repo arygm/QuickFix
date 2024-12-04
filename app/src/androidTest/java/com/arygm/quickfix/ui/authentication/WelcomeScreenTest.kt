@@ -35,128 +35,127 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class WelcomeScreenTest {
 
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    private lateinit var navigationActions: NavigationActions
-    private lateinit var mockFirestore: FirebaseFirestore
-    private lateinit var accountRepository: AccountRepository
-    private lateinit var accountViewModel: AccountViewModel
-    private lateinit var userProfileRepositoryFirestore: UserProfileRepositoryFirestore
-    private lateinit var workerProfileRepositoryFirestore: WorkerProfileRepositoryFirestore
-    private lateinit var userViewModel: ProfileViewModel
-    private lateinit var preferencesRepository: PreferencesRepository
-    private lateinit var preferencesViewModel: PreferencesViewModel
+  private lateinit var navigationActions: NavigationActions
+  private lateinit var mockFirestore: FirebaseFirestore
+  private lateinit var accountRepository: AccountRepository
+  private lateinit var accountViewModel: AccountViewModel
+  private lateinit var userProfileRepositoryFirestore: UserProfileRepositoryFirestore
+  private lateinit var workerProfileRepositoryFirestore: WorkerProfileRepositoryFirestore
+  private lateinit var userViewModel: ProfileViewModel
+  private lateinit var preferencesRepository: PreferencesRepository
+  private lateinit var preferencesViewModel: PreferencesViewModel
 
-    private var intentsInitialized = false // Keep track of Intents initialization
+  private var intentsInitialized = false // Keep track of Intents initialization
 
-    @Before
-    fun setup() {
-        mockFirestore = mock()
-        navigationActions = mock()
-        userProfileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore)
-        workerProfileRepositoryFirestore = WorkerProfileRepositoryFirestore(mockFirestore)
-        accountRepository = mock()
-        accountViewModel = AccountViewModel(accountRepository)
-        userViewModel = ProfileViewModel(userProfileRepositoryFirestore)
-        preferencesRepository = mock()
-        preferencesViewModel = PreferencesViewModel(preferencesRepository)
+  @Before
+  fun setup() {
+    mockFirestore = mock()
+    navigationActions = mock()
+    userProfileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore)
+    workerProfileRepositoryFirestore = WorkerProfileRepositoryFirestore(mockFirestore)
+    accountRepository = mock()
+    accountViewModel = AccountViewModel(accountRepository)
+    userViewModel = ProfileViewModel(userProfileRepositoryFirestore)
+    preferencesRepository = mock()
+    preferencesViewModel = PreferencesViewModel(preferencesRepository)
 
-        // Explicitly specify the type for getPreferenceByKey
-        whenever(preferencesRepository.getPreferenceByKey(any<Preferences.Key<Boolean>>()))
-            .thenReturn(flowOf(false))
+    // Explicitly specify the type for getPreferenceByKey
+    whenever(preferencesRepository.getPreferenceByKey(any<Preferences.Key<Boolean>>()))
+        .thenReturn(flowOf(false))
 
-        whenever(navigationActions.currentRoute()).thenReturn(Screen.WELCOME)
+    whenever(navigationActions.currentRoute()).thenReturn(Screen.WELCOME)
+  }
+
+  @After
+  fun tearDown() {
+    // Only release Intents if they were initialized
+    if (intentsInitialized) {
+      Intents.release()
+      intentsInitialized = false
+    }
+  }
+
+  @Test
+  fun testInitialState() {
+    composeTestRule.setContent {
+      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
-    @After
-    fun tearDown() {
-        // Only release Intents if they were initialized
-        if (intentsInitialized) {
-            Intents.release()
-            intentsInitialized = false
-        }
+    // Check if the background image is displayed
+    composeTestRule.onNodeWithTag("welcomeBox").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("boxDecoration1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("workerBackground").assertIsDisplayed()
+
+    // Check that the QuickFix logo is displayed
+    composeTestRule.onNodeWithTag("quickFixLogo").assertIsDisplayed()
+
+    // Check that the QuickFix text is displayed
+    composeTestRule.onNodeWithTag("quickFixText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("quickFixText").assertTextEquals("QuickFix")
+
+    // Check that the buttons are displayed
+    composeTestRule.onNodeWithTag("logInButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("logInButton").assertHasClickAction()
+    composeTestRule.onNodeWithTag("logInButton").assertTextEquals("LOG IN TO QUICKFIX")
+    composeTestRule.onNodeWithTag("RegistrationButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("RegistrationButton").assertHasClickAction()
+    composeTestRule.onNodeWithTag("RegistrationButton").assertTextEquals("REGISTER TO QUICKFIX")
+
+    // Check if Google button and logo are displayed
+    composeTestRule.onNodeWithTag("googleButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("googleButton").assertTextEquals("CONTINUE WITH GOOGLE")
+  }
+
+  @Test
+  fun testLogInButtonClickNavigatesToLogin() {
+    composeTestRule.setContent {
+      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
-    @Test
-    fun testInitialState() {
-        composeTestRule.setContent {
-            WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
-        }
+    // Click the "LOG IN TO QUICKFIX" button
+    composeTestRule.onNodeWithTag("logInButton").performClick()
 
-        // Check if the background image is displayed
-        composeTestRule.onNodeWithTag("welcomeBox").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("boxDecoration1").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("workerBackground").assertIsDisplayed()
-
-        // Check that the QuickFix logo is displayed
-        composeTestRule.onNodeWithTag("quickFixLogo").assertIsDisplayed()
-
-        // Check that the QuickFix text is displayed
-        composeTestRule.onNodeWithTag("quickFixText").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("quickFixText").assertTextEquals("QuickFix")
-
-        // Check that the buttons are displayed
-        composeTestRule.onNodeWithTag("logInButton").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("logInButton").assertHasClickAction()
-        composeTestRule.onNodeWithTag("logInButton").assertTextEquals("LOG IN TO QUICKFIX")
-        composeTestRule.onNodeWithTag("RegistrationButton").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("RegistrationButton").assertHasClickAction()
-        composeTestRule.onNodeWithTag("RegistrationButton").assertTextEquals("REGISTER TO QUICKFIX")
-
-        // Check if Google button and logo are displayed
-        composeTestRule.onNodeWithTag("googleButton").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("googleButton").assertTextEquals("CONTINUE WITH GOOGLE")
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      Mockito.mockingDetails(navigationActions).invocations.isNotEmpty()
     }
 
-    @Test
-    fun testLogInButtonClickNavigatesToLogin() {
-        composeTestRule.setContent {
-            WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
-        }
+    // Verify that the navigation action is triggered for the login screen
+    Mockito.verify(navigationActions).navigateTo(Screen.LOGIN)
+  }
 
-        // Click the "LOG IN TO QUICKFIX" button
-        composeTestRule.onNodeWithTag("logInButton").performClick()
-
-        composeTestRule.waitUntil(timeoutMillis = 10000) {
-            Mockito.mockingDetails(navigationActions).invocations.isNotEmpty()
-        }
-
-        // Verify that the navigation action is triggered for the login screen
-        Mockito.verify(navigationActions).navigateTo(Screen.LOGIN)
+  @Test
+  fun testRegistrationButtonClickNavigatesToRegister() {
+    composeTestRule.setContent {
+      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
-    @Test
-    fun testRegistrationButtonClickNavigatesToRegister() {
-        composeTestRule.setContent {
-            WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
-        }
+    // Click the "REGISTER TO QUICKFIX" button
+    composeTestRule.onNodeWithTag("RegistrationButton").performClick()
 
-        // Click the "REGISTER TO QUICKFIX" button
-        composeTestRule.onNodeWithTag("RegistrationButton").performClick()
-
-        composeTestRule.waitUntil(timeoutMillis = 10000) {
-            Mockito.mockingDetails(navigationActions).invocations.isNotEmpty()
-        }
-
-        // Verify that the navigation action is triggered for the registration/info screen
-        Mockito.verify(navigationActions).navigateTo(Screen.REGISTER)
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      Mockito.mockingDetails(navigationActions).invocations.isNotEmpty()
     }
 
-    @Test
-    fun testGoogleButtonClickSendsIntent() {
-        // Initialize Intents for this test
-        Intents.init()
-        intentsInitialized = true // Mark Intents as initialized
+    // Verify that the navigation action is triggered for the registration/info screen
+    Mockito.verify(navigationActions).navigateTo(Screen.REGISTER)
+  }
 
-        composeTestRule.setContent {
-            WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
-        }
+  @Test
+  fun testGoogleButtonClickSendsIntent() {
+    // Initialize Intents for this test
+    Intents.init()
+    intentsInitialized = true // Mark Intents as initialized
 
-        // Perform click on the Google Sign-In button
-        composeTestRule.onNodeWithTag("googleButton").performClick()
-
-        // Assert that an Intent resolving to Google Mobile Services has been sent
-        Intents.intended(IntentMatchers.toPackage("com.google.android.gms"))
+    composeTestRule.setContent {
+      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
+
+    // Perform click on the Google Sign-In button
+    composeTestRule.onNodeWithTag("googleButton").performClick()
+
+    // Assert that an Intent resolving to Google Mobile Services has been sent
+    Intents.intended(IntentMatchers.toPackage("com.google.android.gms"))
+  }
 }

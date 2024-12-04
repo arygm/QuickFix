@@ -5,7 +5,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
@@ -14,7 +13,6 @@ import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
-import com.google.firebase.Timestamp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -26,152 +24,154 @@ import org.mockito.kotlin.*
 @RunWith(AndroidJUnit4::class)
 class GoogleInfoScreenTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    private lateinit var accountRepository: AccountRepository
-    private lateinit var accountViewModel: AccountViewModel
-    private lateinit var profileRepository: ProfileRepository
-    private lateinit var profileViewModel: ProfileViewModel
-    private lateinit var preferencesRepository: PreferencesRepository
-    private lateinit var preferencesViewModel: PreferencesViewModel
-    private lateinit var navigationActions: NavigationActions
+  private lateinit var accountRepository: AccountRepository
+  private lateinit var accountViewModel: AccountViewModel
+  private lateinit var profileRepository: ProfileRepository
+  private lateinit var profileViewModel: ProfileViewModel
+  private lateinit var preferencesRepository: PreferencesRepository
+  private lateinit var preferencesViewModel: PreferencesViewModel
+  private lateinit var navigationActions: NavigationActions
 
-    private val USER_ID_KEY = stringPreferencesKey("user_id")
-    private val EMAIL_KEY = stringPreferencesKey("email")
+  private val USER_ID_KEY = stringPreferencesKey("user_id")
+  private val EMAIL_KEY = stringPreferencesKey("email")
 
-    @Before
-    fun setup() {
-        // Initialize the repositories and view models
+  @Before
+  fun setup() {
+    // Initialize the repositories and view models
 
-        accountRepository = mock()
-        profileRepository = mock()
-        preferencesRepository = TestPreferencesRepository()
+    accountRepository = mock()
+    profileRepository = mock()
+    preferencesRepository = TestPreferencesRepository()
 
-        accountViewModel = AccountViewModel(accountRepository)
+    accountViewModel = AccountViewModel(accountRepository)
 
-        navigationActions = mock()
+    navigationActions = mock()
 
-        profileViewModel = ProfileViewModel(profileRepository)
-        preferencesViewModel = PreferencesViewModel(preferencesRepository)
-        // Set preferences
-        runBlocking {
-            preferencesRepository.setPreferenceByKey(USER_ID_KEY, "test_uid")
-            preferencesRepository.setPreferenceByKey(EMAIL_KEY, "test@example.com")
-        }
-
-        // Mock accountRepository.updateAccount to call onSuccess
-        doAnswer {
-            val onSuccess = it.arguments[1] as () -> Unit
-            onSuccess()
-            null
-        }.whenever(accountRepository).updateAccount(any(), any(), any())
-
-        // Mock accountRepository.deleteAccountById
-        doAnswer {
-            val onSuccess = it.arguments[1] as () -> Unit
-            onSuccess()
-            null
-        }.whenever(accountRepository).deleteAccountById(any(), any(), any())
-
-        // Mock profileRepository.deleteProfileById
-        doAnswer {
-            val onSuccess = it.arguments[1] as () -> Unit
-            onSuccess()
-            null
-        }.whenever(profileRepository).deleteProfileById(any(), any(), any())
-
+    profileViewModel = ProfileViewModel(profileRepository)
+    preferencesViewModel = PreferencesViewModel(preferencesRepository)
+    // Set preferences
+    runBlocking {
+      preferencesRepository.setPreferenceByKey(USER_ID_KEY, "test_uid")
+      preferencesRepository.setPreferenceByKey(EMAIL_KEY, "test@example.com")
     }
 
-    @Test
-    fun testInitialState() {
-        composeTestRule.setContent {
-            GoogleInfoScreen(
-                navigationActions = navigationActions,
-                accountViewModel = accountViewModel,
-                userViewModel = profileViewModel,
-                preferencesViewModel = preferencesViewModel
-            )
+    // Mock accountRepository.updateAccount to call onSuccess
+    doAnswer {
+          val onSuccess = it.arguments[1] as () -> Unit
+          onSuccess()
+          null
         }
+        .whenever(accountRepository)
+        .updateAccount(any(), any(), any())
 
-        composeTestRule.waitForIdle()
+    // Mock accountRepository.deleteAccountById
+    doAnswer {
+          val onSuccess = it.arguments[1] as () -> Unit
+          onSuccess()
+          null
+        }
+        .whenever(accountRepository)
+        .deleteAccountById(any(), any(), any())
 
-        // Verify initial UI state
-        composeTestRule.onNodeWithTag("InfoBox").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("contentBox").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("decorationBox").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("welcomeText").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("firstNameInput").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("lastNameInput").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("birthDateInput").assertIsDisplayed()
+    // Mock profileRepository.deleteProfileById
+    doAnswer {
+          val onSuccess = it.arguments[1] as () -> Unit
+          onSuccess()
+          null
+        }
+        .whenever(profileRepository)
+        .deleteProfileById(any(), any(), any())
+  }
 
-        // Verify "Next" button is disabled initially
-        composeTestRule.onNodeWithTag("nextButton").assertIsDisplayed().assertIsNotEnabled()
+  @Test
+  fun testInitialState() {
+    composeTestRule.setContent {
+      GoogleInfoScreen(
+          navigationActions = navigationActions,
+          accountViewModel = accountViewModel,
+          userViewModel = profileViewModel,
+          preferencesViewModel = preferencesViewModel)
     }
 
-    @Test
-    fun testInvalidDateShowsError() {
-        composeTestRule.setContent {
-            GoogleInfoScreen(
-                navigationActions = navigationActions,
-                accountViewModel = accountViewModel,
-                userViewModel = profileViewModel,
-                preferencesViewModel = preferencesViewModel
-            )
-        }
+    composeTestRule.waitForIdle()
 
-        composeTestRule.waitForIdle()
+    // Verify initial UI state
+    composeTestRule.onNodeWithTag("InfoBox").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("contentBox").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("decorationBox").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("welcomeText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("firstNameInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("lastNameInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("birthDateInput").assertIsDisplayed()
 
-        // Enter an invalid date
-        composeTestRule.onNodeWithTag("birthDateInput").performTextInput("99/99/9999")
+    // Verify "Next" button is disabled initially
+    composeTestRule.onNodeWithTag("nextButton").assertIsDisplayed().assertIsNotEnabled()
+  }
 
-        // Verify error message and button state
-        composeTestRule.onNodeWithText("INVALID DATE").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("nextButton").assertIsNotEnabled()
+  @Test
+  fun testInvalidDateShowsError() {
+    composeTestRule.setContent {
+      GoogleInfoScreen(
+          navigationActions = navigationActions,
+          accountViewModel = accountViewModel,
+          userViewModel = profileViewModel,
+          preferencesViewModel = preferencesViewModel)
     }
 
-    @Test
-    fun testNextButtonEnabledWhenFormIsValid() {
-        composeTestRule.setContent {
-            GoogleInfoScreen(
-                navigationActions = navigationActions,
-                accountViewModel = accountViewModel,
-                userViewModel = profileViewModel,
-                preferencesViewModel = preferencesViewModel
-            )
-        }
+    composeTestRule.waitForIdle()
 
-        composeTestRule.waitForIdle()
+    // Enter an invalid date
+    composeTestRule.onNodeWithTag("birthDateInput").performTextInput("99/99/9999")
 
-        // Fill out the form
-        composeTestRule.onNodeWithTag("firstNameInput").performTextInput("John")
-        composeTestRule.onNodeWithTag("lastNameInput").performTextInput("Doe")
-        composeTestRule.onNodeWithTag("birthDateInput").performTextInput("01/01/1990")
+    // Verify error message and button state
+    composeTestRule.onNodeWithText("INVALID DATE").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("nextButton").assertIsNotEnabled()
+  }
 
-        // Verify "Next" button is enabled
-        composeTestRule.onNodeWithTag("nextButton").assertIsEnabled()
-
-        // Click the "Next" button
-        composeTestRule.onNodeWithTag("nextButton").performClick()
-
-        // Verify account update and navigation
-        verify(accountRepository).updateAccount(any(), any(), any())
-        verify(navigationActions).navigateTo(TopLevelDestinations.HOME)
+  @Test
+  fun testNextButtonEnabledWhenFormIsValid() {
+    composeTestRule.setContent {
+      GoogleInfoScreen(
+          navigationActions = navigationActions,
+          accountViewModel = accountViewModel,
+          userViewModel = profileViewModel,
+          preferencesViewModel = preferencesViewModel)
     }
+
+    composeTestRule.waitForIdle()
+
+    // Fill out the form
+    composeTestRule.onNodeWithTag("firstNameInput").performTextInput("John")
+    composeTestRule.onNodeWithTag("lastNameInput").performTextInput("Doe")
+    composeTestRule.onNodeWithTag("birthDateInput").performTextInput("01/01/1990")
+
+    // Verify "Next" button is enabled
+    composeTestRule.onNodeWithTag("nextButton").assertIsEnabled()
+
+    // Click the "Next" button
+    composeTestRule.onNodeWithTag("nextButton").performClick()
+
+    // Verify account update and navigation
+    verify(accountRepository).updateAccount(any(), any(), any())
+    verify(navigationActions).navigateTo(TopLevelDestinations.HOME)
+  }
 }
 
 // Test implementation of PreferencesRepository
 class TestPreferencesRepository : PreferencesRepository {
-    private val preferencesMap = mutableMapOf<Preferences.Key<*>, Any?>()
+  private val preferencesMap = mutableMapOf<Preferences.Key<*>, Any?>()
 
-    override fun <T> getPreferenceByKey(key: Preferences.Key<T>) = MutableStateFlow(preferencesMap[key] as? T)
+  override fun <T> getPreferenceByKey(key: Preferences.Key<T>) =
+      MutableStateFlow(preferencesMap[key] as? T)
 
-    override suspend fun <T> setPreferenceByKey(key: Preferences.Key<T>, value: T) {
-        preferencesMap[key] = value
-    }
+  override suspend fun <T> setPreferenceByKey(key: Preferences.Key<T>, value: T) {
+    preferencesMap[key] = value
+  }
 
-    override suspend fun clearPreferences() {
-        preferencesMap.clear()
-    }
+  override suspend fun clearPreferences() {
+    preferencesMap.clear()
+  }
 }

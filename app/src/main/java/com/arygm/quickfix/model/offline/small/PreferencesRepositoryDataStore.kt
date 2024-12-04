@@ -8,21 +8,15 @@ import kotlinx.coroutines.flow.map
 
 class PreferencesRepositoryDataStore(private val dataStore: DataStore<Preferences>) :
     PreferencesRepository {
-    override fun <T> getPreferenceByKey(key: Preferences.Key<T>): Flow<T?> {
-        return dataStore.data.map { preferences ->
-            preferences[key]
-        }
-    }
+  override fun <T> getPreferenceByKey(key: Preferences.Key<T>): Flow<T?> {
+    return dataStore.data.map { preferences -> preferences[key] }
+  }
 
-    override suspend fun <T> setPreferenceByKey(key: Preferences.Key<T>, value: T) {
-        dataStore.edit { preferences ->
-            preferences[key] = value
-        }
-    }
+  override suspend fun <T> setPreferenceByKey(key: Preferences.Key<T>, value: T) {
+    dataStore.edit { preferences -> preferences[key] = value }
+  }
 
-    override suspend fun clearPreferences() {
-        dataStore.edit { preferences ->
-            preferences.clear()
-        }
-    }
+  override suspend fun clearPreferences() {
+    dataStore.edit { preferences -> preferences.clear() }
+  }
 }

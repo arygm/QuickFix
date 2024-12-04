@@ -49,7 +49,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
@@ -64,7 +63,6 @@ import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_SHRUNK
 import com.arygm.quickfix.utils.isValidEmail
 import com.arygm.quickfix.utils.signInWithEmailAndFetchAccount
-import com.arygm.quickfix.utils.timestampToString
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -274,7 +272,7 @@ fun LogInScreen(
                                       preferencesViewModel = preferencesViewModel,
                                       onResult = {
                                         if (it) {
-                                            coroutineScope.launch {
+                                          coroutineScope.launch {
                                             shrinkBox = false
                                             delay(BOX_COLLAPSE_SPEED.toLong())
                                             Log.d("LoginFlow", "Starting login with email: $email")

@@ -42,7 +42,6 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
-import com.arygm.quickfix.ui.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
@@ -56,6 +55,7 @@ import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.search.QuickFixFinderScreen
@@ -134,9 +134,8 @@ fun QuickFixApp() {
       viewModel(factory = AnnouncementViewModel.Factory)
   val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
 
-    val preferencesViewModel: PreferencesViewModel = viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
-
-
+  val preferencesViewModel: PreferencesViewModel =
+      viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
 
   // Initialized here because needed for the bottom bar
   val profileNavController = rememberNavController()
@@ -211,32 +210,18 @@ fun QuickFixApp() {
               ) {
                 composable(Screen.WELCOME) {
                   WelcomeScreen(
-                      navigationActionsRoot,
-                      accountViewModel,
-                      userViewModel,
-                      preferencesViewModel)
+                      navigationActionsRoot, accountViewModel, userViewModel, preferencesViewModel)
                 }
                 composable(Screen.LOGIN) {
-                  LogInScreen(
-                      navigationActionsRoot,
-                      accountViewModel,
-                      preferencesViewModel
-                  )
+                  LogInScreen(navigationActionsRoot, accountViewModel, preferencesViewModel)
                 }
                 composable(Screen.REGISTER) {
                   RegisterScreen(
-                      navigationActionsRoot,
-                      accountViewModel,
-                      userViewModel,
-                      preferencesViewModel)
+                      navigationActionsRoot, accountViewModel, userViewModel, preferencesViewModel)
                 }
                 composable(Screen.GOOGLE_INFO) {
                   GoogleInfoScreen(
-                      navigationActionsRoot,
-                      accountViewModel,
-                      userViewModel,
-                      preferencesViewModel
-                  )
+                      navigationActionsRoot, accountViewModel, userViewModel, preferencesViewModel)
                 }
                 composable(Screen.RESET_PASSWORD) {
                   ResetPasswordScreen(navigationActionsRoot, accountViewModel)
@@ -322,18 +307,10 @@ fun ProfileNavHost(
   }
   NavHost(navController = profileNavController, startDestination = Screen.PROFILE) {
     composable(Screen.PROFILE) {
-      ProfileScreen(
-          profileNavigationActions,
-          navigationActionsRoot,
-          preferencesViewModel
-      )
+      ProfileScreen(profileNavigationActions, navigationActionsRoot, preferencesViewModel)
     }
     composable(Screen.ACCOUNT_CONFIGURATION) {
-      AccountConfigurationScreen(
-          profileNavigationActions,
-          accountViewModel,
-          preferencesViewModel
-      )
+      AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)
     }
     composable(Screen.TO_WORKER) {
       BusinessScreen(

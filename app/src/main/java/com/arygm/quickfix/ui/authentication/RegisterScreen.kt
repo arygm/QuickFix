@@ -57,7 +57,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
@@ -83,17 +82,17 @@ fun RegisterScreen(
     firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(), // Injected dependency
     createAccountFunc:
         (
-        firebaseAuth: FirebaseAuth,
-        firstName: String,
-        lastName: String,
-        email: String,
-        password: String,
-        birthDate: String,
-        accountViewModel: AccountViewModel,
-        userViewModel: ProfileViewModel,
-        preferencesViewModel: PreferencesViewModel,
-        onSuccess: () -> Unit,
-        onFailure: () -> Unit) -> Unit =
+            firebaseAuth: FirebaseAuth,
+            firstName: String,
+            lastName: String,
+            email: String,
+            password: String,
+            birthDate: String,
+            accountViewModel: AccountViewModel,
+            userViewModel: ProfileViewModel,
+            preferencesViewModel: PreferencesViewModel,
+            onSuccess: () -> Unit,
+            onFailure: () -> Unit) -> Unit =
         ::createAccountWithEmailAndPassword // Default implementation
 ) {
   val context = LocalContext.current
@@ -490,7 +489,7 @@ fun RegisterScreen(
                                           birthDate,
                                           accountViewModel,
                                           userViewModel,
-                                            preferencesViewModel,
+                                          preferencesViewModel,
                                           {
                                             navigationActions.navigateTo(TopLevelDestinations.HOME)
                                           },
