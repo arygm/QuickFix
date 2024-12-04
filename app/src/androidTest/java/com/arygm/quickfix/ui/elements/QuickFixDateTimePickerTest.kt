@@ -49,7 +49,7 @@ class QuickFixDateTimePickerTest {
     }
 
     // Simulate date selection to advance to time picker
-    composeTestRule.onNodeWithText("1").performClick() // Select a date
+    composeTestRule.onNodeWithText("${LocalDate.now().dayOfMonth}").performClick() // Select a date
     composeTestRule.onNodeWithText("OK").performClick()
 
     // Assert TimePickerDialog is displayed
