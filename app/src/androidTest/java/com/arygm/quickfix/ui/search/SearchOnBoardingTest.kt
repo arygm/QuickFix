@@ -2,7 +2,12 @@ package com.arygm.quickfix.ui.search
 
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.AnnotatedString
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.category.CategoryViewModel
@@ -53,7 +58,7 @@ class SearchOnBoardingTest {
 
     // Enter some text and check if the trailing clear icon appears
     composeTestRule.onNodeWithTag("searchContent").performTextInput("plumbing")
-    composeTestRule.onNodeWithTag("clearSearchQueryIcon").assertIsDisplayed()
+    composeTestRule.onNodeWithTag(C.Tag.clear_button_text_field_custom).assertIsDisplayed()
   }
 
   @Test

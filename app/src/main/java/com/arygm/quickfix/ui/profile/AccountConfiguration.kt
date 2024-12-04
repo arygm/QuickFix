@@ -87,7 +87,11 @@ fun AccountConfigurationScreen(
         loggedInAccount.birthDate.let {
           val calendar = GregorianCalendar()
           calendar.time = loggedInAccount.birthDate.toDate()
-          return@let "${calendar.get(Calendar.DAY_OF_MONTH)}/${calendar.get(Calendar.MONTH) + 1}/${calendar.get(Calendar.YEAR)}"
+          return@let "${calendar.get(Calendar.DAY_OF_MONTH)}/${calendar.get(Calendar.MONTH) + 1}/${
+                    calendar.get(
+                        Calendar.YEAR
+                    )
+                }"
         })
   }
   val context = LocalContext.current
