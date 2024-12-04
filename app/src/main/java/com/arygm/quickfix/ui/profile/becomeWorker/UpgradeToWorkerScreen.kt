@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.profile.becomeWorker
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
@@ -37,8 +38,8 @@ fun BusinessScreen(
   val focusManager = LocalFocusManager.current
   val displayName = remember { mutableStateOf("") }
   val description = remember { mutableStateOf("") }
-  val imagePathPP = remember { mutableStateOf("") }
-  val imagePathBP = remember { mutableStateOf("") }
+  val imageBitmapPP = remember { mutableStateOf<Bitmap?>(null) }
+  val imageBitmapBP = remember { mutableStateOf<Bitmap?>(null) }
   var displayNameError by remember { mutableStateOf(false) }
   var descriptionError by remember { mutableStateOf(false) }
   Scaffold(
@@ -83,8 +84,8 @@ fun BusinessScreen(
                         pagerState,
                         displayName,
                         description,
-                        imagePathPP,
-                        imagePathBP,
+                        imageBitmapPP,
+                        imageBitmapBP,
                         displayNameError = displayNameError,
                         onDisplayNameErrorChange = { displayNameError = it },
                         descriptionError = descriptionError,

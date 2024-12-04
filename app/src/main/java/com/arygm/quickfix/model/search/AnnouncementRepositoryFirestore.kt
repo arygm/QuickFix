@@ -1,17 +1,26 @@
 package com.arygm.quickfix.model.search
 
 import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.utils.performFirestoreOperation
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import java.io.ByteArrayOutputStream
 
-class AnnouncementRepositoryFirestore(private val db: FirebaseFirestore) : AnnouncementRepository {
+class AnnouncementRepositoryFirestore(
+    private val db: FirebaseFirestore,
+    private val storage: FirebaseStorage
+) : AnnouncementRepository {
 
   private val collectionPath = "announcements"
+  private val storageRef = storage.reference
+  private val compressionQuality = 50
 
   override fun getNewUid(): String {
     return db.collection(collectionPath).document().id
@@ -79,18 +88,45 @@ class AnnouncementRepositoryFirestore(private val db: FirebaseFirestore) : Annou
       onFailure: (Exception) -> Unit
   ) {
     val announcementId = announcement.announcementId
-
+    announcement.quickFixImages.forEach { uri -> Log.d("UploadingImages", uri) }
     val announcementDocRef = db.collection(collectionPath).document(announcementId)
     performFirestoreOperation(announcementDocRef.set(announcement), onSuccess, onFailure)
   }
 
   override fun uploadAnnouncementImages(
       announcementId: String,
-      bitmaps: List<Bitmap>,
+      images: List<Bitmap>,
       onSuccess: (List<String>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    TODO("Not yet implemented")
+
+    val announcementFolderRef = storageRef.child("announcements/$announcementId")
+
+    val uploadTasks =
+        images.map { bitmap ->
+          val fileRef = announcementFolderRef.child("image_${System.currentTimeMillis()}.jpg")
+
+          val baos = ByteArrayOutputStream()
+          bitmap.compress(Bitmap.CompressFormat.JPEG, compressionQuality, baos)
+          val byteArray = baos.toByteArray()
+
+          fileRef.putBytes(byteArray).continueWithTask { task ->
+            if (!task.isSuccessful) {
+              task.exception?.let { throw it }
+            }
+            fileRef.downloadUrl
+          }
+        }
+
+    Tasks.whenAllSuccess<Uri>(uploadTasks)
+        .addOnSuccessListener { uris ->
+          val uploadedImageUrls = uris.map { it.toString() }
+          onSuccess(uploadedImageUrls)
+        }
+        .addOnFailureListener { exception ->
+          Log.e("UploadingImages", "Failed to upload images: ${exception.message}")
+          onFailure(exception)
+        }
   }
 
   override fun updateAnnouncement(

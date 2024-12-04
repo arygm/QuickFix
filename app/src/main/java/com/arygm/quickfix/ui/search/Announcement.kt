@@ -4,19 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -24,24 +12,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -81,7 +55,6 @@ fun AnnouncementScreen(
     navigationActions: NavigationActions,
     isUser: Boolean = true
 ) {
-
   val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
   val userId =
       loggedInAccount?.uid
@@ -97,7 +70,7 @@ fun AnnouncementScreen(
     mutableStateOf(true)
   } // TODO: add the different categories
   var locationIsSelected by rememberSaveable {
-    mutableStateOf(false)
+    mutableStateOf(true)
   } // TODO: add the implemented location
   var descriptionIsEmpty by rememberSaveable { mutableStateOf(true) }
   val uploadedImages by announcementViewModel.uploadedImages.collectAsState()
@@ -105,6 +78,66 @@ fun AnnouncementScreen(
   // State to control the visibility of the image upload sheet
   var showUploadImageSheet by remember { mutableStateOf(false) }
   val sheetState = rememberModalBottomSheetState()
+
+  // Function to reset announcement parameters
+  val resetAnnouncementParameters = {
+    title = ""
+    category = ""
+    description = ""
+    location = ""
+    titleIsEmpty = true
+    descriptionIsEmpty = true
+    // categoryIsSelected = false
+    // locationIsSelected = false
+  }
+
+  // Function to update user profile
+  val updateUserProfileWithAnnouncement: (Announcement) -> Unit = { announcement ->
+    profileViewModel.fetchUserProfile(userId) { profile ->
+      if (profile is UserProfile) {
+        val announcementList = profile.announcements + announcement.announcementId
+
+        profileViewModel.updateProfile(
+            UserProfile(profile.locations, announcementList, profile.uid),
+            onSuccess = {
+              accountViewModel.fetchUserAccount(profile.uid) { account ->
+                loggedInAccountViewModel.setLoggedInAccount(account!!)
+              }
+            },
+            onFailure = {
+              // Handle failure
+            })
+      } else {
+        Log.e("Wrong profile", "Should be a user profile")
+      }
+    }
+  }
+
+  // Function to handle successful image upload
+  val handleSuccessfulImageUpload: (String, List<String>) -> Unit =
+      { announcementId, uploadedImageUrls ->
+        // Make the announcement
+        val announcement =
+            Announcement(
+                announcementId = announcementId,
+                userId = userId,
+                title = title,
+                category = category, // replace by the category type
+                description = description,
+                location = null,
+                availability = emptyList(),
+                quickFixImages = uploadedImageUrls)
+        announcementViewModel.announce(announcement)
+
+        // Clear the added pictures
+        announcementViewModel.clearUploadedImages()
+
+        // Update the user profile with the new announcement
+        updateUserProfileWithAnnouncement(announcement)
+
+        // Reset all parameters after making an announcement
+        resetAnnouncementParameters()
+      }
 
   BoxWithConstraints {
     val widthRatio = maxWidth / 411
@@ -353,13 +386,9 @@ fun AnnouncementScreen(
                                                     listOf(visibleImages[index]))
                                               }, // Provide the delete action
                                               modifier =
-                                                  Modifier.align(
-                                                          Alignment
-                                                              .TopEnd) // Align at the top-right
-                                                                       // corner
-                                                      .padding(4.dp) // Add some padding for spacing
-                                                      .size(24.dp) // Set size for the button
-                                              ) {
+                                                  Modifier.align(Alignment.TopEnd)
+                                                      .padding(4.dp)
+                                                      .size(24.dp)) {
                                                 Icon(
                                                     imageVector = Icons.Filled.Close,
                                                     contentDescription = "Remove Image",
@@ -396,48 +425,18 @@ fun AnnouncementScreen(
             QuickFixButton(
                 buttonText = "Post your announcement",
                 onClickAction = {
-
-                  // Make the announcement
-                  val announcement =
-                      Announcement(
-                          announcementId = announcementViewModel.getNewUid(),
-                          userId = userId,
-                          title = title,
-                          category = category, // replace by the category type
-                          description = description,
-                          location = null,
-                          availability = emptyList(),
-                          quickFixImages = emptyList())
-                  announcementViewModel.announce(announcement)
-
-                  // Update the user profile with the new announcement
-
-                  profileViewModel.fetchUserProfile(userId) { profile ->
-                    if (profile is UserProfile) {
-                      val announcementList = profile.announcements + announcement.announcementId
-
-                      profileViewModel.updateProfile(
-                          UserProfile(profile.locations, announcementList, profile.uid),
-                          {
-                            accountViewModel.fetchUserAccount(profile.uid) { account ->
-                              loggedInAccountViewModel.setLoggedInAccount(account!!)
-                            }
-                          },
-                          {})
-                    } else {
-                      Log.e("Wrong profile", "Should be a user profile")
-                    }
-                  }
-
-                  // Reset all parameters after making an announcement
-                  title = ""
-                  category = ""
-                  description = ""
-                  location = ""
-                  titleIsEmpty = true
-                  // categoryIsSelected = false
-                  // locationIsSelected = false
-                  descriptionIsEmpty = true
+                  val announcementId = announcementViewModel.getNewUid()
+                  // Upload the added pictures to Firebase Storage
+                  announcementViewModel.uploadAnnouncementImages(
+                      announcementId = announcementId,
+                      images = announcementViewModel.uploadedImages.value,
+                      onSuccess = { uploadedImageUrls ->
+                        handleSuccessfulImageUpload(announcementId, uploadedImageUrls)
+                      },
+                      onFailure = { e ->
+                        // Handle the failure case
+                        Log.e("AnnouncementViewModel", "Failed to upload images: ${e.message}")
+                      })
                 },
                 buttonColor = colorScheme.primary,
                 textColor = colorScheme.onPrimary,

@@ -1,10 +1,12 @@
 package com.arygm.quickfix.model.search
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,8 +19,11 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   private val announcements_ = MutableStateFlow<List<Announcement>>(emptyList())
   val announcements: StateFlow<List<Announcement>> = announcements_.asStateFlow()
 
-  private val uploadedImages_ = MutableStateFlow<List<String>>(emptyList())
-  val uploadedImages: StateFlow<List<String>> = uploadedImages_.asStateFlow()
+  private val uploadedImages_ = MutableStateFlow<List<Bitmap>>(emptyList())
+  val uploadedImages: StateFlow<List<Bitmap>> = uploadedImages_.asStateFlow()
+
+  /*private val uploadedImagesUrl_ = MutableStateFlow<List<String>>(emptyList())
+  val uploadedImagesUrl: StateFlow<List<String>> = uploadedImagesUrl_.asStateFlow()*/
 
   // create factory
   companion object {
@@ -26,7 +31,9 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return AnnouncementViewModel(AnnouncementRepositoryFirestore(Firebase.firestore)) as T
+            return AnnouncementViewModel(
+                AnnouncementRepositoryFirestore(Firebase.firestore, Firebase.storage))
+                as T
           }
         }
   }
@@ -75,6 +82,24 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
         })
   }
 
+  fun uploadAnnouncementImages(
+      announcementId: String,
+      images: List<Bitmap>, // List of image file paths as strings
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    Log.d("UploadingImages", "$images.size")
+    repository.uploadAnnouncementImages(
+        announcementId = announcementId,
+        images = images,
+        onSuccess = {
+          /*uploadedImagesUrl_.value = it
+          Log.d("UploadingImages", "Size after success of uploadAnnouncementImages : ${uploadedImagesUrl_.value.size}")
+          */ onSuccess(it)
+        },
+        onFailure = { e -> onFailure(e) })
+  }
+
   /**
    * Updates an announcement.
    *
@@ -117,23 +142,24 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   /**
    * Adds a new image to the list of uploaded images.
    *
-   * @param imageUrl The URL of the image to be added.
+   * @param image The `Bitmap` of the image to be added.
    */
-  fun addUploadedImage(imageUrl: String) {
-    uploadedImages_.value += imageUrl
+  fun addUploadedImage(image: Bitmap) {
+    uploadedImages_.value += image
   }
 
   /**
    * Deletes a list of images from the list of uploaded images.
    *
-   * @param imageUrls The list of image URLs to be removed.
+   * @param images The list of `Bitmap` images to be removed.
    */
-  fun deleteUploadedImages(imageUrls: List<String>) {
-    uploadedImages_.value = uploadedImages_.value.filterNot { it in imageUrls }
+  fun deleteUploadedImages(images: List<Bitmap>) {
+    uploadedImages_.value = uploadedImages_.value.filterNot { it in images }
   }
 
   /** Clears the entire list of uploaded images. */
   fun clearUploadedImages() {
     uploadedImages_.value = emptyList()
+    // uploadedImagesUrl_.value = emptyList()
   }
 }

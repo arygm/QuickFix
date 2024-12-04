@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.camera
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -64,7 +65,7 @@ fun QuickFixDisplayImages(
 ) {
   val imagesToDisplay by announcementViewModel.uploadedImages.collectAsState()
   var isSelecting by remember { mutableStateOf(false) }
-  var selectedImages by remember { mutableStateOf(setOf<String>()) }
+  var selectedImages by remember { mutableStateOf(setOf<Bitmap>()) }
 
   Scaffold(
       topBar = {
