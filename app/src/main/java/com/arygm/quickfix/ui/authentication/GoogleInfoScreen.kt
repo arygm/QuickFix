@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButton
@@ -57,6 +58,9 @@ import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.stringToTimestamp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -65,7 +69,8 @@ fun GoogleInfoScreen(
     navigationActions: NavigationActions,
     loggedInAccountViewModel: LoggedInAccountViewModel,
     accountViewModel: AccountViewModel,
-    userViewModel: ProfileViewModel
+    userViewModel: ProfileViewModel,
+    preferencesViewModel: PreferencesViewModel
 ) {
 
   val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
@@ -230,6 +235,32 @@ fun GoogleInfoScreen(
                                     stringToTimestamp(birthDate)!!,
                                     loggedInAccount!!.isWorker),
                                 onSuccess = {
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        preferencesViewModel.savePreference(
+                                            key = com.arygm.quickfix.utils.IS_SIGN_IN_KEY,
+                                            value = true
+                                        )
+                                        preferencesViewModel.savePreference(
+                                            key = com.arygm.quickfix.utils.EMAIL_KEY,
+                                            value = loggedInAccount!!.email
+                                        )
+                                        preferencesViewModel.savePreference(
+                                            key = com.arygm.quickfix.utils.USER_ID_KEY,
+                                            value = loggedInAccount!!.uid
+                                        )
+                                        preferencesViewModel.savePreference(
+                                            key = com.arygm.quickfix.utils.FIRST_NAME_KEY,
+                                            value = firstName
+                                        )
+                                        preferencesViewModel.savePreference(
+                                            key = com.arygm.quickfix.utils.LAST_NAME_KEY,
+                                            value = lastName
+                                        )
+                                        preferencesViewModel.savePreference(
+                                            key = com.arygm.quickfix.utils.DATE_OF_BIRTH_KEY,
+                                            value = birthDate
+                                        )
+                                    }
                                   loggedInAccountViewModel.setLoggedInAccount(
                                       Account(
                                           loggedInAccount!!.uid,
@@ -237,7 +268,8 @@ fun GoogleInfoScreen(
                                           lastName,
                                           loggedInAccount!!.email,
                                           stringToTimestamp(birthDate)!!,
-                                          loggedInAccount!!.isWorker))
+                                          loggedInAccount!!.isWorker)
+                                  )
                                   navigationActions.navigateTo(TopLevelDestinations.HOME)
                                 },
                                 onFailure = {

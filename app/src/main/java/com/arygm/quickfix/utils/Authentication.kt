@@ -12,6 +12,7 @@ import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -22,6 +23,8 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -139,6 +142,7 @@ fun createAccountWithEmailAndPassword(
     accountViewModel: AccountViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
     userViewModel: ProfileViewModel,
+    preferencesViewModel: PreferencesViewModel,
     onSuccess: () -> Unit,
     onFailure: () -> Unit
 ) {
@@ -170,6 +174,32 @@ fun createAccountWithEmailAndPassword(
                 accountViewModel.addAccount(
                     createdAccount,
                     onSuccess = {
+                        CoroutineScope(Dispatchers.IO).launch {
+                          preferencesViewModel.savePreference(
+                              key = IS_SIGN_IN_KEY,
+                                value = true
+                          )
+                            preferencesViewModel.savePreference(
+                                key = EMAIL_KEY,
+                                value = email
+                            )
+                            preferencesViewModel.savePreference(
+                                key = USER_ID_KEY,
+                                value = createdAccount.uid
+                            )
+                            preferencesViewModel.savePreference(
+                                key = FIRST_NAME_KEY,
+                                value = createdAccount.firstName
+                            )
+                            preferencesViewModel.savePreference(
+                                key = LAST_NAME_KEY,
+                                value = createdAccount.lastName
+                            )
+                            preferencesViewModel.savePreference(
+                                key = DATE_OF_BIRTH_KEY,
+                                value = birthDate
+                            )
+                        }
                       loggedInAccountViewModel.setLoggedInAccount(createdAccount)
                       onSuccess()
                     },

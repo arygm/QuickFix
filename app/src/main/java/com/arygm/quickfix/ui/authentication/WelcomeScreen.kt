@@ -45,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -54,7 +55,10 @@ import com.arygm.quickfix.ui.theme.ButtonPrimary
 import com.arygm.quickfix.utils.rememberFirebaseAuthLauncher
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UseOfNonLambdaOffsetOverload")
 @Composable
@@ -62,7 +66,8 @@ fun WelcomeScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
-    userViewModel: ProfileViewModel
+    userViewModel: ProfileViewModel,
+    preferencesViewModel: PreferencesViewModel
 ) {
   val colorScheme = MaterialTheme.colorScheme
 
@@ -82,6 +87,34 @@ fun WelcomeScreen(
   val launcher =
       rememberFirebaseAuthLauncher(
           onAuthCompleteOne = { result ->
+              CoroutineScope(Dispatchers.IO).launch {
+                  preferencesViewModel.savePreference(
+                      key = com.arygm.quickfix.utils.IS_SIGN_IN_KEY,
+                      value = true
+                  )
+                  loggedInAccountViewModel.loggedInAccount.value?.let {
+                      preferencesViewModel.savePreference(
+                          key = com.arygm.quickfix.utils.EMAIL_KEY,
+                          value = it.email
+                      )
+                      preferencesViewModel.savePreference(
+                          key = com.arygm.quickfix.utils.FIRST_NAME_KEY,
+                          value = it.firstName
+                      )
+                      preferencesViewModel.savePreference(
+                          key = com.arygm.quickfix.utils.LAST_NAME_KEY,
+                          value = it.lastName
+                      )
+                      preferencesViewModel.savePreference(
+                          key = com.arygm.quickfix.utils.DATE_OF_BIRTH_KEY,
+                          value = it.birthDate.toString()
+                      )
+                      preferencesViewModel.savePreference(
+                          key = com.arygm.quickfix.utils.USER_ID_KEY,
+                          value = it.uid
+                      )
+                  }
+              }
             Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
             navigationActions.navigateTo(TopLevelDestinations.HOME)
           },
