@@ -2,7 +2,9 @@ package com.arygm.quickfix.model.categories
 
 import com.arygm.quickfix.model.categories.plumbing.PlumbingCategory
 import com.arygm.quickfix.model.categories.plumbing.PlumbingSubCategory
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PlumbingSubCategoryTest {

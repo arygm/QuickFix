@@ -53,14 +53,6 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew assembleRelease
 
-      #      - name: Sign the APK
-      #        run: |
-      #          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore signIn.jks -storepass $KEYSTORE_PASSWORD -keypass $KEY_PASSWORD app/build/outputs/apk/release/app-release.apk $KEY_ALIAS
-      #
-      #      - name: Zipalign the APK
-      #        run: |
-      #          $ANDROID_HOME/build-tools/31.0.0/zipalign -v 4 app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/app-M1.apk
-
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
