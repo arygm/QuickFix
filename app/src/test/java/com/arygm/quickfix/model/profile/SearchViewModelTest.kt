@@ -25,7 +25,7 @@ class SearchViewModelTest {
     mockRepository = mock(WorkerProfileRepositoryFirestore::class.java)
     cateRepository = mock(CategoryRepositoryFirestore::class.java)
     // Initialize the ViewModel with the mocked repository
-    viewModel = SearchViewModel(mockRepository, cateRepository)
+    viewModel = SearchViewModel(mockRepository)
   }
 
   @Test
@@ -244,26 +244,5 @@ class SearchViewModelTest {
     val result = viewModel.workerProfiles.value
     assertEquals(1, result.size)
     assertEquals("worker_127", result[0].uid)
-  }
-
-  @Test
-  fun fetchCategoriesCallsOnFailure() {
-    // Arrange: Prepare an error message
-    val errorMessage = "Failed to fetch categories"
-
-    // Mock repository behavior for a failure response
-    doAnswer { invocation ->
-          val onFailure = invocation.arguments[1] as (Exception) -> Unit
-          onFailure(Exception(errorMessage)) // Simulate failure callback
-          null
-        }
-        .`when`(cateRepository)
-        .fetchCategories(anyOrNull(), anyOrNull())
-
-    // Act: Call ViewModel's function to fetch categories
-    viewModel.fetchCategories()
-
-    // Assert: Check that the ViewModel state is updated correctly on failure
-    assertTrue(viewModel.categories.value.isEmpty()) // The list should be empty
   }
 }

@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
@@ -46,9 +47,10 @@ fun SearchOnBoarding(
     navigationActions: NavigationActions,
     navigationActionsRoot: NavigationActions,
     isUser: Boolean,
-    searchViewModel: SearchViewModel
+    searchViewModel: SearchViewModel,
+    categoryViewModel: CategoryViewModel
 ) {
-  val categories = searchViewModel.categories.collectAsState().value
+  val categories = categoryViewModel.categories.collectAsState().value
   Log.d("SearchOnBoarding", "Categories: $categories")
   val itemCategories = remember { categories }
   val expandedStates = remember {

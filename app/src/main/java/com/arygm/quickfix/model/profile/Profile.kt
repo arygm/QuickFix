@@ -4,6 +4,8 @@ import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.model.profile.dataFields.Review
+import java.time.LocalDate
+import java.time.LocalTime
 
 open class Profile(
     val uid: String,
@@ -54,7 +56,10 @@ class WorkerProfile(
     val profilePicture: String = "",
     val price: Double = 130.0,
     val displayName: String = "",
-    uid: String = ""
+    val unavailability_list: List<LocalDate> = emptyList<LocalDate>(),
+    val workingHours: Pair<LocalTime, LocalTime> = Pair(LocalTime.now(), LocalTime.now()),
+    uid: String = "",
+    val tags: List<String> = emptyList(),
 ) : Profile(uid, quickFixes) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

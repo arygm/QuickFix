@@ -1,8 +1,12 @@
 package com.arygm.quickfix.ui.search
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.category.Scale
 import com.arygm.quickfix.model.category.Subcategory
@@ -151,7 +155,7 @@ class SearchCategoryButtonTest {
     // Step 2: Set up the initial state
     val isExpandedState = mutableStateOf(false)
     navigationActions = mock(NavigationActions::class.java)
-    searchViewModel = SearchViewModel(mock(), mock())
+    searchViewModel = SearchViewModel(mock())
     composeTestRule.setContent {
       // Provide LocalInspectionMode if you prefer to disable animations
       // CompositionLocalProvider(LocalInspectionMode provides true) {

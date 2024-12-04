@@ -1,7 +1,14 @@
 package com.arygm.quickfix.model.categories
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.Carpenter
+import androidx.compose.material.icons.outlined.CleaningServices
+import androidx.compose.material.icons.outlined.ElectricalServices
+import androidx.compose.material.icons.outlined.Handyman
+import androidx.compose.material.icons.outlined.ImagesearchRoller
+import androidx.compose.material.icons.outlined.LocalShipping
+import androidx.compose.material.icons.outlined.NaturePeople
+import androidx.compose.material.icons.outlined.Plumbing
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.arygm.quickfix.model.categories.painting.PaintingCategory
 import com.arygm.quickfix.model.categories.plumbing.PlumbingCategory

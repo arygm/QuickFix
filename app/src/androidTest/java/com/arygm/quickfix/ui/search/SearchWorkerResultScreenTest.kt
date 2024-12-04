@@ -1,7 +1,24 @@
 package com.arygm.quickfix.ui.search
 
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.filter
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasParent
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onChildren
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepositoryFirestore
@@ -12,6 +29,8 @@ import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import java.time.LocalDate
+import java.time.LocalTime
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -47,7 +66,7 @@ class SearchWorkerResultScreenTest {
     accountRepository = mock(AccountRepositoryFirestore::class.java)
 
     // Initialize ViewModels with mocked repositories
-    searchViewModel = SearchViewModel(workerRepository, categoryRepository)
+    searchViewModel = SearchViewModel(workerRepository)
     accountViewModel = AccountViewModel(accountRepository)
 
     // Provide test data to searchViewModel
@@ -121,14 +140,26 @@ class SearchWorkerResultScreenTest {
     composeTestRule.setContent {
       SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
     }
-    // Verify that all filter buttons in the LazyRow are visible and clickable
-    val filterButtonsRow = composeTestRule.onNodeWithTag("filter_buttons_row")
 
-    listOfButtons.forEachIndexed { index, button ->
-      // Scroll to each button and check if it's displayed with a click action
+    // Wait for the UI to settle
+    composeTestRule.waitForIdle()
+
+    // Verify that the LazyRow for filter buttons is visible
+    val filterButtonsRow = composeTestRule.onNodeWithTag("filter_buttons_row")
+    filterButtonsRow.assertExists().assertIsDisplayed()
+
+    // Define the expected button texts
+    val expectedButtons =
+        listOf("Location", "Service Type", "Availability", "Highest Rating", "Price Range")
+
+    // Verify each button exists, is displayed, and clickable
+    expectedButtons.forEachIndexed { index, buttonText ->
+      // Scroll to the button index (important for last two buttons in LazyRow)
       filterButtonsRow.performScrollToIndex(index)
+
+      // Assert button properties
       composeTestRule
-          .onNodeWithTag("filter_button_${button.text}")
+          .onNodeWithText(buttonText)
           .assertExists()
           .assertIsDisplayed()
           .assertHasClickAction()
@@ -451,5 +482,257 @@ class SearchWorkerResultScreenTest {
         .assertExists()
         .assertIsDisplayed()
         .assertTextContains("save")
+  }
+
+  @Test
+  fun testWorkerFilteringByAvailabilityDays() {
+    // Set up test worker profiles with specific working hours and unavailability
+    val worker1 =
+        WorkerProfile(
+            uid = "worker1",
+            fieldOfWork = "Painter",
+            rating = 4.5,
+            workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
+            unavailability_list = listOf(LocalDate.now()),
+            location = Location(0.0, 0.0))
+
+    val worker2 =
+        WorkerProfile(
+            uid = "worker2",
+            fieldOfWork = "Electrician",
+            rating = 4.0,
+            workingHours = Pair(LocalTime.of(8, 0), LocalTime.of(16, 0)),
+            unavailability_list = emptyList(),
+            location = Location(0.0, 0.0))
+
+    val worker3 =
+        WorkerProfile(
+            uid = "worker3",
+            fieldOfWork = "Plumber",
+            rating = 5.0,
+            workingHours = Pair(LocalTime.of(10, 0), LocalTime.of(18, 0)),
+            unavailability_list = emptyList(),
+            location = Location(0.0, 0.0))
+
+    // Update the searchViewModel with these test workers
+    searchViewModel._workerProfiles.value = listOf(worker1, worker2, worker3)
+
+    // Set the composable content
+    composeTestRule.setContent {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+    }
+
+    // Initially, all workers should be displayed
+    composeTestRule.waitForIdle()
+
+    // Verify that all 3 workers are displayed
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
+
+    // Simulate clicking the "Availability" filter button
+    composeTestRule.onNodeWithText("Availability").performClick()
+
+    // composeTestRule.waitUntil(10000){false}
+
+    // Wait for the bottom sheet to appear
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("availabilityBottomSheet").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("timePickerColumn").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("timeInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("bottomSheetColumn").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Enter time").assertIsDisplayed()
+
+    val today = LocalDate.now()
+    val todayDayOfMonth = today.dayOfMonth.toString()
+
+    val textFields =
+        composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
+
+    // Ensure that we have at least two text fields
+    assert(textFields.fetchSemanticsNodes().size >= 2)
+
+    // Set the hour to "07"
+    textFields[0].performTextReplacement("10")
+
+    // Set the minute to "00"
+    textFields[1].performTextReplacement("00")
+
+    // Find the node representing today's date and perform a click
+    composeTestRule.onNode(hasText(todayDayOfMonth) and hasClickAction()).performClick()
+
+    composeTestRule.onNodeWithText("OK").performClick()
+
+    composeTestRule.waitForIdle()
+
+    // Verify that 2 workers are displayed
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
+  }
+
+  @Test
+  fun testWorkerFilteringByAvailabilityHours() {
+    // Set up test worker profiles with specific working hours and unavailability
+    val worker1 =
+        WorkerProfile(
+            uid = "worker1",
+            fieldOfWork = "Painter",
+            rating = 4.5,
+            workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
+            unavailability_list = emptyList(),
+            location = Location(0.0, 0.0))
+
+    val worker2 =
+        WorkerProfile(
+            uid = "worker2",
+            fieldOfWork = "Electrician",
+            rating = 4.0,
+            workingHours = Pair(LocalTime.of(8, 0), LocalTime.of(16, 0)),
+            unavailability_list = emptyList(),
+            location = Location(0.0, 0.0))
+
+    val worker3 =
+        WorkerProfile(
+            uid = "worker3",
+            fieldOfWork = "Plumber",
+            rating = 5.0,
+            workingHours = Pair(LocalTime.of(10, 0), LocalTime.of(18, 0)),
+            unavailability_list = emptyList(),
+            location = Location(0.0, 0.0))
+
+    // Update the searchViewModel with these test workers
+    searchViewModel._workerProfiles.value = listOf(worker1, worker2, worker3)
+
+    // Set the composable content
+    composeTestRule.setContent {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+    }
+
+    // Initially, all workers should be displayed
+    composeTestRule.waitForIdle()
+
+    // Verify that all 3 workers are displayed
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
+
+    // Simulate clicking the "Availability" filter button
+    composeTestRule.onNodeWithText("Availability").performClick()
+
+    // composeTestRule.waitUntil(10000){false}
+
+    // Wait for the bottom sheet to appear
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("availabilityBottomSheet").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("timePickerColumn").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("timeInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("bottomSheetColumn").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Enter time").assertIsDisplayed()
+
+    val today = LocalDate.now()
+    val todayDayOfMonth = today.dayOfMonth.toString()
+
+    val textFields =
+        composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
+
+    // Ensure that we have at least two text fields
+    assert(textFields.fetchSemanticsNodes().size >= 2)
+
+    // Set the hour to "07"
+    textFields[0].performTextReplacement("08")
+
+    // Set the minute to "00"
+    textFields[1].performTextReplacement("00")
+
+    // Find the node representing today's date and perform a click
+    composeTestRule.onNode(hasText(todayDayOfMonth) and hasClickAction()).performClick()
+
+    composeTestRule.onNodeWithText("OK").performClick()
+
+    composeTestRule.waitForIdle()
+
+    // Verify that one worker is displayed
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(1)
+  }
+
+  @Test
+  fun testWorkerFilteringByAvailabilityMinutes() {
+    // Set up test worker profiles with specific working hours and unavailability
+    val worker1 =
+        WorkerProfile(
+            uid = "worker1",
+            fieldOfWork = "Painter",
+            rating = 4.5,
+            workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
+            unavailability_list = emptyList(),
+            location = Location(0.0, 0.0))
+
+    val worker2 =
+        WorkerProfile(
+            uid = "worker2",
+            fieldOfWork = "Electrician",
+            rating = 4.0,
+            workingHours = Pair(LocalTime.of(8, 30), LocalTime.of(16, 0)),
+            unavailability_list = emptyList(),
+            location = Location(0.0, 0.0))
+
+    val worker3 =
+        WorkerProfile(
+            uid = "worker3",
+            fieldOfWork = "Plumber",
+            rating = 5.0,
+            workingHours = Pair(LocalTime.of(10, 0), LocalTime.of(18, 0)),
+            unavailability_list = emptyList(),
+            location = Location(0.0, 0.0))
+
+    // Update the searchViewModel with these test workers
+    searchViewModel._workerProfiles.value = listOf(worker1, worker2, worker3)
+
+    // Set the composable content
+    composeTestRule.setContent {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+    }
+
+    // Initially, all workers should be displayed
+    composeTestRule.waitForIdle()
+
+    // Verify that all 3 workers are displayed
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
+
+    // Simulate clicking the "Availability" filter button
+    composeTestRule.onNodeWithText("Availability").performClick()
+
+    // composeTestRule.waitUntil(10000){false}
+
+    // Wait for the bottom sheet to appear
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("availabilityBottomSheet").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("timePickerColumn").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("timeInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("bottomSheetColumn").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Enter time").assertIsDisplayed()
+
+    val today = LocalDate.now()
+    val todayDayOfMonth = today.dayOfMonth.toString()
+
+    val textFields =
+        composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
+
+    // Ensure that we have at least two text fields
+    assert(textFields.fetchSemanticsNodes().size >= 2)
+
+    // Set the hour to "07"
+    textFields[0].performTextReplacement("08")
+
+    // Set the minute to "00"
+    textFields[1].performTextReplacement("00")
+
+    // Find the node representing today's date and perform a click
+    composeTestRule.onNode(hasText(todayDayOfMonth) and hasClickAction()).performClick()
+
+    composeTestRule.onNodeWithText("OK").performClick()
+
+    composeTestRule.waitForIdle()
+
+    // Verify that no workers are displayed
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(0)
   }
 }
