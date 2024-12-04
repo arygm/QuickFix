@@ -1,13 +1,18 @@
 package com.arygm.quickfix.ui.elements
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,8 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 
 /**
@@ -32,20 +35,20 @@ import com.arygm.quickfix.ui.theme.QuickFixTheme
  * @param onResetClick Callback triggered when the "Reset" text is clicked.
  * @param onDismissRequest Callback triggered when the modal sheet is dismissed.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChooseServiceTypeSheet(
     showModalBottomSheet: Boolean,
     serviceTypes: List<String>,
-    selectedService: String,
-    onServiceSelect: (String) -> Unit,
-    onApplyClick: () -> Unit,
-    onResetClick: () -> Unit,
+    onApplyClick: (List<String>) -> Unit,
     onDismissRequest: () -> Unit
 ) {
+  var selectedServices by remember { mutableStateOf(emptyList<String>()) }
   if (showModalBottomSheet) {
-    Dialog(
+    ModalBottomSheet(
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        modifier = Modifier.testTag("chooseServiceTypeModalSheet")) {
           BoxWithConstraints {
             val paddingHorizontal = maxWidth * 0.04f // Relative horizontal padding (4% of width)
             val verticalSpacing = maxHeight * 0.015f // Relative vertical spacing (1.5% of height)
@@ -80,17 +83,28 @@ fun ChooseServiceTypeSheet(
                   Spacer(modifier = Modifier.height(verticalSpacing)) // Space below divider
 
                   // Display each service option in a row
-                  Row(
-                      modifier = Modifier.fillMaxWidth().padding(verticalSpacing),
+                  LazyRow(
+                      modifier =
+                          Modifier.fillMaxWidth()
+                              .padding(vertical = verticalSpacing)
+                              .testTag("lazyServiceRow"),
                       horizontalArrangement =
                           Arrangement.spacedBy(paddingHorizontal, Alignment.CenterHorizontally)) {
-                        serviceTypes.forEach { service ->
-                          val isSelected = service == selectedService
+                        items(serviceTypes) { service ->
+                          val isSelected = service in selectedServices
                           Text(
                               text = service,
                               style = MaterialTheme.typography.bodyMedium,
                               modifier =
-                                  Modifier.clickable { onServiceSelect(service) }
+                                  Modifier.clickable {
+                                        selectedServices =
+                                            if (isSelected) {
+                                              selectedServices -
+                                                  service // Remove if already selected
+                                            } else {
+                                              selectedServices + service // Add if not selected
+                                            }
+                                      }
                                       .background(
                                           color =
                                               if (isSelected) colorScheme.primary
@@ -114,7 +128,10 @@ fun ChooseServiceTypeSheet(
 
                   // Apply button to confirm the selection
                   Button(
-                      onClick = onApplyClick,
+                      onClick = {
+                        onApplyClick(selectedServices)
+                        onDismissRequest()
+                      },
                       modifier =
                           Modifier.fillMaxWidth()
                               .padding(horizontal = buttonPaddingHorizontal)
@@ -132,9 +149,13 @@ fun ChooseServiceTypeSheet(
                   // Reset option to clear the selection
                   Text(
                       text = "Reset",
-                      color = colorScheme.onSecondaryContainer,
+                      color =
+                          if (selectedServices.isNotEmpty()) colorScheme.primary
+                          else colorScheme.onSecondaryContainer,
                       modifier =
-                          Modifier.clickable { onResetClick() }
+                          Modifier.clickable(enabled = selectedServices.isNotEmpty()) {
+                                selectedServices = emptyList<String>()
+                              }
                               .padding(vertical = verticalSpacing / 2)
                               .testTag("resetButton"))
                 }
@@ -150,7 +171,6 @@ fun ChooseServiceTypeSheet(
 @Preview(showBackground = true)
 @Composable
 fun ChooseServiceTypePreview() {
-  var selectedService by remember { mutableStateOf("Exterior Painter") }
   var showModal by remember { mutableStateOf(true) }
 
   val serviceTypes = listOf("Exterior Painter", "Interior Painter")
@@ -159,10 +179,7 @@ fun ChooseServiceTypePreview() {
     ChooseServiceTypeSheet(
         showModalBottomSheet = showModal,
         serviceTypes = serviceTypes,
-        selectedService = selectedService,
-        onServiceSelect = { selectedService = it },
-        onApplyClick = { /* Handle Apply */},
-        onResetClick = { selectedService = "" },
+        onApplyClick = { l -> l.forEach { it -> Log.d("Chill Guy", it) } },
         onDismissRequest = { showModal = false })
   }
 }

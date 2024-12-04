@@ -127,6 +127,7 @@ fun ExpandableCategoryItem(
                                         }
                                         .clickable {
                                           searchViewModel.updateSearchQuery(it.name)
+                                          searchViewModel.setSearchSubcategory(it)
                                           navigationActions.navigateTo(Screen.SEARCH_WORKER_RESULT)
                                         },
                                 text = it.name,

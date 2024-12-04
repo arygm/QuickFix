@@ -70,6 +70,7 @@ fun QuickFixAvailabilityBottomSheet(
                       selection =
                           CalendarSelection.Dates { newDates ->
                             onOkClick(newDates, timePickerState.hour, timePickerState.minute)
+                            onDismissRequest()
                           })
                 }
               }
