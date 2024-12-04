@@ -1,16 +1,14 @@
 package com.arygm.quickfix.model.search
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.arygm.quickfix.model.category.Category
-import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import java.time.LocalDate
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -21,7 +19,6 @@ import kotlinx.coroutines.launch
 
 open class SearchViewModel(
     private val workerProfileRepo: WorkerProfileRepositoryFirestore,
-    private val categoryRepo: CategoryRepositoryFirestore
 ) : ViewModel() {
 
   private val _searchQuery = MutableStateFlow("")
@@ -33,13 +30,6 @@ open class SearchViewModel(
   private val _errorMessage = MutableStateFlow<String?>(null)
   val errorMessage: StateFlow<String?> = _errorMessage
 
-  private val _categories = MutableStateFlow<List<Category>>(emptyList())
-  val categories: StateFlow<List<Category>> = _categories
-
-  init {
-    categoryRepo.init { fetchCategories() }
-  }
-
   companion object {
     private val firestoreInstance by lazy { Firebase.firestore } // Singleton Firestore instance
 
@@ -47,10 +37,7 @@ open class SearchViewModel(
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return SearchViewModel(
-                WorkerProfileRepositoryFirestore(firestoreInstance),
-                CategoryRepositoryFirestore(firestoreInstance))
-                as T
+            return SearchViewModel(WorkerProfileRepositoryFirestore(firestoreInstance)) as T
           }
         }
   }
@@ -68,12 +55,6 @@ open class SearchViewModel(
       _searchQuery.value = query
       filterWorkerProfiles(fieldOfWork = query)
     }
-  }
-
-  fun fetchCategories() {
-    categoryRepo.fetchCategories(
-        onSuccess = { categories -> _categories.value = categories as List<Category> },
-        onFailure = { e -> Log.e("SearchViewModel", "Failed to fetch categories: ${e.message}") })
   }
 
   fun filterWorkerProfiles(
@@ -124,5 +105,25 @@ open class SearchViewModel(
 
     val c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return earthRadius * c
+  }
+
+  fun filterWorkersByAvailability(
+      workers: List<WorkerProfile>,
+      selectedDays: List<LocalDate>,
+      selectedHour: Int,
+      selectedMinute: Int
+  ): List<WorkerProfile> {
+    return workers
+        .filter { worker ->
+          val workingStart = worker.workingHours.first
+          val workingEnd = worker.workingHours.second
+
+          // Check if the selected time is within the worker's working hours
+          (selectedHour > workingStart.hour ||
+              (selectedHour == workingStart.hour && selectedMinute >= workingStart.minute)) &&
+              (selectedHour < workingEnd.hour ||
+                  (selectedHour == workingEnd.hour && selectedMinute <= workingEnd.minute))
+        }
+        .filter { worker -> selectedDays.none { day -> worker.unavailability_list.contains(day) } }
   }
 }

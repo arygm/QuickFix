@@ -1,4 +1,4 @@
-package com.arygm.quickfix.model.service
+package com.arygm.quickfix.model.profile.dataFields
 
 data class IncludedService(override val name: String) : Service
 
