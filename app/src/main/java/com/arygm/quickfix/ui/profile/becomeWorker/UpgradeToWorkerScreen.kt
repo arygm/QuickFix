@@ -47,7 +47,7 @@ fun BusinessScreen(
   val imagePathBP = remember { mutableStateOf("") }
   var displayNameError by remember { mutableStateOf(false) }
   var descriptionError by remember { mutableStateOf(false) }
-  val price = remember { mutableStateOf("") }
+  val price = remember { mutableDoubleStateOf(0.0) }
   val fieldOfWork = remember { mutableStateOf("") }
   val includedServices = remember { mutableStateOf(listOf<IncludedService>()) }
   val addOnServices = remember { mutableStateOf(listOf<AddOnService>()) }
@@ -69,7 +69,7 @@ fun BusinessScreen(
             },
             navigationIcon = {
               IconButton(
-                  onClick = { // navigationActions.goBack()
+                  onClick = {navigationActions.goBack()
                   },
                   modifier = Modifier.testTag("goBackButton")) {
                     Icon(

@@ -1,5 +1,7 @@
 package com.arygm.quickfix.ui.profile.becomeWorker.views.professional
 
+import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -15,7 +17,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,7 +28,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableDoubleState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,7 +55,7 @@ import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.ressources.C
-import com.arygm.quickfix.ui.elements.QuickFixCheckedListElement
+import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
@@ -57,18 +63,51 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 @Composable
 fun ProfessionalInfoScreen(
     pagerState: PagerState,
-    price: MutableState<String>,
+    price: MutableDoubleState,
     fieldOfWork: MutableState<String>,
     includedServices: MutableState<List<IncludedService>>,
     addOnServices: MutableState<List<AddOnService>>,
     tags: MutableState<List<String>>,
     categories: List<Category>,
 ) {
+    val formValidatedIncludedServices = remember { mutableStateOf(false) }
+    val formValidatedAddOnServices = remember { mutableStateOf(false) }
   var selectedCategory by remember { mutableStateOf(Category()) }
   var selectedSubcategory by remember { mutableStateOf(Subcategory()) }
   var expandedDropDownCategory by remember { mutableStateOf(false) }
   var expandedDropDownSubcategory by remember { mutableStateOf(false) }
-  BoxWithConstraints {
+    val (listServices, checkedStatesIncludedServices) = remember(selectedSubcategory) {
+        val services = selectedSubcategory.setServices
+        val checkedStates = mutableStateListOf<Boolean>().apply {
+            repeat(services.size) { add(false) }
+        }
+        services to checkedStates
+    }
+    val listAddOnServicesFromSet by remember(listServices, checkedStatesIncludedServices) {
+        derivedStateOf {
+            Log.d("listAddOnServicesFromSet", listServices.filterIndexed { index, _ ->
+                index < checkedStatesIncludedServices.size && !checkedStatesIncludedServices[index]
+            }.toString())
+            listServices.filterIndexed { index, _ ->
+                index < checkedStatesIncludedServices.size && !checkedStatesIncludedServices[index]
+            }
+        }
+    }
+
+    // Initialize checkedStatesAddOnServices when listAddOnServices changes
+    val checkedStatesAddOnServices = remember(listAddOnServicesFromSet) {
+        mutableStateListOf<Boolean>().apply {
+            repeat(listAddOnServicesFromSet.size) { add(false) }
+        }
+    }
+
+    val textFieldList = remember { mutableStateListOf<MutableState<String>>()}
+
+    val canAddTextField = remember { mutableStateOf(true) }
+
+
+
+    BoxWithConstraints {
     val widthRatio = maxWidth / 411
     val heightRatio = maxHeight / 860
     val sizeRatio = minOf(widthRatio, heightRatio)
@@ -178,6 +217,13 @@ fun ProfessionalInfoScreen(
                           selectedCategory = category
                           selectedSubcategory = Subcategory()
                           expandedDropDownCategory = false
+                            formValidatedIncludedServices.value = false
+                            formValidatedAddOnServices.value = false
+                            textFieldList.clear()
+                            addOnServices.value = emptyList()
+                            includedServices.value = emptyList()
+                            fieldOfWork.value = ""
+                            price.doubleValue = 0.0
                         },
                         modifier = Modifier.height(30.dp * heightRatio.value))
                   }
@@ -239,49 +285,85 @@ fun ProfessionalInfoScreen(
                         onClick = {
                           selectedSubcategory = subcategory
                           expandedDropDownSubcategory = false
+                            fieldOfWork.value = selectedSubcategory.name
                         },
                         modifier = Modifier.height(30.dp * heightRatio.value))
                   }
                 }
           }
         }
+          Spacer(modifier = Modifier.height(16.dp * heightRatio.value))
       }
+
       if(selectedCategory.name.isNotEmpty() && selectedSubcategory.name.isNotEmpty()) {
           item {
-              val listServices = selectedSubcategory.setServices
-              val checkedStatesServices = remember {
-                  mutableStateListOf(*List(listServices.size) { false }.toTypedArray())
+              val indices = (0 until listServices.size step 2)
+              QuickFixCheckedList(
+                    listServices = listServices,
+                    checkedStatesServices = checkedStatesIncludedServices,
+                    heightRatio = heightRatio,
+                    indices = indices,
+                  minToSelect = 5,
+                  maxToSelect = listServices.size,
+                    onClickActionOk = {
+                        includedServices.value = listServices.filterIndexed { index, _ ->
+                            checkedStatesIncludedServices[index]
+                        }.map { IncludedService(it) }
+                        formValidatedIncludedServices.value = true
+                    },
+                    formValidated = formValidatedIncludedServices,
+                  boldText = " 5 to 10 Included services",
+                  label = "Choose",
+                  secondPartLabel = " in your ${selectedCategory.id} job from this set",
+                  widthRatio = widthRatio,
+              )
+              Spacer(modifier = Modifier.height(16.dp * heightRatio.value))
+          }
+          if (formValidatedIncludedServices.value){
+              item {
+                  val indices = (0 until listAddOnServicesFromSet.size step 2)
+                  QuickFixCheckedList(
+                      listServices = listAddOnServicesFromSet,
+                      checkedStatesServices = checkedStatesAddOnServices,
+                      heightRatio = heightRatio,
+                      indices = indices,
+                      minToSelect = 4,
+                      maxToSelect = listAddOnServicesFromSet.size,
+                      onClickActionOk = {
+                          val filteredAddOnServices = listAddOnServicesFromSet.filterIndexed { index, _ ->
+                              checkedStatesAddOnServices[index]
+                          }.map { AddOnService(it) }
+
+                          // Map textFieldList to AddOnService
+                          val textFieldAddOnServices = textFieldList.map { AddOnService(it.value) }
+
+                          // Combine both lists and assign to addOnServices.value
+                          addOnServices.value = filteredAddOnServices + textFieldAddOnServices
+                          formValidatedAddOnServices.value = true
+                          canAddTextField.value = false
+
+                      },
+                      formValidated = formValidatedAddOnServices,
+                      boldText = " At least 4 Add-on services",
+                      label = "Choose",
+                      secondPartLabel = " in your ${selectedCategory.id} job from the set or from yourself",
+                      widthRatio = widthRatio,
+                      isTextFieldList = true,
+                        textFieldList = textFieldList,
+                        canAddTextField = canAddTextField,
+                  )
               }
-              val half = (listServices.size + 1) / 2
-              val leftIndices = 0 until half
-              val rightIndices = half until listServices.size
-              Row(modifier = Modifier.fillMaxWidth()) {
-                  // Left Column
-                  Column(modifier = Modifier.weight(1f)) {
-                      leftIndices.forEach { index ->
-                          QuickFixCheckedListElement(
-                              listServices = listServices,
-                              checkedStatesServices = checkedStatesServices,
-                              index = index
-                          )
-                      }
-                  }
-                  // Right Column
-                  Column(modifier = Modifier.weight(1f)) {
-                      rightIndices.forEach { index ->
-                          QuickFixCheckedListElement(
-                              listServices = listServices,
-                              checkedStatesServices = checkedStatesServices,
-                              index = index
-                          )
-                      }
+              item {
+                      // Display the list of composables
+
+
+
                   }
               }
           }
       }
     }
   }
-}
 
 @Composable
 fun calculateMaxTextWidth(texts: List<String>, textStyle: TextStyle): Dp {
