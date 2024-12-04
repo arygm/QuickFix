@@ -4,8 +4,10 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.text.AnnotatedString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.category.Subcategory
@@ -177,7 +179,8 @@ class ProfessionalInfoScreenTest {
     // Verify that subcategory field is reset
     composeTestRule
         .onNodeWithTag(professionalInfoScreenSubcategoryField)
-        .assertTextEquals("") // Assuming it resets to empty string
+        .assert(SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("")))
+    // Assuming it resets to empty string
 
     // Subcategory field should now display subcategories for "Electrical"
     composeTestRule.onNodeWithTag(professionalInfoScreenSubcategoryField).performClick()

@@ -228,7 +228,7 @@ fun QuickFixTextFieldCustom(
                               if (!singleLine) it.padding(8.dp) else it
                             }, // Adjust padding if needed for alignment
                             contentAlignment = Alignment.CenterStart) {
-                              if (value.isEmpty()) {
+                              if (updatedValue.isEmpty()) {
                                 Text(
                                     text = placeHolderText,
                                     style =
@@ -241,9 +241,9 @@ fun QuickFixTextFieldCustom(
                         }
                       })
                 }
-                if ((showTrailingIcon() && value.isNotEmpty()) || alwaysShowTrailingIcon) {
+                if ((showTrailingIcon() && updatedValue.isNotEmpty()) || alwaysShowTrailingIcon) {
                   IconButton(
-                      onClick = { if (onClick) onValueChange("") },
+                      onClick = { if (onClick) onValueChangeWithLimit("") },
                       modifier =
                           Modifier.testTag(C.Tag.clear_button_text_field_custom)
                               .size(sizeIconGroup)
