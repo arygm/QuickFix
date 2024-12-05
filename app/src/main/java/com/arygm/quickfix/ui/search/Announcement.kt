@@ -128,7 +128,7 @@ fun AnnouncementScreen(
         val announcementList = profile.announcements + announcement.announcementId
 
         profileViewModel.updateProfile(
-            UserProfile(profile.locations, announcementList, profile.uid),
+            UserProfile(profile.locations, announcementList, profile.wallet, profile.uid),
             onSuccess = {
               accountViewModel.fetchUserAccount(profile.uid) { account ->
                 loggedInAccountViewModel.setLoggedInAccount(account!!)
