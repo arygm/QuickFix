@@ -10,10 +10,10 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arygm.quickfix.ui.theme.TimeSelectorUnselectedContainerColor
 import com.arygm.quickfix.utils.MyAppTheme
 import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
@@ -166,7 +166,7 @@ fun TimePickerDialog(
                         timeSelectorSelectedContainerColor = colorScheme.primary.copy(alpha = 0.3f),
                         timeSelectorSelectedContentColor = colorScheme.onBackground,
                         clockDialColor = colorScheme.primary.copy(alpha = 0.1f),
-                        timeSelectorUnselectedContainerColor = Color(0xffe9e0e0),
+                        timeSelectorUnselectedContainerColor = TimeSelectorUnselectedContainerColor,
                         timeSelectorUnselectedContentColor = colorScheme.onSecondaryContainer,
                         clockDialUnselectedContentColor = colorScheme.onBackground),
             )
@@ -179,7 +179,7 @@ fun TimePickerDialog(
                         timeSelectorSelectedContainerColor = colorScheme.primary.copy(alpha = 0.3f),
                         timeSelectorSelectedContentColor = colorScheme.onBackground,
                         clockDialColor = colorScheme.primary.copy(alpha = 0.1f),
-                        timeSelectorUnselectedContainerColor = Color(0xffe9e0e0),
+                        timeSelectorUnselectedContainerColor = TimeSelectorUnselectedContainerColor,
                         timeSelectorUnselectedContentColor = colorScheme.onSecondaryContainer,
                         clockDialUnselectedContentColor = colorScheme.onBackground),
             )

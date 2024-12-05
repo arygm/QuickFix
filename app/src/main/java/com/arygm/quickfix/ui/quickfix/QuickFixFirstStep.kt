@@ -222,7 +222,7 @@ fun QuickFixFirstStep(locationViewModel: LocationViewModel, navigationActions: N
 
               item {
                 QuickFixTextFieldCustom(
-                    heightField = 150.dp,
+                    heightField = 150.dp * heightRatio.value,
                     widthField = 400.dp * widthRatio.value,
                     value = quickNote,
                     onValueChange = { quickNote = it },
