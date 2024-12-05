@@ -61,6 +61,8 @@ object C {
         "professionalInfoScreen_dropDownCateItem"
     const val professionalInfoScreenSubcategoryDropdownMenuItem =
         "professionalInfoScreen_dropDownSubcateItem"
+    const val professionalInfoScreenTagsList = "professionalInfoScreen_tagsList"
+    const val professionalInfoScreenPriceField = "professionalInfoScreen_priceField"
 
     // QuickFixCheckedList
     const val quickFixCheckedListElement = "quickFixCheckedListElement"
