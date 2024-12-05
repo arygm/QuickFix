@@ -4,6 +4,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,8 +22,11 @@ fun setAccountPreferences(
     preferencesViewModel: PreferencesViewModel,
     account: Account,
     signIn: Boolean = true,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-  CoroutineScope(Dispatchers.IO).launch {
+  // Use withContext rather than launching a new scope
+  // This ensures the code is executed in the caller's coroutine context
+  CoroutineScope(dispatcher).launch {
     preferencesViewModel.savePreference(IS_SIGN_IN_KEY, signIn)
     preferencesViewModel.savePreference(USER_ID_KEY, account.uid)
     preferencesViewModel.savePreference(FIRST_NAME_KEY, account.firstName)
