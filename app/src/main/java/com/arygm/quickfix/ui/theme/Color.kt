@@ -69,3 +69,6 @@ val DarkTextButtonQuaternary = Color(0xFFB78080)
 
 /* Title */
 val DarkTitlePrimary = Color(0xFF66001A)
+
+/* Time selector */
+val TimeSelectorUnselectedContainerColor = Color(0xFFE9E0E0)
