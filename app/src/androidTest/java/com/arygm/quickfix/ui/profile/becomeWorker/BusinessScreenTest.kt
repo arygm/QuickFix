@@ -6,11 +6,17 @@ import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
+import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.profile.*
+import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
+import org.mockito.Mockito
 import org.mockito.kotlin.*
 
 class BusinessScreenTest {
@@ -23,7 +29,9 @@ class BusinessScreenTest {
   private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
   private lateinit var userProfileRepositoryFirestore: ProfileRepository
   private lateinit var workerProfileRepositoryFirestore: ProfileRepository
+  private lateinit var categoryRepo: CategoryRepositoryFirestore
   private lateinit var workerViewModel: ProfileViewModel
+  private lateinit var categoryViewModel: CategoryViewModel
 
   private val testUserProfile =
       Account(
@@ -40,19 +48,21 @@ class BusinessScreenTest {
     userProfileRepositoryFirestore = mock()
     workerProfileRepositoryFirestore = mock()
     accountRepository = mock()
+      categoryRepo = mock()
     accountViewModel = AccountViewModel(accountRepository)
     workerViewModel = ProfileViewModel(workerProfileRepositoryFirestore)
     loggedInAccountViewModel =
         LoggedInAccountViewModel(userProfileRepositoryFirestore, workerProfileRepositoryFirestore)
     loggedInAccountViewModel.setLoggedInAccount(testUserProfile)
+      categoryViewModel = CategoryViewModel(categoryRepo)
   }
-  /*
+
    @Test
    fun testInitialUI() {
      composeTestRule.setContent {
        QuickFixTheme {
          BusinessScreen(
-             navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
+             navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel, categoryViewModel)
        }
      }
 
@@ -62,14 +72,13 @@ class BusinessScreenTest {
      composeTestRule.onNodeWithTag(C.Tag.upgradeToWorkerPager).assertIsDisplayed()
    }
 
-  */
-  /*
+
    @Test
    fun testBackButtonNavigatesBack() {
      composeTestRule.setContent {
        QuickFixTheme {
          BusinessScreen(
-             navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel)
+             navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel, categoryViewModel)
        }
      }
 
@@ -77,5 +86,4 @@ class BusinessScreenTest {
      Mockito.verify(navigationActions).goBack()
    }
 
-  */
 }
