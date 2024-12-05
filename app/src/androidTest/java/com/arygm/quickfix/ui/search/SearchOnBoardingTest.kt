@@ -1,7 +1,11 @@
 package com.arygm.quickfix.ui.search
 
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
