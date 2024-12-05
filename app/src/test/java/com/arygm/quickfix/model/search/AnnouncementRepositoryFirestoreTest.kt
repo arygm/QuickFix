@@ -33,7 +33,6 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.timeout
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -126,8 +125,7 @@ class AnnouncementRepositoryFirestoreTest {
         },
         onFailure = { fail("Failure callback should not be called") })
 
-    // Verify that the 'documents' field was accessed
-    verify(mockQuerySnapshot, timeout(100)).documents
+    verify(mockCollectionReference).get()
   }
 
   @Test
