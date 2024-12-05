@@ -166,7 +166,9 @@ fun QuickFixCheckedList(
                     contentDescription = "textfield delete $index",
                     tint = colorScheme.onSurface,
                     modifier =
-                        Modifier.size(width = 30.dp * widthRatio.value, height = 30.dp * heightRatio.value)
+                        Modifier.size(
+                                width = 30.dp * widthRatio.value,
+                                height = 30.dp * heightRatio.value)
                             .clickable {
                               service.value = ""
                               textFieldList.remove(service)

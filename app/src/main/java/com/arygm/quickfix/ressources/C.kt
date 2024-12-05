@@ -74,5 +74,8 @@ object C {
     const val quickFixCheckedListOk = "quickFixCheckedListOk"
     const val quickFixCheckedListReset = "quickFixCheckedListReset"
     const val quickFixCheckedListEdit = "quickFixCheckedListEdit"
+
+    // quickfix
+    const val quickFixUploadPictures = "quickFixUploadPictures"
   }
 }

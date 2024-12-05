@@ -5,8 +5,19 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.text.AnnotatedString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.category.Scale
@@ -304,7 +315,8 @@ class ProfessionalInfoScreenTest {
     // Verify that subcategory field is reset
     composeTestRule
         .onNodeWithTag(professionalInfoScreenSubcategoryField)
-        .assertTextEquals("") // Assuming it resets to empty string
+        .assert(SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("")))
+    // Assuming it resets to empty string
 
     // Subcategory field should now display subcategories for "Electrical"
     composeTestRule.onNodeWithTag(professionalInfoScreenSubcategoryField).performClick()
