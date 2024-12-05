@@ -3,6 +3,7 @@ package com.arygm.quickfix.model.quickfix
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.arygm.quickfix.model.bill.BillField
+import com.arygm.quickfix.model.categories.WorkerCategory
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
@@ -85,6 +86,7 @@ class QuickFixRepositoryFirestoreTest {
           chatUid = "chat123",
           title = "Fix My Wall",
           bill = listOf(testBillField),
+          category = WorkerCategory.PAINTING,
           location = testLocation)
 
   @Before
@@ -482,6 +484,7 @@ class QuickFixRepositoryFirestoreTest {
     whenever(document.get("imageUrl")).thenReturn(quickFix.imageUrl)
     whenever(document.get("date")).thenReturn(quickFix.date)
     whenever(document.getTimestamp("time")).thenReturn(quickFix.time)
+    whenever(document.getString("category")).thenReturn(quickFix.category.name)
     whenever(document.get("includedServices"))
         .thenReturn(quickFix.includedServices.map { mapOf("name" to it.name) })
     whenever(document.get("addOnServices"))

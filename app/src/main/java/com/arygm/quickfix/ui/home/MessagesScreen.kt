@@ -59,15 +59,13 @@ fun MessageScreen(
   val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
 
   val userId = loggedInAccount?.uid ?: return
-  val activeChatId = loggedInAccount?.activeChats?.firstOrNull()
+  val activeChat = loggedInAccount?.activeChats?.firstOrNull()
 
   // If no chat is active, we can display an empty interface. This will be changed later
-  if (activeChatId == null) {
+  if (activeChat == null) {
     Column(
         modifier =
-            Modifier.fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .testTag("messageScreen")) {
+            Modifier.fillMaxSize().background(colorScheme.background).testTag("messageScreen")) {
           // Header avec bouton de retour et photo de profil
           Header(navigationActions)
           // Message list vide
@@ -86,16 +84,14 @@ fun MessageScreen(
   val coroutineScope = rememberCoroutineScope()
 
   val chatList by chatViewModel.chats.collectAsState()
-  val chat = chatList.firstOrNull { it.chatId == activeChatId }
+  val chat = chatList.firstOrNull { it.chatId == activeChat.chatId }
 
   // Charge les chats lorsqu'un chat actif est défini
-  LaunchedEffect(key1 = activeChatId) { chatViewModel.getChats() }
+  LaunchedEffect(key1 = activeChat) { chatViewModel.getChats() }
 
   Column(
       modifier =
-          Modifier.fillMaxSize()
-              .background(MaterialTheme.colorScheme.background)
-              .testTag("messageScreen")) {
+          Modifier.fillMaxSize().background(colorScheme.background).testTag("messageScreen")) {
         // Header with back button and profile picture
         Header(navigationActions)
 

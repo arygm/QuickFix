@@ -38,14 +38,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.quickfix.QuickFix
+import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.ui.theme.poppinsTypography
-
-// Data class for QuickFix item
-data class QuickFix(val name: String, val taskDescription: String, val date: String)
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun QuickFixesWidget(
-    status: String = "All",
+    status: Status,
     quickFixList: List<QuickFix>,
     onShowAllClick: () -> Unit,
     onItemClick: (QuickFix) -> Unit,
@@ -74,7 +75,8 @@ fun QuickFixesWidget(
               horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "$status QuickFixes",
+                    text =
+                        "${status.toString().lowercase().replaceFirstChar { it.uppercase() }} QuickFixes",
                     color = MaterialTheme.colorScheme.onBackground,
                     style = poppinsTypography.headlineMedium,
                     fontSize = 19.sp,
@@ -115,12 +117,13 @@ fun QuickFixesWidget(
 
 @Composable
 fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
+  val formatter = SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault())
   Row(
       modifier =
           Modifier.fillMaxWidth()
               .padding(horizontal = 12.dp, vertical = 8.dp)
               .clickable { onClick() }
-              .testTag("QuickFixItem_${quickFix.name}"), // Added testTag
+              .testTag("QuickFixItem_${quickFix.workerName}"), // Added testTag
       verticalAlignment = Alignment.CenterVertically) {
         Column(modifier = Modifier.weight(0.15f)) {
           // Profile image placeholder
@@ -138,8 +141,8 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
           // Row for name and task description on the same line
           Row(verticalAlignment = Alignment.Bottom) {
             Text(
-                text = quickFix.name,
-                modifier = Modifier.testTag(quickFix.name), // Added testTag
+                text = quickFix.workerName,
+                modifier = Modifier.testTag(quickFix.workerName), // Added testTag
                 style = poppinsTypography.bodyMedium,
                 fontSize = 15.sp,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -148,8 +151,8 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
                 overflow = TextOverflow.Ellipsis)
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = quickFix.taskDescription, // Removed leading comma for clarity
-                modifier = Modifier.testTag(quickFix.taskDescription), // Added testTag
+                text = quickFix.title, // Removed leading comma for clarity
+                modifier = Modifier.testTag(quickFix.title), // Added testTag
                 style = poppinsTypography.bodyMedium,
                 fontSize = 15.sp,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
@@ -159,8 +162,10 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
           }
           // Date text on a separate line
           Text(
-              text = quickFix.date,
-              modifier = Modifier.testTag(quickFix.date), // Added testTag
+              text = formatter.format(quickFix.date.first().toDate()),
+              modifier =
+                  Modifier.testTag(
+                      formatter.format(quickFix.date.first().toDate()).toString()), // Added testTag
               style = poppinsTypography.bodyMedium,
               fontSize = 15.sp,
               fontWeight = FontWeight.Normal,

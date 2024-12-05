@@ -3,7 +3,7 @@ package com.arygm.quickfix.model.messaging
 import com.arygm.quickfix.utils.performFirestoreOperation
 import com.google.firebase.firestore.FirebaseFirestore
 
-class ChatRepositoryFirestore(private val db: FirebaseFirestore) : ChatRepository {
+open class ChatRepositoryFirestore(private val db: FirebaseFirestore) : ChatRepository {
   private val collectionPath = "chats"
   private val chats by lazy { db.collection(collectionPath) }
 
@@ -27,6 +27,17 @@ class ChatRepositoryFirestore(private val db: FirebaseFirestore) : ChatRepositor
           onSuccess(chats)
         }
         .addOnFailureListener { onFailure(it) }
+  }
+
+  override fun getChatsByUserId(
+      userId: String,
+      onSuccess: (List<Chat>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    chats.get().addOnSuccessListener {
+      val chats = it.toObjects(Chat::class.java)
+      onSuccess(chats.filter { it.useruid == userId || it.workeruid == userId })
+    }
   }
 
   override fun chatExists(

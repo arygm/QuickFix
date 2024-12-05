@@ -9,6 +9,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.printToLog
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.kaspresso.screen.HomeScreenObject
+import com.arygm.quickfix.model.quickfix.QuickFixRepository
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -28,7 +30,9 @@ class HomeScreenTest : TestCase() {
     step("Set up the HomeScreen") {
       composeTestRule.setContent {
         val navigationActions = mock(NavigationActions::class.java)
-        HomeScreen(navigationActions)
+        val quickFixRepository = mock(QuickFixRepository::class.java)
+        val quickFixViewModel = QuickFixViewModel(quickFixRepository)
+        HomeScreen(navigationActions, true, quickFixViewModel)
       }
     }
 
