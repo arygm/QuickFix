@@ -22,9 +22,6 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   private val uploadedImages_ = MutableStateFlow<List<Bitmap>>(emptyList())
   val uploadedImages: StateFlow<List<Bitmap>> = uploadedImages_.asStateFlow()
 
-  /*private val uploadedImagesUrl_ = MutableStateFlow<List<String>>(emptyList())
-  val uploadedImagesUrl: StateFlow<List<String>> = uploadedImagesUrl_.asStateFlow()*/
-
   // create factory
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -92,11 +89,7 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
     repository.uploadAnnouncementImages(
         announcementId = announcementId,
         images = images,
-        onSuccess = {
-          /*uploadedImagesUrl_.value = it
-          Log.d("UploadingImages", "Size after success of uploadAnnouncementImages : ${uploadedImagesUrl_.value.size}")
-          */ onSuccess(it)
-        },
+        onSuccess = { onSuccess(it) },
         onFailure = { e -> onFailure(e) })
   }
 
@@ -160,6 +153,5 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   /** Clears the entire list of uploaded images. */
   fun clearUploadedImages() {
     uploadedImages_.value = emptyList()
-    // uploadedImagesUrl_.value = emptyList()
   }
 }

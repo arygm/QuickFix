@@ -3,12 +3,9 @@ package com.arygm.quickfix.ui.search
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -21,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,18 +29,9 @@ import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -50,7 +39,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -69,8 +58,9 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun AnnouncementScreen(
     announcementViewModel: AnnouncementViewModel =
@@ -123,10 +113,11 @@ fun AnnouncementScreen(
     title = ""
     category = ""
     description = ""
+    location = null
     titleIsEmpty = true
     descriptionIsEmpty = true
     // categoryIsSelected = false
-    // locationIsSelected = false
+    locationIsSelected = false
     navigationActions.saveToCurBackStack("selectedLocation", null)
   }
 
@@ -143,8 +134,8 @@ fun AnnouncementScreen(
                 loggedInAccountViewModel.setLoggedInAccount(account!!)
               }
             },
-            onFailure = {
-              // Handle failure
+            onFailure = { e ->
+              Log.e("ProfileViewModel", "Failed to update profile: ${e.message}")
             })
       } else {
         Log.e("Wrong profile", "Should be a user profile")
@@ -307,9 +298,8 @@ fun AnnouncementScreen(
                     Text(
                         text = location?.name ?: "Location",
                         color =
-                            if (location == null)
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            else MaterialTheme.colorScheme.onBackground,
+                            if (location == null) colorScheme.onSurface.copy(alpha = 0.6f)
+                            else colorScheme.onBackground,
                         style = MaterialTheme.typography.bodyLarge,
                         maxLines = 1,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
@@ -365,7 +355,8 @@ fun AnnouncementScreen(
                           .height(90.dp) // Same height as the button when no images exist
                           .clip(RoundedCornerShape(8.dp))
                           .background(colorScheme.surface)
-                          .clickable { showUploadImageSheet = true }) {
+                          .clickable { showUploadImageSheet = true }
+                          .testTag("uploadedImagesBox")) {
                     Row(
                         modifier =
                             Modifier.fillMaxSize()
@@ -384,7 +375,7 @@ fun AnnouncementScreen(
 
                           // LazyRow for displaying images
                           LazyRow(
-                              modifier = Modifier.fillMaxSize(),
+                              modifier = Modifier.fillMaxSize().testTag("uploadedImagesLazyRow"),
                               contentPadding = PaddingValues(horizontal = 8.dp)) {
                                 val maxVisibleImages = 3
                                 val visibleImages = uploadedImages.take(maxVisibleImages)
@@ -398,7 +389,8 @@ fun AnnouncementScreen(
                                               .padding(
                                                   end =
                                                       if (index != visibleImages.lastIndex) 8.dp
-                                                      else 0.dp),
+                                                      else 0.dp)
+                                              .testTag("uploadedImageCard$index"),
                                       shape = RoundedCornerShape(8.dp)) {
                                         Box(modifier = Modifier.fillMaxSize()) {
                                           // Display the image
@@ -406,7 +398,9 @@ fun AnnouncementScreen(
                                               painter =
                                                   rememberAsyncImagePainter(visibleImages[index]),
                                               contentDescription = "Image $index",
-                                              modifier = Modifier.fillMaxSize(),
+                                              modifier =
+                                                  Modifier.fillMaxSize()
+                                                      .testTag("uploadedImage$index"),
                                               contentScale = ContentScale.Crop)
 
                                           // Overlay logic for the third image
@@ -418,7 +412,8 @@ fun AnnouncementScreen(
                                                         .clickable {
                                                           navigationActions.navigateTo(
                                                               Screen.DISPLAY_UPLOADED_IMAGES)
-                                                        }, // Set the boolean to true on click
+                                                        } // Set the boolean to true on click
+                                                        .testTag("remainingImagesOverlay"),
                                                 contentAlignment = Alignment.Center) {
                                                   Text(
                                                       text = "+$remainingImageCount",
@@ -436,7 +431,8 @@ fun AnnouncementScreen(
                                               modifier =
                                                   Modifier.align(Alignment.TopEnd)
                                                       .padding(4.dp)
-                                                      .size(24.dp)) {
+                                                      .size(24.dp)
+                                                      .testTag("deleteImageButton$index")) {
                                                 Icon(
                                                     imageVector = Icons.Filled.Close,
                                                     contentDescription = "Remove Image",
@@ -474,17 +470,24 @@ fun AnnouncementScreen(
                 buttonText = "Post your announcement",
                 onClickAction = {
                   val announcementId = announcementViewModel.getNewUid()
-                  // Upload the added pictures to Firebase Storage
-                  announcementViewModel.uploadAnnouncementImages(
-                      announcementId = announcementId,
-                      images = announcementViewModel.uploadedImages.value,
-                      onSuccess = { uploadedImageUrls ->
-                        handleSuccessfulImageUpload(announcementId, uploadedImageUrls)
-                      },
-                      onFailure = { e ->
-                        // Handle the failure case
-                        Log.e("AnnouncementViewModel", "Failed to upload images: ${e.message}")
-                      })
+                  val images = announcementViewModel.uploadedImages.value
+
+                  if (images.isEmpty()) {
+                    // If there are no images to upload, proceed directly
+                    handleSuccessfulImageUpload(announcementId, emptyList())
+                  } else {
+                    // Upload the added pictures to Firebase Storage
+                    announcementViewModel.uploadAnnouncementImages(
+                        announcementId = announcementId,
+                        images = images,
+                        onSuccess = { uploadedImageUrls ->
+                          handleSuccessfulImageUpload(announcementId, uploadedImageUrls)
+                        },
+                        onFailure = { e ->
+                          // Handle the failure case
+                          Log.e("AnnouncementViewModel", "Failed to upload images: ${e.message}")
+                        })
+                  }
                 },
                 buttonColor = colorScheme.primary,
                 textColor = colorScheme.onPrimary,

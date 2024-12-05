@@ -1,11 +1,9 @@
 package com.arygm.quickfix.model.search
 
 import android.graphics.Bitmap
-import android.net.Uri
 import android.util.Log
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.utils.performFirestoreOperation
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldPath
@@ -99,34 +97,32 @@ class AnnouncementRepositoryFirestore(
       onSuccess: (List<String>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-
     val announcementFolderRef = storageRef.child("announcements/$announcementId")
+    val uploadedImageUrls = mutableListOf<String>()
+    var uploadCount = 0
 
-    val uploadTasks =
-        images.map { bitmap ->
-          val fileRef = announcementFolderRef.child("image_${System.currentTimeMillis()}.jpg")
+    images.forEach { bitmap ->
+      val fileRef = announcementFolderRef.child("image_${System.currentTimeMillis()}.jpg")
 
-          val baos = ByteArrayOutputStream()
-          bitmap.compress(Bitmap.CompressFormat.JPEG, compressionQuality, baos)
-          val byteArray = baos.toByteArray()
+      val baos = ByteArrayOutputStream()
+      bitmap.compress(Bitmap.CompressFormat.JPEG, compressionQuality, baos)
+      val byteArray = baos.toByteArray()
 
-          fileRef.putBytes(byteArray).continueWithTask { task ->
-            if (!task.isSuccessful) {
-              task.exception?.let { throw it }
-            }
+      fileRef
+          .putBytes(byteArray)
+          .addOnSuccessListener {
             fileRef.downloadUrl
+                .addOnSuccessListener { uri ->
+                  uploadedImageUrls.add(uri.toString())
+                  uploadCount++
+                  if (uploadCount == images.size) {
+                    onSuccess(uploadedImageUrls)
+                  }
+                }
+                .addOnFailureListener { exception -> onFailure(exception) }
           }
-        }
-
-    Tasks.whenAllSuccess<Uri>(uploadTasks)
-        .addOnSuccessListener { uris ->
-          val uploadedImageUrls = uris.map { it.toString() }
-          onSuccess(uploadedImageUrls)
-        }
-        .addOnFailureListener { exception ->
-          Log.e("UploadingImages", "Failed to upload images: ${exception.message}")
-          onFailure(exception)
-        }
+          .addOnFailureListener { exception -> onFailure(exception) }
+    }
   }
 
   override fun updateAnnouncement(

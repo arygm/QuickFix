@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
@@ -47,10 +46,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
+import com.arygm.quickfix.R
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
@@ -62,8 +63,10 @@ fun QuickFixDisplayImages(
     navigationActions: NavigationActions, // Navigation actions parameter
     announcementViewModel: AnnouncementViewModel =
         viewModel(factory = AnnouncementViewModel.Factory),
+    images: List<Bitmap> = emptyList() // added these for testing
 ) {
-  val imagesToDisplay by announcementViewModel.uploadedImages.collectAsState()
+  val uploadedImages by announcementViewModel.uploadedImages.collectAsState()
+  val imagesToDisplay = images.ifEmpty { uploadedImages }
   var isSelecting by remember { mutableStateOf(false) }
   var selectedImages by remember { mutableStateOf(setOf<Bitmap>()) }
 
@@ -78,13 +81,14 @@ fun QuickFixDisplayImages(
                     // "Select All" button or placeholder
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                       if (isSelecting && canDelete) {
-                        TextButton(onClick = { selectedImages = imagesToDisplay.toSet() }) {
-                          Text(
-                              "Select all",
-                              style = MaterialTheme.typography.headlineSmall,
-                              color = colorScheme.primary,
-                              modifier = Modifier.testTag("selectionButton"))
-                        }
+                        TextButton(
+                            modifier = Modifier.testTag("selectionButton"),
+                            onClick = { selectedImages = imagesToDisplay.toSet() }) {
+                              Text(
+                                  "Select all",
+                                  style = MaterialTheme.typography.headlineSmall,
+                                  color = colorScheme.primary)
+                            }
                       }
                     }
 
@@ -100,6 +104,7 @@ fun QuickFixDisplayImages(
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
                       if (isSelecting && canDelete) {
                         TextButton(
+                            modifier = Modifier.testTag("endSelectionButton"),
                             onClick = {
                               isSelecting = false
                               selectedImages = emptySet()
@@ -107,8 +112,7 @@ fun QuickFixDisplayImages(
                               Text(
                                   "Done",
                                   style = MaterialTheme.typography.headlineSmall,
-                                  color = colorScheme.primary,
-                                  modifier = Modifier.testTag("endSelectionButton"))
+                                  color = colorScheme.primary)
                             }
                       }
                     }
@@ -130,9 +134,15 @@ fun QuickFixDisplayImages(
               if (canDelete) {
                 if (!isSelecting) {
                   Log.d("isSelecting", "is not selecting")
-                  IconButton(onClick = { isSelecting = true }) {
-                    Icon(Icons.Default.MoreHoriz, contentDescription = "More options")
-                  }
+                  IconButton(
+                      modifier = Modifier.testTag("SelectImagesButton"),
+                      onClick = { isSelecting = true }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.selectimages),
+                            contentDescription = "Select images",
+                            modifier = Modifier.size(20.dp),
+                            tint = colorScheme.primary)
+                      }
                 }
               }
             })
@@ -174,16 +184,19 @@ fun QuickFixDisplayImages(
                 Box(modifier = Modifier.fillMaxSize()) {
                   Card(
                       modifier =
-                          Modifier.fillMaxWidth().aspectRatio(1f).clickable {
-                            if (isSelecting) {
-                              selectedImages =
-                                  if (selectedImages.contains(image)) {
-                                    selectedImages - image
-                                  } else {
-                                    selectedImages + image
-                                  }
-                            }
-                          },
+                          Modifier.fillMaxWidth()
+                              .aspectRatio(1f)
+                              .clickable {
+                                if (isSelecting) {
+                                  selectedImages =
+                                      if (selectedImages.contains(image)) {
+                                        selectedImages - image
+                                      } else {
+                                        selectedImages + image
+                                      }
+                                }
+                              }
+                              .testTag("imageCard_$index"), // Added test tag here
                       shape = MaterialTheme.shapes.medium,
                       elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
                         Image(
@@ -202,17 +215,21 @@ fun QuickFixDisplayImages(
                             },
                         contentDescription = null,
                         tint =
-                            if (selectedImages.contains(image)) MaterialTheme.colorScheme.primary
-                            else Color.Gray,
+                            if (selectedImages.contains(image)) colorScheme.primary else Color.Gray,
                         modifier =
-                            Modifier.size(24.dp).align(Alignment.TopStart).padding(4.dp).clickable {
-                              selectedImages =
-                                  if (selectedImages.contains(image)) {
-                                    selectedImages - image
-                                  } else {
-                                    selectedImages + image
-                                  }
-                            })
+                            Modifier.size(24.dp)
+                                .align(Alignment.TopStart)
+                                .padding(4.dp)
+                                .clickable {
+                                  selectedImages =
+                                      if (selectedImages.contains(image)) {
+                                        selectedImages - image
+                                      } else {
+                                        selectedImages + image
+                                      }
+                                }
+                                .testTag("selectionIcon_$index") // Added test tag here
+                        )
                   }
                 }
               }

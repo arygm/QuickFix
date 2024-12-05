@@ -148,7 +148,9 @@ fun QuickFixApp() {
           screen != Screen.REGISTER &&
           screen != Screen.RESET_PASSWORD &&
           screen != Screen.GOOGLE_INFO &&
-          screenInSearchNavHost?.let { it != Screen.DISPLAY_UPLOADED_IMAGES && it != Screen.SEARCH_LOCATION} ?: true &&
+          screenInSearchNavHost?.let {
+            it != Screen.DISPLAY_UPLOADED_IMAGES && it != Screen.SEARCH_LOCATION
+          } ?: true &&
           screenInProfileNavHost?.let {
             it != Screen.ACCOUNT_CONFIGURATION && it != Screen.TO_WORKER
           } ?: true

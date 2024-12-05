@@ -37,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.R
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
@@ -48,31 +49,34 @@ fun QuickFixUploadImageSheet(
     showModalBottomSheet: Boolean,
     onDismissRequest: () -> Unit,
     onShowBottomSheetChange: (Boolean) -> Unit,
-    cameraLauncher: ActivityResultLauncher<Void>? = null,
+    cameraLauncher: ActivityResultLauncher<Void?>? = null,
     galleryLauncher: ActivityResultLauncher<String>? = null,
-    onActionRequest: (Bitmap) -> Unit
+    onActionRequest: (Bitmap) -> Unit,
+    // Injected dependencies for testing
+    permissionState: PermissionState =
+        rememberPermissionState(permission = Manifest.permission.CAMERA),
 ) {
   val scope = rememberCoroutineScope()
   val takePictureRequested = remember { mutableStateOf(false) }
   val context = LocalContext.current
-  val permissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
 
   // Use the provided or default cameraLauncher
   val cameraLauncherInstance =
-      rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicturePreview()) {
-          bitmap ->
-        if (bitmap != null) {
-          onActionRequest(bitmap)
-        }
-        // Hide the bottom sheet
-        scope
-            .launch { sheetState.hide() }
-            .invokeOnCompletion {
-              if (!sheetState.isVisible) {
-                onShowBottomSheetChange(false)
+      cameraLauncher
+          ?: rememberLauncherForActivityResult(
+              contract = ActivityResultContracts.TakePicturePreview()) { bitmap ->
+                if (bitmap != null) {
+                  onActionRequest(bitmap)
+                }
+                // Hide the bottom sheet
+                scope
+                    .launch { sheetState.hide() }
+                    .invokeOnCompletion {
+                      if (!sheetState.isVisible) {
+                        onShowBottomSheetChange(false)
+                      }
+                    }
               }
-            }
-      }
 
   // Use the provided or default galleryLauncher
   val galleryLauncherInstance =
