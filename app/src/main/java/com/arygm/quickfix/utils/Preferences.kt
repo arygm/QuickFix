@@ -20,7 +20,7 @@ val IS_WORKER_KEY = booleanPreferencesKey("is_worker")
 fun setAccountPreferences(
     preferencesViewModel: PreferencesViewModel,
     account: Account,
-    signIn: Boolean = true
+    signIn: Boolean = true,
 ) {
   CoroutineScope(Dispatchers.IO).launch {
     preferencesViewModel.savePreference(IS_SIGN_IN_KEY, signIn)

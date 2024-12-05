@@ -99,7 +99,8 @@ fun WelcomeScreen(
   // fast forward to home screen if user is already signed in
   LaunchedEffect(Unit) {
     preferencesViewModel.loadPreference(com.arygm.quickfix.utils.IS_SIGN_IN_KEY) {
-      if (it == true) { // Ensure the value is `true` before navigating
+      if (it == true && navigationActions.currentScreen == Screen.WELCOME) { // Ensure the value is `true` before navigating
+          Log.i("SignInScreen", "User is signed in, fast forwarding to home screen")
         navigationActions.navigateTo(TopLevelDestinations.HOME)
       } else {
         Log.d("SignInScreen", "User is not signed in or preference not set")

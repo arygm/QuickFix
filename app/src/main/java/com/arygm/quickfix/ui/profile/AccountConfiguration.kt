@@ -56,9 +56,11 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.ui.authentication.CustomTextField
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.isValidEmail
+import com.arygm.quickfix.utils.setAccountPreferences
 import com.google.firebase.Timestamp
 import java.util.GregorianCalendar
 import kotlinx.coroutines.CoroutineScope
@@ -220,7 +222,7 @@ fun AccountConfigurationScreen(
                             email = it
                             emailError = !isValidEmail(it)
                             accountViewModel.accountExists(email) { exists, account ->
-                              emailError = exists && account != null && email != email
+                              emailError = exists && account != null && email != account.email
                             }
                           },
                           placeHolderText = "Enter your email address",
@@ -300,24 +302,16 @@ fun AccountConfigurationScreen(
                             0,
                             0,
                             0)
+                          val newAccount = Account(
+                          uid = uid,
+                          firstName = firstName,
+                          lastName = lastName,
+                          email = email,
+                          birthDate = Timestamp(calendar.time))
                         accountViewModel.updateAccount(
-                            Account(
-                                uid = uid,
-                                firstName = firstName,
-                                lastName = lastName,
-                                email = email,
-                                birthDate = Timestamp(calendar.time)),
+                            newAccount,
                             onSuccess = {
-                              CoroutineScope(Dispatchers.IO).launch {
-                                preferencesViewModel.savePreference(
-                                    com.arygm.quickfix.utils.FIRST_NAME_KEY, firstName)
-                                preferencesViewModel.savePreference(
-                                    com.arygm.quickfix.utils.LAST_NAME_KEY, lastName)
-                                preferencesViewModel.savePreference(
-                                    com.arygm.quickfix.utils.EMAIL_KEY, email)
-                                preferencesViewModel.savePreference(
-                                    com.arygm.quickfix.utils.DATE_OF_BIRTH_KEY, birthDate)
-                              }
+                              setAccountPreferences(preferencesViewModel, newAccount)
                             },
                             onFailure = {})
                         navigationActions.goBack()
