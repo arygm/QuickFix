@@ -1,5 +1,8 @@
+// SearchOnBoarding.kt
+
 package com.arygm.quickfix.ui.search
 
+import QuickFixSlidingWindowWorker
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -30,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -57,11 +61,28 @@ fun SearchOnBoarding(
   val listState = rememberLazyListState()
 
   var searchQuery by remember { mutableStateOf("") }
+  var isWindowVisible by remember { mutableStateOf(false) }
+
+  // Variables for WorkerSlidingWindowContent
+  // These will be set when a worker profile is selected
+  var bannerImage by remember { mutableStateOf(R.drawable.moroccan_flag) }
+  var profilePicture by remember { mutableStateOf(R.drawable.placeholder_worker) }
+  var initialSaved by remember { mutableStateOf(false) }
+  var workerCategory by remember { mutableStateOf("Exterior Painter") }
+  var workerAddress by remember { mutableStateOf("Ecublens, VD") }
+  var description by remember { mutableStateOf("Worker description goes here.") }
+  var includedServices by remember { mutableStateOf(listOf("Service 1", "Service 2")) }
+  var addonServices by remember { mutableStateOf(listOf("Add-on 1", "Add-on 2")) }
+  var workerRating by remember { mutableStateOf(4.5) }
+  var tags by remember { mutableStateOf(listOf("Tag1", "Tag2")) }
+  var reviews by remember { mutableStateOf(listOf("Review 1", "Review 2")) }
 
   BoxWithConstraints {
     val widthRatio = maxWidth.value / 411f
     val heightRatio = maxHeight.value / 860f
     val sizeRatio = minOf(widthRatio, heightRatio)
+    val screenHeight = maxHeight
+    val screenWidth = maxWidth
 
     // Use Scaffold for the layout structure
     Scaffold(
@@ -146,9 +167,46 @@ fun SearchOnBoarding(
                       listState = listState,
                       widthRatio = widthRatio,
                       heightRatio = heightRatio,
-                  )
+                      onBookClick = { selectedProfile ->
+                        // Handle profile click
+                        // Set up variables for WorkerSlidingWindowContent
+                        bannerImage = R.drawable.moroccan_flag // Replace with actual data
+                        profilePicture = R.drawable.placeholder_worker // Replace with actual data
+                        initialSaved = false // Replace with actual data
+                        workerCategory = selectedProfile.fieldOfWork
+                        workerAddress = selectedProfile.location?.name ?: "Unknown"
+                        description = selectedProfile.description
+                        includedServices = selectedProfile.includedServices.map { it.name }
+                        addonServices = selectedProfile.addOnServices.map { it.name }
+                        workerRating = selectedProfile.rating
+                        tags = selectedProfile.tags
+                        reviews =
+                            selectedProfile.reviews.map {
+                              it.review
+                            } // Replace 'text' with the correct property
+                        isWindowVisible = true
+                      })
                 }
               }
         })
+
+    // Call to WorkerSlidingWindowContent
+    QuickFixSlidingWindowWorker(
+        isVisible = isWindowVisible,
+        onDismiss = { isWindowVisible = false },
+        bannerImage = bannerImage,
+        profilePicture = profilePicture,
+        initialSaved = initialSaved,
+        workerCategory = workerCategory,
+        workerAddress = workerAddress,
+        description = description,
+        includedServices = includedServices,
+        addonServices = addonServices,
+        workerRating = workerRating,
+        tags = tags,
+        reviews = reviews,
+        screenHeight = screenHeight,
+        screenWidth = screenWidth,
+        onContinueClick = { /* Handle continue */})
   }
 }

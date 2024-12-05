@@ -1,5 +1,8 @@
+// Updated ProfileResults.kt
+
 package com.arygm.quickfix.ui.search
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,78 +34,77 @@ import com.arygm.quickfix.utils.LocationHelper
 
 @Composable
 fun ProfileResults(
-    profiles: List<WorkerProfile>, // Assuming WorkerProfile is your model class
+    profiles: List<WorkerProfile>,
     listState: LazyListState,
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
     widthRatio: Float,
     heightRatio: Float,
+    onBookClick: (WorkerProfile) -> Unit // Added parameter
 ) {
   // Column for wrapping the list
-  Column(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp * widthRatio),
-      horizontalAlignment = Alignment.Start) {
-        // Title: "Profiles"
-        Text(
-            text = "Profiles",
-            style = poppinsTypography.labelLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-        Spacer(modifier = Modifier.height(4.dp * heightRatio))
+  Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
+    // Title: "Profiles"
+    Text(
+        text = "Profiles",
+        style = poppinsTypography.labelLarge,
+        color = MaterialTheme.colorScheme.onBackground,
+        modifier = Modifier.padding(horizontal = 10.dp * widthRatio),
+    )
+    Spacer(modifier = Modifier.height(4.dp * heightRatio))
 
-        // LazyColumn for displaying profiles
-        LazyColumn(modifier = Modifier.fillMaxWidth(), state = listState) {
-          items(profiles.size) { index ->
-            val profile = profiles[index]
-            var account by remember { mutableStateOf<Account?>(null) }
-            var distance by remember { mutableStateOf<Int?>(null) }
+    // LazyColumn for displaying profiles
+    LazyColumn(modifier = Modifier.fillMaxWidth(), state = listState) {
+      items(profiles.size) { index ->
+        val profile = profiles[index]
+        var account by remember { mutableStateOf<Account?>(null) }
+        var distance by remember { mutableStateOf<Int?>(null) }
 
-            // Get user's current location and calculate distance
-            val locationHelper = LocationHelper(LocalContext.current, MainActivity())
-            locationHelper.getCurrentLocation { location ->
-              location?.let {
-                distance =
-                    profile.location?.let { workerLocation ->
-                      searchViewModel
-                          .calculateDistance(
-                              workerLocation.latitude,
-                              workerLocation.longitude,
-                              it.latitude,
-                              it.longitude)
-                          .toInt()
-                    }
-              }
-            }
-
-            // Fetch user account details
-            LaunchedEffect(profile.uid) {
-              accountViewModel.fetchUserAccount(profile.uid) { fetchedAccount ->
-                account = fetchedAccount
-              }
-            }
-
-            // Render profile card if account data is available
-            account?.let { acc ->
-              SearchWorkerProfileResult(
-                  modifier =
-                      Modifier.padding(vertical = 10.dp * heightRatio)
-                          .fillMaxWidth()
-                          .testTag("worker_profile_result_$index"),
-                  profileImage = R.drawable.placeholder_worker, // Replace with actual image
-                  name = "${acc.firstName} ${acc.lastName}",
-                  category = profile.fieldOfWork,
-                  rating = profile.rating,
-                  reviewCount = profile.reviews.size,
-                  location = profile.location?.name ?: "Unknown",
-                  price = profile.price.toString(),
-                  distance = distance,
-                  onBookClick = {
-                    // Handle book action
-                  })
-            }
-
-            Spacer(modifier = Modifier.height(10.dp * heightRatio))
+        // Get user's current location and calculate distance
+        val locationHelper = LocationHelper(LocalContext.current, MainActivity())
+        locationHelper.getCurrentLocation { location ->
+          location?.let {
+            distance =
+                profile.location?.let { workerLocation ->
+                  searchViewModel
+                      .calculateDistance(
+                          workerLocation.latitude,
+                          workerLocation.longitude,
+                          it.latitude,
+                          it.longitude)
+                      .toInt()
+                }
           }
         }
+
+        // Fetch user account details
+        LaunchedEffect(profile.uid) {
+          accountViewModel.fetchUserAccount(profile.uid) { fetchedAccount ->
+            account = fetchedAccount
+          }
+        }
+
+        // Render profile card if account data is available
+        account?.let { acc ->
+          SearchWorkerProfileResult(
+              modifier =
+                  Modifier.padding(vertical = 10.dp * heightRatio)
+                      .fillMaxWidth()
+                      .testTag("worker_profile_result_$index")
+                      .clickable {}, // Added clickable modifier
+              profileImage = R.drawable.placeholder_worker, // Replace with actual image
+              name = "${acc.firstName} ${acc.lastName}",
+              category = profile.fieldOfWork,
+              rating = profile.rating,
+              reviewCount = profile.reviews.size,
+              location = profile.location?.name ?: "Unknown",
+              price = profile.price.toString(),
+              distance = distance,
+              onBookClick = { onBookClick(profile) })
+        }
+
+        Spacer(modifier = Modifier.height(10.dp * heightRatio))
       }
+    }
+  }
 }
