@@ -79,6 +79,7 @@ import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixButton
+import com.arygm.quickfix.ui.elements.QuickFixPriceRangeBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixSlidingWindow
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
@@ -100,6 +101,7 @@ fun SearchWorkerResult(
 ) {
   var showAvailabilityBottomSheet by remember { mutableStateOf(false) }
   var showServicesBottomSheet by remember { mutableStateOf(false) }
+  var showPriceRangeBottomSheet by remember { mutableStateOf(false) }
   val workerProfiles by searchViewModel.workerProfiles.collectAsState()
   var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
 
@@ -128,7 +130,7 @@ fun SearchWorkerResult(
               leadingIcon = Icons.Default.WorkspacePremium,
           ),
           SearchFilterButtons(
-              onClick = { /* Handle click */},
+              onClick = { showPriceRangeBottomSheet = true },
               text = "Price Range",
           ),
       )
@@ -383,6 +385,14 @@ fun SearchWorkerResult(
           },
           onDismissRequest = { showServicesBottomSheet = false })
     }
+
+    QuickFixPriceRangeBottomSheet(
+        showPriceRangeBottomSheet,
+        onApplyClick = { start, end ->
+          filteredWorkerProfiles =
+              searchViewModel.filterWorkersByPriceRange(filteredWorkerProfiles, start, end)
+        },
+        onDismissRequest = { showPriceRangeBottomSheet = false })
 
     if (isWindowVisible) {
       QuickFixSlidingWindow(isVisible = isWindowVisible, onDismiss = { isWindowVisible = false }) {

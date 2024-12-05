@@ -924,4 +924,100 @@ class SearchWorkerResultScreenTest {
     // Verify no workers are displayed
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(0)
   }
+
+  @Test
+  fun testPriceRangeFilterDisplaysBottomSheet() {
+    // Set the content
+    composeTestRule.setContent {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(4)
+    // Click on the "Price Range" filter button
+    composeTestRule.onNodeWithText("Price Range").performClick()
+
+    // Wait for the bottom sheet to appear
+    composeTestRule.waitForIdle()
+
+    // Verify that the price range bottom sheet is displayed
+    composeTestRule.onNodeWithTag("priceRangeModalSheet").assertExists().assertIsDisplayed()
+  }
+
+  @Test
+  fun testPriceRangeFilterUpdatesResults() {
+    val workers =
+        listOf(
+            WorkerProfile(uid = "worker1", price = 150.0, fieldOfWork = "Painter", rating = 4.5),
+            WorkerProfile(
+                uid = "worker2", price = 560.0, fieldOfWork = "Electrician", rating = 4.8),
+            WorkerProfile(uid = "worker3", price = 3010.0, fieldOfWork = "Plumber", rating = 3.9))
+
+    // Provide test data to the searchViewModel
+    searchViewModel._workerProfiles.value = workers
+
+    // Set the content
+    composeTestRule.setContent {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(4)
+    // Click on the "Price Range" filter button
+    composeTestRule.onNodeWithText("Price Range").performClick()
+
+    // Wait for the bottom sheet to appear
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithText("Apply").performClick()
+
+    // Wait for the UI to update
+    composeTestRule.waitForIdle()
+
+    val sortedWorkers = listOf(workers[1])
+    val workerNodes = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
+
+    workerNodes.assertCountEquals(sortedWorkers.size)
+
+    sortedWorkers.forEachIndexed { index, worker ->
+      workerNodes[index].assert(hasAnyChild(hasText("${worker.rating} ★", substring = true)))
+    }
+  }
+
+  @Test
+  fun testPriceRangeFilterExcludesWorkersOutsideRange() {
+    val workers =
+        listOf(
+            WorkerProfile(uid = "worker1", price = 150.0, fieldOfWork = "Painter", rating = 4.5),
+            WorkerProfile(
+                uid = "worker2", price = 500.0, fieldOfWork = "Electrician", rating = 4.8),
+            WorkerProfile(uid = "worker3", price = 3001.0, fieldOfWork = "Plumber", rating = 3.9))
+
+    // Provide test data to the searchViewModel
+    searchViewModel._workerProfiles.value = workers
+
+    // Set the content
+    composeTestRule.setContent {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(4)
+    // Click on the "Price Range" filter button
+    composeTestRule.onNodeWithText("Price Range").performClick()
+
+    // Wait for the bottom sheet to appear
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithText("Apply").performClick()
+
+    // Wait for the UI to update
+    composeTestRule.waitForIdle()
+
+    val sortedWorkers = listOf(workers[1])
+    val workerNodes = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
+
+    workerNodes.assertCountEquals(sortedWorkers.size)
+
+    sortedWorkers.forEachIndexed { index, worker ->
+      workerNodes[index].assert(hasAnyChild(hasText("${worker.rating} ★", substring = true)))
+    }
+  }
 }

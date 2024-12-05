@@ -433,4 +433,207 @@ class WorkerFilterTest {
 
     assertEquals(0, sortedWorkers.size) // No workers match all conditions
   }
+
+  @Test
+  fun `filterWorkersByPriceRange returns workers within price range`() {
+    val workers =
+        listOf(
+            WorkerProfile(price = 100.0, displayName = "Worker 1"),
+            WorkerProfile(price = 200.0, displayName = "Worker 2"),
+            WorkerProfile(price = 300.0, displayName = "Worker 3"),
+            WorkerProfile(price = 400.0, displayName = "Worker 4"))
+
+    val result = searchViewModel.filterWorkersByPriceRange(workers, 150, 350)
+
+    assertEquals(2, result.size)
+    assertEquals("Worker 2", result[0].displayName)
+    assertEquals("Worker 3", result[1].displayName)
+  }
+
+  @Test
+  fun `filterWorkersByPriceRange excludes workers outside price range`() {
+    val workers =
+        listOf(
+            WorkerProfile(price = 100.0, displayName = "Worker 1"),
+            WorkerProfile(price = 200.0, displayName = "Worker 2"),
+            WorkerProfile(price = 300.0, displayName = "Worker 3"))
+
+    val result = searchViewModel.filterWorkersByPriceRange(workers, 250, 350)
+
+    assertEquals(1, result.size)
+    assertEquals("Worker 3", result[0].displayName)
+  }
+
+  @Test
+  fun `filterWorkersByPriceRange returns empty list if no workers match`() {
+    val workers =
+        listOf(
+            WorkerProfile(price = 100.0, displayName = "Worker 1"),
+            WorkerProfile(price = 200.0, displayName = "Worker 2"))
+
+    val result = searchViewModel.filterWorkersByPriceRange(workers, 300, 400)
+
+    assertEquals(0, result.size)
+  }
+
+  @Test
+  fun `filterWorkersByPriceRange includes workers on the boundary`() {
+    val workers =
+        listOf(
+            WorkerProfile(price = 100.0, displayName = "Worker 1"),
+            WorkerProfile(price = 200.0, displayName = "Worker 2"),
+            WorkerProfile(price = 300.0, displayName = "Worker 3"))
+
+    val result = searchViewModel.filterWorkersByPriceRange(workers, 100, 300)
+
+    assertEquals(3, result.size)
+    assertEquals("Worker 1", result[0].displayName)
+    assertEquals("Worker 2", result[1].displayName)
+    assertEquals("Worker 3", result[2].displayName)
+  }
+
+  @Test
+  fun `combine filters by price range, availability, and services`() {
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                price = 150.0,
+                tags = listOf("Painter", "Plumber"),
+                workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
+                unavailability_list = listOf(LocalDate.of(2023, 12, 5)),
+                rating = 4.5),
+            WorkerProfile(
+                uid = "worker2",
+                price = 200.0,
+                tags = listOf("Painter", "Electrician"),
+                workingHours = Pair(LocalTime.of(8, 0), LocalTime.of(16, 0)),
+                unavailability_list = emptyList(),
+                rating = 5.0),
+            WorkerProfile(
+                uid = "worker3",
+                price = 300.0,
+                tags = listOf("Electrician"),
+                workingHours = Pair(LocalTime.of(10, 0), LocalTime.of(18, 0)),
+                unavailability_list = listOf(LocalDate.of(2023, 12, 4)),
+                rating = 3.8))
+
+    val selectedDays = listOf(LocalDate.of(2023, 12, 4)) // Workers available on this day
+    val selectedHour = 10
+    val selectedMinute = 30
+    val priceStart = 100
+    val priceEnd = 250
+    val selectedServices = listOf("Painter")
+
+    // Apply availability filter
+    val availableWorkers =
+        searchViewModel.filterWorkersByAvailability(
+            workers, selectedDays, selectedHour, selectedMinute)
+
+    // Apply price range filter
+    val priceFilteredWorkers =
+        searchViewModel.filterWorkersByPriceRange(availableWorkers, priceStart, priceEnd)
+
+    // Apply services filter
+    val serviceFilteredWorkers =
+        searchViewModel.filterWorkersByServices(priceFilteredWorkers, selectedServices)
+
+    // Sort by rating
+    val sortedWorkers = searchViewModel.sortWorkersByRating(serviceFilteredWorkers)
+
+    assertEquals(2, sortedWorkers.size)
+    assertEquals("worker2", sortedWorkers[0].uid)
+    assertEquals("worker1", sortedWorkers[1].uid)
+  }
+
+  @Test
+  fun `combine filters excludes workers with mismatched conditions`() {
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                price = 150.0,
+                tags = listOf("Plumber"),
+                workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
+                unavailability_list = listOf(LocalDate.of(2023, 12, 4)),
+                rating = 4.5),
+            WorkerProfile(
+                uid = "worker2",
+                price = 200.0,
+                tags = listOf("Painter", "Electrician"),
+                workingHours = Pair(LocalTime.of(8, 0), LocalTime.of(16, 0)),
+                unavailability_list = emptyList(),
+                rating = 5.0))
+
+    val selectedDays = listOf(LocalDate.of(2023, 12, 4)) // Workers available on this day
+    val selectedHour = 10
+    val selectedMinute = 30
+    val priceStart = 100
+    val priceEnd = 250
+    val selectedServices = listOf("Interior Painter") // No worker matches this service
+
+    // Apply availability filter
+    val availableWorkers =
+        searchViewModel.filterWorkersByAvailability(
+            workers, selectedDays, selectedHour, selectedMinute)
+
+    // Apply price range filter
+    val priceFilteredWorkers =
+        searchViewModel.filterWorkersByPriceRange(availableWorkers, priceStart, priceEnd)
+
+    // Apply services filter
+    val serviceFilteredWorkers =
+        searchViewModel.filterWorkersByServices(priceFilteredWorkers, selectedServices)
+
+    // Sort by rating
+    val sortedWorkers = searchViewModel.sortWorkersByRating(serviceFilteredWorkers)
+
+    assertEquals(0, sortedWorkers.size) // No workers match all filters
+  }
+
+  @Test
+  fun `combine filters with edge case on availability and price`() {
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                price = 150.0,
+                tags = listOf("Painter"),
+                workingHours = Pair(LocalTime.of(10, 30), LocalTime.of(17, 0)),
+                unavailability_list = emptyList(),
+                rating = 4.5),
+            WorkerProfile(
+                uid = "worker2",
+                price = 250.0,
+                tags = listOf("Painter"),
+                workingHours = Pair(LocalTime.of(8, 0), LocalTime.of(18, 0)),
+                unavailability_list = emptyList(),
+                rating = 5.0))
+
+    val selectedDays = listOf(LocalDate.of(2023, 12, 3))
+    val selectedHour = 10
+    val selectedMinute = 30
+    val priceStart = 200
+    val priceEnd = 300
+    val selectedServices = listOf("Painter")
+
+    // Apply availability filter
+    val availableWorkers =
+        searchViewModel.filterWorkersByAvailability(
+            workers, selectedDays, selectedHour, selectedMinute)
+
+    // Apply price range filter
+    val priceFilteredWorkers =
+        searchViewModel.filterWorkersByPriceRange(availableWorkers, priceStart, priceEnd)
+
+    // Apply services filter
+    val serviceFilteredWorkers =
+        searchViewModel.filterWorkersByServices(priceFilteredWorkers, selectedServices)
+
+    // Sort by rating
+    val sortedWorkers = searchViewModel.sortWorkersByRating(serviceFilteredWorkers)
+
+    assertEquals(1, sortedWorkers.size)
+    assertEquals("worker2", sortedWorkers[0].uid)
+  }
 }
