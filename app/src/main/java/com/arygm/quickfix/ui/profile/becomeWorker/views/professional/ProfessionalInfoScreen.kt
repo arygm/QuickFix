@@ -249,7 +249,7 @@ fun ProfessionalInfoScreen(
             QuickFixTextFieldCustom(
                 modifier =
                     Modifier.semantics { testTag = C.Tag.professionalInfoScreenSubcategoryField },
-                heightField = 27.dp,
+                heightField = 27.dp * heightRatio.value,
                 widthField = 380.dp * widthRatio.value,
                 value = selectedSubcategory.name,
                 onValueChange = {},
@@ -321,7 +321,7 @@ fun ProfessionalInfoScreen(
                 formValidatedIncludedServices.value = true
               },
               formValidated = formValidatedIncludedServices,
-              boldText = " 5 to 10 Included services",
+              boldText = " at least 5 Included services",
               label = "Choose",
               secondPartLabel = " in your ${selectedCategory.id} job from this set",
               widthRatio = widthRatio,

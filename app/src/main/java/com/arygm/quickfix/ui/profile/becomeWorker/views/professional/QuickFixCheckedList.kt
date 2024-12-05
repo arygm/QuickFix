@@ -121,7 +121,7 @@ fun QuickFixCheckedList(
               color = colorScheme.background,
               thickness = 1.5.dp,
               modifier =
-                  Modifier.padding(start = 32.dp).semantics {
+                  Modifier.padding(start = 32.dp * widthRatio.value).semantics {
                     testTag = C.Tag.quickFixCheckedListElementDivider + (index)
                   })
           Spacer(modifier = Modifier.height(8.dp * heightRatio.value))
@@ -149,7 +149,7 @@ fun QuickFixCheckedList(
                     borderColor = colorScheme.tertiaryContainer,
                     placeHolderText = "Select Occupation",
                     alwaysShowTrailingIcon = true,
-                    moveTrailingIconLeft = 2.dp,
+                    moveTrailingIconLeft = 2.dp * widthRatio.value,
                     singleLine = false,
                     heightInEnabled = true,
                     minHeight = 27.dp * heightRatio.value, // Set default height
@@ -166,7 +166,7 @@ fun QuickFixCheckedList(
                     contentDescription = "textfield delete $index",
                     tint = colorScheme.onSurface,
                     modifier =
-                        Modifier.size(30.dp)
+                        Modifier.size(width = 30.dp * widthRatio.value, height = 30.dp * heightRatio.value)
                             .clickable {
                               service.value = ""
                               textFieldList.remove(service)
