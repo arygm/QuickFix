@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,8 +55,10 @@ import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.ressources.C
+import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,7 +72,8 @@ fun ProfessionalInfoScreen(
     categories: List<Category>,
     formValidatedTest: Boolean = false
 ) {
-  val formValidatedIncludedServices = remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val formValidatedIncludedServices = remember { mutableStateOf(false) }
   val formValidatedAddOnServices = remember { mutableStateOf(false) }
   var selectedCategory by remember { mutableStateOf(Category()) }
   var selectedSubcategory by remember { mutableStateOf(Subcategory()) }
@@ -238,6 +242,8 @@ fun ProfessionalInfoScreen(
                           fieldOfWork.value = ""
                           price.doubleValue = 0.0
                           canAddTextField.value = true
+                            price.value = 0.0
+                            priceString.value = ""
                         },
                         modifier =
                             Modifier.height(30.dp * heightRatio.value).semantics {
@@ -501,12 +507,53 @@ fun ProfessionalInfoScreen(
                     canAddTextField = canAddTextField,
                 )
             }
+            if (formValidatedAddOnServices.value || formValidatedTest) {
+                item {
+                    Row(
+                        modifier =
+                        Modifier.fillMaxWidth()
+                            .padding(start = 5.dp, end = 5.dp, bottom = 8.dp)
+                    ) {
+                        QuickFixButton(
+                            buttonText = "Cancel",
+                            onClickAction = {},
+                            buttonColor = colorScheme.surface,
+                            textColor = colorScheme.error,
+                            modifier =
+                            Modifier.weight(0.5f).semantics { testTag = C.Tag.personalInfoScreencancelButton },
+                            textStyle =
+                            poppinsTypography.headlineMedium.copy(
+                                fontSize = 16.sp, fontWeight = FontWeight.SemiBold))
+                        QuickFixButton(
+                            buttonText = "Continue",
+                            onClickAction = {
+                                coroutineScope.launch { pagerState.scrollToPage(pagerState.currentPage + 1) }
+                            },
+                            buttonColor = colorScheme.primary,
+                            enabled =
+                            formValidatedAddOnServices.value &&
+                                    formValidatedIncludedServices.value &&
+                                    formValidatedTags.value &&
+                                    priceError.value.not() &&
+                                    selectedCategory.name.isNotEmpty() &&
+                                    selectedSubcategory.name.isNotEmpty() &&
+                                    price.doubleValue != 0.0,
+                            textColor = colorScheme.onPrimary,
+                            textStyle =
+                            poppinsTypography.headlineMedium.copy(
+                                fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
+                            modifier =
+                            Modifier.weight(0.5f).semantics {
+                                testTag = C.Tag.personalInfoScreencontinueButton
+                            },
+                        )
+                    }
+                }
+            }
         }
-          item {
-            // Display the list of composables
 
-          }
         }
+
       }
     }
   }
