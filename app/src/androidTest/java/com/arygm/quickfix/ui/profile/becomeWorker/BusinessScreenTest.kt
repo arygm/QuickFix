@@ -48,42 +48,48 @@ class BusinessScreenTest {
     userProfileRepositoryFirestore = mock()
     workerProfileRepositoryFirestore = mock()
     accountRepository = mock()
-      categoryRepo = mock()
+    categoryRepo = mock()
     accountViewModel = AccountViewModel(accountRepository)
     workerViewModel = ProfileViewModel(workerProfileRepositoryFirestore)
     loggedInAccountViewModel =
         LoggedInAccountViewModel(userProfileRepositoryFirestore, workerProfileRepositoryFirestore)
     loggedInAccountViewModel.setLoggedInAccount(testUserProfile)
-      categoryViewModel = CategoryViewModel(categoryRepo)
+    categoryViewModel = CategoryViewModel(categoryRepo)
   }
 
-   @Test
-   fun testInitialUI() {
-     composeTestRule.setContent {
-       QuickFixTheme {
-         BusinessScreen(
-             navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel, categoryViewModel)
-       }
-     }
+  @Test
+  fun testInitialUI() {
+    composeTestRule.setContent {
+      QuickFixTheme {
+        BusinessScreen(
+            navigationActions,
+            accountViewModel,
+            workerViewModel,
+            loggedInAccountViewModel,
+            categoryViewModel)
+      }
+    }
 
-     // Check UI elements are displayed
-     composeTestRule.onNodeWithTag(C.Tag.upgradeToWorkerScaffold).assertIsDisplayed()
-     composeTestRule.onNodeWithTag(C.Tag.upgradeToWorkerTopBar).assertIsDisplayed()
-     composeTestRule.onNodeWithTag(C.Tag.upgradeToWorkerPager).assertIsDisplayed()
-   }
+    // Check UI elements are displayed
+    composeTestRule.onNodeWithTag(C.Tag.upgradeToWorkerScaffold).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(C.Tag.upgradeToWorkerTopBar).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(C.Tag.upgradeToWorkerPager).assertIsDisplayed()
+  }
 
+  @Test
+  fun testBackButtonNavigatesBack() {
+    composeTestRule.setContent {
+      QuickFixTheme {
+        BusinessScreen(
+            navigationActions,
+            accountViewModel,
+            workerViewModel,
+            loggedInAccountViewModel,
+            categoryViewModel)
+      }
+    }
 
-   @Test
-   fun testBackButtonNavigatesBack() {
-     composeTestRule.setContent {
-       QuickFixTheme {
-         BusinessScreen(
-             navigationActions, accountViewModel, workerViewModel, loggedInAccountViewModel, categoryViewModel)
-       }
-     }
-
-     composeTestRule.onNodeWithTag("goBackButton").performClick()
-     Mockito.verify(navigationActions).goBack()
-   }
-
+    composeTestRule.onNodeWithTag("goBackButton").performClick()
+    Mockito.verify(navigationActions).goBack()
+  }
 }

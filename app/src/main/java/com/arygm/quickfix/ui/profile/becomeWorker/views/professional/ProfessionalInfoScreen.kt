@@ -224,6 +224,7 @@ fun ProfessionalInfoScreen(
                           includedServices.value = emptyList()
                           fieldOfWork.value = ""
                           price.doubleValue = 0.0
+                          canAddTextField.value = true
                         },
                         modifier =
                             Modifier.height(30.dp * heightRatio.value).semantics {
