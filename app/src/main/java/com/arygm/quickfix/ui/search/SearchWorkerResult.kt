@@ -367,7 +367,6 @@ fun SearchWorkerResult(
               searchViewModel.filterWorkersByAvailability(workerProfiles, days, hour, minute)
         }
 
-    if (isWindowVisible) {
       QuickFixSlidingWindow(isVisible = isWindowVisible, onDismiss = { isWindowVisible = false }) {
         // Content of the sliding window
         Column(
@@ -681,6 +680,5 @@ fun SearchWorkerResult(
                   }
             }
       }
-    }
   }
 }
