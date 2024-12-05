@@ -202,7 +202,12 @@ fun QuickFixFirstStep(locationViewModel: LocationViewModel, navigationActions: N
               }
 
               items(listServices.size) { index ->
-                QuickFixCheckedListElement(listServices, checkedStatesServices, index)
+                QuickFixCheckedListElement(
+                    listServices,
+                    checkedStatesServices,
+                    index,
+                    widthRatio = widthRatio,
+                    heightRatio = heightRatio)
               }
 
               item {
@@ -584,7 +589,7 @@ fun QuickFixFirstStep(locationViewModel: LocationViewModel, navigationActions: N
                       QuickFixButton(
                           buttonText = "Cancel",
                           buttonColor = Color.Transparent,
-                          onClickAction = { navigationActions.goBack() },
+                          onClickAction = { /*navigationActions.goBack()*/},
                           modifier = Modifier.weight(0.5f),
                           textColor = colorScheme.onSecondaryContainer,
                           textStyle =
