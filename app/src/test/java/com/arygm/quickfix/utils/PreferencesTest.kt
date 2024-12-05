@@ -32,7 +32,7 @@ class PreferencesTest {
   }
 
   @Test
-  fun `setAccountPreferences saves preferences for signed-in user`() =
+  fun setAccountPreferencesSavesUserPreferences() =
       runTest(testDispatcher) {
         // Arrange
         val account =
