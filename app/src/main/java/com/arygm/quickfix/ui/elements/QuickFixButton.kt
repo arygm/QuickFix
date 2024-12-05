@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -41,7 +42,9 @@ fun QuickFixButton(
     enabled: Boolean = true,
     height: Dp = 50.dp,
     leadingIcon: ImageVector? = null,
-    trailingIcon: ImageVector? = null
+    trailingIcon: ImageVector? = null,
+    leadingIconTint: Color? = null,
+    trailingIconTint: Color? = null,
 ) {
   Button(
       onClick = onClickAction,
@@ -71,14 +74,16 @@ fun QuickFixButton(
             Image(
                 imageVector = it,
                 contentDescription = "leading_icon",
-                modifier = Modifier.padding(end = 8.dp))
+                modifier = Modifier.padding(end = 8.dp),
+                colorFilter = leadingIconTint?.let { it1 -> ColorFilter.tint(it1) })
           }
           Text(text = buttonText, style = textStyle)
           trailingIcon?.let {
             Image(
                 imageVector = it,
                 contentDescription = "trailing_icon",
-                modifier = Modifier.padding(start = 8.dp))
+                modifier = Modifier.padding(start = 8.dp),
+                colorFilter = trailingIconTint?.let { it1 -> ColorFilter.tint(it1) })
           }
         }
       }

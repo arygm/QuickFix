@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -56,16 +55,12 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.ui.authentication.CustomTextField
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.isValidEmail
 import com.arygm.quickfix.utils.setAccountPreferences
 import com.google.firebase.Timestamp
 import java.util.GregorianCalendar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -302,17 +297,16 @@ fun AccountConfigurationScreen(
                             0,
                             0,
                             0)
-                          val newAccount = Account(
-                          uid = uid,
-                          firstName = firstName,
-                          lastName = lastName,
-                          email = email,
-                          birthDate = Timestamp(calendar.time))
+                        val newAccount =
+                            Account(
+                                uid = uid,
+                                firstName = firstName,
+                                lastName = lastName,
+                                email = email,
+                                birthDate = Timestamp(calendar.time))
                         accountViewModel.updateAccount(
                             newAccount,
-                            onSuccess = {
-                              setAccountPreferences(preferencesViewModel, newAccount)
-                            },
+                            onSuccess = { setAccountPreferences(preferencesViewModel, newAccount) },
                             onFailure = {})
                         navigationActions.goBack()
                         return@Button

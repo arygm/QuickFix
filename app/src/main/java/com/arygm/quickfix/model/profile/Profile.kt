@@ -26,6 +26,7 @@ open class Profile(
 class UserProfile(
     val locations: List<Location>,
     val announcements: List<String>, // Each string correspond to an announcement id.
+    val wallet: Double = 0.0,
     uid: String,
     quickFixes: List<String> =
         emptyList(), // String of uid that will represents the uid of the QuickFixes

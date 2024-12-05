@@ -339,7 +339,7 @@ private fun updateAccountConfigurationAndVerify(
   }
 
   composeTestRule.waitUntil(20000) {
-    val profileNode = composeTestRule.onAllNodesWithTag("ProfileName")
+    val profileNode = composeTestRule.onAllNodesWithTag("ProfileDisplayName")
     // Check if there's at least one node with the expected text
     profileNode.fetchSemanticsNodes().any { semanticsNode ->
       val text = semanticsNode.config.getOrNull(SemanticsProperties.Text)?.joinToString()
@@ -347,5 +347,5 @@ private fun updateAccountConfigurationAndVerify(
     }
   }
   // Verify that the profile name has been updated correctly
-  composeTestRule.onNodeWithTag("ProfileName").assertTextEquals(expectedProfileName)
+  composeTestRule.onNodeWithTag("ProfileDisplayName").assertTextEquals(expectedProfileName)
 }

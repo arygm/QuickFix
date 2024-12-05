@@ -176,7 +176,7 @@ fun QuickFixTextFieldCustom(
                     start = moveContentHorizontal, top = moveContentBottom, bottom = moveContentTop)
                 .testTag(clickableTestTag) // Apply padding
                 .clickable(enabled = !isTextField && enabled) { onTextFieldClick() },
-        contentAlignment = Alignment.Center) {
+        contentAlignment = if (singleLine) Alignment.Center else Alignment.TopStart) {
           Row(
               horizontalArrangement = Arrangement.Center, // Aligning icon and text horizontally
               verticalAlignment = Alignment.CenterVertically, // Aligning icon and text vertically
@@ -221,24 +221,29 @@ fun QuickFixTextFieldCustom(
                       keyboardOptions = keyboardOptions,
                       visualTransformation = visualTransformation,
                       enabled = isTextField && enabled,
-                      maxLines = maxLines)
-                  if (value.isEmpty()) {
-                    Log.d("QuickFixTextFieldCustom", "placeHolderText: $placeHolderText")
-                    Text(
-                        modifier = Modifier.testTag(C.Tag.place_holder_text_field_custom),
-                        text = placeHolderText,
-                        style =
-                            textStyle.copy(
-                                color =
-                                    if (isError) errorColor
-                                    else placeHolderColor), // Placeholder text style
-                        textAlign = TextAlign.Start // Align the placeholder text to the start
-                        )
-                  }
+                      maxLines = maxLines,
+                      decorationBox = { innerTextField ->
+                        Box(
+                            Modifier.fillMaxWidth().let {
+                              if (!singleLine) it.padding(8.dp) else it
+                            }, // Adjust padding if needed for alignment
+                            contentAlignment = Alignment.CenterStart) {
+                              if (updatedValue.isEmpty()) {
+                                Text(
+                                    text = placeHolderText,
+                                    style =
+                                        textStyle.copy(
+                                            color = if (isError) errorColor else placeHolderColor),
+                                    modifier =
+                                        Modifier.testTag(C.Tag.place_holder_text_field_custom))
+                              }
+                              innerTextField() // The actual input text field
+                        }
+                      })
                 }
-                if ((showTrailingIcon() && value.isNotEmpty()) || alwaysShowTrailingIcon) {
+                if ((showTrailingIcon() && updatedValue.isNotEmpty()) || alwaysShowTrailingIcon) {
                   IconButton(
-                      onClick = { if (onClick) onValueChange("") },
+                      onClick = { if (onClick) onValueChangeWithLimit("") },
                       modifier =
                           Modifier.testTag(C.Tag.clear_button_text_field_custom)
                               .size(sizeIconGroup)
