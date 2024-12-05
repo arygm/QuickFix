@@ -36,6 +36,7 @@ import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.account.AccountConfigurationScreen
@@ -270,13 +271,14 @@ fun HomeNavHost(
 ) {
   val homeNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(homeNavController) }
+  val quickFixViewModel: QuickFixViewModel = viewModel(factory = QuickFixViewModel.Factory)
 
   NavHost(
       navController = homeNavController,
       startDestination = Screen.HOME,
       route = Route.HOME,
   ) {
-    composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
+    composable(Screen.HOME) { HomeScreen(navigationActions, isUser, quickFixViewModel) }
     // Add MessageScreen as a nested composable within Home
     composable(Screen.MESSAGES) {
       //  MessageScreen(
@@ -329,8 +331,20 @@ fun ProfileNavHost(
 fun DashBoardNavHost(isUser: Boolean) {
   val dashboardNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(dashboardNavController) }
+  val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
+  val quickFixViewModel: QuickFixViewModel = viewModel(factory = QuickFixViewModel.Factory)
+  val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory)
+  val profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.WorkerFactory)
   NavHost(navController = dashboardNavController, startDestination = Screen.DASHBOARD) {
-    composable(Screen.DASHBOARD) { DashboardScreen(navigationActions, isUser) }
+    composable(Screen.DASHBOARD) {
+      DashboardScreen(
+          isUser,
+          navigationActions,
+          quickFixViewModel,
+          chatViewModel,
+          accountViewModel,
+          profileViewModel)
+    }
   }
 }
 

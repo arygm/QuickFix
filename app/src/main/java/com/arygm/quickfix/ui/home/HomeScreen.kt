@@ -25,12 +25,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,24 +41,26 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
+import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.elements.PopularServicesRow
-import com.arygm.quickfix.ui.elements.QuickFix
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.QuickFixesWidget
 import com.arygm.quickfix.ui.elements.Service
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
-import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
+fun HomeScreen(
+    navigationActions: NavigationActions,
+    isUser: Boolean = true,
+    quickFixViewModel: QuickFixViewModel
+) {
   val focusManager = LocalFocusManager.current
   // Sample data for services and quick fixes
   val services =
@@ -66,13 +69,8 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
           Service("Gardener", R.drawable.gardener),
           Service("Electrician", R.drawable.electrician))
 
-  val quickFixes =
-      listOf(
-          QuickFix("Ramy", "Bathroom painting", "Sat, 12 Oct 2024"),
-          QuickFix("Mehdi", "Laying kitchen tiles", "Sun, 13 Oct 2024"),
-          QuickFix("Ramy", "Bathroom painting", "Sat, 12 Oct 2024"),
-          QuickFix("Mehdi", "Laying kitchen tiles", "Sun, 13 Oct 2024"),
-          QuickFix("Moha", "Toilet plumbing", "Mon, 14 Oct 2024"))
+  val quickFixes = quickFixViewModel.quickFixes.collectAsState().value
+  LaunchedEffect(Unit) { quickFixViewModel.getQuickFixes() }
 
   Scaffold(
       modifier =
@@ -183,24 +181,12 @@ fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
                           .weight(1.5f) // Flexible space, larger than the PopularServicesRow
                   ) {
                     QuickFixesWidget(
-                        status = "Upcoming",
-                        quickFixList = quickFixes,
+                        status = Status.UPCOMING,
+                        quickFixList = quickFixes.filter { it.status == Status.UPCOMING },
                         onShowAllClick = { /* Handle Show All Click */},
                         onItemClick = { /* Handle QuickFix Item Click */},
                         modifier = Modifier.testTag("UpcomingQuickFixes"))
                   }
             }
       })
-}
-
-@Composable
-@Preview
-fun PreviewHomeScreen() {
-  QuickFixTheme {
-    val navController = rememberNavController()
-    val navigationActions = remember { NavigationActions(navController) }
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-      HomeScreen(navigationActions)
-    }
-  }
 }

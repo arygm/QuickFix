@@ -1,5 +1,6 @@
 package com.arygm.quickfix.model.account
 
+import com.arygm.quickfix.model.messaging.Chat
 import com.google.firebase.Timestamp
 
 data class Account(
@@ -9,5 +10,5 @@ data class Account(
     val email: String,
     val birthDate: Timestamp,
     val isWorker: Boolean = false,
-    val activeChats: List<String> = emptyList(),
+    val activeChats: List<Chat> = emptyList(),
 )

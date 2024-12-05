@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.dashboard
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,26 +40,27 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.categories.WorkerCategory
+import com.arygm.quickfix.model.messaging.Chat
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.ui.theme.poppinsTypography
-
-// Data class for QuickFix item
-data class MessageSneakPeak(
-    val name: String,
-    val messageOverview: String,
-    val date: String,
-    val profileImage: Int,
-    val isRead: Boolean,
-    val notificationCount: Int,
-    val serviceIcon: ImageVector
-)
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @Composable
 fun MessagesWidget(
-    messageList: List<MessageSneakPeak>,
+    messageList: List<Chat>,
     onShowAllClick: () -> Unit,
-    onItemClick: (MessageSneakPeak) -> Unit,
+    onItemClick: (Chat) -> Unit,
     modifier: Modifier = Modifier,
-    itemsToShowDefault: Int = 3
+    itemsToShowDefault: Int = 3,
+    isUser: Boolean,
+    accountViewModel: AccountViewModel,
+    profileViewModel: ProfileViewModel
 ) {
   var showAll by remember { mutableStateOf(false) } // Toggle for showing all items
   BoxWithConstraints {
@@ -106,7 +108,12 @@ fun MessagesWidget(
 
           val itemsToShow = if (showAll) messageList else messageList.take(itemsToShowDefault)
           messageList.take(itemsToShow.size).forEachIndexed { index, message ->
-            MessageItem(messageSneakPeak = message, onClick = { onItemClick(message) })
+            MessageItem(
+                chat = message,
+                onClick = { onItemClick(message) },
+                isUser = isUser,
+                accountViewModel = accountViewModel,
+                profileViewModel = profileViewModel)
 
             // Divider between items
             if (index < itemsToShow.size - 1) {
@@ -121,13 +128,42 @@ fun MessagesWidget(
 }
 
 @Composable
-fun MessageItem(messageSneakPeak: MessageSneakPeak, onClick: () -> Unit) {
+fun MessageItem(
+    chat: Chat,
+    onClick: () -> Unit,
+    isUser: Boolean,
+    accountViewModel: AccountViewModel,
+    profileViewModel: ProfileViewModel
+) {
+
+  val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+  var messageName by remember { mutableStateOf("") }
+  var messageDescription by remember { mutableStateOf("") }
+  var serviceIcon by remember { mutableStateOf<ImageVector?>(null) }
+  accountViewModel.fetchUserAccount(if (isUser) chat.workeruid else chat.useruid) { account ->
+    if (account != null) {
+      messageName = "${account.firstName} ${account.lastName}"
+      messageDescription =
+          chat.messages.last().content.apply {
+            if (chat.messages.last().senderId == if (isUser) chat.useruid else chat.workeruid) {
+              messageDescription = "You: $messageDescription"
+            }
+          }
+      profileViewModel.fetchUserProfile(account.uid) { profile ->
+        if (profile != null && profile is WorkerProfile) {
+          serviceIcon = WorkerCategory.entries.find { it.description == profile.fieldOfWork }?.icon
+        } else {
+          Log.d("MessageItem", "Profile not found for ${account.uid}")
+        }
+      }
+    }
+  }
   Row(
       modifier =
           Modifier.fillMaxWidth()
               .padding(horizontal = 12.dp, vertical = 8.dp)
               .clickable { onClick() }
-              .testTag("MessageItem_${messageSneakPeak.name}"), // Added testTag
+              .testTag("MessageItem_${chat.chatId}"), // Added testTag
       verticalAlignment = Alignment.CenterVertically) {
         Column(modifier = Modifier.weight(0.15f)) {
           // Profile image placeholder
@@ -148,8 +184,8 @@ fun MessageItem(messageSneakPeak: MessageSneakPeak, onClick: () -> Unit) {
           // Row for name and task description on the same line
           Row(verticalAlignment = Alignment.Bottom) {
             Text(
-                text = messageSneakPeak.name,
-                modifier = Modifier.testTag(messageSneakPeak.name), // Added testTag
+                text = messageName,
+                modifier = Modifier.testTag(messageName), // Added testTag
                 style = poppinsTypography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold,
@@ -157,18 +193,21 @@ fun MessageItem(messageSneakPeak: MessageSneakPeak, onClick: () -> Unit) {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis)
             Spacer(modifier = Modifier.width(4.dp))
-            Icon(
-                imageVector = messageSneakPeak.serviceIcon,
-                contentDescription = "Service Icon",
-                tint = MaterialTheme.colorScheme.primary)
+            serviceIcon?.let {
+              Icon(
+                  imageVector = it,
+                  contentDescription = "Service Icon",
+                  tint = MaterialTheme.colorScheme.onSurface,
+                  modifier = Modifier.size(20.dp))
+            }
           }
           Text(
-              text = messageSneakPeak.messageOverview, // Removed leading comma for clarity
-              modifier = Modifier.testTag(messageSneakPeak.messageOverview), // Added testTag
+              text = messageDescription, // Removed leading comma for clarity
+              modifier = Modifier.testTag(messageDescription), // Added testTag
               style = poppinsTypography.bodyMedium.copy(fontSize = 12.sp),
               fontWeight = FontWeight.Normal,
               color =
-                  if (messageSneakPeak.isRead) MaterialTheme.colorScheme.onSurface
+                  if (chat.messages.last().isRead) MaterialTheme.colorScheme.onSurface
                   else MaterialTheme.colorScheme.onBackground,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis)
@@ -176,15 +215,17 @@ fun MessageItem(messageSneakPeak: MessageSneakPeak, onClick: () -> Unit) {
 
         Spacer(modifier = Modifier.width(8.dp))
         Column(
-            modifier = Modifier.weight(0.15f).align(Alignment.Top),
+            modifier = Modifier.weight(0.2f).align(Alignment.Top),
             verticalArrangement = Arrangement.SpaceBetween) {
+              val lastMessageDate = chat.messages.last().timestamp
               Text(
-                  text = messageSneakPeak.date,
+                  text = formatCustomDate(lastMessageDate),
                   modifier =
-                      Modifier.testTag(messageSneakPeak.date).align(Alignment.End), // Added testTag
+                      Modifier.testTag(formatCustomDate(lastMessageDate))
+                          .align(Alignment.End), // Added testTag
                   style = MaterialTheme.typography.labelSmall,
                   color = MaterialTheme.colorScheme.onSurface)
-              if (messageSneakPeak.notificationCount > 0) {
+              if (chat.messages.any { !it.isRead }) {
                 Spacer(modifier = Modifier.height(3.dp))
                 Box(
                     modifier =
@@ -193,7 +234,7 @@ fun MessageItem(messageSneakPeak: MessageSneakPeak, onClick: () -> Unit) {
                             .background(MaterialTheme.colorScheme.primary)
                             .align(Alignment.End)) {
                       Text(
-                          text = messageSneakPeak.notificationCount.toString(),
+                          text = chat.messages.count { !it.isRead }.toString(),
                           color = MaterialTheme.colorScheme.onPrimary,
                           style = MaterialTheme.typography.bodySmall,
                           modifier = Modifier.align(Alignment.Center))
@@ -201,4 +242,31 @@ fun MessageItem(messageSneakPeak: MessageSneakPeak, onClick: () -> Unit) {
               }
             }
       }
+}
+
+fun formatCustomDate(timestamp: Timestamp): String {
+  val now = Calendar.getInstance()
+  val lastMessageDate = Calendar.getInstance().apply { time = timestamp.toDate() }
+
+  return when {
+    // Check if the date is today
+    now.get(Calendar.YEAR) == lastMessageDate.get(Calendar.YEAR) &&
+        now.get(Calendar.DAY_OF_YEAR) == lastMessageDate.get(Calendar.DAY_OF_YEAR) -> {
+      SimpleDateFormat("HH:mm", Locale.getDefault()).format(lastMessageDate.time)
+    }
+    // Check if the date is yesterday
+    now.get(Calendar.YEAR) == lastMessageDate.get(Calendar.YEAR) &&
+        now.get(Calendar.DAY_OF_YEAR) - lastMessageDate.get(Calendar.DAY_OF_YEAR) == 1 -> {
+      "Yesterday"
+    }
+    // Check if the date is within the same week
+    now.get(Calendar.WEEK_OF_YEAR) == lastMessageDate.get(Calendar.WEEK_OF_YEAR) &&
+        now.get(Calendar.YEAR) == lastMessageDate.get(Calendar.YEAR) -> {
+      SimpleDateFormat("EEEE", Locale.getDefault()).format(lastMessageDate.time)
+    }
+    // Otherwise, return the date in the format "dd.MM.yy"
+    else -> {
+      SimpleDateFormat("dd.MM.yy", Locale.getDefault()).format(lastMessageDate.time)
+    }
+  }
 }

@@ -68,7 +68,7 @@ class MessageScreenTest {
           lastName = "User",
           email = "test@example.com",
           birthDate = Timestamp.now(),
-          activeChats = listOf("testChatId"))
+          activeChats = listOf(Chat("testChatId", "workerId", "testUserId", emptyList())))
 
   private val testChat =
       Chat(

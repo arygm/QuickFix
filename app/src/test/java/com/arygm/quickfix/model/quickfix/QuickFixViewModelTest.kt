@@ -1,6 +1,7 @@
 package com.arygm.quickfix.model.quickfix
 
 import com.arygm.quickfix.model.bill.BillField
+import com.arygm.quickfix.model.categories.WorkerCategory
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
@@ -49,6 +50,7 @@ class QuickFixViewModelTest {
           chatUid = "chat123",
           title = "Fix My Wall",
           bill = listOf(testBillField),
+          category = WorkerCategory.PAINTING,
           location = testLocation)
 
   @Before

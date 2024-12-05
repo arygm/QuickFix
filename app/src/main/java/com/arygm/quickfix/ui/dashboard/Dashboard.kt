@@ -8,9 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ElectricalServices
-import androidx.compose.material.icons.outlined.ImagesearchRoller
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +15,8 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,19 +26,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.arygm.quickfix.R
-import com.arygm.quickfix.ui.elements.QuickFix
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.messaging.ChatViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
+import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixesWidget
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import kotlin.random.Random
 
 @Composable
-fun DashboardScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
+fun DashboardScreen(
+    isUser: Boolean = true,
+    navigationActions: NavigationActions,
+    quickFixViewModel: QuickFixViewModel,
+    chatViewModel: ChatViewModel,
+    accountViewModel: AccountViewModel,
+    profileViewModel: ProfileViewModel,
+) {
 
   data class QuickFixFilterButtons(
-      val title: String,
+      val status: Status,
       val isSelected: Boolean,
       val onClick: () -> Unit
   )
@@ -47,48 +55,28 @@ fun DashboardScreen(navigationActions: NavigationActions, isUser: Boolean = true
   var quickFixFilterButtons by remember {
     mutableStateOf(
         listOf(
-            QuickFixFilterButtons("All", false, {}),
-            QuickFixFilterButtons("Upcoming", true, {}),
-            QuickFixFilterButtons("Canceled", false, {}),
-            QuickFixFilterButtons("Unpaid", false, {}),
-            QuickFixFilterButtons("Finished", false, {}),
+            QuickFixFilterButtons(Status.ALL, false, {}),
+            QuickFixFilterButtons(Status.UPCOMING, true, {}),
+            QuickFixFilterButtons(Status.PAID, false, {}),
+            QuickFixFilterButtons(Status.UNPAID, false, {}),
+            QuickFixFilterButtons(Status.PENDING, false, {}),
+            QuickFixFilterButtons(Status.COMPLETED, false, {}),
+            QuickFixFilterButtons(Status.CANCELED, false, {}),
         ))
   }
 
-  // Sample data for fetched filtered quick fixes
-  val quickFixes =
-      listOf(
-          QuickFix("Adam", "Bathroom renovation", "Sat, 12 Oct 2024"),
-          QuickFix("Mehdi", "Laying kitchen tiles", "Sun, 13 Oct 2024"),
-          QuickFix("Ramy", "Bathroom painting", "Sat, 12 Oct 2024"),
-          QuickFix("Ramy", "Bathroom painting", "Sat, 12 Oct 2024"),
-          QuickFix("Mehdi", "Laying kitchen tiles", "Sun, 13 Oct 2024"),
-          QuickFix("Ramy", "Bathroom painting", "Sat, 12 Oct 2024"))
+  val quickfixes = quickFixViewModel.quickFixes.collectAsState().value
 
-  val messageList =
-      listOf(
-          MessageSneakPeak(
-              "Ramy Hatimy",
-              "Hello, I’m available everyday from 7pm to 8pm bla bla bla bla bla bla bla",
-              "8:30",
-              R.drawable.placeholder_worker,
-              false,
-              2,
-              Icons.Outlined.ImagesearchRoller),
-          MessageSneakPeak(
-              "Adam Ait Bousselham",
-              "Yes of course I’ll be there by 9pm. Can you tell me ouais c'est comment la vie d'artiste hehehe",
-              "11:00",
-              R.drawable.placeholder_worker,
-              true,
-              0,
-              Icons.Outlined.ElectricalServices),
-      )
+  val messageList = chatViewModel.chats.collectAsState().value
+  LaunchedEffect(Unit) {
+    quickFixViewModel.getQuickFixes()
+    chatViewModel.getChats()
+  }
 
-  val billList =
-      quickFixes.map {
-        BillSneakPeak(it.name, it.taskDescription, it.date, Random.nextDouble(10.00, 10000.00))
-      }
+  /*val billList =
+  quickfixes.map {
+    BillSneakPeak(it.name, it.taskDescription, it.date, Random.nextDouble(10.00, 10000.00))
+  }*/
 
   Scaffold(
       containerColor = colorScheme.background,
@@ -116,77 +104,103 @@ fun DashboardScreen(navigationActions: NavigationActions, isUser: Boolean = true
 
                   LazyRow(
                       horizontalArrangement = Arrangement.spacedBy(4.dp),
-                  ) {
-                    items(quickFixFilterButtons.size) { index ->
-                      QuickFixButton(
-                          buttonText = quickFixFilterButtons[index].title,
-                          onClickAction = {
-                            quickFixFilterButtons =
-                                quickFixFilterButtons.mapIndexed { i, button ->
-                                  button.copy(isSelected = i == index)
-                                }
-                            quickFixFilterButtons[index].onClick()
-                          },
-                          textColor =
-                              if (quickFixFilterButtons[index].isSelected) colorScheme.onPrimary
-                              else colorScheme.primary,
-                          textStyle = poppinsTypography.bodyMedium,
-                          buttonColor =
-                              if (quickFixFilterButtons[index].isSelected) colorScheme.primary
-                              else colorScheme.onPrimary,
-                          height = 40.dp,
-                          modifier = Modifier.padding(7.dp),
-                          contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
-                          border =
-                              if (quickFixFilterButtons[index].isSelected) null
-                              else BorderStroke(1.dp, colorScheme.primary),
-                      )
-                    }
-                  }
-                  val buttonTitle = quickFixFilterButtons.firstOrNull { it.isSelected }?.title
+                      modifier = Modifier.testTag("LazyRowTag")) {
+                        items(quickFixFilterButtons.size) { index ->
+                          QuickFixButton(
+                              buttonText =
+                                  quickFixFilterButtons[index]
+                                      .status
+                                      .toString()
+                                      .lowercase()
+                                      .replaceFirstChar { it.uppercase() },
+                              onClickAction = {
+                                quickFixFilterButtons =
+                                    quickFixFilterButtons.mapIndexed { i, button ->
+                                      button.copy(isSelected = i == index)
+                                    }
+                                quickFixFilterButtons[index].onClick()
+                              },
+                              textColor =
+                                  if (quickFixFilterButtons[index].isSelected) colorScheme.onPrimary
+                                  else colorScheme.primary,
+                              textStyle = poppinsTypography.bodyMedium,
+                              buttonColor =
+                                  if (quickFixFilterButtons[index].isSelected) colorScheme.primary
+                                  else colorScheme.onPrimary,
+                              height = 40.dp,
+                              modifier = Modifier.padding(7.dp),
+                              contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
+                              border =
+                                  if (quickFixFilterButtons[index].isSelected) null
+                                  else BorderStroke(1.dp, colorScheme.primary),
+                          )
+                        }
+                      }
+                  val buttonTitle = quickFixFilterButtons.firstOrNull { it.isSelected }?.status
                   when (buttonTitle) {
-                    "Upcoming" ->
+                    Status.UPCOMING ->
                         QuickFixesWidget(
-                            status = "Upcoming",
-                            quickFixList = quickFixes,
+                            status = Status.UPCOMING,
+                            quickFixList = quickfixes.filter { it.status == Status.UPCOMING },
                             onShowAllClick = { /* Handle Show All Click */},
                             onItemClick = { /* Handle QuickFix Item Click */},
                             modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                             itemsToShowDefault = 3,
                         )
-                    "Canceled" -> {
+                    Status.CANCELED -> {
                       QuickFixesWidget(
-                          status = "Canceled",
-                          quickFixList = quickFixes,
+                          status = Status.CANCELED,
+                          quickFixList = quickfixes.filter { it.status == Status.CANCELED },
                           onShowAllClick = { /* Handle Show All Click */},
                           onItemClick = { /* Handle QuickFix Item Click */},
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
                       )
                     }
-                    "Unpaid" -> {
+                    Status.UNPAID -> {
                       QuickFixesWidget(
-                          status = "Unpaid",
-                          quickFixList = quickFixes,
+                          status = Status.UNPAID,
+                          quickFixList = quickfixes.filter { it.status == Status.UNPAID },
                           onShowAllClick = { /* Handle Show All Click */},
                           onItemClick = { /* Handle QuickFix Item Click */},
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
                       )
                     }
-                    "Finished" -> {
+                    Status.COMPLETED -> {
                       QuickFixesWidget(
-                          status = "Finished",
-                          quickFixList = quickFixes,
+                          status = Status.COMPLETED,
+                          quickFixList = quickfixes.filter { it.status == Status.COMPLETED },
                           onShowAllClick = { /* Handle Show All Click */},
                           onItemClick = { /* Handle QuickFix Item Click */},
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
                       )
                     }
-                    "All" -> {
+                    Status.ALL -> {
                       QuickFixesWidget(
-                          quickFixList = quickFixes,
+                          status = Status.ALL,
+                          quickFixList = quickfixes,
+                          onShowAllClick = { /* Handle Show All Click */},
+                          onItemClick = { /* Handle QuickFix Item Click */},
+                          modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
+                          itemsToShowDefault = 3,
+                      )
+                    }
+                    Status.PENDING -> {
+                      QuickFixesWidget(
+                          status = Status.PENDING,
+                          quickFixList = quickfixes.filter { it.status == Status.PENDING },
+                          onShowAllClick = { /* Handle Show All Click */},
+                          onItemClick = { /* Handle QuickFix Item Click */},
+                          modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
+                          itemsToShowDefault = 3,
+                      )
+                    }
+                    else -> {
+                      QuickFixesWidget(
+                          status = Status.PAID,
+                          quickFixList = quickfixes.filter { it.status == Status.PAID },
                           onShowAllClick = { /* Handle Show All Click */},
                           onItemClick = { /* Handle QuickFix Item Click */},
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
@@ -203,16 +217,23 @@ fun DashboardScreen(navigationActions: NavigationActions, isUser: Boolean = true
                     onItemClick = { /*Handle Message Item Click*/},
                     onShowAllClick = { /*Handle Show All Click*/},
                     itemsToShowDefault = 3,
+                    isUser = isUser,
+                    accountViewModel = accountViewModel,
+                    profileViewModel = profileViewModel,
                 )
               }
 
               item {
-                BillsWidget(
-                    billList = billList,
-                    onItemClick = { /*Handle Bill Item Click*/},
-                    onShowAllClick = { /*Handle Show All Click*/},
+                /*BillsWidget(
+                billList = billList,
+                onItemClick = { */
+                /*Handle Bill Item Click*/
+                /*},
+                onShowAllClick = { */
+                /*Handle Show All Click*/
+                /*},
                     itemsToShowDefault = 2,
-                )
+                )*/
               }
             }
       })

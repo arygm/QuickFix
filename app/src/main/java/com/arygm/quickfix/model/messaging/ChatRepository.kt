@@ -9,6 +9,12 @@ interface ChatRepository {
 
   fun getChats(onSuccess: (List<Chat>) -> Unit, onFailure: (Exception) -> Unit)
 
+  fun getChatsByUserId(
+      userId: String,
+      onSuccess: (List<Chat>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   fun chatExists(
       userId: String,
       workerId: String,

@@ -2,6 +2,7 @@ package com.arygm.quickfix.model.quickfix
 
 import android.util.Log
 import com.arygm.quickfix.model.bill.BillField
+import com.arygm.quickfix.model.categories.WorkerCategory
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
@@ -12,7 +13,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
-class QuickFixRepositoryFirestore(private val db: FirebaseFirestore) : QuickFixRepository {
+open class QuickFixRepositoryFirestore(private val db: FirebaseFirestore) : QuickFixRepository {
 
   val collectionPath = "quickFix"
 
@@ -159,6 +160,15 @@ class QuickFixRepositoryFirestore(private val db: FirebaseFirestore) : QuickFixR
             }
           } ?: emptyList()
 
+      val categoryString = document.getString("category") ?: return null
+      val category =
+          try {
+            WorkerCategory.valueOf(categoryString)
+          } catch (e: IllegalArgumentException) {
+            Log.e("QuickFixRepositoryFirestore", "Unknown category: $categoryString", e)
+            return null
+          }
+
       val workerName = document.getString("workerName") ?: ""
       val userName = document.getString("userName") ?: ""
       val chatUid = document.getString("chatUid") ?: ""
@@ -198,6 +208,7 @@ class QuickFixRepositoryFirestore(private val db: FirebaseFirestore) : QuickFixR
           imageUrl = imageUrl,
           date = dateList,
           time = time,
+          category = category,
           includedServices = includedServices,
           addOnServices = addOnServices,
           workerName = workerName,
