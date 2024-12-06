@@ -145,4 +145,12 @@ open class SearchViewModel(
   fun sortWorkersByRating(workers: List<WorkerProfile>): List<WorkerProfile> {
     return workers.sortedByDescending { it.rating }
   }
+
+  fun filterWorkersByPriceRange(
+      workers: List<WorkerProfile>,
+      start: Int,
+      end: Int
+  ): List<WorkerProfile> {
+    return workers.filter { worker -> worker.price in start.toDouble()..end.toDouble() }
+  }
 }
