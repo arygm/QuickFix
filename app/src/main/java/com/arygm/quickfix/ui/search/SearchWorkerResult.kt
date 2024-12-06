@@ -34,7 +34,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.LocationSearching
+import androidx.compose.material.icons.filled.Loop
+import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Tune
@@ -108,12 +114,20 @@ fun SearchWorkerResult(
   val listOfButtons =
       listOf(
           SearchFilterButtons(
+              onClick = { filteredWorkerProfiles = workerProfiles},
+              text = "Clear",
+              leadingIcon = Icons.Default.Clear
+          ),
+          SearchFilterButtons(
               onClick = { /* Handle click */},
               text = "Location",
+              leadingIcon = Icons.Default.LocationSearching,
+              trailingIcon = Icons.Default.KeyboardArrowDown,
           ),
           SearchFilterButtons(
               onClick = { showServicesBottomSheet = true },
               text = "Service Type",
+              leadingIcon = Icons.Default.Handyman,
               trailingIcon = Icons.Default.KeyboardArrowDown,
           ),
           SearchFilterButtons(
@@ -132,6 +146,8 @@ fun SearchWorkerResult(
           SearchFilterButtons(
               onClick = { showPriceRangeBottomSheet = true },
               text = "Price Range",
+              leadingIcon = Icons.Default.MonetizationOn,
+              trailingIcon = Icons.Default.KeyboardArrowDown,
           ),
       )
 

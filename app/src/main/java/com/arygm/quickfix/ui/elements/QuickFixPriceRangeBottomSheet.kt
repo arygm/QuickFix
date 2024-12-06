@@ -20,6 +20,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,8 +41,8 @@ fun QuickFixPriceRangeBottomSheet(
     onApplyClick: (Int, Int) -> Unit,
     onDismissRequest: () -> Unit
 ) {
-  var range_0 by remember { mutableStateOf(0) }
-  var range_1 by remember { mutableStateOf(0) }
+  var range0 by remember { mutableIntStateOf(0) }
+  var range1 by remember { mutableIntStateOf(0) }
   if (showModalBottomSheet) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -116,8 +117,8 @@ fun QuickFixPriceRangeBottomSheet(
                               tooltipHeight = 30.dp * heightRatio.value,
                               tooltipTriangleSize = 5.dp,
                               onProgressChanged = { value1, value2 ->
-                                range_0 = value1
-                                range_1 = value2
+                                range0 = value1
+                                range1 = value2
                               })
                         }
 
@@ -135,9 +136,9 @@ fun QuickFixPriceRangeBottomSheet(
 
                   Button(
                       onClick = {
-                        onApplyClick(range_0, range_1)
-                        Log.d("hey", range_0.toString())
-                        Log.d("hey", range_1.toString())
+                        onApplyClick(range0, range1)
+                        Log.d("hey", range0.toString())
+                        Log.d("hey", range1.toString())
                         onDismissRequest()
                       },
                       modifier =
