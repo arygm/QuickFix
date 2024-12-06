@@ -242,6 +242,7 @@ fun SearchWorkerResult(
                 }
 
                 ProfileResults(
+                    modifier = Modifier.testTag("worker_profiles_list"),
                     profiles = filteredWorkerProfiles,
                     listState = listState,
                     searchViewModel = searchViewModel,
@@ -253,7 +254,7 @@ fun SearchWorkerResult(
                       // TODO when linking the backend remove placeHolder data
                       val profile =
                           WorkerProfile(
-                              rating = 4.5,
+                              rating = 4.8,
                               fieldOfWork = "Exterior Painter",
                               description = "Worker description goes here.",
                               location =

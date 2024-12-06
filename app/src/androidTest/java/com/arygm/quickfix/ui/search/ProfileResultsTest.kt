@@ -101,7 +101,7 @@ class ProfileResultsTest {
           accountViewModel = accountViewModel,
           widthRatio = 1.0f,
           heightRatio = 1.0f,
-      )
+          onBookClick = { _ -> })
     }
 
     // Allow coroutines to complete

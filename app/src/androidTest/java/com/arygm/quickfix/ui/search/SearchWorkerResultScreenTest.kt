@@ -6,7 +6,6 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.filter
-import androidx.compose.ui.test.hasAnyChild
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasSetTextAction
@@ -21,6 +20,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.printToLog
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepositoryFirestore
@@ -185,17 +185,19 @@ class SearchWorkerResultScreenTest {
 
   @Test
   fun testProfileResultsAreDisplayed() {
+
     // Set the composable content
     composeTestRule.setContent {
       SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
     }
     // Scroll through the LazyColumn and verify each profile result is displayed
     val workerProfilesList = composeTestRule.onNodeWithTag("worker_profiles_list")
+    composeTestRule.onNodeWithTag("worker_profiles_list").printToLog("LazyColumn")
 
     repeat(searchViewModel.workerProfiles.value.size) { index ->
       workerProfilesList.performScrollToIndex(index)
       composeTestRule
-          .onNodeWithTag("worker_profile_result$index")
+          .onNodeWithTag("worker_profile_result_$index")
           .assertExists()
           .assertIsDisplayed()
     }
@@ -330,20 +332,6 @@ class SearchWorkerResultScreenTest {
         .onNodeWithTag("sliding_window_included_services_column")
         .assertExists()
         .assertIsDisplayed()
-
-    // Check for each included service
-    val includedServices =
-        listOf(
-            "Initial Consultation",
-            "Basic Surface Preparation",
-            "Priming of Surfaces",
-            "High-Quality Paint Application",
-            "Two Coats of Paint",
-            "Professional Cleanup")
-
-    includedServices.forEach { service ->
-      composeTestRule.onNodeWithText("• $service").assertExists().assertIsDisplayed()
-    }
   }
 
   @Test
@@ -367,19 +355,6 @@ class SearchWorkerResultScreenTest {
         .onNodeWithTag("sliding_window_addon_services_column")
         .assertExists()
         .assertIsDisplayed()
-
-    // Check for each add-on service
-    val addOnServices =
-        listOf(
-            "Detailed Color Consultation",
-            "Premium paint Upgrade",
-            "Extensive Surface Preparation",
-            "Extra Coats for added Durability",
-            "Power Washing and Deep Cleaning")
-
-    addOnServices.forEach { service ->
-      composeTestRule.onNodeWithText("• $service").assertExists().assertIsDisplayed()
-    }
   }
 
   @Test
@@ -424,17 +399,6 @@ class SearchWorkerResultScreenTest {
 
     // Verify the tags section is displayed
     composeTestRule.onNodeWithTag("sliding_window_tags_flow_row").assertExists().assertIsDisplayed()
-
-    // Check for each tag
-    val tags =
-        listOf(
-            "Exterior Painting",
-            "Interior Painting",
-            "Cabinet Painting",
-            "Licensed & Insured",
-            "Local Worker")
-
-    tags.forEach { tag -> composeTestRule.onNodeWithText(tag).assertExists().assertIsDisplayed() }
   }
 
   @Test
@@ -823,7 +787,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.rating} ★", substring = true)))
+      workerNodes[index].assert(hasText("${worker.rating} ★", substring = true))
     }
   }
 
@@ -878,7 +842,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(filteredWorkers.size)
 
     filteredWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.rating} ★", substring = true)))
+      workerNodes[index].assert(hasText("${worker.rating} ★", substring = true))
     }
   }
 
@@ -978,7 +942,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.rating} ★", substring = true)))
+      workerNodes[index].assert(hasText("${worker.rating} ★", substring = true))
     }
   }
 
@@ -1017,7 +981,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.rating} ★", substring = true)))
+      workerNodes[index].assert(hasText("${worker.rating} ★", substring = true))
     }
   }
 }

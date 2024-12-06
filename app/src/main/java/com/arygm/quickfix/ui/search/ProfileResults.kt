@@ -32,6 +32,7 @@ import com.arygm.quickfix.utils.LocationHelper
 
 @Composable
 fun ProfileResults(
+    modifier: Modifier = Modifier,
     profiles: List<WorkerProfile>,
     listState: LazyListState,
     searchViewModel: SearchViewModel,
@@ -51,7 +52,7 @@ fun ProfileResults(
     Spacer(modifier = Modifier.height(4.dp * heightRatio))
 
     // LazyColumn for displaying profiles
-    LazyColumn(modifier = Modifier.fillMaxWidth(), state = listState) {
+    LazyColumn(modifier = modifier.fillMaxWidth(), state = listState) {
       items(profiles.size) { index ->
         val profile = profiles[index]
         var account by remember { mutableStateOf<Account?>(null) }

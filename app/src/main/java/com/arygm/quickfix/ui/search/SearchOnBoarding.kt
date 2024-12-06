@@ -1,5 +1,3 @@
-// SearchOnBoarding.kt
-
 package com.arygm.quickfix.ui.search
 
 import QuickFixSlidingWindowWorker
