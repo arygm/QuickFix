@@ -59,260 +59,244 @@ fun QuickFixLocationFilterBottomSheet(
     onApplyClick: (Location, Int) -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    var range by remember { mutableIntStateOf(0) }
-    if (showModalBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = onDismissRequest,
-            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-            modifier = Modifier.testTag("locationFilterModalSheet")
-        ) {
-            BoxWithConstraints {
-                val paddingHorizontal = maxWidth * 0.04f
-                val verticalSpacing = maxHeight * 0.015f
-                val cornerRadius = maxWidth * 0.05f
-                val buttonPaddingHorizontal = maxWidth * 0.04f
+  var range by remember { mutableIntStateOf(0) }
+  if (showModalBottomSheet) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        modifier = Modifier.testTag("locationFilterModalSheet")) {
+          BoxWithConstraints {
+            val paddingHorizontal = maxWidth * 0.04f
+            val verticalSpacing = maxHeight * 0.015f
+            val cornerRadius = maxWidth * 0.05f
+            val buttonPaddingHorizontal = maxWidth * 0.04f
 
-                val widthRatio = maxWidth / 411
-                val heightRatio = maxHeight / 860
+            val widthRatio = maxWidth / 411
+            val heightRatio = maxHeight / 860
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
+            Column(
+                modifier =
+                    Modifier.fillMaxWidth()
                         .background(
                             colorScheme.surface,
-                            RoundedCornerShape(topStart = cornerRadius, topEnd = cornerRadius)
-                        )
+                            RoundedCornerShape(topStart = cornerRadius, topEnd = cornerRadius))
                         .padding(horizontal = 0.dp)
                         .testTag("locationFilterColumn"),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Search Radius",
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = colorScheme.outline,
-                        modifier = Modifier.testTag("locationFilterTitle")
-                    )
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                  Text(
+                      text = "Search Radius",
+                      style = MaterialTheme.typography.headlineLarge,
+                      color = colorScheme.outline,
+                      modifier = Modifier.testTag("locationFilterTitle"))
 
-                    Spacer(modifier = Modifier.height(verticalSpacing))
+                  Spacer(modifier = Modifier.height(verticalSpacing))
 
-                    // Full-width divider under the title
-                    Divider(
-                        color = colorScheme.onSecondaryContainer,
-                        thickness = 1.dp,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                  Divider(
+                      color = colorScheme.onSecondaryContainer,
+                      thickness = 1.dp,
+                      modifier = Modifier.fillMaxWidth().testTag("locationFilterDivider"))
 
-                    Spacer(modifier = Modifier.height(verticalSpacing))
+                  Spacer(modifier = Modifier.height(verticalSpacing))
 
-                    val locationOptions = mutableListOf("Use my Current Location")
-                    userProfile.locations.forEach { loc ->
-                        locationOptions += loc.name
-                    }
-                    val selectedOption = remember { mutableStateOf<Int?>(null) }
+                  val locationOptions = mutableListOf("Use my Current Location")
+                  userProfile.locations.forEach { loc -> locationOptions += loc.name }
+                  val selectedOption = remember { mutableStateOf<Int?>(null) }
 
-                    // Limit the height of the list so it doesn't push the button out of view
-                    val maxListHeight = heightRatio*800 * 0.5f
+                  val maxListHeight = heightRatio * 800 * 0.5f
 
-                    Text(
-                        text = "Location Options:",
-                        style = MaterialTheme.typography.headlineSmall.copy(fontSize = 14.sp),
-                        color = colorScheme.onBackground,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.align(Alignment.Start).padding(horizontal = 16.dp)
-                    )
+                  Text(
+                      text = "Location Options:",
+                      style = MaterialTheme.typography.headlineSmall.copy(fontSize = 14.sp),
+                      color = colorScheme.onBackground,
+                      fontWeight = FontWeight.SemiBold,
+                      modifier =
+                          Modifier.align(Alignment.Start)
+                              .padding(horizontal = 16.dp)
+                              .testTag("locationOptionsTitle"))
 
-                    Spacer(modifier = Modifier.height(verticalSpacing))
+                  Spacer(modifier = Modifier.height(verticalSpacing))
 
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .heightIn(max = maxListHeight) // Limit the height of the list
-                    ) {
+                  LazyColumn(
+                      modifier =
+                          Modifier.fillMaxWidth()
+                              .padding(horizontal = 16.dp)
+                              .heightIn(max = maxListHeight)
+                              .testTag("locationOptionsList")) {
                         items(locationOptions.size) { index ->
-                            val optionText = locationOptions[index]
-
-                            Column {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
+                          val optionText = locationOptions[index]
+                          Column(modifier = Modifier.testTag("locationOptionContainer$index")) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier =
+                                    Modifier.fillMaxWidth()
                                         .padding(vertical = 3.dp * heightRatio.value)
                                         .toggleable(
                                             value = selectedOption.value == index,
-                                            onValueChange = {
-                                                selectedOption.value = index
-                                            },
+                                            onValueChange = { selectedOption.value = index },
                                             enabled = true,
-                                            role = Role.RadioButton
-                                        )
-                                ) {
-                                    RadioButton(
-                                        selected = (selectedOption.value == index),
-                                        onClick = { selectedOption.value = index },
-                                        modifier = Modifier.size(
-                                            width = 24.dp * widthRatio.value,
-                                            height = 24.dp * heightRatio.value
-                                        ),
-                                        colors = RadioButtonDefaults.colors(
-                                            selectedColor = colorScheme.primary,
-                                            unselectedColor = colorScheme.tertiaryContainer
-                                        )
-                                    )
+                                            role = Role.RadioButton)
+                                        .testTag("locationOptionRow$index")) {
+                                  RadioButton(
+                                      selected = (selectedOption.value == index),
+                                      onClick = { selectedOption.value = index },
+                                      modifier =
+                                          Modifier.size(
+                                                  width = 24.dp * widthRatio.value,
+                                                  height = 24.dp * heightRatio.value)
+                                              .testTag("locationOptionRadio$index"),
+                                      colors =
+                                          RadioButtonDefaults.colors(
+                                              selectedColor = colorScheme.primary,
+                                              unselectedColor = colorScheme.tertiaryContainer))
 
-                                    Spacer(modifier = Modifier.width(8.dp * widthRatio.value))
+                                  Spacer(modifier = Modifier.width(8.dp * widthRatio.value))
 
-                                    Text(
-                                        text = optionText,
-                                        style = poppinsTypography.labelSmall,
-                                        fontWeight = FontWeight.Medium,
-                                        color = colorScheme.onBackground
-                                    )
+                                  Text(
+                                      text = optionText,
+                                      style = poppinsTypography.labelSmall,
+                                      fontWeight = FontWeight.Medium,
+                                      color = colorScheme.onBackground,
+                                      modifier = Modifier.testTag("locationOptionText$index"))
                                 }
 
-                                // Add a divider after each item except the last one
-                                if (index < locationOptions.lastIndex) {
-                                    Spacer(modifier = Modifier.height(8.dp * heightRatio.value))
-                                    HorizontalDivider(
-                                        color = colorScheme.background,
-                                        thickness = 1.5.dp,
-                                        modifier = Modifier
-                                            .padding(start = 32.dp * widthRatio.value)
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp * heightRatio.value))
-                                }
+                            if (index < locationOptions.lastIndex) {
+                              Spacer(modifier = Modifier.height(8.dp * heightRatio.value))
+                              HorizontalDivider(
+                                  color = colorScheme.background,
+                                  thickness = 1.5.dp,
+                                  modifier =
+                                      Modifier.padding(start = 32.dp * widthRatio.value)
+                                          .testTag("locationOptionDivider$index"))
+                              Spacer(modifier = Modifier.height(8.dp * heightRatio.value))
                             }
+                          }
                         }
 
                         item { Spacer(modifier = Modifier.height(16.dp)) }
-                    }
+                      }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = verticalSpacing)
-                            .testTag("priceRangeRow"),
-                        horizontalArrangement = Arrangement.spacedBy(paddingHorizontal, Alignment.CenterHorizontally),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                  Row(
+                      modifier =
+                          Modifier.fillMaxWidth()
+                              .padding(vertical = verticalSpacing)
+                              .testTag("priceRangeRow"),
+                      horizontalArrangement =
+                          Arrangement.spacedBy(paddingHorizontal, Alignment.CenterHorizontally),
+                      verticalAlignment = Alignment.CenterVertically) {
                         Row(
                             modifier = Modifier.weight(0.15f).testTag("leftDistText"),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            Text(
-                                text = "0 km",
-                                color = colorScheme.onBackground,
-                                style = TextStyle(fontWeight = FontWeight.SemiBold)
-                            )
-                        }
+                            horizontalArrangement = Arrangement.End) {
+                              Text(
+                                  text = "0 km",
+                                  color = colorScheme.onBackground,
+                                  style = TextStyle(fontWeight = FontWeight.SemiBold),
+                                  modifier = Modifier.testTag("leftDistTextValue"))
+                            }
 
                         Row(modifier = Modifier.weight(0.70f).testTag("locationFilterSlider")) {
-                            QuickFixPriceRange(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp),
-                                rangeColor = colorScheme.primary,
-                                backColor = colorScheme.secondaryContainer,
-                                barHeight = 8.dp,
-                                circleRadius = 8.dp,
-                                cornerRadius = CornerRadius(10f, 10f),
-                                minValue = 0,
-                                maxValue = 800,
-                                progress1InitialValue = 200,
-                                progress2InitialValue = 900,
-                                tooltipSpacing = 5.dp,
-                                tooltipWidth = 50.dp * widthRatio.value,
-                                tooltipHeight = 30.dp * heightRatio.value,
-                                tooltipTriangleSize = 5.dp,
-                                isDoubleSlider = false,
-                                onProgressChanged = { value1, _ ->
-                                    range = value1
-                                }
-                            )
+                          QuickFixPriceRange(
+                              modifier =
+                                  Modifier.fillMaxWidth()
+                                      .padding(horizontal = 8.dp)
+                                      .testTag("quickFixPriceRange"),
+                              rangeColor = colorScheme.primary,
+                              backColor = colorScheme.secondaryContainer,
+                              barHeight = 8.dp,
+                              circleRadius = 8.dp,
+                              cornerRadius = CornerRadius(10f, 10f),
+                              minValue = 0,
+                              maxValue = 800,
+                              progress1InitialValue = 200,
+                              progress2InitialValue = 900,
+                              tooltipSpacing = 5.dp,
+                              tooltipWidth = 50.dp * widthRatio.value,
+                              tooltipHeight = 30.dp * heightRatio.value,
+                              tooltipTriangleSize = 5.dp,
+                              isDoubleSlider = false,
+                              onProgressChanged = { value1, _ -> range = value1 })
                         }
 
                         Row(
                             modifier = Modifier.weight(0.15f).testTag("rightPriceDistText"),
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            Text(
-                                text = "800 km",
-                                color = colorScheme.onBackground,
-                                style = TextStyle(fontWeight = FontWeight.SemiBold)
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(verticalSpacing * 1.5f))
-
-                    Button(
-                        enabled = selectedOption.value != null,
-                        onClick = {
-                            if (selectedOption.value == 0){
-                                if (locationHelper.checkPermissions()) {
-                                    var location : Location
-                                    locationHelper.getCurrentLocation { loc ->
-                                        loc?.let {
-                                            location = Location(loc.latitude,loc.longitude,"Phone Location")
-                                            onApplyClick(location,range)
-                                        }
-                                    }
-                                } else {
-                                    locationHelper.requestPermissions()
-                                }
-                            }else{
-                                onApplyClick(userProfile.locations[selectedOption.value!!.minus(1)],range)
+                            horizontalArrangement = Arrangement.Start) {
+                              Text(
+                                  text = "800 km",
+                                  color = colorScheme.onBackground,
+                                  style = TextStyle(fontWeight = FontWeight.SemiBold),
+                                  modifier = Modifier.testTag("rightDistTextValue"))
                             }
-                            onDismissRequest()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = buttonPaddingHorizontal)
-                            .testTag("applyButton"),
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                            containerColor = colorScheme.primary,
-                            contentColor = colorScheme.onPrimary
-                        )
-                    ) {
-                        Text("Apply")
-                    }
-                }
-            }
-        }
-    }
-}
+                      }
 
+                  Spacer(modifier = Modifier.height(verticalSpacing * 1.5f))
+
+                  Button(
+                      enabled = selectedOption.value != null,
+                      onClick = {
+                        if (selectedOption.value == 0) {
+                          if (locationHelper.checkPermissions()) {
+                            locationHelper.getCurrentLocation { loc ->
+                              loc?.let {
+                                val location = Location(it.latitude, it.longitude, "Phone Location")
+                                onApplyClick(location, range)
+                              }
+                            }
+                          } else {
+                            locationHelper.requestPermissions()
+                          }
+                        } else {
+                          onApplyClick(
+                              userProfile.locations[selectedOption.value!!.minus(1)], range)
+                        }
+                        onDismissRequest()
+                      },
+                      modifier =
+                          Modifier.fillMaxWidth()
+                              .padding(horizontal = buttonPaddingHorizontal)
+                              .testTag("applyButton"),
+                      colors =
+                          androidx.compose.material3.ButtonDefaults.buttonColors(
+                              containerColor = colorScheme.primary,
+                              contentColor = colorScheme.onPrimary)) {
+                        Text("Apply", modifier = Modifier.testTag("applyButtonText"))
+                      }
+                }
+          }
+        }
+  }
+}
 
 @Preview(showBackground = true)
 @Composable
 fun hehe() {
-    var showModal by remember { mutableStateOf(true) }
-    val userProfile = UserProfile(locations = listOf(Location(0.0,0.0,"Home"),
-        Location(0.0,0.0,"Work"),
-        Location(0.0,0.0,"EPFL"),
-        Location(0.0,0.0,"Doctor"),
-        Location(0.0,0.0,"Dentist"),
-        Location(0.0,0.0,"Parents"),
-        Location(0.0,0.0,"Friend"),
-        Location(0.0,0.0,"Vet"),
-        Location(0.0,0.0,"Children")),
-        uid = "1",
-        announcements = emptyList()
-    )
-    val locationHelper = LocationHelper(LocalContext.current, MainActivity())
+  var showModal by remember { mutableStateOf(true) }
+  val userProfile =
+      UserProfile(
+          locations =
+              listOf(
+                  Location(0.0, 0.0, "Home"),
+                  Location(0.0, 0.0, "Work"),
+                  Location(0.0, 0.0, "EPFL"),
+                  Location(0.0, 0.0, "Doctor"),
+                  Location(0.0, 0.0, "Dentist"),
+                  Location(0.0, 0.0, "Parents"),
+                  Location(0.0, 0.0, "Friend"),
+                  Location(0.0, 0.0, "Vet"),
+                  Location(0.0, 0.0, "Children")),
+          uid = "1",
+          announcements = emptyList())
+  val locationHelper = LocationHelper(LocalContext.current, MainActivity())
 
-    QuickFixTheme {
-        QuickFixLocationFilterBottomSheet(
-            showModalBottomSheet = showModal,
-            userProfile = userProfile,
-            locationHelper = locationHelper,
-            onApplyClick = { loc,a ->
-                Log.d("Chill Guy", a.toString())
-                Log.d("Chill Guy", loc.name)
-                Log.d("Chill Guy", loc.longitude.toString())
-                Log.d("Chill Guy", loc.latitude.toString())
-
-            },
-            onDismissRequest = { showModal = false })
-    }
+  QuickFixTheme {
+    QuickFixLocationFilterBottomSheet(
+        showModalBottomSheet = showModal,
+        userProfile = userProfile,
+        locationHelper = locationHelper,
+        onApplyClick = { loc, a ->
+          Log.d("Chill Guy", a.toString())
+          Log.d("Chill Guy", loc.name)
+          Log.d("Chill Guy", loc.longitude.toString())
+          Log.d("Chill Guy", loc.latitude.toString())
+        },
+        onDismissRequest = { showModal = false })
+  }
 }
