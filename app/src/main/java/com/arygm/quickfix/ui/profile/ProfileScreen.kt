@@ -31,8 +31,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -44,11 +46,9 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
+import com.arygm.quickfix.utils.clearAccountPreferences
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +57,7 @@ fun ProfileScreen(
     navigationActionsRoot: NavigationActions,
     preferencesViewModel: PreferencesViewModel
 ) {
+
   // List of options handled by the profile screen
   val options =
       listOf(
@@ -105,6 +106,7 @@ fun ProfileScreen(
                                 tint = colorScheme.primary,
                                 modifier = Modifier.size(24.dp))
                             Spacer(modifier = Modifier.width(65.dp))
+
                             val displayName = remember { mutableStateOf("Loading...") }
 
                             LaunchedEffect(Unit) {
@@ -118,9 +120,6 @@ fun ProfileScreen(
                                         }
                                   }
                             }
-
-                            Log.d("user", "Display name: $displayName")
-
                             Text(
                                 text = displayName.value,
                                 style = MaterialTheme.typography.bodyLarge,
@@ -282,9 +281,7 @@ fun ProfileScreen(
               // Logout Button
               Button(
                   onClick = {
-                    CoroutineScope(Dispatchers.IO).launch {
-                      preferencesViewModel.clearAllPreferences()
-                    }
+                    clearAccountPreferences(preferencesViewModel)
                     navigationActionsRoot.navigateTo(TopLevelDestinations.WELCOME)
                     Log.d("user", Firebase.auth.currentUser.toString())
                   },
