@@ -248,7 +248,8 @@ fun QuickFixApp() {
                     { currentScreen ->
                       screenInSearchNavHost = currentScreen // Mise à jour de l'écran actif
                     },
-                    categoryViewModel)
+                    categoryViewModel,
+                    preferencesViewModel)
               }
 
               composable(Route.DASHBOARD) { DashBoardNavHost(isUser) }
@@ -347,7 +348,8 @@ fun SearchNavHost(
     accountViewModel: AccountViewModel,
     announcementViewModel: AnnouncementViewModel,
     onScreenChange: (String) -> Unit,
-    categoryViewModel: CategoryViewModel
+    categoryViewModel: CategoryViewModel,
+    preferencesViewModel: PreferencesViewModel
 ) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
@@ -375,7 +377,12 @@ fun SearchNavHost(
       QuickFixDisplayImages(isUser, navigationActions, announcementViewModel)
     }
     composable(Screen.SEARCH_WORKER_RESULT) {
-      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+      SearchWorkerResult(
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          profileViewModel,
+          preferencesViewModel)
     }
     composable(Screen.SEARCH_LOCATION) {
       LocationSearchCustomScreen(

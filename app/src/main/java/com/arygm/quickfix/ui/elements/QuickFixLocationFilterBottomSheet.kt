@@ -2,6 +2,7 @@ package com.arygm.quickfix.ui.elements
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -57,7 +58,9 @@ fun QuickFixLocationFilterBottomSheet(
     userProfile: UserProfile,
     locationHelper: LocationHelper,
     onApplyClick: (Location, Int) -> Unit,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    onClearClick: () -> Unit,
+    clearEnabled: Boolean
 ) {
   var range by remember { mutableIntStateOf(0) }
   if (showModalBottomSheet) {
@@ -259,6 +262,18 @@ fun QuickFixLocationFilterBottomSheet(
                               contentColor = colorScheme.onPrimary)) {
                         Text("Apply", modifier = Modifier.testTag("applyButtonText"))
                       }
+                  Text(
+                      text = "Clear",
+                      color =
+                          if (clearEnabled) colorScheme.primary
+                          else colorScheme.onSecondaryContainer,
+                      modifier =
+                          Modifier.clickable(enabled = clearEnabled) {
+                                onClearClick()
+                                onDismissRequest()
+                              }
+                              .padding(vertical = verticalSpacing / 2)
+                              .testTag("resetButton"))
                 }
           }
         }
@@ -297,6 +312,8 @@ fun hehe() {
           Log.d("Chill Guy", loc.longitude.toString())
           Log.d("Chill Guy", loc.latitude.toString())
         },
-        onDismissRequest = { showModal = false })
+        onDismissRequest = { showModal = false },
+        onClearClick = {},
+        clearEnabled = false)
   }
 }

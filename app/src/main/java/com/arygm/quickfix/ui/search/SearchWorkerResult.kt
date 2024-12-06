@@ -79,21 +79,27 @@ import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixButton
+import com.arygm.quickfix.ui.elements.QuickFixLocationFilterBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixPriceRangeBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixSlidingWindow
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.LocationHelper
+import com.arygm.quickfix.utils.loadUserId
+import java.time.LocalDate
 
 data class SearchFilterButtons(
     val onClick: () -> Unit,
     val text: String,
     val leadingIcon: ImageVector? = null,
-    val trailingIcon: ImageVector? = null,
+    val trailingIcon: ImageVector? = null
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -101,13 +107,57 @@ data class SearchFilterButtons(
 fun SearchWorkerResult(
     navigationActions: NavigationActions,
     searchViewModel: SearchViewModel,
-    accountViewModel: AccountViewModel
+    accountViewModel: AccountViewModel,
+    userProfileViewModel: ProfileViewModel,
+    preferencesViewModel: PreferencesViewModel
 ) {
   var showAvailabilityBottomSheet by remember { mutableStateOf(false) }
   var showServicesBottomSheet by remember { mutableStateOf(false) }
   var showPriceRangeBottomSheet by remember { mutableStateOf(false) }
+  var showLocationBottomSheet by remember { mutableStateOf(false) }
   val workerProfiles by searchViewModel.workerProfiles.collectAsState()
   var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
+
+  var availabilityFilterApplied by remember { mutableStateOf(false) }
+  var servicesFilterApplied by remember { mutableStateOf(false) }
+  var priceFilterApplied by remember { mutableStateOf(false) }
+  var locationFilterApplied by remember { mutableStateOf(false) }
+
+  var selectedDays by remember { mutableStateOf(emptyList<LocalDate>()) }
+  var selectedHour by remember { mutableStateOf(0) }
+  var selectedMinute by remember { mutableStateOf(0) }
+  var selectedServices by remember { mutableStateOf(emptyList<String>()) }
+  var selectedPriceStart by remember { mutableStateOf(0) }
+  var selectedPriceEnd by remember { mutableStateOf(0) }
+  var selectedLocation by remember { mutableStateOf(com.arygm.quickfix.model.locations.Location()) }
+  var maxDistance by remember { mutableStateOf(0) }
+
+  fun reapplyFilters() {
+    var updatedProfiles = workerProfiles
+
+    if (availabilityFilterApplied) {
+      updatedProfiles =
+          searchViewModel.filterWorkersByAvailability(
+              updatedProfiles, selectedDays, selectedHour, selectedMinute)
+    }
+
+    if (servicesFilterApplied) {
+      updatedProfiles = searchViewModel.filterWorkersByServices(updatedProfiles, selectedServices)
+    }
+
+    if (priceFilterApplied) {
+      updatedProfiles =
+          searchViewModel.filterWorkersByPriceRange(
+              updatedProfiles, selectedPriceStart, selectedPriceEnd)
+    }
+
+    if (locationFilterApplied) {
+      updatedProfiles =
+          searchViewModel.filterWorkersByDistance(updatedProfiles, selectedLocation, maxDistance)
+    }
+
+    filteredWorkerProfiles = updatedProfiles
+  }
 
   val listOfButtons =
       listOf(
@@ -116,7 +166,7 @@ fun SearchWorkerResult(
               text = "Clear",
               leadingIcon = Icons.Default.Clear),
           SearchFilterButtons(
-              onClick = { /* Handle click */},
+              onClick = { showLocationBottomSheet = true },
               text = "Location",
               leadingIcon = Icons.Default.LocationSearching,
               trailingIcon = Icons.Default.KeyboardArrowDown,
@@ -217,6 +267,18 @@ fun SearchWorkerResult(
   val searchQuery by searchViewModel.searchQuery.collectAsState()
   val searchSubcategory by searchViewModel.searchSubcategory.collectAsState()
   var currentLocation by remember { mutableStateOf<Location?>(null) }
+
+  var userProfile = UserProfile(locations = emptyList(), announcements = emptyList(), uid = "0")
+  var uid by remember { mutableStateOf("Loading...") }
+
+  LaunchedEffect(Unit) { uid = loadUserId(preferencesViewModel) }
+  userProfileViewModel.fetchUserProfile(uid) { profile ->
+    if (profile is UserProfile) {
+      userProfile = profile
+    } else {
+      Log.e("SearchWorkerResult", "Fetched a worker profile from a user profile repo.")
+    }
+  }
 
   val locationHelper: LocationHelper = LocationHelper(LocalContext.current, MainActivity())
 
@@ -379,14 +441,19 @@ fun SearchWorkerResult(
         }
 
     QuickFixAvailabilityBottomSheet(
-        showAvailabilityBottomSheet, onDismissRequest = { showAvailabilityBottomSheet = false }) {
-            days,
-            hour,
-            minute ->
+        showAvailabilityBottomSheet,
+        onDismissRequest = { showAvailabilityBottomSheet = false },
+        onOkClick = { days, hour, minute ->
           filteredWorkerProfiles =
               searchViewModel.filterWorkersByAvailability(
                   filteredWorkerProfiles, days, hour, minute)
-        }
+          availabilityFilterApplied = true
+        },
+        onClearClick = {
+          availabilityFilterApplied = false
+          reapplyFilters()
+        },
+        clearEnabled = availabilityFilterApplied)
 
     searchSubcategory?.let {
       ChooseServiceTypeSheet(
@@ -395,8 +462,14 @@ fun SearchWorkerResult(
           onApplyClick = { services ->
             filteredWorkerProfiles =
                 searchViewModel.filterWorkersByServices(filteredWorkerProfiles, services)
+            servicesFilterApplied = true
           },
-          onDismissRequest = { showServicesBottomSheet = false })
+          onDismissRequest = { showServicesBottomSheet = false },
+          onClearClick = {
+            servicesFilterApplied = false
+            reapplyFilters()
+          },
+          clearEnabled = servicesFilterApplied)
     }
 
     QuickFixPriceRangeBottomSheet(
@@ -404,8 +477,30 @@ fun SearchWorkerResult(
         onApplyClick = { start, end ->
           filteredWorkerProfiles =
               searchViewModel.filterWorkersByPriceRange(filteredWorkerProfiles, start, end)
+          priceFilterApplied = true
         },
-        onDismissRequest = { showPriceRangeBottomSheet = false })
+        onDismissRequest = { showPriceRangeBottomSheet = false },
+        onClearClick = {
+          priceFilterApplied = false
+          reapplyFilters()
+        },
+        clearEnabled = priceFilterApplied)
+
+    QuickFixLocationFilterBottomSheet(
+        showLocationBottomSheet,
+        userProfile = userProfile,
+        locationHelper = locationHelper,
+        onApplyClick = { location, max ->
+          filteredWorkerProfiles =
+              searchViewModel.filterWorkersByDistance(filteredWorkerProfiles, location, max)
+          locationFilterApplied = true
+        },
+        onDismissRequest = { showLocationBottomSheet = false },
+        onClearClick = {
+          locationFilterApplied = false
+          reapplyFilters()
+        },
+        clearEnabled = locationFilterApplied)
 
     if (isWindowVisible) {
       QuickFixSlidingWindow(isVisible = isWindowVisible, onDismiss = { isWindowVisible = false }) {

@@ -30,7 +30,11 @@ class QuickFixAvailabilityBottomSheetTest {
   fun bottomSheetIsDisplayed_whenShowModalBottomSheetIsTrue() {
     composeTestRule.setContent {
       QuickFixAvailabilityBottomSheet(
-          showModalBottomSheet = true, onDismissRequest = {}, onOkClick = { a, b, c -> })
+          showModalBottomSheet = true,
+          onDismissRequest = {},
+          onOkClick = { a, b, c -> },
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Assert that the bottom sheet is displayed
@@ -47,7 +51,11 @@ class QuickFixAvailabilityBottomSheetTest {
   fun bottomSheetIsNotDisplayed_whenShowModalBottomSheetIsFalse() {
     composeTestRule.setContent {
       QuickFixAvailabilityBottomSheet(
-          showModalBottomSheet = false, onDismissRequest = {}, onOkClick = { a, b, c -> })
+          showModalBottomSheet = false,
+          onDismissRequest = {},
+          onOkClick = { a, b, c -> },
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Assert that the bottom sheet does not exist
@@ -60,7 +68,11 @@ class QuickFixAvailabilityBottomSheetTest {
   fun timePickerIsDisplayed_inBottomSheet() {
     composeTestRule.setContent {
       QuickFixAvailabilityBottomSheet(
-          showModalBottomSheet = true, onDismissRequest = {}, onOkClick = { a, b, c -> })
+          showModalBottomSheet = true,
+          onDismissRequest = {},
+          onOkClick = { a, b, c -> },
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Assert that the TimePicker components are displayed
@@ -89,7 +101,9 @@ class QuickFixAvailabilityBottomSheetTest {
             selectedDates = a
             selectedHour = b
             selectedMinute = c
-          })
+          },
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Wait for the content to be settled
@@ -134,7 +148,9 @@ class QuickFixAvailabilityBottomSheetTest {
       QuickFixAvailabilityBottomSheet(
           showModalBottomSheet = true,
           onDismissRequest = {},
-          onOkClick = { a, b, c -> onOkClickCalled = true })
+          onOkClick = { a, b, c -> onOkClickCalled = true },
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Simulate date selection in CalendarView
@@ -158,7 +174,9 @@ class QuickFixAvailabilityBottomSheetTest {
       QuickFixAvailabilityBottomSheet(
           showModalBottomSheet = true,
           onDismissRequest = { onDismissRequestCalled = true },
-          onOkClick = { a, b, c -> })
+          onOkClick = { a, b, c -> },
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Simulate dismissing the bottom sheet
@@ -166,5 +184,49 @@ class QuickFixAvailabilityBottomSheetTest {
 
     // Assert that onDismissRequest was called
     composeTestRule.runOnIdle { assert(onDismissRequestCalled) }
+  }
+
+  /** Test that [onClearClick] is called when the clear action is enabled and performed. */
+  @OptIn(ExperimentalMaterial3Api::class)
+  @Test
+  fun onClearClick_isCalled_whenClearEnabled() {
+    var onClearClickCalled = false
+
+    composeTestRule.setContent {
+      QuickFixAvailabilityBottomSheet(
+          showModalBottomSheet = true,
+          onDismissRequest = {},
+          onOkClick = { _, _, _ -> },
+          onClearClick = { onClearClickCalled = true },
+          clearEnabled = true)
+    }
+
+    // Simulate the clear action (assume clicking on an element invokes the clear logic)
+    composeTestRule.onNodeWithText("Cancel").performClick()
+
+    // Assert that onClearClick was called
+    composeTestRule.runOnIdle { assert(onClearClickCalled) }
+  }
+
+  /** Test that [onClearClick] is not called when clear action is disabled. */
+  @OptIn(ExperimentalMaterial3Api::class)
+  @Test
+  fun onClearClick_isNotCalled_whenClearDisabled() {
+    var onClearClickCalled = false
+
+    composeTestRule.setContent {
+      QuickFixAvailabilityBottomSheet(
+          showModalBottomSheet = true,
+          onDismissRequest = {},
+          onOkClick = { _, _, _ -> },
+          onClearClick = { onClearClickCalled = true },
+          clearEnabled = false)
+    }
+
+    // Simulate the clear action (assume clicking on an element invokes the clear logic)
+    composeTestRule.onNodeWithText("Cancel").performClick()
+
+    // Assert that onClearClick was not called
+    composeTestRule.runOnIdle { assert(!onClearClickCalled) }
   }
 }

@@ -2,6 +2,7 @@ package com.arygm.quickfix.ui.elements
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -39,7 +40,9 @@ import com.arygm.quickfix.ui.theme.QuickFixTheme
 fun QuickFixPriceRangeBottomSheet(
     showModalBottomSheet: Boolean,
     onApplyClick: (Int, Int) -> Unit,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    onClearClick: () -> Unit,
+    clearEnabled: Boolean
 ) {
   var range0 by remember { mutableIntStateOf(0) }
   var range1 by remember { mutableIntStateOf(0) }
@@ -151,6 +154,19 @@ fun QuickFixPriceRangeBottomSheet(
                               contentColor = colorScheme.onPrimary)) {
                         Text("Apply")
                       }
+
+                  Text(
+                      text = "Clear",
+                      color =
+                          if (clearEnabled) colorScheme.primary
+                          else colorScheme.onSecondaryContainer,
+                      modifier =
+                          Modifier.clickable(enabled = clearEnabled) {
+                                onClearClick()
+                                onDismissRequest()
+                              }
+                              .padding(vertical = verticalSpacing / 2)
+                              .testTag("resetButton"))
                 }
           }
         }
@@ -169,6 +185,8 @@ fun haha() {
           Log.d("Chill Guy", a.toString())
           Log.d("Chill Guy", b.toString())
         },
-        onDismissRequest = { showModal = false })
+        onDismissRequest = { showModal = false },
+        onClearClick = {},
+        clearEnabled = false)
   }
 }

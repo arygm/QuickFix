@@ -65,7 +65,9 @@ class QuickFixLocationFilterBottomSheetTest {
             userProfile = userProfile,
             locationHelper = locationHelper,
             onApplyClick = { _, _ -> },
-            onDismissRequest = {})
+            onDismissRequest = {},
+            onClearClick = {},
+            clearEnabled = false)
       }
     }
 
@@ -81,7 +83,9 @@ class QuickFixLocationFilterBottomSheetTest {
             userProfile = userProfile,
             locationHelper = locationHelper,
             onApplyClick = { _, _ -> },
-            onDismissRequest = {})
+            onDismissRequest = {},
+            onClearClick = {},
+            clearEnabled = false)
       }
     }
 
@@ -97,7 +101,9 @@ class QuickFixLocationFilterBottomSheetTest {
             userProfile = userProfile,
             locationHelper = locationHelper,
             onApplyClick = { _, _ -> },
-            onDismissRequest = {})
+            onDismissRequest = {},
+            onClearClick = {},
+            clearEnabled = false)
       }
     }
 
@@ -163,7 +169,9 @@ class QuickFixLocationFilterBottomSheetTest {
               appliedLocation = loc
               appliedRange = r
             },
-            onDismissRequest = { dismissed = true })
+            onDismissRequest = { dismissed = true },
+            onClearClick = {},
+            clearEnabled = false)
       }
     }
 
@@ -201,7 +209,9 @@ class QuickFixLocationFilterBottomSheetTest {
               appliedLocation = loc
               appliedRange = r
             },
-            onDismissRequest = { dismissed = true })
+            onDismissRequest = { dismissed = true },
+            onClearClick = {},
+            clearEnabled = false)
       }
     }
 
@@ -232,11 +242,74 @@ class QuickFixLocationFilterBottomSheetTest {
             userProfile = userProfile,
             locationHelper = locationHelper,
             onApplyClick = { _, _ -> },
-            onDismissRequest = {})
+            onDismissRequest = {},
+            onClearClick = {},
+            clearEnabled = false)
       }
     }
 
     // Ensure no radio button clicked yet
     composeTestRule.onNodeWithTag("applyButton").assertIsDisplayed().assertIsNotEnabled()
+  }
+
+  /** Test that the Clear button calls [onClearClick] when enabled. */
+  @Test
+  fun clearButtonCallsOnClearClickWhenEnabled() {
+    var clearCalled = false
+    var dismissCalled = false
+
+    composeTestRule.setContent {
+      QuickFixTheme {
+        QuickFixLocationFilterBottomSheet(
+            showModalBottomSheet = true,
+            userProfile = userProfile,
+            locationHelper = locationHelper,
+            onApplyClick = { _, _ -> },
+            onDismissRequest = { dismissCalled = true },
+            onClearClick = { clearCalled = true },
+            clearEnabled = true)
+      }
+    }
+
+    // Simulate clicking the Clear button
+    composeTestRule.onNodeWithTag("resetButton").performClick()
+
+    // Assert that onClearClick and onDismissRequest were called
+    composeTestRule.runOnIdle {
+      assert(clearCalled) { "Expected onClearClick to be called" }
+      assert(dismissCalled) { "Expected onDismissRequest to be called" }
+    }
+  }
+
+  /**
+   * Test that the Clear button is disabled and does not call [onClearClick] when [clearEnabled] is
+   * false.
+   */
+  @Test
+  fun clearButtonDoesNotCallOnClearClickWhenDisabled() {
+    var clearCalled = false
+    var dismissCalled = false
+
+    composeTestRule.setContent {
+      QuickFixTheme {
+        QuickFixLocationFilterBottomSheet(
+            showModalBottomSheet = true,
+            userProfile = userProfile,
+            locationHelper = locationHelper,
+            onApplyClick = { _, _ -> },
+            onDismissRequest = { dismissCalled = true },
+            onClearClick = { clearCalled = true },
+            clearEnabled = false)
+      }
+    }
+
+    // Simulate clicking the Clear button
+    composeTestRule.onNodeWithTag("resetButton").performClick()
+
+    // Assert that onClearClick was not called
+    composeTestRule.runOnIdle {
+      assert(!clearCalled) { "Expected onClearClick not to be called" }
+      assert(!dismissCalled) { "Expected onDismissRequest not to be called" }
+    }
   }
 }
