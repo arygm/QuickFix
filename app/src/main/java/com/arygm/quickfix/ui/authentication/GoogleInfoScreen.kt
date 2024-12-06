@@ -73,7 +73,7 @@ fun GoogleInfoScreen(
   var birthDate by remember { mutableStateOf("") }
   var uid by remember { mutableStateOf("") }
   var email by remember { mutableStateOf("") }
-  preferencesViewModel.loadPreference(key = com.arygm.quickfix.utils.USER_ID_KEY) { uid = it ?: "" }
+  preferencesViewModel.loadPreference(key = com.arygm.quickfix.utils.UID_KEY) { uid = it ?: "" }
   preferencesViewModel.loadPreference(key = com.arygm.quickfix.utils.EMAIL_KEY) { email = it ?: "" }
 
   var birthDateError by remember { mutableStateOf(false) }

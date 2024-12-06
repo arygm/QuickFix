@@ -64,7 +64,7 @@ class ProfileConfigurationScreenTest {
         .thenReturn(flowOf("testValue"))
 
     // Mock specific keys explicitly
-    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.USER_ID_KEY))
+    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.UID_KEY))
         .thenReturn(flowOf("testUid"))
     whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.FIRST_NAME_KEY))
         .thenReturn(flowOf("John"))
@@ -72,7 +72,7 @@ class ProfileConfigurationScreenTest {
         .thenReturn(flowOf("Doe"))
     whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.EMAIL_KEY))
         .thenReturn(flowOf("john.doe@example.com"))
-    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.DATE_OF_BIRTH_KEY))
+    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.BIRTH_DATE_KEY))
         .thenReturn(flowOf("01/01/1990"))
   }
 

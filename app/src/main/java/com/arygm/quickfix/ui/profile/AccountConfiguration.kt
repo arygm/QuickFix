@@ -78,7 +78,7 @@ fun AccountConfigurationScreen(
   var birthDate by remember { mutableStateOf("") }
 
   LaunchedEffect(Unit) {
-    preferencesViewModel.loadPreference(com.arygm.quickfix.utils.USER_ID_KEY) { value ->
+    preferencesViewModel.loadPreference(com.arygm.quickfix.utils.UID_KEY) { value ->
       uid = value ?: "nouid"
     }
     preferencesViewModel.loadPreference(com.arygm.quickfix.utils.FIRST_NAME_KEY) { value ->
@@ -90,7 +90,7 @@ fun AccountConfigurationScreen(
     preferencesViewModel.loadPreference(com.arygm.quickfix.utils.EMAIL_KEY) { value ->
       email = value ?: "noemail"
     }
-    preferencesViewModel.loadPreference(com.arygm.quickfix.utils.DATE_OF_BIRTH_KEY) { value ->
+    preferencesViewModel.loadPreference(com.arygm.quickfix.utils.BIRTH_DATE_KEY) { value ->
       Log.d("AccountConfigurationScreen", "Loaded birthdate: $value")
       birthDate = value ?: "nodate"
     }

@@ -51,12 +51,12 @@ class PreferencesTest {
 
         // Assert
         verify(preferencesViewModel).savePreference(IS_SIGN_IN_KEY, true)
-        verify(preferencesViewModel).savePreference(USER_ID_KEY, "user123")
+        verify(preferencesViewModel).savePreference(UID_KEY, "user123")
         verify(preferencesViewModel).savePreference(FIRST_NAME_KEY, "Alice")
         verify(preferencesViewModel).savePreference(LAST_NAME_KEY, "Smith")
         verify(preferencesViewModel).savePreference(EMAIL_KEY, "alice.smith@example.com")
         // Adjust date string as per your timestampToString implementation
-        verify(preferencesViewModel).savePreference(DATE_OF_BIRTH_KEY, "15/05/1990")
+        verify(preferencesViewModel).savePreference(BIRTH_DATE_KEY, "15/05/1990")
         verify(preferencesViewModel).savePreference(IS_WORKER_KEY, true)
       }
 }
