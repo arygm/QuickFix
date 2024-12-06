@@ -72,8 +72,8 @@ fun ProfessionalInfoScreen(
     categories: List<Category>,
     formValidatedTest: Boolean = false
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val formValidatedIncludedServices = remember { mutableStateOf(false) }
+  val coroutineScope = rememberCoroutineScope()
+  val formValidatedIncludedServices = remember { mutableStateOf(false) }
   val formValidatedAddOnServices = remember { mutableStateOf(false) }
   var selectedCategory by remember { mutableStateOf(Category()) }
   var selectedSubcategory by remember { mutableStateOf(Subcategory()) }
@@ -113,16 +113,16 @@ fun ProfessionalInfoScreen(
 
   val canAddTextField = remember { mutableStateOf(true) }
 
-    val (listTags, checkedStatesTags) =
-        remember(selectedSubcategory) {
-            val services = selectedSubcategory.tags
-            val checkedStates =
-                mutableStateListOf<Boolean>().apply { repeat(services.size) { add(false) } }
-            services to checkedStates
-        }
-    val formValidatedTags = remember { mutableStateOf(false) }
-    val priceString = remember { mutableStateOf("") }
-    val priceError = remember { mutableStateOf(false) } // Tracks if there's an error
+  val (listTags, checkedStatesTags) =
+      remember(selectedSubcategory) {
+        val services = selectedSubcategory.tags
+        val checkedStates =
+            mutableStateListOf<Boolean>().apply { repeat(services.size) { add(false) } }
+        services to checkedStates
+      }
+  val formValidatedTags = remember { mutableStateOf(false) }
+  val priceString = remember { mutableStateOf("") }
+  val priceError = remember { mutableStateOf(false) } // Tracks if there's an error
 
   BoxWithConstraints {
     val widthRatio = maxWidth / 411
@@ -242,8 +242,8 @@ fun ProfessionalInfoScreen(
                           fieldOfWork.value = ""
                           price.doubleValue = 0.0
                           canAddTextField.value = true
-                            price.value = 0.0
-                            priceString.value = ""
+                          price.value = 0.0
+                          priceString.value = ""
                         },
                         modifier =
                             Modifier.height(30.dp * heightRatio.value).semantics {
@@ -321,128 +321,115 @@ fun ProfessionalInfoScreen(
         }
         Spacer(modifier = Modifier.height(16.dp * heightRatio.value))
       }
-        if (selectedCategory.name.isNotEmpty() && selectedSubcategory.name.isNotEmpty()) {
-            item {
-                Column{
-                    Text(
-                        text =
-                        buildAnnotatedString {
-                            append("Reference Price")
-                            withStyle(
-                                style =
-                                SpanStyle(
-                                    color = colorScheme.primary,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            ) {
-                                append("*")
-                            }
-                        },
-                        style =
-                        poppinsTypography.headlineMedium.copy(
-                            fontSize = 12.sp, fontWeight = FontWeight.Medium
-                        ),
-                        color = colorScheme.onBackground,
-                        modifier = Modifier
-                    )
-                    Spacer(modifier = Modifier.height(1.dp * heightRatio.value))
-
-                    Row {
-                        selectedSubcategory.scale?.let {
-                            Log.d("scale", it.longScale)
-                            Text(
-                                text = it.longScale,
-                                style =
-                                poppinsTypography.headlineMedium.copy(
-                                    fontSize = 9.sp, fontWeight = FontWeight.Medium
-                                ),
-                                color = colorScheme.onSurface,
-                                modifier =
-                                Modifier.weight(0.8f).semantics {
-                                    testTag = C.Tag.professionalInfoScreenSectionDescription
-                                })
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(2.dp * heightRatio.value))
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Box(
-                            modifier = Modifier.weight(0.4f)
-                        ){
-                            QuickFixTextFieldCustom(
-                                modifier = Modifier.semantics { testTag = C.Tag.professionalInfoScreenPriceField },
-                                heightField = 27.dp,
-                                widthField = 380.dp * widthRatio.value,
-                                value = priceString.value,
-                                onValueChange = { input ->
-                                    priceString.value = input
-
-                                    // Try to parse the input to double
-                                    val parsedPrice = input.toDoubleOrNull()
-                                    if (parsedPrice != null) {
-                                        price.doubleValue = parsedPrice
-                                        priceError.value = false
-                                    } else {
-                                        // Parsing failed, set error
-                                        priceError.value = true
-                                    }
-                                },
-                                shape = RoundedCornerShape(8.dp),
-                                hasShadow = false,
-                                borderColor = colorScheme.tertiaryContainer,
-                                placeHolderText = "Enter Price",
-                                isError = priceError.value,
-                                errorText = "Please enter a valid number",
-                                showError = priceError.value,
-                                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
-                                trailingText = {
-                                    Text(
-                                        text = "CHF",
-                                        style = poppinsTypography.headlineMedium.copy(
-                                            fontSize = 12.sp, fontWeight = FontWeight.Medium
-                                        ),
-                                        color = colorScheme.onSurface,
-                                        modifier = Modifier.padding(end = 8.dp)
-                                    )
-                                },
-                                alwaysShowTrailingIcon = true,
-                                moveTrailingIconLeft = 20.dp
-                            )
-                        }
-                        Spacer(modifier = Modifier.weight(0.6f))
-                    }
-                    Spacer(modifier = Modifier.height(16.dp * heightRatio.value))
-                }
-            }
-            item {
-                val indices = (0 until listTags.size step 2)
-                QuickFixCheckedList(
-                    listServices = listTags,
-                    checkedStatesServices = checkedStatesTags,
-                    heightRatio = heightRatio,
-                    indices = indices,
-                    minToSelect = 3,
-                    maxToSelect = listTags.size,
-                    onClickActionOk = {
-                        tags.value =
-                            listTags
-                                .filterIndexed { index, _ -> checkedStatesIncludedServices[index] }
-                        formValidatedTags.value = true
+      if (selectedCategory.name.isNotEmpty() && selectedSubcategory.name.isNotEmpty()) {
+        item {
+          Column {
+            Text(
+                text =
+                    buildAnnotatedString {
+                      append("Reference Price")
+                      withStyle(
+                          style =
+                              SpanStyle(
+                                  color = colorScheme.primary,
+                                  fontSize = 12.sp,
+                                  fontWeight = FontWeight.Medium)) {
+                            append("*")
+                          }
                     },
-                    formValidated = formValidatedTags,
-                    boldText = " at least 3 Tags",
-                    label = "Choose",
-                    secondPartLabel = " that describes your skills",
-                    widthRatio = widthRatio,
+                style =
+                    poppinsTypography.headlineMedium.copy(
+                        fontSize = 12.sp, fontWeight = FontWeight.Medium),
+                color = colorScheme.onBackground,
+                modifier = Modifier)
+            Spacer(modifier = Modifier.height(1.dp * heightRatio.value))
+
+            Row {
+              selectedSubcategory.scale?.let {
+                Log.d("scale", it.longScale)
+                Text(
+                    text = it.longScale,
+                    style =
+                        poppinsTypography.headlineMedium.copy(
+                            fontSize = 9.sp, fontWeight = FontWeight.Medium),
+                    color = colorScheme.onSurface,
                     modifier =
-                    Modifier.semantics { testTag = C.Tag.professionalInfoScreenTagsList },
-                )
-                Spacer(modifier = Modifier.height(16.dp * heightRatio.value))
+                        Modifier.weight(0.8f).semantics {
+                          testTag = C.Tag.professionalInfoScreenSectionDescription
+                        })
+              }
             }
+            Spacer(modifier = Modifier.height(2.dp * heightRatio.value))
+            Row(modifier = Modifier.fillMaxWidth()) {
+              Box(modifier = Modifier.weight(0.4f)) {
+                QuickFixTextFieldCustom(
+                    modifier =
+                        Modifier.semantics { testTag = C.Tag.professionalInfoScreenPriceField },
+                    heightField = 27.dp,
+                    widthField = 380.dp * widthRatio.value,
+                    value = priceString.value,
+                    onValueChange = { input ->
+                      priceString.value = input
 
-
+                      // Try to parse the input to double
+                      val parsedPrice = input.toDoubleOrNull()
+                      if (parsedPrice != null) {
+                        price.doubleValue = parsedPrice
+                        priceError.value = false
+                      } else {
+                        // Parsing failed, set error
+                        priceError.value = true
+                      }
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    hasShadow = false,
+                    borderColor = colorScheme.tertiaryContainer,
+                    placeHolderText = "Enter Price",
+                    isError = priceError.value,
+                    errorText = "Please enter a valid number",
+                    showError = priceError.value,
+                    keyboardOptions =
+                        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
+                    trailingText = {
+                      Text(
+                          text = "CHF",
+                          style =
+                              poppinsTypography.headlineMedium.copy(
+                                  fontSize = 12.sp, fontWeight = FontWeight.Medium),
+                          color = colorScheme.onSurface,
+                          modifier = Modifier.padding(end = 8.dp))
+                    },
+                    alwaysShowTrailingIcon = true,
+                    moveTrailingIconLeft = 20.dp)
+              }
+              Spacer(modifier = Modifier.weight(0.6f))
+            }
+            Spacer(modifier = Modifier.height(16.dp * heightRatio.value))
+          }
+        }
+        item {
+          val indices = (0 until listTags.size step 2)
+          QuickFixCheckedList(
+              listServices = listTags,
+              checkedStatesServices = checkedStatesTags,
+              heightRatio = heightRatio,
+              indices = indices,
+              minToSelect = 3,
+              maxToSelect = listTags.size,
+              onClickActionOk = {
+                tags.value =
+                    listTags.filterIndexed { index, _ -> checkedStatesIncludedServices[index] }
+                formValidatedTags.value = true
+              },
+              formValidated = formValidatedTags,
+              boldText = " at least 3 Tags",
+              label = "Choose",
+              secondPartLabel = " that describes your skills",
+              widthRatio = widthRatio,
+              modifier = Modifier.semantics { testTag = C.Tag.professionalInfoScreenTagsList },
+          )
+          Spacer(modifier = Modifier.height(16.dp * heightRatio.value))
+        }
 
         item {
           val indices = (0 until listServices.size step 2)
@@ -470,93 +457,95 @@ fun ProfessionalInfoScreen(
           )
           Spacer(modifier = Modifier.height(16.dp * heightRatio.value))
         }
-        if (formValidatedIncludedServices.value || formValidatedTest || (!formValidatedIncludedServices.value && checkedStatesAddOnServices.any {it})) {
-            item {
-                val indices = (0 until listAddOnServicesFromSet.size step 2)
-                QuickFixCheckedList(
-                    modifier =
+        if (formValidatedIncludedServices.value ||
+            formValidatedTest ||
+            (!formValidatedIncludedServices.value && checkedStatesAddOnServices.any { it })) {
+          item {
+            val indices = (0 until listAddOnServicesFromSet.size step 2)
+            QuickFixCheckedList(
+                modifier =
                     Modifier.semantics { testTag = C.Tag.professionalInfoScreenAddOnServicesList },
-                    listServices = listAddOnServicesFromSet,
-                    checkedStatesServices = checkedStatesAddOnServices,
-                    heightRatio = heightRatio,
-                    indices = indices,
-                    minToSelect = 4,
-                    maxToSelect = listAddOnServicesFromSet.size,
-                    onClickActionOk = {
-                        val filteredAddOnServices =
-                            listAddOnServicesFromSet
-                                .filterIndexed { index, _ -> checkedStatesAddOnServices[index] }
-                                .map { AddOnService(it) }
+                listServices = listAddOnServicesFromSet,
+                checkedStatesServices = checkedStatesAddOnServices,
+                heightRatio = heightRatio,
+                indices = indices,
+                minToSelect = 4,
+                maxToSelect = listAddOnServicesFromSet.size,
+                onClickActionOk = {
+                  val filteredAddOnServices =
+                      listAddOnServicesFromSet
+                          .filterIndexed { index, _ -> checkedStatesAddOnServices[index] }
+                          .map { AddOnService(it) }
 
-                        // Map textFieldList to AddOnService
-                        val textFieldAddOnServices = textFieldList.map { AddOnService(it.value) }
+                  // Map textFieldList to AddOnService
+                  val textFieldAddOnServices = textFieldList.map { AddOnService(it.value) }
 
-                        // Combine both lists and assign to addOnServices.value
-                        addOnServices.value = filteredAddOnServices + textFieldAddOnServices
-                        formValidatedAddOnServices.value = true
-                        canAddTextField.value = false
-                    },
-                    formValidated = formValidatedAddOnServices,
-                    boldText = " At least 4 Add-on services",
-                    label = "Choose",
-                    secondPartLabel =
+                  // Combine both lists and assign to addOnServices.value
+                  addOnServices.value = filteredAddOnServices + textFieldAddOnServices
+                  formValidatedAddOnServices.value = true
+                  canAddTextField.value = false
+                },
+                formValidated = formValidatedAddOnServices,
+                boldText = " At least 4 Add-on services",
+                label = "Choose",
+                secondPartLabel =
                     " in your ${selectedCategory.id} job from the set or from yourself",
-                    widthRatio = widthRatio,
-                    isTextFieldList = true,
-                    textFieldList = textFieldList,
-                    canAddTextField = canAddTextField,
-                )
-            }
-            if (formValidatedAddOnServices.value || formValidatedTest) {
-                item {
-                    Row(
+                widthRatio = widthRatio,
+                isTextFieldList = true,
+                textFieldList = textFieldList,
+                canAddTextField = canAddTextField,
+            )
+          }
+          if (formValidatedAddOnServices.value || formValidatedTest) {
+            item {
+              Row(
+                  modifier =
+                      Modifier.fillMaxWidth().padding(start = 5.dp, end = 5.dp, bottom = 8.dp)) {
+                    QuickFixButton(
+                        buttonText = "Cancel",
+                        onClickAction = {},
+                        buttonColor = colorScheme.surface,
+                        textColor = colorScheme.error,
                         modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(start = 5.dp, end = 5.dp, bottom = 8.dp)
-                    ) {
-                        QuickFixButton(
-                            buttonText = "Cancel",
-                            onClickAction = {},
-                            buttonColor = colorScheme.surface,
-                            textColor = colorScheme.error,
-                            modifier =
-                            Modifier.weight(0.5f).semantics { testTag = C.Tag.personalInfoScreencancelButton },
-                            textStyle =
+                            Modifier.weight(0.5f).semantics {
+                              testTag = C.Tag.personalInfoScreencancelButton
+                            },
+                        textStyle =
                             poppinsTypography.headlineMedium.copy(
                                 fontSize = 16.sp, fontWeight = FontWeight.SemiBold))
-                        QuickFixButton(
-                            buttonText = "Continue",
-                            onClickAction = {
-                                coroutineScope.launch { pagerState.scrollToPage(pagerState.currentPage + 1) }
-                            },
-                            buttonColor = colorScheme.primary,
-                            enabled =
+                    QuickFixButton(
+                        buttonText = "Continue",
+                        onClickAction = {
+                          coroutineScope.launch {
+                            pagerState.scrollToPage(pagerState.currentPage + 1)
+                          }
+                        },
+                        buttonColor = colorScheme.primary,
+                        enabled =
                             formValidatedAddOnServices.value &&
-                                    formValidatedIncludedServices.value &&
-                                    formValidatedTags.value &&
-                                    priceError.value.not() &&
-                                    selectedCategory.name.isNotEmpty() &&
-                                    selectedSubcategory.name.isNotEmpty() &&
-                                    price.doubleValue != 0.0,
-                            textColor = colorScheme.onPrimary,
-                            textStyle =
+                                formValidatedIncludedServices.value &&
+                                formValidatedTags.value &&
+                                priceError.value.not() &&
+                                selectedCategory.name.isNotEmpty() &&
+                                selectedSubcategory.name.isNotEmpty() &&
+                                price.doubleValue != 0.0,
+                        textColor = colorScheme.onPrimary,
+                        textStyle =
                             poppinsTypography.headlineMedium.copy(
                                 fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
-                            modifier =
+                        modifier =
                             Modifier.weight(0.5f).semantics {
-                                testTag = C.Tag.personalInfoScreencontinueButton
+                              testTag = C.Tag.personalInfoScreencontinueButton
                             },
-                        )
-                    }
-                }
+                    )
+                  }
             }
+          }
         }
-
-        }
-
       }
     }
   }
+}
 
 @Composable
 fun calculateMaxTextWidth(texts: List<String>, textStyle: TextStyle): Dp {

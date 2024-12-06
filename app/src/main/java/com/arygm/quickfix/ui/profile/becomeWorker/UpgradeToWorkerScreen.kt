@@ -41,6 +41,7 @@ import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.profile.becomeWorker.views.personal.PersonalInfoScreen
 import com.arygm.quickfix.ui.profile.becomeWorker.views.professional.ProfessionalInfoScreen
+import com.arygm.quickfix.ui.profile.becomeWorker.views.welcome.WelcomeOnBoardScreen
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -125,7 +126,9 @@ fun BusinessScreen(
                       tags,
                       categories)
                 }
-                2 -> {}
+                2 -> {
+                  WelcomeOnBoardScreen(navigationActions)
+                }
               }
             }
       })
