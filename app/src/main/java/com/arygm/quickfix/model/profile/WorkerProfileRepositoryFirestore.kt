@@ -1,6 +1,8 @@
 package com.arygm.quickfix.model.profile
 
+import android.graphics.Bitmap
 import android.util.Log
+import androidx.datastore.core.Storage
 import com.arygm.quickfix.model.locations.Location
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
@@ -8,13 +10,17 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.storage.FirebaseStorage
+import java.io.ByteArrayOutputStream
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.math.cos
 
-open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRepository {
+open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore, private val storage: FirebaseStorage) : ProfileRepository {
 
   private val collectionPath = "workers"
+    private val storageRef = storage.reference
+    private val compressionQuality = 50
 
   override fun init(onSuccess: () -> Unit) {
     Firebase.auth.addAuthStateListener {
@@ -95,6 +101,40 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
     }
   }
 
+    override fun uploadProfileImages(
+        accountId: String,
+        images: List<Bitmap>,
+        onSuccess: (List<String>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val workerFolderRef = storageRef.child("profiles/$accountId/worker")
+        val uploadedImageUrls = mutableListOf<String>()
+        var uploadCount = 0
+
+        images.forEach { bitmap ->
+            val fileRef = workerFolderRef.child("image_${System.currentTimeMillis()}.jpg")
+
+            val baos = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, compressionQuality, baos)
+            val byteArray = baos.toByteArray()
+
+            fileRef
+                .putBytes(byteArray)
+                .addOnSuccessListener {
+                    fileRef.downloadUrl
+                        .addOnSuccessListener { uri ->
+                            uploadedImageUrls.add(uri.toString())
+                            uploadCount++
+                            if (uploadCount == images.size) {
+                                onSuccess(uploadedImageUrls)
+                            }
+                        }
+                        .addOnFailureListener { exception -> onFailure(exception) }
+                }
+                .addOnFailureListener { exception -> onFailure(exception) }
+        }
+    }
+
   private fun documentToWorker(document: DocumentSnapshot): WorkerProfile? {
     return try {
       val uid = document.id
@@ -116,7 +156,6 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore) :
           document.get("workingHours") as? Pair<LocalTime, LocalTime>
               ?: Pair(LocalTime.now(), LocalTime.now())
       WorkerProfile(
-          rating = rating,
           uid = uid,
           price = price,
           description = description,

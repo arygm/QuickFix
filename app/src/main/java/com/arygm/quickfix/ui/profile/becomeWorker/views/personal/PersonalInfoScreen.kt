@@ -14,18 +14,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,8 +49,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
+import androidx.compose.ui.window.PopupProperties
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
+import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -68,7 +77,12 @@ fun PersonalInfoScreen(
     onDescriptionErrorChange: (Boolean) -> Unit,
     showBottomSheetPPR: Boolean = false,
     showBottomSheetBPR: Boolean = false,
+    locationViewModel: LocationViewModel,
+    locationWorker: MutableState<Location>,
 ) {
+    var locationTitle by remember { mutableStateOf("") }
+    val locationSuggestions by locationViewModel.locationSuggestions.collectAsState()
+    var locationExpanded by remember { mutableStateOf(false) }
   val coroutineScope = rememberCoroutineScope()
   var showBottomSheetPP by remember { mutableStateOf(showBottomSheetPPR) }
   var showBottomSheetBP by remember { mutableStateOf(showBottomSheetBPR) }
@@ -339,12 +353,78 @@ fun PersonalInfoScreen(
                 poppinsTypography.headlineMedium.copy(
                     fontSize = 12.sp, fontWeight = FontWeight.Medium),
             charCounterColor = colorScheme.onSecondaryContainer,
-            moveContentTop = 125.dp,
             isError = descriptionError,
             errorText = "Please enter at least 150 characters",
             showError = descriptionError,
-            singleLine = true)
+            singleLine = false)
+          Spacer(modifier = Modifier.height(17.dp * heightRatio.value))
+          QuickFixTextFieldCustom(
+              value = locationTitle,
+              onValueChange = {
+                  locationExpanded = it.isNotEmpty()
+                  locationTitle = it
+                  if (locationExpanded) {
+                      locationViewModel.setQuery(it)
+                  }
+              },
+              singleLine = true,
+              placeHolderText = "Enter a location ...",
+              showLeadingIcon = { false },
+              showTrailingIcon = { false },
+              hasShadow = false,
+              placeHolderColor = colorScheme.onSecondaryContainer,
+              label =
+              @Composable {
+                  Text(
+                      text = "Location",
+                      style = poppinsTypography.labelSmall,
+                      fontWeight = FontWeight.Medium,
+                      color = colorScheme.onBackground,
+                      modifier = Modifier.padding(horizontal = 4.dp))
+              },
+              showLabel = true,
+              shape = RoundedCornerShape(5.dp),
+              widthField = 400 * widthRatio,
+              moveContentHorizontal = 10.dp,
+              borderColor = colorScheme.tertiaryContainer,
+              borderThickness = 1.5.dp,
+              textStyle =
+              poppinsTypography.labelSmall.copy(
+                  fontWeight = FontWeight.Medium,
+              ),
+          )
+
+          DropdownMenu(
+              expanded = locationExpanded,
+              properties = PopupProperties(focusable = false),
+              onDismissRequest = { locationExpanded = false },
+              modifier = Modifier.width(400 * widthRatio),
+              containerColor = colorScheme.surface,
+          ) {
+              locationSuggestions.forEachIndexed { index, location ->
+                  DropdownMenuItem(
+                      onClick = {
+                          locationExpanded = false
+                          locationViewModel.setQuery(location.name)
+                          locationTitle = location.name
+                          locationWorker.value = location
+                      },
+                      text = {
+                          Text(
+                              text = location.name,
+                              style = poppinsTypography.labelSmall,
+                              fontWeight = FontWeight.Medium,
+                              color = colorScheme.onBackground,
+                              modifier = Modifier.padding(horizontal = 4.dp))
+                      })
+                  if (index < locationSuggestions.size - 1) {
+                      HorizontalDivider(
+                          color = colorScheme.onSecondaryContainer, thickness = 1.5.dp)
+                  }
+              }
+          }
       }
+
       Row(
           modifier =
               Modifier.fillMaxWidth()
@@ -365,6 +445,7 @@ fun PersonalInfoScreen(
             buttonText = "Continue",
             onClickAction = {
               coroutineScope.launch { pagerState.scrollToPage(pagerState.currentPage + 1) }
+
             },
             buttonColor = colorScheme.primary,
             enabled =

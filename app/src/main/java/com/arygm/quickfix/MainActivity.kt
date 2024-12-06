@@ -134,7 +134,7 @@ fun QuickFixApp() {
   val announcementViewModel: AnnouncementViewModel =
       viewModel(factory = AnnouncementViewModel.Factory)
   val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
-
+    val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
   val preferencesViewModel: PreferencesViewModel =
       viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
 
@@ -261,7 +261,7 @@ fun QuickFixApp() {
                     navigationActionsRoot,
                     onScreenChange = { currentScreen -> screenInProfileNavHost = currentScreen },
                     categoryViewModel,
-                    preferencesViewModel)
+                    preferencesViewModel, locationViewModel)
               }
             }
       }
@@ -300,7 +300,8 @@ fun ProfileNavHost(
     navigationActionsRoot: NavigationActions,
     onScreenChange: (String) -> Unit,
     categoryViewModel: CategoryViewModel,
-    preferencesViewModel: PreferencesViewModel
+    preferencesViewModel: PreferencesViewModel,
+    locationViewModel: LocationViewModel
 ) {
 
   val profileNavController = rememberNavController()
@@ -322,7 +323,9 @@ fun ProfileNavHost(
           accountViewModel,
           workerViewModel,
           loggedInAccountViewModel,
+          preferencesViewModel,
           categoryViewModel,
+            locationViewModel
       )
     }
   }

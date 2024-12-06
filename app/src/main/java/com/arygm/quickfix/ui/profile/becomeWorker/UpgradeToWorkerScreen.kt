@@ -1,6 +1,7 @@
 package com.arygm.quickfix.ui.profile.becomeWorker
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -32,10 +34,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.locations.LocationViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.ressources.C
@@ -44,6 +51,15 @@ import com.arygm.quickfix.ui.profile.becomeWorker.views.personal.PersonalInfoScr
 import com.arygm.quickfix.ui.profile.becomeWorker.views.professional.ProfessionalInfoScreen
 import com.arygm.quickfix.ui.profile.becomeWorker.views.welcome.WelcomeOnBoardScreen
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.utils.loadBirthDate
+import com.arygm.quickfix.utils.loadEmail
+import com.arygm.quickfix.utils.loadFirstName
+import com.arygm.quickfix.utils.loadIsWorker
+import com.arygm.quickfix.utils.loadLastName
+import com.arygm.quickfix.utils.loadUserId
+import com.arygm.quickfix.utils.setAccountPreferences
+import com.arygm.quickfix.utils.stringToTimestamp
+import com.google.firebase.Timestamp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,9 +68,12 @@ fun BusinessScreen(
     accountViewModel: AccountViewModel,
     workerProfileViewModel: ProfileViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
-    categoryViewModel: CategoryViewModel
+    preferencesViewModel: PreferencesViewModel,
+    categoryViewModel: CategoryViewModel,
+    locationViewModel: LocationViewModel
 ) {
-  val categories = categoryViewModel.categories.collectAsState().value
+    val locationWorker = remember { mutableStateOf(Location()) }
+    val categories = categoryViewModel.categories.collectAsState().value
   val pagerState = rememberPagerState(pageCount = { 3 })
   val focusManager = LocalFocusManager.current
   val displayName = remember { mutableStateOf("") }
@@ -68,6 +87,83 @@ fun BusinessScreen(
   val includedServices = remember { mutableStateOf(listOf<IncludedService>()) }
   val addOnServices = remember { mutableStateOf(listOf<AddOnService>()) }
   val tags = remember { mutableStateOf(listOf<String>()) }
+    var workerId by remember { mutableStateOf("") }
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var birthDate by remember { mutableStateOf("") }
+    var isWorker by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        workerId = loadUserId(preferencesViewModel)
+        firstName = loadFirstName(preferencesViewModel)
+        lastName = loadLastName(preferencesViewModel)
+        email = loadEmail(preferencesViewModel)
+        birthDate = loadBirthDate(preferencesViewModel)
+        isWorker = loadIsWorker(preferencesViewModel)
+    }
+
+
+    val handleSuccessfulImageUpload: (String, List<String>) -> Unit =
+        { accountId, uploadedImageUrls ->
+            // Make the announcement
+            val workerProfile =
+                WorkerProfile(
+                    location = locationWorker.value,
+                    fieldOfWork = fieldOfWork.value,
+                    description = description.value,
+                    price = price.doubleValue,
+                    displayName = displayName.value,
+                    includedServices = includedServices.value,
+                    addOnServices = addOnServices.value,
+                    tags = tags.value,
+                    profilePicture = uploadedImageUrls[0],
+                    bannerPicture = uploadedImageUrls[1],
+                    uid = accountId)
+            Log.d("UpgradeToWorkerScreen", "workerProfile: ${locationWorker.value.name} ${fieldOfWork.value} ${description.value} ${price.doubleValue} ${displayName.value} ${includedServices.value} ${addOnServices.value} ${tags.value} ${uploadedImageUrls[0]} ${uploadedImageUrls[1]} $accountId")
+            workerProfileViewModel.addProfile(workerProfile,
+                onSuccess = {
+                    val newAccount = Account(
+                        uid = workerId,
+                        firstName = firstName,
+                        lastName = lastName,
+                        email = email,
+                        birthDate = stringToTimestamp(birthDate) ?: Timestamp.now(),
+                        isWorker = true
+                    )
+                    accountViewModel.updateAccount(newAccount,
+                    onSuccess = {
+                        setAccountPreferences(preferencesViewModel, newAccount)
+                    },
+                    onFailure = { e ->
+                        // Handle the failure case
+                        Log.e("AnnouncementViewModel", "Failed to update account: ${e.message}")
+                    })
+                },
+                onFailure = { e ->
+                    // Handle the failure case
+                    Log.e("AnnouncementViewModel", "Failed to add announcement: ${e.message}")
+                })
+        }
+
+    LaunchedEffect(pagerState.currentPage) {
+        Log.d("UpgradeToWorker", "entered the last page")
+        if(pagerState.currentPage == 2){
+            Log.d("UpgradeToWorker", "entered the last page")
+            val images = listOfNotNull(imageBitmapPP.value, imageBitmapBP.value)
+                // If there are no images to upload, proceed directly
+                workerProfileViewModel.uploadProfileImages(
+                    accountId = workerId,
+                    images = images,
+                    onSuccess = { uploadedImageUrls ->
+                        handleSuccessfulImageUpload(workerId, uploadedImageUrls)
+                    },
+                    onFailure = { e ->
+                        // Handle the failure case
+                        Log.e("AnnouncementViewModel", "Failed to upload images: ${e.message}")
+                    })
+        }
+    }
   Scaffold(
       modifier =
           Modifier.pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
@@ -103,7 +199,7 @@ fun BusinessScreen(
             modifier =
                 Modifier.padding(innerPadding).fillMaxSize().semantics {
                   testTag = C.Tag.upgradeToWorkerPager
-                }) { page ->
+                }, userScrollEnabled = false) { page ->
               when (page) {
                 0 -> {
                   PersonalInfoScreen(
@@ -115,7 +211,9 @@ fun BusinessScreen(
                       displayNameError = displayNameError,
                       onDisplayNameErrorChange = { displayNameError = it },
                       descriptionError = descriptionError,
-                      onDescriptionErrorChange = { descriptionError = it })
+                      onDescriptionErrorChange = { descriptionError = it },
+                      locationViewModel =  locationViewModel,
+                      locationWorker = locationWorker)
                 }
                 1 -> {
                   ProfessionalInfoScreen(

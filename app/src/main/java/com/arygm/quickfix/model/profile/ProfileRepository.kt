@@ -1,5 +1,7 @@
 package com.arygm.quickfix.model.profile
 
+import android.graphics.Bitmap
+
 interface ProfileRepository {
 
   fun init(onSuccess: () -> Unit)
@@ -22,4 +24,10 @@ interface ProfileRepository {
   */
 
   fun getProfileById(uid: String, onSuccess: (Profile?) -> Unit, onFailure: (Exception) -> Unit)
+  fun uploadProfileImages(
+    accountId: String,
+    images: List<Bitmap>,
+    onSuccess: (List<String>) -> Unit,
+    onFailure: (Exception) -> Unit
+  )
 }

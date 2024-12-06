@@ -46,7 +46,6 @@ class UserProfile(
 }
 
 class WorkerProfile(
-    val rating: Double = 0.0,
     val fieldOfWork: String = "",
     val description: String = "",
     val location: Location? = null,
@@ -55,6 +54,7 @@ class WorkerProfile(
     val addOnServices: List<AddOnService> = emptyList<AddOnService>(),
     val reviews: ArrayDeque<Review> = ArrayDeque<Review>(),
     val profilePicture: String = "",
+    val bannerPicture: String = "",
     val price: Double = 130.0,
     val displayName: String = "",
     val unavailability_list: List<LocalDate> = emptyList<LocalDate>(),
@@ -70,11 +70,10 @@ class WorkerProfile(
     return fieldOfWork == other.fieldOfWork &&
         description == other.description &&
         location == other.location &&
-        rating == other.rating &&
         reviews == other.reviews
   }
 
   override fun hashCode(): Int {
-    return listOf(super.hashCode(), fieldOfWork, description, location, rating, reviews).hashCode()
+    return listOf(super.hashCode(), fieldOfWork, description, location, reviews).hashCode()
   }
 }
