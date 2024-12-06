@@ -2,6 +2,8 @@ package com.arygm.quickfix
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -50,6 +52,7 @@ import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.camera.QuickFixDisplayImages
 import com.arygm.quickfix.ui.dashboard.DashboardScreen
 import com.arygm.quickfix.ui.elements.LocationSearchCustomScreen
+import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
 import com.arygm.quickfix.ui.home.FakeMessageScreen
 import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
@@ -118,7 +121,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 @Preview
 fun QuickFixApp() {
-
+    val context = LocalContext.current
   val rootNavController = rememberNavController()
   val navigationActionsRoot = remember { NavigationActions(rootNavController) }
 
@@ -168,6 +171,16 @@ fun QuickFixApp() {
 
   var showBottomBar by remember { mutableStateOf(false) }
 
+    var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
+
+    // Simulate monitoring connectivity (replace this with actual monitoring in production)
+    LaunchedEffect(Unit) {
+        while (true) {
+            isOffline = !isConnectedToInternet(context)
+            delay(3000) // Poll every 3 seconds
+        }
+    }
+
   // Delay the appearance of the bottom bar
   LaunchedEffect(shouldShowBottomBar) {
     if (shouldShowBottomBar) {
@@ -179,6 +192,9 @@ fun QuickFixApp() {
   }
 
   Scaffold(
+      topBar = {
+          QuickFixOfflineBar(isVisible = isOffline)
+      },
       bottomBar = {
         // Show BottomNavigationMenu only if the route is not part of the login/registration flow
         AnimatedVisibility(
@@ -290,6 +306,14 @@ fun HomeNavHost(
       FakeMessageScreen(navigationActions)
     }
   }
+}
+
+fun isConnectedToInternet(context: Context): Boolean {
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = connectivityManager.activeNetwork ?: return false
+    val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+    return activeNetwork.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }
 
 @Composable
