@@ -1,5 +1,12 @@
-package com.arygm.quickfix.ui.elements
+package com.arygm.quickfix.ui.camera
 
+import android.Manifest
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,23 +22,96 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.R
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun QuickFixUploadImageSheet(
+    sheetState: SheetState,
     showModalBottomSheet: Boolean,
     onDismissRequest: () -> Unit,
-    onTakePhotoClick: () -> Unit,
-    onChooseFromLibraryClick: () -> Unit
+    onShowBottomSheetChange: (Boolean) -> Unit,
+    cameraLauncher: ActivityResultLauncher<Void?>? = null,
+    galleryLauncher: ActivityResultLauncher<String>? = null,
+    onActionRequest: (Bitmap) -> Unit,
+    // Injected dependencies for testing
+    permissionState: PermissionState =
+        rememberPermissionState(permission = Manifest.permission.CAMERA),
 ) {
+  val scope = rememberCoroutineScope()
+  val takePictureRequested = remember { mutableStateOf(false) }
+  val context = LocalContext.current
+
+  // Use the provided or default cameraLauncher
+  val cameraLauncherInstance =
+      cameraLauncher
+          ?: rememberLauncherForActivityResult(
+              contract = ActivityResultContracts.TakePicturePreview()) { bitmap ->
+                if (bitmap != null) {
+                  onActionRequest(bitmap)
+                }
+                // Hide the bottom sheet
+                scope
+                    .launch { sheetState.hide() }
+                    .invokeOnCompletion {
+                      if (!sheetState.isVisible) {
+                        onShowBottomSheetChange(false)
+                      }
+                    }
+              }
+
+  // Use the provided or default galleryLauncher
+  val galleryLauncherInstance =
+      galleryLauncher
+          ?: rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) {
+              uri ->
+            if (uri != null) {
+              try {
+                val inputStream = context.contentResolver.openInputStream(uri)
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+                if (bitmap != null) {
+                  onActionRequest(bitmap) // Notify that a new Bitmap is available
+                }
+              } catch (e: Exception) {
+                Log.e("GalleryLauncher", "Error decoding selected image: ${e.localizedMessage}")
+              }
+
+              // Hide the bottom sheet
+              scope
+                  .launch { sheetState.hide() }
+                  .invokeOnCompletion {
+                    if (!sheetState.isVisible) {
+                      onShowBottomSheetChange(false)
+                    }
+                  }
+            }
+          }
+
+  LaunchedEffect(permissionState.status) {
+    if (takePictureRequested.value && permissionState.status.isGranted) {
+      takePictureRequested.value = false
+      cameraLauncherInstance.launch(null)
+    }
+  }
+
   if (showModalBottomSheet) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -55,8 +135,13 @@ fun QuickFixUploadImageSheet(
                     modifier =
                         Modifier.fillMaxWidth()
                             .clickable {
-                              onTakePhotoClick()
-                              onDismissRequest()
+                              // Check if the app has the required permissions to use the camera
+                              if (permissionState.status.isGranted) {
+                                cameraLauncherInstance.launch(null)
+                              } else {
+                                takePictureRequested.value = true
+                                permissionState.launchPermissionRequest()
+                              }
                             }
                             .padding(vertical = 8.dp)
                             .testTag("cameraRow"),
@@ -84,10 +169,7 @@ fun QuickFixUploadImageSheet(
                 Row(
                     modifier =
                         Modifier.fillMaxWidth()
-                            .clickable {
-                              onChooseFromLibraryClick()
-                              onDismissRequest()
-                            }
+                            .clickable { galleryLauncherInstance.launch("image/*") }
                             .padding(vertical = 8.dp)
                             .testTag("libraryRow"),
                     verticalAlignment = Alignment.CenterVertically,

@@ -3,6 +3,7 @@ package com.arygm.quickfix.model.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
@@ -24,6 +25,9 @@ open class SearchViewModel(
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery
 
+  val _searchSubcategory = MutableStateFlow<Subcategory?>(null)
+  val searchSubcategory: StateFlow<Subcategory?> = _searchSubcategory
+
   val _workerProfiles = MutableStateFlow<List<WorkerProfile>>(emptyList())
   val workerProfiles: StateFlow<List<WorkerProfile>> = _workerProfiles
 
@@ -44,6 +48,10 @@ open class SearchViewModel(
 
   fun setSearchQuery(query: String) { // Used for test purposes
     _searchQuery.value = query
+  }
+
+  fun setSearchSubcategory(subcategory: Subcategory) { // Used for test purposes
+    _searchSubcategory.value = subcategory
   }
 
   fun setWorkerProfiles(workerProfiles: List<WorkerProfile>) { // Used for test purposes
@@ -125,5 +133,24 @@ open class SearchViewModel(
                   (selectedHour == workingEnd.hour && selectedMinute <= workingEnd.minute))
         }
         .filter { worker -> selectedDays.none { day -> worker.unavailability_list.contains(day) } }
+  }
+
+  fun filterWorkersByServices(
+      workers: List<WorkerProfile>,
+      selectedServices: List<String>
+  ): List<WorkerProfile> {
+    return workers.filter { worker -> selectedServices.all { service -> service in worker.tags } }
+  }
+
+  fun sortWorkersByRating(workers: List<WorkerProfile>): List<WorkerProfile> {
+    return workers.sortedByDescending { it.rating }
+  }
+
+  fun filterWorkersByPriceRange(
+      workers: List<WorkerProfile>,
+      start: Int,
+      end: Int
+  ): List<WorkerProfile> {
+    return workers.filter { worker -> worker.price in start.toDouble()..end.toDouble() }
   }
 }

@@ -1,10 +1,12 @@
 package com.arygm.quickfix.ui.search
 
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.filter
+import androidx.compose.ui.test.hasAnyChild
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasSetTextAction
@@ -24,6 +26,7 @@ import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
+import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
@@ -734,5 +737,287 @@ class SearchWorkerResultScreenTest {
 
     // Verify that no workers are displayed
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(0)
+  }
+
+  @Test
+  fun testWorkerFilteringByServices() {
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                tags = listOf("Exterior Painter", "Interior Painter"),
+                rating = 4.5),
+            WorkerProfile(
+                uid = "worker2", tags = listOf("Interior Painter", "Electrician"), rating = 4.0),
+            WorkerProfile(uid = "worker3", tags = listOf("Plumber"), rating = 5.0))
+
+    // Set up subcategory tags
+    searchViewModel._searchSubcategory.value =
+        Subcategory(tags = listOf("Exterior Painter", "Interior Painter", "Electrician", "Plumber"))
+
+    searchViewModel._workerProfiles.value = workers
+
+    composeTestRule.setContent {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+    }
+
+    // Click on the "Service Type" filter button
+    composeTestRule.onNodeWithText("Service Type").performClick()
+
+    // Wait for the bottom sheet to appear
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("chooseServiceTypeModalSheet").assertIsDisplayed()
+
+    // Simulate selecting "Interior Painter"
+    composeTestRule.onNodeWithText("Interior Painter").performClick()
+    composeTestRule.onNodeWithText("Apply").performClick()
+
+    composeTestRule.waitForIdle()
+
+    // Verify filtered workers
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
+  }
+
+  @Test
+  fun testWorkerSortingByRating() {
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                displayName = "Worker One",
+                tags = listOf("Electrician"),
+                rating = 3.5),
+            WorkerProfile(
+                uid = "worker2",
+                displayName = "Worker Two",
+                tags = listOf("Electrician"),
+                rating = 4.8),
+            WorkerProfile(
+                uid = "worker3",
+                displayName = "Worker Three",
+                tags = listOf("Electrician"),
+                rating = 2.9))
+
+    // Provide test data to the searchViewModel
+    searchViewModel._workerProfiles.value = workers
+    searchViewModel._searchSubcategory.value =
+        Subcategory(tags = listOf("Exterior Painter", "Interior Painter", "Electrician", "Plumber"))
+
+    composeTestRule.setContent {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+    }
+
+    // Scroll to the "Highest Rating" button in the LazyRow
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
+
+    // Click on the "Highest Rating" filter button
+    composeTestRule.onNodeWithText("Highest Rating").performClick()
+
+    composeTestRule.waitForIdle()
+
+    // Verify that workers are sorted by rating in descending order
+    val sortedWorkers = workers.sortedByDescending { it.rating }
+    val workerNodes = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
+
+    workerNodes.assertCountEquals(sortedWorkers.size)
+
+    sortedWorkers.forEachIndexed { index, worker ->
+      workerNodes[index].assert(hasAnyChild(hasText("${worker.rating} ★", substring = true)))
+    }
+  }
+
+  @Test
+  fun testCombinedFilters() {
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                displayName = "Worker One",
+                tags = listOf("Electrician"),
+                rating = 4.5),
+            WorkerProfile(
+                uid = "worker2",
+                displayName = "Worker Two",
+                tags = listOf("Electrician", "Plumber"),
+                rating = 4.8),
+            WorkerProfile(
+                uid = "worker3",
+                displayName = "Worker Three",
+                tags = listOf("Plumber"),
+                rating = 2.9))
+
+    // Provide test data to the searchViewModel
+    searchViewModel._workerProfiles.value = workers
+    searchViewModel._searchSubcategory.value =
+        Subcategory(tags = listOf("Exterior Painter", "Interior Painter", "Electrician", "Plumber"))
+
+    composeTestRule.setContent {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+    }
+
+    // Apply Service Type filter
+    composeTestRule.onNodeWithText("Service Type").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithText("Electrician").performClick()
+    composeTestRule.onNodeWithText("Apply").performClick()
+    composeTestRule.waitForIdle()
+
+    // Scroll to the "Highest Rating" button in the LazyRow
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
+
+    // Apply Highest Rating filter
+    composeTestRule.onNodeWithText("Highest Rating").performClick()
+    composeTestRule.waitForIdle()
+
+    // Verify filtered workers
+    val filteredWorkers =
+        workers.filter { it.tags.contains("Electrician") }.sortedByDescending { it.rating }
+    val workerNodes = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
+
+    workerNodes.assertCountEquals(filteredWorkers.size)
+
+    filteredWorkers.forEachIndexed { index, worker ->
+      workerNodes[index].assert(hasAnyChild(hasText("${worker.rating} ★", substring = true)))
+    }
+  }
+
+  @Test
+  fun testNoMatchingWorkers() {
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                displayName = "Worker One",
+                tags = listOf("Electrician"),
+                rating = 4.5),
+            WorkerProfile(
+                uid = "worker2",
+                displayName = "Worker Two",
+                tags = listOf("Electrician", "Plumber"),
+                rating = 4.8),
+            WorkerProfile(
+                uid = "worker3",
+                displayName = "Worker Three",
+                tags = listOf("Plumber"),
+                rating = 2.9))
+
+    // Provide test data to the searchViewModel
+    searchViewModel._workerProfiles.value = workers
+    searchViewModel._searchSubcategory.value =
+        Subcategory(
+            tags =
+                listOf(
+                    "Carpenter", "Exterior Painter", "Interior Painter", "Electrician", "Plumber"))
+
+    composeTestRule.setContent {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+    }
+
+    // Apply Service Type filter for a tag that doesn't exist
+    composeTestRule.onNodeWithText("Service Type").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithText("Carpenter").performClick() // No workers with "Carpenter" tag
+    composeTestRule.onNodeWithText("Apply").performClick()
+    composeTestRule.waitForIdle()
+
+    // Verify no workers are displayed
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(0)
+  }
+
+  @Test
+  fun testPriceRangeFilterDisplaysBottomSheet() {
+    // Set the content
+    composeTestRule.setContent {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(4)
+    // Click on the "Price Range" filter button
+    composeTestRule.onNodeWithText("Price Range").performClick()
+
+    // Wait for the bottom sheet to appear
+    composeTestRule.waitForIdle()
+
+    // Verify that the price range bottom sheet is displayed
+    composeTestRule.onNodeWithTag("priceRangeModalSheet").assertExists().assertIsDisplayed()
+  }
+
+  @Test
+  fun testPriceRangeFilterUpdatesResults() {
+    val workers =
+        listOf(
+            WorkerProfile(uid = "worker1", price = 150.0, fieldOfWork = "Painter", rating = 4.5),
+            WorkerProfile(
+                uid = "worker2", price = 560.0, fieldOfWork = "Electrician", rating = 4.8),
+            WorkerProfile(uid = "worker3", price = 3010.0, fieldOfWork = "Plumber", rating = 3.9))
+
+    // Provide test data to the searchViewModel
+    searchViewModel._workerProfiles.value = workers
+
+    // Set the content
+    composeTestRule.setContent {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(4)
+    // Click on the "Price Range" filter button
+    composeTestRule.onNodeWithText("Price Range").performClick()
+
+    // Wait for the bottom sheet to appear
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithText("Apply").performClick()
+
+    // Wait for the UI to update
+    composeTestRule.waitForIdle()
+
+    val sortedWorkers = listOf(workers[1])
+    val workerNodes = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
+
+    workerNodes.assertCountEquals(sortedWorkers.size)
+
+    sortedWorkers.forEachIndexed { index, worker ->
+      workerNodes[index].assert(hasAnyChild(hasText("${worker.rating} ★", substring = true)))
+    }
+  }
+
+  @Test
+  fun testPriceRangeFilterExcludesWorkersOutsideRange() {
+    val workers =
+        listOf(
+            WorkerProfile(uid = "worker1", price = 150.0, fieldOfWork = "Painter", rating = 4.5),
+            WorkerProfile(
+                uid = "worker2", price = 500.0, fieldOfWork = "Electrician", rating = 4.8),
+            WorkerProfile(uid = "worker3", price = 3001.0, fieldOfWork = "Plumber", rating = 3.9))
+
+    // Provide test data to the searchViewModel
+    searchViewModel._workerProfiles.value = workers
+
+    // Set the content
+    composeTestRule.setContent {
+      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(4)
+    // Click on the "Price Range" filter button
+    composeTestRule.onNodeWithText("Price Range").performClick()
+
+    // Wait for the bottom sheet to appear
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithText("Apply").performClick()
+
+    // Wait for the UI to update
+    composeTestRule.waitForIdle()
+
+    val sortedWorkers = listOf(workers[1])
+    val workerNodes = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
+
+    workerNodes.assertCountEquals(sortedWorkers.size)
+
+    sortedWorkers.forEachIndexed { index, worker ->
+      workerNodes[index].assert(hasAnyChild(hasText("${worker.rating} ★", substring = true)))
+    }
   }
 }

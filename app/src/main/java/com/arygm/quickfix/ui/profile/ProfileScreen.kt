@@ -30,8 +30,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -39,10 +42,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.R
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
+import com.arygm.quickfix.utils.clearAccountPreferences
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -50,10 +54,10 @@ import com.google.firebase.auth.auth
 @Composable
 fun ProfileScreen(
     navigationActions: NavigationActions,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
-    navigationActionsRoot: NavigationActions
+    navigationActionsRoot: NavigationActions,
+    preferencesViewModel: PreferencesViewModel
 ) {
-  val loggedInProfile by loggedInAccountViewModel.loggedInAccount.collectAsState()
+
   // List of options handled by the profile screen
   val options =
       listOf(
@@ -103,15 +107,21 @@ fun ProfileScreen(
                                 modifier = Modifier.size(24.dp))
                             Spacer(modifier = Modifier.width(65.dp))
 
-                            val displayName =
-                                if (loggedInProfile != null) {
-                                  capitalizeName(
-                                      loggedInProfile?.firstName, loggedInProfile?.lastName)
-                                } else {
-                                  "Loading..." // Isn't supposed to happen
-                                }
+                            val displayName = remember { mutableStateOf("Loading...") }
+
+                            LaunchedEffect(Unit) {
+                              preferencesViewModel.loadPreference(
+                                  key = com.arygm.quickfix.utils.FIRST_NAME_KEY) { firstName ->
+                                    Log.d("user", "First name: $firstName")
+                                    preferencesViewModel.loadPreference(
+                                        key = com.arygm.quickfix.utils.LAST_NAME_KEY) { lastName ->
+                                          Log.d("user", "Last name: $lastName")
+                                          displayName.value = capitalizeName(firstName, lastName)
+                                        }
+                                  }
+                            }
                             Text(
-                                text = displayName,
+                                text = displayName.value,
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = colorScheme.onBackground,
                                 modifier = Modifier.testTag("ProfileName"))
@@ -271,7 +281,7 @@ fun ProfileScreen(
               // Logout Button
               Button(
                   onClick = {
-                    loggedInAccountViewModel.logOut(Firebase.auth)
+                    clearAccountPreferences(preferencesViewModel)
                     navigationActionsRoot.navigateTo(TopLevelDestinations.WELCOME)
                     Log.d("user", Firebase.auth.currentUser.toString())
                   },

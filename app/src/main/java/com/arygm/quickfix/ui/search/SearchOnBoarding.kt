@@ -4,6 +4,7 @@ package com.arygm.quickfix.ui.search
 
 import QuickFixSlidingWindowWorker
 import android.util.Log
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -19,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -31,6 +31,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.R
@@ -52,6 +54,7 @@ fun SearchOnBoarding(
     categoryViewModel: CategoryViewModel
 ) {
   val profiles = searchViewModel.workerProfiles.collectAsState().value
+  val focusManager = LocalFocusManager.current
   val categories = categoryViewModel.categories.collectAsState().value
   Log.d("SearchOnBoarding", "Categories: $categories")
   val itemCategories = remember { categories }
@@ -104,15 +107,11 @@ fun SearchOnBoarding(
                           leadingIcon = Icons.Outlined.Search,
                           showTrailingIcon = { searchQuery.isNotEmpty() },
                           trailingIcon = {
-                            IconButton(
-                                onClick = { searchQuery = "" },
-                                modifier = Modifier.testTag("clearSearchQueryIcon")) {
-                                  Icon(
-                                      imageVector = Icons.Filled.Clear,
-                                      contentDescription = "Clear search query",
-                                      tint = colorScheme.onBackground,
-                                  )
-                                }
+                            Icon(
+                                imageVector = Icons.Filled.Clear,
+                                contentDescription = "Clear search query",
+                                tint = colorScheme.onBackground,
+                            )
                           },
                           placeHolderText = "Find your perfect fix with QuickFix",
                           value = searchQuery, // Search query
@@ -188,7 +187,11 @@ fun SearchOnBoarding(
                       })
                 }
               }
-        })
+        },
+        modifier =
+            Modifier.pointerInput(Unit) {
+              detectTapGestures(onTap = { focusManager.clearFocus() })
+            })
 
     // Call to WorkerSlidingWindowContent
     QuickFixSlidingWindowWorker(

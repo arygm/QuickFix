@@ -57,7 +57,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
@@ -77,8 +77,8 @@ import com.google.firebase.auth.FirebaseAuth
 fun RegisterScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
     userViewModel: ProfileViewModel,
+    preferencesViewModel: PreferencesViewModel,
     firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(), // Injected dependency
     createAccountFunc:
         (
@@ -89,8 +89,8 @@ fun RegisterScreen(
             password: String,
             birthDate: String,
             accountViewModel: AccountViewModel,
-            loggedInAccountViewModel: LoggedInAccountViewModel,
             userViewModel: ProfileViewModel,
+            preferencesViewModel: PreferencesViewModel,
             onSuccess: () -> Unit,
             onFailure: () -> Unit) -> Unit =
         ::createAccountWithEmailAndPassword // Default implementation
@@ -488,8 +488,8 @@ fun RegisterScreen(
                                           password,
                                           birthDate,
                                           accountViewModel,
-                                          loggedInAccountViewModel,
                                           userViewModel,
+                                          preferencesViewModel,
                                           {
                                             navigationActions.navigateTo(TopLevelDestinations.HOME)
                                           },

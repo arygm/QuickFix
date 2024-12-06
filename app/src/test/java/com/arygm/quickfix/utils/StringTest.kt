@@ -12,6 +12,55 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class StringTest {
+  @Test
+  fun `test timestampToString with default pattern`() {
+    val calendar = GregorianCalendar(2023, Calendar.JANUARY, 1, 0, 0, 0)
+    calendar.set(Calendar.MILLISECOND, 0)
+    val timestamp = Timestamp(calendar.time)
+
+    val result = timestampToString(timestamp)
+    assertEquals("01/01/2023", result)
+  }
+
+  @Test
+  fun `test timestampToString with custom pattern`() {
+    val calendar = GregorianCalendar(2023, Calendar.JANUARY, 1, 0, 0, 0)
+    calendar.set(Calendar.MILLISECOND, 0)
+    val timestamp = Timestamp(calendar.time)
+
+    val result = timestampToString(timestamp, "yyyy/MM/dd")
+    assertEquals("2023/01/01", result)
+  }
+
+  @Test
+  fun `test timestampToString with leap year date`() {
+    val calendar = GregorianCalendar(2020, Calendar.FEBRUARY, 29, 0, 0, 0)
+    calendar.set(Calendar.MILLISECOND, 0)
+    val timestamp = Timestamp(calendar.time)
+
+    val result = timestampToString(timestamp)
+    assertEquals("29/02/2020", result)
+  }
+
+  @Test
+  fun `test timestampToString with old date`() {
+    val calendar = GregorianCalendar(1999, Calendar.DECEMBER, 31, 0, 0, 0)
+    calendar.set(Calendar.MILLISECOND, 0)
+    val timestamp = Timestamp(calendar.time)
+
+    val result = timestampToString(timestamp)
+    assertEquals("31/12/1999", result)
+  }
+
+  @Test
+  fun `test timestampToString with different time zones`() {
+    val calendar = GregorianCalendar(2023, Calendar.JANUARY, 1, 12, 0, 0)
+    calendar.set(Calendar.MILLISECOND, 0)
+    val timestamp = Timestamp(calendar.time)
+
+    val result = timestampToString(timestamp, "yyyy-MM-dd HH:mm:ss")
+    assertEquals("2023-01-01 12:00:00", result)
+  }
 
   @Test
   fun `test valid email addresses`() {

@@ -34,7 +34,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,7 +45,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButton
@@ -54,6 +53,9 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.utils.ANIMATED_BOX_ROTATION
 import com.arygm.quickfix.utils.isValidDate
+import com.arygm.quickfix.utils.loadEmail
+import com.arygm.quickfix.utils.loadUserId
+import com.arygm.quickfix.utils.setAccountPreferences
 import com.arygm.quickfix.utils.stringToTimestamp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -63,16 +65,21 @@ import com.google.firebase.auth.auth
 @Composable
 fun GoogleInfoScreen(
     navigationActions: NavigationActions,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
     accountViewModel: AccountViewModel,
-    userViewModel: ProfileViewModel
+    userViewModel: ProfileViewModel,
+    preferencesViewModel: PreferencesViewModel
 ) {
-
-  val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
 
   var firstName by remember { mutableStateOf("") }
   var lastName by remember { mutableStateOf("") }
   var birthDate by remember { mutableStateOf("") }
+  var email by remember { mutableStateOf("Loading...") }
+  var uid by remember { mutableStateOf("Loading...") }
+
+  LaunchedEffect(Unit) {
+    uid = loadUserId(preferencesViewModel)
+    email = loadEmail(preferencesViewModel)
+  }
 
   var birthDateError by remember { mutableStateOf(false) }
 
@@ -101,8 +108,8 @@ fun GoogleInfoScreen(
                 QuickFixBackButton(
                     onClick = {
                       shrinkBox = false
-                      accountViewModel.deleteAccountById(loggedInAccount!!.uid)
-                      userViewModel.deleteProfileById(loggedInAccount!!.uid)
+                      accountViewModel.deleteAccountById(uid)
+                      userViewModel.deleteProfileById(uid)
                       Firebase.auth.currentUser?.delete()?.addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                           navigationActions.goBack()
@@ -220,24 +227,20 @@ fun GoogleInfoScreen(
 
                       Button(
                           onClick = {
-                            shrinkBox = false
-                            accountViewModel.updateAccount(
+                            val newAccount =
                                 Account(
-                                    loggedInAccount!!.uid,
+                                    uid,
                                     firstName,
                                     lastName,
-                                    loggedInAccount!!.email,
+                                    email,
                                     stringToTimestamp(birthDate)!!,
-                                    loggedInAccount!!.isWorker),
+                                    false // default to non-worker account
+                                    )
+                            shrinkBox = false
+                            accountViewModel.updateAccount(
+                                newAccount,
                                 onSuccess = {
-                                  loggedInAccountViewModel.setLoggedInAccount(
-                                      Account(
-                                          loggedInAccount!!.uid,
-                                          firstName,
-                                          lastName,
-                                          loggedInAccount!!.email,
-                                          stringToTimestamp(birthDate)!!,
-                                          loggedInAccount!!.isWorker))
+                                  setAccountPreferences(preferencesViewModel, newAccount)
                                   navigationActions.navigateTo(TopLevelDestinations.HOME)
                                 },
                                 onFailure = {

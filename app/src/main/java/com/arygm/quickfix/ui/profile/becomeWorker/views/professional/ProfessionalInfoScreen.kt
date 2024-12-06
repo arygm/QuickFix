@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.profile.becomeWorker.views.professional
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -24,8 +25,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableDoubleState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,6 +48,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.model.category.Category
+import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.ressources.C
@@ -54,17 +59,54 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 @Composable
 fun ProfessionalInfoScreen(
     pagerState: PagerState,
-    price: MutableState<String>,
+    price: MutableDoubleState,
     fieldOfWork: MutableState<String>,
     includedServices: MutableState<List<IncludedService>>,
     addOnServices: MutableState<List<AddOnService>>,
     tags: MutableState<List<String>>,
     categories: List<Category>,
+    formValidatedTest: Boolean = false
 ) {
+  val formValidatedIncludedServices = remember { mutableStateOf(false) }
+  val formValidatedAddOnServices = remember { mutableStateOf(false) }
   var selectedCategory by remember { mutableStateOf(Category()) }
-  var selectedSubcategory by remember { mutableStateOf("") }
+  var selectedSubcategory by remember { mutableStateOf(Subcategory()) }
   var expandedDropDownCategory by remember { mutableStateOf(false) }
   var expandedDropDownSubcategory by remember { mutableStateOf(false) }
+  val (listServices, checkedStatesIncludedServices) =
+      remember(selectedSubcategory) {
+        val services = selectedSubcategory.setServices
+        val checkedStates =
+            mutableStateListOf<Boolean>().apply { repeat(services.size) { add(false) } }
+        services to checkedStates
+      }
+  val listAddOnServicesFromSet by
+      remember(listServices, checkedStatesIncludedServices) {
+        derivedStateOf {
+          Log.d(
+              "listAddOnServicesFromSet",
+              listServices
+                  .filterIndexed { index, _ ->
+                    index < checkedStatesIncludedServices.size &&
+                        !checkedStatesIncludedServices[index]
+                  }
+                  .toString())
+          listServices.filterIndexed { index, _ ->
+            index < checkedStatesIncludedServices.size && !checkedStatesIncludedServices[index]
+          }
+        }
+      }
+
+  // Initialize checkedStatesAddOnServices when listAddOnServices changes
+  val checkedStatesAddOnServices =
+      remember(listAddOnServicesFromSet) {
+        mutableStateListOf<Boolean>().apply { repeat(listAddOnServicesFromSet.size) { add(false) } }
+      }
+
+  val textFieldList = remember { mutableStateListOf<MutableState<String>>() }
+
+  val canAddTextField = remember { mutableStateOf(true) }
+
   BoxWithConstraints {
     val widthRatio = maxWidth / 411
     val heightRatio = maxHeight / 860
@@ -168,15 +210,26 @@ fun ProfessionalInfoScreen(
                       testTag = C.Tag.professionalInfoScreenCategoryDropdownMenu
                     },
                 containerColor = colorScheme.surface) {
-                  categories.forEach { category ->
+                  categories.forEachIndexed { index, category ->
                     DropdownMenuItem(
                         text = { Text(text = category.name, style = categoryTextStyle) },
                         onClick = {
                           selectedCategory = category
-                          selectedSubcategory = ""
+                          selectedSubcategory = Subcategory()
                           expandedDropDownCategory = false
+                          formValidatedIncludedServices.value = false
+                          formValidatedAddOnServices.value = false
+                          textFieldList.clear()
+                          addOnServices.value = emptyList()
+                          includedServices.value = emptyList()
+                          fieldOfWork.value = ""
+                          price.doubleValue = 0.0
+                          canAddTextField.value = true
                         },
-                        modifier = Modifier.height(30.dp * heightRatio.value))
+                        modifier =
+                            Modifier.height(30.dp * heightRatio.value).semantics {
+                              testTag = C.Tag.professionalInfoScreenCategoryDropdownMenuItem + index
+                            })
                   }
                 }
           }
@@ -196,9 +249,9 @@ fun ProfessionalInfoScreen(
             QuickFixTextFieldCustom(
                 modifier =
                     Modifier.semantics { testTag = C.Tag.professionalInfoScreenSubcategoryField },
-                heightField = 27.dp,
+                heightField = 27.dp * heightRatio.value,
                 widthField = 380.dp * widthRatio.value,
-                value = selectedSubcategory,
+                value = selectedSubcategory.name,
                 onValueChange = {},
                 shape = RoundedCornerShape(8.dp),
                 hasShadow = false,
@@ -230,21 +283,96 @@ fun ProfessionalInfoScreen(
                       testTag = C.Tag.professionalInfoScreenSubcategoryDropdownMenu
                     },
                 containerColor = colorScheme.surface) {
-                  selectedCategory.subcategories.forEach { subcategory ->
+                  selectedCategory.subcategories.forEachIndexed { index, subcategory ->
                     DropdownMenuItem(
                         text = { Text(text = subcategory.name, style = categoryTextStyle) },
                         onClick = {
-                          selectedSubcategory = subcategory.name
+                          selectedSubcategory = subcategory
                           expandedDropDownSubcategory = false
+                          fieldOfWork.value = selectedSubcategory.name
                         },
-                        modifier = Modifier.height(30.dp * heightRatio.value))
+                        modifier =
+                            Modifier.height(30.dp * heightRatio.value).semantics {
+                              testTag =
+                                  C.Tag.professionalInfoScreenSubcategoryDropdownMenuItem + index
+                            })
                   }
                 }
           }
         }
+        Spacer(modifier = Modifier.height(16.dp * heightRatio.value))
       }
 
-      item { Row { Column(modifier = Modifier.weight(1f), content = {}) } }
+      if (selectedCategory.name.isNotEmpty() && selectedSubcategory.name.isNotEmpty()) {
+        item {
+          val indices = (0 until listServices.size step 2)
+          QuickFixCheckedList(
+              listServices = listServices,
+              checkedStatesServices = checkedStatesIncludedServices,
+              heightRatio = heightRatio,
+              indices = indices,
+              minToSelect = 5,
+              maxToSelect = listServices.size,
+              onClickActionOk = {
+                includedServices.value =
+                    listServices
+                        .filterIndexed { index, _ -> checkedStatesIncludedServices[index] }
+                        .map { IncludedService(it) }
+                formValidatedIncludedServices.value = true
+              },
+              formValidated = formValidatedIncludedServices,
+              boldText = " at least 5 Included services",
+              label = "Choose",
+              secondPartLabel = " in your ${selectedCategory.id} job from this set",
+              widthRatio = widthRatio,
+              modifier =
+                  Modifier.semantics { testTag = C.Tag.professionalInfoScreenIncludedServicesList },
+          )
+          Spacer(modifier = Modifier.height(16.dp * heightRatio.value))
+        }
+        if (formValidatedIncludedServices.value || formValidatedTest) {
+          item {
+            val indices = (0 until listAddOnServicesFromSet.size step 2)
+            QuickFixCheckedList(
+                modifier =
+                    Modifier.semantics { testTag = C.Tag.professionalInfoScreenAddOnServicesList },
+                listServices = listAddOnServicesFromSet,
+                checkedStatesServices = checkedStatesAddOnServices,
+                heightRatio = heightRatio,
+                indices = indices,
+                minToSelect = 4,
+                maxToSelect = listAddOnServicesFromSet.size,
+                onClickActionOk = {
+                  val filteredAddOnServices =
+                      listAddOnServicesFromSet
+                          .filterIndexed { index, _ -> checkedStatesAddOnServices[index] }
+                          .map { AddOnService(it) }
+
+                  // Map textFieldList to AddOnService
+                  val textFieldAddOnServices = textFieldList.map { AddOnService(it.value) }
+
+                  // Combine both lists and assign to addOnServices.value
+                  addOnServices.value = filteredAddOnServices + textFieldAddOnServices
+                  formValidatedAddOnServices.value = true
+                  canAddTextField.value = false
+                },
+                formValidated = formValidatedAddOnServices,
+                boldText = " At least 4 Add-on services",
+                label = "Choose",
+                secondPartLabel =
+                    " in your ${selectedCategory.id} job from the set or from yourself",
+                widthRatio = widthRatio,
+                isTextFieldList = true,
+                textFieldList = textFieldList,
+                canAddTextField = canAddTextField,
+            )
+          }
+          item {
+            // Display the list of composables
+
+          }
+        }
+      }
     }
   }
 }

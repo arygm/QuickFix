@@ -47,6 +47,7 @@ fun QuickFixFinderScreen(
     profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
     loggedInAccountViewModel: LoggedInAccountViewModel =
         viewModel(factory = LoggedInAccountViewModel.Factory),
+    accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
     searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory),
     accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
     announcementViewModel: AnnouncementViewModel =
@@ -110,6 +111,7 @@ fun QuickFixFinderScreen(
                               announcementViewModel,
                               loggedInAccountViewModel,
                               profileViewModel,
+                              accountViewModel,
                               navigationActions,
                               isUser)
                       else -> Text("Should never happen !")

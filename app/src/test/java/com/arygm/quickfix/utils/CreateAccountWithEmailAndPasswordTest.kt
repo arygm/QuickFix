@@ -5,7 +5,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesRepositoryDataStore
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
@@ -48,9 +49,11 @@ class CreateAccountWithEmailAndPasswordTest {
 
   @Mock private lateinit var workerProfileRepository: WorkerProfileRepositoryFirestore
 
+  @Mock private lateinit var preferencesRepository: PreferencesRepositoryDataStore
+
   private lateinit var accountViewModel: AccountViewModel
   private lateinit var profileViewModel: ProfileViewModel
-  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
+  private lateinit var preferencesViewModel: PreferencesViewModel
 
   private lateinit var firebaseAuthMockedStatic: MockedStatic<FirebaseAuth>
 
@@ -76,9 +79,8 @@ class CreateAccountWithEmailAndPasswordTest {
     accountViewModel = AccountViewModel(accountRepository)
     profileViewModel = ProfileViewModel(userProfileRepository)
 
-    // Initialize loggedInAccountViewModel with the mocked repositories
-    loggedInAccountViewModel =
-        LoggedInAccountViewModel(userProfileRepository, workerProfileRepository)
+    // Initialize preferencesViewModel with the mocked repository
+    preferencesViewModel = PreferencesViewModel(preferencesRepository)
 
     // Mock FirebaseAuth.getInstance().currentUser
     whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
@@ -135,8 +137,8 @@ class CreateAccountWithEmailAndPasswordTest {
         password = password,
         birthDate = birthDate,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
         userViewModel = profileViewModel,
+        preferencesViewModel = preferencesViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -165,9 +167,6 @@ class CreateAccountWithEmailAndPasswordTest {
     assertEquals(firstName, capturedAccount.firstName)
     assertEquals(lastName, capturedAccount.lastName)
     assertEquals(email, capturedAccount.email)
-
-    // Verify that the loggedInAccount was set
-    assertEquals(capturedAccount, loggedInAccountViewModel.loggedInAccount.value)
   }
 
   @Test
@@ -198,8 +197,8 @@ class CreateAccountWithEmailAndPasswordTest {
         password = password,
         birthDate = birthDate,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
         userViewModel = profileViewModel,
+        preferencesViewModel = preferencesViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -253,8 +252,8 @@ class CreateAccountWithEmailAndPasswordTest {
         password = password,
         birthDate = birthDate,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
         userViewModel = profileViewModel,
+        preferencesViewModel = preferencesViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -300,8 +299,8 @@ class CreateAccountWithEmailAndPasswordTest {
         password = password,
         birthDate = birthDate,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
         userViewModel = profileViewModel,
+        preferencesViewModel = preferencesViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -357,8 +356,8 @@ class CreateAccountWithEmailAndPasswordTest {
         password = password,
         birthDate = birthDate,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
         userViewModel = profileViewModel,
+        preferencesViewModel = preferencesViewModel,
         onSuccess = {},
         onFailure = {})
 
@@ -399,8 +398,8 @@ class CreateAccountWithEmailAndPasswordTest {
         password = password,
         birthDate = birthDate,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
         userViewModel = profileViewModel,
+        preferencesViewModel = preferencesViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -443,8 +442,8 @@ class CreateAccountWithEmailAndPasswordTest {
         password = password,
         birthDate = birthDate,
         accountViewModel = accountViewModel,
-        loggedInAccountViewModel = loggedInAccountViewModel,
         userViewModel = profileViewModel,
+        preferencesViewModel = preferencesViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 

@@ -11,18 +11,24 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.datastore.preferences.core.Preferences
 import com.arygm.quickfix.R
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesRepository
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 class ProfileScreenTest {
 
@@ -30,10 +36,11 @@ class ProfileScreenTest {
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var mockFirestore: FirebaseFirestore
-  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
   private lateinit var userProfileRepositoryFirestore: UserProfileRepositoryFirestore
   private lateinit var workerProfileRepositoryFirestore: WorkerProfileRepositoryFirestore
   private lateinit var navigationActionsRoot: NavigationActions
+  private lateinit var preferencesRepository: PreferencesRepository
+  private lateinit var preferencesViewModel: PreferencesViewModel
 
   private val options =
       listOf(
@@ -51,19 +58,27 @@ class ProfileScreenTest {
   fun setup() {
     mockFirestore = mock(FirebaseFirestore::class.java)
     navigationActions = mock(NavigationActions::class.java)
+    navigationActionsRoot = mock(NavigationActions::class.java)
     userProfileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore)
     workerProfileRepositoryFirestore = WorkerProfileRepositoryFirestore(mockFirestore)
-    loggedInAccountViewModel =
-        LoggedInAccountViewModel(
-            userProfileRepo = userProfileRepositoryFirestore,
-            workerProfileRepo = workerProfileRepositoryFirestore)
-    navigationActionsRoot = mock(NavigationActions::class.java)
+    preferencesRepository = mock()
+    preferencesViewModel = PreferencesViewModel(preferencesRepository)
+
+    // Mock PreferencesRepository to return valid Flows
+    whenever(preferencesRepository.getPreferenceByKey(any<Preferences.Key<String>>()))
+        .thenReturn(flowOf("testValue"))
+
+    // Explicitly mock specific keys if needed
+    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.FIRST_NAME_KEY))
+        .thenReturn(flowOf("John"))
+    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.LAST_NAME_KEY))
+        .thenReturn(flowOf("Doe"))
   }
 
   @Test
   fun profileScreenDisplaysCorrectly() {
     composeTestRule.setContent {
-      ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot)
+      ProfileScreen(navigationActions, navigationActionsRoot, preferencesViewModel)
     }
 
     // Test for profile title and name
@@ -93,7 +108,7 @@ class ProfileScreenTest {
   @Test
   fun walletButtonClickTest() {
     composeTestRule.setContent {
-      ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot)
+      ProfileScreen(navigationActions, navigationActionsRoot, preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("WalletButton").performClick()
@@ -102,7 +117,7 @@ class ProfileScreenTest {
   @Test
   fun helpButtonClickTest() {
     composeTestRule.setContent {
-      ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot)
+      ProfileScreen(navigationActions, navigationActionsRoot, preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("HelpButton").performClick()
@@ -111,7 +126,7 @@ class ProfileScreenTest {
   @Test
   fun optionsAreDisplayedCorrectly() {
     composeTestRule.setContent {
-      ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot)
+      ProfileScreen(navigationActions, navigationActionsRoot, preferencesViewModel)
     }
 
     options.forEach { option ->
@@ -127,7 +142,7 @@ class ProfileScreenTest {
   @Test
   fun logoutButtonClickTest() {
     composeTestRule.setContent {
-      ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot)
+      ProfileScreen(navigationActions, navigationActionsRoot, preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("LogoutButton").performClick()
@@ -136,7 +151,7 @@ class ProfileScreenTest {
   @Test
   fun navigateToAccountConfigurationTest() {
     composeTestRule.setContent {
-      ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot)
+      ProfileScreen(navigationActions, navigationActionsRoot, preferencesViewModel)
     }
 
     // Perform click on "Account configuration"
@@ -149,7 +164,7 @@ class ProfileScreenTest {
   @Test
   fun navigateToWorkerSetupTest() {
     composeTestRule.setContent {
-      ProfileScreen(navigationActions, loggedInAccountViewModel, navigationActionsRoot)
+      ProfileScreen(navigationActions, navigationActionsRoot, preferencesViewModel)
     }
 
     // Perform click on "Set up your business account"

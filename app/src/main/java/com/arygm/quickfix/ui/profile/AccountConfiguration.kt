@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.account
+package com.arygm.quickfix.ui.profile
 
 import android.annotation.SuppressLint
 import android.widget.Toast
@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -34,7 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,15 +50,19 @@ import androidx.compose.ui.zIndex
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.ui.authentication.CustomTextField
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.isValidEmail
+import com.arygm.quickfix.utils.loadBirthDate
+import com.arygm.quickfix.utils.loadEmail
+import com.arygm.quickfix.utils.loadFirstName
+import com.arygm.quickfix.utils.loadLastName
+import com.arygm.quickfix.utils.setAccountPreferences
 import com.google.firebase.Timestamp
-import java.util.Calendar
 import java.util.GregorianCalendar
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -67,33 +71,25 @@ import java.util.GregorianCalendar
 fun AccountConfigurationScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel
+    preferencesViewModel: PreferencesViewModel
 ) {
-  val loggedInAccount =
-      loggedInAccountViewModel.loggedInAccount.collectAsState().value
-          ?: return Text(
-              text = "No account currently selected. Should not happen",
-              color = colorScheme.primary)
 
-  var firstName by remember { mutableStateOf(loggedInAccount.firstName) }
-  var lastName by remember { mutableStateOf(loggedInAccount.lastName) }
-  var email by remember { mutableStateOf(loggedInAccount.email) }
+  val uid by remember { mutableStateOf("Loading...") }
+  var firstName by remember { mutableStateOf("Loading...") }
+  var lastName by remember { mutableStateOf("Loading...") }
+  var email by remember { mutableStateOf("Loading...") }
+  var birthDate by remember { mutableStateOf("Loading...") }
+
+  LaunchedEffect(Unit) {
+    firstName = loadFirstName(preferencesViewModel)
+    lastName = loadLastName(preferencesViewModel)
+    email = loadEmail(preferencesViewModel)
+    birthDate = loadBirthDate(preferencesViewModel)
+  }
 
   var emailError by remember { mutableStateOf(false) }
   var birthDateError by remember { mutableStateOf(false) }
 
-  var birthDate by remember {
-    mutableStateOf(
-        loggedInAccount.birthDate.let {
-          val calendar = GregorianCalendar()
-          calendar.time = loggedInAccount.birthDate.toDate()
-          return@let "${calendar.get(Calendar.DAY_OF_MONTH)}/${calendar.get(Calendar.MONTH) + 1}/${
-                    calendar.get(
-                        Calendar.YEAR
-                    )
-                }"
-        })
-  }
   val context = LocalContext.current
 
   Scaffold(
@@ -114,7 +110,7 @@ fun AccountConfigurationScreen(
                   onClick = { navigationActions.goBack() },
                   modifier = Modifier.testTag("goBackButton")) {
                     Icon(
-                        Icons.Outlined.ArrowBack,
+                        Icons.AutoMirrored.Outlined.ArrowBack,
                         contentDescription = "Back",
                         tint = colorScheme.primary)
                   }
@@ -162,8 +158,7 @@ fun AccountConfigurationScreen(
                               modifier = Modifier.size(24.dp))
                           Spacer(modifier = Modifier.width(65.dp))
 
-                          val displayName =
-                              capitalizeName(loggedInAccount.firstName, loggedInAccount.lastName)
+                          val displayName = capitalizeName(firstName, lastName)
 
                           Text(
                               text = displayName,
@@ -214,8 +209,7 @@ fun AccountConfigurationScreen(
                             email = it
                             emailError = !isValidEmail(it)
                             accountViewModel.accountExists(email) { exists, account ->
-                              emailError =
-                                  exists && account != null && email != loggedInAccount.email
+                              emailError = exists && account != null && email != account.email
                             }
                           },
                           placeHolderText = "Enter your email address",
@@ -295,18 +289,16 @@ fun AccountConfigurationScreen(
                             0,
                             0,
                             0)
-                        accountViewModel.updateAccount(
+                        val newAccount =
                             Account(
-                                uid = loggedInAccount.uid,
+                                uid = uid,
                                 firstName = firstName,
                                 lastName = lastName,
                                 email = email,
-                                birthDate = Timestamp(calendar.time)),
-                            onSuccess = {
-                              accountViewModel.fetchUserAccount(loggedInAccount.uid) { account ->
-                                loggedInAccountViewModel.setLoggedInAccount(account!!)
-                              }
-                            },
+                                birthDate = Timestamp(calendar.time))
+                        accountViewModel.updateAccount(
+                            newAccount,
+                            onSuccess = { setAccountPreferences(preferencesViewModel, newAccount) },
                             onFailure = {})
                         navigationActions.goBack()
                         return@Button

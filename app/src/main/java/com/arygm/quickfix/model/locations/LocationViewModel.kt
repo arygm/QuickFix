@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import okhttp3.OkHttpClient
 
-class LocationViewModel(val repository: LocationRepository) : ViewModel() {
+open class LocationViewModel(val repository: LocationRepository) : ViewModel() {
   // State to manage the search query
   private val query_ = MutableStateFlow("")
   val query: StateFlow<String> = query_.asStateFlow()
@@ -29,6 +29,10 @@ class LocationViewModel(val repository: LocationRepository) : ViewModel() {
         query,
         onSuccess = { results -> locations_.value = results },
         onFailure = { exception -> error_.value = exception })
+  }
+
+  fun setLocations(locations: List<Location>) {
+    locations_.value = locations
   }
 
   // Create a factory for the ViewModel
