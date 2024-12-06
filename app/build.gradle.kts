@@ -197,6 +197,7 @@ dependencies {
     implementation(libs.androidx.espresso.core)
     implementation(libs.androidx.espresso.intents)
     implementation(libs.mockk.android)
+    implementation(libs.androidx.datastore.preferences)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.mockk)
@@ -261,7 +262,7 @@ dependencies {
     globalTestImplementation(libs.mockito.kotlin)
     androidTestImplementation(libs.mockito.android)
 
-    implementation("com.maxkeppeler.sheets-compose-dialogs:calendar:1.2.0")
+    implementation(libs.calendar)
 }
 
 tasks.withType<Test> {

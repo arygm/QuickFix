@@ -54,5 +54,28 @@ object C {
     const val professionalInfoScreenSubcategoryDropdownMenu =
         "professionalInfoScreen_dropDownSubcate"
     const val professionalInfoScreenCategoryDropdownMenu = "professionalInfoScreen_dropDownCate"
+    const val professionalInfoScreenIncludedServicesList =
+        "professionalInfoScreen_includedServicesList"
+    const val professionalInfoScreenAddOnServicesList = "professionalInfoScreen_addOnServicesList"
+    const val professionalInfoScreenCategoryDropdownMenuItem =
+        "professionalInfoScreen_dropDownCateItem"
+    const val professionalInfoScreenSubcategoryDropdownMenuItem =
+        "professionalInfoScreen_dropDownSubcateItem"
+
+    // QuickFixCheckedList
+    const val quickFixCheckedListElement = "quickFixCheckedListElement"
+    const val quickFixCheckedListElementRight = "quickFixCheckedListElementRight"
+    const val quickFixCheckedListElementLeft = "quickFixCheckedListElementLeft"
+    const val quickFixCheckedListElementDivider = "quickFixCheckedListElementDivider"
+    const val quickFixCheckedListTextFieldElement = "quickFixCheckedListTextFieldElement"
+    const val quickFixCheckedListTextFieldElementDelete =
+        "quickFixCheckedListTextFieldElementDelete"
+    const val quickFixCheckedListTextFieldElementAdd = "quickFixCheckedListTextFieldElementAdd"
+    const val quickFixCheckedListOk = "quickFixCheckedListOk"
+    const val quickFixCheckedListReset = "quickFixCheckedListReset"
+    const val quickFixCheckedListEdit = "quickFixCheckedListEdit"
+
+    // quickfix
+    const val quickFixUploadPictures = "quickFixUploadPictures"
   }
 }

@@ -20,6 +20,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,7 +62,7 @@ fun BusinessScreen(
   val imageBitmapBP = remember { mutableStateOf<Bitmap?>(null) }
   var displayNameError by remember { mutableStateOf(false) }
   var descriptionError by remember { mutableStateOf(false) }
-  val price = remember { mutableStateOf("") }
+  val price = remember { mutableDoubleStateOf(0.0) }
   val fieldOfWork = remember { mutableStateOf("") }
   val includedServices = remember { mutableStateOf(listOf<IncludedService>()) }
   val addOnServices = remember { mutableStateOf(listOf<AddOnService>()) }

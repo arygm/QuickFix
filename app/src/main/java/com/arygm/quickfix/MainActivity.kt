@@ -1,5 +1,6 @@
 package com.arygm.quickfix
 
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -23,8 +24,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,10 +38,10 @@ import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
-import com.arygm.quickfix.ui.account.AccountConfigurationScreen
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
@@ -53,6 +56,7 @@ import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Route
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.search.QuickFixFinderScreen
@@ -60,6 +64,8 @@ import com.arygm.quickfix.ui.search.SearchWorkerResult
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.utils.LocationHelper
 import kotlinx.coroutines.delay
+
+val Context.dataStore by preferencesDataStore(name = "quickfix_preferences")
 
 class MainActivity : ComponentActivity() {
 
@@ -128,6 +134,9 @@ fun QuickFixApp() {
   val announcementViewModel: AnnouncementViewModel =
       viewModel(factory = AnnouncementViewModel.Factory)
   val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
+
+  val preferencesViewModel: PreferencesViewModel =
+      viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
 
   // Initialized here because needed for the bottom bar
   val profileNavController = rememberNavController()
@@ -205,27 +214,18 @@ fun QuickFixApp() {
               ) {
                 composable(Screen.WELCOME) {
                   WelcomeScreen(
-                      navigationActionsRoot,
-                      accountViewModel,
-                      loggedInAccountViewModel,
-                      userViewModel)
+                      navigationActionsRoot, accountViewModel, userViewModel, preferencesViewModel)
                 }
                 composable(Screen.LOGIN) {
-                  LogInScreen(navigationActionsRoot, accountViewModel, loggedInAccountViewModel)
+                  LogInScreen(navigationActionsRoot, accountViewModel, preferencesViewModel)
                 }
                 composable(Screen.REGISTER) {
                   RegisterScreen(
-                      navigationActionsRoot,
-                      accountViewModel,
-                      loggedInAccountViewModel,
-                      userViewModel)
+                      navigationActionsRoot, accountViewModel, userViewModel, preferencesViewModel)
                 }
                 composable(Screen.GOOGLE_INFO) {
                   GoogleInfoScreen(
-                      navigationActionsRoot,
-                      loggedInAccountViewModel,
-                      accountViewModel,
-                      userViewModel)
+                      navigationActionsRoot, accountViewModel, userViewModel, preferencesViewModel)
                 }
                 composable(Screen.RESET_PASSWORD) {
                   ResetPasswordScreen(navigationActionsRoot, accountViewModel)
@@ -260,7 +260,8 @@ fun QuickFixApp() {
                     workerViewModel,
                     navigationActionsRoot,
                     onScreenChange = { currentScreen -> screenInProfileNavHost = currentScreen },
-                    categoryViewModel)
+                    categoryViewModel,
+                    preferencesViewModel)
               }
             }
       }
@@ -298,7 +299,8 @@ fun ProfileNavHost(
     workerViewModel: ProfileViewModel,
     navigationActionsRoot: NavigationActions,
     onScreenChange: (String) -> Unit,
-    categoryViewModel: CategoryViewModel
+    categoryViewModel: CategoryViewModel,
+    preferencesViewModel: PreferencesViewModel
 ) {
 
   val profileNavController = rememberNavController()
@@ -309,14 +311,10 @@ fun ProfileNavHost(
   }
   NavHost(navController = profileNavController, startDestination = Screen.PROFILE) {
     composable(Screen.PROFILE) {
-      ProfileScreen(
-          profileNavigationActions,
-          loggedInAccountViewModel = loggedInAccountViewModel,
-          navigationActionsRoot)
+      ProfileScreen(profileNavigationActions, navigationActionsRoot, preferencesViewModel)
     }
     composable(Screen.ACCOUNT_CONFIGURATION) {
-      AccountConfigurationScreen(
-          profileNavigationActions, accountViewModel, loggedInAccountViewModel)
+      AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)
     }
     composable(Screen.TO_WORKER) {
       BusinessScreen(
@@ -324,7 +322,8 @@ fun ProfileNavHost(
           accountViewModel,
           workerViewModel,
           loggedInAccountViewModel,
-          categoryViewModel)
+          categoryViewModel,
+      )
     }
   }
 }

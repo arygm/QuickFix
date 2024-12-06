@@ -49,7 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -71,7 +71,7 @@ import kotlinx.coroutines.launch
 fun LogInScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel
+    preferencesViewModel: PreferencesViewModel
 ) {
   var errorHasOccurred by remember { mutableStateOf(false) }
   var emailError = false
@@ -269,7 +269,7 @@ fun LogInScreen(
                                       email = email,
                                       password = password,
                                       accountViewModel = accountViewModel,
-                                      loggedInAccountViewModel = loggedInAccountViewModel,
+                                      preferencesViewModel = preferencesViewModel,
                                       onResult = {
                                         if (it) {
                                           coroutineScope.launch {
