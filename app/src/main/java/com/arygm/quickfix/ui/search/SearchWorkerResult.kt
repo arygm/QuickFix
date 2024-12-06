@@ -38,9 +38,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationSearching
-import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Tune
@@ -114,10 +112,9 @@ fun SearchWorkerResult(
   val listOfButtons =
       listOf(
           SearchFilterButtons(
-              onClick = { filteredWorkerProfiles = workerProfiles},
+              onClick = { filteredWorkerProfiles = workerProfiles },
               text = "Clear",
-              leadingIcon = Icons.Default.Clear
-          ),
+              leadingIcon = Icons.Default.Clear),
           SearchFilterButtons(
               onClick = { /* Handle click */},
               text = "Location",
