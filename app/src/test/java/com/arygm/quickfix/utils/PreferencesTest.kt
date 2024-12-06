@@ -9,10 +9,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
+import org.mockito.kotlin.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PreferencesTest {
@@ -55,8 +55,77 @@ class PreferencesTest {
         verify(preferencesViewModel).savePreference(FIRST_NAME_KEY, "Alice")
         verify(preferencesViewModel).savePreference(LAST_NAME_KEY, "Smith")
         verify(preferencesViewModel).savePreference(EMAIL_KEY, "alice.smith@example.com")
-        // Adjust date string as per your timestampToString implementation
-        verify(preferencesViewModel).savePreference(BIRTH_DATE_KEY, "15/05/1990")
+        verify(preferencesViewModel)
+            .savePreference(
+                BIRTH_DATE_KEY,
+                "15/05/1990") // Ensure formatting matches your timestampToString implementation
         verify(preferencesViewModel).savePreference(IS_WORKER_KEY, true)
+      }
+
+  @Test
+  fun setSignInSavesSignInPreference() =
+      runTest(testDispatcher) {
+        // Act
+        setSignIn(preferencesViewModel, true, dispatcher = testDispatcher)
+        testScheduler.advanceUntilIdle()
+
+        // Assert
+        verify(preferencesViewModel).savePreference(IS_SIGN_IN_KEY, true)
+      }
+
+  @Test
+  fun loadIsSignInReturnsCorrectValue() =
+      runTest(testDispatcher) {
+        // Arrange
+        whenever(preferencesViewModel.loadPreference(eq(IS_SIGN_IN_KEY), any())).thenAnswer {
+            invocation ->
+          val callback = invocation.arguments[1] as (Boolean?) -> Unit
+          callback(true)
+        }
+
+        // Act
+        val result = loadIsSignIn(preferencesViewModel)
+
+        // Assert
+        assertEquals(true, result)
+      }
+
+  @Test
+  fun loadFirstNameReturnsCorrectValue() =
+      runTest(testDispatcher) {
+        // Arrange
+        whenever(preferencesViewModel.loadPreference(eq(FIRST_NAME_KEY), any())).thenAnswer {
+            invocation ->
+          val callback = invocation.arguments[1] as (String?) -> Unit
+          callback("Alice")
+        }
+
+        // Act
+        val result = loadFirstName(preferencesViewModel)
+
+        // Assert
+        assertEquals("Alice", result)
+      }
+
+  @Test
+  fun setFirstNameSavesFirstNamePreference() =
+      runTest(testDispatcher) {
+        // Act
+        setFirstName(preferencesViewModel, "Alice", dispatcher = testDispatcher)
+        testScheduler.advanceUntilIdle()
+
+        // Assert
+        verify(preferencesViewModel).savePreference(FIRST_NAME_KEY, "Alice")
+      }
+
+  @Test
+  fun clearAccountPreferencesClearsAllPreferences() =
+      runTest(testDispatcher) {
+        // Act
+        clearAccountPreferences(preferencesViewModel, dispatcher = testDispatcher)
+        testScheduler.advanceUntilIdle()
+
+        // Assert
+        verify(preferencesViewModel).clearAllPreferences()
       }
 }

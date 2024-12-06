@@ -34,7 +34,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,13 +73,13 @@ fun GoogleInfoScreen(
   var firstName by remember { mutableStateOf("") }
   var lastName by remember { mutableStateOf("") }
   var birthDate by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("Loading...") }
-    var uid by remember { mutableStateOf("Loading...") }
+  var email by remember { mutableStateOf("Loading...") }
+  var uid by remember { mutableStateOf("Loading...") }
 
-    LaunchedEffect(Unit) {
-        uid = loadUserId(preferencesViewModel)
-        email = loadEmail(preferencesViewModel)
-    }
+  LaunchedEffect(Unit) {
+    uid = loadUserId(preferencesViewModel)
+    email = loadEmail(preferencesViewModel)
+  }
 
   var birthDateError by remember { mutableStateOf(false) }
 

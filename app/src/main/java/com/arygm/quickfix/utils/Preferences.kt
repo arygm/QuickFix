@@ -4,12 +4,12 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 // =====Account Preferences=====//
 val IS_SIGN_IN_KEY = booleanPreferencesKey("is_sign_in")
@@ -27,24 +27,22 @@ fun setAccountPreferences(
     signIn: Boolean = true,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-    CoroutineScope(dispatcher).launch {
-        preferencesViewModel.savePreference(IS_SIGN_IN_KEY, signIn)
-        preferencesViewModel.savePreference(UID_KEY, account.uid)
-        preferencesViewModel.savePreference(FIRST_NAME_KEY, account.firstName)
-        preferencesViewModel.savePreference(LAST_NAME_KEY, account.lastName)
-        preferencesViewModel.savePreference(EMAIL_KEY, account.email)
-        preferencesViewModel.savePreference(BIRTH_DATE_KEY, timestampToString(account.birthDate))
-        preferencesViewModel.savePreference(IS_WORKER_KEY, account.isWorker)
-    }
+  CoroutineScope(dispatcher).launch {
+    preferencesViewModel.savePreference(IS_SIGN_IN_KEY, signIn)
+    preferencesViewModel.savePreference(UID_KEY, account.uid)
+    preferencesViewModel.savePreference(FIRST_NAME_KEY, account.firstName)
+    preferencesViewModel.savePreference(LAST_NAME_KEY, account.lastName)
+    preferencesViewModel.savePreference(EMAIL_KEY, account.email)
+    preferencesViewModel.savePreference(BIRTH_DATE_KEY, timestampToString(account.birthDate))
+    preferencesViewModel.savePreference(IS_WORKER_KEY, account.isWorker)
+  }
 }
 
 fun clearAccountPreferences(
     preferencesViewModel: PreferencesViewModel,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-    CoroutineScope(dispatcher).launch {
-        preferencesViewModel.clearAllPreferences()
-    }
+  CoroutineScope(dispatcher).launch { preferencesViewModel.clearAllPreferences() }
 }
 
 // Setter functions
@@ -53,9 +51,7 @@ fun setSignIn(
     signIn: Boolean,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-    CoroutineScope(dispatcher).launch {
-        preferencesViewModel.savePreference(IS_SIGN_IN_KEY, signIn)
-    }
+  CoroutineScope(dispatcher).launch { preferencesViewModel.savePreference(IS_SIGN_IN_KEY, signIn) }
 }
 
 fun setUserId(
@@ -63,9 +59,7 @@ fun setUserId(
     userId: String,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-    CoroutineScope(dispatcher).launch {
-        preferencesViewModel.savePreference(UID_KEY, userId)
-    }
+  CoroutineScope(dispatcher).launch { preferencesViewModel.savePreference(UID_KEY, userId) }
 }
 
 fun setFirstName(
@@ -73,9 +67,9 @@ fun setFirstName(
     firstName: String,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-    CoroutineScope(dispatcher).launch {
-        preferencesViewModel.savePreference(FIRST_NAME_KEY, firstName)
-    }
+  CoroutineScope(dispatcher).launch {
+    preferencesViewModel.savePreference(FIRST_NAME_KEY, firstName)
+  }
 }
 
 fun setLastName(
@@ -83,9 +77,7 @@ fun setLastName(
     lastName: String,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-    CoroutineScope(dispatcher).launch {
-        preferencesViewModel.savePreference(LAST_NAME_KEY, lastName)
-    }
+  CoroutineScope(dispatcher).launch { preferencesViewModel.savePreference(LAST_NAME_KEY, lastName) }
 }
 
 fun setEmail(
@@ -93,9 +85,7 @@ fun setEmail(
     email: String,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-    CoroutineScope(dispatcher).launch {
-        preferencesViewModel.savePreference(EMAIL_KEY, email)
-    }
+  CoroutineScope(dispatcher).launch { preferencesViewModel.savePreference(EMAIL_KEY, email) }
 }
 
 fun setBirthDate(
@@ -103,9 +93,9 @@ fun setBirthDate(
     dateOfBirth: String,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-    CoroutineScope(dispatcher).launch {
-        preferencesViewModel.savePreference(BIRTH_DATE_KEY, dateOfBirth)
-    }
+  CoroutineScope(dispatcher).launch {
+    preferencesViewModel.savePreference(BIRTH_DATE_KEY, dateOfBirth)
+  }
 }
 
 fun setIsWorker(
@@ -113,94 +103,91 @@ fun setIsWorker(
     isWorker: Boolean,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-    CoroutineScope(dispatcher).launch {
-        preferencesViewModel.savePreference(IS_WORKER_KEY, isWorker)
-    }
+  CoroutineScope(dispatcher).launch { preferencesViewModel.savePreference(IS_WORKER_KEY, isWorker) }
 }
 
 // Loader functions
 suspend fun loadIsSignIn(preferencesViewModel: PreferencesViewModel): Boolean {
-    return suspendCoroutine { cont ->
-        var resumed = false
-        preferencesViewModel.loadPreference(IS_SIGN_IN_KEY) { value ->
-            if (!resumed) {
-                resumed = true
-                cont.resume(value ?: false)
-            }
-        }
+  return suspendCoroutine { cont ->
+    var resumed = false
+    preferencesViewModel.loadPreference(IS_SIGN_IN_KEY) { value ->
+      if (!resumed) {
+        resumed = true
+        cont.resume(value ?: false)
+      }
     }
+  }
 }
 
 suspend fun loadUserId(preferencesViewModel: PreferencesViewModel): String {
-    return suspendCoroutine { cont ->
-        var resumed = false
-        preferencesViewModel.loadPreference(FIRST_NAME_KEY) { value ->
-            if (!resumed) {
-                resumed = true
+  return suspendCoroutine { cont ->
+    var resumed = false
+    preferencesViewModel.loadPreference(FIRST_NAME_KEY) { value ->
+      if (!resumed) {
+        resumed = true
 
-                cont.resume(value ?: "no_first_name")
-            }
-        }
+        cont.resume(value ?: "no_first_name")
+      }
     }
+  }
 }
 
 suspend fun loadFirstName(preferencesViewModel: PreferencesViewModel): String {
-    return suspendCoroutine { cont ->
-        var resumed = false
-        preferencesViewModel.loadPreference(FIRST_NAME_KEY) { value ->
-            if (!resumed) {
-                resumed = true
-                cont.resume(value ?: "no_first_name")
-            }
-        }
+  return suspendCoroutine { cont ->
+    var resumed = false
+    preferencesViewModel.loadPreference(FIRST_NAME_KEY) { value ->
+      if (!resumed) {
+        resumed = true
+        cont.resume(value ?: "no_first_name")
+      }
     }
+  }
 }
 
 suspend fun loadLastName(preferencesViewModel: PreferencesViewModel): String {
-    return suspendCoroutine { cont ->
-        var resumed = false
-        preferencesViewModel.loadPreference(LAST_NAME_KEY) { value ->
-            if (!resumed) {
-                resumed = true
-                cont.resume(value ?: "no_last_name")
-            }
-        }
+  return suspendCoroutine { cont ->
+    var resumed = false
+    preferencesViewModel.loadPreference(LAST_NAME_KEY) { value ->
+      if (!resumed) {
+        resumed = true
+        cont.resume(value ?: "no_last_name")
+      }
     }
+  }
 }
 
 suspend fun loadEmail(preferencesViewModel: PreferencesViewModel): String {
-    return suspendCoroutine { cont ->
-        var resumed = false
-        preferencesViewModel.loadPreference(EMAIL_KEY) { value ->
-            if (!resumed) {
-                resumed = true
-                cont.resume(value ?: "no_email")
-            }
-        }
+  return suspendCoroutine { cont ->
+    var resumed = false
+    preferencesViewModel.loadPreference(EMAIL_KEY) { value ->
+      if (!resumed) {
+        resumed = true
+        cont.resume(value ?: "no_email")
+      }
     }
+  }
 }
 
 suspend fun loadBirthDate(preferencesViewModel: PreferencesViewModel): String {
-    return suspendCoroutine { cont ->
-        var resumed = false
-        preferencesViewModel.loadPreference(BIRTH_DATE_KEY) { value ->
-            if (!resumed) {
-                resumed = true
-                cont.resume(value ?: "no_birth_date")
-            }
-        }
+  return suspendCoroutine { cont ->
+    var resumed = false
+    preferencesViewModel.loadPreference(BIRTH_DATE_KEY) { value ->
+      if (!resumed) {
+        resumed = true
+        cont.resume(value ?: "no_birth_date")
+      }
     }
+  }
 }
 
 suspend fun loadIsWorker(preferencesViewModel: PreferencesViewModel): Boolean {
-    return suspendCoroutine { cont ->
-        var resumed = false
-        preferencesViewModel.loadPreference(IS_WORKER_KEY) { value ->
-            if (!resumed) {
-                resumed = true
-                cont.resume(value ?: false)
-            }
-        }
+  return suspendCoroutine { cont ->
+    var resumed = false
+    preferencesViewModel.loadPreference(IS_WORKER_KEY) { value ->
+      if (!resumed) {
+        resumed = true
+        cont.resume(value ?: false)
+      }
     }
+  }
 }
-
