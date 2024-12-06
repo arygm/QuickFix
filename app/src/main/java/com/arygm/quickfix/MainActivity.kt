@@ -388,7 +388,6 @@ fun SearchNavHost(
           isUser,
           profileViewModel,
           loggedInAccountViewModel,
-          accountViewModel,
           searchViewModel,
           accountViewModel,
           announcementViewModel,

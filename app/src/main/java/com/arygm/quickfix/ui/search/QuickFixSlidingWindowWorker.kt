@@ -86,9 +86,7 @@ fun QuickFixSlidingWindowWorker(
           Box(
               modifier =
                   Modifier.fillMaxWidth()
-                      .height(
-                          screenHeight *
-                              0.23f) // Adjusted height to accommodate profile picture overlap
+                      .height(screenHeight * 0.23f)
                       .testTag("sliding_window_top_bar")) {
                 // Banner Image
                 Image(

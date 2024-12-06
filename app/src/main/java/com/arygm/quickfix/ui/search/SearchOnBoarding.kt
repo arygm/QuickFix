@@ -114,7 +114,7 @@ fun SearchOnBoarding(
                             )
                           },
                           placeHolderText = "Find your perfect fix with QuickFix",
-                          value = searchQuery, // Search query
+                          value = searchQuery,
                           onValueChange = {
                             searchQuery = it
                             searchViewModel.updateSearchQuery(it)
@@ -167,11 +167,10 @@ fun SearchOnBoarding(
                       widthRatio = widthRatio,
                       heightRatio = heightRatio,
                       onBookClick = { selectedProfile ->
-                        // Handle profile click
                         // Set up variables for WorkerSlidingWindowContent
-                        bannerImage = R.drawable.moroccan_flag // Replace with actual data
-                        profilePicture = R.drawable.placeholder_worker // Replace with actual data
-                        initialSaved = false // Replace with actual data
+                        bannerImage = R.drawable.moroccan_flag
+                        profilePicture = R.drawable.placeholder_worker
+                        initialSaved = false
                         workerCategory = selectedProfile.fieldOfWork
                         workerAddress = selectedProfile.location?.name ?: "Unknown"
                         description = selectedProfile.description
@@ -179,10 +178,7 @@ fun SearchOnBoarding(
                         addonServices = selectedProfile.addOnServices.map { it.name }
                         workerRating = selectedProfile.rating
                         tags = selectedProfile.tags
-                        reviews =
-                            selectedProfile.reviews.map {
-                              it.review
-                            } // Replace 'text' with the correct property
+                        reviews = selectedProfile.reviews.map { it.review }
                         isWindowVisible = true
                       })
                 }
@@ -193,7 +189,6 @@ fun SearchOnBoarding(
               detectTapGestures(onTap = { focusManager.clearFocus() })
             })
 
-    // Call to WorkerSlidingWindowContent
     QuickFixSlidingWindowWorker(
         isVisible = isWindowVisible,
         onDismiss = { isWindowVisible = false },

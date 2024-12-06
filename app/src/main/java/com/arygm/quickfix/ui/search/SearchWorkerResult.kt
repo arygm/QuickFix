@@ -1,5 +1,3 @@
-// Updated SearchWorkerResult.kt
-
 package com.arygm.quickfix.ui.search
 
 import QuickFixSlidingWindowWorker
@@ -54,6 +52,10 @@ import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.profile.dataFields.AddOnService
+import com.arygm.quickfix.model.profile.dataFields.IncludedService
+import com.arygm.quickfix.model.profile.dataFields.Review
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
@@ -62,6 +64,7 @@ import com.arygm.quickfix.ui.elements.QuickFixPriceRangeBottomSheet
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.LocationHelper
+import java.time.LocalTime
 
 data class SearchFilterButtons(
     val onClick: () -> Unit,
@@ -135,7 +138,6 @@ fun SearchWorkerResult(
   var tags by remember { mutableStateOf(listOf<String>()) }
   var reviews by remember { mutableStateOf(listOf<String>()) }
 
-  // Wrap everything in a Box to allow overlay
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     val screenHeight = maxHeight
     val screenWidth = maxWidth
@@ -239,36 +241,66 @@ fun SearchWorkerResult(
                   }
                 }
 
-                // Use ProfileResults here
                 ProfileResults(
                     profiles = filteredWorkerProfiles,
                     listState = listState,
                     searchViewModel = searchViewModel,
                     accountViewModel = accountViewModel,
-                    widthRatio = 1f, // Adjust as needed
-                    heightRatio = 1f, // Adjust as needed
+                    widthRatio = 1f,
+                    heightRatio = 1f,
                     onBookClick = { selectedProfile ->
-                      // Handle profile click
+
+                      // TODO when linking the backend remove placeHolder data
+                      val profile =
+                          WorkerProfile(
+                              rating = 4.5,
+                              fieldOfWork = "Exterior Painter",
+                              description = "Worker description goes here.",
+                              location =
+                                  com.arygm.quickfix.model.locations.Location(
+                                      12.0, 12.0, "Ecublens, VD"),
+                              quickFixes = listOf("Painting", "Gardening"),
+                              includedServices =
+                                  listOf(
+                                      IncludedService("Painting"),
+                                      IncludedService("Gardening"),
+                                  ),
+                              addOnServices =
+                                  listOf(
+                                      AddOnService("Furniture Assembly"),
+                                      AddOnService("Window Cleaning"),
+                                  ),
+                              reviews =
+                                  ArrayDeque(
+                                      listOf(
+                                          Review("Great service!", "4"),
+                                          Review("Very professional", "3.5"),
+                                      )),
+                              profilePicture = "placeholder_worker",
+                              price = 130.0,
+                              displayName = "John Doe",
+                              unavailability_list = emptyList(),
+                              workingHours = Pair(LocalTime.now(), LocalTime.now()),
+                              uid = "1234",
+                              tags = listOf("Painter", "Gardener"),
+                          )
+
                       // Update variables for Sliding Window
                       bannerImage = R.drawable.moroccan_flag // Replace with actual data
                       profilePicture = R.drawable.placeholder_worker // Replace with actual data
                       initialSaved = false // Replace with actual data
-                      workerCategory = selectedProfile.fieldOfWork
-                      workerAddress = selectedProfile.location?.name ?: "Unknown"
-                      description = selectedProfile.description
+                      workerCategory = profile.fieldOfWork
+                      workerAddress = profile.location?.name ?: "Unknown"
+                      description = profile.description
 
-                      // Extract included services
-                      includedServices = selectedProfile.includedServices.map { it.name }
+                      includedServices = profile.includedServices.map { it.name }
 
-                      // Extract addon services
-                      addonServices = selectedProfile.addOnServices.map { it.name }
+                      addonServices = profile.addOnServices.map { it.name }
 
-                      workerRating = selectedProfile.rating
-                      tags = selectedProfile.tags
+                      workerRating = profile.rating
+                      tags = profile.tags
 
-                      // Extract reviews
-                      reviews =
-                          selectedProfile.reviews.map { it.review } // Use the correct property
+                      reviews = profile.reviews.map { it.review }
 
                       isWindowVisible = true
                     })
@@ -304,7 +336,6 @@ fun SearchWorkerResult(
         },
         onDismissRequest = { showPriceRangeBottomSheet = false })
 
-    // Call to QuickFixSlidingWindowWorker
     QuickFixSlidingWindowWorker(
         isVisible = isWindowVisible,
         onDismiss = { isWindowVisible = false },

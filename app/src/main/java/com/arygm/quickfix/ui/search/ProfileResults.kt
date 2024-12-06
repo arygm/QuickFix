@@ -1,5 +1,3 @@
-// Updated ProfileResults.kt
-
 package com.arygm.quickfix.ui.search
 
 import androidx.compose.foundation.clickable
@@ -40,11 +38,10 @@ fun ProfileResults(
     accountViewModel: AccountViewModel,
     widthRatio: Float,
     heightRatio: Float,
-    onBookClick: (WorkerProfile) -> Unit // Added parameter
+    onBookClick: (WorkerProfile) -> Unit
 ) {
   // Column for wrapping the list
   Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
-    // Title: "Profiles"
     Text(
         text = "Profiles",
         style = poppinsTypography.labelLarge,
@@ -91,8 +88,8 @@ fun ProfileResults(
                   Modifier.padding(vertical = 10.dp * heightRatio)
                       .fillMaxWidth()
                       .testTag("worker_profile_result_$index")
-                      .clickable {}, // Added clickable modifier
-              profileImage = R.drawable.placeholder_worker, // Replace with actual image
+                      .clickable {},
+              profileImage = R.drawable.placeholder_worker,
               name = "${acc.firstName} ${acc.lastName}",
               category = profile.fieldOfWork,
               rating = profile.rating,
