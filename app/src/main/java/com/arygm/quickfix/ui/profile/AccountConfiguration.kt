@@ -1,7 +1,6 @@
 package com.arygm.quickfix.ui.profile
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +57,10 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.isValidEmail
+import com.arygm.quickfix.utils.loadBirthDate
+import com.arygm.quickfix.utils.loadEmail
+import com.arygm.quickfix.utils.loadFirstName
+import com.arygm.quickfix.utils.loadLastName
 import com.arygm.quickfix.utils.setAccountPreferences
 import com.google.firebase.Timestamp
 import java.util.GregorianCalendar
@@ -71,30 +74,19 @@ fun AccountConfigurationScreen(
     preferencesViewModel: PreferencesViewModel
 ) {
 
-  var uid by remember { mutableStateOf("") }
-  var firstName by remember { mutableStateOf("") }
-  var lastName by remember { mutableStateOf("") }
-  var email by remember { mutableStateOf("") }
-  var birthDate by remember { mutableStateOf("") }
+  val uid by remember { mutableStateOf("Loading...") }
+  var firstName by remember { mutableStateOf("Loading...") }
+  var lastName by remember { mutableStateOf("Loading...") }
+  var email by remember { mutableStateOf("Loading...") }
+  var birthDate by remember { mutableStateOf("Loading...") }
 
   LaunchedEffect(Unit) {
-    preferencesViewModel.loadPreference(com.arygm.quickfix.utils.USER_ID_KEY) { value ->
-      uid = value ?: "nouid"
-    }
-    preferencesViewModel.loadPreference(com.arygm.quickfix.utils.FIRST_NAME_KEY) { value ->
-      firstName = value ?: "nofirstname"
-    }
-    preferencesViewModel.loadPreference(com.arygm.quickfix.utils.LAST_NAME_KEY) { value ->
-      lastName = value ?: "nolastname"
-    }
-    preferencesViewModel.loadPreference(com.arygm.quickfix.utils.EMAIL_KEY) { value ->
-      email = value ?: "noemail"
-    }
-    preferencesViewModel.loadPreference(com.arygm.quickfix.utils.DATE_OF_BIRTH_KEY) { value ->
-      Log.d("AccountConfigurationScreen", "Loaded birthdate: $value")
-      birthDate = value ?: "nodate"
-    }
+    firstName = loadFirstName(preferencesViewModel)
+    lastName = loadLastName(preferencesViewModel)
+    email = loadEmail(preferencesViewModel)
+    birthDate = loadBirthDate(preferencesViewModel)
   }
+
   var emailError by remember { mutableStateOf(false) }
   var birthDateError by remember { mutableStateOf(false) }
 
