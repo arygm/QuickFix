@@ -121,7 +121,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 @Preview
 fun QuickFixApp() {
-    val context = LocalContext.current
+  val context = LocalContext.current
   val rootNavController = rememberNavController()
   val navigationActionsRoot = remember { NavigationActions(rootNavController) }
 
@@ -171,15 +171,15 @@ fun QuickFixApp() {
 
   var showBottomBar by remember { mutableStateOf(false) }
 
-    var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
+  var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
 
-    // Simulate monitoring connectivity (replace this with actual monitoring in production)
-    LaunchedEffect(Unit) {
-        while (true) {
-            isOffline = !isConnectedToInternet(context)
-            delay(3000) // Poll every 3 seconds
-        }
+  // Simulate monitoring connectivity (replace this with actual monitoring in production)
+  LaunchedEffect(Unit) {
+    while (true) {
+      isOffline = !isConnectedToInternet(context)
+      delay(3000) // Poll every 3 seconds
     }
+  }
 
   // Delay the appearance of the bottom bar
   LaunchedEffect(shouldShowBottomBar) {
@@ -192,9 +192,7 @@ fun QuickFixApp() {
   }
 
   Scaffold(
-      topBar = {
-          QuickFixOfflineBar(isVisible = isOffline)
-      },
+      topBar = { QuickFixOfflineBar(isVisible = isOffline) },
       bottomBar = {
         // Show BottomNavigationMenu only if the route is not part of the login/registration flow
         AnimatedVisibility(
@@ -309,11 +307,11 @@ fun HomeNavHost(
 }
 
 fun isConnectedToInternet(context: Context): Boolean {
-    val connectivityManager =
-        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val network = connectivityManager.activeNetwork ?: return false
-    val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
-    return activeNetwork.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+  val connectivityManager =
+      context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+  val network = connectivityManager.activeNetwork ?: return false
+  val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+  return activeNetwork.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }
 
 @Composable
