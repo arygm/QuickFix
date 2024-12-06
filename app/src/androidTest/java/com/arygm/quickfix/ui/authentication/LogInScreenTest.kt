@@ -8,7 +8,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesRepository
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -30,8 +31,9 @@ class LogInScreenTest {
   private lateinit var userProfileRepo: UserProfileRepositoryFirestore
   private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
   private lateinit var accountViewModel: AccountViewModel
-  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
   private lateinit var mockFirestore: FirebaseFirestore
+  private lateinit var preferencesRepository: PreferencesRepository
+  private lateinit var preferencesViewModel: PreferencesViewModel
 
   @Before
   fun setup() {
@@ -41,9 +43,8 @@ class LogInScreenTest {
     userProfileRepo = UserProfileRepositoryFirestore(mockFirestore)
     workerProfileRepo = WorkerProfileRepositoryFirestore(mockFirestore)
     accountViewModel = AccountViewModel(accountRepository)
-    loggedInAccountViewModel =
-        LoggedInAccountViewModel(
-            userProfileRepo = userProfileRepo, workerProfileRepo = workerProfileRepo)
+    preferencesRepository = mock(PreferencesRepository::class.java)
+    preferencesViewModel = PreferencesViewModel(preferencesRepository)
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.LOGIN)
   }
@@ -51,7 +52,7 @@ class LogInScreenTest {
   @Test
   fun testInitialUI() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+      LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
     }
 
     // Check that the scaffold and content boxes are displayed
@@ -86,7 +87,7 @@ class LogInScreenTest {
   @Test
   fun testLoginButtonEnabledWhenFieldsAreFilled() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+      LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
     }
 
     // Input valid email and password
@@ -100,7 +101,7 @@ class LogInScreenTest {
   @Test
   fun testInvalidEmailShowsError() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+      LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
     }
 
     // Input an invalid email
@@ -116,7 +117,7 @@ class LogInScreenTest {
   @Test
   fun testForgotPasswordLinkIsDisplayed() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+      LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
     }
 
     // Check that the forgot password text is displayed
@@ -126,7 +127,7 @@ class LogInScreenTest {
   @Test
   fun testForgotPasswordLinkNavigatesToResetPassword() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+      LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
     }
 
     // Click the "Forgot your password?" link
@@ -139,7 +140,7 @@ class LogInScreenTest {
   @Test
   fun testBackButtonNavigatesBack() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, loggedInAccountViewModel)
+      LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
     }
 
     // Click the back button

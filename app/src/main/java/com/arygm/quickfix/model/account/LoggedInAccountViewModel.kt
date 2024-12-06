@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+@Deprecated("Replaced by PreferencesViewModel")
 class LoggedInAccountViewModel(
     private val userProfileRepo: ProfileRepository,
     private val workerProfileRepo: ProfileRepository

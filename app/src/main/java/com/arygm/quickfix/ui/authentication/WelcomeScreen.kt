@@ -44,7 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -61,8 +61,8 @@ import kotlinx.coroutines.delay
 fun WelcomeScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
-    userViewModel: ProfileViewModel
+    userViewModel: ProfileViewModel,
+    preferencesViewModel: PreferencesViewModel
 ) {
   val colorScheme = MaterialTheme.colorScheme
 
@@ -91,11 +91,24 @@ fun WelcomeScreen(
           },
           onAuthError = { Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}") },
           accountViewModel,
-          loggedInAccountViewModel = loggedInAccountViewModel,
-          userViewModel = userViewModel)
+          userViewModel = userViewModel,
+          preferencesViewModel = preferencesViewModel)
 
   val token = stringResource(com.arygm.quickfix.R.string.default_web_client_id)
 
+  // fast forward to home screen if user is already signed in
+  LaunchedEffect(Unit) {
+    preferencesViewModel.loadPreference(com.arygm.quickfix.utils.IS_SIGN_IN_KEY) {
+      if (it == true &&
+          navigationActions.currentScreen ==
+              Screen.WELCOME) { // Ensure the value is `true` before navigating
+        Log.i("SignInScreen", "User is signed in, fast forwarding to home screen")
+        navigationActions.navigateTo(TopLevelDestinations.HOME)
+      } else {
+        Log.d("SignInScreen", "User is not signed in or preference not set")
+      }
+    }
+  }
   LaunchedEffect(Unit) {
     expandBox = false // Start expanding the box
     delay(200) // Wait for box to fully shrink
