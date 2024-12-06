@@ -178,6 +178,7 @@ dependencies {
 
     implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.firebase.storage.ktx)
     testImplementation(libs.json)
     implementation(libs.gson)
 

@@ -49,6 +49,7 @@ object Screen {
   const val RESET_PASSWORD = "Reset password Screen"
   const val GOOGLE_INFO = "Google Info Screen"
   const val SEARCH_WORKER_RESULT = "Search Worker Result Screen"
+  const val DISPLAY_UPLOADED_IMAGES = "Displayed images Screen"
   const val SEARCH_LOCATION = "SEARCH_Location Screen"
 }
 

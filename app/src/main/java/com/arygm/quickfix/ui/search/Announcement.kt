@@ -1,8 +1,11 @@
 package com.arygm.quickfix.ui.search
 
+import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -15,50 +18,49 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.search.Announcement
 import com.arygm.quickfix.model.search.AnnouncementViewModel
+import com.arygm.quickfix.ui.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
-import com.arygm.quickfix.ui.elements.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun AnnouncementScreen(
     announcementViewModel: AnnouncementViewModel =
@@ -66,10 +68,10 @@ fun AnnouncementScreen(
     loggedInAccountViewModel: LoggedInAccountViewModel =
         viewModel(factory = LoggedInAccountViewModel.Factory),
     profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
+    accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
     navigationActions: NavigationActions,
     isUser: Boolean = true
 ) {
-
   val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
   val userId =
       loggedInAccount?.uid
@@ -77,7 +79,6 @@ fun AnnouncementScreen(
 
   var title by rememberSaveable { mutableStateOf("") }
   var category by rememberSaveable { mutableStateOf("") }
-  // var location by remember { mutableStateOf("") }
   var location by remember { mutableStateOf<Location?>(null) }
   var description by rememberSaveable { mutableStateOf("") }
 
@@ -89,6 +90,7 @@ fun AnnouncementScreen(
     mutableStateOf(false)
   } // TODO: add the implemented location
   var descriptionIsEmpty by rememberSaveable { mutableStateOf(true) }
+  val uploadedImages by announcementViewModel.uploadedImages.collectAsState()
 
   // State to control the visibility of the image upload sheet
   var showUploadImageSheet by rememberSaveable { mutableStateOf(false) }
@@ -103,6 +105,69 @@ fun AnnouncementScreen(
       locationIsSelected = false
     }
   }
+
+  val sheetState = rememberModalBottomSheetState()
+
+  // Function to reset announcement parameters
+  val resetAnnouncementParameters = {
+    title = ""
+    category = ""
+    description = ""
+    location = null
+    titleIsEmpty = true
+    descriptionIsEmpty = true
+    // categoryIsSelected = false
+    locationIsSelected = false
+    navigationActions.saveToCurBackStack("selectedLocation", null)
+  }
+
+  // Function to update user profile
+  val updateUserProfileWithAnnouncement: (Announcement) -> Unit = { announcement ->
+    profileViewModel.fetchUserProfile(userId) { profile ->
+      if (profile is UserProfile) {
+        val announcementList = profile.announcements + announcement.announcementId
+
+        profileViewModel.updateProfile(
+            UserProfile(profile.locations, announcementList, profile.wallet, profile.uid),
+            onSuccess = {
+              accountViewModel.fetchUserAccount(profile.uid) { account ->
+                loggedInAccountViewModel.setLoggedInAccount(account!!)
+              }
+            },
+            onFailure = { e ->
+              Log.e("ProfileViewModel", "Failed to update profile: ${e.message}")
+            })
+      } else {
+        Log.e("Wrong profile", "Should be a user profile")
+      }
+    }
+  }
+
+  // Function to handle successful image upload
+  val handleSuccessfulImageUpload: (String, List<String>) -> Unit =
+      { announcementId, uploadedImageUrls ->
+        // Make the announcement
+        val announcement =
+            Announcement(
+                announcementId = announcementId,
+                userId = userId,
+                title = title,
+                category = category, // replace by the category type
+                description = description,
+                location = location!!,
+                availability = emptyList(),
+                quickFixImages = uploadedImageUrls)
+        announcementViewModel.announce(announcement)
+
+        // Clear the added pictures
+        announcementViewModel.clearUploadedImages()
+
+        // Update the user profile with the new announcement
+        updateUserProfileWithAnnouncement(announcement)
+
+        // Reset all parameters after making an announcement
+        resetAnnouncementParameters()
+      }
 
   BoxWithConstraints {
     val widthRatio = maxWidth / 411
@@ -233,9 +298,8 @@ fun AnnouncementScreen(
                     Text(
                         text = location?.name ?: "Location",
                         color =
-                            if (location == null)
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            else MaterialTheme.colorScheme.onBackground,
+                            if (location == null) colorScheme.onSurface.copy(alpha = 0.6f)
+                            else colorScheme.onBackground,
                         style = MaterialTheme.typography.bodyLarge,
                         maxLines = 1,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
@@ -246,7 +310,7 @@ fun AnnouncementScreen(
             QuickFixButtonWithIcon(
                 buttonText = "Availability",
                 onClickAction = {
-                  // TODO: Apply the backend of the pictures
+                  // TODO: Apply the backend of the availability
                 },
                 buttonColor = colorScheme.surface,
                 textColor = colorScheme.onBackground,
@@ -262,20 +326,130 @@ fun AnnouncementScreen(
 
             Spacer(modifier = Modifier.padding(10.dp))
 
-            QuickFixButtonWithIcon(
-                buttonText = "Upload pictures",
-                onClickAction = { showUploadImageSheet = true },
-                buttonColor = colorScheme.surface,
-                textColor = colorScheme.onBackground,
-                textStyle = MaterialTheme.typography.titleMedium,
-                modifier =
-                    Modifier.width(360.dp)
-                        .height(90.dp)
-                        .testTag("picturesButton")
-                        .graphicsLayer(alpha = 1f),
-                iconId = R.drawable.upload_image,
-                iconContentDescription = "upload_image",
-                iconColor = colorScheme.onBackground)
+            if (uploadedImages.isEmpty()) {
+              QuickFixButtonWithIcon(
+                  buttonText = "Upload pictures",
+                  onClickAction = { showUploadImageSheet = true },
+                  buttonColor = colorScheme.surface,
+                  textColor = colorScheme.onBackground,
+                  textStyle = MaterialTheme.typography.titleMedium,
+                  modifier =
+                      Modifier.width(360.dp)
+                          .height(90.dp)
+                          .testTag("picturesButton")
+                          .graphicsLayer(alpha = 1f),
+                  iconId = R.drawable.upload_image,
+                  iconContentDescription = "upload_image",
+                  iconColor = colorScheme.onBackground)
+            } else {
+              Box(
+                  modifier =
+                      Modifier.width(360.dp)
+                          .fillMaxWidth(0.8f)
+                          .shadow(
+                              elevation = 2.dp,
+                              shape = RoundedCornerShape(10.dp),
+                              clip = false // Ensure the shadow is not clipped
+                              )
+                          .clip(RoundedCornerShape(10.dp))
+                          .height(90.dp) // Same height as the button when no images exist
+                          .clip(RoundedCornerShape(8.dp))
+                          .background(colorScheme.surface)
+                          .clickable { showUploadImageSheet = true }
+                          .testTag("uploadedImagesBox")) {
+                    Row(
+                        modifier =
+                            Modifier.fillMaxSize()
+                                .padding(start = 15.dp, top = 4.dp, bottom = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start) {
+                          // Leading Icon
+                          Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
+                          Icon(
+                              painter = painterResource(id = R.drawable.upload_image),
+                              contentDescription = "Upload image",
+                              modifier = Modifier.size(20.dp),
+                              tint = colorScheme.onBackground)
+
+                          Spacer(modifier = Modifier.width(15.dp))
+
+                          // LazyRow for displaying images
+                          LazyRow(
+                              modifier = Modifier.fillMaxSize().testTag("uploadedImagesLazyRow"),
+                              contentPadding = PaddingValues(horizontal = 8.dp)) {
+                                val maxVisibleImages = 3
+                                val visibleImages = uploadedImages.take(maxVisibleImages)
+                                val remainingImageCount = uploadedImages.size - maxVisibleImages
+
+                                // Display the visible images
+                                items(visibleImages.size) { index ->
+                                  Card(
+                                      modifier =
+                                          Modifier.size(90.dp)
+                                              .padding(
+                                                  end =
+                                                      if (index != visibleImages.lastIndex) 8.dp
+                                                      else 0.dp)
+                                              .testTag("uploadedImageCard$index"),
+                                      shape = RoundedCornerShape(8.dp)) {
+                                        Box(modifier = Modifier.fillMaxSize()) {
+                                          // Display the image
+                                          Image(
+                                              painter =
+                                                  rememberAsyncImagePainter(visibleImages[index]),
+                                              contentDescription = "Image $index",
+                                              modifier =
+                                                  Modifier.fillMaxSize()
+                                                      .testTag("uploadedImage$index"),
+                                              contentScale = ContentScale.Crop)
+
+                                          // Overlay logic for the third image
+                                          if (index == 2 && remainingImageCount > 0) {
+                                            Box(
+                                                modifier =
+                                                    Modifier.fillMaxSize()
+                                                        .background(Color.Black.copy(alpha = 0.6f))
+                                                        .clickable {
+                                                          navigationActions.navigateTo(
+                                                              Screen.DISPLAY_UPLOADED_IMAGES)
+                                                        } // Set the boolean to true on click
+                                                        .testTag("remainingImagesOverlay"),
+                                                contentAlignment = Alignment.Center) {
+                                                  Text(
+                                                      text = "+$remainingImageCount",
+                                                      color = Color.White,
+                                                      style = MaterialTheme.typography.bodyLarge)
+                                                }
+                                          }
+
+                                          // Delete button
+                                          IconButton(
+                                              onClick = {
+                                                announcementViewModel.deleteUploadedImages(
+                                                    listOf(visibleImages[index]))
+                                              }, // Provide the delete action
+                                              modifier =
+                                                  Modifier.align(Alignment.TopEnd)
+                                                      .padding(4.dp)
+                                                      .size(24.dp)
+                                                      .testTag("deleteImageButton$index")) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Close,
+                                                    contentDescription = "Remove Image",
+                                                    tint = Color.White,
+                                                    modifier =
+                                                        Modifier.background(
+                                                            color = Color.Black.copy(alpha = 0.6f),
+                                                            shape = CircleShape))
+                                              }
+                                        }
+                                      }
+                                }
+                              }
+                        }
+                  }
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).padding(start = 8.dp),
             ) {
@@ -295,46 +469,25 @@ fun AnnouncementScreen(
             QuickFixButton(
                 buttonText = "Post your announcement",
                 onClickAction = {
+                  val announcementId = announcementViewModel.getNewUid()
+                  val images = announcementViewModel.uploadedImages.value
 
-                  // Make the announcement
-                  val announcement =
-                      Announcement(
-                          announcementId = announcementViewModel.getNewUid(),
-                          userId = userId,
-                          title = title,
-                          category = category, // replace by the category type
-                          description = description,
-                          location = location!!,
-                          availability = emptyList(),
-                          quickFixImages = emptyList())
-                  announcementViewModel.announce(announcement)
-
-                  // Update the user profile with the new announcement
-                  val currentUserProfile = loggedInAccountViewModel.userProfile.value
-                  if (currentUserProfile != null) {
-                    val announcementList =
-                        currentUserProfile.announcements + announcement.announcementId
-
-                    profileViewModel.updateProfile(
-                        UserProfile(
-                            currentUserProfile.locations,
-                            announcementList,
-                            currentUserProfile.wallet,
-                            currentUserProfile.uid),
-                        {},
-                        {})
+                  if (images.isEmpty()) {
+                    // If there are no images to upload, proceed directly
+                    handleSuccessfulImageUpload(announcementId, emptyList())
+                  } else {
+                    // Upload the added pictures to Firebase Storage
+                    announcementViewModel.uploadAnnouncementImages(
+                        announcementId = announcementId,
+                        images = images,
+                        onSuccess = { uploadedImageUrls ->
+                          handleSuccessfulImageUpload(announcementId, uploadedImageUrls)
+                        },
+                        onFailure = { e ->
+                          // Handle the failure case
+                          Log.e("AnnouncementViewModel", "Failed to upload images: ${e.message}")
+                        })
                   }
-
-                  // Reset all parameters after making an announcement
-                  title = ""
-                  category = ""
-                  description = ""
-                  location = null
-                  titleIsEmpty = true
-                  categoryIsSelected = true // TODO: add the different categories
-                  locationIsSelected = false
-                  descriptionIsEmpty = true
-                  navigationActions.saveToCurBackStack("selectedLocation", null)
                 },
                 buttonColor = colorScheme.primary,
                 textColor = colorScheme.onPrimary,
@@ -353,16 +506,11 @@ fun AnnouncementScreen(
         })
     // Upload Image Sheet
     QuickFixUploadImageSheet(
+        sheetState = sheetState,
         showModalBottomSheet = showUploadImageSheet,
         onDismissRequest = { showUploadImageSheet = false },
-        onTakePhotoClick = {
-          // TODO: Handle take photo action
-          showUploadImageSheet = false
-        },
-        onChooseFromLibraryClick = {
-          // TODO: choose from library action
-          showUploadImageSheet = false
-        })
+        onShowBottomSheetChange = { showUploadImageSheet = it },
+        onActionRequest = { value -> announcementViewModel.addUploadedImage(value) })
   }
 }
 
