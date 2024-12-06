@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.profile.becomeWorker
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +20,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,11 +58,11 @@ fun BusinessScreen(
   val focusManager = LocalFocusManager.current
   val displayName = remember { mutableStateOf("") }
   val description = remember { mutableStateOf("") }
-  val imagePathPP = remember { mutableStateOf("") }
-  val imagePathBP = remember { mutableStateOf("") }
+  val imageBitmapPP = remember { mutableStateOf<Bitmap?>(null) }
+  val imageBitmapBP = remember { mutableStateOf<Bitmap?>(null) }
   var displayNameError by remember { mutableStateOf(false) }
   var descriptionError by remember { mutableStateOf(false) }
-  val price = remember { mutableStateOf("") }
+  val price = remember { mutableDoubleStateOf(0.0) }
   val fieldOfWork = remember { mutableStateOf("") }
   val includedServices = remember { mutableStateOf(listOf<IncludedService>()) }
   val addOnServices = remember { mutableStateOf(listOf<AddOnService>()) }
@@ -107,8 +109,8 @@ fun BusinessScreen(
                       pagerState,
                       displayName,
                       description,
-                      imagePathPP,
-                      imagePathBP,
+                      imageBitmapPP,
+                      imageBitmapBP,
                       displayNameError = displayNameError,
                       onDisplayNameErrorChange = { displayNameError = it },
                       descriptionError = descriptionError,

@@ -222,7 +222,12 @@ fun QuickFixFirstStep(
               }
 
               items(listServices.size) { index ->
-                QuickFixCheckedListElement(listServices, checkedStatesServices, index)
+                QuickFixCheckedListElement(
+                    listServices,
+                    checkedStatesServices,
+                    index,
+                    widthRatio = widthRatio,
+                    heightRatio = heightRatio)
               }
 
               item {

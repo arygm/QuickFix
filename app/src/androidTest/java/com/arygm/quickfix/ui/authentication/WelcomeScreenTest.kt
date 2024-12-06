@@ -7,26 +7,30 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.datastore.preferences.core.Preferences
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesRepository
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.flowOf
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class WelcomeScreenTest {
@@ -37,28 +41,31 @@ class WelcomeScreenTest {
   private lateinit var mockFirestore: FirebaseFirestore
   private lateinit var accountRepository: AccountRepository
   private lateinit var accountViewModel: AccountViewModel
-  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
   private lateinit var userProfileRepositoryFirestore: UserProfileRepositoryFirestore
   private lateinit var workerProfileRepositoryFirestore: WorkerProfileRepositoryFirestore
   private lateinit var userViewModel: ProfileViewModel
+  private lateinit var preferencesRepository: PreferencesRepository
+  private lateinit var preferencesViewModel: PreferencesViewModel
 
   private var intentsInitialized = false // Keep track of Intents initialization
 
   @Before
   fun setup() {
-    mockFirestore = mock(FirebaseFirestore::class.java)
-    navigationActions = mock(NavigationActions::class.java)
+    mockFirestore = mock()
+    navigationActions = mock()
     userProfileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore)
     workerProfileRepositoryFirestore = WorkerProfileRepositoryFirestore(mockFirestore)
-    accountRepository = mock(AccountRepository::class.java)
+    accountRepository = mock()
     accountViewModel = AccountViewModel(accountRepository)
     userViewModel = ProfileViewModel(userProfileRepositoryFirestore)
-    loggedInAccountViewModel =
-        LoggedInAccountViewModel(
-            userProfileRepo = userProfileRepositoryFirestore,
-            workerProfileRepo = workerProfileRepositoryFirestore)
+    preferencesRepository = mock()
+    preferencesViewModel = PreferencesViewModel(preferencesRepository)
 
-    `when`(navigationActions.currentRoute()).thenReturn(Screen.WELCOME)
+    // Explicitly specify the type for getPreferenceByKey
+    whenever(preferencesRepository.getPreferenceByKey(any<Preferences.Key<Boolean>>()))
+        .thenReturn(flowOf(false))
+
+    whenever(navigationActions.currentRoute()).thenReturn(Screen.WELCOME)
   }
 
   @After
@@ -73,7 +80,7 @@ class WelcomeScreenTest {
   @Test
   fun testInitialState() {
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Check if the background image is displayed
@@ -104,7 +111,7 @@ class WelcomeScreenTest {
   @Test
   fun testLogInButtonClickNavigatesToLogin() {
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Click the "LOG IN TO QUICKFIX" button
@@ -121,7 +128,7 @@ class WelcomeScreenTest {
   @Test
   fun testRegistrationButtonClickNavigatesToRegister() {
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Click the "REGISTER TO QUICKFIX" button
@@ -142,7 +149,7 @@ class WelcomeScreenTest {
     intentsInitialized = true // Mark Intents as initialized
 
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Perform click on the Google Sign-In button
