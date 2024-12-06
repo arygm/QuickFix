@@ -11,6 +11,10 @@ class ChatRepositoryFirestore(private val db: FirebaseFirestore) : ChatRepositor
     onSuccess()
   }
 
+  override fun getRandomUid(): String {
+    return db.collection(collectionPath).document().id
+  }
+
   override fun createChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     performFirestoreOperation(chats.document(chat.chatId).set(chat), onSuccess, onFailure)
   }

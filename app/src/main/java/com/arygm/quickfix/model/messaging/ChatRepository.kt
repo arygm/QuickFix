@@ -3,6 +3,8 @@ package com.arygm.quickfix.model.messaging
 interface ChatRepository {
   fun init(onSuccess: () -> Unit)
 
+  fun getRandomUid(): String
+
   fun createChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
   fun deleteChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)

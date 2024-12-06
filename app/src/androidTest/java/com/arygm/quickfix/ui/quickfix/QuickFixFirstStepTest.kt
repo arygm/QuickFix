@@ -4,6 +4,12 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.arygm.quickfix.model.locations.LocationRepository
 import com.arygm.quickfix.model.locations.LocationViewModel
+import com.arygm.quickfix.model.messaging.ChatRepository
+import com.arygm.quickfix.model.messaging.ChatViewModel
+import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.quickfix.QuickFixRepository
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import java.time.LocalDate
 import org.junit.Before
@@ -16,6 +22,12 @@ class QuickFixFirstStepTest {
   private lateinit var navigationActions: NavigationActions
   private lateinit var locationRepository: LocationRepository
   private lateinit var locationViewModel: LocationViewModel
+  private lateinit var chatRepository: ChatRepository
+  private lateinit var chatViewModel: ChatViewModel
+  private lateinit var profileRepository: ProfileRepository
+  private lateinit var profileViewModel: ProfileViewModel
+  private lateinit var quickFixRepository: QuickFixRepository
+  private lateinit var quickFixViewModel: QuickFixViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -24,6 +36,12 @@ class QuickFixFirstStepTest {
     navigationActions = mock(NavigationActions::class.java)
     locationRepository = mock(LocationRepository::class.java)
     locationViewModel = LocationViewModel(locationRepository)
+    chatRepository = mock(ChatRepository::class.java)
+    chatViewModel = ChatViewModel(chatRepository)
+    profileRepository = mock(ProfileRepository::class.java)
+    profileViewModel = ProfileViewModel(profileRepository)
+    quickFixRepository = mock(QuickFixRepository::class.java)
+    quickFixViewModel = QuickFixViewModel(quickFixRepository)
   }
 
   @Test
@@ -31,7 +49,12 @@ class QuickFixFirstStepTest {
 
     composeTestRule.setContent {
       QuickFixFirstStep(
-          navigationActions = navigationActions, locationViewModel = locationViewModel)
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel,
+          chatViewModel = chatViewModel,
+          profileViewModel = profileViewModel,
+          workerName = "Test Worker",
+          quickFixViewModel = quickFixViewModel)
     }
 
     // Verify default UI elements
@@ -48,7 +71,12 @@ class QuickFixFirstStepTest {
   fun textInputBehavior() {
     composeTestRule.setContent {
       QuickFixFirstStep(
-          navigationActions = navigationActions, locationViewModel = locationViewModel)
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel,
+          chatViewModel = chatViewModel,
+          profileViewModel = profileViewModel,
+          workerName = "Test Worker",
+          quickFixViewModel = quickFixViewModel)
     }
 
     // Enter text in the title field
@@ -64,7 +92,12 @@ class QuickFixFirstStepTest {
   fun serviceSelection() {
     composeTestRule.setContent {
       QuickFixFirstStep(
-          navigationActions = navigationActions, locationViewModel = locationViewModel)
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel,
+          chatViewModel = chatViewModel,
+          profileViewModel = profileViewModel,
+          workerName = "Test Worker",
+          quickFixViewModel = quickFixViewModel)
     }
 
     // Select a service
@@ -77,7 +110,12 @@ class QuickFixFirstStepTest {
   fun datePickerIntegration() {
     composeTestRule.setContent {
       QuickFixFirstStep(
-          navigationActions = navigationActions, locationViewModel = locationViewModel)
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel,
+          chatViewModel = chatViewModel,
+          profileViewModel = profileViewModel,
+          workerName = "Test Worker",
+          quickFixViewModel = quickFixViewModel)
     }
 
     // Open the date picker
