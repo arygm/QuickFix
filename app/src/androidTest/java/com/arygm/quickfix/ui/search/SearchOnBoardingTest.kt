@@ -1,7 +1,8 @@
 package com.arygm.quickfix.ui.search
 
 import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -9,8 +10,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import com.arygm.quickfix.model.account.AccountViewModel
+import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.text.AnnotatedString
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
