@@ -12,7 +12,8 @@ import androidx.compose.ui.test.performTextInput
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesRepository
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
@@ -40,11 +41,12 @@ class RegisterScreenTest {
   private lateinit var mockFirestore: FirebaseFirestore
   private lateinit var accountRepository: AccountRepository
   private lateinit var accountViewModel: AccountViewModel
-  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
   private lateinit var userProfileRepositoryFirestore: UserProfileRepositoryFirestore
   private lateinit var workerProfileRepositoryFirestore: WorkerProfileRepositoryFirestore
   private lateinit var userViewModel: ProfileViewModel
   private lateinit var navigationActions: NavigationActions
+  private lateinit var preferencesRepository: PreferencesRepository
+  private lateinit var preferencesViewModel: PreferencesViewModel
 
   @Before
   fun setup() {
@@ -55,17 +57,16 @@ class RegisterScreenTest {
     accountRepository = mock(AccountRepository::class.java)
     accountViewModel = AccountViewModel(accountRepository)
     userViewModel = ProfileViewModel(userProfileRepositoryFirestore)
-    loggedInAccountViewModel =
-        LoggedInAccountViewModel(
-            userProfileRepo = userProfileRepositoryFirestore,
-            workerProfileRepo = workerProfileRepositoryFirestore)
+    preferencesRepository = mock(PreferencesRepository::class.java)
+    preferencesViewModel = PreferencesViewModel(preferencesRepository)
+
     `when`(navigationActions.currentRoute()).thenReturn(Screen.REGISTER)
   }
 
   @Test
   fun testInitialUI() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Check that the scaffold and content boxes are displayed
@@ -109,7 +110,7 @@ class RegisterScreenTest {
   @Test
   fun testInvalidEmailShowsError() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Input an invalid email
@@ -123,7 +124,7 @@ class RegisterScreenTest {
   @Test
   fun testInvalidDateShowsError() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Input an invalid birth date
@@ -137,7 +138,7 @@ class RegisterScreenTest {
   @Test
   fun testPasswordMismatch() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Enter different passwords
@@ -163,8 +164,8 @@ class RegisterScreenTest {
             _: String,
             _: String,
             _: AccountViewModel,
-            _: LoggedInAccountViewModel,
             _: ProfileViewModel,
+            _: PreferencesViewModel,
             onSuccess: () -> Unit,
             _: () -> Unit ->
           createAccountFuncCalled = true
@@ -182,8 +183,8 @@ class RegisterScreenTest {
       RegisterScreen(
           navigationActions,
           accountViewModel,
-          loggedInAccountViewModel,
           userViewModel,
+          preferencesViewModel,
           createAccountFunc = testCreateAccountFunc)
     }
 
@@ -213,7 +214,7 @@ class RegisterScreenTest {
   @Test
   fun testRegisterButtonDisabledWhenFormIncomplete() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Fill only partial inputs
@@ -232,7 +233,7 @@ class RegisterScreenTest {
   @Test
   fun testBackButtonNavigatesBack() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Click the back button
@@ -245,7 +246,7 @@ class RegisterScreenTest {
   @Test
   fun testLoginButtonNavigatesToLogin() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Click the "Login !" button
@@ -278,7 +279,7 @@ class RegisterScreenTest {
 
     // Act
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("emailInput").performTextInput(existingEmail)
@@ -314,7 +315,7 @@ class RegisterScreenTest {
 
     // Act
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, loggedInAccountViewModel, userViewModel)
+      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("emailInput").performTextInput(newEmail)
@@ -351,8 +352,8 @@ class RegisterScreenTest {
             _: String,
             _: String,
             _: AccountViewModel,
-            _: LoggedInAccountViewModel,
             _: ProfileViewModel,
+            _: PreferencesViewModel,
             onSuccess: () -> Unit,
             _: () -> Unit ->
           createAccountFuncCalled = true
@@ -363,8 +364,8 @@ class RegisterScreenTest {
       RegisterScreen(
           navigationActions,
           accountViewModel,
-          loggedInAccountViewModel,
           userViewModel,
+          preferencesViewModel,
           createAccountFunc = testCreateAccountFunc)
     }
 
@@ -420,8 +421,8 @@ class RegisterScreenTest {
             _: String,
             _: String,
             _: AccountViewModel,
-            _: LoggedInAccountViewModel,
             _: ProfileViewModel,
+            _: PreferencesViewModel,
             _: () -> Unit,
             onFailure: () -> Unit ->
           createAccountFuncCalled = true
@@ -432,10 +433,9 @@ class RegisterScreenTest {
       RegisterScreen(
           navigationActions,
           accountViewModel,
-          loggedInAccountViewModel,
           userViewModel,
-          createAccountFunc = testCreateAccountFunc,
-      )
+          preferencesViewModel,
+          createAccountFunc = testCreateAccountFunc)
     }
     // Fill out valid inputs
     composeTestRule.onNodeWithTag("firstNameInput").performTextInput("John")

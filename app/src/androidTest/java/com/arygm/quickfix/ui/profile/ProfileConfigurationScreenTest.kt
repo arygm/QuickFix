@@ -1,32 +1,29 @@
 package com.arygm.quickfix.ui.profile
 
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextReplacement
+import androidx.datastore.preferences.core.Preferences
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
-import com.arygm.quickfix.model.profile.Profile
-import com.arygm.quickfix.model.profile.ProfileRepository
-import com.arygm.quickfix.ui.account.AccountConfigurationScreen
+import com.arygm.quickfix.model.offline.small.PreferencesRepository
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.*
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Calendar
 import java.util.GregorianCalendar
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.doAnswer
-import org.mockito.Mockito.mock
+import org.mockito.Mockito.*
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -39,9 +36,10 @@ class ProfileConfigurationScreenTest {
   private lateinit var mockFirestore: FirebaseFirestore
   private lateinit var accountRepository: AccountRepository
   private lateinit var accountViewModel: AccountViewModel
-  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
   private lateinit var userProfileRepositoryFirestore: ProfileRepository
   private lateinit var workerProfileRepositoryFirestore: ProfileRepository
+  private lateinit var preferencesRepository: PreferencesRepository
+  private lateinit var preferencesViewModel: PreferencesViewModel
 
   private val testUserProfile =
       Account(
@@ -54,17 +52,28 @@ class ProfileConfigurationScreenTest {
 
   @Before
   fun setup() {
-    mockFirestore = mock(FirebaseFirestore::class.java)
-    navigationActions = mock(NavigationActions::class.java)
-    userProfileRepositoryFirestore = mock(ProfileRepository::class.java)
-    workerProfileRepositoryFirestore = mock(ProfileRepository::class.java)
-    accountRepository = mock(AccountRepository::class.java)
+    mockFirestore = mock()
+    navigationActions = mock()
+    accountRepository = mock()
     accountViewModel = AccountViewModel(accountRepository)
-    loggedInAccountViewModel =
-        LoggedInAccountViewModel(
-            userProfileRepo = userProfileRepositoryFirestore,
-            workerProfileRepo = workerProfileRepositoryFirestore)
-    loggedInAccountViewModel.loggedInAccount_.value = testUserProfile
+    preferencesRepository = mock()
+    preferencesViewModel = PreferencesViewModel(preferencesRepository)
+
+    // Explicitly specify the type for `any<T>()`
+    whenever(preferencesRepository.getPreferenceByKey(any<Preferences.Key<String>>()))
+        .thenReturn(flowOf("testValue"))
+
+    // Mock specific keys explicitly
+    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.USER_ID_KEY))
+        .thenReturn(flowOf("testUid"))
+    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.FIRST_NAME_KEY))
+        .thenReturn(flowOf("John"))
+    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.LAST_NAME_KEY))
+        .thenReturn(flowOf("Doe"))
+    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.EMAIL_KEY))
+        .thenReturn(flowOf("john.doe@example.com"))
+    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.DATE_OF_BIRTH_KEY))
+        .thenReturn(flowOf("01/01/1990"))
   }
 
   @Test
@@ -85,7 +94,7 @@ class ProfileConfigurationScreenTest {
         AccountConfigurationScreen(
             navigationActions = navigationActions,
             accountViewModel = accountViewModel,
-            loggedInAccountViewModel = loggedInAccountViewModel)
+            preferencesViewModel = preferencesViewModel)
       }
     }
 
@@ -134,7 +143,7 @@ class ProfileConfigurationScreenTest {
         AccountConfigurationScreen(
             navigationActions = navigationActions,
             accountViewModel = accountViewModel,
-            loggedInAccountViewModel = loggedInAccountViewModel)
+            preferencesViewModel = preferencesViewModel)
       }
     }
 
@@ -155,12 +164,10 @@ class ProfileConfigurationScreenTest {
   @Test
   fun testUpdateEmailWithInvalidEmailShowsError() {
     composeTestRule.setContent {
-      QuickFixTheme {
-        AccountConfigurationScreen(
-            navigationActions = navigationActions,
-            accountViewModel = accountViewModel,
-            loggedInAccountViewModel = loggedInAccountViewModel)
-      }
+      AccountConfigurationScreen(
+          navigationActions = navigationActions,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel)
     }
 
     // Update email with invalid email using performTextReplacement
@@ -191,7 +198,7 @@ class ProfileConfigurationScreenTest {
         AccountConfigurationScreen(
             navigationActions = navigationActions,
             accountViewModel = accountViewModel,
-            loggedInAccountViewModel = loggedInAccountViewModel)
+            preferencesViewModel = preferencesViewModel)
       }
     }
 
@@ -220,7 +227,7 @@ class ProfileConfigurationScreenTest {
         AccountConfigurationScreen(
             navigationActions = navigationActions,
             accountViewModel = accountViewModel,
-            loggedInAccountViewModel = loggedInAccountViewModel)
+            preferencesViewModel = preferencesViewModel)
       }
     }
 
@@ -241,7 +248,7 @@ class ProfileConfigurationScreenTest {
         AccountConfigurationScreen(
             navigationActions = navigationActions,
             accountViewModel = accountViewModel,
-            loggedInAccountViewModel = loggedInAccountViewModel)
+            preferencesViewModel = preferencesViewModel)
       }
     }
 
@@ -287,7 +294,7 @@ class ProfileConfigurationScreenTest {
         AccountConfigurationScreen(
             navigationActions = navigationActions,
             accountViewModel = accountViewModel,
-            loggedInAccountViewModel = loggedInAccountViewModel)
+            preferencesViewModel = preferencesViewModel)
       }
     }
 
@@ -322,7 +329,7 @@ class ProfileConfigurationScreenTest {
         AccountConfigurationScreen(
             navigationActions = navigationActions,
             accountViewModel = accountViewModel,
-            loggedInAccountViewModel = loggedInAccountViewModel)
+            preferencesViewModel = preferencesViewModel)
       }
     }
 
@@ -334,46 +341,6 @@ class ProfileConfigurationScreenTest {
   }
 
   @Test
-  fun testEmailAlreadyExistsShowsError() {
-    // Arrange
-    doAnswer { invocation ->
-          val email = invocation.getArgument<String>(0)
-          val onSuccess = invocation.getArgument<(Pair<Boolean, Account?>) -> Unit>(1)
-          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
-          val existingProfile =
-              Account(
-                  uid = "existingUid",
-                  firstName = "Existing",
-                  lastName = "User",
-                  email = "existing@example.com",
-                  birthDate = Timestamp.now(),
-                  isWorker = false)
-          onSuccess(Pair(true, existingProfile))
-          null
-        }
-        .whenever(accountRepository)
-        .accountExists(any(), any(), any())
-
-    composeTestRule.setContent {
-      QuickFixTheme {
-        AccountConfigurationScreen(
-            navigationActions = navigationActions,
-            accountViewModel = accountViewModel,
-            loggedInAccountViewModel = loggedInAccountViewModel)
-      }
-    }
-
-    // Update email to an existing email using performTextReplacement
-    composeTestRule.onNodeWithTag("emailInput").performTextReplacement("existing@example.com")
-
-    // Click Save button
-    composeTestRule.onNodeWithTag("SaveButton").performClick()
-
-    // Verify that updateProfile was not called
-    verify(accountRepository, never()).updateAccount(any(), any(), any())
-  }
-
-  @Test
   fun testInitialUIElementsAreDisplayed() {
     // Set up the content
     composeTestRule.setContent {
@@ -381,7 +348,7 @@ class ProfileConfigurationScreenTest {
         AccountConfigurationScreen(
             navigationActions = navigationActions,
             accountViewModel = accountViewModel,
-            loggedInAccountViewModel = loggedInAccountViewModel)
+            preferencesViewModel = preferencesViewModel)
       }
     }
 

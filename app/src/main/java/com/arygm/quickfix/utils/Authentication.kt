@@ -10,8 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -31,10 +31,11 @@ fun rememberFirebaseAuthLauncher(
     onAuthCompleteTwo: (AuthResult) -> Unit,
     onAuthError: (ApiException) -> Unit,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
     userViewModel: ProfileViewModel,
+    preferencesViewModel: PreferencesViewModel
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
   val scope = rememberCoroutineScope()
+
   return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
       result ->
     val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
@@ -48,7 +49,7 @@ fun rememberFirebaseAuthLauncher(
         user?.let {
           accountViewModel.fetchUserAccount(it.uid) { existingAccount ->
             if (existingAccount != null) {
-              loggedInAccountViewModel.setLoggedInAccount(existingAccount)
+              setAccountPreferences(preferencesViewModel, existingAccount)
               onAuthCompleteOne(authResult)
             } else {
               // Extract user information from Google account
@@ -58,14 +59,14 @@ fun rememberFirebaseAuthLauncher(
               val uid = user.uid
 
               // Create a new Account object
-              val account =
+              val newAccount =
                   Account(
                       uid = uid,
                       firstName = firstName,
                       lastName = lastName,
                       email = email,
                       birthDate = Timestamp.now())
-
+              setAccountPreferences(preferencesViewModel, newAccount, false)
               val defaultLocation = Location(0.0, 0.0, "defaultLocation")
               val defaultUserProfile =
                   UserProfile(
@@ -76,11 +77,8 @@ fun rememberFirebaseAuthLauncher(
                   defaultUserProfile,
                   onSuccess = {
                     accountViewModel.addAccount(
-                        account,
-                        onSuccess = {
-                          loggedInAccountViewModel.setLoggedInAccount(account)
-                          onAuthCompleteTwo(authResult)
-                        },
+                        newAccount,
+                        onSuccess = { onAuthCompleteTwo(authResult) },
                         onFailure = { Log.e("Registration", "Failed to save account") })
                   },
                   onFailure = { Log.e("Registration", "Failed to create User Profile") })
@@ -98,7 +96,7 @@ fun signInWithEmailAndFetchAccount(
     email: String,
     password: String,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
+    preferencesViewModel: PreferencesViewModel,
     onResult: (Boolean) -> Unit
 ) {
   FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
@@ -110,7 +108,7 @@ fun signInWithEmailAndFetchAccount(
             it.uid,
             onResult = { account ->
               if (account != null) {
-                loggedInAccountViewModel.setLoggedInAccount(account)
+                setAccountPreferences(preferencesViewModel, account)
                 onResult(true)
               } else {
                 Log.e("Login Screen", "Error Logging in Account.")
@@ -137,8 +135,8 @@ fun createAccountWithEmailAndPassword(
     password: String,
     birthDate: String,
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
     userViewModel: ProfileViewModel,
+    preferencesViewModel: PreferencesViewModel,
     onSuccess: () -> Unit,
     onFailure: () -> Unit
 ) {
@@ -170,7 +168,7 @@ fun createAccountWithEmailAndPassword(
                 accountViewModel.addAccount(
                     createdAccount,
                     onSuccess = {
-                      loggedInAccountViewModel.setLoggedInAccount(createdAccount)
+                      setAccountPreferences(preferencesViewModel, createdAccount)
                       onSuccess()
                     },
                     onFailure = {

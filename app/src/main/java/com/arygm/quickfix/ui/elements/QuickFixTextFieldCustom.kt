@@ -144,125 +144,127 @@ fun QuickFixTextFieldCustom(
       }
       Spacer(modifier = Modifier.padding(1.5.dp))
     }
-      Box(
-          modifier =
-              Modifier.let {
-                    if (isError)
-                        it.clip(shape)
-                            .background(MaterialTheme.colorScheme.surface)
-                            .border(borderThickness, errorColor, shape)
-                            .background(errorColor.copy(alpha = 0.2f))
-                    else {
-                      if (hasShadow) {
-                        Log.d("QuickFixTextFieldCustom", "debug: $debug")
-                        it.shadow(elevation = 2.dp, shape = shape, clip = false)
-                            .clip(shape)
-                            .background(MaterialTheme.colorScheme.surface)
-                            .border(borderThickness, borderColor, shape)
-                      } else {
-                        it.clip(shape)
-                            .background(MaterialTheme.colorScheme.surface)
-                            .border(borderThickness, borderColor, shape)
-                      }
+    Box(
+        modifier =
+            Modifier.let {
+                  if (isError)
+                      it.clip(shape)
+                          .background(MaterialTheme.colorScheme.surface)
+                          .border(borderThickness, errorColor, shape)
+                          .background(errorColor.copy(alpha = 0.2f))
+                  else {
+                    if (hasShadow) {
+                      Log.d("QuickFixTextFieldCustom", "debug: $debug")
+                      it.shadow(elevation = 2.dp, shape = shape, clip = false)
+                          .clip(shape)
+                          .background(MaterialTheme.colorScheme.surface)
+                          .border(borderThickness, borderColor, shape)
+                    } else {
+                      it.clip(shape)
+                          .background(MaterialTheme.colorScheme.surface)
+                          .border(borderThickness, borderColor, shape)
                     }
-                  }
-                  .width(widthField)
-                  .then(
-                      if (heightInEnabled) {
-                        Modifier.defaultMinSize(minHeight = minHeight).heightIn(max = maxHeight)
-                      } else {
-                        Modifier.height(heightField)
-                      })
-                  .fillMaxWidth() // Fill the width of the container
-                  .padding(
-                      start = moveContentHorizontal,
-                      top = moveContentBottom,
-                      bottom = moveContentTop)
-                  .testTag(clickableTestTag) // Apply padding
-                  .clickable(enabled = !isTextField && enabled) { onTextFieldClick() },
-          contentAlignment = Alignment.Center) {
-            Row(
-                horizontalArrangement = Arrangement.Center, // Aligning icon and text horizontally
-                verticalAlignment = Alignment.CenterVertically, // Aligning icon and text vertically
-                modifier = Modifier.fillMaxWidth()) {
-                  if (showLeadingIcon()) { // Conditionally show the leading icon
-                    if (leadingIcon != null) {
-                      Icon(
-                          imageVector = leadingIcon,
-                          contentDescription = descriptionLeadIcon,
-                          tint = leadIconColor, // Icon color
-                          modifier =
-                              Modifier.size(sizeIconGroup) // Set icon size
-                                  .padding(end = 8.dp)
-                                  .testTag(
-                                      C.Tag.icon_custom_text_field) // Space between icon and text
-                          )
-                    }
-                  }
-                  Spacer(
-                      Modifier.padding(
-                          horizontal = spaceBetweenLeadIconText)) // Space between icon and text
-                  Box(modifier = Modifier.weight(1f)) {
-                    BasicTextField(
-                        value = updatedValue,
-                        onValueChange = onValueChangeWithLimit,
-                        modifier =
-                            modifier
-                                .fillMaxWidth()
-                                .focusRequester(focusRequester)
-                                .testTag(C.Tag.text_field_custom)
-                                .focusable(isTextField && enabled)
-                                .let {
-                                  if (singleLine) {
-                                    it.horizontalScroll(scrollState)
-                                  } else it // Enable horizontal scrolling
-                                },
-                        textStyle =
-                            textStyle.copy(
-                                color =
-                                    if (isError) errorColor
-                                    else textColor), // Text style with color
-                        singleLine = singleLine, // Keep the text on a single line
-                        keyboardOptions = keyboardOptions,
-                        visualTransformation = visualTransformation,
-                        enabled = isTextField && enabled,
-                        maxLines = maxLines)
-                    if (value.isEmpty()) {
-                      Log.d("QuickFixTextFieldCustom", "placeHolderText: $placeHolderText")
-                      Text(
-                          modifier = Modifier.testTag(C.Tag.place_holder_text_field_custom),
-                          text = placeHolderText,
-                          style =
-                              textStyle.copy(
-                                  color =
-                                      if (isError) errorColor
-                                      else placeHolderColor), // Placeholder text style
-                          textAlign = TextAlign.Start // Align the placeholder text to the start
-                          )
-                    }
-                  }
-                  if ((showTrailingIcon() && value.isNotEmpty()) || alwaysShowTrailingIcon) {
-                    IconButton(
-                        onClick = { if (onClick) onValueChange("") },
-                        modifier =
-                            Modifier.testTag(C.Tag.clear_button_text_field_custom)
-                                .size(sizeIconGroup)
-                                .padding(end = moveTrailingIconLeft)
-                                .align(Alignment.CenterVertically)) {
-                          trailingIcon?.invoke()
-                        }
-                  }
-                  if (showTrailingText) {
-                    trailingText?.invoke()
                   }
                 }
-          }
-      if (showError && isError) {
-        Text(
-            errorText,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(top = 4.dp, start = 3.dp).testTag("errorText"))
-      }
+                .width(widthField)
+                .then(
+                    if (heightInEnabled) {
+                      Modifier.defaultMinSize(minHeight = minHeight).heightIn(max = maxHeight)
+                    } else {
+                      Modifier.height(heightField)
+                    })
+                .fillMaxWidth() // Fill the width of the container
+                .padding(
+                    start = moveContentHorizontal, top = moveContentBottom, bottom = moveContentTop)
+                .testTag(clickableTestTag) // Apply padding
+                .clickable(enabled = !isTextField && enabled) { onTextFieldClick() },
+        contentAlignment = if (singleLine) Alignment.Center else Alignment.TopStart) {
+          Row(
+              horizontalArrangement = Arrangement.Center, // Aligning icon and text horizontally
+              verticalAlignment = Alignment.CenterVertically, // Aligning icon and text vertically
+              modifier = Modifier.fillMaxWidth()) {
+                if (showLeadingIcon()) { // Conditionally show the leading icon
+                  if (leadingIcon != null) {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = descriptionLeadIcon,
+                        tint = leadIconColor, // Icon color
+                        modifier =
+                            Modifier.size(sizeIconGroup) // Set icon size
+                                .padding(end = 8.dp)
+                                .testTag(
+                                    C.Tag.icon_custom_text_field) // Space between icon and text
+                        )
+                  }
+                }
+                Spacer(
+                    Modifier.padding(
+                        horizontal = spaceBetweenLeadIconText)) // Space between icon and text
+                Box(modifier = Modifier.weight(1f)) {
+                  BasicTextField(
+                      value = updatedValue,
+                      onValueChange = onValueChangeWithLimit,
+                      modifier =
+                          modifier
+                              .fillMaxWidth()
+                              .focusRequester(focusRequester)
+                              .testTag(C.Tag.text_field_custom)
+                              .focusable(isTextField && enabled)
+                              .let {
+                                if (singleLine) {
+                                  it.horizontalScroll(scrollState)
+                                } else it // Enable horizontal scrolling
+                              },
+                      textStyle =
+                          textStyle.copy(
+                              color =
+                                  if (isError) errorColor else textColor), // Text style with color
+                      singleLine = singleLine, // Keep the text on a single line
+                      keyboardOptions = keyboardOptions,
+                      visualTransformation = visualTransformation,
+                      enabled = isTextField && enabled,
+                      maxLines = maxLines,
+                      decorationBox = { innerTextField ->
+                        Box(
+                            Modifier.fillMaxWidth().let {
+                              if (!singleLine) it.padding(8.dp) else it
+                            }, // Adjust padding if needed for alignment
+                            contentAlignment = Alignment.CenterStart) {
+                              if (updatedValue.isEmpty()) {
+                                Text(
+                                    text = placeHolderText,
+                                    style =
+                                        textStyle.copy(
+                                            color = if (isError) errorColor else placeHolderColor),
+                                    modifier =
+                                        Modifier.testTag(C.Tag.place_holder_text_field_custom))
+                              }
+                              innerTextField() // The actual input text field
+                        }
+                      })
+                }
+                if ((showTrailingIcon() && updatedValue.isNotEmpty()) || alwaysShowTrailingIcon) {
+                  IconButton(
+                      onClick = { if (onClick) onValueChangeWithLimit("") },
+                      modifier =
+                          Modifier.testTag(C.Tag.clear_button_text_field_custom)
+                              .size(sizeIconGroup)
+                              .padding(end = moveTrailingIconLeft)
+                              .align(Alignment.CenterVertically)) {
+                        trailingIcon?.invoke()
+                      }
+                }
+              if (showTrailingText) {
+                  trailingText?.invoke()
+              }
+              }
+        }
+    if (showError && isError) {
+      Text(
+          errorText,
+          color = MaterialTheme.colorScheme.error,
+          style = MaterialTheme.typography.bodySmall,
+          modifier = Modifier.padding(top = 4.dp, start = 3.dp).testTag("errorText"))
+    }
   }
 }

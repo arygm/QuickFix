@@ -19,7 +19,7 @@ interface AnnouncementRepository {
 
   fun uploadAnnouncementImages(
       announcementId: String,
-      bitmaps: List<Bitmap>,
+      images: List<Bitmap>, // List of image file paths as strings
       onSuccess: (List<String>) -> Unit,
       onFailure: (Exception) -> Unit
   )

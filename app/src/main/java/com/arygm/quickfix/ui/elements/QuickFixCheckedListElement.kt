@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
@@ -32,7 +33,9 @@ fun QuickFixCheckedListElement(
     radioButtonAlignment: Alignment.Vertical = Alignment.CenterVertically,
     displayHorizontalDivider: Boolean = true,
     canSelect: Boolean = true,
-    maxAchieved: Boolean = false
+    maxAchieved: Boolean = false,
+    heightRatio: Dp = 1.dp,
+    widthRatio: Dp = 1.dp
 ) {
   Column {
     Row(
@@ -45,10 +48,14 @@ fun QuickFixCheckedListElement(
                     onValueChange = { checkedStatesServices[index] = it },
                     role = Role.RadioButton // Role as a RadioButton
                     )
-                .padding(vertical = 3.dp)) {
+                .padding(vertical = 3.dp * heightRatio.value)) {
           Box(
               modifier =
-                  Modifier.size(24.dp) // Set the size of the RadioButton explicitly
+                  Modifier.size(
+                          width = 24.dp * widthRatio.value,
+                          height =
+                              24.dp *
+                                  heightRatio.value) // Set the size of the RadioButton explicitly
                       .align(radioButtonAlignment) // Align it vertically in the Row
               ) {
                 RadioButton(
@@ -62,13 +69,20 @@ fun QuickFixCheckedListElement(
                     }, // Handle toggle
                     modifier =
                         Modifier.size(
-                            24.dp), // Set the size directly to remove extra padding of RadioButton
+                            width = 24.dp * widthRatio.value,
+                            height =
+                                24.dp *
+                                    heightRatio
+                                        .value), // Set the size directly to remove extra padding
+                    // of RadioButton
                     colors =
                         RadioButtonDefaults.colors(
                             selectedColor = colorScheme.primary,
                             unselectedColor = colorScheme.tertiaryContainer))
               }
-          Spacer(modifier = Modifier.width(8.dp)) // Add space between RadioButton and Text
+          Spacer(
+              modifier =
+                  Modifier.width(8.dp * widthRatio.value)) // Add space between RadioButton and Text
           Text(
               text = listServices[index],
               style = poppinsTypography.labelSmall,
@@ -79,7 +93,7 @@ fun QuickFixCheckedListElement(
       HorizontalDivider(
           color = colorScheme.background,
           thickness = 1.5.dp,
-          modifier = Modifier.padding(start = 32.dp))
+          modifier = Modifier.padding(start = 32.dp * widthRatio.value))
     }
   }
 }

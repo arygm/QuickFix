@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.profile.becomeWorker.views.personal
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.arygm.quickfix.ressources.C
+import com.arygm.quickfix.ui.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.theme.poppinsTypography
@@ -58,8 +60,8 @@ fun PersonalInfoScreen(
     pagerState: PagerState,
     displayName: MutableState<String>,
     description: MutableState<String>,
-    imagePathPP: MutableState<String>,
-    imagePathBP: MutableState<String>,
+    imageBitmapPP: MutableState<Bitmap?>,
+    imageBitmapBP: MutableState<Bitmap?>,
     displayNameError: Boolean,
     onDisplayNameErrorChange: (Boolean) -> Unit,
     descriptionError: Boolean,
@@ -88,8 +90,7 @@ fun PersonalInfoScreen(
             modifier = Modifier.semantics { testTag = C.Tag.personalInfoScreenSectionTitle })
         Row(modifier = Modifier.fillMaxWidth()) {
           Text(
-              "Tell us a bit about yourself. This information will appear on your public profile, so that potential " +
-                  "buyers can get to know you better.",
+              "Tell us a bit about yourself. This information will appear on your public profile, so that potential buyers can get to know you better.",
               style =
                   poppinsTypography.headlineMedium.copy(
                       fontSize = 9.sp, fontWeight = FontWeight.Medium),
@@ -113,26 +114,25 @@ fun PersonalInfoScreen(
             },
             shape = RoundedCornerShape(8.dp),
             showLabel = true,
-            label =
-                @Composable {
-                  Text(
-                      text =
-                          buildAnnotatedString {
-                            append("Display name")
-                            withStyle(
-                                style =
-                                    SpanStyle(
-                                        color = colorScheme.primary,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Medium)) {
-                                  append("*")
-                                }
-                          },
-                      style =
-                          poppinsTypography.headlineMedium.copy(
-                              fontSize = 12.sp, fontWeight = FontWeight.Medium),
-                      color = colorScheme.onBackground)
-                },
+            label = {
+              Text(
+                  text =
+                      buildAnnotatedString {
+                        append("Display name")
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color = colorScheme.primary,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium)) {
+                              append("*")
+                            }
+                      },
+                  style =
+                      poppinsTypography.headlineMedium.copy(
+                          fontSize = 12.sp, fontWeight = FontWeight.Medium),
+                  color = colorScheme.onBackground)
+            },
             hasShadow = false,
             borderColor = colorScheme.tertiaryContainer,
             placeHolderText = "Ex. Moha A.",
@@ -174,7 +174,7 @@ fun PersonalInfoScreen(
                         .background(colorScheme.background)
                         .semantics { testTag = C.Tag.personalInfoScreenprofilePictureBackground }) {
                   SubcomposeAsyncImage(
-                      model = imagePathPP.value.takeIf { it.isNotEmpty() },
+                      model = imageBitmapPP.value,
                       contentDescription = "Profile Picture",
                       modifier =
                           Modifier.fillMaxSize().semantics {
@@ -242,8 +242,8 @@ fun PersonalInfoScreen(
                         .background(colorScheme.background)
                         .semantics { testTag = C.Tag.personalInfoScreenBannerPictureBackground }) {
                   SubcomposeAsyncImage(
-                      model = imagePathBP.value.takeIf { it.isNotEmpty() },
-                      contentDescription = "Profile Picture",
+                      model = imageBitmapBP.value,
+                      contentDescription = "Banner Picture",
                       modifier =
                           Modifier.fillMaxSize().semantics {
                             testTag = C.Tag.personalInfoScreenBannerPicture
@@ -279,26 +279,25 @@ fun PersonalInfoScreen(
                 }
           }
         }
-        if (showBottomSheetPP || showBottomSheetBP) {
-          CameraBottomSheet(
-              Modifier.semantics { testTag = C.Tag.cameraBottomSheet },
-              sheetState = sheetState,
-              onDismissRequest = {
-                if (showBottomSheetPP) showBottomSheetPP = false else showBottomSheetBP = false
-              },
-              onShowBottomSheetChange = {
-                if (showBottomSheetPP) showBottomSheetPP = it else showBottomSheetBP = it
-              },
-              onActionRequest = { value ->
-                if (showBottomSheetPP) {
-                  imagePathPP.value = value
-                  Log.d("imagePathPP", imagePathPP.value)
-                } else {
-                  imagePathBP.value = value
-                  Log.d("imagePathBP", imagePathBP.value)
-                }
-              })
-        }
+        QuickFixUploadImageSheet(
+            sheetState = sheetState,
+            showModalBottomSheet = showBottomSheetPP || showBottomSheetBP,
+            onDismissRequest = {
+              if (showBottomSheetPP) showBottomSheetPP = false else showBottomSheetBP = false
+            },
+            onShowBottomSheetChange = {
+              if (showBottomSheetPP) showBottomSheetPP = it else showBottomSheetBP = it
+            },
+            onActionRequest = { bitmap ->
+              if (showBottomSheetPP) {
+                imageBitmapPP.value = bitmap
+                Log.d("imageBitmapPP", imageBitmapPP.value.toString())
+              } else {
+                imageBitmapBP.value = bitmap
+                Log.d("imageBitmapBP", imageBitmapBP.value.toString())
+              }
+            })
+
         Spacer(modifier = Modifier.height(17.dp))
         QuickFixTextFieldCustom(
             modifier = Modifier.semantics { testTag = C.Tag.personalInfoScreendescriptionField },
@@ -311,26 +310,25 @@ fun PersonalInfoScreen(
             },
             shape = RoundedCornerShape(8.dp),
             showLabel = true,
-            label =
-                @Composable {
-                  Text(
-                      text =
-                          buildAnnotatedString {
-                            append("Description")
-                            withStyle(
-                                style =
-                                    SpanStyle(
-                                        color = colorScheme.primary,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Medium)) {
-                                  append("*")
-                                }
-                          },
-                      style =
-                          poppinsTypography.headlineMedium.copy(
-                              fontSize = 12.sp, fontWeight = FontWeight.Medium),
-                      color = colorScheme.onBackground)
-                },
+            label = {
+              Text(
+                  text =
+                      buildAnnotatedString {
+                        append("Description")
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color = colorScheme.primary,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium)) {
+                              append("*")
+                            }
+                      },
+                  style =
+                      poppinsTypography.headlineMedium.copy(
+                          fontSize = 12.sp, fontWeight = FontWeight.Medium),
+                  color = colorScheme.onBackground)
+            },
             hasShadow = false,
             borderColor = colorScheme.tertiaryContainer,
             placeHolderText = "Type a description...",
@@ -372,7 +370,7 @@ fun PersonalInfoScreen(
             enabled =
                 displayName.value.isNotEmpty() &&
                     description.value.isNotEmpty() &&
-                    imagePathPP.value.isNotEmpty(),
+                    imageBitmapPP.value != null,
             textColor = colorScheme.onPrimary,
             textStyle =
                 poppinsTypography.headlineMedium.copy(

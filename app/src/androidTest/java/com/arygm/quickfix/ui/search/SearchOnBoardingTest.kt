@@ -1,15 +1,19 @@
 package com.arygm.quickfix.ui.search
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.text.AnnotatedString
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.search.SearchViewModel
+import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import io.mockk.mockk
 import org.junit.Before
@@ -54,7 +58,7 @@ class SearchOnBoardingTest {
 
     // Enter some text and check if the trailing clear icon appears
     composeTestRule.onNodeWithTag("searchContent").performTextInput("plumbing")
-    composeTestRule.onNodeWithTag("clearSearchQueryIcon").assertIsDisplayed()
+    composeTestRule.onNodeWithTag(C.Tag.clear_button_text_field_custom).assertIsDisplayed()
   }
 
   @Test
@@ -71,9 +75,17 @@ class SearchOnBoardingTest {
     // Input text into the search field
     val searchInput = composeTestRule.onNodeWithTag("searchContent")
     searchInput.performTextInput("electrician")
+    searchInput.assertTextEquals("electrician") // Verify text input
 
-    // Click the trailing icon (clear button) and verify the text is cleared
-    composeTestRule.onNodeWithTag("clearSearchQueryIcon").performClick()
-    searchInput.assertTextEquals("") // Verify the text is cleared
+    // Click the trailing icon (clear button)
+    composeTestRule.onNodeWithTag(C.Tag.clear_button_text_field_custom).performClick()
+
+    // Wait for UI to settle
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag(C.Tag.clear_button_text_field_custom).assertDoesNotExist()
+    searchInput.printToLog("searchInput")
+    // Verify the text is cleared
+    searchInput.assert(
+        SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("")))
   }
 }

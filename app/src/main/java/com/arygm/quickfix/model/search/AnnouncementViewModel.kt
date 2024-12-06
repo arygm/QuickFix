@@ -1,10 +1,12 @@
 package com.arygm.quickfix.model.search
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,13 +19,18 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   private val announcements_ = MutableStateFlow<List<Announcement>>(emptyList())
   val announcements: StateFlow<List<Announcement>> = announcements_.asStateFlow()
 
+  private val uploadedImages_ = MutableStateFlow<List<Bitmap>>(emptyList())
+  val uploadedImages: StateFlow<List<Bitmap>> = uploadedImages_.asStateFlow()
+
   // create factory
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return AnnouncementViewModel(AnnouncementRepositoryFirestore(Firebase.firestore)) as T
+            return AnnouncementViewModel(
+                AnnouncementRepositoryFirestore(Firebase.firestore, Firebase.storage))
+                as T
           }
         }
   }
@@ -72,6 +79,20 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
         })
   }
 
+  fun uploadAnnouncementImages(
+      announcementId: String,
+      images: List<Bitmap>, // List of image file paths as strings
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    Log.d("UploadingImages", "$images.size")
+    repository.uploadAnnouncementImages(
+        announcementId = announcementId,
+        images = images,
+        onSuccess = { onSuccess(it) },
+        onFailure = { e -> onFailure(e) })
+  }
+
   /**
    * Updates an announcement.
    *
@@ -109,5 +130,28 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
         onFailure = { e ->
           Log.e("AnnouncementViewModel", "User $userId failed to delete announcement: ${e.message}")
         })
+  }
+
+  /**
+   * Adds a new image to the list of uploaded images.
+   *
+   * @param image The `Bitmap` of the image to be added.
+   */
+  fun addUploadedImage(image: Bitmap) {
+    uploadedImages_.value += image
+  }
+
+  /**
+   * Deletes a list of images from the list of uploaded images.
+   *
+   * @param images The list of `Bitmap` images to be removed.
+   */
+  fun deleteUploadedImages(images: List<Bitmap>) {
+    uploadedImages_.value = uploadedImages_.value.filterNot { it in images }
+  }
+
+  /** Clears the entire list of uploaded images. */
+  fun clearUploadedImages() {
+    uploadedImages_.value = emptyList()
   }
 }
