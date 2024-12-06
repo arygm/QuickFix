@@ -47,6 +47,7 @@ import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
 import com.arygm.quickfix.ui.authentication.ResetPasswordScreen
 import com.arygm.quickfix.ui.authentication.WelcomeScreen
+import com.arygm.quickfix.ui.camera.QuickFixDisplayImages
 import com.arygm.quickfix.ui.dashboard.DashboardScreen
 import com.arygm.quickfix.ui.elements.LocationSearchCustomScreen
 import com.arygm.quickfix.ui.home.FakeMessageScreen
@@ -141,10 +142,11 @@ fun QuickFixApp() {
   val profileNavController = rememberNavController()
   val profileNavigationActions = remember { NavigationActions(profileNavController) }
 
-  val isUser = false // TODO: This variable needs to get its value after the authentication
+  val isUser = true // TODO: This variable needs to get its value after the authentication
   val screen by remember { navigationActionsRoot::currentScreen }
   var screenInProfileNavHost by remember { mutableStateOf<String?>(null) }
   var screenInSearchNavHost by remember { mutableStateOf<String?>(null) }
+
   // Make `bottomBarVisible` reactive to changes in `screen`
   val shouldShowBottomBar by remember {
     derivedStateOf {
@@ -155,7 +157,9 @@ fun QuickFixApp() {
           screen != Screen.REGISTER &&
           screen != Screen.RESET_PASSWORD &&
           screen != Screen.GOOGLE_INFO &&
-          screenInSearchNavHost?.let { it != Screen.SEARCH_LOCATION } ?: true &&
+          screenInSearchNavHost?.let {
+            it != Screen.DISPLAY_UPLOADED_IMAGES && it != Screen.SEARCH_LOCATION
+          } ?: true &&
           screenInProfileNavHost?.let {
             it != Screen.ACCOUNT_CONFIGURATION && it != Screen.TO_WORKER
           } ?: true
@@ -362,9 +366,13 @@ fun SearchNavHost(
           isUser,
           profileViewModel,
           loggedInAccountViewModel,
+          accountViewModel,
           searchViewModel,
           announcementViewModel,
           categoryViewModel)
+    }
+    composable(Screen.DISPLAY_UPLOADED_IMAGES) {
+      QuickFixDisplayImages(isUser, navigationActions, announcementViewModel)
     }
     composable(Screen.SEARCH_WORKER_RESULT) {
       SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
