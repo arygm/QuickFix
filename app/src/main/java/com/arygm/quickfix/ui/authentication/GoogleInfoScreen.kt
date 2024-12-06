@@ -34,6 +34,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +54,8 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.utils.ANIMATED_BOX_ROTATION
 import com.arygm.quickfix.utils.isValidDate
+import com.arygm.quickfix.utils.loadEmail
+import com.arygm.quickfix.utils.loadUserId
 import com.arygm.quickfix.utils.setAccountPreferences
 import com.arygm.quickfix.utils.stringToTimestamp
 import com.google.firebase.Firebase
@@ -71,10 +74,13 @@ fun GoogleInfoScreen(
   var firstName by remember { mutableStateOf("") }
   var lastName by remember { mutableStateOf("") }
   var birthDate by remember { mutableStateOf("") }
-  var uid by remember { mutableStateOf("") }
-  var email by remember { mutableStateOf("") }
-  preferencesViewModel.loadPreference(key = com.arygm.quickfix.utils.UID_KEY) { uid = it ?: "" }
-  preferencesViewModel.loadPreference(key = com.arygm.quickfix.utils.EMAIL_KEY) { email = it ?: "" }
+    var email by remember { mutableStateOf("Loading...") }
+    var uid by remember { mutableStateOf("Loading...") }
+
+    LaunchedEffect(Unit) {
+        uid = loadUserId(preferencesViewModel)
+        email = loadEmail(preferencesViewModel)
+    }
 
   var birthDateError by remember { mutableStateOf(false) }
 

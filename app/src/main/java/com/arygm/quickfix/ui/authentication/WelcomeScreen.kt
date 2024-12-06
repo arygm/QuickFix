@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,7 +52,9 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.arygm.quickfix.ui.theme.ButtonPrimary
+import com.arygm.quickfix.utils.loadIsSignIn
 import com.arygm.quickfix.utils.rememberFirebaseAuthLauncher
+import com.arygm.quickfix.utils.setSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import kotlinx.coroutines.delay
@@ -78,7 +81,7 @@ fun WelcomeScreen(
       animateDpAsState(targetValue = if (expandBox) 0.dp else (-890).dp, label = "moveBoxX")
 
   val context = LocalContext.current
-
+    var isSignIn by remember { mutableStateOf(false) }
   val launcher =
       rememberFirebaseAuthLauncher(
           onAuthCompleteOne = { result ->
@@ -98,16 +101,15 @@ fun WelcomeScreen(
 
   // fast forward to home screen if user is already signed in
   LaunchedEffect(Unit) {
-    preferencesViewModel.loadPreference(com.arygm.quickfix.utils.IS_SIGN_IN_KEY) {
-      if (it == true &&
-          navigationActions.currentScreen ==
-              Screen.WELCOME) { // Ensure the value is `true` before navigating
+      isSignIn = loadIsSignIn(preferencesViewModel)
+      if (isSignIn && navigationActions.currentScreen ==
+          Screen.WELCOME
+      ) { // Ensure the value is `true` before navigating
         Log.i("SignInScreen", "User is signed in, fast forwarding to home screen")
         navigationActions.navigateTo(TopLevelDestinations.HOME)
       } else {
         Log.d("SignInScreen", "User is not signed in or preference not set")
       }
-    }
   }
   LaunchedEffect(Unit) {
     expandBox = false // Start expanding the box
