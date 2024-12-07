@@ -153,4 +153,20 @@ open class SearchViewModel(
   ): List<WorkerProfile> {
     return workers.filter { worker -> worker.price in start.toDouble()..end.toDouble() }
   }
+
+  fun filterWorkersByDistance(
+      workers: List<WorkerProfile>,
+      userLocation: Location,
+      maxDistance: Int
+  ): List<WorkerProfile> {
+    return workers.filter { worker ->
+      val distance =
+          calculateDistance(
+              userLocation.latitude,
+              userLocation.longitude,
+              worker.location!!.latitude,
+              worker.location.longitude)
+      distance <= maxDistance
+    }
+  }
 }

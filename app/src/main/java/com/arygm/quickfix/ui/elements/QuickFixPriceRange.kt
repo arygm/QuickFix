@@ -42,7 +42,8 @@ fun QuickFixPriceRange(
     tooltipWidth: Dp,
     tooltipHeight: Dp,
     tooltipTriangleSize: Dp,
-    onProgressChanged: (value1: Int, value2: Int) -> Unit
+    onProgressChanged: (value1: Int, value2: Int) -> Unit,
+    isDoubleSlider: Boolean = true
 ) {
 
   val circleRadiusInPx = with(LocalDensity.current) { circleRadius.toPx() }
@@ -55,18 +56,18 @@ fun QuickFixPriceRange(
   var progress1 by remember { mutableStateOf((progress1InitialValue - minValue).toFloat() / range) }
   var progress2 by remember { mutableStateOf((progress2InitialValue - minValue).toFloat() / range) }
 
+  // Initial callback
   LaunchedEffect(Unit) {
     val value1 = minValue + (progress1 * range).roundToInt()
     val value2 = minValue + (progress2 * range).roundToInt()
-    onProgressChanged(value1, value2)
+    // If single slider, just return value1 twice for consistency
+    onProgressChanged(value1, if (isDoubleSlider) value2 else value1)
   }
 
   var width by remember { mutableStateOf(0f) }
-
   var height by remember { mutableStateOf(0f) }
 
   var leftCircleDragging by remember { mutableStateOf(false) }
-
   var rightCircleDragging by remember { mutableStateOf(false) }
 
   val leftTooltipOverlapping = remember { mutableStateOf(false) }
@@ -81,12 +82,12 @@ fun QuickFixPriceRange(
 
   val scaleAnim2 by
       animateFloatAsState(
-          targetValue = if (rightCircleDragging) 2f else 1f,
+          targetValue = if (rightCircleDragging && isDoubleSlider) 2f else 1f,
           animationSpec = tween(durationMillis = 300))
 
   val tooltipAnim1 by
       animateFloatAsState(
-          targetValue = if (leftTooltipOverlapping.value) -180f else 0f,
+          targetValue = if (leftTooltipOverlapping.value && isDoubleSlider) -180f else 0f,
           animationSpec = tween(durationMillis = 300))
 
   val path = remember { Path() }
@@ -111,7 +112,8 @@ fun QuickFixPriceRange(
 
                         if (dis1 < circleRadiusInPx) { // left circle clicked
                           leftCircleDragging = true
-                        } else if (dis2 < circleRadiusInPx) { // right circle clicked
+                        } else if (isDoubleSlider &&
+                            dis2 < circleRadiusInPx) { // right circle clicked (only if double)
                           rightCircleDragging = true
                         }
                       }
@@ -119,10 +121,12 @@ fun QuickFixPriceRange(
                         var x = motionEvent.x.coerceIn(0f, width)
 
                         if (leftCircleDragging) {
-                          x = x.coerceAtMost(rightCircleOffset.x)
+                          if (isDoubleSlider) {
+                            x = x.coerceAtMost(rightCircleOffset.x)
+                          }
                           progress1 = x / width
                           leftCircleOffset = Offset(x = x, y = height / 2f)
-                        } else if (rightCircleDragging) {
+                        } else if (isDoubleSlider && rightCircleDragging) {
                           x = x.coerceAtLeast(leftCircleOffset.x)
                           progress2 = x / width
                           rightCircleOffset = Offset(x = x, y = height / 2f)
@@ -133,7 +137,7 @@ fun QuickFixPriceRange(
                         rightCircleDragging = false
                         val value1 = minValue + (progress1 * range).roundToInt()
                         val value2 = minValue + (progress2 * range).roundToInt()
-                        onProgressChanged(value1, value2)
+                        onProgressChanged(value1, if (isDoubleSlider) value2 else value1)
                       }
                     }
                     true
@@ -143,26 +147,33 @@ fun QuickFixPriceRange(
                 height = it.size.height.toFloat()
 
                 leftCircleOffset = Offset(x = width * progress1, y = height / 2f)
-                rightCircleOffset = Offset(x = width * progress2, y = height / 2f)
+                if (isDoubleSlider) {
+                  rightCircleOffset = Offset(x = width * progress2, y = height / 2f)
+                }
               }
               .semantics { testTag = "QuickFixPriceRange" } // Add test tag to the Canvas
       ) {
         val barTop = height / 2f - barHeight.toPx() / 4f
         val barHeightPx = barHeight.toPx() / 2f
 
+        // Draw background bar
         drawRoundRect(
             color = backColor,
             cornerRadius = cornerRadius,
             topLeft = Offset(x = 0f, y = barTop),
             size = Size(width = width, height = barHeightPx))
 
-        // Draw inner rect (between two circles)
+        // Determine the filled portion depending on single/double slider
+        val startX = if (isDoubleSlider) width * progress1 else 0f
+        val endX = if (isDoubleSlider) width * progress2 else width * progress1
+
+        // Draw filled range
         drawRect(
             color = rangeColor,
-            topLeft = Offset(x = width * progress1, y = barTop),
-            size = Size(width = width * (progress2 - progress1), height = barHeightPx))
+            topLeft = Offset(x = startX, y = barTop),
+            size = Size(width = endX - startX, height = barHeightPx))
 
-        // Draw left circle
+        // Draw left circle (always)
         scale(scaleAnim1, pivot = leftCircleOffset) {
           drawCircle(
               color = rangeColor.copy(alpha = 0.2f),
@@ -171,18 +182,16 @@ fun QuickFixPriceRange(
         }
         drawCircle(color = rangeColor, radius = circleRadius.toPx(), center = leftCircleOffset)
 
-        // Draw right circle
-        scale(scaleAnim2, pivot = rightCircleOffset) {
-          drawCircle(
-              color = rangeColor.copy(alpha = 0.2f),
-              radius = circleRadius.toPx(),
-              center = rightCircleOffset)
+        // Draw right circle only if double slider
+        if (isDoubleSlider) {
+          scale(scaleAnim2, pivot = rightCircleOffset) {
+            drawCircle(
+                color = rangeColor.copy(alpha = 0.2f),
+                radius = circleRadius.toPx(),
+                center = rightCircleOffset)
+          }
+          drawCircle(color = rangeColor, radius = circleRadius.toPx(), center = rightCircleOffset)
         }
-        drawCircle(
-            color = rangeColor,
-            radius = circleRadius.toPx(),
-            center = rightCircleOffset,
-        )
 
         // Define shadow properties
         val shadowRadius = 8f // Adjust as needed
@@ -199,20 +208,26 @@ fun QuickFixPriceRange(
               }
             }
 
-        // Draw left Tooltip with shadow
+        // Calculate tooltip positions
         val leftL = leftCircleOffset.x - tooltipWidth.toPx() / 2f
         val topL =
             leftCircleOffset.y - tooltipSpacing.toPx() - circleRadiusInPx - tooltipHeight.toPx()
 
-        val leftR = rightCircleOffset.x - tooltipWidth.toPx() / 2f
+        val leftR = if (isDoubleSlider) rightCircleOffset.x - tooltipWidth.toPx() / 2f else 0f
         val topR =
-            rightCircleOffset.y - tooltipSpacing.toPx() - circleRadiusInPx - tooltipHeight.toPx()
+            if (isDoubleSlider)
+                rightCircleOffset.y -
+                    tooltipSpacing.toPx() -
+                    circleRadiusInPx -
+                    tooltipHeight.toPx()
+            else 0f
 
-        if (leftCircleDragging || rightCircleDragging) {
+        if (isDoubleSlider && (leftCircleDragging || rightCircleDragging)) {
           leftTooltipOverlapping.value = (leftL + tooltipWidth.toPx()) >= leftR
         }
 
-        rotate(tooltipAnim1, pivot = leftCircleOffset) {
+        // Draw left Tooltip with rotation if needed
+        rotate(if (isDoubleSlider) tooltipAnim1 else 0f, pivot = leftCircleOffset) {
           drawIntoCanvas { canvas ->
             path.reset()
             path.apply {
@@ -234,25 +249,27 @@ fun QuickFixPriceRange(
           }
         }
 
-        // Draw right Tooltip with shadow
-        drawIntoCanvas { canvas ->
-          path.reset()
-          path.apply {
-            addRoundRect(
-                RoundRect(
-                    left = leftR,
-                    top = topR,
-                    right = leftR + tooltipWidth.toPx(),
-                    bottom = topR + tooltipHeight.toPx(),
-                    cornerRadius = CornerRadius(x = 15f, y = 15f)))
-            moveTo(
-                x = rightCircleOffset.x - tooltipTriangleSize.toPx(),
-                y = rightCircleOffset.y - circleRadiusInPx - tooltipSpacing.toPx())
-            relativeLineTo(tooltipTriangleSize.toPx(), tooltipTriangleSize.toPx())
-            relativeLineTo(tooltipTriangleSize.toPx(), -tooltipTriangleSize.toPx())
-            close()
+        // Draw right Tooltip only if double slider
+        if (isDoubleSlider) {
+          drawIntoCanvas { canvas ->
+            path.reset()
+            path.apply {
+              addRoundRect(
+                  RoundRect(
+                      left = leftR,
+                      top = topR,
+                      right = leftR + tooltipWidth.toPx(),
+                      bottom = topR + tooltipHeight.toPx(),
+                      cornerRadius = CornerRadius(x = 15f, y = 15f)))
+              moveTo(
+                  x = rightCircleOffset.x - tooltipTriangleSize.toPx(),
+                  y = rightCircleOffset.y - circleRadiusInPx - tooltipSpacing.toPx())
+              relativeLineTo(tooltipTriangleSize.toPx(), tooltipTriangleSize.toPx())
+              relativeLineTo(tooltipTriangleSize.toPx(), -tooltipTriangleSize.toPx())
+              close()
+            }
+            canvas.drawPath(path, tooltipPaint)
           }
-          canvas.drawPath(path, tooltipPaint)
         }
 
         val valueLeft = minValue + (progress1 * range).roundToInt()
@@ -262,7 +279,8 @@ fun QuickFixPriceRange(
                 text = AnnotatedString(textLeft), style = TextStyle(color = primaryColor))
         var textSize = textLayoutResult.size
 
-        rotate(tooltipAnim1, pivot = leftCircleOffset) {
+        // Draw left tooltip text
+        rotate(if (isDoubleSlider) tooltipAnim1 else 0f, pivot = leftCircleOffset) {
           drawText(
               textLayoutResult = textLayoutResult,
               topLeft =
@@ -271,21 +289,24 @@ fun QuickFixPriceRange(
                       y = topL + tooltipHeight.toPx() / 2 - textSize.height / 2))
         }
 
-        val valueRight = minValue + (progress2 * range).roundToInt()
-        val textRight = valueRight.toString()
-        textLayoutResult =
-            textMeasurer.measure(
-                text = AnnotatedString(textRight),
-                style = TextStyle(color = primaryColor),
-            )
-        textSize = textLayoutResult.size
+        if (isDoubleSlider) {
+          val valueRight = minValue + (progress2 * range).roundToInt()
+          val textRight = valueRight.toString()
+          textLayoutResult =
+              textMeasurer.measure(
+                  text = AnnotatedString(textRight),
+                  style = TextStyle(color = primaryColor),
+              )
+          textSize = textLayoutResult.size
 
-        drawText(
-            textLayoutResult = textLayoutResult,
-            topLeft =
-                Offset(
-                    x = leftR + tooltipWidth.toPx() / 2 - textSize.width / 2,
-                    y = topR + tooltipHeight.toPx() / 2 - textSize.height / 2),
-        )
+          // Draw right tooltip text
+          drawText(
+              textLayoutResult = textLayoutResult,
+              topLeft =
+                  Offset(
+                      x = leftR + tooltipWidth.toPx() / 2 - textSize.width / 2,
+                      y = topR + tooltipHeight.toPx() / 2 - textSize.height / 2),
+          )
+        }
       }
 }
