@@ -1059,12 +1059,12 @@ class SearchWorkerResultScreenTest {
         listOf(
             WorkerProfile(
                 uid = "worker1",
-                location = com.arygm.quickfix.model.locations.Location(40.0, -74.0, "Home"),
+                location = Location(40.0, -74.0, "Home"),
                 fieldOfWork = "Painter",
                 rating = 4.5),
             WorkerProfile(
                 uid = "worker2",
-                location = com.arygm.quickfix.model.locations.Location(45.0, -75.0, "Far"),
+                location = Location(45.0, -75.0, "Far"),
                 fieldOfWork = "Electrician",
                 rating = 4.0))
 
@@ -1125,19 +1125,19 @@ class SearchWorkerResultScreenTest {
                 uid = "worker1",
                 fieldOfWork = "Painter",
                 rating = 4.5,
-                location = com.arygm.quickfix.model.locations.Location(40.0, -74.0, "Home"),
+                location = Location(40.0, -74.0, "Home"),
                 tags = listOf("Interior Painter")),
             WorkerProfile(
                 uid = "worker2",
                 fieldOfWork = "Electrician",
                 rating = 4.0,
-                location = com.arygm.quickfix.model.locations.Location(45.0, -75.0, "Far"),
+                location = Location(45.0, -75.0, "Far"),
                 tags = listOf("Electrician")),
             WorkerProfile(
                 uid = "worker3",
                 fieldOfWork = "Plumber",
                 rating = 3.5,
-                location = com.arygm.quickfix.model.locations.Location(42.0, -74.5, "Work"),
+                location = Location(42.0, -74.5, "Work"),
                 tags = listOf("Plumber")))
 
     searchViewModel._workerProfiles.value = workers
@@ -1197,7 +1197,7 @@ class SearchWorkerResultScreenTest {
             rating = 4.5,
             workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
             unavailability_list = listOf(LocalDate.now().plusDays(1)), // Tomorrow unavailable
-            location = com.arygm.quickfix.model.locations.Location(0.0, 0.0, ""))
+            location = Location(0.0, 0.0, ""))
     val worker2 =
         WorkerProfile(
             uid = "worker2",
@@ -1205,7 +1205,7 @@ class SearchWorkerResultScreenTest {
             rating = 4.0,
             workingHours = Pair(LocalTime.of(8, 0), LocalTime.of(16, 0)),
             unavailability_list = emptyList(),
-            location = com.arygm.quickfix.model.locations.Location(0.0, 0.0, ""))
+            location = Location(0.0, 0.0, ""))
 
     searchViewModel._workerProfiles.value = listOf(worker1, worker2)
 

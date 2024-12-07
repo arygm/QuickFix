@@ -39,6 +39,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,13 +57,13 @@ import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.model.profile.dataFields.Review
-import com.arygm.quickfix.model.offline.small.PreferencesViewModel
-import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
@@ -72,9 +73,9 @@ import com.arygm.quickfix.ui.elements.QuickFixPriceRangeBottomSheet
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.LocationHelper
-import java.time.LocalTime
 import com.arygm.quickfix.utils.loadUserId
 import java.time.LocalDate
+import java.time.LocalTime
 
 data class SearchFilterButtons(
     val onClick: () -> Unit,
