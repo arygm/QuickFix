@@ -184,16 +184,16 @@ fun AnnouncementScreen(
               modifier =
                   Modifier.fillMaxWidth()
                       .padding(padding)
-                      .padding(top = 30.dp)
+                      .padding(top = 30.dp * heightRatio.value)
                       .align(Alignment.Center)
-                      .padding(16.dp)
+                      .padding(16.dp * widthRatio.value)
                       .zIndex(100f)
                       .verticalScroll(rememberScrollState()),
               horizontalAlignment = Alignment.CenterHorizontally,
               verticalArrangement = Arrangement.Center,
           ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 8.dp * widthRatio.value),
             ) {
               QuickFixTextFieldCustom(
                   value = title,
@@ -203,10 +203,10 @@ fun AnnouncementScreen(
                   },
                   placeHolderText = "Enter the title of your quickFix",
                   placeHolderColor = colorScheme.onSecondaryContainer,
-                  shape = RoundedCornerShape(12.dp),
-                  moveContentHorizontal = 10.dp,
-                  heightField = 42.dp,
-                  widthField = 360.dp,
+                  shape = RoundedCornerShape(12.dp * heightRatio.value),
+                  moveContentHorizontal = 10.dp * widthRatio.value,
+                  heightField = 50.dp * heightRatio.value,
+                  widthField = 360.dp * widthRatio.value,
                   modifier = Modifier.testTag("titleInput"),
                   showLabel = true,
                   label = {
@@ -218,20 +218,20 @@ fun AnnouncementScreen(
                   })
             }
 
-            Spacer(modifier = Modifier.padding(6.dp))
+            Spacer(modifier = Modifier.padding(6.dp * heightRatio.value))
 
             Column(
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 8.dp * widthRatio.value),
             ) {
               QuickFixTextFieldCustom(
                   value = category,
                   onValueChange = { category = it },
                   placeHolderText = "Enter the category",
                   placeHolderColor = colorScheme.onSecondaryContainer,
-                  shape = RoundedCornerShape(12.dp),
-                  moveContentHorizontal = 10.dp,
-                  heightField = 42.dp,
-                  widthField = 360.dp,
+                  shape = RoundedCornerShape(12.dp * heightRatio.value),
+                  moveContentHorizontal = 10.dp * widthRatio.value,
+                  heightField = 50.dp * heightRatio.value,
+                  widthField = 360.dp * widthRatio.value,
                   modifier = Modifier.testTag("categoryInput"),
                   showLabel = true,
                   label = {
@@ -243,10 +243,10 @@ fun AnnouncementScreen(
                   })
             }
 
-            Spacer(modifier = Modifier.padding(6.dp))
+            Spacer(modifier = Modifier.padding(6.dp * heightRatio.value))
 
             Column(
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 8.dp * widthRatio.value),
             ) {
               QuickFixTextFieldCustom(
                   value = description,
@@ -256,10 +256,10 @@ fun AnnouncementScreen(
                   },
                   placeHolderText = "Describe the quickFix",
                   placeHolderColor = colorScheme.onSecondaryContainer,
-                  shape = RoundedCornerShape(12.dp),
-                  moveContentHorizontal = 10.dp,
-                  heightField = 95.dp,
-                  widthField = 360.dp,
+                  shape = RoundedCornerShape(12.dp * heightRatio.value),
+                  moveContentHorizontal = 10.dp * widthRatio.value,
+                  heightField = 120.dp * heightRatio.value,
+                  widthField = 360.dp * widthRatio.value,
                   modifier = Modifier.testTag("descriptionInput"),
                   showLabel = true,
                   label = {
@@ -272,10 +272,10 @@ fun AnnouncementScreen(
                   singleLine = false)
             }
 
-            Spacer(modifier = Modifier.padding(6.dp))
+            Spacer(modifier = Modifier.padding(6.dp * heightRatio.value))
 
             Column(
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 8.dp * widthRatio.value),
             ) {
               Text(
                   text = "Location *",
@@ -286,14 +286,20 @@ fun AnnouncementScreen(
               Box(
                   modifier =
                       Modifier.testTag("locationInput")
-                          .shadow(elevation = 2.dp, shape = RoundedCornerShape(12.dp), clip = false)
-                          .clip(RoundedCornerShape(12.dp))
-                          .background(MaterialTheme.colorScheme.surface)
-                          .border(1.dp, Color.Transparent, RoundedCornerShape(12.dp))
-                          .width(360.dp)
-                          .height(42.dp)
+                          .shadow(
+                              elevation = 2.dp,
+                              shape = RoundedCornerShape(12.dp * heightRatio.value),
+                              clip = false)
+                          .clip(RoundedCornerShape(12.dp * heightRatio.value))
+                          .background(colorScheme.surface)
+                          .border(
+                              1.dp,
+                              Color.Transparent,
+                              RoundedCornerShape(12.dp * heightRatio.value))
+                          .width(360.dp * widthRatio.value)
+                          .height(50.dp * heightRatio.value)
                           .clickable { navigationActions.navigateTo(Screen.SEARCH_LOCATION) }
-                          .padding(horizontal = 16.dp),
+                          .padding(horizontal = 16.dp * widthRatio.value),
                   contentAlignment = Alignment.CenterStart) {
                     Text(
                         text = location?.name ?: "Location",
@@ -305,7 +311,7 @@ fun AnnouncementScreen(
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                   }
             }
-            Spacer(modifier = Modifier.padding(10.dp))
+            Spacer(modifier = Modifier.padding(10.dp * heightRatio.value))
 
             QuickFixButtonWithIcon(
                 buttonText = "Availability",
@@ -316,15 +322,15 @@ fun AnnouncementScreen(
                 textColor = colorScheme.onBackground,
                 textStyle = MaterialTheme.typography.titleMedium,
                 modifier =
-                    Modifier.width(360.dp)
-                        .height(42.dp)
+                    Modifier.width(360.dp * widthRatio.value)
+                        .height(50.dp * heightRatio.value)
                         .testTag("availabilityButton")
                         .graphicsLayer(alpha = 1f),
                 iconId = R.drawable.calendar,
                 iconContentDescription = "availability",
                 iconColor = colorScheme.onBackground)
 
-            Spacer(modifier = Modifier.padding(10.dp))
+            Spacer(modifier = Modifier.padding(10.dp * heightRatio.value))
 
             if (uploadedImages.isEmpty()) {
               QuickFixButtonWithIcon(
@@ -334,8 +340,8 @@ fun AnnouncementScreen(
                   textColor = colorScheme.onBackground,
                   textStyle = MaterialTheme.typography.titleMedium,
                   modifier =
-                      Modifier.width(360.dp)
-                          .height(90.dp)
+                      Modifier.width(360.dp * widthRatio.value)
+                          .height(125.dp * heightRatio.value)
                           .testTag("picturesButton")
                           .graphicsLayer(alpha = 1f),
                   iconId = R.drawable.upload_image,
@@ -344,7 +350,7 @@ fun AnnouncementScreen(
             } else {
               Box(
                   modifier =
-                      Modifier.width(360.dp)
+                      Modifier.width(360.dp * widthRatio.value)
                           .fillMaxWidth(0.8f)
                           .shadow(
                               elevation = 2.dp,
@@ -352,7 +358,10 @@ fun AnnouncementScreen(
                               clip = false // Ensure the shadow is not clipped
                               )
                           .clip(RoundedCornerShape(10.dp))
-                          .height(90.dp) // Same height as the button when no images exist
+                          .height(
+                              125.dp *
+                                  heightRatio
+                                      .value) // Same height as the button when no images exist
                           .clip(RoundedCornerShape(8.dp))
                           .background(colorScheme.surface)
                           .clickable { showUploadImageSheet = true }
@@ -368,7 +377,7 @@ fun AnnouncementScreen(
                           Icon(
                               painter = painterResource(id = R.drawable.upload_image),
                               contentDescription = "Upload image",
-                              modifier = Modifier.size(20.dp),
+                              modifier = Modifier.size(20.dp * sizeRatio.value),
                               tint = colorScheme.onBackground)
 
                           Spacer(modifier = Modifier.width(15.dp))
@@ -385,7 +394,7 @@ fun AnnouncementScreen(
                                 items(visibleImages.size) { index ->
                                   Card(
                                       modifier =
-                                          Modifier.size(90.dp)
+                                          Modifier.size(125.dp * sizeRatio.value)
                                               .padding(
                                                   end =
                                                       if (index != visibleImages.lastIndex) 8.dp
@@ -431,7 +440,7 @@ fun AnnouncementScreen(
                                               modifier =
                                                   Modifier.align(Alignment.TopEnd)
                                                       .padding(4.dp)
-                                                      .size(24.dp)
+                                                      .size(24.dp * sizeRatio.value)
                                                       .testTag("deleteImageButton$index")) {
                                                 Icon(
                                                     imageVector = Icons.Filled.Close,
@@ -493,8 +502,8 @@ fun AnnouncementScreen(
                 textColor = colorScheme.onPrimary,
                 textStyle = MaterialTheme.typography.titleMedium,
                 modifier =
-                    Modifier.width(360.dp)
-                        .height(55.dp)
+                    Modifier.width(360.dp * widthRatio.value)
+                        .height(55.dp * heightRatio.value)
                         .testTag("announcementButton")
                         .graphicsLayer(alpha = 1f),
                 enabled =
