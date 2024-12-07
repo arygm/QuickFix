@@ -84,4 +84,8 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
         onSuccess = { getChats() },
         onFailure = { e -> Log.e("ChatViewModel", "Failed to delete message: ${e.message}") })
   }
+
+  fun getRandomUid(): String {
+    return repository.getRandomUid()
+  }
 }

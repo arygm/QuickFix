@@ -83,4 +83,12 @@ class QuickFixViewModel(private val repository: QuickFixRepository) : ViewModel(
           onResult(null)
         })
   }
+
+  fun getRandomUid(): String {
+    return repository.getRandomUid()
+  }
+
+  fun setQuickFixes(quickFixes: List<QuickFix>) { // For testing purposes
+    quickFixes_.value = quickFixes
+  }
 }
