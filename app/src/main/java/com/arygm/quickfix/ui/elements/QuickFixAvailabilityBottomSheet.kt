@@ -32,7 +32,9 @@ import java.util.Calendar
 fun QuickFixAvailabilityBottomSheet(
     showModalBottomSheet: Boolean,
     onDismissRequest: () -> Unit,
-    onOkClick: (List<LocalDate>, Int, Int) -> Unit
+    onOkClick: (List<LocalDate>, Int, Int) -> Unit,
+    onClearClick: () -> Unit,
+    clearEnabled: Boolean
 ) {
   if (showModalBottomSheet) {
     ModalBottomSheet(
@@ -58,7 +60,13 @@ fun QuickFixAvailabilityBottomSheet(
                   CalendarView(
                       useCaseState =
                           rememberUseCaseState(
-                              visible = true, onCloseRequest = { onDismissRequest() }),
+                              visible = true,
+                              onCloseRequest = {
+                                if (clearEnabled) {
+                                  onClearClick()
+                                }
+                                onDismissRequest()
+                              }),
                       config =
                           CalendarConfig(
                               yearSelection = true,

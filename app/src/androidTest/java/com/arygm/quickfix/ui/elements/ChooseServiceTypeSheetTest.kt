@@ -36,7 +36,9 @@ class ChooseServiceTypeSheetTest {
             showModalBottomSheet = true,
             serviceTypes = serviceTypes,
             onApplyClick = onApplyClick,
-            onDismissRequest = onDismissRequest)
+            onDismissRequest = onDismissRequest,
+            onClearClick = {},
+            clearEnabled = false)
       }
     }
 
@@ -65,7 +67,9 @@ class ChooseServiceTypeSheetTest {
             showModalBottomSheet = true,
             serviceTypes = serviceTypes,
             onApplyClick = onApplyClick,
-            onDismissRequest = onDismissRequest)
+            onDismissRequest = onDismissRequest,
+            onClearClick = {},
+            clearEnabled = false)
       }
     }
 
@@ -85,7 +89,9 @@ class ChooseServiceTypeSheetTest {
             showModalBottomSheet = true,
             serviceTypes = serviceTypes,
             onApplyClick = onApplyClick,
-            onDismissRequest = onDismissRequest)
+            onDismissRequest = onDismissRequest,
+            onClearClick = {},
+            clearEnabled = false)
       }
     }
 
@@ -108,7 +114,9 @@ class ChooseServiceTypeSheetTest {
             showModalBottomSheet = true,
             serviceTypes = serviceTypes,
             onApplyClick = onApplyClick,
-            onDismissRequest = onDismissRequest)
+            onDismissRequest = onDismissRequest,
+            onClearClick = {},
+            clearEnabled = false)
       }
     }
 
@@ -134,7 +142,9 @@ class ChooseServiceTypeSheetTest {
             showModalBottomSheet = true,
             serviceTypes = serviceTypes,
             onApplyClick = onApplyClick,
-            onDismissRequest = onDismissRequest)
+            onDismissRequest = onDismissRequest,
+            onClearClick = {},
+            clearEnabled = false)
       }
     }
 
@@ -160,11 +170,74 @@ class ChooseServiceTypeSheetTest {
             showModalBottomSheet = false,
             serviceTypes = serviceTypes,
             onApplyClick = onApplyClick,
-            onDismissRequest = onDismissRequest)
+            onDismissRequest = onDismissRequest,
+            onClearClick = {},
+            clearEnabled = false)
       }
     }
 
     // Assert the dialog is not displayed
     composeTestRule.onNodeWithTag("chooseServiceTypeModalSheet").assertDoesNotExist()
+  }
+
+  /** Test that the Clear button calls [onClearClick] when enabled. */
+  @Test
+  fun clearButtonCallsOnClearClickWhenEnabled() {
+    var clearCalled = false
+    var dismissCalled = false
+    val serviceTypes = listOf("Exterior Painter", "Interior Painter")
+
+    composeTestRule.setContent {
+      QuickFixTheme {
+        ChooseServiceTypeSheet(
+            showModalBottomSheet = true,
+            serviceTypes = serviceTypes,
+            onApplyClick = onApplyClick,
+            onDismissRequest = { dismissCalled = true },
+            onClearClick = { clearCalled = true },
+            clearEnabled = true)
+      }
+    }
+
+    // Simulate clicking the Clear button
+    composeTestRule.onNodeWithTag("resetButton").performClick()
+
+    // Assert that onClearClick and onDismissRequest were called
+    composeTestRule.runOnIdle {
+      assert(clearCalled) { "Expected onClearClick to be called" }
+      assert(dismissCalled) { "Expected onDismissRequest to be called" }
+    }
+  }
+
+  /**
+   * Test that the Clear button is disabled and does not call [onClearClick] when [clearEnabled] is
+   * false.
+   */
+  @Test
+  fun clearButtonDoesNotCallOnClearClickWhenDisabled() {
+    var clearCalled = false
+    var dismissCalled = false
+    val serviceTypes = listOf("Exterior Painter", "Interior Painter")
+
+    composeTestRule.setContent {
+      QuickFixTheme {
+        ChooseServiceTypeSheet(
+            showModalBottomSheet = true,
+            serviceTypes = serviceTypes,
+            onApplyClick = onApplyClick,
+            onDismissRequest = { dismissCalled = true },
+            onClearClick = { clearCalled = true },
+            clearEnabled = false)
+      }
+    }
+
+    // Simulate clicking the Clear button
+    composeTestRule.onNodeWithTag("resetButton").performClick()
+
+    // Assert that onClearClick was not called
+    composeTestRule.runOnIdle {
+      assert(!clearCalled) { "Expected onClearClick not to be called" }
+      assert(!dismissCalled) { "Expected onDismissRequest not to be called" }
+    }
   }
 }

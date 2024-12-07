@@ -41,7 +41,9 @@ fun ChooseServiceTypeSheet(
     showModalBottomSheet: Boolean,
     serviceTypes: List<String>,
     onApplyClick: (List<String>) -> Unit,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    onClearClick: () -> Unit,
+    clearEnabled: Boolean
 ) {
   var selectedServices by remember { mutableStateOf(emptyList<String>()) }
   if (showModalBottomSheet) {
@@ -148,13 +150,15 @@ fun ChooseServiceTypeSheet(
 
                   // Reset option to clear the selection
                   Text(
-                      text = "Reset",
+                      text = "Clear",
                       color =
-                          if (selectedServices.isNotEmpty()) colorScheme.primary
+                          if (clearEnabled) colorScheme.primary
                           else colorScheme.onSecondaryContainer,
                       modifier =
-                          Modifier.clickable(enabled = selectedServices.isNotEmpty()) {
+                          Modifier.clickable(enabled = clearEnabled) {
                                 selectedServices = emptyList<String>()
+                                onClearClick()
+                                onDismissRequest()
                               }
                               .padding(vertical = verticalSpacing / 2)
                               .testTag("resetButton"))
@@ -180,6 +184,8 @@ fun ChooseServiceTypePreview() {
         showModalBottomSheet = showModal,
         serviceTypes = serviceTypes,
         onApplyClick = { l -> l.forEach { it -> Log.d("Chill Guy", it) } },
-        onDismissRequest = { showModal = false })
+        onDismissRequest = { showModal = false },
+        onClearClick = {},
+        clearEnabled = false)
   }
 }

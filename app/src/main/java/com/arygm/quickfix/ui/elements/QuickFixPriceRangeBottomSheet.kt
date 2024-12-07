@@ -2,6 +2,7 @@ package com.arygm.quickfix.ui.elements
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,10 +40,12 @@ import com.arygm.quickfix.ui.theme.QuickFixTheme
 fun QuickFixPriceRangeBottomSheet(
     showModalBottomSheet: Boolean,
     onApplyClick: (Int, Int) -> Unit,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    onClearClick: () -> Unit,
+    clearEnabled: Boolean
 ) {
-  var range_0 by remember { mutableStateOf(0) }
-  var range_1 by remember { mutableStateOf(0) }
+  var range0 by remember { mutableIntStateOf(0) }
+  var range1 by remember { mutableIntStateOf(0) }
   if (showModalBottomSheet) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -116,8 +120,8 @@ fun QuickFixPriceRangeBottomSheet(
                               tooltipHeight = 30.dp * heightRatio.value,
                               tooltipTriangleSize = 5.dp,
                               onProgressChanged = { value1, value2 ->
-                                range_0 = value1
-                                range_1 = value2
+                                range0 = value1
+                                range1 = value2
                               })
                         }
 
@@ -135,9 +139,9 @@ fun QuickFixPriceRangeBottomSheet(
 
                   Button(
                       onClick = {
-                        onApplyClick(range_0, range_1)
-                        Log.d("hey", range_0.toString())
-                        Log.d("hey", range_1.toString())
+                        onApplyClick(range0, range1)
+                        Log.d("hey", range0.toString())
+                        Log.d("hey", range1.toString())
                         onDismissRequest()
                       },
                       modifier =
@@ -150,6 +154,19 @@ fun QuickFixPriceRangeBottomSheet(
                               contentColor = colorScheme.onPrimary)) {
                         Text("Apply")
                       }
+
+                  Text(
+                      text = "Clear",
+                      color =
+                          if (clearEnabled) colorScheme.primary
+                          else colorScheme.onSecondaryContainer,
+                      modifier =
+                          Modifier.clickable(enabled = clearEnabled) {
+                                onClearClick()
+                                onDismissRequest()
+                              }
+                              .padding(vertical = verticalSpacing / 2)
+                              .testTag("resetButton"))
                 }
           }
         }
@@ -168,6 +185,8 @@ fun haha() {
           Log.d("Chill Guy", a.toString())
           Log.d("Chill Guy", b.toString())
         },
-        onDismissRequest = { showModal = false })
+        onDismissRequest = { showModal = false },
+        onClearClick = {},
+        clearEnabled = false)
   }
 }
