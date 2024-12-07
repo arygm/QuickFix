@@ -99,7 +99,6 @@ class ProfileResultsTest {
           listState = rememberLazyListState(),
           searchViewModel = searchViewModel,
           accountViewModel = accountViewModel,
-          widthRatio = 1.0f,
           heightRatio = 1.0f,
           onBookClick = { _ -> })
     }
