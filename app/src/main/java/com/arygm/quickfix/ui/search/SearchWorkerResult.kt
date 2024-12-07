@@ -247,7 +247,6 @@ fun SearchWorkerResult(
                     listState = listState,
                     searchViewModel = searchViewModel,
                     accountViewModel = accountViewModel,
-                    widthRatio = 1f,
                     heightRatio = 1f,
                     onBookClick = { selectedProfile ->
 

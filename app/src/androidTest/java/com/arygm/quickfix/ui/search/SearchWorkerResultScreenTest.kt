@@ -20,7 +20,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.printToLog
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepositoryFirestore
@@ -192,7 +191,6 @@ class SearchWorkerResultScreenTest {
     }
     // Scroll through the LazyColumn and verify each profile result is displayed
     val workerProfilesList = composeTestRule.onNodeWithTag("worker_profiles_list")
-    composeTestRule.onNodeWithTag("worker_profiles_list").printToLog("LazyColumn")
 
     repeat(searchViewModel.workerProfiles.value.size) { index ->
       workerProfilesList.performScrollToIndex(index)

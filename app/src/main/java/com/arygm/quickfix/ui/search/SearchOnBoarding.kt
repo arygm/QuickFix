@@ -137,7 +137,7 @@ fun SearchOnBoarding(
                           textColor = colorScheme.onBackground,
                           buttonColor = colorScheme.background,
                           buttonOpacity = 1f,
-                          textStyle = poppinsTypography.bodyMedium,
+                          textStyle = poppinsTypography.labelSmall,
                           onClickAction = {
                             navigationActionsRoot.navigateTo(TopLevelDestinations.HOME)
                           },
@@ -162,7 +162,6 @@ fun SearchOnBoarding(
                       searchViewModel = searchViewModel,
                       accountViewModel = accountViewModel,
                       listState = listState,
-                      widthRatio = widthRatio,
                       heightRatio = heightRatio,
                       onBookClick = { selectedProfile ->
                         // Set up variables for WorkerSlidingWindowContent
