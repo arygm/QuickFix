@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
@@ -107,7 +108,8 @@ fun QuickFixTextFieldCustom(
     maxLines: Int = Int.MAX_VALUE,
     heightInEnabled: Boolean = false,
     trailingText: @Composable (() -> Unit)? = {},
-    showTrailingText: Boolean = true
+    showTrailingText: Boolean = true,
+    iconButtonOnClickable: () -> Unit = {},
 ) {
   val scrollState = rememberScrollState() // Scroll state for horizontal scrolling
   // Launch a coroutine to scroll to the end of the text when typing
@@ -245,7 +247,14 @@ fun QuickFixTextFieldCustom(
                 }
                 if ((showTrailingIcon() && updatedValue.isNotEmpty()) || alwaysShowTrailingIcon) {
                   IconButton(
-                      onClick = { if (onClick) onValueChangeWithLimit("") },
+                      enabled = !isTextField && enabled,
+                      onClick = {
+                          if (isTextField) {
+                              if (onClick) onValueChangeWithLimit("")
+                          }else{
+                            iconButtonOnClickable()
+                          }
+                                },
                       modifier =
                           Modifier.testTag(C.Tag.clear_button_text_field_custom)
                               .size(sizeIconGroup)

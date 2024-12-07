@@ -118,9 +118,9 @@ fun BusinessScreen(
                     addOnServices = addOnServices.value,
                     tags = tags.value,
                     profilePicture = uploadedImageUrls[0],
-                    bannerPicture = uploadedImageUrls[1],
+                    bannerPicture = if (uploadedImageUrls.size > 1) uploadedImageUrls[1] else "",
                     uid = accountId)
-            Log.d("UpgradeToWorkerScreen", "workerProfile: ${locationWorker.value.name} ${fieldOfWork.value} ${description.value} ${price.doubleValue} ${displayName.value} ${includedServices.value} ${addOnServices.value} ${tags.value} ${uploadedImageUrls[0]} ${uploadedImageUrls[1]} $accountId")
+            Log.d("UpgradeToWorkerScreen", "workerProfile: ${locationWorker.value.name} ${fieldOfWork.value} ${description.value} ${price.doubleValue} ${displayName.value} ${includedServices.value} ${addOnServices.value} ${tags.value} ${uploadedImageUrls[0]} ${if (uploadedImageUrls.size > 1) uploadedImageUrls[1] else ""} $accountId")
             workerProfileViewModel.addProfile(workerProfile,
                 onSuccess = {
                     val newAccount = Account(
@@ -147,12 +147,11 @@ fun BusinessScreen(
         }
 
     LaunchedEffect(pagerState.currentPage) {
-        Log.d("UpgradeToWorker", "entered the last page")
         if(pagerState.currentPage == 2){
             Log.d("UpgradeToWorker", "entered the last page")
             val images = listOfNotNull(imageBitmapPP.value, imageBitmapBP.value)
                 // If there are no images to upload, proceed directly
-                workerProfileViewModel.uploadProfileImages(
+            workerProfileViewModel.uploadProfileImages(
                     accountId = workerId,
                     images = images,
                     onSuccess = { uploadedImageUrls ->
@@ -199,7 +198,7 @@ fun BusinessScreen(
             modifier =
                 Modifier.padding(innerPadding).fillMaxSize().semantics {
                   testTag = C.Tag.upgradeToWorkerPager
-                }, userScrollEnabled = false) { page ->
+                }, userScrollEnabled = true) { page ->
               when (page) {
                 0 -> {
                   PersonalInfoScreen(

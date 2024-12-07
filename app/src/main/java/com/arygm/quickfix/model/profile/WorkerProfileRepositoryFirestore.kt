@@ -4,6 +4,9 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.datastore.core.Storage
 import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.profile.dataFields.AddOnService
+import com.arygm.quickfix.model.profile.dataFields.IncludedService
+import com.arygm.quickfix.model.profile.dataFields.Review
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -15,6 +18,7 @@ import java.io.ByteArrayOutputStream
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.math.cos
+
 
 open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore, private val storage: FirebaseStorage) : ProfileRepository {
 
@@ -49,12 +53,7 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore, p
 
   override fun addProfile(profile: Profile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     val workerProfile = profile as WorkerProfile
-    val data =
-        mapOf(
-            "uid" to workerProfile.uid,
-            "description" to workerProfile.description,
-            "fieldOfWork" to workerProfile.fieldOfWork, // Convert to string
-            "location" to workerProfile.location?.toFirestoreMap())
+      val data = workerProfile.toFirestoreMap()
     performFirestoreOperation(
         db.collection(collectionPath).document(profile.uid).set(data), onSuccess, onFailure)
   }
@@ -65,12 +64,8 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore, p
       onFailure: (Exception) -> Unit
   ) {
     val workerProfile = profile as WorkerProfile
-    val data =
-        mapOf(
-            "uid" to workerProfile.uid,
-            "description" to workerProfile.description,
-            "fieldOfWork" to workerProfile.fieldOfWork,
-            "location" to workerProfile.location?.toFirestoreMap())
+    val data = workerProfile.toFirestoreMap()
+
     performFirestoreOperation(
         db.collection(collectionPath).document(profile.uid).set(data), onSuccess, onFailure)
   }
@@ -107,20 +102,21 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore, p
         onSuccess: (List<String>) -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        val workerFolderRef = storageRef.child("profiles/$accountId/worker")
+        val workerFolderRef = storageRef.child("profiles").child(accountId).child("worker")
         val uploadedImageUrls = mutableListOf<String>()
         var uploadCount = 0
 
         images.forEach { bitmap ->
             val fileRef = workerFolderRef.child("image_${System.currentTimeMillis()}.jpg")
+            Log.d("WorkerProfileRepositoryFirestore", "Uploading to path: ${fileRef.path}")
 
             val baos = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, compressionQuality, baos)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, compressionQuality, baos) // Compress the image
             val byteArray = baos.toByteArray()
 
-            fileRef
-                .putBytes(byteArray)
+            fileRef.putBytes(byteArray)
                 .addOnSuccessListener {
+                    Log.d("WorkerProfileRepositoryFirestore", "Image uploaded successfully: ${fileRef.name}")
                     fileRef.downloadUrl
                         .addOnSuccessListener { uri ->
                             uploadedImageUrls.add(uri.toString())
@@ -129,9 +125,15 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore, p
                                 onSuccess(uploadedImageUrls)
                             }
                         }
-                        .addOnFailureListener { exception -> onFailure(exception) }
+                        .addOnFailureListener { exception ->
+                            Log.e("WorkerProfileRepositoryFirestore", "Failed to get download URL for ${fileRef.name}", exception)
+                            onFailure(exception)
+                        }
                 }
-                .addOnFailureListener { exception -> onFailure(exception) }
+                .addOnFailureListener { exception ->
+                    Log.e("WorkerProfileRepositoryFirestore", "Failed to upload image: ${fileRef.name}", exception)
+                    onFailure(exception)
+                }
         }
     }
 
@@ -141,8 +143,6 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore, p
       val description = document.getString("description") ?: return null
       val fieldOfWork = document.getString("fieldOfWork") ?: return null
       val locationData = document.get("location") as? Map<String, Any> ?: return null
-      val price = document.getDouble("price") ?: 0.0
-      val rating = document.getDouble("rating") ?: 0.0
       val location =
           locationData.let {
             Location(
@@ -150,19 +150,87 @@ open class WorkerProfileRepositoryFirestore(private val db: FirebaseFirestore, p
                 longitude = it["longitude"] as? Double ?: 0.0,
                 name = it["name"] as? String ?: "")
           }
-      val unavailability_list =
-          document.get("unavailability_list") as? List<LocalDate> ?: emptyList<LocalDate>()
-      val workingHours =
-          document.get("workingHours") as? Pair<LocalTime, LocalTime>
-              ?: Pair(LocalTime.now(), LocalTime.now())
+        val price = document.getDouble("price") ?: 0.0
+        val displayName = document.getString("display_name") ?: ""
+        val includedServicesData = document.get("included_services") as? List<Map<String, Any>> ?: emptyList()
+        val includedServices = includedServicesData.mapNotNull { serviceMap ->
+            try {
+                IncludedService(
+                    name = serviceMap["name"] as? String ?: "",
+                )
+            } catch (e: Exception) {
+                Log.e("Firestore", "Error parsing included service: $serviceMap", e)
+                null // Skip invalid entries
+            }
+        }
+        val addOnServicesData = document.get("addOnServices") as? List<Map<String, Any>> ?: emptyList()
+        val addOnServices = addOnServicesData.mapNotNull { serviceMap ->
+            try {
+                AddOnService(
+                    name = serviceMap["name"] as? String ?: "",
+                    )
+            } catch (e: Exception) {
+                Log.e("Firestore", "Error parsing add-on service: $serviceMap", e)
+                null // Skip invalid entries
+            }
+        }
+
+        val workingHoursMap = document.get("workingHours") as? Map<String, String>
+        val workingHours = if (workingHoursMap != null) {
+            Pair(
+                LocalTime.parse(workingHoursMap["start"] ?: LocalTime.now().toString()),
+                LocalTime.parse(workingHoursMap["end"] ?: LocalTime.now().toString())
+            )
+        } else {
+            Pair(LocalTime.now(), LocalTime.now()) // Default value
+        }
+
+        val unavailabilityListData = document.get("unavailability_list") as? List<String> ?: emptyList()
+        val unavailabilityList = unavailabilityListData.mapNotNull { dateString ->
+            try {
+                LocalDate.parse(dateString) // Parses the String into LocalDate
+            } catch (e: Exception) {
+                null // If parsing fails, skip this entry
+            }
+        }
+
+        val reviewsData = document.get("reviews") as? List<Map<String, Any>> // Ensure type is Map<String, Any>
+            ?: emptyList() // Fallback to an empty list if `reviews` is null or not a list
+
+        val reviews = reviewsData.mapNotNull { reviewMap ->
+            try {
+                Review(
+                    username = reviewMap["username"] as? String ?: "", // Safely cast and fallback to an empty string
+                    review = reviewMap["review"] as? String ?: "", // Safely cast and fallback to an empty string
+                    rating = (reviewMap["rating"] as? Number)?.toDouble() ?: 0.0 // Safely cast rating to Double
+                )
+            } catch (e: Exception) {
+                Log.e("Firestore", "Error parsing review: $reviewMap", e)
+                null // Skip invalid entries
+            }
+        }
+        val tags = document.get("tags") as? List<String> ?: emptyList()
+        val profilePicture = document.getString("profileImageUrl") ?: ""
+        val bannerPicture = document.getString("bannerImageUrl") ?: ""
+        val quickFixes = document.get("quickFixes") as? List<String> ?: emptyList()
+
       WorkerProfile(
           uid = uid,
           price = price,
           description = description,
           fieldOfWork = fieldOfWork,
           location = location,
-          unavailability_list = unavailability_list,
-          workingHours = workingHours)
+          unavailability_list = unavailabilityList,
+          workingHours = workingHours,
+          reviews = reviews.toCollection(ArrayDeque()),
+            includedServices = includedServices,
+            addOnServices = addOnServices,
+            profilePicture = profilePicture,
+            bannerPicture = bannerPicture,
+            displayName = displayName,
+            tags = tags,
+            quickFixes = quickFixes
+          )
     } catch (e: Exception) {
       Log.e("WorkerProfileRepositoryFirestore", "Error converting document to WorkerProfile", e)
       null

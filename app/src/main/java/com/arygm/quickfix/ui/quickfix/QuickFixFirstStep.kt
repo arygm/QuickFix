@@ -147,6 +147,7 @@ fun QuickFixFirstStep(locationViewModel: LocationViewModel, navigationActions: N
         }
 
         if (cameraBottomSheet) {
+
           CameraBottomSheet(
               onDismissRequest = { cameraBottomSheet = false },
               modifier = Modifier.fillMaxWidth(),

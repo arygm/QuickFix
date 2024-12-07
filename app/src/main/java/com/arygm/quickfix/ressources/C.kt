@@ -45,6 +45,7 @@ object C {
     const val personalInfoScreenBannerPictureField = "personalInfoScreen_bannerPictureField"
     const val personalInfoScreenBannerPicture = "personalInfoScreen_bannerPicture"
     const val cameraBottomSheet = "personalInfoScreen_cameraBottomSheet"
+    const val personalInfoScreenLoactionDropdownMenu = "personalInfoScreen_locationDropdownMenu"
 
     // ProfessionalInfoScreen
     const val professionalInfoScreenSectionTitle = "professionalInfoScreen_sectionTitle"
