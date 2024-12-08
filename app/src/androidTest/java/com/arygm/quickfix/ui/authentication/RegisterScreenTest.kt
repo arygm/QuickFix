@@ -23,10 +23,13 @@ import com.arygm.quickfix.ui.navigation.TopLevelDestinations
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
@@ -47,13 +50,18 @@ class RegisterScreenTest {
   private lateinit var navigationActions: NavigationActions
   private lateinit var preferencesRepository: PreferencesRepository
   private lateinit var preferencesViewModel: PreferencesViewModel
+  private lateinit var mockStorage: FirebaseStorage
+  @Mock private lateinit var storageRef: StorageReference
 
   @Before
   fun setup() {
     mockFirestore = mock(FirebaseFirestore::class.java)
+    mockStorage = mock(FirebaseStorage::class.java)
+    storageRef = mock(StorageReference::class.java)
+    whenever(mockStorage.reference).thenReturn(storageRef)
     navigationActions = mock(NavigationActions::class.java)
-    userProfileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore)
-    workerProfileRepositoryFirestore = WorkerProfileRepositoryFirestore(mockFirestore)
+    userProfileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore, mockStorage)
+    workerProfileRepositoryFirestore = WorkerProfileRepositoryFirestore(mockFirestore, mockStorage)
     accountRepository = mock(AccountRepository::class.java)
     accountViewModel = AccountViewModel(accountRepository)
     userViewModel = ProfileViewModel(userProfileRepositoryFirestore)

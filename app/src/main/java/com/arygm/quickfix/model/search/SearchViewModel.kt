@@ -10,6 +10,7 @@ import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import java.time.LocalDate
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -39,12 +40,14 @@ open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositor
 
   companion object {
     private val firestoreInstance by lazy { Firebase.firestore } // Singleton Firestore instance
-
+    private val storageInstance by lazy { Firebase.storage } // Singleton Storage instance
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return SearchViewModel(WorkerProfileRepositoryFirestore(firestoreInstance)) as T
+            return SearchViewModel(
+                WorkerProfileRepositoryFirestore(firestoreInstance, storageInstance))
+                as T
           }
         }
   }
