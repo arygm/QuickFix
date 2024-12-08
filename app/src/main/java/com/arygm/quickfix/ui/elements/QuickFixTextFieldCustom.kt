@@ -38,7 +38,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
@@ -249,12 +248,12 @@ fun QuickFixTextFieldCustom(
                   IconButton(
                       enabled = isTextField || (!isTextField && enabled),
                       onClick = {
-                          if (isTextField) {
-                              if (onClick) onValueChangeWithLimit("")
-                          }else{
-                            iconButtonOnClickable()
-                          }
-                                },
+                        if (isTextField) {
+                          if (onClick) onValueChangeWithLimit("")
+                        } else {
+                          iconButtonOnClickable()
+                        }
+                      },
                       modifier =
                           Modifier.testTag(C.Tag.clear_button_text_field_custom)
                               .size(sizeIconGroup)
@@ -263,9 +262,9 @@ fun QuickFixTextFieldCustom(
                         trailingIcon?.invoke()
                       }
                 }
-              if (showTrailingText) {
+                if (showTrailingText) {
                   trailingText?.invoke()
-              }
+                }
               }
         }
     if (showError && isError) {

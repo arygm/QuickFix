@@ -21,7 +21,9 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ProfileViewModel(UserProfileRepositoryFirestore(Firebase.firestore, Firebase.storage)) as T
+            return ProfileViewModel(
+                UserProfileRepositoryFirestore(Firebase.firestore, Firebase.storage))
+                as T
           }
         }
 
@@ -29,7 +31,9 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ProfileViewModel(WorkerProfileRepositoryFirestore(Firebase.firestore, Firebase.storage)) as T
+            return ProfileViewModel(
+                WorkerProfileRepositoryFirestore(Firebase.firestore, Firebase.storage))
+                as T
           }
         }
   }
@@ -95,17 +99,18 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
           onResult(null)
         })
   }
-    fun uploadProfileImages(
-        accountId: String,
-        images: List<Bitmap>, // List of image file paths as strings
-        onSuccess: (List<String>) -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        Log.d("UploadingImages", "$images.size")
-        repository.uploadProfileImages(
-            accountId = accountId,
-            images = images,
-            onSuccess = { onSuccess(it) },
-            onFailure = { e -> onFailure(e) })
-    }
+
+  fun uploadProfileImages(
+      accountId: String,
+      images: List<Bitmap>, // List of image file paths as strings
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    Log.d("UploadingImages", "$images.size")
+    repository.uploadProfileImages(
+        accountId = accountId,
+        images = images,
+        onSuccess = { onSuccess(it) },
+        onFailure = { e -> onFailure(e) })
+  }
 }

@@ -21,6 +21,7 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
+import java.io.ByteArrayOutputStream
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
@@ -45,7 +46,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
-import java.io.ByteArrayOutputStream
 
 @RunWith(RobolectricTestRunner::class)
 class UserProfileRepositoryFirestoreTest {
@@ -103,8 +103,6 @@ class UserProfileRepositoryFirestoreTest {
     whenever(storageRef.child(anyString())).thenReturn(storageRef1)
     whenever(storageRef1.child(anyString())).thenReturn(storageRef2)
     whenever(storageRef2.child(anyString())).thenReturn(workerProfileFolderRef)
-
-
 
     profileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore, mockStorage)
 
@@ -690,14 +688,17 @@ class UserProfileRepositoryFirestoreTest {
 
     // Mock storageRef.child("workerProfiles/$workerProfileId")
     Mockito.`when`(storageRef.child("profiles").child(accountId).child("user"))
-      .thenReturn(workerProfileFolderRef)
+        .thenReturn(workerProfileFolderRef)
 
-    // For each image, when workerProfileFolderRef.child(anyString()) is called, return a new fileRef
+    // For each image, when workerProfileFolderRef.child(anyString()) is called, return a new
+    // fileRef
     val fileRef1 = mock(StorageReference::class.java)
     val fileRef2 = mock(StorageReference::class.java)
     val fileRefs = listOf(fileRef1, fileRef2)
     var fileRefIndex = 0
-    Mockito.`when`(workerProfileFolderRef.child(anyString())).thenAnswer { fileRefs[fileRefIndex++] }
+    Mockito.`when`(workerProfileFolderRef.child(anyString())).thenAnswer {
+      fileRefs[fileRefIndex++]
+    }
 
     // Mock putBytes
     val mockUploadTask1 = mock(UploadTask::class.java)
@@ -711,7 +712,8 @@ class UserProfileRepositoryFirestoreTest {
 
     // Mock mockUploadTask.addOnSuccessListener(...)
     mockUploadTasks.forEachIndexed { index, mockUploadTask ->
-      Mockito.`when`(mockUploadTask.addOnSuccessListener(org.mockito.kotlin.any())).thenAnswer { invocation ->
+      Mockito.`when`(mockUploadTask.addOnSuccessListener(org.mockito.kotlin.any())).thenAnswer {
+          invocation ->
         val listener = invocation.getArgument<OnSuccessListener<UploadTask.TaskSnapshot>>(0)
         val taskSnapshot = mock(UploadTask.TaskSnapshot::class.java) // Mock the snapshot
         listener.onSuccess(taskSnapshot)
@@ -726,13 +728,13 @@ class UserProfileRepositoryFirestoreTest {
     // Act
     var resultUrls = listOf<String>()
     profileRepositoryFirestore.uploadProfileImages(
-      accountId,
-      bitmaps,
-      onSuccess = {
-        resultUrls = it
-        Assert.assertEquals(expectedUrls, resultUrls)
-      },
-      onFailure = { fail("onFailure should not be called") })
+        accountId,
+        bitmaps,
+        onSuccess = {
+          resultUrls = it
+          Assert.assertEquals(expectedUrls, resultUrls)
+        },
+        onFailure = { fail("onFailure should not be called") })
 
     // Wait for tasks to complete
     shadowOf(Looper.getMainLooper()).idle()
@@ -747,7 +749,7 @@ class UserProfileRepositoryFirestoreTest {
 
     // Mock storageRef.child("workerProfiles/$workerProfileId")
     Mockito.`when`(storageRef.child("profiles").child(accountId).child("user"))
-      .thenReturn(workerProfileFolderRef)
+        .thenReturn(workerProfileFolderRef)
     // Mock fileRef
     val fileRef = mock(StorageReference::class.java)
     whenever(workerProfileFolderRef.child(anyString())).thenReturn(fileRef)
@@ -768,13 +770,13 @@ class UserProfileRepositoryFirestoreTest {
     var onFailureCalled = false
     var exceptionReceived: Exception? = null
     profileRepositoryFirestore.uploadProfileImages(
-      accountId,
-      images,
-      onSuccess = { fail("onSuccess should not be called when upload fails") },
-      onFailure = { e ->
-        onFailureCalled = true
-        exceptionReceived = e
-      })
+        accountId,
+        images,
+        onSuccess = { fail("onSuccess should not be called when upload fails") },
+        onFailure = { e ->
+          onFailureCalled = true
+          exceptionReceived = e
+        })
 
     // Wait for tasks to complete
     shadowOf(Looper.getMainLooper()).idle()

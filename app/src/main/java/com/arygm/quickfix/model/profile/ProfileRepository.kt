@@ -24,10 +24,11 @@ interface ProfileRepository {
   */
 
   fun getProfileById(uid: String, onSuccess: (Profile?) -> Unit, onFailure: (Exception) -> Unit)
+
   fun uploadProfileImages(
-    accountId: String,
-    images: List<Bitmap>,
-    onSuccess: (List<String>) -> Unit,
-    onFailure: (Exception) -> Unit
+      accountId: String,
+      images: List<Bitmap>,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
   )
 }

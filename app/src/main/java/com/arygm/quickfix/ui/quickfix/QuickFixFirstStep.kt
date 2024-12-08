@@ -1,6 +1,7 @@
 package com.arygm.quickfix.ui.quickfix
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -53,6 +54,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -66,7 +68,15 @@ import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.PopupProperties
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
+import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
+import com.arygm.quickfix.model.messaging.ChatViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.dataFields.AddOnService
+import com.arygm.quickfix.model.profile.dataFields.IncludedService
+import com.arygm.quickfix.model.quickfix.QuickFix
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
+import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixCheckedListElement
@@ -77,17 +87,26 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.profile.becomeWorker.views.personal.CameraBottomSheet
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.firebase.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
-fun QuickFixFirstStep(locationViewModel: LocationViewModel, navigationActions: NavigationActions) {
+fun QuickFixFirstStep(
+    locationViewModel: LocationViewModel,
+    navigationActions: NavigationActions,
+    quickFixViewModel: QuickFixViewModel,
+    chatViewModel: ChatViewModel,
+    workerName: String,
+    profileViewModel: ProfileViewModel
+) {
 
   val focusManager = LocalFocusManager.current
-
+  val context = LocalContext.current
   var quickFixTile by remember { mutableStateOf("") }
   val listServices = listOf("Service 1", "Service 2", "Service 3", "Service 4", "Service 5")
   val checkedStatesServices = remember { mutableStateListOf(*Array(listServices.size) { false }) }
@@ -106,6 +125,7 @@ fun QuickFixFirstStep(locationViewModel: LocationViewModel, navigationActions: N
   var quickNote by remember { mutableStateOf("") }
 
   var locationTitle by remember { mutableStateOf("") }
+  var locationQuickFix by remember { mutableStateOf(Location(0.0, 0.0, "")) }
   var locationExpanded by remember { mutableStateOf(false) }
   val locationSuggestions by locationViewModel.locationSuggestions.collectAsState()
 
@@ -458,6 +478,7 @@ fun QuickFixFirstStep(locationViewModel: LocationViewModel, navigationActions: N
                           locationExpanded = false
                           locationViewModel.setQuery(location.name)
                           locationTitle = location.name
+                          locationQuickFix = location
                         },
                         text = {
                           Text(
@@ -590,7 +611,7 @@ fun QuickFixFirstStep(locationViewModel: LocationViewModel, navigationActions: N
                       QuickFixButton(
                           buttonText = "Cancel",
                           buttonColor = Color.Transparent,
-                          onClickAction = { /*navigationActions.goBack()*/},
+                          onClickAction = { /* navigationActions.goBack() */},
                           modifier = Modifier.weight(0.5f),
                           textColor = colorScheme.onSecondaryContainer,
                           textStyle =
@@ -604,7 +625,45 @@ fun QuickFixFirstStep(locationViewModel: LocationViewModel, navigationActions: N
                           buttonText = "Continue",
                           buttonColor = colorScheme.primary,
                           onClickAction = {
-                            // Go to the next step
+                            quickFixViewModel.addQuickFix(
+                                QuickFix(
+                                    uid = quickFixViewModel.getRandomUid(),
+                                    status = Status.PENDING,
+                                    imageUrl = listOfImagePath,
+                                    date =
+                                        listDates.map {
+                                          Timestamp(it.atZone(ZoneId.systemDefault()).toInstant())
+                                        },
+                                    time =
+                                        Timestamp(
+                                            listDates
+                                                .first()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toInstant()),
+                                    includedServices =
+                                        listServices
+                                            .filterIndexed { index, _ ->
+                                              checkedStatesServices[index]
+                                            }
+                                            .map { IncludedService(it) },
+                                    addOnServices =
+                                        listAddOnServices
+                                            .filterIndexed { index, _ ->
+                                              checkedStatesAddOnServices[index]
+                                            }
+                                            .map { AddOnService(it) },
+                                    workerName = workerName,
+                                    userName = "Place Holder, to change",
+                                    title = quickFixTile,
+                                    chatUid = chatViewModel.getRandomUid(),
+                                    bill = emptyList(),
+                                    location = locationQuickFix),
+                                onSuccess = {
+                                  /* navigationActions.goToQuickFixSecondStep() */
+                                  Toast.makeText(context, "QuickFix added", Toast.LENGTH_SHORT)
+                                      .show()
+                                },
+                                onFailure = { /* Handle failure */})
                           },
                           modifier = Modifier.weight(0.5f),
                           textColor = colorScheme.onPrimary,

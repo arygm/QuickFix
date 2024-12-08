@@ -19,7 +19,6 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -55,7 +54,6 @@ import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.PopupProperties
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
-import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.ressources.C
@@ -84,9 +82,9 @@ fun PersonalInfoScreen(
     locationViewModel: LocationViewModel,
     locationWorker: MutableState<Location>,
 ) {
-    var locationTitle by remember { mutableStateOf("") }
-    val locationSuggestions by locationViewModel.locationSuggestions.collectAsState()
-    var locationExpanded by remember { mutableStateOf(false) }
+  var locationTitle by remember { mutableStateOf("") }
+  val locationSuggestions by locationViewModel.locationSuggestions.collectAsState()
+  var locationExpanded by remember { mutableStateOf(false) }
   val coroutineScope = rememberCoroutineScope()
   var showBottomSheetPP by remember { mutableStateOf(showBottomSheetPPR) }
   var showBottomSheetBP by remember { mutableStateOf(showBottomSheetBPR) }
@@ -361,104 +359,94 @@ fun PersonalInfoScreen(
             errorText = "Please enter at least 150 characters",
             showError = descriptionError,
             singleLine = false)
-          Spacer(modifier = Modifier.height(17.dp * heightRatio.value))
-          val locationTextStyle =
-              MaterialTheme.typography.labelMedium.copy(
-                  fontSize = 10.sp,
-                  color = colorScheme.onBackground,
-                  fontWeight = FontWeight.Medium)
-          val maxCategoryTextWidth =
-              calculateMaxTextWidth(
-                  texts = locationSuggestions.map { it.name }, textStyle = locationTextStyle)
+        Spacer(modifier = Modifier.height(17.dp * heightRatio.value))
+        val locationTextStyle =
+            MaterialTheme.typography.labelMedium.copy(
+                fontSize = 10.sp, color = colorScheme.onBackground, fontWeight = FontWeight.Medium)
+        val maxCategoryTextWidth =
+            calculateMaxTextWidth(
+                texts = locationSuggestions.map { it.name }, textStyle = locationTextStyle)
 
-          // Add padding or extra space if needed
-          val dropdownMenuWidth = maxCategoryTextWidth + 40.dp
-          Row {
-              Box(
-                  modifier = Modifier.weight(0.465f).align(Alignment.Bottom),
-              ) {
-                  QuickFixTextFieldCustom(
-                      modifier =
-                      Modifier.semantics { testTag = C.Tag.personalInfoScreenLocationField },
-                      widthField = 380.dp * widthRatio.value,
-                      value = locationTitle,
-                      onValueChange = {
-                          locationExpanded = it.isNotEmpty() && locationSuggestions.isNotEmpty()
-                          locationTitle = it
-                          if (it.isNotEmpty()) {
-                              locationViewModel.setQuery(it)
-                          }
-                      },
-                      shape = RoundedCornerShape(8.dp),
-                      showLabel = true,
-                      label =
-                      @Composable {
-                          Text(
-                              text =
-                              buildAnnotatedString {
-                                  append("Location")
-                                  withStyle(
-                                      style =
-                                      SpanStyle(
-                                          color = colorScheme.primary,
-                                          fontSize = 12.sp,
-                                          fontWeight = FontWeight.Medium
-                                      )
-                                  ) {
-                                      append("*")
-                                  }
-                              },
-                              style =
-                              poppinsTypography.headlineMedium.copy(
-                                  fontSize = 12.sp, fontWeight = FontWeight.Medium
-                              ),
-                              color = colorScheme.onBackground
-                          )
-                      },
-                      hasShadow = false,
-                      borderColor = colorScheme.tertiaryContainer,
-                      placeHolderText = "Select Occupation",
-                      moveTrailingIconLeft = 2.dp,
-                      singleLine = false,
-                      heightInEnabled = true,
-                      minHeight = 27.dp * heightRatio.value, // Set default height
-                      maxHeight =
-                      54.dp * heightRatio.value, // Allow expansion up to double the default height
-                      maxLines = 2,
-                  )
-                  DropdownMenu(
-                      expanded = locationExpanded,
-                      properties = PopupProperties(focusable = false),
-                      onDismissRequest = { locationExpanded = false },
-                      modifier =
-                      Modifier.width(dropdownMenuWidth * widthRatio.value).semantics {
-                          testTag = C.Tag.personalInfoScreenLoactionDropdownMenu
-                      },
-                      containerColor = colorScheme.surface
-                  ) {
-                      locationSuggestions.forEachIndexed { index, location ->
-                          DropdownMenuItem(
-                              text = { Text(text = location.name, style = locationTextStyle) },
-                              onClick = {
-                                  locationExpanded = false
-                                  locationViewModel.setQuery(location.name)
-                                  locationTitle = location.name
-                                  locationWorker.value = location
-                              },
-                              modifier =
-                              Modifier.height(30.dp * heightRatio.value).semantics {
-                                  testTag =
-                                      C.Tag.professionalInfoScreenLocationDropdownMenuItem + index
-                              })
-                          if (index < locationSuggestions.size - 1) {
-                              HorizontalDivider(
-                                  color = colorScheme.onSecondaryContainer, thickness = 1.5.dp
-                              )
-                          }
-                      }
+        // Add padding or extra space if needed
+        val dropdownMenuWidth = maxCategoryTextWidth + 40.dp
+        Row {
+          Box(
+              modifier = Modifier.weight(0.465f).align(Alignment.Bottom),
+          ) {
+            QuickFixTextFieldCustom(
+                modifier = Modifier.semantics { testTag = C.Tag.personalInfoScreenLocationField },
+                widthField = 380.dp * widthRatio.value,
+                value = locationTitle,
+                onValueChange = {
+                  locationExpanded = it.isNotEmpty() && locationSuggestions.isNotEmpty()
+                  locationTitle = it
+                  if (it.isNotEmpty()) {
+                    locationViewModel.setQuery(it)
                   }
-              }
+                },
+                shape = RoundedCornerShape(8.dp),
+                showLabel = true,
+                label =
+                    @Composable {
+                      Text(
+                          text =
+                              buildAnnotatedString {
+                                append("Location")
+                                withStyle(
+                                    style =
+                                        SpanStyle(
+                                            color = colorScheme.primary,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Medium)) {
+                                      append("*")
+                                    }
+                              },
+                          style =
+                              poppinsTypography.headlineMedium.copy(
+                                  fontSize = 12.sp, fontWeight = FontWeight.Medium),
+                          color = colorScheme.onBackground)
+                    },
+                hasShadow = false,
+                borderColor = colorScheme.tertiaryContainer,
+                placeHolderText = "Select Occupation",
+                moveTrailingIconLeft = 2.dp,
+                singleLine = false,
+                heightInEnabled = true,
+                minHeight = 27.dp * heightRatio.value, // Set default height
+                maxHeight =
+                    54.dp * heightRatio.value, // Allow expansion up to double the default height
+                maxLines = 2,
+            )
+            DropdownMenu(
+                expanded = locationExpanded,
+                properties = PopupProperties(focusable = false),
+                onDismissRequest = { locationExpanded = false },
+                modifier =
+                    Modifier.width(dropdownMenuWidth * widthRatio.value).semantics {
+                      testTag = C.Tag.personalInfoScreenLoactionDropdownMenu
+                    },
+                containerColor = colorScheme.surface) {
+                  locationSuggestions.forEachIndexed { index, location ->
+                    DropdownMenuItem(
+                        text = { Text(text = location.name, style = locationTextStyle) },
+                        onClick = {
+                          locationExpanded = false
+                          locationViewModel.setQuery(location.name)
+                          locationTitle = location.name
+                          locationWorker.value = location
+                        },
+                        modifier =
+                            Modifier.height(30.dp * heightRatio.value).semantics {
+                              testTag = C.Tag.professionalInfoScreenLocationDropdownMenuItem + index
+                            })
+                    if (index < locationSuggestions.size - 1) {
+                      HorizontalDivider(
+                          color = colorScheme.onSecondaryContainer, thickness = 1.5.dp)
+                    }
+                  }
+                }
           }
+        }
       }
 
       Row(
@@ -481,7 +469,6 @@ fun PersonalInfoScreen(
             buttonText = "Continue",
             onClickAction = {
               coroutineScope.launch { pagerState.scrollToPage(pagerState.currentPage + 1) }
-
             },
             buttonColor = colorScheme.primary,
             enabled =

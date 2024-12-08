@@ -1,7 +1,8 @@
 package com.arygm.quickfix.ui.search
 
-import android.location.Location
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,7 +35,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.LocationSearching
+import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Tune
@@ -75,21 +80,28 @@ import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixButton
+import com.arygm.quickfix.ui.elements.QuickFixLocationFilterBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixPriceRangeBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixSlidingWindow
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.LocationHelper
+import com.arygm.quickfix.utils.loadUserId
+import java.time.LocalDate
 
 data class SearchFilterButtons(
     val onClick: () -> Unit,
     val text: String,
     val leadingIcon: ImageVector? = null,
     val trailingIcon: ImageVector? = null,
+    val applied: Boolean = false
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -97,42 +109,142 @@ data class SearchFilterButtons(
 fun SearchWorkerResult(
     navigationActions: NavigationActions,
     searchViewModel: SearchViewModel,
-    accountViewModel: AccountViewModel
+    accountViewModel: AccountViewModel,
+    userProfileViewModel: ProfileViewModel,
+    preferencesViewModel: PreferencesViewModel
 ) {
+  val locationHelper = LocationHelper(LocalContext.current, MainActivity())
+  var phoneLocation by remember {
+    mutableStateOf(com.arygm.quickfix.model.locations.Location(0.0, 0.0, "Default"))
+  }
+  var baseLocation by remember { mutableStateOf(phoneLocation) }
+  val context = LocalContext.current
+  LaunchedEffect(Unit) {
+    if (locationHelper.checkPermissions()) {
+      locationHelper.getCurrentLocation { location ->
+        if (location != null) {
+          phoneLocation =
+              com.arygm.quickfix.model.locations.Location(
+                  location.latitude, location.longitude, "Phone Location")
+          baseLocation = phoneLocation
+        } else {
+          Toast.makeText(context, "Unable to fetch location", Toast.LENGTH_SHORT).show()
+        }
+      }
+    } else {
+      Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
+    }
+  }
+
+  var showFilterButtons by remember { mutableStateOf(false) }
   var showAvailabilityBottomSheet by remember { mutableStateOf(false) }
   var showServicesBottomSheet by remember { mutableStateOf(false) }
   var showPriceRangeBottomSheet by remember { mutableStateOf(false) }
-  val workerProfiles by searchViewModel.workerProfiles.collectAsState()
+  var showLocationBottomSheet by remember { mutableStateOf(false) }
+  val workerProfiles by searchViewModel.subCategoryWorkerProfiles.collectAsState()
   var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
+
+  var availabilityFilterApplied by remember { mutableStateOf(false) }
+  var servicesFilterApplied by remember { mutableStateOf(false) }
+  var priceFilterApplied by remember { mutableStateOf(false) }
+  var locationFilterApplied by remember { mutableStateOf(false) }
+  var ratingFilterApplied by remember { mutableStateOf(false) }
+
+  var selectedDays by remember { mutableStateOf(emptyList<LocalDate>()) }
+  var selectedHour by remember { mutableStateOf(0) }
+  var selectedMinute by remember { mutableStateOf(0) }
+  var selectedServices by remember { mutableStateOf(emptyList<String>()) }
+  var selectedPriceStart by remember { mutableStateOf(0) }
+  var selectedPriceEnd by remember { mutableStateOf(0) }
+  var selectedLocation by remember { mutableStateOf(com.arygm.quickfix.model.locations.Location()) }
+  var maxDistance by remember { mutableStateOf(0) }
+
+  fun reapplyFilters() {
+    var updatedProfiles = workerProfiles
+
+    if (availabilityFilterApplied) {
+      updatedProfiles =
+          searchViewModel.filterWorkersByAvailability(
+              updatedProfiles, selectedDays, selectedHour, selectedMinute)
+    }
+
+    if (servicesFilterApplied) {
+      updatedProfiles = searchViewModel.filterWorkersByServices(updatedProfiles, selectedServices)
+    }
+
+    if (priceFilterApplied) {
+      updatedProfiles =
+          searchViewModel.filterWorkersByPriceRange(
+              updatedProfiles, selectedPriceStart, selectedPriceEnd)
+    }
+
+    if (locationFilterApplied) {
+      updatedProfiles =
+          searchViewModel.filterWorkersByDistance(updatedProfiles, selectedLocation, maxDistance)
+    }
+
+    if (ratingFilterApplied) {
+      updatedProfiles = searchViewModel.sortWorkersByRating(updatedProfiles)
+    }
+
+    filteredWorkerProfiles = updatedProfiles
+  }
 
   val listOfButtons =
       listOf(
           SearchFilterButtons(
-              onClick = { /* Handle click */},
+              onClick = {
+                filteredWorkerProfiles = workerProfiles
+                availabilityFilterApplied = false
+                priceFilterApplied = false
+                locationFilterApplied = false
+                ratingFilterApplied = false
+                servicesFilterApplied = false
+                selectedServices = emptyList()
+                baseLocation = phoneLocation
+              },
+              text = "Clear",
+              leadingIcon = Icons.Default.Clear,
+              applied = false),
+          SearchFilterButtons(
+              onClick = { showLocationBottomSheet = true },
               text = "Location",
-          ),
+              leadingIcon = Icons.Default.LocationSearching,
+              trailingIcon = Icons.Default.KeyboardArrowDown,
+              applied = locationFilterApplied),
           SearchFilterButtons(
               onClick = { showServicesBottomSheet = true },
               text = "Service Type",
+              leadingIcon = Icons.Default.Handyman,
               trailingIcon = Icons.Default.KeyboardArrowDown,
-          ),
+              applied = servicesFilterApplied),
           SearchFilterButtons(
               onClick = { showAvailabilityBottomSheet = true },
               text = "Availability",
               leadingIcon = Icons.Default.CalendarMonth,
               trailingIcon = Icons.Default.KeyboardArrowDown,
-          ),
+              applied = availabilityFilterApplied),
           SearchFilterButtons(
               onClick = {
-                filteredWorkerProfiles = searchViewModel.sortWorkersByRating(filteredWorkerProfiles)
+                if (ratingFilterApplied) {
+                  ratingFilterApplied = false
+                  reapplyFilters()
+                } else {
+                  filteredWorkerProfiles =
+                      searchViewModel.sortWorkersByRating(filteredWorkerProfiles)
+                  ratingFilterApplied = true
+                }
               },
               text = "Highest Rating",
               leadingIcon = Icons.Default.WorkspacePremium,
-          ),
+              trailingIcon = if (ratingFilterApplied) Icons.Default.Clear else null,
+              applied = ratingFilterApplied),
           SearchFilterButtons(
               onClick = { showPriceRangeBottomSheet = true },
               text = "Price Range",
-          ),
+              leadingIcon = Icons.Default.MonetizationOn,
+              trailingIcon = Icons.Default.KeyboardArrowDown,
+              applied = priceFilterApplied),
       )
 
   // ==========================================================================//
@@ -203,9 +315,18 @@ fun SearchWorkerResult(
   var saved by remember { mutableStateOf(false) }
   val searchQuery by searchViewModel.searchQuery.collectAsState()
   val searchSubcategory by searchViewModel.searchSubcategory.collectAsState()
-  var currentLocation by remember { mutableStateOf<Location?>(null) }
 
-  val locationHelper: LocationHelper = LocationHelper(LocalContext.current, MainActivity())
+  var userProfile = UserProfile(locations = emptyList(), announcements = emptyList(), uid = "0")
+  var uid by remember { mutableStateOf("Loading...") }
+
+  LaunchedEffect(Unit) { uid = loadUserId(preferencesViewModel) }
+  userProfileViewModel.fetchUserProfile(uid) { profile ->
+    if (profile is UserProfile) {
+      userProfile = profile
+    } else {
+      Log.e("SearchWorkerResult", "Fetched a worker profile from a user profile repo.")
+    }
+  }
 
   // Wrap everything in a Box to allow overlay
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -264,7 +385,7 @@ fun SearchWorkerResult(
                       )
                     }
 
-                LazyRow(
+                Row(
                     modifier =
                         Modifier.fillMaxWidth()
                             .padding(top = screenHeight * 0.02f, bottom = screenHeight * 0.01f)
@@ -273,41 +394,63 @@ fun SearchWorkerResult(
                             .testTag("filter_buttons_row"),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                  items(1) {
-                    Box(modifier = Modifier.height(screenHeight * 0.05f)) {
-                      IconButton(
-                          onClick = { /* Goes to all filter screen */},
-                          modifier = Modifier.padding(bottom = screenHeight * 0.01f),
-                          content = {
-                            Icon(
-                                imageVector = Icons.Default.Tune,
-                                contentDescription = "Filter",
-                                tint = colorScheme.onBackground,
-                            )
-                          },
-                          colors =
-                              IconButtonDefaults.iconButtonColors()
-                                  .copy(containerColor = colorScheme.surface),
-                      )
-                    }
-                    Spacer(modifier = Modifier.width(10.dp))
-                  }
+                  // Tune Icon - fixed, non-scrollable
+                  IconButton(
+                      onClick = { showFilterButtons = !showFilterButtons },
+                      modifier =
+                          Modifier.padding(bottom = screenHeight * 0.01f).testTag("tuneButton"),
+                      content = {
+                        Icon(
+                            imageVector = Icons.Default.Tune,
+                            contentDescription = "Filter",
+                            tint =
+                                if (showFilterButtons) colorScheme.onPrimary
+                                else colorScheme.onBackground,
+                        )
+                      },
+                      colors =
+                          IconButtonDefaults.iconButtonColors(
+                              containerColor =
+                                  if (showFilterButtons) colorScheme.primary
+                                  else colorScheme.surface),
+                  )
 
-                  items(listOfButtons.size) { index ->
-                    QuickFixButton(
-                        buttonText = listOfButtons[index].text,
-                        onClickAction = listOfButtons[index].onClick,
-                        buttonColor = colorScheme.surface,
-                        textColor = colorScheme.onBackground,
-                        textStyle =
-                            poppinsTypography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                        height = screenHeight * 0.05f,
-                        leadingIcon = listOfButtons[index].leadingIcon,
-                        trailingIcon = listOfButtons[index].trailingIcon,
-                        contentPadding =
-                            PaddingValues(vertical = 0.dp, horizontal = screenWidth * 0.02f),
-                        modifier = Modifier.testTag("filter_button_${listOfButtons[index].text}"))
-                    Spacer(modifier = Modifier.width(screenHeight * 0.01f))
+                  Spacer(modifier = Modifier.width(10.dp))
+
+                  AnimatedVisibility(visible = showFilterButtons) {
+                    LazyRow(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.testTag("lazy_filter_row")) {
+                          items(listOfButtons.size) { index ->
+                            QuickFixButton(
+                                buttonText = listOfButtons[index].text,
+                                onClickAction = listOfButtons[index].onClick,
+                                buttonColor =
+                                    if (listOfButtons[index].applied) colorScheme.primary
+                                    else colorScheme.surface,
+                                textColor =
+                                    if (listOfButtons[index].applied) colorScheme.onPrimary
+                                    else colorScheme.onBackground,
+                                textStyle =
+                                    poppinsTypography.labelSmall.copy(
+                                        fontWeight = FontWeight.Medium),
+                                height = screenHeight * 0.05f,
+                                leadingIcon = listOfButtons[index].leadingIcon,
+                                trailingIcon = listOfButtons[index].trailingIcon,
+                                leadingIconTint =
+                                    if (listOfButtons[index].applied) colorScheme.onPrimary
+                                    else colorScheme.onBackground,
+                                trailingIconTint =
+                                    if (listOfButtons[index].applied) colorScheme.onPrimary
+                                    else colorScheme.onBackground,
+                                contentPadding =
+                                    PaddingValues(
+                                        vertical = 0.dp, horizontal = screenWidth * 0.02f),
+                                modifier =
+                                    Modifier.testTag("filter_button_${listOfButtons[index].text}"))
+                            Spacer(modifier = Modifier.width(screenHeight * 0.01f))
+                          }
+                        }
                   }
                 }
 
@@ -317,21 +460,16 @@ fun SearchWorkerResult(
                     var account by remember { mutableStateOf<Account?>(null) }
                     var distance by remember { mutableStateOf<Int?>(null) }
 
-                    locationHelper.getCurrentLocation { location ->
-                      currentLocation = location
-                      location?.let {
-                        distance =
-                            profile.location
-                                ?.let { workerLocation ->
-                                  searchViewModel.calculateDistance(
-                                      workerLocation.latitude,
-                                      workerLocation.longitude,
-                                      it.latitude,
-                                      it.longitude)
-                                }
-                                ?.toInt()
-                      }
-                    }
+                    distance =
+                        profile.location
+                            ?.let { workerLocation ->
+                              searchViewModel.calculateDistance(
+                                  workerLocation.latitude,
+                                  workerLocation.longitude,
+                                  baseLocation!!.latitude,
+                                  baseLocation!!.longitude)
+                            }
+                            ?.toInt()
 
                     LaunchedEffect(profile.uid) {
                       accountViewModel.fetchUserAccount(profile.uid) { fetchedAccount: Account? ->
@@ -350,7 +488,7 @@ fun SearchWorkerResult(
                             profileImage = R.drawable.placeholder_worker,
                             name = "${acc.firstName} ${acc.lastName}",
                             category = profile.fieldOfWork,
-                            rating = profile.reviews.map {review -> review.rating }.average(),
+                            rating = profile.reviews.map { review -> review.rating }.average(),
                             reviewCount = profile.reviews.size,
                             location = it,
                             price = profile.price.toString(),
@@ -366,33 +504,88 @@ fun SearchWorkerResult(
         }
 
     QuickFixAvailabilityBottomSheet(
-        showAvailabilityBottomSheet, onDismissRequest = { showAvailabilityBottomSheet = false }) {
-            days,
-            hour,
-            minute ->
+        showAvailabilityBottomSheet,
+        onDismissRequest = { showAvailabilityBottomSheet = false },
+        onOkClick = { days, hour, minute ->
+          selectedDays = days
+          selectedHour = hour
+          selectedMinute = minute
           filteredWorkerProfiles =
               searchViewModel.filterWorkersByAvailability(
                   filteredWorkerProfiles, days, hour, minute)
-        }
+          availabilityFilterApplied = true
+        },
+        onClearClick = {
+          availabilityFilterApplied = false
+          selectedDays = emptyList()
+          selectedHour = 0
+          selectedMinute = 0
+          reapplyFilters()
+        },
+        clearEnabled = availabilityFilterApplied)
 
     searchSubcategory?.let {
       ChooseServiceTypeSheet(
           showServicesBottomSheet,
           it.tags,
+          selectedServices = selectedServices,
           onApplyClick = { services ->
+            selectedServices = services
             filteredWorkerProfiles =
-                searchViewModel.filterWorkersByServices(filteredWorkerProfiles, services)
+                searchViewModel.filterWorkersByServices(filteredWorkerProfiles, selectedServices)
+            servicesFilterApplied = true
           },
-          onDismissRequest = { showServicesBottomSheet = false })
+          onDismissRequest = { showServicesBottomSheet = false },
+          onClearClick = {
+            selectedServices = emptyList()
+            servicesFilterApplied = false
+            reapplyFilters()
+          },
+          clearEnabled = servicesFilterApplied)
     }
 
     QuickFixPriceRangeBottomSheet(
         showPriceRangeBottomSheet,
         onApplyClick = { start, end ->
+          selectedPriceStart = start
+          selectedPriceEnd = end
           filteredWorkerProfiles =
               searchViewModel.filterWorkersByPriceRange(filteredWorkerProfiles, start, end)
+          priceFilterApplied = true
         },
-        onDismissRequest = { showPriceRangeBottomSheet = false })
+        onDismissRequest = { showPriceRangeBottomSheet = false },
+        onClearClick = {
+          selectedPriceStart = 0
+          selectedPriceEnd = 0
+          priceFilterApplied = false
+          reapplyFilters()
+        },
+        clearEnabled = priceFilterApplied)
+
+    QuickFixLocationFilterBottomSheet(
+        showLocationBottomSheet,
+        userProfile = userProfile,
+        phoneLocation = phoneLocation,
+        onApplyClick = { location, max ->
+          selectedLocation = location
+          if (location == com.arygm.quickfix.model.locations.Location(0.0, 0.0, "Default")) {
+            Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
+          }
+          baseLocation = location
+          maxDistance = max
+          filteredWorkerProfiles =
+              searchViewModel.filterWorkersByDistance(filteredWorkerProfiles, location, max)
+          locationFilterApplied = true
+        },
+        onDismissRequest = { showLocationBottomSheet = false },
+        onClearClick = {
+          baseLocation = phoneLocation
+          selectedLocation = com.arygm.quickfix.model.locations.Location()
+          maxDistance = 0
+          locationFilterApplied = false
+          reapplyFilters()
+        },
+        clearEnabled = locationFilterApplied)
 
     if (isWindowVisible) {
       QuickFixSlidingWindow(isVisible = isWindowVisible, onDismiss = { isWindowVisible = false }) {

@@ -48,31 +48,40 @@ class UserProfile(
 class WorkerProfile(
     val fieldOfWork: String = "General Work", // Default generic field of work
     val description: String = "No description available", // Default description
-    val location: Location? = Location(0.0, 0.0, "Unknown Location"), // Default to an empty Location
-    quickFixes: List<String> = listOf("Fix a leaking faucet", "Assemble a furniture piece"), // Default list with realistic examples
-    val includedServices: List<IncludedService> = listOf(
-        IncludedService(name = "Basic Consultation"),
-        IncludedService(name = "Service Inspection")
-    ), // Default services
-    val addOnServices: List<AddOnService> = listOf(
-        AddOnService(name = "Express Delivery"),
-        AddOnService(name = "Premium Materials")
-    ), // Default add-on services
-    val reviews: ArrayDeque<Review> = ArrayDeque(
+    val location: Location? =
+        Location(0.0, 0.0, "Unknown Location"), // Default to an empty Location
+    quickFixes: List<String> =
         listOf(
-            Review(username = "User1", review = "Great service!", rating = 5.0),
-            Review(username = "User2", review = "Very satisfied", rating = 4.5)
-        )
-    ), // Default reviews
-    val profilePicture: String = "https://example.com/default-profile-pic.jpg", // Default profile picture URL
-    val bannerPicture: String = "https://example.com/default-banner-pic.jpg", // Default banner picture URL
+            "Fix a leaking faucet",
+            "Assemble a furniture piece"), // Default list with realistic examples
+    val includedServices: List<IncludedService> =
+        listOf(
+            IncludedService(name = "Basic Consultation"),
+            IncludedService(name = "Service Inspection")), // Default services
+    val addOnServices: List<AddOnService> =
+        listOf(
+            AddOnService(name = "Express Delivery"),
+            AddOnService(name = "Premium Materials")), // Default add-on services
+    val reviews: ArrayDeque<Review> =
+        ArrayDeque(
+            listOf(
+                Review(username = "User1", review = "Great service!", rating = 5.0),
+                Review(
+                    username = "User2",
+                    review = "Very satisfied",
+                    rating = 4.5))), // Default reviews
+    val profilePicture: String =
+        "https://example.com/default-profile-pic.jpg", // Default profile picture URL
+    val bannerPicture: String =
+        "https://example.com/default-banner-pic.jpg", // Default banner picture URL
     val price: Double = 50.0, // Default price
     val displayName: String = "Anonymous Worker", // Default display name
-    val unavailability_list: List<LocalDate> = listOf(
-        LocalDate.now().plusDays(1),
-        LocalDate.now().plusDays(3)
-    ), // Default unavailability dates
-    val workingHours: Pair<LocalTime, LocalTime> = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)), // Default working hours (9 AM to 5 PM)
+    val unavailability_list: List<LocalDate> =
+        listOf(
+            LocalDate.now().plusDays(1),
+            LocalDate.now().plusDays(3)), // Default unavailability dates
+    val workingHours: Pair<LocalTime, LocalTime> =
+        Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)), // Default working hours (9 AM to 5 PM)
     uid: String = "default-uid", // Default UID
     val tags: List<String> = listOf("Reliable", "Experienced", "Professional"), // Default tags
     val rating: Double = reviews.map { it.rating }.average(),
@@ -92,26 +101,26 @@ class WorkerProfile(
     return listOf(super.hashCode(), fieldOfWork, description, location, reviews).hashCode()
   }
 
-    fun toFirestoreMap(): Map<String, Any?> {
-        return mapOf(
-            "uid" to this.uid,
-            "description" to this.description,
-            "fieldOfWork" to this.fieldOfWork,
-            "location" to this.location?.toFirestoreMap(),
-            "price" to this.price,
-            "display_name" to this.displayName,
-            "included_services" to this.includedServices.map { it.toFirestoreMap() },
-            "addOnServices" to this.addOnServices.map { it.toFirestoreMap() },
-            "workingHours" to mapOf(
+  fun toFirestoreMap(): Map<String, Any?> {
+    return mapOf(
+        "uid" to this.uid,
+        "description" to this.description,
+        "fieldOfWork" to this.fieldOfWork,
+        "location" to this.location?.toFirestoreMap(),
+        "price" to this.price,
+        "display_name" to this.displayName,
+        "included_services" to this.includedServices.map { it.toFirestoreMap() },
+        "addOnServices" to this.addOnServices.map { it.toFirestoreMap() },
+        "workingHours" to
+            mapOf(
                 "start" to this.workingHours.first.toString(), // Convert LocalTime to String
-                "end" to this.workingHours.second.toString()
-            ),
-            "unavailability_list" to this.unavailability_list.map { it.toString() }, // Convert LocalDate to String
-            "reviews" to this.reviews.map { it.toFirestoreMap() }.toList(),
-            "tags" to this.tags,
-            "profileImageUrl" to this.profilePicture,
-            "bannerImageUrl" to this.bannerPicture,
-            "quickFixes" to this.quickFixes
-        )
-    }
+                "end" to this.workingHours.second.toString()),
+        "unavailability_list" to
+            this.unavailability_list.map { it.toString() }, // Convert LocalDate to String
+        "reviews" to this.reviews.map { it.toFirestoreMap() }.toList(),
+        "tags" to this.tags,
+        "profileImageUrl" to this.profilePicture,
+        "bannerImageUrl" to this.bannerPicture,
+        "quickFixes" to this.quickFixes)
+  }
 }

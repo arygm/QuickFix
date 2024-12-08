@@ -78,7 +78,10 @@ fun QuickFixCheckedList(
     Column(modifier = Modifier.fillMaxWidth()) {
       indices.forEach { index ->
         Column(
-            modifier = Modifier.semantics { testTag = C.Tag.quickFixCheckedListElement + index + testTagPrecision}) {
+            modifier =
+                Modifier.semantics {
+                  testTag = C.Tag.quickFixCheckedListElement + index + testTagPrecision
+                }) {
               Row(modifier = Modifier.fillMaxWidth()) {
                 Row(modifier = Modifier.weight(1f).align(Alignment.Top)) {
                   QuickFixCheckedListElement(
@@ -91,7 +94,8 @@ fun QuickFixCheckedList(
                       maxAchieved = checkedStatesServices.filter { it }.size >= maxToSelect,
                       modifier =
                           Modifier.semantics {
-                            testTag = C.Tag.quickFixCheckedListElementLeft + (index) + testTagPrecision
+                            testTag =
+                                C.Tag.quickFixCheckedListElementLeft + (index) + testTagPrecision
                           })
                 }
                 // Second item in the row
@@ -107,7 +111,8 @@ fun QuickFixCheckedList(
                         maxAchieved = checkedStatesServices.filter { it }.size >= maxToSelect,
                         modifier =
                             Modifier.semantics {
-                              testTag = C.Tag.quickFixCheckedListElementRight + (index) + testTagPrecision
+                              testTag =
+                                  C.Tag.quickFixCheckedListElementRight + (index) + testTagPrecision
                             })
                   }
                 } else {
@@ -140,7 +145,8 @@ fun QuickFixCheckedList(
                 QuickFixTextFieldCustom(
                     modifier =
                         Modifier.semantics {
-                          testTag = C.Tag.quickFixCheckedListTextFieldElement + index + testTagPrecision
+                          testTag =
+                              C.Tag.quickFixCheckedListTextFieldElement + index + testTagPrecision
                         },
                     widthField = 380.dp * widthRatio.value,
                     value = service.value,
@@ -176,7 +182,10 @@ fun QuickFixCheckedList(
                             }
                             .weight(0.1f)
                             .semantics {
-                              testTag = C.Tag.quickFixCheckedListTextFieldElementDelete + index + testTagPrecision
+                              testTag =
+                                  C.Tag.quickFixCheckedListTextFieldElementDelete +
+                                      index +
+                                      testTagPrecision
                             })
               } else {
                 Spacer(modifier = Modifier.weight(0.1f))

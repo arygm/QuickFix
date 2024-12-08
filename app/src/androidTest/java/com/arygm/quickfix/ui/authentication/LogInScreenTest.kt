@@ -39,8 +39,8 @@ class LogInScreenTest {
   private lateinit var mockStorage: FirebaseStorage
   private lateinit var preferencesRepository: PreferencesRepository
   private lateinit var preferencesViewModel: PreferencesViewModel
-  @Mock
-  private lateinit var storageRef: StorageReference
+  @Mock private lateinit var storageRef: StorageReference
+
   @Before
   fun setup() {
     mockStorage = mock(FirebaseStorage::class.java)

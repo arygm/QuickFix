@@ -11,11 +11,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
 
-class UserProfileRepositoryFirestore(private val db: FirebaseFirestore, private val storage: FirebaseStorage) : ProfileRepository {
+class UserProfileRepositoryFirestore(
+    private val db: FirebaseFirestore,
+    private val storage: FirebaseStorage
+) : ProfileRepository {
 
   private val collectionPath = "users"
-    private val storageRef = storage.reference
-    private val compressionQuality = 50
+  private val storageRef = storage.reference
+  private val compressionQuality = 50
 
   override fun init(onSuccess: () -> Unit) {
     Firebase.auth.addAuthStateListener {
@@ -65,42 +68,39 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore, private 
         db.collection(collectionPath).document(id).delete(), onSuccess, onFailure)
   }
 
-    override fun uploadProfileImages(
-        accountId: String,
-        images: List<Bitmap>,
-        onSuccess: (List<String>) -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        val workerFolderRef = storageRef.child("profiles").child(accountId).child("user")
-        val uploadedImageUrls = mutableListOf<String>()
-        var uploadCount = 0
+  override fun uploadProfileImages(
+      accountId: String,
+      images: List<Bitmap>,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val workerFolderRef = storageRef.child("profiles").child(accountId).child("user")
+    val uploadedImageUrls = mutableListOf<String>()
+    var uploadCount = 0
 
-        images.forEach { bitmap ->
-            val fileRef = workerFolderRef.child("image_${System.currentTimeMillis()}.jpg")
+    images.forEach { bitmap ->
+      val fileRef = workerFolderRef.child("image_${System.currentTimeMillis()}.jpg")
 
-            val baos = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, compressionQuality, baos) // Compress the image
-            val byteArray = baos.toByteArray()
+      val baos = ByteArrayOutputStream()
+      bitmap.compress(Bitmap.CompressFormat.JPEG, compressionQuality, baos) // Compress the image
+      val byteArray = baos.toByteArray()
 
-            fileRef.putBytes(byteArray)
-                .addOnSuccessListener {
-                    fileRef.downloadUrl
-                        .addOnSuccessListener { uri ->
-                            uploadedImageUrls.add(uri.toString())
-                            uploadCount++
-                            if (uploadCount == images.size) {
-                                onSuccess(uploadedImageUrls)
-                            }
-                        }
-                        .addOnFailureListener { exception ->
-                            onFailure(exception)
-                        }
+      fileRef
+          .putBytes(byteArray)
+          .addOnSuccessListener {
+            fileRef.downloadUrl
+                .addOnSuccessListener { uri ->
+                  uploadedImageUrls.add(uri.toString())
+                  uploadCount++
+                  if (uploadCount == images.size) {
+                    onSuccess(uploadedImageUrls)
+                  }
                 }
-                .addOnFailureListener { exception ->
-                    onFailure(exception)
-                }
-        }
+                .addOnFailureListener { exception -> onFailure(exception) }
+          }
+          .addOnFailureListener { exception -> onFailure(exception) }
     }
+  }
 
   private fun performFirestoreOperation(
       task: Task<Void>,

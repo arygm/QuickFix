@@ -50,9 +50,7 @@ class WelcomeScreenTest {
   private lateinit var preferencesRepository: PreferencesRepository
   private lateinit var preferencesViewModel: PreferencesViewModel
   private lateinit var mockStorage: FirebaseStorage
-  @Mock
-  private lateinit var storageRef: StorageReference
-
+  @Mock private lateinit var storageRef: StorageReference
 
   private var intentsInitialized = false // Keep track of Intents initialization
 

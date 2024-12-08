@@ -2,7 +2,6 @@ package com.arygm.quickfix.ui.profile.becomeWorker.views.professional
 
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,11 +18,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.category.Scale
@@ -187,67 +181,67 @@ class ProfessionalInfoScreenTest {
             "This is your time to shine. Let potential buyers know what you do best and how you gained your skills, certifications and experience.")
   }
 
-    @Test
-    fun professionalInfoScreen_categoryFullWorkflow() {
-        setUpProfessionalInfoScreen(categories = categories)
+  @Test
+  fun professionalInfoScreen_categoryFullWorkflow() {
+    setUpProfessionalInfoScreen(categories = categories)
 
-        // Open the category dropdown
-        composeTestRule.onNodeWithTag(professionalInfoScreenCategoryField).performClick()
+    // Open the category dropdown
+    composeTestRule.onNodeWithTag(professionalInfoScreenCategoryField).performClick()
 
-        // Verify that the dropdown menu is displayed
-        composeTestRule.onNodeWithTag(professionalInfoScreenCategoryDropdownMenu).assertIsDisplayed()
+    // Verify that the dropdown menu is displayed
+    composeTestRule.onNodeWithTag(professionalInfoScreenCategoryDropdownMenu).assertIsDisplayed()
 
-        // Verify that all categories are displayed
-        categories.forEachIndexed { index, _ ->
-            composeTestRule
-                .onNodeWithTag(C.Tag.professionalInfoScreenCategoryDropdownMenuItem + index)
-                .assertIsDisplayed()
-        }
-
-        // Select the first category
-        composeTestRule
-            .onNodeWithTag(C.Tag.professionalInfoScreenCategoryDropdownMenuItem + 0)
-            .performClick()
-
-        composeTestRule.onNodeWithTag(professionalInfoScreenSubcategoryField).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(professionalInfoScreenSubcategoryField).performClick()
-
-        // Verify subcategories
-        categories[0].subcategories.forEachIndexed { index, _ ->
-            composeTestRule
-                .onNodeWithTag(C.Tag.professionalInfoScreenSubcategoryDropdownMenuItem + index)
-                .assertIsDisplayed()
-        }
-
-        // Select the first subcategory
-        composeTestRule
-            .onNodeWithTag(C.Tag.professionalInfoScreenSubcategoryDropdownMenuItem + 0)
-            .performClick()
-        composeTestRule.onNodeWithTag(C.Tag.professionalInfoScreenIncludedServicesList)
-            .performScrollTo()
-            .assertIsDisplayed()
-
-        composeTestRule.onNodeWithTag(C.Tag.professionalInfoScreenAddOnServicesList)
-            .performScrollTo()
-            .assertIsDisplayed()
-
-        composeTestRule.onNodeWithTag(C.Tag.professionalInfoScreenTagsList).performScrollTo()
-            .assertIsDisplayed()
-
-        composeTestRule.onNodeWithText("CHF")
-            .performScrollTo()
-            .assertIsDisplayed()
-
-        categories[0].subcategories[0].scale?.let {
-            composeTestRule.onNodeWithTag(C.Tag.professionalInfoScreenLabelReferencePrice)
-                .assertExists()
-        }
-
-        categories[0].subcategories[0].scale?.let {
-            composeTestRule.onNodeWithText(it.longScale)
-                .assertExists()
-        }
+    // Verify that all categories are displayed
+    categories.forEachIndexed { index, _ ->
+      composeTestRule
+          .onNodeWithTag(C.Tag.professionalInfoScreenCategoryDropdownMenuItem + index)
+          .assertIsDisplayed()
     }
+
+    // Select the first category
+    composeTestRule
+        .onNodeWithTag(C.Tag.professionalInfoScreenCategoryDropdownMenuItem + 0)
+        .performClick()
+
+    composeTestRule.onNodeWithTag(professionalInfoScreenSubcategoryField).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(professionalInfoScreenSubcategoryField).performClick()
+
+    // Verify subcategories
+    categories[0].subcategories.forEachIndexed { index, _ ->
+      composeTestRule
+          .onNodeWithTag(C.Tag.professionalInfoScreenSubcategoryDropdownMenuItem + index)
+          .assertIsDisplayed()
+    }
+
+    // Select the first subcategory
+    composeTestRule
+        .onNodeWithTag(C.Tag.professionalInfoScreenSubcategoryDropdownMenuItem + 0)
+        .performClick()
+    composeTestRule
+        .onNodeWithTag(C.Tag.professionalInfoScreenIncludedServicesList)
+        .performScrollTo()
+        .assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag(C.Tag.professionalInfoScreenAddOnServicesList)
+        .performScrollTo()
+        .assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag(C.Tag.professionalInfoScreenTagsList)
+        .performScrollTo()
+        .assertIsDisplayed()
+
+    composeTestRule.onNodeWithText("CHF").performScrollTo().assertIsDisplayed()
+
+    categories[0].subcategories[0].scale?.let {
+      composeTestRule.onNodeWithTag(C.Tag.professionalInfoScreenLabelReferencePrice).assertExists()
+    }
+
+    categories[0].subcategories[0].scale?.let {
+      composeTestRule.onNodeWithText(it.longScale).assertExists()
+    }
+  }
 
   @Test
   fun professionalInfoScreen_categoryDropdownDisplaysOptions() {

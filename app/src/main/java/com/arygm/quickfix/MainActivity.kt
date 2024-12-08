@@ -3,6 +3,8 @@ package com.arygm.quickfix
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -27,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -52,6 +53,7 @@ import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.camera.QuickFixDisplayImages
 import com.arygm.quickfix.ui.dashboard.DashboardScreen
 import com.arygm.quickfix.ui.elements.LocationSearchCustomScreen
+import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
 import com.arygm.quickfix.ui.home.FakeMessageScreen
 import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
@@ -72,8 +74,8 @@ val Context.dataStore by preferencesDataStore(name = "quickfix_preferences")
 class MainActivity : ComponentActivity() {
 
   private lateinit var locationHelper: LocationHelper
-    private var testBitmapPP = mutableStateOf<Bitmap?>(null)
-    private var testLocation = mutableStateOf<Location?>(Location())
+  private var testBitmapPP = mutableStateOf<Bitmap?>(null)
+  private var testLocation = mutableStateOf<Location?>(Location())
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -100,13 +102,14 @@ class MainActivity : ComponentActivity() {
       locationHelper.requestPermissions()
     }
   }
-    fun setTestBitmap(bitmap: Bitmap) {
-        testBitmapPP.value = bitmap
-    }
-    fun setTestLocation(location: Location) {
-        testLocation.value = location
-    }
 
+  fun setTestBitmap(bitmap: Bitmap) {
+    testBitmapPP.value = bitmap
+  }
+
+  fun setTestLocation(location: Location) {
+    testLocation.value = location
+  }
 
   override fun onRequestPermissionsResult(
       requestCode: Int,
@@ -128,7 +131,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
-
+  val context = LocalContext.current
   val rootNavController = rememberNavController()
   val navigationActionsRoot = remember { NavigationActions(rootNavController) }
 
@@ -144,7 +147,7 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
   val announcementViewModel: AnnouncementViewModel =
       viewModel(factory = AnnouncementViewModel.Factory)
   val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
-    val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
+  val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
   val preferencesViewModel: PreferencesViewModel =
       viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
 
@@ -178,6 +181,16 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
 
   var showBottomBar by remember { mutableStateOf(false) }
 
+  var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
+
+  // Simulate monitoring connectivity (replace this with actual monitoring in production)
+  LaunchedEffect(Unit) {
+    while (true) {
+      isOffline = !isConnectedToInternet(context)
+      delay(3000) // Poll every 3 seconds
+    }
+  }
+
   // Delay the appearance of the bottom bar
   LaunchedEffect(shouldShowBottomBar) {
     if (shouldShowBottomBar) {
@@ -189,6 +202,7 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
   }
 
   Scaffold(
+      topBar = { QuickFixOfflineBar(isVisible = isOffline) },
       bottomBar = {
         // Show BottomNavigationMenu only if the route is not part of the login/registration flow
         AnimatedVisibility(
@@ -258,7 +272,8 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
                     { currentScreen ->
                       screenInSearchNavHost = currentScreen // Mise à jour de l'écran actif
                     },
-                    categoryViewModel)
+                    categoryViewModel,
+                    preferencesViewModel)
               }
 
               composable(Route.DASHBOARD) { DashBoardNavHost(isUser) }
@@ -271,7 +286,8 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
                     navigationActionsRoot,
                     onScreenChange = { currentScreen -> screenInProfileNavHost = currentScreen },
                     categoryViewModel,
-                    preferencesViewModel, locationViewModel,
+                    preferencesViewModel,
+                    locationViewModel,
                     testBitmapPP)
               }
             }
@@ -301,6 +317,14 @@ fun HomeNavHost(
       FakeMessageScreen(navigationActions)
     }
   }
+}
+
+fun isConnectedToInternet(context: Context): Boolean {
+  val connectivityManager =
+      context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+  val network = connectivityManager.activeNetwork ?: return false
+  val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+  return activeNetwork.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }
 
 @Composable
@@ -338,10 +362,9 @@ fun ProfileNavHost(
           loggedInAccountViewModel,
           preferencesViewModel,
           categoryViewModel,
-            locationViewModel,
+          locationViewModel,
           testBitmapPP,
-          testLocation
-      )
+          testLocation)
     }
   }
 }
@@ -365,7 +388,8 @@ fun SearchNavHost(
     accountViewModel: AccountViewModel,
     announcementViewModel: AnnouncementViewModel,
     onScreenChange: (String) -> Unit,
-    categoryViewModel: CategoryViewModel
+    categoryViewModel: CategoryViewModel,
+    preferencesViewModel: PreferencesViewModel
 ) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
@@ -393,7 +417,12 @@ fun SearchNavHost(
       QuickFixDisplayImages(isUser, navigationActions, announcementViewModel)
     }
     composable(Screen.SEARCH_WORKER_RESULT) {
-      SearchWorkerResult(navigationActions, searchViewModel, accountViewModel)
+      SearchWorkerResult(
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          profileViewModel,
+          preferencesViewModel)
     }
     composable(Screen.SEARCH_LOCATION) {
       LocationSearchCustomScreen(

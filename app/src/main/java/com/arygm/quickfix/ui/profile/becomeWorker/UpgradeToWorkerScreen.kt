@@ -74,8 +74,8 @@ fun BusinessScreen(
     testBitmapPP: Bitmap? = null,
     testLocation: Location? = Location()
 ) {
-    val locationWorker = remember { mutableStateOf(Location()) }
-    val categories = categoryViewModel.categories.collectAsState().value
+  val locationWorker = remember { mutableStateOf(Location()) }
+  val categories = categoryViewModel.categories.collectAsState().value
   val pagerState = rememberPagerState(pageCount = { 3 })
   val focusManager = LocalFocusManager.current
   val displayName = remember { mutableStateOf("") }
@@ -89,82 +89,83 @@ fun BusinessScreen(
   val includedServices = remember { mutableStateOf(listOf<IncludedService>()) }
   val addOnServices = remember { mutableStateOf(listOf<AddOnService>()) }
   val tags = remember { mutableStateOf(listOf<String>()) }
-    var workerId by remember { mutableStateOf("") }
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var birthDate by remember { mutableStateOf("") }
-    var isWorker by remember { mutableStateOf(false) }
+  var workerId by remember { mutableStateOf("") }
+  var firstName by remember { mutableStateOf("") }
+  var lastName by remember { mutableStateOf("") }
+  var email by remember { mutableStateOf("") }
+  var birthDate by remember { mutableStateOf("") }
+  var isWorker by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        workerId = loadUserId(preferencesViewModel)
-        firstName = loadFirstName(preferencesViewModel)
-        lastName = loadLastName(preferencesViewModel)
-        email = loadEmail(preferencesViewModel)
-        birthDate = loadBirthDate(preferencesViewModel)
-        isWorker = loadIsWorker(preferencesViewModel)
-    }
+  LaunchedEffect(Unit) {
+    workerId = loadUserId(preferencesViewModel)
+    firstName = loadFirstName(preferencesViewModel)
+    lastName = loadLastName(preferencesViewModel)
+    email = loadEmail(preferencesViewModel)
+    birthDate = loadBirthDate(preferencesViewModel)
+    isWorker = loadIsWorker(preferencesViewModel)
+  }
 
-
-    val handleSuccessfulImageUpload: (String, List<String>) -> Unit =
-        { accountId, uploadedImageUrls ->
-            // Make the announcement
-            val workerProfile =
-                WorkerProfile(
-                    location = locationWorker.value,
-                    fieldOfWork = fieldOfWork.value,
-                    description = description.value,
-                    price = price.doubleValue,
-                    displayName = displayName.value,
-                    includedServices = includedServices.value,
-                    addOnServices = addOnServices.value,
-                    tags = tags.value,
-                    profilePicture = uploadedImageUrls[0],
-                    bannerPicture = if (uploadedImageUrls.size > 1) uploadedImageUrls[1] else "",
-                    uid = accountId)
-            Log.d("UpgradeToWorkerScreen", "workerProfile: ${locationWorker.value.name} ${fieldOfWork.value} ${description.value} ${price.doubleValue} ${displayName.value} ${includedServices.value} ${addOnServices.value} ${tags.value} ${uploadedImageUrls[0]} ${if (uploadedImageUrls.size > 1) uploadedImageUrls[1] else ""} $accountId")
-            workerProfileViewModel.addProfile(workerProfile,
-                onSuccess = {
-                    val newAccount = Account(
-                        uid = workerId,
-                        firstName = firstName,
-                        lastName = lastName,
-                        email = email,
-                        birthDate = stringToTimestamp(birthDate) ?: Timestamp.now(),
-                        isWorker = true
-                    )
-                    accountViewModel.updateAccount(newAccount,
-                    onSuccess = {
-                        setAccountPreferences(preferencesViewModel, newAccount)
-                    },
-                    onFailure = { e ->
-                        // Handle the failure case
-                        Log.e("AnnouncementViewModel", "Failed to update account: ${e.message}")
-                    })
-                },
-                onFailure = { e ->
+  val handleSuccessfulImageUpload: (String, List<String>) -> Unit =
+      { accountId, uploadedImageUrls ->
+        // Make the announcement
+        val workerProfile =
+            WorkerProfile(
+                location = locationWorker.value,
+                fieldOfWork = fieldOfWork.value,
+                description = description.value,
+                price = price.doubleValue,
+                displayName = displayName.value,
+                includedServices = includedServices.value,
+                addOnServices = addOnServices.value,
+                tags = tags.value,
+                profilePicture = uploadedImageUrls[0],
+                bannerPicture = if (uploadedImageUrls.size > 1) uploadedImageUrls[1] else "",
+                uid = accountId)
+        Log.d(
+            "UpgradeToWorkerScreen",
+            "workerProfile: ${locationWorker.value.name} ${fieldOfWork.value} ${description.value} ${price.doubleValue} ${displayName.value} ${includedServices.value} ${addOnServices.value} ${tags.value} ${uploadedImageUrls[0]} ${if (uploadedImageUrls.size > 1) uploadedImageUrls[1] else ""} $accountId")
+        workerProfileViewModel.addProfile(
+            workerProfile,
+            onSuccess = {
+              val newAccount =
+                  Account(
+                      uid = workerId,
+                      firstName = firstName,
+                      lastName = lastName,
+                      email = email,
+                      birthDate = stringToTimestamp(birthDate) ?: Timestamp.now(),
+                      isWorker = true)
+              accountViewModel.updateAccount(
+                  newAccount,
+                  onSuccess = { setAccountPreferences(preferencesViewModel, newAccount) },
+                  onFailure = { e ->
                     // Handle the failure case
-                    Log.e("AnnouncementViewModel", "Failed to add announcement: ${e.message}")
-                })
-        }
+                    Log.e("AnnouncementViewModel", "Failed to update account: ${e.message}")
+                  })
+            },
+            onFailure = { e ->
+              // Handle the failure case
+              Log.e("AnnouncementViewModel", "Failed to add announcement: ${e.message}")
+            })
+      }
 
-    LaunchedEffect(pagerState.currentPage) {
-        if(pagerState.currentPage == 2){
-            Log.d("UpgradeToWorker", "entered the last page")
-            val images = listOfNotNull(imageBitmapPP.value, imageBitmapBP.value)
-                // If there are no images to upload, proceed directly
-            workerProfileViewModel.uploadProfileImages(
-                    accountId = workerId,
-                    images = images,
-                    onSuccess = { uploadedImageUrls ->
-                        handleSuccessfulImageUpload(workerId, uploadedImageUrls)
-                    },
-                    onFailure = { e ->
-                        // Handle the failure case
-                        Log.e("AnnouncementViewModel", "Failed to upload images: ${e.message}")
-                    })
-        }
+  LaunchedEffect(pagerState.currentPage) {
+    if (pagerState.currentPage == 2) {
+      Log.d("UpgradeToWorker", "entered the last page")
+      val images = listOfNotNull(imageBitmapPP.value, imageBitmapBP.value)
+      // If there are no images to upload, proceed directly
+      workerProfileViewModel.uploadProfileImages(
+          accountId = workerId,
+          images = images,
+          onSuccess = { uploadedImageUrls ->
+            handleSuccessfulImageUpload(workerId, uploadedImageUrls)
+          },
+          onFailure = { e ->
+            // Handle the failure case
+            Log.e("AnnouncementViewModel", "Failed to upload images: ${e.message}")
+          })
     }
+  }
   Scaffold(
       modifier =
           Modifier.pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
@@ -200,7 +201,8 @@ fun BusinessScreen(
             modifier =
                 Modifier.padding(innerPadding).fillMaxSize().semantics {
                   testTag = C.Tag.upgradeToWorkerPager
-                }, userScrollEnabled = true) { page ->
+                },
+            userScrollEnabled = false) { page ->
               when (page) {
                 0 -> {
                   PersonalInfoScreen(
@@ -213,7 +215,7 @@ fun BusinessScreen(
                       onDisplayNameErrorChange = { displayNameError = it },
                       descriptionError = descriptionError,
                       onDescriptionErrorChange = { descriptionError = it },
-                      locationViewModel =  locationViewModel,
+                      locationViewModel = locationViewModel,
                       locationWorker = locationWorker)
                 }
                 1 -> {

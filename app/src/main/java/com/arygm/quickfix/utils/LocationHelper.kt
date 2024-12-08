@@ -13,7 +13,7 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
-class LocationHelper(
+open class LocationHelper(
     private val context: Context,
     private val activity: Activity,
     private val fusedLocationProviderClient: FusedLocationProviderClient =

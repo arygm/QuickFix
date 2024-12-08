@@ -1,5 +1,6 @@
 package com.arygm.quickfix.model.search
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -19,9 +20,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-open class SearchViewModel(
-    private val workerProfileRepo: WorkerProfileRepositoryFirestore,
-) : ViewModel() {
+open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositoryFirestore) :
+    ViewModel() {
 
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery
@@ -32,17 +32,22 @@ open class SearchViewModel(
   val _workerProfiles = MutableStateFlow<List<WorkerProfile>>(emptyList())
   val workerProfiles: StateFlow<List<WorkerProfile>> = _workerProfiles
 
+  val _subCategoryWorkerProfiles = MutableStateFlow<List<WorkerProfile>>(emptyList())
+  val subCategoryWorkerProfiles: StateFlow<List<WorkerProfile>> = _subCategoryWorkerProfiles
+
   private val _errorMessage = MutableStateFlow<String?>(null)
   val errorMessage: StateFlow<String?> = _errorMessage
 
   companion object {
     private val firestoreInstance by lazy { Firebase.firestore } // Singleton Firestore instance
-private val storageInstance by lazy { Firebase.storage } // Singleton Storage instance
+    private val storageInstance by lazy { Firebase.storage } // Singleton Storage instance
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return SearchViewModel(WorkerProfileRepositoryFirestore(firestoreInstance, storageInstance)) as T
+            return SearchViewModel(
+                WorkerProfileRepositoryFirestore(firestoreInstance, storageInstance))
+                as T
           }
         }
   }
@@ -144,9 +149,7 @@ private val storageInstance by lazy { Firebase.storage } // Singleton Storage in
   }
 
   fun sortWorkersByRating(workers: List<WorkerProfile>): List<WorkerProfile> {
-    return workers.sortedByDescending {
-        it.rating
-    }
+    return workers.sortedByDescending { it.rating }
   }
 
   fun filterWorkersByPriceRange(
@@ -155,5 +158,32 @@ private val storageInstance by lazy { Firebase.storage } // Singleton Storage in
       end: Int
   ): List<WorkerProfile> {
     return workers.filter { worker -> worker.price in start.toDouble()..end.toDouble() }
+  }
+
+  fun filterWorkersByDistance(
+      workers: List<WorkerProfile>,
+      userLocation: Location,
+      maxDistance: Int
+  ): List<WorkerProfile> {
+    return workers.filter { worker ->
+      val distance =
+          calculateDistance(
+              userLocation.latitude,
+              userLocation.longitude,
+              worker.location!!.latitude,
+              worker.location.longitude)
+      distance <= maxDistance
+    }
+  }
+
+  fun filterWorkersBySubcategory(fieldOfWork: String) {
+    workerProfileRepo.getProfiles(
+        onSuccess = { profiles ->
+          val workerProfiles =
+              profiles.filterIsInstance<WorkerProfile>() // Cast profiles to WorkerProfile
+          val filteredProfiles = workerProfiles.filter { it.fieldOfWork == fieldOfWork }
+          _subCategoryWorkerProfiles.value = filteredProfiles
+        },
+        onFailure = { Log.e("SearchViewModel", "Failed to fetch worker profiles.") })
   }
 }

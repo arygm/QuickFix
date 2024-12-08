@@ -67,7 +67,8 @@ object C {
     const val professionalInfoScreenTagsList = "professionalInfoScreen_tagsList"
     const val professionalInfoScreenPriceField = "professionalInfoScreen_priceField"
     const val professionalInfoScreenSectionScale = "professionalInfoScreen_sectionScale"
-    const val professionalInfoScreenLabelReferencePrice = "professionalInfoScreen_labelReferencePrice"
+    const val professionalInfoScreenLabelReferencePrice =
+        "professionalInfoScreen_labelReferencePrice"
     const val professionalInfoScreencancelButton = "professionalInfoScreen_cancelButton"
     const val professionalInfoScreencontinueButton = "professionalInfoScreen_continueButton"
 

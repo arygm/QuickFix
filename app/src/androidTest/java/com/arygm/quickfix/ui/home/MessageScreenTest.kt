@@ -60,9 +60,7 @@ class MessageScreenTest {
   private lateinit var chatRepository: ChatRepository
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var mockStorage: FirebaseStorage
-    @Mock
-    private lateinit var storageRef: StorageReference
-
+  @Mock private lateinit var storageRef: StorageReference
 
   // Simulated state flows
   private val chatListFlow = MutableStateFlow<List<Chat>>(emptyList())
@@ -87,9 +85,9 @@ class MessageScreenTest {
   @Before
   fun setup() {
     // Mock configuration
-      mockStorage = mock(FirebaseStorage::class.java)
-      storageRef = mock(StorageReference::class.java)
-      whenever(mockStorage.reference).thenReturn(storageRef)
+    mockStorage = mock(FirebaseStorage::class.java)
+    storageRef = mock(StorageReference::class.java)
+    whenever(mockStorage.reference).thenReturn(storageRef)
     mockFirestore = mock(FirebaseFirestore::class.java)
     navigationActions = mock(NavigationActions::class.java)
     accountRepository = mock(AccountRepository::class.java)

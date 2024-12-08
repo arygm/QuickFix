@@ -47,7 +47,6 @@ class ProfileScreenTest {
   private lateinit var mockStorage: FirebaseStorage
   @Mock private lateinit var storageRef: StorageReference
 
-
   private val options =
       listOf(
           OptionItem("Settings", IconType.Vector(Icons.Outlined.Settings)) {},
