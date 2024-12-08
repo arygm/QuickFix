@@ -524,4 +524,102 @@ class ChatRepositoryFirestoreTest {
     assertTrue(callbackCalled)
     assertEquals(exception, returnedException)
   }
+
+  @Test
+  fun `documentToChat transforms valid DocumentSnapshot into Chat`() {
+    // Mock a valid Firestore DocumentSnapshot
+    Mockito.`when`(mockDocumentSnapshot.getString("chatId")).thenReturn("chat123")
+    Mockito.`when`(mockDocumentSnapshot.getString("workeruid")).thenReturn("worker123")
+    Mockito.`when`(mockDocumentSnapshot.getString("useruid")).thenReturn("user123")
+    Mockito.`when`(mockDocumentSnapshot.getString("quickFixUid")).thenReturn("quickfix123")
+    Mockito.`when`(mockDocumentSnapshot.getString("chatStatus"))
+        .thenReturn(ChatStatus.ACCEPTED.name)
+
+    val messages =
+        listOf(
+            mapOf(
+                "messageId" to "msg1",
+                "senderId" to "user123",
+                "content" to "Hello",
+                "timestamp" to com.google.firebase.Timestamp.now()),
+            mapOf(
+                "messageId" to "msg2",
+                "senderId" to "worker123",
+                "content" to "Hi there!",
+                "timestamp" to com.google.firebase.Timestamp.now()))
+    Mockito.`when`(mockDocumentSnapshot.get("messages")).thenReturn(messages)
+
+    // Simulate Firestore QuerySnapshot containing this document
+    Mockito.`when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
+
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+    Mockito.`when`(mockChatsCollection.get()).thenReturn(taskCompletionSource.task)
+
+    var callbackCalled = false
+    var returnedChats: List<Chat>? = null
+
+    // Call the public method that uses documentToChat
+    chatRepositoryFirestore.getChats(
+        onSuccess = { chats ->
+          callbackCalled = true
+          returnedChats = chats
+        },
+        onFailure = { fail("Failure callback should not be called") })
+
+    // Simulate successful Firestore query
+    taskCompletionSource.setResult(mockQuerySnapshot)
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assertions
+    assertTrue(callbackCalled)
+    assertNotNull(returnedChats)
+    assertEquals(1, returnedChats?.size)
+
+    val chat = returnedChats?.first()
+    assertEquals("chat123", chat?.chatId)
+    assertEquals("worker123", chat?.workeruid)
+    assertEquals("user123", chat?.useruid)
+    assertEquals("quickfix123", chat?.quickFixUid)
+    assertEquals(ChatStatus.ACCEPTED, chat?.chatStatus)
+    assertEquals(2, chat?.messages?.size)
+
+    val firstMessage = chat?.messages?.get(0)
+    assertEquals("msg1", firstMessage?.messageId)
+    assertEquals("Hello", firstMessage?.content)
+    assertEquals("user123", firstMessage?.senderId)
+  }
+
+  @Test
+  fun `documentToChat handles missing fields gracefully`() {
+    // Mock a DocumentSnapshot with missing fields
+    Mockito.`when`(mockDocumentSnapshot.getString("chatId")).thenReturn(null)
+    Mockito.`when`(mockDocumentSnapshot.getString("workeruid")).thenReturn("worker123")
+    Mockito.`when`(mockDocumentSnapshot.getString("useruid")).thenReturn("user123")
+    Mockito.`when`(mockDocumentSnapshot.getString("chatStatus"))
+        .thenReturn(ChatStatus.ACCEPTED.name)
+
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+    Mockito.`when`(mockChatsCollection.get()).thenReturn(taskCompletionSource.task)
+
+    var callbackCalled = false
+    var returnedChats: List<Chat>? = null
+
+    // Call the public method that uses documentToChat
+    chatRepositoryFirestore.getChats(
+        onSuccess = { chats ->
+          callbackCalled = true
+          returnedChats = chats
+        },
+        onFailure = { fail("Failure callback should not be called") })
+
+    // Simulate successful Firestore query with an invalid document
+    Mockito.`when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
+    taskCompletionSource.setResult(mockQuerySnapshot)
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assertions
+    assertTrue(callbackCalled)
+    assertNotNull(returnedChats)
+    assertEquals(0, returnedChats?.size) // Invalid documents should be ignored
+  }
 }

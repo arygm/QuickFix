@@ -371,4 +371,83 @@ class MessageScreenTest {
     composeTestRule.onNodeWithTag("acceptButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("refuseButton").assertIsDisplayed()
   }
+
+  @Test
+  fun testClickingOnSuggestionSendsMessageAndUpdatesChat() {
+    // Arrange: On modifie le chat pour qu'il ait le statut GETTING_SUGGESTIONS
+    val gettingSuggestionsChat = fakeChat.copy(chatStatus = ChatStatus.GETTING_SUGGESTIONS)
+
+    // On force le repository à retourner ce chat
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(List<Chat>) -> Unit>(0)
+          onSuccess(listOf(gettingSuggestionsChat))
+          null
+        }
+        .whenever(chatRepository)
+        .getChats(any(), any())
+
+    runBlocking {
+      chatViewModel.getChats()
+      chatViewModel.selectChat(gettingSuggestionsChat)
+      quickFixViewModel.getQuickFixes()
+    }
+
+    // Comme isUser = true, on a les suggestions côté user : "How is it going?", etc.
+    val suggestions =
+        listOf(
+            "How is it going?",
+            "Is the time and day okay for you?",
+            "I can’t wait to work with you!")
+
+    // On veut vérifier que lorsque l'utilisateur clique sur une suggestion, updateChat et
+    // sendMessage sont appelés.
+    // On va mocker sendMessage et updateChat pour capturer leurs arguments.
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<() -> Unit>(1)
+          onSuccess()
+          null
+        }
+        .whenever(chatRepository)
+        .updateChat(any(), any(), any())
+
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<() -> Unit>(2)
+          onSuccess()
+          null
+        }
+        .whenever(chatRepository)
+        .sendMessage(any(), any(), any(), any())
+
+    // Act
+    composeTestRule.setContent {
+      QuickFixTheme {
+        MessageScreen(
+            chatViewModel = chatViewModel,
+            navigationActions = navigationActions,
+            quickFixViewModel = quickFixViewModel,
+            userId = testUserId,
+            isUser = true)
+      }
+    }
+
+    // Assert: Les suggestions doivent être affichées
+    suggestions.forEach { suggestion ->
+      composeTestRule.onNodeWithText(suggestion).assertIsDisplayed()
+    }
+
+    // On clique sur la première suggestion par exemple
+    val chosenSuggestion = suggestions.first()
+    composeTestRule.onNodeWithText(chosenSuggestion).performClick()
+
+    // Vérifier que updateChat a été appelé pour passer le statut en ACCEPTED
+    verify(chatRepository).updateChat(argThat { chatStatus == ChatStatus.ACCEPTED }, any(), any())
+
+    // Vérifier que sendMessage a été appelé avec le message "How is it going?"
+    verify(chatRepository)
+        .sendMessage(
+            argThat { chatId == gettingSuggestionsChat.chatId },
+            argThat { content == chosenSuggestion },
+            any(),
+            any())
+  }
 }
