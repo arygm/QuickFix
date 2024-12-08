@@ -1,10 +1,12 @@
 package com.arygm.quickfix.model.profile
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +21,9 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ProfileViewModel(UserProfileRepositoryFirestore(Firebase.firestore)) as T
+            return ProfileViewModel(
+                UserProfileRepositoryFirestore(Firebase.firestore, Firebase.storage))
+                as T
           }
         }
 
@@ -27,7 +31,9 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ProfileViewModel(WorkerProfileRepositoryFirestore(Firebase.firestore)) as T
+            return ProfileViewModel(
+                WorkerProfileRepositoryFirestore(Firebase.firestore, Firebase.storage))
+                as T
           }
         }
   }
@@ -92,5 +98,19 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
           Log.e("ProfileViewModel", "Error fetching profile: ${e.message}")
           onResult(null)
         })
+  }
+
+  fun uploadProfileImages(
+      accountId: String,
+      images: List<Bitmap>, // List of image file paths as strings
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    Log.d("UploadingImages", "$images.size")
+    repository.uploadProfileImages(
+        accountId = accountId,
+        images = images,
+        onSuccess = { onSuccess(it) },
+        onFailure = { e -> onFailure(e) })
   }
 }

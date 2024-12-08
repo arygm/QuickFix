@@ -10,6 +10,7 @@ import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,8 +34,8 @@ class LoggedInAccountViewModel(
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return LoggedInAccountViewModel(
-                UserProfileRepositoryFirestore(Firebase.firestore),
-                WorkerProfileRepositoryFirestore(Firebase.firestore))
+                UserProfileRepositoryFirestore(Firebase.firestore, Firebase.storage),
+                WorkerProfileRepositoryFirestore(Firebase.firestore, Firebase.storage))
                 as T
           }
         }

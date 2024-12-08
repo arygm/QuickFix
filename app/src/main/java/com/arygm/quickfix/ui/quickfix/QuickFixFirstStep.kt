@@ -167,6 +167,7 @@ fun QuickFixFirstStep(
         }
 
         if (cameraBottomSheet) {
+
           CameraBottomSheet(
               onDismissRequest = { cameraBottomSheet = false },
               modifier = Modifier.fillMaxWidth(),

@@ -20,10 +20,13 @@ import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
@@ -41,6 +44,8 @@ class ProfileScreenTest {
   private lateinit var navigationActionsRoot: NavigationActions
   private lateinit var preferencesRepository: PreferencesRepository
   private lateinit var preferencesViewModel: PreferencesViewModel
+  private lateinit var mockStorage: FirebaseStorage
+  @Mock private lateinit var storageRef: StorageReference
 
   private val options =
       listOf(
@@ -56,11 +61,14 @@ class ProfileScreenTest {
 
   @Before
   fun setup() {
+    mockStorage = mock(FirebaseStorage::class.java)
+    storageRef = mock(StorageReference::class.java)
+    whenever(mockStorage.reference).thenReturn(storageRef)
     mockFirestore = mock(FirebaseFirestore::class.java)
     navigationActions = mock(NavigationActions::class.java)
     navigationActionsRoot = mock(NavigationActions::class.java)
-    userProfileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore)
-    workerProfileRepositoryFirestore = WorkerProfileRepositoryFirestore(mockFirestore)
+    workerProfileRepositoryFirestore = WorkerProfileRepositoryFirestore(mockFirestore, mockStorage)
+    userProfileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore, mockStorage)
     preferencesRepository = mock()
     preferencesViewModel = PreferencesViewModel(preferencesRepository)
 

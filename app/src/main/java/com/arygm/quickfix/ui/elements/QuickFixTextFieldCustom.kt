@@ -105,7 +105,10 @@ fun QuickFixTextFieldCustom(
     minHeight: Dp = 40.dp,
     maxHeight: Dp = Dp.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
-    heightInEnabled: Boolean = false
+    heightInEnabled: Boolean = false,
+    trailingText: @Composable (() -> Unit)? = {},
+    showTrailingText: Boolean = true,
+    iconButtonOnClickable: () -> Unit = {},
 ) {
   val scrollState = rememberScrollState() // Scroll state for horizontal scrolling
   // Launch a coroutine to scroll to the end of the text when typing
@@ -243,7 +246,14 @@ fun QuickFixTextFieldCustom(
                 }
                 if ((showTrailingIcon() && updatedValue.isNotEmpty()) || alwaysShowTrailingIcon) {
                   IconButton(
-                      onClick = { if (onClick) onValueChangeWithLimit("") },
+                      enabled = isTextField || (!isTextField && enabled),
+                      onClick = {
+                        if (isTextField) {
+                          if (onClick) onValueChangeWithLimit("")
+                        } else {
+                          iconButtonOnClickable()
+                        }
+                      },
                       modifier =
                           Modifier.testTag(C.Tag.clear_button_text_field_custom)
                               .size(sizeIconGroup)
@@ -251,6 +261,9 @@ fun QuickFixTextFieldCustom(
                               .align(Alignment.CenterVertically)) {
                         trailingIcon?.invoke()
                       }
+                }
+                if (showTrailingText) {
+                  trailingText?.invoke()
                 }
               }
         }

@@ -1,5 +1,6 @@
 package com.arygm.quickfix.model.profile
 
+import android.graphics.Bitmap
 import android.util.Log
 import com.arygm.quickfix.model.locations.Location
 import com.google.android.gms.tasks.Task
@@ -7,10 +8,17 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import java.io.ByteArrayOutputStream
 
-class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRepository {
+class UserProfileRepositoryFirestore(
+    private val db: FirebaseFirestore,
+    private val storage: FirebaseStorage
+) : ProfileRepository {
 
   private val collectionPath = "users"
+  private val storageRef = storage.reference
+  private val compressionQuality = 50
 
   override fun init(onSuccess: () -> Unit) {
     Firebase.auth.addAuthStateListener {
@@ -58,6 +66,40 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : Profil
   ) {
     performFirestoreOperation(
         db.collection(collectionPath).document(id).delete(), onSuccess, onFailure)
+  }
+
+  override fun uploadProfileImages(
+      accountId: String,
+      images: List<Bitmap>,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val workerFolderRef = storageRef.child("profiles").child(accountId).child("user")
+    val uploadedImageUrls = mutableListOf<String>()
+    var uploadCount = 0
+
+    images.forEach { bitmap ->
+      val fileRef = workerFolderRef.child("image_${System.currentTimeMillis()}.jpg")
+
+      val baos = ByteArrayOutputStream()
+      bitmap.compress(Bitmap.CompressFormat.JPEG, compressionQuality, baos) // Compress the image
+      val byteArray = baos.toByteArray()
+
+      fileRef
+          .putBytes(byteArray)
+          .addOnSuccessListener {
+            fileRef.downloadUrl
+                .addOnSuccessListener { uri ->
+                  uploadedImageUrls.add(uri.toString())
+                  uploadCount++
+                  if (uploadCount == images.size) {
+                    onSuccess(uploadedImageUrls)
+                  }
+                }
+                .addOnFailureListener { exception -> onFailure(exception) }
+          }
+          .addOnFailureListener { exception -> onFailure(exception) }
+    }
   }
 
   private fun performFirestoreOperation(

@@ -4,25 +4,64 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.locations.LocationRepository
+import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.profile.becomeWorker.views.personal.PersonalInfoScreen
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 
 @RunWith(AndroidJUnit4::class)
-class PersonalInfoScreenTest {
+class PersonalInfoScreenTest() {
 
   @get:Rule val composeTestRule = createComposeRule()
 
+  private lateinit var locationViewModel: LocationViewModel
+  private lateinit var locationRepo: LocationRepository
+
+  @Before
+  fun setup() {
+    locationViewModel = mock(LocationViewModel::class.java)
+    locationRepo = mock(LocationRepository::class.java)
+
+    val testLocationSuggestions =
+        MutableStateFlow(listOf(Location(name = "New York"), Location(name = "Los Angeles")))
+
+    // Mock the LocationViewModel
+    locationViewModel =
+        object : LocationViewModel(locationRepo) {
+          override val locationSuggestions: StateFlow<List<Location>> = testLocationSuggestions
+
+          override fun setQuery(query: String) {
+            // Simulate filtering by query
+            testLocationSuggestions.value =
+                if (query.isEmpty()) {
+                  emptyList()
+                } else {
+                  listOf(Location(name = "New York"), Location(name = "Los Angeles")).filter {
+                    it.name.contains(query, ignoreCase = true)
+                  }
+                }
+          }
+        }
+  }
   // Helper function to set up the screen
   private fun setUpPersonalInfoScreen(
       displayName: MutableState<String>,
@@ -35,6 +74,7 @@ class PersonalInfoScreenTest {
       pagerStateHolder: (PagerState) -> Unit = {},
       showBottomSheetPPR: Boolean = false,
       showBottomSheetBPR: Boolean = false,
+      locationWorker: MutableState<Location> = mutableStateOf(Location())
   ) {
     composeTestRule.setContent {
       val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = initialPage)
@@ -51,7 +91,8 @@ class PersonalInfoScreenTest {
           onDescriptionErrorChange = { descriptionError.value = it },
           showBottomSheetPPR = showBottomSheetPPR,
           showBottomSheetBPR = showBottomSheetBPR,
-      )
+          locationViewModel = locationViewModel,
+          locationWorker = locationWorker)
     }
   }
 
@@ -64,6 +105,7 @@ class PersonalInfoScreenTest {
     val displayNameError = mutableStateOf(false)
     val descriptionError = mutableStateOf(false)
     var pagerState: PagerState? = null
+    var locationWorker = mutableStateOf(Location())
 
     setUpPersonalInfoScreen(
         displayName,
@@ -73,7 +115,8 @@ class PersonalInfoScreenTest {
         displayNameError,
         descriptionError,
         initialPage = 0,
-        pagerStateHolder = { pagerState = it })
+        pagerStateHolder = { pagerState = it },
+        locationWorker = locationWorker)
 
     composeTestRule.onNodeWithTag(C.Tag.personalInfoScreenSectionTitle).assertIsDisplayed()
     composeTestRule.onNodeWithTag(C.Tag.personalInfoScreenSectionDescription).assertIsDisplayed()
@@ -186,5 +229,40 @@ class PersonalInfoScreenTest {
     assertEquals(testBitmap, imageBitmapPP.value)
   }
 
-  // Update other tests similarly to handle Bitmap types...
+  @Test
+  fun testLocationFieldBehavior() {
+    // Mocked location suggestions
+    setUpPersonalInfoScreen(
+        displayName = mutableStateOf("John"),
+        description = mutableStateOf("Valid description exceeding 150 characters..."),
+        imageBitmapPP = mutableStateOf(null),
+        imageBitmapBP = mutableStateOf(null),
+        displayNameError = mutableStateOf(false),
+        descriptionError = mutableStateOf(false),
+        locationWorker = mutableStateOf(Location()))
+
+    // Verify the initial state (DropdownMenu not displayed)
+    composeTestRule.onNodeWithTag(C.Tag.personalInfoScreenLoactionDropdownMenu).assertDoesNotExist()
+
+    // Enter text into the QuickFixTextFieldCustom
+    composeTestRule.onNodeWithTag(C.Tag.personalInfoScreenLocationField).performTextInput("New")
+
+    // Verify that the DropdownMenu is displayed
+    composeTestRule.onNodeWithTag(C.Tag.personalInfoScreenLoactionDropdownMenu).assertIsDisplayed()
+
+    // Verify DropdownMenuItems are displayed
+    composeTestRule
+        .onAllNodesWithTag(C.Tag.professionalInfoScreenLocationDropdownMenuItem + 0)
+        .assertCountEquals(1) // Expect one item (filtered list)
+
+    // Select the first item
+    composeTestRule
+        .onNodeWithTag(C.Tag.professionalInfoScreenLocationDropdownMenuItem + 0)
+        .performClick()
+
+    // Verify the text in the field updates
+    composeTestRule
+        .onNodeWithTag(C.Tag.personalInfoScreenLocationField)
+        .assertTextContains("New York")
+  }
 }

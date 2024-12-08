@@ -488,7 +488,7 @@ fun SearchWorkerResult(
                             profileImage = R.drawable.placeholder_worker,
                             name = "${acc.firstName} ${acc.lastName}",
                             category = profile.fieldOfWork,
-                            rating = profile.rating,
+                            rating = profile.reviews.map { review -> review.rating }.average(),
                             reviewCount = profile.reviews.size,
                             location = it,
                             price = profile.price.toString(),
