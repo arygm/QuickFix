@@ -39,6 +39,7 @@ import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.utils.inToMonth
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -97,7 +98,7 @@ class SearchWorkerResultScreenTest {
     userViewModel = ProfileViewModel(userProfileRepositoryFirestore)
 
     // Provide test data to SearchViewModel
-    searchViewModel._workerProfiles.value =
+    searchViewModel._subCategoryWorkerProfiles.value =
         listOf(
             WorkerProfile(
                 uid = "test_uid_1",
@@ -191,8 +192,9 @@ class SearchWorkerResultScreenTest {
     // Wait for the UI to settle
     composeTestRule.waitForIdle()
 
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
     // Verify that the LazyRow for filter buttons is visible
-    val filterButtonsRow = composeTestRule.onNodeWithTag("filter_buttons_row")
+    val filterButtonsRow = composeTestRule.onNodeWithTag("lazy_filter_row")
     filterButtonsRow.assertExists().assertIsDisplayed()
 
     // Define the expected button texts
@@ -552,7 +554,7 @@ class SearchWorkerResultScreenTest {
             fieldOfWork = "Painter",
             rating = 4.5,
             workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
-            unavailability_list = listOf(LocalDate.now()),
+            unavailability_list = listOf(LocalDate.of(LocalDate.now().year, 1, 1)),
             location = Location(0.0, 0.0))
 
     val worker2 =
@@ -574,7 +576,7 @@ class SearchWorkerResultScreenTest {
             location = Location(0.0, 0.0))
 
     // Update the searchViewModel with these test workers
-    searchViewModel._workerProfiles.value = listOf(worker1, worker2, worker3)
+    searchViewModel._subCategoryWorkerProfiles.value = listOf(worker1, worker2, worker3)
 
     // Set the composable content
     composeTestRule.setContent {
@@ -588,7 +590,8 @@ class SearchWorkerResultScreenTest {
     // Verify that all 3 workers are displayed
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
 
-    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
     // Simulate clicking the "Availability" filter button
     composeTestRule.onNodeWithText("Availability").performClick()
 
@@ -604,7 +607,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithText("Enter time").assertIsDisplayed()
 
     val today = LocalDate.now()
-    val todayDayOfMonth = today.dayOfMonth.toString()
+    val month = inToMonth(today.month.value)
 
     val textFields =
         composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
@@ -619,7 +622,9 @@ class SearchWorkerResultScreenTest {
     textFields[1].performTextReplacement("00")
 
     // Find the node representing today's date and perform a click
-    composeTestRule.onNode(hasText(todayDayOfMonth) and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText(month) and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText("Jan") and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText("1") and hasClickAction()).performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 
@@ -660,7 +665,7 @@ class SearchWorkerResultScreenTest {
             location = Location(0.0, 0.0))
 
     // Update the searchViewModel with these test workers
-    searchViewModel._workerProfiles.value = listOf(worker1, worker2, worker3)
+    searchViewModel._subCategoryWorkerProfiles.value = listOf(worker1, worker2, worker3)
 
     // Set the composable content
     composeTestRule.setContent {
@@ -674,7 +679,8 @@ class SearchWorkerResultScreenTest {
     // Verify that all 3 workers are displayed
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
 
-    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
     // Simulate clicking the "Availability" filter button
     composeTestRule.onNodeWithText("Availability").performClick()
 
@@ -690,7 +696,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithText("Enter time").assertIsDisplayed()
 
     val today = LocalDate.now()
-    val todayDayOfMonth = today.dayOfMonth.toString()
+    val month = inToMonth(today.month.value)
 
     val textFields =
         composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
@@ -705,7 +711,9 @@ class SearchWorkerResultScreenTest {
     textFields[1].performTextReplacement("00")
 
     // Find the node representing today's date and perform a click
-    composeTestRule.onNode(hasText(todayDayOfMonth) and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText(month) and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText("Jan") and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText("1") and hasClickAction()).performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 
@@ -746,7 +754,7 @@ class SearchWorkerResultScreenTest {
             location = Location(0.0, 0.0))
 
     // Update the searchViewModel with these test workers
-    searchViewModel._workerProfiles.value = listOf(worker1, worker2, worker3)
+    searchViewModel._subCategoryWorkerProfiles.value = listOf(worker1, worker2, worker3)
 
     // Set the composable content
     composeTestRule.setContent {
@@ -760,7 +768,8 @@ class SearchWorkerResultScreenTest {
     // Verify that all 3 workers are displayed
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
 
-    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
     // Simulate clicking the "Availability" filter button
     composeTestRule.onNodeWithText("Availability").performClick()
 
@@ -776,7 +785,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithText("Enter time").assertIsDisplayed()
 
     val today = LocalDate.now()
-    val todayDayOfMonth = today.dayOfMonth.toString()
+    val month = inToMonth(today.month.value)
 
     val textFields =
         composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
@@ -791,7 +800,9 @@ class SearchWorkerResultScreenTest {
     textFields[1].performTextReplacement("00")
 
     // Find the node representing today's date and perform a click
-    composeTestRule.onNode(hasText(todayDayOfMonth) and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText(month) and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText("Jan") and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText("1") and hasClickAction()).performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 
@@ -817,13 +828,15 @@ class SearchWorkerResultScreenTest {
     searchViewModel._searchSubcategory.value =
         Subcategory(tags = listOf("Exterior Painter", "Interior Painter", "Electrician", "Plumber"))
 
-    searchViewModel._workerProfiles.value = workers
+    searchViewModel._subCategoryWorkerProfiles.value = workers
 
     composeTestRule.setContent {
       SearchWorkerResult(
           navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
     }
 
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
     // Click on the "Service Type" filter button
     composeTestRule.onNodeWithText("Service Type").performClick()
 
@@ -863,7 +876,7 @@ class SearchWorkerResultScreenTest {
                 rating = 2.9))
 
     // Provide test data to the searchViewModel
-    searchViewModel._workerProfiles.value = workers
+    searchViewModel._subCategoryWorkerProfiles.value = workers
     searchViewModel._searchSubcategory.value =
         Subcategory(tags = listOf("Exterior Painter", "Interior Painter", "Electrician", "Plumber"))
 
@@ -872,8 +885,9 @@ class SearchWorkerResultScreenTest {
           navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
     }
 
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
     // Scroll to the "Highest Rating" button in the LazyRow
-    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
 
     // Click on the "Highest Rating" filter button
     composeTestRule.onNodeWithText("Highest Rating").performClick()
@@ -912,7 +926,7 @@ class SearchWorkerResultScreenTest {
                 rating = 2.9))
 
     // Provide test data to the searchViewModel
-    searchViewModel._workerProfiles.value = workers
+    searchViewModel._subCategoryWorkerProfiles.value = workers
     searchViewModel._searchSubcategory.value =
         Subcategory(tags = listOf("Exterior Painter", "Interior Painter", "Electrician", "Plumber"))
 
@@ -921,6 +935,8 @@ class SearchWorkerResultScreenTest {
           navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
     }
 
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
     // Apply Service Type filter
     composeTestRule.onNodeWithText("Service Type").performClick()
     composeTestRule.waitForIdle()
@@ -929,7 +945,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.waitForIdle()
 
     // Scroll to the "Highest Rating" button in the LazyRow
-    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
 
     // Apply Highest Rating filter
     composeTestRule.onNodeWithText("Highest Rating").performClick()
@@ -968,7 +984,7 @@ class SearchWorkerResultScreenTest {
                 rating = 2.9))
 
     // Provide test data to the searchViewModel
-    searchViewModel._workerProfiles.value = workers
+    searchViewModel._subCategoryWorkerProfiles.value = workers
     searchViewModel._searchSubcategory.value =
         Subcategory(
             tags =
@@ -979,6 +995,9 @@ class SearchWorkerResultScreenTest {
       SearchWorkerResult(
           navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
     }
+
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
 
     // Apply Service Type filter for a tag that doesn't exist
     composeTestRule.onNodeWithText("Service Type").performClick()
@@ -999,7 +1018,8 @@ class SearchWorkerResultScreenTest {
           navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
     }
 
-    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(4)
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(4)
     // Click on the "Price Range" filter button
     composeTestRule.onNodeWithText("Price Range").performClick()
 
@@ -1020,7 +1040,7 @@ class SearchWorkerResultScreenTest {
             WorkerProfile(uid = "worker3", price = 3010.0, fieldOfWork = "Plumber", rating = 3.9))
 
     // Provide test data to the searchViewModel
-    searchViewModel._workerProfiles.value = workers
+    searchViewModel._subCategoryWorkerProfiles.value = workers
 
     // Set the content
     composeTestRule.setContent {
@@ -1028,7 +1048,8 @@ class SearchWorkerResultScreenTest {
           navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
     }
 
-    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(4)
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(4)
     // Click on the "Price Range" filter button
     composeTestRule.onNodeWithText("Price Range").performClick()
 
@@ -1060,7 +1081,7 @@ class SearchWorkerResultScreenTest {
             WorkerProfile(uid = "worker3", price = 3001.0, fieldOfWork = "Plumber", rating = 3.9))
 
     // Provide test data to the searchViewModel
-    searchViewModel._workerProfiles.value = workers
+    searchViewModel._subCategoryWorkerProfiles.value = workers
 
     // Set the content
     composeTestRule.setContent {
@@ -1068,7 +1089,8 @@ class SearchWorkerResultScreenTest {
           navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
     }
 
-    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(4)
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(4)
     // Click on the "Price Range" filter button
     composeTestRule.onNodeWithText("Price Range").performClick()
 
@@ -1107,7 +1129,7 @@ class SearchWorkerResultScreenTest {
                 rating = 4.0))
 
     // Provide test data to the searchViewModel
-    searchViewModel._workerProfiles.value = workers
+    searchViewModel._subCategoryWorkerProfiles.value = workers
 
     // Set the composable content
     composeTestRule.setContent {
@@ -1119,8 +1141,9 @@ class SearchWorkerResultScreenTest {
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
 
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
     // Scroll to the "Location" button in the LazyRow if needed
-    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
 
     // Open the Location filter bottom sheet
     composeTestRule.onNodeWithText("Location").performClick()
@@ -1140,7 +1163,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(1)
 
     // Open Location filter again to clear
-    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
     composeTestRule.onNodeWithText("Location").performClick()
     composeTestRule.waitForIdle()
 
@@ -1178,7 +1201,7 @@ class SearchWorkerResultScreenTest {
                 location = com.arygm.quickfix.model.locations.Location(42.0, -74.5, "Work"),
                 tags = listOf("Plumber")))
 
-    searchViewModel._workerProfiles.value = workers
+    searchViewModel._subCategoryWorkerProfiles.value = workers
     searchViewModel._searchSubcategory.value =
         Subcategory(tags = listOf("Interior Painter", "Electrician", "Plumber"))
 
@@ -1191,6 +1214,8 @@ class SearchWorkerResultScreenTest {
     // Initially, all 3 workers
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
 
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
     // Apply Service Type filter = "Interior Painter"
     composeTestRule.onNodeWithText("Service Type").performClick()
     composeTestRule.waitForIdle()
@@ -1203,7 +1228,7 @@ class SearchWorkerResultScreenTest {
 
     // Apply Location filter to get even more specific (Assume "Home")
     composeTestRule
-        .onNodeWithTag("filter_buttons_row")
+        .onNodeWithTag("lazy_filter_row")
         .performScrollToIndex(1) // scroll to "Location" if needed
     composeTestRule.onNodeWithText("Location").performClick()
     composeTestRule.waitForIdle()
@@ -1215,7 +1240,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(1)
 
     // Now clear the Location filter but keep the Service Type filter
-    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
     composeTestRule.onNodeWithText("Location").performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("resetButton").performClick()
@@ -1245,7 +1270,7 @@ class SearchWorkerResultScreenTest {
             unavailability_list = emptyList(),
             location = com.arygm.quickfix.model.locations.Location(0.0, 0.0, ""))
 
-    searchViewModel._workerProfiles.value = listOf(worker1, worker2)
+    searchViewModel._subCategoryWorkerProfiles.value = listOf(worker1, worker2)
 
     composeTestRule.setContent {
       SearchWorkerResult(
@@ -1256,7 +1281,8 @@ class SearchWorkerResultScreenTest {
     // Initially 2 workers
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
 
-    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(4)
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(4)
     // Apply Availability filter for today at 10:00 (both should be available)
     composeTestRule.onNodeWithText("Availability").performClick()
     composeTestRule.waitForIdle()
@@ -1275,5 +1301,105 @@ class SearchWorkerResultScreenTest {
 
     // With availability cleared and no other filters applied, we should still see 2 workers
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
+  }
+
+  @Test
+  fun testTogglingRatingFilterOff() {
+    val workers =
+        listOf(
+            WorkerProfile(uid = "w1", rating = 3.0),
+            WorkerProfile(uid = "w2", rating = 4.5),
+            WorkerProfile(uid = "w3", rating = 2.0))
+
+    searchViewModel._subCategoryWorkerProfiles.value = workers
+    // Initially, no rating filter applied, workers are in initial order
+    // We'll toggle the rating filter on, then off.
+
+    composeTestRule.setContent {
+      SearchWorkerResult(
+          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+    }
+
+    composeTestRule.waitForIdle()
+    // Show filter buttons
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+
+    // Apply Highest Rating filter
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
+    composeTestRule.onNodeWithText("Highest Rating").performClick()
+    composeTestRule.waitForIdle()
+
+    // Now workers should be sorted by rating descending: w2(4.5), w1(3.0), w3(2.0)
+    val workerNodes = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
+    workerNodes.assertCountEquals(workers.size)
+    // Verify order by rating text
+    workerNodes[0].assert(hasAnyChild(hasText("4.5 ★", substring = true)))
+    workerNodes[1].assert(hasAnyChild(hasText("3.0 ★", substring = true)))
+    workerNodes[2].assert(hasAnyChild(hasText("2.0 ★", substring = true)))
+
+    // Click again to remove Highest Rating filter
+    composeTestRule.onNodeWithText("Highest Rating").performClick()
+    composeTestRule.waitForIdle()
+
+    // With the rating filter removed, `reapplyFilters()` is called, and no filters are applied.
+    // The default implementation should revert to the original order (the order in
+    // `_subCategoryWorkerProfiles`).
+    // Check that the initial worker (w1) is now first again.
+    val workerNodesAfterRevert = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
+    workerNodesAfterRevert[0].assert(
+        hasAnyChild(hasText("3.0 ★", substring = true))) // w1 first again
+    workerNodesAfterRevert[1].assert(hasAnyChild(hasText("4.5 ★", substring = true)))
+    workerNodesAfterRevert[2].assert(hasAnyChild(hasText("2.0 ★", substring = true)))
+  }
+
+  @Test
+  fun testTogglingFilterButtonsVisibility() {
+    // Set some workers just so the UI loads normally
+    searchViewModel._subCategoryWorkerProfiles.value = listOf(WorkerProfile(uid = "test"))
+
+    composeTestRule.setContent {
+      SearchWorkerResult(
+          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+    }
+
+    composeTestRule.waitForIdle()
+
+    // Initially, the lazy_filter_row might not be visible until we click the tune button
+    composeTestRule.onNodeWithTag("lazy_filter_row").assertDoesNotExist()
+
+    // Click the tune button to show filter buttons
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").assertIsDisplayed()
+
+    // Click the tune button again to hide filter buttons
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("lazy_filter_row").assertDoesNotExist()
+  }
+
+  @Test
+  fun testServiceTypeSheetNotShownWhenSubcategoryIsNull() {
+    // No subcategory set
+    searchViewModel._searchSubcategory.value = null
+    // Workers to display something
+    searchViewModel._subCategoryWorkerProfiles.value = listOf(WorkerProfile(uid = "w1"))
+
+    composeTestRule.setContent {
+      SearchWorkerResult(
+          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+    }
+
+    composeTestRule.waitForIdle()
+    // Show filter buttons
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+
+    // Attempt to open the Service Type filter
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithText("Service Type").performClick()
+
+    composeTestRule.waitForIdle()
+
+    // Since searchSubcategory is null, ChooseServiceTypeSheet should not appear
+    composeTestRule.onNodeWithTag("chooseServiceTypeModalSheet").assertDoesNotExist()
   }
 }

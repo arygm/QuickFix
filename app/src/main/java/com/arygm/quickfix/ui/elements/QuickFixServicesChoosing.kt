@@ -40,12 +40,13 @@ import com.arygm.quickfix.ui.theme.QuickFixTheme
 fun ChooseServiceTypeSheet(
     showModalBottomSheet: Boolean,
     serviceTypes: List<String>,
+    selectedServices: List<String> = emptyList<String>(),
     onApplyClick: (List<String>) -> Unit,
     onDismissRequest: () -> Unit,
     onClearClick: () -> Unit,
     clearEnabled: Boolean
 ) {
-  var selectedServices by remember { mutableStateOf(emptyList<String>()) }
+  var localSelectedServices by remember(selectedServices) { mutableStateOf(selectedServices) }
   if (showModalBottomSheet) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -93,18 +94,18 @@ fun ChooseServiceTypeSheet(
                       horizontalArrangement =
                           Arrangement.spacedBy(paddingHorizontal, Alignment.CenterHorizontally)) {
                         items(serviceTypes) { service ->
-                          val isSelected = service in selectedServices
+                          val isSelected = service in localSelectedServices
                           Text(
                               text = service,
                               style = MaterialTheme.typography.bodyMedium,
                               modifier =
                                   Modifier.clickable {
-                                        selectedServices =
+                                        localSelectedServices =
                                             if (isSelected) {
-                                              selectedServices -
+                                              localSelectedServices -
                                                   service // Remove if already selected
                                             } else {
-                                              selectedServices + service // Add if not selected
+                                              localSelectedServices + service // Add if not selected
                                             }
                                       }
                                       .background(
@@ -130,8 +131,9 @@ fun ChooseServiceTypeSheet(
 
                   // Apply button to confirm the selection
                   Button(
+                      enabled = localSelectedServices.isNotEmpty(),
                       onClick = {
-                        onApplyClick(selectedServices)
+                        onApplyClick(localSelectedServices)
                         onDismissRequest()
                       },
                       modifier =
@@ -156,7 +158,7 @@ fun ChooseServiceTypeSheet(
                           else colorScheme.onSecondaryContainer,
                       modifier =
                           Modifier.clickable(enabled = clearEnabled) {
-                                selectedServices = emptyList<String>()
+                                localSelectedServices = emptyList<String>()
                                 onClearClick()
                                 onDismissRequest()
                               }
