@@ -8,8 +8,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
@@ -40,12 +40,13 @@ import com.arygm.quickfix.ui.theme.QuickFixTheme
 fun ChooseServiceTypeSheet(
     showModalBottomSheet: Boolean,
     serviceTypes: List<String>,
+    selectedServices: List<String> = emptyList<String>(),
     onApplyClick: (List<String>) -> Unit,
     onDismissRequest: () -> Unit,
     onClearClick: () -> Unit,
     clearEnabled: Boolean
 ) {
-  var selectedServices by remember { mutableStateOf(emptyList<String>()) }
+  var localSelectedServices by remember(selectedServices) { mutableStateOf(selectedServices) }
   if (showModalBottomSheet) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -77,10 +78,10 @@ fun ChooseServiceTypeSheet(
                   Spacer(modifier = Modifier.height(verticalSpacing)) // Space below title
 
                   // Full-width divider under the title
-                  Divider(
-                      color = colorScheme.onSecondaryContainer,
+                  HorizontalDivider(
+                      modifier = Modifier.fillMaxWidth(),
                       thickness = 1.dp,
-                      modifier = Modifier.fillMaxWidth())
+                      color = colorScheme.onSecondaryContainer)
 
                   Spacer(modifier = Modifier.height(verticalSpacing)) // Space below divider
 
@@ -93,18 +94,18 @@ fun ChooseServiceTypeSheet(
                       horizontalArrangement =
                           Arrangement.spacedBy(paddingHorizontal, Alignment.CenterHorizontally)) {
                         items(serviceTypes) { service ->
-                          val isSelected = service in selectedServices
+                          val isSelected = service in localSelectedServices
                           Text(
                               text = service,
                               style = MaterialTheme.typography.bodyMedium,
                               modifier =
                                   Modifier.clickable {
-                                        selectedServices =
+                                        localSelectedServices =
                                             if (isSelected) {
-                                              selectedServices -
+                                              localSelectedServices -
                                                   service // Remove if already selected
                                             } else {
-                                              selectedServices + service // Add if not selected
+                                              localSelectedServices + service // Add if not selected
                                             }
                                       }
                                       .background(
@@ -130,8 +131,9 @@ fun ChooseServiceTypeSheet(
 
                   // Apply button to confirm the selection
                   Button(
+                      enabled = localSelectedServices.isNotEmpty(),
                       onClick = {
-                        onApplyClick(selectedServices)
+                        onApplyClick(localSelectedServices)
                         onDismissRequest()
                       },
                       modifier =
@@ -156,7 +158,7 @@ fun ChooseServiceTypeSheet(
                           else colorScheme.onSecondaryContainer,
                       modifier =
                           Modifier.clickable(enabled = clearEnabled) {
-                                selectedServices = emptyList<String>()
+                                localSelectedServices = emptyList<String>()
                                 onClearClick()
                                 onDismissRequest()
                               }

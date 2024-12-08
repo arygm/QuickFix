@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -56,7 +55,7 @@ import com.arygm.quickfix.utils.LocationHelper
 fun QuickFixLocationFilterBottomSheet(
     showModalBottomSheet: Boolean,
     userProfile: UserProfile,
-    locationHelper: LocationHelper,
+    phoneLocation: Location,
     onApplyClick: (Location, Int) -> Unit,
     onDismissRequest: () -> Unit,
     onClearClick: () -> Unit,
@@ -94,10 +93,10 @@ fun QuickFixLocationFilterBottomSheet(
 
                   Spacer(modifier = Modifier.height(verticalSpacing))
 
-                  Divider(
-                      color = colorScheme.onSecondaryContainer,
+                  HorizontalDivider(
+                      modifier = Modifier.fillMaxWidth().testTag("locationFilterDivider"),
                       thickness = 1.dp,
-                      modifier = Modifier.fillMaxWidth().testTag("locationFilterDivider"))
+                      color = colorScheme.onSecondaryContainer)
 
                   Spacer(modifier = Modifier.height(verticalSpacing))
 
@@ -236,16 +235,7 @@ fun QuickFixLocationFilterBottomSheet(
                       enabled = selectedOption.value != null,
                       onClick = {
                         if (selectedOption.value == 0) {
-                          if (locationHelper.checkPermissions()) {
-                            locationHelper.getCurrentLocation { loc ->
-                              loc?.let {
-                                val location = Location(it.latitude, it.longitude, "Phone Location")
-                                onApplyClick(location, range)
-                              }
-                            }
-                          } else {
-                            locationHelper.requestPermissions()
-                          }
+                          onApplyClick(phoneLocation, range)
                         } else {
                           onApplyClick(
                               userProfile.locations[selectedOption.value!!.minus(1)], range)
@@ -305,7 +295,7 @@ fun hehe() {
     QuickFixLocationFilterBottomSheet(
         showModalBottomSheet = showModal,
         userProfile = userProfile,
-        locationHelper = locationHelper,
+        phoneLocation = Location(200.0, 200.0, "Phone Location"),
         onApplyClick = { loc, a ->
           Log.d("Chill Guy", a.toString())
           Log.d("Chill Guy", loc.name)

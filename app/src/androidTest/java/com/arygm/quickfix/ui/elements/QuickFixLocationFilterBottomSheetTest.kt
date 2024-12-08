@@ -1,33 +1,26 @@
 package com.arygm.quickfix.ui.elements
 
-import android.Manifest
-import android.app.Activity
-import android.content.Context
-import android.content.pm.PackageManager
-import android.location.LocationManager
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.core.app.ActivityCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.ui.theme.QuickFixTheme
-import com.arygm.quickfix.utils.LocationHelper
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
 import org.mockito.Mockito.*
 
 @RunWith(AndroidJUnit4::class)
 class QuickFixLocationFilterBottomSheetTest {
 
   @get:Rule val composeTestRule = createComposeRule()
+
+  private lateinit var onApplyClick: (Location, Int) -> Unit
+  private lateinit var onDismissRequest: () -> Unit
+  private lateinit var onClearClick: () -> Unit
 
   private val userProfile =
       UserProfile(
@@ -38,22 +31,13 @@ class QuickFixLocationFilterBottomSheetTest {
                   Location(46.2, 6.2, "EPFL")),
           announcements = emptyList(),
           uid = "test_user")
-  private lateinit var context: Context
-  private lateinit var locationHelper: LocationHelper
-  private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-  private lateinit var activity: Activity
+  private val phoneLocation = Location(37.422, -122.084, "Phone Location")
 
   @Before
   fun setup() {
-    context = mock(Context::class.java)
-    activity = mock(Activity::class.java)
-    fusedLocationProviderClient = mock(FusedLocationProviderClient::class.java)
-    // Create a spy of LocationHelper
-    locationHelper = spy(LocationHelper(context, activity, fusedLocationProviderClient))
-    `when`(ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION))
-        .thenReturn(PackageManager.PERMISSION_GRANTED)
-    `when`(ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION))
-        .thenReturn(PackageManager.PERMISSION_GRANTED)
+    onApplyClick = mock()
+    onDismissRequest = mock()
+    onClearClick = mock()
   }
 
   @Test
@@ -63,10 +47,10 @@ class QuickFixLocationFilterBottomSheetTest {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = true,
             userProfile = userProfile,
-            locationHelper = locationHelper,
-            onApplyClick = { _, _ -> },
-            onDismissRequest = {},
-            onClearClick = {},
+            phoneLocation = phoneLocation,
+            onApplyClick = onApplyClick,
+            onDismissRequest = onDismissRequest,
+            onClearClick = onClearClick,
             clearEnabled = false)
       }
     }
@@ -81,10 +65,10 @@ class QuickFixLocationFilterBottomSheetTest {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = false,
             userProfile = userProfile,
-            locationHelper = locationHelper,
-            onApplyClick = { _, _ -> },
-            onDismissRequest = {},
-            onClearClick = {},
+            phoneLocation = phoneLocation,
+            onApplyClick = onApplyClick,
+            onDismissRequest = onDismissRequest,
+            onClearClick = onClearClick,
             clearEnabled = false)
       }
     }
@@ -99,10 +83,10 @@ class QuickFixLocationFilterBottomSheetTest {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = true,
             userProfile = userProfile,
-            locationHelper = locationHelper,
-            onApplyClick = { _, _ -> },
-            onDismissRequest = {},
-            onClearClick = {},
+            phoneLocation = phoneLocation,
+            onApplyClick = onApplyClick,
+            onDismissRequest = onDismissRequest,
+            onClearClick = onClearClick,
             clearEnabled = false)
       }
     }
@@ -124,73 +108,33 @@ class QuickFixLocationFilterBottomSheetTest {
   }
 
   @Test
-  fun selectingCurrentLocationEnablesApplyButtonAndCallsOnApply() {
-
-    // Mock location enabled
-    val locationManager = mock(LocationManager::class.java)
-    `when`(context.getSystemService(Context.LOCATION_SERVICE)).thenReturn(locationManager)
-    `when`(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true)
-    `when`(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true)
-
-    // Mock permissions check
-    `when`(ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION))
-        .thenReturn(PackageManager.PERMISSION_GRANTED)
-    `when`(ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION))
-        .thenReturn(PackageManager.PERMISSION_GRANTED)
-
-    // Mock fusedLocationProviderClient.lastLocation
-    val mockLocation = mock(android.location.Location::class.java)
-    `when`(mockLocation.latitude).thenReturn(37.422)
-    `when`(mockLocation.longitude).thenReturn(-122.084)
-
-    val mockTask = mock(Task::class.java) as Task<android.location.Location>
-    `when`(mockTask.isSuccessful).thenReturn(true)
-    `when`(mockTask.result).thenReturn(mockLocation)
-    `when`(fusedLocationProviderClient.lastLocation).thenReturn(mockTask)
-
-    // Mock addOnCompleteListener
-    `when`(mockTask.addOnCompleteListener(Mockito.any())).thenAnswer { invocation ->
-      val listener = invocation.arguments[0] as OnCompleteListener<android.location.Location>
-      listener.onComplete(mockTask)
-      mockTask
-    }
-
-    var appliedLocation: Location? = null
-    var appliedRange = -1
-    var dismissed = false
-
+  fun selectingCurrentLocationEnablesApply_andCallsOnApplyClick() {
     composeTestRule.setContent {
       QuickFixTheme {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = true,
             userProfile = userProfile,
-            locationHelper = locationHelper,
-            onApplyClick = { loc, r ->
-              appliedLocation = loc
-              appliedRange = r
-            },
-            onDismissRequest = { dismissed = true },
-            onClearClick = {},
+            phoneLocation = phoneLocation,
+            onApplyClick = onApplyClick,
+            onDismissRequest = onDismissRequest,
+            onClearClick = onClearClick,
             clearEnabled = false)
       }
     }
 
-    // Select the "Use my Current Location" radio
+    // Select "Use my Current Location" which is option 0
     composeTestRule.onNodeWithTag("locationOptionRow0").performClick()
+
     // Now apply button should be enabled
     composeTestRule.onNodeWithTag("applyButton").assertIsEnabled()
 
     // Click apply
     composeTestRule.onNodeWithTag("applyButton").performClick()
 
-    composeTestRule.runOnIdle {
-      // Check that onApplyClick was called
-      assertEquals("Phone Location", appliedLocation?.name)
-      // Default slider value = 200 (as defined in code)
-      assertEquals(200, appliedRange)
-      // Check that onDismissRequest was called
-      assert(dismissed)
-    }
+    // Verify onApplyClick is called with phoneLocation and default range (0 initially, or as set in
+    // the component)
+    verify(onApplyClick).invoke(phoneLocation, 200) // 200 is the initial slider value based on code
+    verify(onDismissRequest).invoke()
   }
 
   @Test
@@ -204,13 +148,13 @@ class QuickFixLocationFilterBottomSheetTest {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = true,
             userProfile = userProfile,
-            locationHelper = locationHelper, // We won't call getCurrentLocation this time
+            phoneLocation = phoneLocation,
             onApplyClick = { loc, r ->
               appliedLocation = loc
               appliedRange = r
             },
             onDismissRequest = { dismissed = true },
-            onClearClick = {},
+            onClearClick = onClearClick,
             clearEnabled = false)
       }
     }
@@ -240,10 +184,10 @@ class QuickFixLocationFilterBottomSheetTest {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = true,
             userProfile = userProfile,
-            locationHelper = locationHelper,
-            onApplyClick = { _, _ -> },
-            onDismissRequest = {},
-            onClearClick = {},
+            phoneLocation = phoneLocation,
+            onApplyClick = onApplyClick,
+            onDismissRequest = onDismissRequest,
+            onClearClick = onClearClick,
             clearEnabled = false)
       }
     }
@@ -263,8 +207,8 @@ class QuickFixLocationFilterBottomSheetTest {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = true,
             userProfile = userProfile,
-            locationHelper = locationHelper,
-            onApplyClick = { _, _ -> },
+            phoneLocation = phoneLocation,
+            onApplyClick = onApplyClick,
             onDismissRequest = { dismissCalled = true },
             onClearClick = { clearCalled = true },
             clearEnabled = true)
@@ -295,8 +239,8 @@ class QuickFixLocationFilterBottomSheetTest {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = true,
             userProfile = userProfile,
-            locationHelper = locationHelper,
-            onApplyClick = { _, _ -> },
+            phoneLocation = phoneLocation,
+            onApplyClick = onApplyClick,
             onDismissRequest = { dismissCalled = true },
             onClearClick = { clearCalled = true },
             clearEnabled = false)
