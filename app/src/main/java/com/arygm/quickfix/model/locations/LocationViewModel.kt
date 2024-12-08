@@ -14,13 +14,13 @@ open class LocationViewModel(val repository: LocationRepository) : ViewModel() {
 
   // State for search results
   private val locations_ = MutableStateFlow<List<Location>>(emptyList())
-  val locationSuggestions: StateFlow<List<Location>> = locations_.asStateFlow()
+  open val locationSuggestions: StateFlow<List<Location>> = locations_.asStateFlow()
 
   // State for errors
   private val error_ = MutableStateFlow<Exception?>(null)
   val error: StateFlow<Exception?> = error_.asStateFlow()
 
-  fun setQuery(query: String) {
+  open fun setQuery(query: String) {
     query_.value = query
     locations_.value = emptyList()
     error_.value = null

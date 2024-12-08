@@ -27,6 +27,8 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +36,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.Mock
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.mock
@@ -56,6 +59,8 @@ class MessageScreenTest {
   private lateinit var userViewModel: ProfileViewModel
   private lateinit var chatRepository: ChatRepository
   private lateinit var chatViewModel: ChatViewModel
+  private lateinit var mockStorage: FirebaseStorage
+  @Mock private lateinit var storageRef: StorageReference
 
   // Simulated state flows
   private val chatListFlow = MutableStateFlow<List<Chat>>(emptyList())
@@ -80,6 +85,9 @@ class MessageScreenTest {
   @Before
   fun setup() {
     // Mock configuration
+    mockStorage = mock(FirebaseStorage::class.java)
+    storageRef = mock(StorageReference::class.java)
+    whenever(mockStorage.reference).thenReturn(storageRef)
     mockFirestore = mock(FirebaseFirestore::class.java)
     navigationActions = mock(NavigationActions::class.java)
     accountRepository = mock(AccountRepository::class.java)
@@ -89,8 +97,8 @@ class MessageScreenTest {
     doNothing().whenever(chatRepository).init(any())
 
     // Initialization of real implementations with mocks
-    userProfileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore)
-    workerProfileRepositoryFirestore = WorkerProfileRepositoryFirestore(mockFirestore)
+    userProfileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore, mockStorage)
+    workerProfileRepositoryFirestore = WorkerProfileRepositoryFirestore(mockFirestore, mockStorage)
 
     // ViewModel configuration
     accountViewModel = AccountViewModel(accountRepository)

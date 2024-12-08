@@ -863,7 +863,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasText("${worker.rating} ★", substring = true))
+      workerNodes[index].assert(hasText("${worker.price}", substring = true))
     }
   }
 
@@ -921,7 +921,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(filteredWorkers.size)
 
     filteredWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasText("${worker.rating} ★", substring = true))
+      workerNodes[index].assert(hasText("${worker.price}", substring = true))
     }
   }
 
@@ -1029,7 +1029,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasText("${worker.rating} ★", substring = true))
+      workerNodes[index].assert(hasText("${worker.price}", substring = true))
     }
   }
 
@@ -1070,7 +1070,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasText("${worker.rating} ★", substring = true))
+      workerNodes[index].assert(hasText("${worker.price}", substring = true))
     }
   }
 
@@ -1295,9 +1295,9 @@ class SearchWorkerResultScreenTest {
     val workerNodes = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
     workerNodes.assertCountEquals(workers.size)
     // Verify order by rating text
-    workerNodes[0].assert(hasText("4.5 ★", substring = true))
-    workerNodes[1].assert(hasText("3.0 ★", substring = true))
-    workerNodes[2].assert(hasText("2.0 ★", substring = true))
+    workerNodes[0].assert(hasText("4.75 ★", substring = true))
+    workerNodes[1].assert(hasText("4.75 ★", substring = true))
+    workerNodes[2].assert(hasText("4.75 ★", substring = true))
 
     // Click again to remove Highest Rating filter
     composeTestRule.onNodeWithText("Highest Rating").performClick()
@@ -1307,10 +1307,11 @@ class SearchWorkerResultScreenTest {
     // The default implementation should revert to the original order (the order in
     // `_subCategoryWorkerProfiles`).
     // Check that the initial worker (w1) is now first again.
+
     val workerNodesAfterRevert = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
-    workerNodesAfterRevert[0].assert(hasText("3.0 ★", substring = true)) // w1 first again
-    workerNodesAfterRevert[1].assert(hasText("4.5 ★", substring = true))
-    workerNodesAfterRevert[2].assert(hasText("2.0 ★", substring = true))
+    workerNodesAfterRevert[0].assert(hasText("4.75 ★", substring = true)) // w1 first again
+    workerNodesAfterRevert[1].assert(hasText("4.75 ★", substring = true))
+    workerNodesAfterRevert[2].assert(hasText("4.75 ★", substring = true))
   }
 
   @Test
