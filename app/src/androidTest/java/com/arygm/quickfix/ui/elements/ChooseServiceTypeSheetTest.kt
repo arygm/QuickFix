@@ -296,7 +296,7 @@ class ChooseServiceTypeSheetTest {
         .onNodeWithTag("applyButton")
         .assertIsDisplayed()
         .assertIsNotEnabled() // There's no direct assert for "disabled", but we can check action
-                              // availability
+    // availability
 
     // Select a service
     composeTestRule.onNodeWithTag("serviceText_Exterior Painter").performClick()
