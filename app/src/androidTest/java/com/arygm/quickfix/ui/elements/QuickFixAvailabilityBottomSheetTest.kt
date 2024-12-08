@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.arygm.quickfix.utils.inToMonth
 import java.time.LocalDate
 import org.junit.Rule
 import org.junit.Test
@@ -90,7 +91,7 @@ class QuickFixAvailabilityBottomSheetTest {
 
     // Get today's date
     val today = LocalDate.now()
-    val todayDayOfMonth = today.dayOfMonth.toString()
+    val month = inToMonth(today.month.value)
 
     composeTestRule.setContent {
       QuickFixAvailabilityBottomSheet(
@@ -122,7 +123,9 @@ class QuickFixAvailabilityBottomSheetTest {
     textFields[1].performTextReplacement("00")
 
     // Find the node representing today's date and perform a click
-    composeTestRule.onNode(hasText(todayDayOfMonth) and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText(month) and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText("Jan") and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText("1") and hasClickAction()).performClick()
 
     // Simulate pressing the OK button (if there is one)
     // If the CalendarView has an OK button, we need to perform a click on it
@@ -132,7 +135,7 @@ class QuickFixAvailabilityBottomSheetTest {
     // Assert that onOkClick was called
     composeTestRule.runOnIdle {
       assert(onOkClickCalled)
-      assert(selectedDates.contains(today))
+      assert(selectedDates.contains(LocalDate.of(today.year, 1, 1)))
       assert(selectedHour == 7)
       assert(selectedMinute == 0)
     }

@@ -197,4 +197,79 @@ class StringTest {
     val result = routeToScreen("INVALID_ROUTE")
     assertEquals(Screen.WELCOME, result)
   }
+
+  @Test
+  fun `test month 1 returns Jan`() {
+    assertEquals("Jan", inToMonth(1))
+  }
+
+  @Test
+  fun `test month 2 returns Feb`() {
+    assertEquals("Feb", inToMonth(2))
+  }
+
+  @Test
+  fun `test month 3 returns Mar`() {
+    assertEquals("Mar", inToMonth(3))
+  }
+
+  @Test
+  fun `test month 4 returns Apr`() {
+    assertEquals("Apr", inToMonth(4))
+  }
+
+  @Test
+  fun `test month 5 returns May`() {
+    assertEquals("May", inToMonth(5))
+  }
+
+  @Test
+  fun `test month 6 returns Jun`() {
+    assertEquals("Jun", inToMonth(6))
+  }
+
+  @Test
+  fun `test month 7 returns Jul`() {
+    assertEquals("Jul", inToMonth(7))
+  }
+
+  @Test
+  fun `test month 8 returns Aug`() {
+    assertEquals("Aug", inToMonth(8))
+  }
+
+  @Test
+  fun `test month 9 returns Sep`() {
+    assertEquals("Sep", inToMonth(9))
+  }
+
+  @Test
+  fun `test month 10 returns Oct`() {
+    assertEquals("Oct", inToMonth(10))
+  }
+
+  @Test
+  fun `test month 11 returns Nov`() {
+    assertEquals("Nov", inToMonth(11))
+  }
+
+  @Test
+  fun `test month 12 returns Dec`() {
+    assertEquals("Dec", inToMonth(12))
+  }
+
+  @Test
+  fun `test month 13 returns Default`() {
+    assertEquals("Default", inToMonth(13))
+  }
+
+  @Test
+  fun `test month 0 returns Default`() {
+    assertEquals("Default", inToMonth(0))
+  }
+
+  @Test
+  fun `test negative month returns Default`() {
+    assertEquals("Default", inToMonth(-5))
+  }
 }

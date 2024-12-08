@@ -1,5 +1,6 @@
 package com.arygm.quickfix.model.search
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -18,9 +19,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-open class SearchViewModel(
-    private val workerProfileRepo: WorkerProfileRepositoryFirestore,
-) : ViewModel() {
+open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositoryFirestore) :
+    ViewModel() {
 
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery
@@ -30,6 +30,9 @@ open class SearchViewModel(
 
   val _workerProfiles = MutableStateFlow<List<WorkerProfile>>(emptyList())
   val workerProfiles: StateFlow<List<WorkerProfile>> = _workerProfiles
+
+  val _subCategoryWorkerProfiles = MutableStateFlow<List<WorkerProfile>>(emptyList())
+  val subCategoryWorkerProfiles: StateFlow<List<WorkerProfile>> = _subCategoryWorkerProfiles
 
   private val _errorMessage = MutableStateFlow<String?>(null)
   val errorMessage: StateFlow<String?> = _errorMessage
@@ -168,5 +171,16 @@ open class SearchViewModel(
               worker.location.longitude)
       distance <= maxDistance
     }
+  }
+
+  fun filterWorkersBySubcategory(fieldOfWork: String) {
+    workerProfileRepo.getProfiles(
+        onSuccess = { profiles ->
+          val workerProfiles =
+              profiles.filterIsInstance<WorkerProfile>() // Cast profiles to WorkerProfile
+          val filteredProfiles = workerProfiles.filter { it.fieldOfWork == fieldOfWork }
+          _subCategoryWorkerProfiles.value = filteredProfiles
+        },
+        onFailure = { Log.e("SearchViewModel", "Failed to fetch worker profiles.") })
   }
 }
