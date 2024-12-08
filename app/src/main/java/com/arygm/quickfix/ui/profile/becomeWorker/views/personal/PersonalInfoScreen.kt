@@ -379,7 +379,7 @@ fun PersonalInfoScreen(
               ) {
                   QuickFixTextFieldCustom(
                       modifier =
-                      Modifier.semantics { testTag = C.Tag.professionalInfoScreenCategoryField },
+                      Modifier.semantics { testTag = C.Tag.personalInfoScreenLocationField },
                       widthField = 380.dp * widthRatio.value,
                       value = locationTitle,
                       onValueChange = {
@@ -448,7 +448,7 @@ fun PersonalInfoScreen(
                               modifier =
                               Modifier.height(30.dp * heightRatio.value).semantics {
                                   testTag =
-                                      C.Tag.professionalInfoScreenCategoryDropdownMenuItem + index
+                                      C.Tag.professionalInfoScreenLocationDropdownMenuItem + index
                               })
                           if (index < locationSuggestions.size - 1) {
                               HorizontalDivider(

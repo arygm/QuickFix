@@ -823,7 +823,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.rating} ★", substring = true)))
+      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
     }
   }
 
@@ -878,7 +878,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(filteredWorkers.size)
 
     filteredWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.rating} ★", substring = true)))
+      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
     }
   }
 
@@ -978,7 +978,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.rating} ★", substring = true)))
+      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
     }
   }
 
@@ -1017,7 +1017,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.rating} ★", substring = true)))
+      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
     }
   }
 }

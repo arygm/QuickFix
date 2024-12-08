@@ -54,7 +54,9 @@ fun WelcomeOnBoardScreen(navigationActions: NavigationActions) {
                             .onboarding_worker_1), // Replace 'my_image' with your PNG file name
             contentDescription = "Description of the image", // Accessibility description
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize() // Optional: Set how the image should scale
+            modifier = Modifier.fillMaxSize().semantics {
+                testTag = C.Tag.welcomeOnBoardScreenImage
+            } // Optional: Set how the image should scale
             )
       }
       Spacer(modifier = Modifier.weight(0.2f))
@@ -69,7 +71,7 @@ fun WelcomeOnBoardScreen(navigationActions: NavigationActions) {
                     fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
             modifier =
                 Modifier.weight(0.5f).semantics {
-                  testTag = C.Tag.personalInfoScreencontinueButton
+                  testTag = C.Tag.welcomeOnBoardScreenStayUserButton
                 })
         QuickFixButton(
             buttonText = "Switch Worker Mode",
@@ -81,7 +83,7 @@ fun WelcomeOnBoardScreen(navigationActions: NavigationActions) {
                     fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
             modifier =
                 Modifier.weight(0.5f).semantics {
-                  testTag = C.Tag.personalInfoScreencontinueButton
+                  testTag = C.Tag.welcomeOnBoardScreenSwitchWorkerButton
                 })
       }
     }

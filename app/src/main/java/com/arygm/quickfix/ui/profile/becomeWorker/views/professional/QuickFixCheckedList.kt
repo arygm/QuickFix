@@ -55,6 +55,7 @@ fun QuickFixCheckedList(
     isTextFieldList: Boolean = false,
     textFieldList: MutableList<MutableState<String>> = mutableListOf(),
     canAddTextField: MutableState<Boolean> = mutableStateOf(true),
+    testTagPrecision: String = ""
 ) {
   Column(modifier = modifier) {
     Text(
@@ -77,7 +78,7 @@ fun QuickFixCheckedList(
     Column(modifier = Modifier.fillMaxWidth()) {
       indices.forEach { index ->
         Column(
-            modifier = Modifier.semantics { testTag = C.Tag.quickFixCheckedListElement + index }) {
+            modifier = Modifier.semantics { testTag = C.Tag.quickFixCheckedListElement + index + testTagPrecision}) {
               Row(modifier = Modifier.fillMaxWidth()) {
                 Row(modifier = Modifier.weight(1f).align(Alignment.Top)) {
                   QuickFixCheckedListElement(
@@ -90,7 +91,7 @@ fun QuickFixCheckedList(
                       maxAchieved = checkedStatesServices.filter { it }.size >= maxToSelect,
                       modifier =
                           Modifier.semantics {
-                            testTag = C.Tag.quickFixCheckedListElementLeft + (index)
+                            testTag = C.Tag.quickFixCheckedListElementLeft + (index) + testTagPrecision
                           })
                 }
                 // Second item in the row
@@ -106,7 +107,7 @@ fun QuickFixCheckedList(
                         maxAchieved = checkedStatesServices.filter { it }.size >= maxToSelect,
                         modifier =
                             Modifier.semantics {
-                              testTag = C.Tag.quickFixCheckedListElementRight + (index)
+                              testTag = C.Tag.quickFixCheckedListElementRight + (index) + testTagPrecision
                             })
                   }
                 } else {
@@ -122,7 +123,7 @@ fun QuickFixCheckedList(
               thickness = 1.5.dp,
               modifier =
                   Modifier.padding(start = 32.dp * widthRatio.value).semantics {
-                    testTag = C.Tag.quickFixCheckedListElementDivider + (index)
+                    testTag = C.Tag.quickFixCheckedListElementDivider + (index) + testTagPrecision
                   })
           Spacer(modifier = Modifier.height(8.dp * heightRatio.value))
         }
@@ -139,7 +140,7 @@ fun QuickFixCheckedList(
                 QuickFixTextFieldCustom(
                     modifier =
                         Modifier.semantics {
-                          testTag = C.Tag.quickFixCheckedListTextFieldElement + index
+                          testTag = C.Tag.quickFixCheckedListTextFieldElement + index + testTagPrecision
                         },
                     widthField = 380.dp * widthRatio.value,
                     value = service.value,
@@ -175,7 +176,7 @@ fun QuickFixCheckedList(
                             }
                             .weight(0.1f)
                             .semantics {
-                              testTag = C.Tag.quickFixCheckedListTextFieldElementDelete + index
+                              testTag = C.Tag.quickFixCheckedListTextFieldElementDelete + index + testTagPrecision
                             })
               } else {
                 Spacer(modifier = Modifier.weight(0.1f))
@@ -193,7 +194,7 @@ fun QuickFixCheckedList(
                     fontSize = 14.sp, fontWeight = FontWeight.SemiBold),
             modifier =
                 Modifier.clickable(onClick = { textFieldList.add(mutableStateOf("")) }).semantics {
-                  testTag = C.Tag.quickFixCheckedListTextFieldElementAdd
+                  testTag = C.Tag.quickFixCheckedListTextFieldElementAdd + testTagPrecision
                 })
         Spacer(modifier = Modifier.height(8.dp * heightRatio.value))
       }
@@ -219,7 +220,7 @@ fun QuickFixCheckedList(
                         fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
                 modifier =
                     Modifier.clickable(enabled = isEnabled(), onClick = onClickActionOk).semantics {
-                      testTag = C.Tag.quickFixCheckedListOk
+                      testTag = C.Tag.quickFixCheckedListOk + testTagPrecision
                     })
             Spacer(modifier = Modifier.width(20.dp * widthRatio.value))
             Text(
@@ -238,7 +239,7 @@ fun QuickFixCheckedList(
                           textFieldList.clear()
                         }
                         .semantics {
-                          testTag = C.Tag.quickFixCheckedListReset
+                          testTag = C.Tag.quickFixCheckedListReset + testTagPrecision
                         } // Adjust padding for appearance
                 )
           } else {
@@ -254,7 +255,7 @@ fun QuickFixCheckedList(
                               formValidated.value = false
                               canAddTextField.value = true
                             })
-                        .semantics { testTag = C.Tag.quickFixCheckedListEdit })
+                        .semantics { testTag = C.Tag.quickFixCheckedListEdit + testTagPrecision })
           }
         }
   }

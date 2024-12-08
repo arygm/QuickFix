@@ -70,7 +70,9 @@ fun BusinessScreen(
     loggedInAccountViewModel: LoggedInAccountViewModel,
     preferencesViewModel: PreferencesViewModel,
     categoryViewModel: CategoryViewModel,
-    locationViewModel: LocationViewModel
+    locationViewModel: LocationViewModel,
+    testBitmapPP: Bitmap? = null,
+    testLocation: Location? = Location()
 ) {
     val locationWorker = remember { mutableStateOf(Location()) }
     val categories = categoryViewModel.categories.collectAsState().value
@@ -78,7 +80,7 @@ fun BusinessScreen(
   val focusManager = LocalFocusManager.current
   val displayName = remember { mutableStateOf("") }
   val description = remember { mutableStateOf("") }
-  val imageBitmapPP = remember { mutableStateOf<Bitmap?>(null) }
+  val imageBitmapPP = remember { mutableStateOf<Bitmap?>(testBitmapPP) }
   val imageBitmapBP = remember { mutableStateOf<Bitmap?>(null) }
   var displayNameError by remember { mutableStateOf(false) }
   var descriptionError by remember { mutableStateOf(false) }

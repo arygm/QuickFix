@@ -145,9 +145,8 @@ private val storageInstance by lazy { Firebase.storage } // Singleton Storage in
 
   fun sortWorkersByRating(workers: List<WorkerProfile>): List<WorkerProfile> {
     return workers.sortedByDescending {
-        it.reviews.map { review ->
-        review.rating
-    }.average() }
+        it.rating
+    }
   }
 
   fun filterWorkersByPriceRange(

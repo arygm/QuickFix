@@ -247,7 +247,7 @@ fun QuickFixTextFieldCustom(
                 }
                 if ((showTrailingIcon() && updatedValue.isNotEmpty()) || alwaysShowTrailingIcon) {
                   IconButton(
-                      enabled = !isTextField && enabled,
+                      enabled = isTextField || (!isTextField && enabled),
                       onClick = {
                           if (isTextField) {
                               if (onClick) onValueChangeWithLimit("")

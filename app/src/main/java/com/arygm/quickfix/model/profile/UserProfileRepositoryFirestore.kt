@@ -71,19 +71,18 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore, private 
         onSuccess: (List<String>) -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        val userFolderRef = storageRef.child("profiles/$accountId/user")
+        val workerFolderRef = storageRef.child("profiles").child(accountId).child("user")
         val uploadedImageUrls = mutableListOf<String>()
         var uploadCount = 0
 
         images.forEach { bitmap ->
-            val fileRef = userFolderRef.child("image_${System.currentTimeMillis()}.jpg")
+            val fileRef = workerFolderRef.child("image_${System.currentTimeMillis()}.jpg")
 
             val baos = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, compressionQuality, baos)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, compressionQuality, baos) // Compress the image
             val byteArray = baos.toByteArray()
 
-            fileRef
-                .putBytes(byteArray)
+            fileRef.putBytes(byteArray)
                 .addOnSuccessListener {
                     fileRef.downloadUrl
                         .addOnSuccessListener { uri ->
@@ -93,9 +92,13 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore, private 
                                 onSuccess(uploadedImageUrls)
                             }
                         }
-                        .addOnFailureListener { exception -> onFailure(exception) }
+                        .addOnFailureListener { exception ->
+                            onFailure(exception)
+                        }
                 }
-                .addOnFailureListener { exception -> onFailure(exception) }
+                .addOnFailureListener { exception ->
+                    onFailure(exception)
+                }
         }
     }
 

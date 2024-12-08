@@ -74,7 +74,8 @@ class WorkerProfile(
     ), // Default unavailability dates
     val workingHours: Pair<LocalTime, LocalTime> = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)), // Default working hours (9 AM to 5 PM)
     uid: String = "default-uid", // Default UID
-    val tags: List<String> = listOf("Reliable", "Experienced", "Professional") // Default tags
+    val tags: List<String> = listOf("Reliable", "Experienced", "Professional"), // Default tags
+    val rating: Double = reviews.map { it.rating }.average(),
 ) : Profile(uid, quickFixes) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

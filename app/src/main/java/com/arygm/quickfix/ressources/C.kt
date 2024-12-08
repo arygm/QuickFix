@@ -46,6 +46,8 @@ object C {
     const val personalInfoScreenBannerPicture = "personalInfoScreen_bannerPicture"
     const val cameraBottomSheet = "personalInfoScreen_cameraBottomSheet"
     const val personalInfoScreenLoactionDropdownMenu = "personalInfoScreen_locationDropdownMenu"
+    const val personalInfoScreenLocationField = "personalInfoScreen_locationField"
+    const val professionalInfoScreenLocationDropdownMenuItem = "professionalInfoScreen_locationItem"
 
     // ProfessionalInfoScreen
     const val professionalInfoScreenSectionTitle = "professionalInfoScreen_sectionTitle"
@@ -64,6 +66,10 @@ object C {
         "professionalInfoScreen_dropDownSubcateItem"
     const val professionalInfoScreenTagsList = "professionalInfoScreen_tagsList"
     const val professionalInfoScreenPriceField = "professionalInfoScreen_priceField"
+    const val professionalInfoScreenSectionScale = "professionalInfoScreen_sectionScale"
+    const val professionalInfoScreenLabelReferencePrice = "professionalInfoScreen_labelReferencePrice"
+    const val professionalInfoScreencancelButton = "professionalInfoScreen_cancelButton"
+    const val professionalInfoScreencontinueButton = "professionalInfoScreen_continueButton"
 
     // QuickFixCheckedList
     const val quickFixCheckedListElement = "quickFixCheckedListElement"
@@ -80,5 +86,10 @@ object C {
 
     // quickfix
     const val quickFixUploadPictures = "quickFixUploadPictures"
+
+    // WelcomeOnBoardScreen
+    const val welcomeOnBoardScreenStayUserButton = "welcomeOnBoardScreenStayUserButton"
+    const val welcomeOnBoardScreenSwitchWorkerButton = "welcomeOnBoardScreenSwitchWorkerButton"
+    const val welcomeOnBoardScreenImage = "welcomeOnBoardScreenImage"
   }
 }

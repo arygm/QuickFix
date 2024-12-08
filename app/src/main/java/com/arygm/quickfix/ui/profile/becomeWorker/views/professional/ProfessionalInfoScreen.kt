@@ -413,7 +413,9 @@ fun ProfessionalInfoScreen(
                               fontSize = 12.sp, fontWeight = FontWeight.Medium
                           ),
                           color = colorScheme.onBackground,
-                          modifier = Modifier
+                          modifier = Modifier.semantics {
+                              testTag = C.Tag.professionalInfoScreenLabelReferencePrice
+                          }
                       )
                       Spacer(modifier = Modifier.height(1.dp * heightRatio.value))
 
@@ -429,7 +431,7 @@ fun ProfessionalInfoScreen(
                                   color = colorScheme.onSurface,
                                   modifier =
                                   Modifier.weight(0.8f).semantics {
-                                      testTag = C.Tag.professionalInfoScreenSectionDescription
+                                      testTag = C.Tag.professionalInfoScreenSectionScale
                                   })
                           }
                       }
@@ -508,6 +510,7 @@ fun ProfessionalInfoScreen(
                   secondPartLabel = " that describes your skills",
                   widthRatio = widthRatio,
                   modifier = Modifier.semantics { testTag = C.Tag.professionalInfoScreenTagsList },
+                  testTagPrecision = "Tags"
               )
               Spacer(modifier = Modifier.height(16.dp * heightRatio.value))
           }
@@ -537,6 +540,7 @@ fun ProfessionalInfoScreen(
                 widthRatio = widthRatio,
                 modifier =
                 Modifier.semantics { testTag = C.Tag.professionalInfoScreenIncludedServicesList },
+                testTagPrecision = "Included Services"
             )
             Spacer(modifier = Modifier.height(16.dp * heightRatio.value))
         }
@@ -579,6 +583,7 @@ fun ProfessionalInfoScreen(
                   isTextFieldList = true,
                   textFieldList = textFieldList,
                   canAddTextField = canAddTextField,
+                  testTagPrecision = "Add-On Services"
               )
           }
           }
@@ -596,7 +601,7 @@ fun ProfessionalInfoScreen(
                         textColor = colorScheme.error,
                         modifier =
                         Modifier.weight(0.5f).semantics {
-                            testTag = C.Tag.personalInfoScreencancelButton
+                            testTag = C.Tag.professionalInfoScreencancelButton
                         },
                         textStyle =
                         poppinsTypography.headlineMedium.copy(
@@ -626,7 +631,7 @@ fun ProfessionalInfoScreen(
                         ),
                         modifier =
                         Modifier.weight(0.5f).semantics {
-                            testTag = C.Tag.personalInfoScreencontinueButton
+                            testTag = C.Tag.professionalInfoScreencontinueButton
                         },
                     )
                 }
