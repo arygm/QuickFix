@@ -354,8 +354,8 @@ class ChatRepositoryFirestoreTest {
   // ----- Send Message Tests -----
 
   @Test
-  fun sendMessage_callsSetOnMessageDocument() {
-    Mockito.`when`(mockMessageDocument.set(any<Message>())).thenReturn(Tasks.forResult(null))
+  fun sendMessage_callsUpdateOnChatDocument() {
+    Mockito.`when`(mockChatDocument.update(eq("messages"), any())).thenReturn(Tasks.forResult(null))
 
     chatRepositoryFirestore.sendMessage(
         chat = chat,
@@ -365,13 +365,12 @@ class ChatRepositoryFirestoreTest {
 
     shadowOf(Looper.getMainLooper()).idle()
 
-    verify(mockMessageDocument).set(eq(message))
+    verify(mockChatDocument).update(eq("messages"), any())
   }
 
   @Test
   fun sendMessage_onSuccess_callsOnSuccess() {
-    val taskCompletionSource = TaskCompletionSource<Void>()
-    Mockito.`when`(mockMessageDocument.set(any<Message>())).thenReturn(taskCompletionSource.task)
+    Mockito.`when`(mockChatDocument.update(eq("messages"), any())).thenReturn(Tasks.forResult(null))
 
     var callbackCalled = false
 
@@ -381,8 +380,6 @@ class ChatRepositoryFirestoreTest {
         onSuccess = { callbackCalled = true },
         onFailure = { fail("Failure callback should not be called") })
 
-    taskCompletionSource.setResult(null)
-
     shadowOf(Looper.getMainLooper()).idle()
 
     assertTrue(callbackCalled)
@@ -391,7 +388,8 @@ class ChatRepositoryFirestoreTest {
   @Test
   fun sendMessage_onFailure_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<Void>()
-    Mockito.`when`(mockMessageDocument.set(any<Message>())).thenReturn(taskCompletionSource.task)
+    Mockito.`when`(mockChatDocument.update(eq("messages"), any()))
+        .thenReturn(taskCompletionSource.task)
 
     val exception = Exception("Test exception")
     var callbackCalled = false
@@ -473,6 +471,56 @@ class ChatRepositoryFirestoreTest {
 
     shadowOf(Looper.getMainLooper()).idle()
 
+    assertTrue(callbackCalled)
+    assertEquals(exception, returnedException)
+  }
+
+  @Test
+  fun updateChat_onSuccess_callsOnSuccess() {
+    val taskCompletionSource = TaskCompletionSource<Void>()
+    Mockito.`when`(mockChatDocument.set(any<Chat>())).thenReturn(taskCompletionSource.task)
+
+    var callbackCalled = false
+
+    // Appel de la méthode à tester
+    chatRepositoryFirestore.updateChat(
+        chat = chat,
+        onSuccess = { callbackCalled = true },
+        onFailure = { fail("Failure callback should not be called") })
+
+    // Simule un succès de l'opération Firestore
+    taskCompletionSource.setResult(null)
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Vérifie que le callback de succès a été appelé
+    assertTrue(callbackCalled)
+  }
+
+  @Test
+  fun updateChat_onFailure_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<Void>()
+    Mockito.`when`(mockChatDocument.set(any<Chat>())).thenReturn(taskCompletionSource.task)
+
+    val exception = Exception("Test exception")
+    var callbackCalled = false
+    var returnedException: Exception? = null
+
+    // Appel de la méthode à tester
+    chatRepositoryFirestore.updateChat(
+        chat = chat,
+        onSuccess = { fail("Success callback should not be called") },
+        onFailure = { e ->
+          callbackCalled = true
+          returnedException = e
+        })
+
+    // Simule un échec de l'opération Firestore
+    taskCompletionSource.setException(exception)
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Vérifie que le callback d'échec a été appelé avec la bonne exception
     assertTrue(callbackCalled)
     assertEquals(exception, returnedException)
   }
