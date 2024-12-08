@@ -43,38 +43,40 @@ import kotlinx.coroutines.launch
 fun MessageScreen(
     chatViewModel: ChatViewModel,
     navigationActions: NavigationActions,
-    quickFixViewModel: QuickFixViewModel, // Directly passed QuickFix object
-    userId: String, // Directly pass the user ID
-    isUser: Boolean // Boolean to differentiate between user and worker
+    quickFixViewModel: QuickFixViewModel,
+    userId: String,
+    isUser: Boolean,
 ) {
+  // Collecting the selected chat from the ViewModel as state
   val activeChat by chatViewModel.selectedChat.collectAsState()
+  // Collecting the list of QuickFixes from the ViewModel as state
   val quickFixList by quickFixViewModel.quickFixes.collectAsState()
 
+  // If no active chat is selected, show a placeholder message and return
   if (activeChat == null) {
-    println("dkhlt fchat khawi")
-    // Placeholder si aucun chat actif
     Text("No active chat selected.", modifier = Modifier.testTag("noActiveChatPlaceholder"))
     return
   }
+  // Assigning the non-null value of activeChat
   val chat = activeChat!!
 
+  // Finding the associated QuickFix for the selected chat
   val chatQuickFix = quickFixList.firstOrNull { it.uid == activeChat?.quickFixUid }
   if (chatQuickFix == null) {
-    println("dkhlt fquickfix khawi")
-
-    // Placeholder si aucun QuickFix n'est trouvé
+    // If no QuickFix is found, show a placeholder message and return
     Text("QuickFix not found.", modifier = Modifier.testTag("quickFixNotFoundPlaceholder"))
     return
   }
   val quickFix = chatQuickFix!!
-  val chatId = chat.chatId // Obtain chatUid directly from QuickFix
+  val chatId = chat.chatId
 
+  // Mutable states to manage input text and sliding window visibility
   var messageText by remember { mutableStateOf("") }
-  var isSlidingWindowVisible by remember { mutableStateOf(false) } // Sliding window visibility
+  var isSlidingWindowVisible by remember { mutableStateOf(false) }
   val coroutineScope = rememberCoroutineScope()
 
+  // Retrieve chat status and prepare suggestions based on user role (User or Worker)
   val chatStatus = chat.chatStatus
-  // List of suggestions based on the user/worker role
   val suggestions =
       if (isUser) {
         listOf(
@@ -86,41 +88,48 @@ fun MessageScreen(
       }
   val listState = rememberLazyListState()
 
+  // Fetch chats and QuickFixes when relevant keys change
   LaunchedEffect(key1 = chatId, key2 = chatStatus, key3 = quickFix) {
     chatViewModel.getChats()
     quickFixViewModel.getQuickFixes()
   }
+  // Automatically scroll to the last message when new messages are added
   LaunchedEffect(chat.messages) {
-    // Automatically scroll to the last message when messages are updated
     chat.messages.let {
       if (it.isNotEmpty()) {
         listState.animateScrollToItem(it.size - 1)
       }
     }
   }
-  Box(
+
+  BoxWithConstraints(
       modifier =
           Modifier.fillMaxSize()
               .background(MaterialTheme.colorScheme.background)
               .testTag("messageScreen")) {
+        val maxWidth = maxWidth
+        val maxHeight = maxHeight
+
         Scaffold(
-            topBar = { Header(navigationActions, modifier = Modifier.testTag("backButton")) },
+            topBar = {
+              // Header section with a back button
+              Header(navigationActions, modifier = Modifier.testTag("backButton"))
+            },
             bottomBar = {
+              // Bottom input bar for entering and sending messages
               Box(
                   modifier =
                       Modifier.fillMaxWidth()
+                          .height(maxHeight * 0.1f)
                           .testTag("messageInputBar")
-                          .background(
-                              MaterialTheme.colorScheme.background) // Change background color here
-                  ) {
+                          .background(MaterialTheme.colorScheme.background)) {
+                    // Message input field and send button
                     MessageInput(
                         messageText = messageText,
                         onMessageChange = { messageText = it },
                         onSendMessage = {
                           if (chatStatus == ChatStatus.ACCEPTED ||
                               chatStatus == ChatStatus.GETTING_SUGGESTIONS) {
-                            Log.e("hhaha", "tseft hamoud lkbir lmessage")
-                            // Allow sending messages only if the worker has accepted the request
                             if (messageText.isNotBlank()) {
                               val newMessage =
                                   Message(
@@ -134,13 +143,9 @@ fun MessageScreen(
                                       chat.copy(chatStatus = ChatStatus.ACCEPTED), {}, {})
                                 }
                                 chatViewModel.sendMessage(chat, newMessage)
-                                Log.e("hhaha", "klit chat ${chat}")
-
                                 messageText = ""
                               }
                             }
-                          } else {
-                            // Do nothing if the worker hasn't accepted
                           }
                         })
                   }
@@ -152,25 +157,28 @@ fun MessageScreen(
                           .testTag("messageListBox")
                           .background(MaterialTheme.colorScheme.background)) {
                     LazyColumn(
-                        state = listState, // Attach LazyListState to LazyColumn
+                        state = listState,
                         modifier = Modifier.fillMaxSize().testTag("messageList")) {
-                          // QuickFixDetailsScreen
+                          // Display QuickFix details at the top
                           item {
-                            // Add QuickFixDetailsScreen as a part of the scrollable content
                             Box(
                                 modifier =
-                                    Modifier.fillMaxWidth().testTag("quickFixDetailsContainer"),
+                                    Modifier.fillMaxWidth()
+                                        .height(maxHeight * 0.52f)
+                                        .padding(
+                                            horizontal = maxWidth * 0.02f,
+                                            vertical = maxHeight * 0.02f)
+                                        .testTag("quickFixDetailsContainer"),
                                 contentAlignment = Alignment.Center) {
                                   Column(
                                       horizontalAlignment = Alignment.CenterHorizontally,
                                       modifier =
                                           Modifier.fillMaxWidth(0.9f)
-                                              .fillMaxHeight(0.55f)
-                                              .padding(8.dp)
-                                              .testTag("quickFixDetails")
+                                              .height(maxHeight * 0.52f)
                                               .background(
                                                   MaterialTheme.colorScheme.surface,
-                                                  RoundedCornerShape(16.dp))) {
+                                                  RoundedCornerShape(16.dp))
+                                              .testTag("quickFixDetails")) {
                                         QuickFixDetailsScreen(
                                             quickFix = quickFix,
                                             isExpanded = false,
@@ -179,8 +187,10 @@ fun MessageScreen(
                                 }
                           }
                           item {
+                            // Display different UI based on the chat status
                             when (chatStatus) {
                               ChatStatus.WAITING_FOR_RESPONSE -> {
+                                // UI for waiting for response
                                 if (isUser) {
                                   Text(
                                       text = "Awaiting confirmation from ${quickFix.workerName}...",
@@ -188,14 +198,15 @@ fun MessageScreen(
                                       color = MaterialTheme.colorScheme.onBackground,
                                       textAlign = TextAlign.Center,
                                       modifier =
-                                          Modifier.padding(16.dp)
+                                          Modifier.padding(vertical = maxHeight * 0.02f)
                                               .testTag("awaitingConfirmationText"))
                                 } else {
+                                  // Worker response options
                                   Column(
                                       horizontalAlignment = Alignment.CenterHorizontally,
                                       modifier =
                                           Modifier.fillMaxWidth()
-                                              .padding(16.dp)
+                                              .padding(horizontal = maxWidth * 0.04f)
                                               .testTag("workerResponseContainer")) {
                                         Text(
                                             text =
@@ -203,13 +214,16 @@ fun MessageScreen(
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onBackground,
                                             textAlign = TextAlign.Center,
-                                            modifier = Modifier.padding(bottom = 16.dp))
+                                            modifier = Modifier.padding(bottom = maxHeight * 0.02f))
                                         Row(
-                                            horizontalArrangement = Arrangement.spacedBy(40.dp),
+                                            horizontalArrangement =
+                                                Arrangement.spacedBy(maxWidth * 0.1f),
                                             modifier = Modifier.fillMaxWidth(0.5f)) {
+                                              // Accept button
                                               IconButton(
                                                   onClick = {
                                                     coroutineScope.launch {
+                                                      Log.e("hhaha", " acceptite")
                                                       chat.let {
                                                         val updatedChat =
                                                             it.copy(
@@ -233,9 +247,11 @@ fun MessageScreen(
                                                         tint = colorScheme.primary,
                                                         modifier = Modifier.fillMaxSize(0.8f))
                                                   }
+                                              // Reject button
                                               IconButton(
                                                   onClick = {
                                                     coroutineScope.launch {
+                                                      Log.e("hhaha", "9alwa")
                                                       chat.let {
                                                         val updatedChat =
                                                             it.copy(
@@ -264,12 +280,13 @@ fun MessageScreen(
                                 }
                               }
                               ChatStatus.GETTING_SUGGESTIONS -> {
+                                // UI for suggestions state
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     modifier =
                                         Modifier.fillMaxWidth()
-                                            .testTag("gettingSuggestionsContainer")
-                                            .padding(16.dp)) {
+                                            .padding(horizontal = maxWidth * 0.04f)
+                                            .testTag("gettingSuggestionsContainer")) {
                                       Text(
                                           text =
                                               if (isUser) {
@@ -280,44 +297,41 @@ fun MessageScreen(
                                           style = MaterialTheme.typography.bodyMedium,
                                           color = MaterialTheme.colorScheme.onBackground,
                                           textAlign = TextAlign.Center,
-                                          modifier = Modifier.padding(bottom = 4.dp))
-                                      Text(
-                                          text =
-                                              "Check out these suggestions to kick-off the conversation 😊",
-                                          style = MaterialTheme.typography.bodySmall,
-                                          color = MaterialTheme.colorScheme.onBackground,
-                                          textAlign = TextAlign.Center)
+                                          modifier = Modifier.padding(bottom = maxHeight * 0.01f))
+                                      SuggestionsRow(
+                                          suggestions = suggestions,
+                                          onSuggestionClick = { suggestion ->
+                                            val newMessage =
+                                                Message(
+                                                    messageId =
+                                                        System.currentTimeMillis().toString(),
+                                                    senderId = userId,
+                                                    content = suggestion,
+                                                    timestamp = Timestamp.now())
+                                            coroutineScope.launch {
+                                              chatViewModel.updateChat(
+                                                  chat.copy(chatStatus = ChatStatus.ACCEPTED),
+                                                  {},
+                                                  {})
+                                              chatViewModel.sendMessage(chat, newMessage)
+                                            }
+                                          })
                                     }
-                                SuggestionsRow(
-                                    suggestions = suggestions,
-                                    onSuggestionClick = { suggestion ->
-                                      val newMessage =
-                                          Message(
-                                              messageId = System.currentTimeMillis().toString(),
-                                              senderId = userId,
-                                              content = suggestion,
-                                              timestamp = Timestamp.now())
-                                      Log.e("hhaha", "chat machi null ${newMessage}")
-
-                                      coroutineScope.launch {
-                                        chatViewModel.updateChat(
-                                            chat.copy(chatStatus = ChatStatus.ACCEPTED), {}, {})
-                                        chatViewModel.sendMessage(chat, newMessage)
-                                      }
-                                    })
                               }
                               ChatStatus.ACCEPTED -> {
+                                // UI for active conversation
                                 Text(
                                     text = "Conversation is active. Start messaging!",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onBackground,
                                     textAlign = TextAlign.Center,
                                     modifier =
-                                        Modifier.padding(16.dp)
-                                            .fillMaxWidth()
+                                        Modifier.fillMaxWidth()
+                                            .padding(vertical = maxHeight * 0.02f)
                                             .testTag("conversationActiveText"))
                               }
                               ChatStatus.WORKER_REFUSED -> {
+                                // UI for rejection state
                                 Text(
                                     text =
                                         if (isUser) {
@@ -329,46 +343,44 @@ fun MessageScreen(
                                     color = MaterialTheme.colorScheme.onBackground,
                                     textAlign = TextAlign.Center,
                                     modifier =
-                                        Modifier.padding(16.dp).testTag("workerRejectedText"))
+                                        Modifier.padding(
+                                                vertical = maxHeight * 0.02f,
+                                                horizontal = maxWidth * 0.02f)
+                                            .testTag("workerRejectedText"))
                               }
                             }
                           }
-
-                          // Messages with date dividers
+                          // Display chat messages with date dividers
                           chat.messages.let { messages ->
                             itemsIndexed(messages) { index, message ->
                               val previousMessage = if (index > 0) messages[index - 1] else null
 
+                              // Add date divider if the message is on a new date
                               if (shouldShowDateDivider(
                                   previousMessage?.timestamp, message.timestamp)) {
                                 DateDivider(
                                     timestamp = message.timestamp,
-                                    modifier = Modifier.testTag("dateDivider_$index"))
+                                    modifier =
+                                        Modifier.padding(vertical = maxHeight * 0.01f)
+                                            .testTag("dateDivider_$index"))
                               }
 
+                              // Display message bubble
                               MessageBubble(
                                   message = message,
                                   isSent = message.senderId == userId,
                                   modifier =
-                                      Modifier.testTag(
-                                          if (message.senderId == userId) "sentMessage_$index"
-                                          else "receivedMessage_$index"))
+                                      Modifier.padding(horizontal = maxWidth * 0.02f)
+                                          .testTag(
+                                              if (message.senderId == userId) "sentMessage_$index"
+                                              else "receivedMessage_$index"))
                             }
                           }
                         }
-
-                    // Sliding window for detailed QuickFix info
-                    /*    if (isSlidingWindowVisible) {
-                        QuickFixSlidingWindowContent(
-                            quickFix = quickFix,
-                            isVisible = isSlidingWindowVisible,
-                            onDismiss = { isSlidingWindowVisible = false }
-                        )
-                    }*/
                   }
-            } // Sliding window overlay
+            }
+        // Sliding window overlay for additional details
         if (isSlidingWindowVisible) {
-
           QuickFixSlidingWindowContent(
               quickFix = quickFix,
               isVisible = isSlidingWindowVisible,

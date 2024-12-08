@@ -111,7 +111,8 @@ class ChatRepositoryFirestore(private val db: FirebaseFirestore) : ChatRepositor
       val chatId = document.getString("chatId") ?: return null
       val workerUid = document.getString("workeruid") ?: return null
       val userUid = document.getString("useruid") ?: return null
-      val quickFixUid = document.getString("quickFixUid") ?: "" // Handle optional QuickFixUid
+      val quickFixUid =
+          document.getString("quickFixUid") ?: return null // Handle optional QuickFixUid
       val chatStatusString =
           document.getString("chatStatus") ?: ChatStatus.WAITING_FOR_RESPONSE.name
       val chatStatus = ChatStatus.valueOf(chatStatusString)
