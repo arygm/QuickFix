@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -94,10 +93,10 @@ fun QuickFixLocationFilterBottomSheet(
 
                   Spacer(modifier = Modifier.height(verticalSpacing))
 
-                  Divider(
-                      color = colorScheme.onSecondaryContainer,
+                  HorizontalDivider(
+                      modifier = Modifier.fillMaxWidth().testTag("locationFilterDivider"),
                       thickness = 1.dp,
-                      modifier = Modifier.fillMaxWidth().testTag("locationFilterDivider"))
+                      color = colorScheme.onSecondaryContainer)
 
                   Spacer(modifier = Modifier.height(verticalSpacing))
 

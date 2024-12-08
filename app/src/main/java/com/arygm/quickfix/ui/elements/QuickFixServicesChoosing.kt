@@ -8,8 +8,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
@@ -78,10 +78,10 @@ fun ChooseServiceTypeSheet(
                   Spacer(modifier = Modifier.height(verticalSpacing)) // Space below title
 
                   // Full-width divider under the title
-                  Divider(
-                      color = colorScheme.onSecondaryContainer,
+                  HorizontalDivider(
+                      modifier = Modifier.fillMaxWidth(),
                       thickness = 1.dp,
-                      modifier = Modifier.fillMaxWidth())
+                      color = colorScheme.onSecondaryContainer)
 
                   Spacer(modifier = Modifier.height(verticalSpacing)) // Space below divider
 

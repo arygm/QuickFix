@@ -47,8 +47,8 @@ fun QuickFixFinderScreen(
     profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
     loggedInAccountViewModel: LoggedInAccountViewModel =
         viewModel(factory = LoggedInAccountViewModel.Factory),
-    accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
     searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory),
+    accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
     announcementViewModel: AnnouncementViewModel =
         viewModel(factory = AnnouncementViewModel.Factory),
     categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
@@ -102,8 +102,8 @@ fun QuickFixFinderScreen(
                           SearchOnBoarding(
                               navigationActions,
                               navigationActionsRoot,
-                              isUser,
                               searchViewModel,
+                              accountViewModel,
                               categoryViewModel)
                       1 ->
                           AnnouncementScreen(
