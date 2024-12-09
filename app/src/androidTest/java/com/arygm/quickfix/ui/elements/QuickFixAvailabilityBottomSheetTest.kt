@@ -91,7 +91,6 @@ class QuickFixAvailabilityBottomSheetTest {
 
     // Get today's date
     val today = LocalDate.now()
-    val month = inToMonth(today.month.value)
 
     composeTestRule.setContent {
       QuickFixAvailabilityBottomSheet(
@@ -123,9 +122,7 @@ class QuickFixAvailabilityBottomSheetTest {
     textFields[1].performTextReplacement("00")
 
     // Find the node representing today's date and perform a click
-    composeTestRule.onNode(hasText(month) and hasClickAction()).performClick()
-    composeTestRule.onNode(hasText("Jan") and hasClickAction()).performClick()
-    composeTestRule.onNode(hasText("1") and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText(today.dayOfMonth.toString()) and hasClickAction()).performClick()
 
     // Simulate pressing the OK button (if there is one)
     // If the CalendarView has an OK button, we need to perform a click on it
@@ -135,7 +132,7 @@ class QuickFixAvailabilityBottomSheetTest {
     // Assert that onOkClick was called
     composeTestRule.runOnIdle {
       assert(onOkClickCalled)
-      assert(selectedDates.contains(LocalDate.of(today.year, 1, 1)))
+      assert(selectedDates.contains(LocalDate.now()))
       assert(selectedHour == 7)
       assert(selectedMinute == 0)
     }

@@ -13,6 +13,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,7 @@ fun RatingBar(rating: Float, modifier: Modifier = Modifier, spaceBetween: Dp = 4
           }
       RatingStar(
           stepRating,
+          modifier = Modifier.testTag("Star_$index"),
           MaterialTheme.colorScheme.primary,
           MaterialTheme.colorScheme.secondaryContainer)
     }
@@ -43,10 +45,11 @@ fun RatingBar(rating: Float, modifier: Modifier = Modifier, spaceBetween: Dp = 4
 @Composable
 private fun RatingStar(
     rating: Float,
+    modifier: Modifier = Modifier,
     ratingColor: Color = Color.Yellow,
     backgroundColor: Color = Color.Gray
 ) {
-  BoxWithConstraints(modifier = Modifier.fillMaxHeight().aspectRatio(1f).clip(starShape)) {
+  BoxWithConstraints(modifier = modifier.fillMaxHeight().aspectRatio(1f).clip(starShape)) {
     Canvas(modifier = Modifier.size(maxHeight)) {
       drawRect(
           brush = SolidColor(backgroundColor),

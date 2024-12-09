@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.search
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,7 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.theme.poppinsFontFamily
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun SearchWorkerProfileResult(
     modifier: Modifier = Modifier,
@@ -78,8 +80,9 @@ fun SearchWorkerProfileResult(
                     verticalArrangement = Arrangement.Top,
                 ) {
                   Row(verticalAlignment = Alignment.CenterVertically) {
+                      val roundedRating = String.format("%.2f", rating).toDouble()
                     Text(
-                        text = "$rating ★",
+                        text = "$roundedRating ★",
                         fontFamily = poppinsFontFamily,
                         color = colorScheme.onBackground,
                         fontSize = 15.sp,

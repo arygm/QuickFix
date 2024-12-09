@@ -3,6 +3,7 @@ package com.arygm.quickfix
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.location.Geocoder
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
@@ -266,7 +267,6 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
                     navigationActionsRoot,
                     searchViewModel,
                     userViewModel,
-                    workerViewModel,
                     loggedInAccountViewModel,
                     accountViewModel,
                     announcementViewModel,
@@ -385,7 +385,6 @@ fun SearchNavHost(
     navigationActionsRoot: NavigationActions,
     searchViewModel: SearchViewModel,
     userProfileViewModel: ProfileViewModel,
-    workerProfileViewModel: ProfileViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
     accountViewModel: AccountViewModel,
     announcementViewModel: AnnouncementViewModel,
@@ -424,8 +423,8 @@ fun SearchNavHost(
           searchViewModel,
           accountViewModel,
           userProfileViewModel,
-          workerProfileViewModel,
-          preferencesViewModel)
+          preferencesViewModel
+      )
     }
     composable(Screen.SEARCH_LOCATION) {
       LocationSearchCustomScreen(

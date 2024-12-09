@@ -127,9 +127,7 @@ class QuickFixFirstStepTest {
     composeTestRule.onNodeWithText("Select Date").assertExists()
 
     // Simulate selecting a date
-    composeTestRule.onNodeWithText(inToMonth(today.month.value)).performClick()
-    composeTestRule.onNodeWithText("Jan").performClick()
-    composeTestRule.onNodeWithText("1").performClick()
+    composeTestRule.onNodeWithText(today.dayOfMonth.toString()).performClick()
     composeTestRule.onNodeWithText("OK").performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
