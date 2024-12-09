@@ -129,7 +129,7 @@ class QuickFixFirstStepTest {
     // Simulate selecting a date
     composeTestRule.onNodeWithText(inToMonth(today.month.value)).performClick()
     composeTestRule.onNodeWithText("Jan").performClick()
-    composeTestRule.onNodeWithText("1").performClick()
+    composeTestRule.onNodeWithText("7").performClick()
     composeTestRule.onNodeWithText("OK").performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
