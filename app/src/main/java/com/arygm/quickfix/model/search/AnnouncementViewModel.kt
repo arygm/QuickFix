@@ -22,6 +22,16 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   private val uploadedImages_ = MutableStateFlow<List<Bitmap>>(emptyList())
   val uploadedImages: StateFlow<List<Bitmap>> = uploadedImages_.asStateFlow()
 
+  private val selectedAnnouncement_ = MutableStateFlow<Announcement?>(null)
+  val selectedAnnouncement: StateFlow<Announcement?> = selectedAnnouncement_.asStateFlow()
+
+  private val selectedAnnouncementImages_ = MutableStateFlow<List<Bitmap>>(emptyList())
+  val selectedAnnouncementImages: StateFlow<List<Bitmap>> =
+      selectedAnnouncementImages_.asStateFlow()
+
+  init {
+    repository.init { getAnnouncements() }
+  }
   // create factory
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -92,6 +102,24 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
         onSuccess = { onSuccess(it) },
         onFailure = { e -> onFailure(e) })
   }
+  /**
+   * Fetches the images for an announcement as bitmaps and updates the state flow.
+   *
+   * @param announcementId The ID of the announcement whose images are to be fetched.
+   */
+  fun fetchAnnouncementImagesAsBitmaps(announcementId: String) {
+    repository.fetchAnnouncementsImagesAsBitmaps(
+        announcementId = announcementId,
+        onSuccess = { bitmaps ->
+          // Update the state flow with the fetched bitmaps
+          selectedAnnouncementImages_.value = bitmaps
+        },
+        onFailure = { e ->
+          Log.e(
+              "AnnouncementViewModel",
+              "Failed to fetch images for announcement $announcementId: ${e.message}")
+        })
+  }
 
   /**
    * Updates an announcement.
@@ -153,5 +181,14 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   /** Clears the entire list of uploaded images. */
   fun clearUploadedImages() {
     uploadedImages_.value = emptyList()
+  }
+
+  /**
+   * Selects an Announcement document.
+   *
+   * @param announcement The Announcement document to be selected.
+   */
+  fun selectAnnouncement(announcement: Announcement) {
+    selectedAnnouncement_.value = announcement
   }
 }

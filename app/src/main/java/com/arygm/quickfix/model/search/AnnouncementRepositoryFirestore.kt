@@ -1,6 +1,7 @@
 package com.arygm.quickfix.model.search
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.utils.performFirestoreOperation
@@ -123,6 +124,51 @@ class AnnouncementRepositoryFirestore(
           }
           .addOnFailureListener { exception -> onFailure(exception) }
     }
+  }
+
+  override fun fetchAnnouncementsImageUrls(
+      announcementId: String,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val firestore = db
+    val collection = firestore.collection(collectionPath)
+
+    collection
+        .document(announcementId)
+        .get()
+        .addOnSuccessListener { document ->
+          val imageUrls = document["quickFixImages"] as? List<String> ?: emptyList()
+          onSuccess(imageUrls)
+        }
+        .addOnFailureListener { onFailure(it) }
+  }
+
+  override fun fetchAnnouncementsImagesAsBitmaps(
+      announcementId: String,
+      onSuccess: (List<Bitmap>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    fetchAnnouncementsImageUrls(
+        announcementId,
+        { urls ->
+          val bitmaps = mutableListOf<Bitmap>()
+          var successCount = 0
+
+          urls.forEach { url ->
+            val imageRef = FirebaseStorage.getInstance().getReferenceFromUrl(url)
+            imageRef
+                .getBytes(Long.MAX_VALUE)
+                .addOnSuccessListener { bytes ->
+                  val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                  bitmaps.add(bitmap)
+                  successCount++
+                  if (successCount == urls.size) onSuccess(bitmaps)
+                }
+                .addOnFailureListener { onFailure(it) }
+          }
+        },
+        onFailure)
   }
 
   override fun updateAnnouncement(

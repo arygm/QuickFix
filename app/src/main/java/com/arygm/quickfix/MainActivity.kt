@@ -265,7 +265,7 @@ fun QuickFixApp() {
                     categoryViewModel)
               }
 
-              composable(Route.DASHBOARD) { DashBoardNavHost(isUser) }
+              composable(Route.DASHBOARD) { DashBoardNavHost(announcementViewModel, isUser) }
 
               composable(Route.PROFILE) {
                 ProfileNavHost(
@@ -351,11 +351,13 @@ fun ProfileNavHost(
 }
 
 @Composable
-fun DashBoardNavHost(isUser: Boolean) {
+fun DashBoardNavHost(announcementViewModel: AnnouncementViewModel, isUser: Boolean) {
   val dashboardNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(dashboardNavController) }
   NavHost(navController = dashboardNavController, startDestination = Screen.DASHBOARD) {
-    composable(Screen.DASHBOARD) { DashboardScreen(navigationActions, isUser) }
+    composable(Screen.DASHBOARD) {
+      DashboardScreen(announcementViewModel, navigationActions, isUser)
+    }
   }
 }
 
