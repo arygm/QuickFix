@@ -198,6 +198,7 @@ class ProfessionalInfoScreenTest {
           .assertIsDisplayed()
     }
 
+    // Select the first category
     composeTestRule
         .onNodeWithTag(C.Tag.professionalInfoScreenCategoryDropdownMenuItem + 0)
         .performClick()
@@ -205,20 +206,41 @@ class ProfessionalInfoScreenTest {
     composeTestRule.onNodeWithTag(professionalInfoScreenSubcategoryField).assertIsDisplayed()
     composeTestRule.onNodeWithTag(professionalInfoScreenSubcategoryField).performClick()
 
+    // Verify subcategories
     categories[0].subcategories.forEachIndexed { index, _ ->
       composeTestRule
           .onNodeWithTag(C.Tag.professionalInfoScreenSubcategoryDropdownMenuItem + index)
           .assertIsDisplayed()
     }
 
+    // Select the first subcategory
     composeTestRule
         .onNodeWithTag(C.Tag.professionalInfoScreenSubcategoryDropdownMenuItem + 0)
         .performClick()
-
     composeTestRule
         .onNodeWithTag(C.Tag.professionalInfoScreenIncludedServicesList)
+        .performScrollTo()
         .assertIsDisplayed()
-    composeTestRule.onNodeWithTag(C.Tag.professionalInfoScreenAddOnServicesList).assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag(C.Tag.professionalInfoScreenAddOnServicesList)
+        .performScrollTo()
+        .assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag(C.Tag.professionalInfoScreenTagsList)
+        .performScrollTo()
+        .assertIsDisplayed()
+
+    composeTestRule.onNodeWithText("CHF").performScrollTo().assertIsDisplayed()
+
+    categories[0].subcategories[0].scale?.let {
+      composeTestRule.onNodeWithTag(C.Tag.professionalInfoScreenLabelReferencePrice).assertExists()
+    }
+
+    categories[0].subcategories[0].scale?.let {
+      composeTestRule.onNodeWithText(it.longScale).assertExists()
+    }
   }
 
   @Test

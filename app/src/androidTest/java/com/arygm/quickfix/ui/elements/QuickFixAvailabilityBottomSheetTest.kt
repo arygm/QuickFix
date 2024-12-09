@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.arygm.quickfix.utils.inToMonth
 import java.time.LocalDate
 import org.junit.Rule
 import org.junit.Test
@@ -30,7 +31,11 @@ class QuickFixAvailabilityBottomSheetTest {
   fun bottomSheetIsDisplayed_whenShowModalBottomSheetIsTrue() {
     composeTestRule.setContent {
       QuickFixAvailabilityBottomSheet(
-          showModalBottomSheet = true, onDismissRequest = {}, onOkClick = { a, b, c -> })
+          showModalBottomSheet = true,
+          onDismissRequest = {},
+          onOkClick = { a, b, c -> },
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Assert that the bottom sheet is displayed
@@ -47,7 +52,11 @@ class QuickFixAvailabilityBottomSheetTest {
   fun bottomSheetIsNotDisplayed_whenShowModalBottomSheetIsFalse() {
     composeTestRule.setContent {
       QuickFixAvailabilityBottomSheet(
-          showModalBottomSheet = false, onDismissRequest = {}, onOkClick = { a, b, c -> })
+          showModalBottomSheet = false,
+          onDismissRequest = {},
+          onOkClick = { a, b, c -> },
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Assert that the bottom sheet does not exist
@@ -60,7 +69,11 @@ class QuickFixAvailabilityBottomSheetTest {
   fun timePickerIsDisplayed_inBottomSheet() {
     composeTestRule.setContent {
       QuickFixAvailabilityBottomSheet(
-          showModalBottomSheet = true, onDismissRequest = {}, onOkClick = { a, b, c -> })
+          showModalBottomSheet = true,
+          onDismissRequest = {},
+          onOkClick = { a, b, c -> },
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Assert that the TimePicker components are displayed
@@ -78,7 +91,7 @@ class QuickFixAvailabilityBottomSheetTest {
 
     // Get today's date
     val today = LocalDate.now()
-    val todayDayOfMonth = today.dayOfMonth.toString()
+    val month = inToMonth(today.month.value)
 
     composeTestRule.setContent {
       QuickFixAvailabilityBottomSheet(
@@ -89,7 +102,9 @@ class QuickFixAvailabilityBottomSheetTest {
             selectedDates = a
             selectedHour = b
             selectedMinute = c
-          })
+          },
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Wait for the content to be settled
@@ -108,7 +123,9 @@ class QuickFixAvailabilityBottomSheetTest {
     textFields[1].performTextReplacement("00")
 
     // Find the node representing today's date and perform a click
-    composeTestRule.onNode(hasText(todayDayOfMonth) and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText(month) and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText("Jan") and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText("1") and hasClickAction()).performClick()
 
     // Simulate pressing the OK button (if there is one)
     // If the CalendarView has an OK button, we need to perform a click on it
@@ -118,7 +135,7 @@ class QuickFixAvailabilityBottomSheetTest {
     // Assert that onOkClick was called
     composeTestRule.runOnIdle {
       assert(onOkClickCalled)
-      assert(selectedDates.contains(today))
+      assert(selectedDates.contains(LocalDate.of(today.year, 1, 1)))
       assert(selectedHour == 7)
       assert(selectedMinute == 0)
     }
@@ -134,7 +151,9 @@ class QuickFixAvailabilityBottomSheetTest {
       QuickFixAvailabilityBottomSheet(
           showModalBottomSheet = true,
           onDismissRequest = {},
-          onOkClick = { a, b, c -> onOkClickCalled = true })
+          onOkClick = { a, b, c -> onOkClickCalled = true },
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Simulate date selection in CalendarView
@@ -158,7 +177,9 @@ class QuickFixAvailabilityBottomSheetTest {
       QuickFixAvailabilityBottomSheet(
           showModalBottomSheet = true,
           onDismissRequest = { onDismissRequestCalled = true },
-          onOkClick = { a, b, c -> })
+          onOkClick = { a, b, c -> },
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Simulate dismissing the bottom sheet
@@ -166,5 +187,49 @@ class QuickFixAvailabilityBottomSheetTest {
 
     // Assert that onDismissRequest was called
     composeTestRule.runOnIdle { assert(onDismissRequestCalled) }
+  }
+
+  /** Test that [onClearClick] is called when the clear action is enabled and performed. */
+  @OptIn(ExperimentalMaterial3Api::class)
+  @Test
+  fun onClearClick_isCalled_whenClearEnabled() {
+    var onClearClickCalled = false
+
+    composeTestRule.setContent {
+      QuickFixAvailabilityBottomSheet(
+          showModalBottomSheet = true,
+          onDismissRequest = {},
+          onOkClick = { _, _, _ -> },
+          onClearClick = { onClearClickCalled = true },
+          clearEnabled = true)
+    }
+
+    // Simulate the clear action (assume clicking on an element invokes the clear logic)
+    composeTestRule.onNodeWithText("Cancel").performClick()
+
+    // Assert that onClearClick was called
+    composeTestRule.runOnIdle { assert(onClearClickCalled) }
+  }
+
+  /** Test that [onClearClick] is not called when clear action is disabled. */
+  @OptIn(ExperimentalMaterial3Api::class)
+  @Test
+  fun onClearClick_isNotCalled_whenClearDisabled() {
+    var onClearClickCalled = false
+
+    composeTestRule.setContent {
+      QuickFixAvailabilityBottomSheet(
+          showModalBottomSheet = true,
+          onDismissRequest = {},
+          onOkClick = { _, _, _ -> },
+          onClearClick = { onClearClickCalled = true },
+          clearEnabled = false)
+    }
+
+    // Simulate the clear action (assume clicking on an element invokes the clear logic)
+    composeTestRule.onNodeWithText("Cancel").performClick()
+
+    // Assert that onClearClick was not called
+    composeTestRule.runOnIdle { assert(!onClearClickCalled) }
   }
 }

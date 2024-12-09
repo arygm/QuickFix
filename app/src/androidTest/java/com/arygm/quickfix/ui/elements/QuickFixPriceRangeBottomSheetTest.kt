@@ -19,7 +19,11 @@ class QuickFixPriceRangeBottomSheetTest {
   fun modalBottomSheetIsVisibleWhenShowModalBottomSheetIsTrue() {
     composeTestRule.setContent {
       QuickFixPriceRangeBottomSheet(
-          showModalBottomSheet = true, onApplyClick = { _, _ -> }, onDismissRequest = {})
+          showModalBottomSheet = true,
+          onApplyClick = { _, _ -> },
+          onDismissRequest = {},
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Verify that the modal bottom sheet is displayed
@@ -30,7 +34,11 @@ class QuickFixPriceRangeBottomSheetTest {
   fun modalBottomSheetIsNotVisibleWhenShowModalBottomSheetIsFalse() {
     composeTestRule.setContent {
       QuickFixPriceRangeBottomSheet(
-          showModalBottomSheet = false, onApplyClick = { _, _ -> }, onDismissRequest = {})
+          showModalBottomSheet = false,
+          onApplyClick = { _, _ -> },
+          onDismissRequest = {},
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Verify that the modal bottom sheet is not displayed
@@ -41,7 +49,11 @@ class QuickFixPriceRangeBottomSheetTest {
   fun modalBottomSheetDisplaysCorrectContent() {
     composeTestRule.setContent {
       QuickFixPriceRangeBottomSheet(
-          showModalBottomSheet = true, onApplyClick = { _, _ -> }, onDismissRequest = {})
+          showModalBottomSheet = true,
+          onApplyClick = { _, _ -> },
+          onDismissRequest = {},
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Verify that the title is displayed
@@ -78,7 +90,9 @@ class QuickFixPriceRangeBottomSheetTest {
             appliedValue1 = value1
             appliedValue2 = value2
           },
-          onDismissRequest = { dismissCalled = true })
+          onDismissRequest = { dismissCalled = true },
+          onClearClick = {},
+          clearEnabled = false)
     }
 
     // Simulate clicking the Apply button
@@ -89,6 +103,58 @@ class QuickFixPriceRangeBottomSheetTest {
       assertEquals(500, appliedValue1)
       assertEquals(2500, appliedValue2)
       assert(dismissCalled) { "Expected onDismissRequest to be called" }
+    }
+  }
+  /** Test that the Clear button calls [onClearClick] when enabled. */
+  @Test
+  fun clearButtonCallsOnClearClickWhenEnabled() {
+    var clearCalled = false
+    var dismissCalled = false
+
+    composeTestRule.setContent {
+      QuickFixPriceRangeBottomSheet(
+          showModalBottomSheet = true,
+          onApplyClick = { _, _ -> },
+          onDismissRequest = { dismissCalled = true },
+          onClearClick = { clearCalled = true },
+          clearEnabled = true)
+    }
+
+    // Simulate clicking the Clear button
+    composeTestRule.onNodeWithTag("resetButton").performClick()
+
+    // Assert that onClearClick and onDismissRequest were called
+    composeTestRule.runOnIdle {
+      assert(clearCalled) { "Expected onClearClick to be called" }
+      assert(dismissCalled) { "Expected onDismissRequest to be called" }
+    }
+  }
+
+  /**
+   * Test that the Clear button is disabled and does not call [onClearClick] when [clearEnabled] is
+   * false.
+   */
+  @Test
+  fun clearButtonDoesNotCallOnClearClickWhenDisabled() {
+    var clearCalled = false
+    var dismissCalled = false
+
+    composeTestRule.setContent {
+      QuickFixPriceRangeBottomSheet(
+          showModalBottomSheet = true,
+          onApplyClick = { _, _ -> },
+          onDismissRequest = { dismissCalled = true },
+          onClearClick = { clearCalled = true },
+          clearEnabled = false)
+    }
+
+    // Simulate clicking the Clear button
+    composeTestRule.onNodeWithTag("resetButton").performClick()
+
+    // Assert that onClearClick was not called
+    composeTestRule.runOnIdle {
+      assert(!clearCalled) { "Expected onClearClick not to be called" }
+      assert(!dismissCalled) { "Expected onDismissRequest not to be called" }
     }
   }
 }

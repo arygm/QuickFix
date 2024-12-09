@@ -122,7 +122,7 @@ suspend fun loadIsSignIn(preferencesViewModel: PreferencesViewModel): Boolean {
 suspend fun loadUserId(preferencesViewModel: PreferencesViewModel): String {
   return suspendCoroutine { cont ->
     var resumed = false
-    preferencesViewModel.loadPreference(FIRST_NAME_KEY) { value ->
+    preferencesViewModel.loadPreference(UID_KEY) { value ->
       if (!resumed) {
         resumed = true
 

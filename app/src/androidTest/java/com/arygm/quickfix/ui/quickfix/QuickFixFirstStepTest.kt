@@ -11,6 +11,7 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFixRepository
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.utils.inToMonth
 import java.time.LocalDate
 import org.junit.Before
 import org.junit.Rule
@@ -118,13 +119,17 @@ class QuickFixFirstStepTest {
           quickFixViewModel = quickFixViewModel)
     }
 
+    val today = LocalDate.now()
+
     // Open the date picker
     composeTestRule.onNodeWithText("Add Suggested Date").performClick()
     // Assert the date picker is displayed
     composeTestRule.onNodeWithText("Select Date").assertExists()
 
     // Simulate selecting a date
-    composeTestRule.onNodeWithText("${LocalDate.now().dayOfMonth}").performClick()
+    composeTestRule.onNodeWithText(inToMonth(today.month.value)).performClick()
+    composeTestRule.onNodeWithText("Jan").performClick()
+    composeTestRule.onNodeWithText("1").performClick()
     composeTestRule.onNodeWithText("OK").performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
