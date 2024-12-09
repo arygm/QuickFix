@@ -25,7 +25,7 @@ class Category:
 
 def initialize_firestore():
     # Initialize the Firebase app
-    cred = credentials.Certificate('data_loader_service_account_key.json')
+    cred = credentials.Certificate('../data_loader_service_account_key.json')
     firebase_admin.initialize_app(cred)
     return firestore.client()
 
@@ -55,10 +55,7 @@ def upload_data(db, categories: List[Category]):
 
     print("Data uploaded successfully.")
 
-def main():
-    db = initialize_firestore()
-
-    categories = [
+categories = [
         Category(
             id="painting",
             name="Painting",
@@ -677,6 +674,9 @@ def main():
             ]
         ),
     ]
+
+def main():
+    db = initialize_firestore()
 
     # Upload the data to Firestore
     upload_data(db, categories)
