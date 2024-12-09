@@ -516,7 +516,7 @@ class SearchWorkerResultScreenTest {
             fieldOfWork = "Painter",
             rating = 4.5,
             workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
-            unavailability_list = listOf(LocalDate.of(LocalDate.now().year, 1, 1)),
+            unavailability_list = listOf(LocalDate.of(LocalDate.now().year, 1, 7)),
             location = Location(0.0, 0.0))
 
     val worker2 =
@@ -586,7 +586,7 @@ class SearchWorkerResultScreenTest {
     // Find the node representing today's date and perform a click
     composeTestRule.onNode(hasText(month) and hasClickAction()).performClick()
     composeTestRule.onNode(hasText("Jan") and hasClickAction()).performClick()
-    composeTestRule.onNode(hasText("1") and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText("7") and hasClickAction()).performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 
@@ -675,7 +675,7 @@ class SearchWorkerResultScreenTest {
     // Find the node representing today's date and perform a click
     composeTestRule.onNode(hasText(month) and hasClickAction()).performClick()
     composeTestRule.onNode(hasText("Jan") and hasClickAction()).performClick()
-    composeTestRule.onNode(hasText("1") and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText("7") and hasClickAction()).performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 
@@ -764,7 +764,7 @@ class SearchWorkerResultScreenTest {
     // Find the node representing today's date and perform a click
     composeTestRule.onNode(hasText(month) and hasClickAction()).performClick()
     composeTestRule.onNode(hasText("Jan") and hasClickAction()).performClick()
-    composeTestRule.onNode(hasText("1") and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText("7") and hasClickAction()).performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 
