@@ -88,6 +88,7 @@ class MessageScreenTest {
 
   @Before
   fun setup() {
+
     navigationActions = mock(NavigationActions::class.java)
     chatRepository = mock(ChatRepository::class.java)
     quickFixRepository = mock(QuickFixRepository::class.java)
@@ -96,6 +97,7 @@ class MessageScreenTest {
     whenever(quickFixRepository.init(any())).thenAnswer { invocation ->
       val onSuccess = invocation.getArgument<() -> Unit>(0)
       onSuccess()
+
       null
     }
 

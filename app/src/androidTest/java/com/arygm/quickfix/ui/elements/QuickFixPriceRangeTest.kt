@@ -360,4 +360,166 @@ class QuickFixPriceRangeTest {
       assert(updatedValue2 == 1000) { "Expected 1000 but was $updatedValue2" }
     }
   }
+
+  @Test
+  fun singleSliderInitialRenderingTest() {
+    composeTestRule.setContent {
+      QuickFixPriceRange(
+          modifier = Modifier.width(300.dp).height(80.dp),
+          rangeColor = Color.Green,
+          backColor = Color.LightGray,
+          barHeight = 8.dp,
+          circleRadius = 12.dp,
+          cornerRadius = CornerRadius(4f, 4f),
+          minValue = 0,
+          maxValue = 3000,
+          progress1InitialValue = 1500,
+          progress2InitialValue = 1500, // ignored in single mode, but still required
+          tooltipSpacing = 4.dp,
+          tooltipWidth = 50.dp,
+          tooltipHeight = 30.dp,
+          tooltipTriangleSize = 5.dp,
+          onProgressChanged = { _, _ -> },
+          isDoubleSlider = false)
+    }
+
+    // Verify that the component is displayed
+    composeTestRule.onNodeWithTag("QuickFixPriceRange").assertExists()
+  }
+
+  @Test
+  fun singleSliderDragTest() {
+    var updatedValue1 = 0
+    var updatedValue2 = 0
+
+    composeTestRule.setContent {
+      QuickFixPriceRange(
+          modifier = Modifier.width(300.dp).height(80.dp),
+          rangeColor = Color.Green,
+          backColor = Color.LightGray,
+          barHeight = 8.dp,
+          circleRadius = 12.dp,
+          cornerRadius = CornerRadius(4f, 4f),
+          minValue = 0,
+          maxValue = 3000,
+          progress1InitialValue = 500,
+          progress2InitialValue = 500, // ignored in single mode
+          tooltipSpacing = 4.dp,
+          tooltipWidth = 50.dp,
+          tooltipHeight = 30.dp,
+          tooltipTriangleSize = 5.dp,
+          onProgressChanged = { value1, value2 ->
+            // value1 and value2 are the same in single-slider mode
+            updatedValue1 = value1
+            updatedValue2 = value2
+          },
+          isDoubleSlider = false)
+    }
+
+    val quickFixNode = composeTestRule.onNodeWithTag("QuickFixPriceRange")
+
+    // Get node bounds
+    val nodeBounds = quickFixNode.getUnclippedBoundsInRoot()
+
+    val density = composeTestRule.density
+
+    // Convert Dp to pixels
+    val widthPx = with(density) { nodeBounds.width.toPx() }
+    val heightPx = with(density) { nodeBounds.height.toPx() }
+    val leftPx = with(density) { nodeBounds.left.toPx() }
+    val topPx = with(density) { nodeBounds.top.toPx() }
+
+    // Calculate starting position of the single circle (progress1)
+    val startX = leftPx + (500f / 3000f) * widthPx
+    val startY = topPx + heightPx / 2f
+
+    // Calculate target position
+    val targetX = leftPx + (2000f / 3000f) * widthPx
+
+    // Perform touch input (drag single circle to new position)
+    quickFixNode.performTouchInput {
+      down(Offset(startX, startY))
+      moveTo(Offset(targetX, startY))
+      up()
+    }
+
+    // Assert that onProgressChanged is called with expected values
+    composeTestRule.runOnIdle {
+      val expectedValue = 2000
+      // Both updatedValue1 and updatedValue2 should be the same
+      assert(updatedValue1 == expectedValue) { "Expected $expectedValue but was $updatedValue1" }
+      assert(updatedValue2 == expectedValue) { "Expected $expectedValue but was $updatedValue2" }
+    }
+  }
+
+  @Test
+  fun singleSliderInitialValuesAtExtremesTest() {
+    var updatedValue1 = 0
+    var updatedValue2 = 0
+
+    composeTestRule.setContent {
+      QuickFixPriceRange(
+          modifier = Modifier.width(300.dp).height(80.dp),
+          rangeColor = Color.Green,
+          backColor = Color.LightGray,
+          barHeight = 8.dp,
+          circleRadius = 12.dp,
+          cornerRadius = CornerRadius(4f, 4f),
+          minValue = 0,
+          maxValue = 3000,
+          progress1InitialValue = 3000,
+          progress2InitialValue = 3000, // ignored
+          tooltipSpacing = 4.dp,
+          tooltipWidth = 50.dp,
+          tooltipHeight = 30.dp,
+          tooltipTriangleSize = 5.dp,
+          onProgressChanged = { value1, value2 ->
+            updatedValue1 = value1
+            updatedValue2 = value2
+          },
+          isDoubleSlider = false)
+    }
+
+    // Assert initial values
+    composeTestRule.runOnIdle {
+      assert(updatedValue1 == 3000) { "Expected 3000 but was $updatedValue1" }
+      assert(updatedValue2 == 3000) { "Expected 3000 but was $updatedValue2" }
+    }
+  }
+
+  @Test
+  fun singleSliderZeroRangeTest() {
+    var updatedValue1 = 0
+    var updatedValue2 = 0
+
+    composeTestRule.setContent {
+      QuickFixPriceRange(
+          modifier = Modifier.width(300.dp).height(80.dp),
+          rangeColor = Color.Green,
+          backColor = Color.LightGray,
+          barHeight = 8.dp,
+          circleRadius = 12.dp,
+          cornerRadius = CornerRadius(4f, 4f),
+          minValue = 1000,
+          maxValue = 1000,
+          progress1InitialValue = 1000,
+          progress2InitialValue = 1000, // ignored
+          tooltipSpacing = 4.dp,
+          tooltipWidth = 50.dp,
+          tooltipHeight = 30.dp,
+          tooltipTriangleSize = 5.dp,
+          onProgressChanged = { value1, value2 ->
+            updatedValue1 = value1
+            updatedValue2 = value2
+          },
+          isDoubleSlider = false)
+    }
+
+    // Assert initial values
+    composeTestRule.runOnIdle {
+      // With zero range, progress stays at minValue
+      assert(updatedValue1 == 1000) { "Expected 1000 but was $updatedValue1" }
+      assert(updatedValue2 == 1000) { "Expected 1000 but was $updatedValue2" }
+    }
+  }
 }

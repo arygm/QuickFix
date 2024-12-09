@@ -1,5 +1,6 @@
 package com.arygm.quickfix.model.search
 
+import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import java.time.LocalDate
@@ -635,5 +636,97 @@ class WorkerFilterTest {
 
     assertEquals(1, sortedWorkers.size)
     assertEquals("worker2", sortedWorkers[0].uid)
+  }
+
+  @Test
+  fun `filterWorkersByDistance returns workers within maxDistance`() {
+    val userLocation = Location(40.0, -74.0, "User Location")
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                location = Location(40.0, -74.1, "Nearby Worker"),
+                displayName = "Nearby Worker"),
+            WorkerProfile(
+                uid = "worker2",
+                location = Location(42.0, -75.0, "Far Worker"),
+                displayName = "Far Worker"),
+            WorkerProfile(
+                uid = "worker3",
+                location = Location(40.0, -74.0, "Same Location"),
+                displayName = "Same Location"))
+
+    val maxDistance = 20 // in kilometers
+
+    val result = searchViewModel.filterWorkersByDistance(workers, userLocation, maxDistance)
+
+    // Validate the result
+    assertEquals(2, result.size)
+    assertEquals("Nearby Worker", result[0].displayName)
+    assertEquals("Same Location", result[1].displayName)
+  }
+
+  @Test
+  fun `filterWorkersByDistance excludes workers beyond maxDistance`() {
+    val userLocation = Location(40.0, -74.0, "User Location")
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                location = Location(40.0, -74.1, "Nearby Worker"),
+                displayName = "Nearby Worker"),
+            WorkerProfile(
+                uid = "worker2",
+                location = Location(45.0, -80.0, "Far Worker"),
+                displayName = "Far Worker"))
+
+    val maxDistance = 10 // in kilometers
+
+    val result = searchViewModel.filterWorkersByDistance(workers, userLocation, maxDistance)
+
+    // Validate the result
+    assertEquals(1, result.size)
+    assertEquals("Nearby Worker", result[0].displayName)
+  }
+
+  @Test
+  fun `filterWorkersByDistance includes only workers exactly at maxDistance`() {
+    val userLocation = Location(40.0, -74.0, "User Location")
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                location = Location(40.1, -74.1, "At Max Distance"),
+                displayName = "At Max Distance"),
+            WorkerProfile(
+                uid = "worker2",
+                location = Location(40.5, -75.0, "Beyond Max Distance"),
+                displayName = "Beyond Max Distance"))
+
+    val maxDistance = 15 // in kilometers
+
+    val result = searchViewModel.filterWorkersByDistance(workers, userLocation, maxDistance)
+
+    // Validate the result
+    assertEquals(1, result.size)
+    assertEquals("At Max Distance", result[0].displayName)
+  }
+
+  @Test
+  fun `filterWorkersByDistance returns empty list if no workers are within maxDistance`() {
+    val userLocation = Location(40.0, -74.0, "User Location")
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                location = Location(45.0, -80.0, "Far Worker"),
+                displayName = "Far Worker"))
+
+    val maxDistance = 5 // in kilometers
+
+    val result = searchViewModel.filterWorkersByDistance(workers, userLocation, maxDistance)
+
+    // Validate the result
+    assertEquals(0, result.size)
   }
 }
