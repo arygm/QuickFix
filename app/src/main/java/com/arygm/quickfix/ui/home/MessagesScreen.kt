@@ -251,7 +251,6 @@ fun MessageScreen(
                                               IconButton(
                                                   onClick = {
                                                     coroutineScope.launch {
-                                                      Log.e("hhaha", "9alwa")
                                                       chat.let {
                                                         val updatedChat =
                                                             it.copy(
@@ -494,10 +493,7 @@ fun MessageInput(
 
         // Send button
         IconButton(
-            onClick = {
-              Log.e("hhaha", "tseft lmessage")
-              onSendMessage()
-            },
+            onClick = { onSendMessage() },
             modifier =
                 Modifier.weight(0.1f)
                     .aspectRatio(1f)

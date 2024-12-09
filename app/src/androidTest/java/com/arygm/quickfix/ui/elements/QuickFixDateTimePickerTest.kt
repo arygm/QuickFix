@@ -29,14 +29,14 @@ class QuickFixDateTimePickerTest {
     // Simulate date selection
     composeTestRule.onNodeWithText(inToMonth(today.month.value)).performClick()
     composeTestRule.onNodeWithText("Jan").performClick()
-    composeTestRule.onNodeWithText("1").performClick()
+    composeTestRule.onNodeWithText("7").performClick()
     composeTestRule.onNodeWithText("OK").performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 
     // Assert that selectedDate is updated
     assert(selectedDate != null)
-    assert(selectedDate == LocalDate.of(LocalDate.now().year, 1, 1))
+    assert(selectedDate == LocalDate.of(LocalDate.now().year, 1, 7))
   }
 
   @Test
@@ -53,7 +53,7 @@ class QuickFixDateTimePickerTest {
     // Simulate date selection to advance to time picker
     composeTestRule.onNodeWithText(inToMonth(today.month.value)).performClick()
     composeTestRule.onNodeWithText("Jan").performClick()
-    composeTestRule.onNodeWithText("1").performClick()
+    composeTestRule.onNodeWithText("7").performClick()
     composeTestRule.onNodeWithText("OK").performClick()
 
     // Assert TimePickerDialog is displayed
@@ -123,7 +123,7 @@ class QuickFixDateTimePickerTest {
     // Select date
     composeTestRule.onNodeWithText(inToMonth(today.month.value)).performClick()
     composeTestRule.onNodeWithText("Jan").performClick()
-    composeTestRule.onNodeWithText("1").performClick()
+    composeTestRule.onNodeWithText("7").performClick()
     composeTestRule.onNodeWithText("OK").performClick()
 
     // Select time
@@ -136,7 +136,7 @@ class QuickFixDateTimePickerTest {
 
     // Assert that date and time are passed correctly
     assert(selectedDateTime != null)
-    assert(selectedDateTime?.first == LocalDate.of(LocalDate.now().year, 1, 1))
+    assert(selectedDateTime?.first == LocalDate.of(LocalDate.now().year, 1, 7))
     assert(selectedDateTime?.second == LocalTime.of(14, LocalTime.now().minute))
   }
 }
