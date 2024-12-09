@@ -1269,9 +1269,9 @@ class SearchWorkerResultScreenTest {
   fun testTogglingRatingFilterOff() {
     val workers =
         listOf(
-            WorkerProfile(uid = "w1", rating = 3.0),
-            WorkerProfile(uid = "w2", rating = 4.5),
-            WorkerProfile(uid = "w3", rating = 2.0))
+            WorkerProfile(uid = "w1", rating = 4.75),
+            WorkerProfile(uid = "w2", rating = 4.75),
+            WorkerProfile(uid = "w3", rating = 4.75))
 
     searchViewModel._subCategoryWorkerProfiles.value = workers
     // Initially, no rating filter applied, workers are in initial order
