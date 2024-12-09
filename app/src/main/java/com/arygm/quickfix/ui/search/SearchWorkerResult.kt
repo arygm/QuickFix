@@ -1,6 +1,8 @@
 package com.arygm.quickfix.ui.search
 
+import android.location.Geocoder
 import android.util.Log
+import android.widget.RatingBar
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -41,11 +43,9 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -83,6 +83,7 @@ import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
@@ -94,7 +95,9 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.LocationHelper
 import com.arygm.quickfix.utils.loadUserId
+import com.example.dynamicstarrating.RatingBar
 import java.time.LocalDate
+import java.util.Locale
 
 data class SearchFilterButtons(
     val onClick: () -> Unit,
@@ -111,8 +114,19 @@ fun SearchWorkerResult(
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
     userProfileViewModel: ProfileViewModel,
+    workerProfileViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel
 ) {
+  val geocoder = Geocoder(LocalContext.current, Locale.getDefault())
+  fun getCityNameFromCoordinates(latitude: Double, longitude: Double): String? {
+    val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+    if (!addresses.isNullOrEmpty()) {
+      val city = addresses[0].locality
+      return city ?: addresses[0].subAdminArea ?: addresses[0].adminArea
+    } else {
+      return null
+    }
+  }
   val locationHelper = LocationHelper(LocalContext.current, MainActivity())
   var phoneLocation by remember {
     mutableStateOf(com.arygm.quickfix.model.locations.Location(0.0, 0.0, "Default"))
@@ -136,6 +150,8 @@ fun SearchWorkerResult(
     }
   }
 
+  var selectedWorker by remember { mutableStateOf(WorkerProfile()) }
+  var selectedCityName by remember { mutableStateOf<String?>(null) }
   var showFilterButtons by remember { mutableStateOf(false) }
   var showAvailabilityBottomSheet by remember { mutableStateOf(false) }
   var showServicesBottomSheet by remember { mutableStateOf(false) }
@@ -143,6 +159,7 @@ fun SearchWorkerResult(
   var showLocationBottomSheet by remember { mutableStateOf(false) }
   val workerProfiles by searchViewModel.subCategoryWorkerProfiles.collectAsState()
   var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
+  val searchSubcategory by searchViewModel.searchSubcategory.collectAsState()
 
   var availabilityFilterApplied by remember { mutableStateOf(false) }
   var servicesFilterApplied by remember { mutableStateOf(false) }
@@ -314,7 +331,6 @@ fun SearchWorkerResult(
   var isWindowVisible by remember { mutableStateOf(false) }
   var saved by remember { mutableStateOf(false) }
   val searchQuery by searchViewModel.searchQuery.collectAsState()
-  val searchSubcategory by searchViewModel.searchSubcategory.collectAsState()
 
   var userProfile = UserProfile(locations = emptyList(), announcements = emptyList(), uid = "0")
   var uid by remember { mutableStateOf("Loading...") }
@@ -458,7 +474,9 @@ fun SearchWorkerResult(
                   items(filteredWorkerProfiles.size) { index ->
                     val profile = filteredWorkerProfiles[index]
                     var account by remember { mutableStateOf<Account?>(null) }
+                    var worker by remember { mutableStateOf<WorkerProfile?>(null) }
                     var distance by remember { mutableStateOf<Int?>(null) }
+                    var cityName by remember { mutableStateOf<String?>(null) }
 
                     distance =
                         profile.location
@@ -472,6 +490,8 @@ fun SearchWorkerResult(
                             ?.toInt()
 
                     LaunchedEffect(profile.uid) {
+                      workerProfileViewModel.fetchUserProfile(
+                          profile.uid, onResult = { worker = it as WorkerProfile })
                       accountViewModel.fetchUserAccount(profile.uid) { fetchedAccount: Account? ->
                         account = fetchedAccount
                       }
@@ -483,18 +503,34 @@ fun SearchWorkerResult(
                           else profile.location?.name
 
                       locationName?.let {
-                        SearchWorkerProfileResult(
-                            modifier = Modifier.testTag("worker_profile_result$index"),
-                            profileImage = R.drawable.placeholder_worker,
-                            name = "${acc.firstName} ${acc.lastName}",
-                            category = profile.fieldOfWork,
-                            rating = profile.reviews.map { review -> review.rating }.average(),
-                            reviewCount = profile.reviews.size,
-                            location = it,
-                            price = profile.price.toString(),
-                            onBookClick = { isWindowVisible = true },
-                            distance = distance,
-                        )
+                        cityName =
+                            worker?.location?.let { it1 ->
+                              worker!!.location?.let { it2 ->
+                                getCityNameFromCoordinates(it1.latitude, it2.longitude)
+                              }
+                            }
+                        cityName?.let { it1 ->
+                          SearchWorkerProfileResult(
+                              modifier = Modifier.testTag("worker_profile_result$index"),
+                              profileImage = R.drawable.placeholder_worker,
+                              name = "${acc.firstName} ${acc.lastName}",
+                              category = profile.fieldOfWork,
+                              rating = profile.reviews.map { review -> review.rating }.average(),
+                              reviewCount = profile.reviews.size,
+                              location = it1,
+                              price = profile.price.toString(),
+                              onBookClick = {
+                                workerProfileViewModel.fetchUserProfile(
+                                    acc.uid,
+                                    onResult = {
+                                      selectedWorker = it as WorkerProfile
+                                      selectedCityName = cityName
+                                      isWindowVisible = true
+                                    })
+                              },
+                              distance = distance,
+                          )
+                        }
                       }
                     }
                     Spacer(modifier = Modifier.height(screenHeight * 0.004f))
@@ -653,15 +689,17 @@ fun SearchWorkerResult(
                           .padding(horizontal = screenWidth * 0.04f)
                           .testTag("sliding_window_worker_additional_info")) {
                     Text(
-                        text = workerCategory,
+                        text = selectedWorker.fieldOfWork,
                         style = MaterialTheme.typography.headlineLarge,
                         color = colorScheme.onBackground,
                         modifier = Modifier.testTag("sliding_window_worker_category"))
-                    Text(
-                        text = workerAddress,
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = colorScheme.onBackground,
-                        modifier = Modifier.testTag("sliding_window_worker_address"))
+                    selectedCityName?.let {
+                      Text(
+                          text = it,
+                          style = MaterialTheme.typography.headlineSmall,
+                          color = colorScheme.onBackground,
+                          modifier = Modifier.testTag("sliding_window_worker_address"))
+                    }
                   }
 
               // Main content should be scrollable
@@ -676,10 +714,10 @@ fun SearchWorkerResult(
                     // Description with "Show more" functionality
                     var showFullDescription by remember { mutableStateOf(false) }
                     val descriptionText =
-                        if (showFullDescription || description.length <= 100) {
-                          description
+                        if (showFullDescription || selectedWorker.description.length <= 100) {
+                          selectedWorker.description
                         } else {
-                          description.take(100) + "..."
+                          selectedWorker.description.take(100) + "..."
                         }
 
                     Text(
@@ -690,7 +728,7 @@ fun SearchWorkerResult(
                             Modifier.padding(horizontal = screenWidth * 0.04f)
                                 .testTag("sliding_window_description"))
 
-                    if (description.length > 100) {
+                    if (selectedWorker.description.length > 100) {
                       Text(
                           text = if (showFullDescription) "Show less" else "Show more",
                           style =
@@ -728,9 +766,10 @@ fun SearchWorkerResult(
                                     style = MaterialTheme.typography.headlineMedium,
                                     color = colorScheme.onBackground)
                                 Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-                                includedServices.forEach { service ->
+                                selectedWorker.includedServices.forEach { service ->
+                                  val name = service.name
                                   Text(
-                                      text = "• $service",
+                                      text = "• $name",
                                       style = MaterialTheme.typography.bodySmall,
                                       color = colorScheme.onSurface,
                                       modifier = Modifier.padding(bottom = screenHeight * 0.005f))
@@ -749,9 +788,10 @@ fun SearchWorkerResult(
                                     style = MaterialTheme.typography.headlineMedium,
                                     color = colorScheme.primary)
                                 Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-                                addonServices.forEach { service ->
+                                selectedWorker.addOnServices.forEach { service ->
+                                  val name = service.name
                                   Text(
-                                      text = "• $service",
+                                      text = "• $name",
                                       style = MaterialTheme.typography.bodySmall,
                                       color = colorScheme.primary,
                                       modifier = Modifier.padding(bottom = screenHeight * 0.005f))
@@ -801,7 +841,7 @@ fun SearchWorkerResult(
                                 .padding(horizontal = screenWidth * 0.04f)
                                 .testTag("sliding_window_tags_flow_row"),
                     ) {
-                      tags.forEach { tag ->
+                      selectedWorker.tags.forEach { tag ->
                         Text(
                             text = tag,
                             color = colorScheme.primary,
@@ -840,21 +880,8 @@ fun SearchWorkerResult(
                         modifier =
                             Modifier.padding(horizontal = screenWidth * 0.04f)
                                 .testTag("sliding_window_star_rating_row")) {
-                          val filledStars = workerRating.toInt()
-                          val unfilledStars = 5 - filledStars
-                          repeat(filledStars) {
-                            Icon(
-                                imageVector = Icons.Filled.Star,
-                                contentDescription = null,
-                                tint = colorScheme.onBackground)
-                          }
-                          repeat(unfilledStars) {
-                            Icon(
-                                imageVector = Icons.Outlined.StarOutline,
-                                contentDescription = null,
-                                tint = colorScheme.onBackground,
-                            )
-                          }
+                          RatingBar(
+                              selectedWorker.rating.toFloat(), modifier = Modifier.height(20.dp))
                         }
                     Spacer(modifier = Modifier.height(screenHeight * 0.01f))
                     LazyRow(
@@ -862,13 +889,13 @@ fun SearchWorkerResult(
                             Modifier.fillMaxWidth()
                                 .padding(horizontal = screenWidth * 0.04f)
                                 .testTag("sliding_window_reviews_row")) {
-                          itemsIndexed(reviews) { index, review ->
+                          itemsIndexed(selectedWorker.reviews) { index, review ->
                             var isExpanded by remember { mutableStateOf(false) }
                             val displayText =
-                                if (isExpanded || review.length <= 100) {
-                                  review
+                                if (isExpanded || review.review.length <= 100) {
+                                  review.review
                                 } else {
-                                  review.take(100) + "..."
+                                  review.review.take(100) + "..."
                                 }
 
                             Box(
@@ -882,7 +909,7 @@ fun SearchWorkerResult(
                                         text = displayText,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = colorScheme.onSurface)
-                                    if (review.length > 100) {
+                                    if (review.review.length > 100) {
                                       Text(
                                           text = if (isExpanded) "See less" else "See more",
                                           style =

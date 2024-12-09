@@ -266,6 +266,7 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
                     navigationActionsRoot,
                     searchViewModel,
                     userViewModel,
+                    workerViewModel,
                     loggedInAccountViewModel,
                     accountViewModel,
                     announcementViewModel,
@@ -383,7 +384,8 @@ fun SearchNavHost(
     isUser: Boolean,
     navigationActionsRoot: NavigationActions,
     searchViewModel: SearchViewModel,
-    profileViewModel: ProfileViewModel,
+    userProfileViewModel: ProfileViewModel,
+    workerProfileViewModel: ProfileViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
     accountViewModel: AccountViewModel,
     announcementViewModel: AnnouncementViewModel,
@@ -406,7 +408,7 @@ fun SearchNavHost(
           navigationActions,
           navigationActionsRoot,
           isUser,
-          profileViewModel,
+          userProfileViewModel,
           loggedInAccountViewModel,
           accountViewModel,
           searchViewModel,
@@ -421,7 +423,8 @@ fun SearchNavHost(
           navigationActions,
           searchViewModel,
           accountViewModel,
-          profileViewModel,
+          userProfileViewModel,
+          workerProfileViewModel,
           preferencesViewModel)
     }
     composable(Screen.SEARCH_LOCATION) {
