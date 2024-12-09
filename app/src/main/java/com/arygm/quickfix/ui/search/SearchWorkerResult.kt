@@ -2,7 +2,6 @@ package com.arygm.quickfix.ui.search
 
 import android.location.Geocoder
 import android.util.Log
-import android.widget.RatingBar
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -91,11 +90,11 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixLocationFilterBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixPriceRangeBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixSlidingWindow
+import com.arygm.quickfix.ui.elements.RatingBar
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.LocationHelper
 import com.arygm.quickfix.utils.loadUserId
-import com.example.dynamicstarrating.RatingBar
 import java.time.LocalDate
 import java.util.Locale
 
@@ -880,8 +879,7 @@ fun SearchWorkerResult(
                         modifier =
                             Modifier.padding(horizontal = screenWidth * 0.04f)
                                 .testTag("sliding_window_star_rating_row")) {
-                          RatingBar(
-                              selectedWorker.rating.toFloat(), modifier = Modifier.height(20.dp))
+                          RatingBar(workerRating.toFloat(), modifier = Modifier.padding(20.dp))
                         }
                     Spacer(modifier = Modifier.height(screenHeight * 0.01f))
                     LazyRow(
