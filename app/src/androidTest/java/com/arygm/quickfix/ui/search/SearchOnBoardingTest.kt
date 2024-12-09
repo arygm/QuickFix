@@ -1,14 +1,18 @@
 package com.arygm.quickfix.ui.search
 
 import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.text.AnnotatedString
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
@@ -27,6 +31,7 @@ class SearchOnBoardingTest {
   private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
   private lateinit var categoryRepo: CategoryRepositoryFirestore
   private lateinit var searchViewModel: SearchViewModel
+  private lateinit var accountViewModel: AccountViewModel
   private lateinit var categoryViewModel: CategoryViewModel
   private lateinit var navigationActionsRoot: NavigationActions
 
@@ -40,6 +45,7 @@ class SearchOnBoardingTest {
     categoryRepo = mockk(relaxed = true)
     searchViewModel = SearchViewModel(workerProfileRepo)
     categoryViewModel = CategoryViewModel(categoryRepo)
+    accountViewModel = mockk(relaxed = true)
   }
 
   @Test
@@ -48,8 +54,8 @@ class SearchOnBoardingTest {
       SearchOnBoarding(
           navigationActions = navigationActions,
           navigationActionsRoot,
-          isUser = true,
           searchViewModel,
+          accountViewModel,
           categoryViewModel)
     }
 
@@ -67,8 +73,8 @@ class SearchOnBoardingTest {
       SearchOnBoarding(
           navigationActions = navigationActions,
           navigationActionsRoot,
-          isUser = true,
           searchViewModel,
+          accountViewModel,
           categoryViewModel)
     }
 
@@ -87,5 +93,24 @@ class SearchOnBoardingTest {
     // Verify the text is cleared
     searchInput.assert(
         SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("")))
+  }
+
+  @Test
+  fun searchOnBoarding_switchesFromCategoriesToProfiles() {
+    composeTestRule.setContent {
+      SearchOnBoarding(
+          navigationActions = navigationActions,
+          navigationActionsRoot = navigationActionsRoot,
+          searchViewModel = searchViewModel,
+          accountViewModel = accountViewModel,
+          categoryViewModel = categoryViewModel)
+    }
+
+    // Verify initial state (Categories are displayed)
+    composeTestRule.onNodeWithText("Categories").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("searchContent").performTextInput("Painter")
+
+    // Verify state after query input (Categories disappear, Profiles appear)
+    composeTestRule.onNodeWithText("Categories").assertDoesNotExist()
   }
 }

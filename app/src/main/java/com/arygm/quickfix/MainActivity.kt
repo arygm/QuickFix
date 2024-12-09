@@ -409,8 +409,8 @@ fun SearchNavHost(
           isUser,
           userProfileViewModel,
           loggedInAccountViewModel,
-          accountViewModel,
           searchViewModel,
+          accountViewModel,
           announcementViewModel,
           categoryViewModel)
     }

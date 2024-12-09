@@ -18,8 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Carpenter
 import androidx.compose.material.icons.outlined.CleaningServices
 import androidx.compose.material.icons.outlined.ElectricalServices
@@ -148,7 +148,7 @@ fun ExpandableCategoryItem(
                                 fontSize = 11.sp,
                                 lineHeight = 16.sp)
                             Icon(
-                                imageVector = Icons.Filled.KeyboardArrowRight,
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                                 contentDescription = if (isExpanded) "Collapse" else "Expand",
                                 modifier =
                                     Modifier.weight(1f)
