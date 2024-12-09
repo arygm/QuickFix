@@ -13,6 +13,8 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
 
   private val chats_ = MutableStateFlow<List<Chat>>(emptyList())
   val chats: StateFlow<List<Chat>> = chats_.asStateFlow()
+  private val selectedChat_ = MutableStateFlow<Chat?>(null)
+  val selectedChat: StateFlow<Chat?> = selectedChat_.asStateFlow()
 
   fun getChats() {
     repository.getChats(
@@ -87,5 +89,26 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
 
   fun getRandomUid(): String {
     return repository.getRandomUid()
+  }
+
+  fun updateChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    repository.updateChat(
+        chat = chat,
+        onSuccess = {
+          getChats()
+          onSuccess()
+        },
+        onFailure = { e ->
+          Log.e("ChatViewModel", "Failed to update chat: ${e.message}")
+          onFailure(e)
+        })
+  }
+
+  fun selectChat(chat: Chat) {
+    selectedChat_.value = chat
+  }
+
+  fun clearSelectedChat() {
+    selectedChat_.value = null
   }
 }

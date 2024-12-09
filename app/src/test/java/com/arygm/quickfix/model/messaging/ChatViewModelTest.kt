@@ -12,6 +12,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -21,6 +22,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.whenever
 
 @ExperimentalCoroutinesApi
 class ChatViewModelTest {
@@ -382,5 +384,80 @@ class ChatViewModelTest {
 
     verify(mockRepository).deleteMessage(eq(chat), eq(message), any(), any())
     verify(mockRepository, never()).getChats(any(), any())
+  }
+
+  @Test
+  fun updateChat_whenSuccess_updatesChats() = runTest {
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<() -> Unit>(1)
+          onSuccess()
+          null
+        }
+        .whenever(mockRepository)
+        .updateChat(eq(chat), any(), any())
+
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(List<Chat>) -> Unit>(0)
+          onSuccess(listOf(chat))
+          null
+        }
+        .whenever(mockRepository)
+        .getChats(any(), any())
+
+    var onSuccessCalled = false
+
+    chatViewModel.updateChat(chat, onSuccess = { onSuccessCalled = true }, onFailure = {})
+
+    testScheduler.advanceUntilIdle()
+
+    assertTrue(onSuccessCalled)
+    assertEquals(listOf(chat), chatViewModel.chats.value)
+    verify(mockRepository).updateChat(eq(chat), any(), any())
+    verify(mockRepository).getChats(any(), any())
+  }
+
+  @Test
+  fun updateChat_whenFailure_callsOnFailure() = runTest {
+    val exception = Exception("Test exception")
+    doAnswer { invocation ->
+          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
+          onFailure(exception)
+          null
+        }
+        .whenever(mockRepository)
+        .updateChat(eq(chat), any(), any())
+
+    var onFailureCalled = false
+
+    chatViewModel.updateChat(
+        chat,
+        onSuccess = { fail("Success callback should not be called") },
+        onFailure = { e ->
+          onFailureCalled = true
+          assertEquals(exception, e)
+        })
+
+    testScheduler.advanceUntilIdle()
+
+    assertTrue(onFailureCalled)
+    verify(mockRepository).updateChat(eq(chat), any(), any())
+    verify(mockRepository, never()).getChats(any(), any())
+  }
+
+  @Test
+  fun selectChat_updatesSelectedChat() {
+    chatViewModel.selectChat(chat)
+
+    assertEquals(chat, chatViewModel.selectedChat.value)
+  }
+
+  @Test
+  fun clearSelectedChat_clearsSelectedChat() {
+    chatViewModel.selectChat(chat)
+    assertEquals(chat, chatViewModel.selectedChat.value)
+
+    chatViewModel.clearSelectedChat()
+
+    assertNull(chatViewModel.selectedChat.value)
   }
 }
