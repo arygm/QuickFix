@@ -59,7 +59,7 @@ class QuickFixFirstStepTest {
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
           profileViewModel = profileViewModel,
-          workerName = "Test Worker",
+          workerId = "Test Worker Id",
           quickFixViewModel = quickFixViewModel)
     }
 
@@ -81,7 +81,7 @@ class QuickFixFirstStepTest {
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
           profileViewModel = profileViewModel,
-          workerName = "Test Worker",
+          workerId = "Test Worker Id",
           quickFixViewModel = quickFixViewModel)
     }
 
@@ -102,7 +102,7 @@ class QuickFixFirstStepTest {
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
           profileViewModel = profileViewModel,
-          workerName = "Test Worker",
+          workerId = "Test Worker Id",
           quickFixViewModel = quickFixViewModel)
     }
 
@@ -120,7 +120,7 @@ class QuickFixFirstStepTest {
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
           profileViewModel = profileViewModel,
-          workerName = "Test Worker",
+          workerId = "Test Worker Id",
           quickFixViewModel = quickFixViewModel)
     }
 
