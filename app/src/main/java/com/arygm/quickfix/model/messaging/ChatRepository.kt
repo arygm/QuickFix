@@ -31,4 +31,6 @@ interface ChatRepository {
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   )
+
+  fun updateChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 }

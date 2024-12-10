@@ -2,9 +2,9 @@ package com.arygm.quickfix.model.messaging
 
 import com.google.firebase.Timestamp
 
-class Message(
-    val messageId: String,
-    val senderId: String,
-    val content: String,
-    val timestamp: Timestamp
+data class Message(
+    val messageId: String = "", // Default value
+    val senderId: String = "", // Default value
+    val content: String = "", // Default value
+    val timestamp: Timestamp = Timestamp.now() // Default value
 )
