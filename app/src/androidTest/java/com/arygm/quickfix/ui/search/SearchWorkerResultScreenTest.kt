@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.hasAnyChild
@@ -84,7 +86,7 @@ class SearchWorkerResultScreenTest {
     userProfileRepositoryFirestore = mock(ProfileRepository::class.java)
     preferencesRepositoryDataStore = mock(PreferencesRepository::class.java)
 
-      // Mock the flow returned by the repository
+    // Mock the flow returned by the repository
     val mockedPreferenceFlow = MutableStateFlow<Any?>(null)
     whenever(preferencesRepositoryDataStore.getPreferenceByKey(any<Preferences.Key<Any>>()))
         .thenReturn(mockedPreferenceFlow)
@@ -386,9 +388,7 @@ class SearchWorkerResultScreenTest {
         .assertIsDisplayed()
 
     // Check for each included service
-    val includedServices =
-        listOf(
-            "Basic Consultation", "Service Inspection")
+    val includedServices = listOf("Basic Consultation", "Service Inspection")
 
     includedServices.forEach { service ->
       composeTestRule.onNodeWithText("• $service").assertExists().assertIsDisplayed()
@@ -419,11 +419,7 @@ class SearchWorkerResultScreenTest {
         .assertIsDisplayed()
 
     // Check for each add-on service
-    val addOnServices =
-        listOf(
-            "Express Delivery",
-            "Premium Materials"
-        )
+    val addOnServices = listOf("Express Delivery", "Premium Materials")
 
     addOnServices.forEach { service ->
       composeTestRule.onNodeWithText("• $service").assertExists().assertIsDisplayed()
@@ -447,31 +443,13 @@ class SearchWorkerResultScreenTest {
     // Wait for the sliding window to appear
     composeTestRule.waitForIdle()
 
-      composeTestRule
-          .onNodeWithTag("starsRow")
-          .assertExists()
-          .assertIsDisplayed()
+    composeTestRule.onNodeWithTag("starsRow").assertExists().assertIsDisplayed()
 
-      composeTestRule
-          .onNodeWithTag("Star_0")
-          .assertExists()
-          .assertIsDisplayed()
-      composeTestRule
-          .onNodeWithTag("Star_1")
-          .assertExists()
-          .assertIsDisplayed()
-      composeTestRule
-          .onNodeWithTag("Star_2")
-          .assertExists()
-          .assertIsDisplayed()
-      composeTestRule
-          .onNodeWithTag("Star_3")
-          .assertExists()
-          .assertIsDisplayed()
-      composeTestRule
-          .onNodeWithTag("Star_4")
-          .assertExists()
-          .assertIsDisplayed()
+    composeTestRule.onNodeWithTag("Star_0").assertExists().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("Star_1").assertExists().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("Star_2").assertExists().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("Star_3").assertExists().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("Star_4").assertExists().assertIsDisplayed()
 
     // Verify the "Continue" button is displayed and clickable
     composeTestRule
@@ -502,8 +480,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("sliding_window_tags_flow_row").assertExists().assertIsDisplayed()
 
     // Check for each tag
-    val tags =
-        listOf("Reliable", "Experienced", "Professional")
+    val tags = listOf("Reliable", "Experienced", "Professional")
 
     tags.forEach { tag -> composeTestRule.onNodeWithText(tag).assertExists().assertIsDisplayed() }
   }
@@ -619,7 +596,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithText("Enter time").assertIsDisplayed()
 
     val today = LocalDate.now()
-      val day = today.dayOfMonth
+    val day = today.dayOfMonth
 
     val textFields =
         composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
@@ -634,7 +611,9 @@ class SearchWorkerResultScreenTest {
     textFields[1].performTextReplacement("00")
 
     // Find the node representing today's date and perform a click
-    composeTestRule.onNode(hasText(day.toString()) and hasClickAction()).performClick()
+    composeTestRule
+        .onNode(hasText(day.toString()) and hasClickAction() and !hasSetTextAction())
+        .performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 
@@ -672,7 +651,7 @@ class SearchWorkerResultScreenTest {
             rating = 5.0,
             workingHours = Pair(LocalTime.of(10, 0), LocalTime.of(18, 0)),
             unavailability_list = emptyList(),
-            location =Location(40.7128, -74.0060))
+            location = Location(40.7128, -74.0060))
 
     // Update the searchViewModel with these test workers
     searchViewModel._subCategoryWorkerProfiles.value = listOf(worker1, worker2, worker3)
@@ -704,7 +683,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithText("Enter time").assertIsDisplayed()
 
     val today = LocalDate.now()
-      val day = today.dayOfMonth
+    val day = today.dayOfMonth
 
     val textFields =
         composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
@@ -719,7 +698,9 @@ class SearchWorkerResultScreenTest {
     textFields[1].performTextReplacement("00")
 
     // Find the node representing today's date and perform a click
-    composeTestRule.onNode(hasText(day.toString()) and hasClickAction()).performClick()
+    composeTestRule
+        .onNode(hasText(day.toString()) and hasClickAction() and !hasSetTextAction())
+        .performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 
@@ -804,7 +785,9 @@ class SearchWorkerResultScreenTest {
     textFields[1].performTextReplacement("00")
 
     // Find the node representing today's date and perform a click
-    composeTestRule.onNode(hasText(day.toString()) and hasClickAction()).performClick()
+    composeTestRule
+        .onNode(hasText(day.toString()) and hasClickAction() and !hasSetTextAction())
+        .performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 
@@ -824,9 +807,15 @@ class SearchWorkerResultScreenTest {
                 rating = 4.5,
                 location = Location(40.7128, -74.0060)),
             WorkerProfile(
-                uid = "worker2", tags = listOf("Interior Painter", "Electrician"), rating = 4.0,
+                uid = "worker2",
+                tags = listOf("Interior Painter", "Electrician"),
+                rating = 4.0,
                 location = Location(40.7128, -74.0060)),
-            WorkerProfile(uid = "worker3", tags = listOf("Plumber"), rating = 5.0, location = Location(40.7128, -74.0060)))
+            WorkerProfile(
+                uid = "worker3",
+                tags = listOf("Plumber"),
+                rating = 5.0,
+                location = Location(40.7128, -74.0060)))
 
     // Set up subcategory tags
     searchViewModel._searchSubcategory.value =
@@ -867,25 +856,28 @@ class SearchWorkerResultScreenTest {
                 uid = "worker1",
                 displayName = "Worker One",
                 tags = listOf("Electrician"),
-                reviews = ArrayDeque(
-                    listOf(
-                        Review(username = "User1", review = "Great service!", rating = 3.5))),
+                reviews =
+                    ArrayDeque(
+                        listOf(
+                            Review(username = "User1", review = "Great service!", rating = 3.5))),
                 location = Location(40.7128, -74.0060)),
             WorkerProfile(
                 uid = "worker2",
                 displayName = "Worker Two",
                 tags = listOf("Electrician"),
-                reviews = ArrayDeque(
-                    listOf(
-                        Review(username = "User1", review = "Great service!", rating = 4.8))),
+                reviews =
+                    ArrayDeque(
+                        listOf(
+                            Review(username = "User1", review = "Great service!", rating = 4.8))),
                 location = Location(40.7128, -74.0060)),
             WorkerProfile(
                 uid = "worker3",
                 displayName = "Worker Three",
                 tags = listOf("Electrician"),
-                reviews = ArrayDeque(
-                    listOf(
-                        Review(username = "User1", review = "Great service!", rating = 2.9))),
+                reviews =
+                    ArrayDeque(
+                        listOf(
+                            Review(username = "User1", review = "Great service!", rating = 2.9))),
                 location = Location(40.7128, -74.0060)))
 
     // Provide test data to the searchViewModel
@@ -926,25 +918,28 @@ class SearchWorkerResultScreenTest {
                 uid = "worker1",
                 displayName = "Worker One",
                 tags = listOf("Electrician"),
-                reviews = ArrayDeque(
-                    listOf(
-                        Review(username = "User1", review = "Great service!", rating = 5.5))),
+                reviews =
+                    ArrayDeque(
+                        listOf(
+                            Review(username = "User1", review = "Great service!", rating = 5.5))),
                 location = Location(40.7128, -74.0060)),
             WorkerProfile(
                 uid = "worker2",
                 displayName = "Worker Two",
                 tags = listOf("Electrician", "Plumber"),
-                reviews = ArrayDeque(
-                    listOf(
-                        Review(username = "User1", review = "Great service!", rating = 4.8))),
+                reviews =
+                    ArrayDeque(
+                        listOf(
+                            Review(username = "User1", review = "Great service!", rating = 4.8))),
                 location = Location(40.7128, -74.0060)),
             WorkerProfile(
                 uid = "worker3",
                 displayName = "Worker Three",
                 tags = listOf("Plumber"),
-                reviews = ArrayDeque(
-                    listOf(
-                        Review(username = "User1", review = "Great service!", rating = 2.9))),
+                reviews =
+                    ArrayDeque(
+                        listOf(
+                            Review(username = "User1", review = "Great service!", rating = 2.9))),
                 location = Location(40.7128, -74.0060)))
 
     // Provide test data to the searchViewModel
@@ -1059,10 +1054,24 @@ class SearchWorkerResultScreenTest {
   fun testPriceRangeFilterUpdatesResults() {
     val workers =
         listOf(
-            WorkerProfile(uid = "worker1", price = 150.0, fieldOfWork = "Painter", rating = 4.5, location = Location(40.7128, -74.0060)),
             WorkerProfile(
-                uid = "worker2", price = 560.0, fieldOfWork = "Electrician", rating = 4.8, location = Location(40.7128, -74.0060)),
-            WorkerProfile(uid = "worker3", price = 3010.0, fieldOfWork = "Plumber", rating = 3.9, location = Location(40.7128, -74.0060)))
+                uid = "worker1",
+                price = 150.0,
+                fieldOfWork = "Painter",
+                rating = 4.5,
+                location = Location(40.7128, -74.0060)),
+            WorkerProfile(
+                uid = "worker2",
+                price = 560.0,
+                fieldOfWork = "Electrician",
+                rating = 4.8,
+                location = Location(40.7128, -74.0060)),
+            WorkerProfile(
+                uid = "worker3",
+                price = 3010.0,
+                fieldOfWork = "Plumber",
+                rating = 3.9,
+                location = Location(40.7128, -74.0060)))
 
     // Provide test data to the searchViewModel
     searchViewModel._subCategoryWorkerProfiles.value = workers
@@ -1100,10 +1109,24 @@ class SearchWorkerResultScreenTest {
   fun testPriceRangeFilterExcludesWorkersOutsideRange() {
     val workers =
         listOf(
-            WorkerProfile(uid = "worker1", price = 150.0, fieldOfWork = "Painter", rating = 4.5, location = Location(40.7128, -74.0060)),
             WorkerProfile(
-                uid = "worker2", price = 500.0, fieldOfWork = "Electrician", rating = 4.8, location = Location(40.7128, -74.0060)),
-            WorkerProfile(uid = "worker3", price = 3001.0, fieldOfWork = "Plumber", rating = 3.9, location = Location(40.7128, -74.0060)))
+                uid = "worker1",
+                price = 150.0,
+                fieldOfWork = "Painter",
+                rating = 4.5,
+                location = Location(40.7128, -74.0060)),
+            WorkerProfile(
+                uid = "worker2",
+                price = 500.0,
+                fieldOfWork = "Electrician",
+                rating = 4.8,
+                location = Location(40.7128, -74.0060)),
+            WorkerProfile(
+                uid = "worker3",
+                price = 3001.0,
+                fieldOfWork = "Plumber",
+                rating = 3.9,
+                location = Location(40.7128, -74.0060)))
 
     // Provide test data to the searchViewModel
     searchViewModel._subCategoryWorkerProfiles.value = workers
@@ -1178,7 +1201,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("locationFilterModalSheet").assertIsDisplayed()
 
     // Select "Home" location
-    composeTestRule.onNodeWithText("Hello").performClick()
+    composeTestRule.onNodeWithText("Home").performClick()
 
     // Click Apply
     composeTestRule.onNodeWithTag("applyButton").performClick()
@@ -1313,20 +1336,22 @@ class SearchWorkerResultScreenTest {
     composeTestRule.waitForIdle()
 
     val today = LocalDate.now().dayOfMonth
-      val textFields =
-          composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
+    val textFields =
+        composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
 
-      // Ensure that we have at least two text fields
-      assert(textFields.fetchSemanticsNodes().size >= 2)
+    // Ensure that we have at least two text fields
+    assert(textFields.fetchSemanticsNodes().size >= 2)
 
-      textFields[0].performTextReplacement("10")
+    textFields[0].performTextReplacement("10")
 
-      textFields[1].performTextReplacement("00")
+    textFields[1].performTextReplacement("00")
 
-      // Find the node representing today's date and perform a click
-      composeTestRule.onNode(hasText(today.toString()) and hasClickAction()).performClick()
+    // Find the node representing today's date and perform a click
+    composeTestRule
+        .onNode(hasText(today.toString()) and hasClickAction() and !hasSetTextAction())
+        .performClick()
 
-      composeTestRule.onNodeWithText("OK").performClick()
+    composeTestRule.onNodeWithText("OK").performClick()
 
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(1)
 
@@ -1344,17 +1369,26 @@ class SearchWorkerResultScreenTest {
   fun testTogglingRatingFilterOff() {
     val workers =
         listOf(
-            WorkerProfile(uid = "w1", reviews = ArrayDeque(
-                listOf(
-                    Review(username = "User1", review = "Great service!", rating = 3.0))),
+            WorkerProfile(
+                uid = "w1",
+                reviews =
+                    ArrayDeque(
+                        listOf(
+                            Review(username = "User1", review = "Great service!", rating = 3.0))),
                 location = Location(40.7128, -74.0060)),
-            WorkerProfile(uid = "w2", reviews = ArrayDeque(
-                listOf(
-                    Review(username = "User1", review = "Great service!", rating = 4.5))),
+            WorkerProfile(
+                uid = "w2",
+                reviews =
+                    ArrayDeque(
+                        listOf(
+                            Review(username = "User1", review = "Great service!", rating = 4.5))),
                 location = Location(40.7128, -74.0060)),
-            WorkerProfile(uid = "w3", reviews = ArrayDeque(
-                listOf(
-                    Review(username = "User1", review = "Great service!", rating = 2.0))),
+            WorkerProfile(
+                uid = "w3",
+                reviews =
+                    ArrayDeque(
+                        listOf(
+                            Review(username = "User1", review = "Great service!", rating = 2.0))),
                 location = Location(40.7128, -74.0060)))
 
     searchViewModel._subCategoryWorkerProfiles.value = workers
@@ -1448,5 +1482,280 @@ class SearchWorkerResultScreenTest {
 
     // Since searchSubcategory is null, ChooseServiceTypeSheet should not appear
     composeTestRule.onNodeWithTag("chooseServiceTypeModalSheet").assertDoesNotExist()
+  }
+
+  @Test
+  fun testWorkerFilteringByServicesTwiceBehavesCorrectly() {
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                tags = listOf("Exterior Painter", "Interior Painter"),
+                rating = 4.5,
+                location = Location(40.7128, -74.0060)),
+            WorkerProfile(
+                uid = "worker2",
+                tags = listOf("Interior Painter", "Electrician"),
+                rating = 4.0,
+                location = Location(40.7128, -74.0060)),
+            WorkerProfile(
+                uid = "worker3",
+                price = 777.0,
+                tags = listOf("Plumber"),
+                rating = 5.0,
+                location = Location(40.7128, -74.0060)))
+
+    // Set up subcategory tags
+    searchViewModel._searchSubcategory.value =
+        Subcategory(tags = listOf("Exterior Painter", "Interior Painter", "Plumber", "Electrician"))
+
+    searchViewModel._subCategoryWorkerProfiles.value = workers
+
+    composeTestRule.setContent {
+      SearchWorkerResult(
+          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+    // Click on the "Service Type" filter button
+    composeTestRule.onNodeWithText("Service Type").performClick()
+
+    // Wait for the bottom sheet to appear
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("chooseServiceTypeModalSheet").assertIsDisplayed()
+
+    // Simulate selecting "Interior Painter"
+    composeTestRule.onNodeWithText("Interior Painter").performClick()
+    composeTestRule.onNodeWithText("Apply").performClick()
+
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
+
+    composeTestRule.onNodeWithText("Service Type").performClick()
+
+    // Wait for the bottom sheet to appear
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("chooseServiceTypeModalSheet").assertIsDisplayed()
+
+    // Simulate selecting "Interior Painter"
+    composeTestRule.onNodeWithText("Interior Painter").performClick()
+    composeTestRule.onNodeWithText("Plumber").performClick()
+    composeTestRule.onNodeWithText("Apply").performClick()
+
+    composeTestRule.waitForIdle()
+
+    // Verify filtered workers
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(1)
+
+    val sortedWorkers = listOf(workers[2])
+    val workerNodes = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
+
+    workerNodes.assertCountEquals(sortedWorkers.size)
+
+    sortedWorkers.forEachIndexed { index, worker ->
+      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
+    }
+  }
+
+  @Test
+  fun testWorkerFilteringByAvailabilityTwiceBehavesCorrectly() {
+    // Set up test worker profiles with specific working hours and unavailability
+    val worker1 =
+        WorkerProfile(
+            uid = "worker1",
+            fieldOfWork = "Painter",
+            rating = 4.5,
+            workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
+            unavailability_list = listOf(LocalDate.now()),
+            location = Location(40.7128, -74.0060))
+
+    val worker2 =
+        WorkerProfile(
+            uid = "worker2",
+            fieldOfWork = "Electrician",
+            rating = 4.0,
+            workingHours = Pair(LocalTime.of(8, 0), LocalTime.of(16, 0)),
+            unavailability_list = listOf(LocalDate.now().plusDays(1)),
+            location = Location(40.7128, -74.0060))
+
+    val worker3 =
+        WorkerProfile(
+            uid = "worker3",
+            fieldOfWork = "Plumber",
+            rating = 5.0,
+            workingHours = Pair(LocalTime.of(10, 0), LocalTime.of(18, 0)),
+            unavailability_list = listOf(LocalDate.now()),
+            location = Location(40.7128, -74.0060))
+
+    // Update the searchViewModel with these test workers
+    searchViewModel._subCategoryWorkerProfiles.value = listOf(worker1, worker2, worker3)
+
+    // Set the composable content
+    composeTestRule.setContent {
+      SearchWorkerResult(
+          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+    }
+
+    // Initially, all workers should be displayed
+    composeTestRule.waitForIdle()
+
+    // Verify that all 3 workers are displayed
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
+
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
+    // Simulate clicking the "Availability" filter button
+    composeTestRule.onNodeWithText("Availability").performClick()
+
+    // Wait for the bottom sheet to appear
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("availabilityBottomSheet").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("timePickerColumn").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("timeInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("bottomSheetColumn").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Enter time").assertIsDisplayed()
+
+    val today = LocalDate.now()
+    val day = today.dayOfMonth
+
+    val textFields =
+        composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
+
+    // Ensure that we have at least two text fields
+    assert(textFields.fetchSemanticsNodes().size >= 2)
+
+    // Set the hour to "07"
+    textFields[0].performTextReplacement("10")
+
+    // Set the minute to "00"
+    textFields[1].performTextReplacement("00")
+
+    // Find the node representing today's date and perform a click
+    composeTestRule
+        .onNode(hasText(day.toString()) and hasClickAction() and !hasSetTextAction())
+        .performClick()
+
+    composeTestRule.onNodeWithText("OK").performClick()
+
+    composeTestRule.waitForIdle()
+
+    // Verify that 2 workers are displayed
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(1)
+
+    composeTestRule.onNodeWithText("Availability").performClick()
+
+    composeTestRule.waitForIdle()
+
+    val textFields2 =
+        composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
+
+    // Ensure that we have at least two text fields
+    assert(textFields2.fetchSemanticsNodes().size >= 2)
+
+    // Set the hour to "07"
+    textFields2[0].performTextReplacement("10")
+
+    // Set the minute to "00"
+    textFields2[1].performTextReplacement("00")
+
+    // Find the node representing today's date and perform a click
+    composeTestRule
+        .onNode(
+            hasText(LocalDate.now().plusDays(1).dayOfMonth.toString()) and
+                hasClickAction() and
+                !hasSetTextAction())
+        .performClick()
+
+    composeTestRule.onNodeWithText("OK").performClick()
+
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
+  }
+
+  @Test
+  fun testLocationFilterReselectBehavesCorrectly() {
+    // Set up test workers with various locations
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                location = com.arygm.quickfix.model.locations.Location(40.0, -74.0, "Home"),
+                fieldOfWork = "Painter",
+                rating = 4.5),
+            WorkerProfile(
+                uid = "worker2",
+                location = com.arygm.quickfix.model.locations.Location(45.0, -75.0, "Far"),
+                fieldOfWork = "Electrician",
+                rating = 4.0))
+
+    // Provide test data to the searchViewModel
+    searchViewModel._subCategoryWorkerProfiles.value = workers
+
+    // Set the composable content
+    composeTestRule.setContent {
+      SearchWorkerResult(
+          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+    }
+
+    // Initially, both workers should be displayed
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
+
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    // Scroll to the "Location" button in the LazyRow if needed
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+
+    // Open the Location filter bottom sheet
+    composeTestRule.onNodeWithText("Location").performClick()
+    composeTestRule.waitForIdle()
+
+    // Verify bottom sheet is displayed
+    composeTestRule.onNodeWithTag("locationFilterModalSheet").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("applyButton").assertIsNotEnabled()
+
+    // Select "Home" location
+    composeTestRule.onNodeWithText("Home").performClick()
+
+    // Click Apply
+    composeTestRule.onNodeWithTag("applyButton").performClick()
+    composeTestRule.waitForIdle()
+
+    // Verify that only the worker at "Home" is displayed (worker1)
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(1)
+
+    // Open Location filter again to clear
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithText("Location").performClick()
+    composeTestRule.waitForIdle()
+
+    // Verify bottom sheet
+    composeTestRule.onNodeWithTag("locationFilterModalSheet").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("applyButton").assertIsEnabled()
+
+    composeTestRule.onNodeWithText("Home").performClick()
+
+    // Clear the filter
+    composeTestRule.onNodeWithTag("resetButton").performClick()
+    composeTestRule.waitForIdle()
+
+    // Verify that we are back to the initial state (2 workers displayed)
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
+
+    composeTestRule.onNodeWithText("Location").performClick()
+    composeTestRule.waitForIdle()
+
+    // Verify bottom sheet
+    composeTestRule.onNodeWithTag("locationFilterModalSheet").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("applyButton").assertIsNotEnabled()
+    composeTestRule.onNodeWithTag("resetButton").assertIsNotEnabled()
   }
 }

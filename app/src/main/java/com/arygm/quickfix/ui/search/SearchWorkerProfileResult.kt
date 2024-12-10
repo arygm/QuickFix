@@ -80,7 +80,7 @@ fun SearchWorkerProfileResult(
                     verticalArrangement = Arrangement.Top,
                 ) {
                   Row(verticalAlignment = Alignment.CenterVertically) {
-                      val roundedRating = String.format("%.2f", rating).toDouble()
+                    val roundedRating = String.format("%.2f", rating).toDouble()
                     Text(
                         text = "$roundedRating ★",
                         fontFamily = poppinsFontFamily,

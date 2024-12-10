@@ -11,7 +11,6 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFixRepository
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.utils.inToMonth
 import java.time.LocalDate
 import org.junit.Before
 import org.junit.Rule

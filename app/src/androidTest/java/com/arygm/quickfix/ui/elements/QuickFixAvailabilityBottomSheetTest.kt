@@ -14,7 +14,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.arygm.quickfix.utils.inToMonth
 import java.time.LocalDate
 import org.junit.Rule
 import org.junit.Test

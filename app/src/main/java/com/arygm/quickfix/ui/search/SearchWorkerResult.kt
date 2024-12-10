@@ -1,6 +1,6 @@
 package com.arygm.quickfix.ui.search
 
-import android.location.Geocoder
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -97,7 +97,6 @@ import com.arygm.quickfix.utils.GeocoderWrapper
 import com.arygm.quickfix.utils.LocationHelper
 import com.arygm.quickfix.utils.loadUserId
 import java.time.LocalDate
-import java.util.Locale
 
 data class SearchFilterButtons(
     val onClick: () -> Unit,
@@ -107,6 +106,7 @@ data class SearchFilterButtons(
     val applied: Boolean = false
 )
 
+@SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SearchWorkerResult(
@@ -115,14 +115,14 @@ fun SearchWorkerResult(
     accountViewModel: AccountViewModel,
     userProfileViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
-    geocoderWrapper: GeocoderWrapper= GeocoderWrapper(LocalContext.current)
+    geocoderWrapper: GeocoderWrapper = GeocoderWrapper(LocalContext.current)
 ) {
-    fun getCityNameFromCoordinates(latitude: Double, longitude: Double): String? {
-        val addresses = geocoderWrapper.getFromLocation(latitude, longitude, 1)
-        return addresses?.firstOrNull()?.locality
-            ?: addresses?.firstOrNull()?.subAdminArea
-            ?: addresses?.firstOrNull()?.adminArea
-    }
+  fun getCityNameFromCoordinates(latitude: Double, longitude: Double): String? {
+    val addresses = geocoderWrapper.getFromLocation(latitude, longitude, 1)
+    return addresses?.firstOrNull()?.locality
+        ?: addresses?.firstOrNull()?.subAdminArea
+        ?: addresses?.firstOrNull()?.adminArea
+  }
   val locationHelper = LocationHelper(LocalContext.current, MainActivity())
   var phoneLocation by remember {
     mutableStateOf(com.arygm.quickfix.model.locations.Location(0.0, 0.0, "Default"))
@@ -130,8 +130,8 @@ fun SearchWorkerResult(
   var baseLocation by remember { mutableStateOf(phoneLocation) }
   val context = LocalContext.current
 
-    var userProfile by remember { mutableStateOf<UserProfile?>(null) }
-    var uid by remember { mutableStateOf("Loading...") }
+  var userProfile by remember { mutableStateOf<UserProfile?>(null) }
+  var uid by remember { mutableStateOf("Loading...") }
 
   LaunchedEffect(Unit) {
     if (locationHelper.checkPermissions()) {
@@ -148,10 +148,8 @@ fun SearchWorkerResult(
     } else {
       Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
     }
-      uid = loadUserId(preferencesViewModel)
-      userProfileViewModel.fetchUserProfile(uid) { profile ->
-          userProfile = profile as UserProfile
-      }
+    uid = loadUserId(preferencesViewModel)
+    userProfileViewModel.fetchUserProfile(uid) { profile -> userProfile = profile as UserProfile }
   }
 
   var selectedWorker by remember { mutableStateOf(WorkerProfile()) }
@@ -179,8 +177,14 @@ fun SearchWorkerResult(
   var selectedPriceEnd by remember { mutableStateOf(0) }
   var selectedLocation by remember { mutableStateOf(com.arygm.quickfix.model.locations.Location()) }
   var maxDistance by remember { mutableStateOf(0) }
+  var selectedLocationIndex by remember { mutableStateOf<Int?>(null) }
+
+  var lastAppliedPriceStart by remember { mutableStateOf(500) }
+  var lastAppliedPriceEnd by remember { mutableStateOf(2500) }
+  var lastAppliedMaxDist by remember { mutableStateOf(200) }
 
   fun reapplyFilters() {
+    Log.d("Chill guy", "entered")
     var updatedProfiles = workerProfiles
 
     if (availabilityFilterApplied) {
@@ -208,6 +212,7 @@ fun SearchWorkerResult(
       updatedProfiles = searchViewModel.sortWorkersByRating(updatedProfiles)
     }
 
+    Log.d("Chill guy", updatedProfiles.size.toString())
     filteredWorkerProfiles = updatedProfiles
   }
 
@@ -221,6 +226,10 @@ fun SearchWorkerResult(
                 locationFilterApplied = false
                 ratingFilterApplied = false
                 servicesFilterApplied = false
+                lastAppliedMaxDist = 200
+                lastAppliedPriceStart = 500
+                lastAppliedPriceEnd = 2500
+                selectedLocationIndex = null
                 selectedServices = emptyList()
                 baseLocation = phoneLocation
               },
@@ -494,7 +503,7 @@ fun SearchWorkerResult(
                       locationName?.let {
                         cityName =
                             profile.location?.let { it1 ->
-                                getCityNameFromCoordinates(it1.latitude, profile.location.longitude)
+                              getCityNameFromCoordinates(it1.latitude, profile.location.longitude)
                             }
                         cityName?.let { it1 ->
                           SearchWorkerProfileResult(
@@ -507,9 +516,9 @@ fun SearchWorkerResult(
                               location = it1,
                               price = profile.price.toString(),
                               onBookClick = {
-                                  selectedWorker = profile
-                                  selectedCityName = cityName
-                                  isWindowVisible = true
+                                selectedWorker = profile
+                                selectedCityName = cityName
+                                isWindowVisible = true
                               },
                               distance = distance,
                           )
@@ -529,9 +538,13 @@ fun SearchWorkerResult(
           selectedDays = days
           selectedHour = hour
           selectedMinute = minute
-          filteredWorkerProfiles =
-              searchViewModel.filterWorkersByAvailability(
-                  filteredWorkerProfiles, days, hour, minute)
+          if (availabilityFilterApplied) {
+            reapplyFilters()
+          } else {
+            filteredWorkerProfiles =
+                searchViewModel.filterWorkersByAvailability(
+                    filteredWorkerProfiles, days, hour, minute)
+          }
           availabilityFilterApplied = true
         },
         onClearClick = {
@@ -550,8 +563,12 @@ fun SearchWorkerResult(
           selectedServices = selectedServices,
           onApplyClick = { services ->
             selectedServices = services
-            filteredWorkerProfiles =
-                searchViewModel.filterWorkersByServices(filteredWorkerProfiles, selectedServices)
+            if (servicesFilterApplied) {
+              reapplyFilters()
+            } else {
+              filteredWorkerProfiles =
+                  searchViewModel.filterWorkersByServices(filteredWorkerProfiles, selectedServices)
+            }
             servicesFilterApplied = true
           },
           onDismissRequest = { showServicesBottomSheet = false },
@@ -568,45 +585,66 @@ fun SearchWorkerResult(
         onApplyClick = { start, end ->
           selectedPriceStart = start
           selectedPriceEnd = end
-          filteredWorkerProfiles =
-              searchViewModel.filterWorkersByPriceRange(filteredWorkerProfiles, start, end)
+          lastAppliedPriceStart = start
+          lastAppliedPriceEnd = end
+          if (priceFilterApplied) {
+            reapplyFilters()
+          } else {
+            filteredWorkerProfiles =
+                searchViewModel.filterWorkersByPriceRange(filteredWorkerProfiles, start, end)
+          }
           priceFilterApplied = true
         },
         onDismissRequest = { showPriceRangeBottomSheet = false },
         onClearClick = {
           selectedPriceStart = 0
           selectedPriceEnd = 0
+          lastAppliedPriceStart = 500
+          lastAppliedPriceEnd = 2500
           priceFilterApplied = false
           reapplyFilters()
         },
-        clearEnabled = priceFilterApplied)
+        clearEnabled = priceFilterApplied,
+        start = lastAppliedPriceStart,
+        end = lastAppliedPriceEnd)
 
-      userProfile?.let {
-          QuickFixLocationFilterBottomSheet(
+    userProfile?.let {
+      QuickFixLocationFilterBottomSheet(
           showLocationBottomSheet,
           userProfile = it,
           phoneLocation = phoneLocation,
+          selectedLocationIndex = selectedLocationIndex,
           onApplyClick = { location, max ->
-              selectedLocation = location
-              if (location == com.arygm.quickfix.model.locations.Location(0.0, 0.0, "Default")) {
-                  Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
-              }
-              baseLocation = location
-              maxDistance = max
+            selectedLocation = location
+            lastAppliedMaxDist = max
+            baseLocation = location
+            maxDistance = max
+            selectedLocationIndex = userProfile!!.locations.indexOf(location) + 1
+
+            if (location == com.arygm.quickfix.model.locations.Location(0.0, 0.0, "Default")) {
+              Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
+            }
+            if (locationFilterApplied) {
+              reapplyFilters()
+            } else {
               filteredWorkerProfiles =
                   searchViewModel.filterWorkersByDistance(filteredWorkerProfiles, location, max)
-              locationFilterApplied = true
+            }
+            locationFilterApplied = true
           },
           onDismissRequest = { showLocationBottomSheet = false },
           onClearClick = {
-              baseLocation = phoneLocation
-              selectedLocation = com.arygm.quickfix.model.locations.Location()
-              maxDistance = 0
-              locationFilterApplied = false
-              reapplyFilters()
+            baseLocation = phoneLocation
+            lastAppliedMaxDist = 200
+            selectedLocation = com.arygm.quickfix.model.locations.Location()
+            maxDistance = 0
+            selectedLocationIndex = null
+            locationFilterApplied = false
+            reapplyFilters()
           },
-          clearEnabled = locationFilterApplied)
-      }
+          clearEnabled = locationFilterApplied,
+          end = lastAppliedMaxDist)
+    }
 
     if (isWindowVisible) {
       QuickFixSlidingWindow(isVisible = isWindowVisible, onDismiss = { isWindowVisible = false }) {
@@ -865,7 +903,9 @@ fun SearchWorkerResult(
                         modifier =
                             Modifier.padding(horizontal = screenWidth * 0.04f)
                                 .testTag("sliding_window_star_rating_row")) {
-                          RatingBar(selectedWorker.rating.toFloat(), modifier = Modifier.height(20.dp).testTag("starsRow"))
+                          RatingBar(
+                              selectedWorker.rating.toFloat(),
+                              modifier = Modifier.height(20.dp).testTag("starsRow"))
                         }
                     Spacer(modifier = Modifier.height(screenHeight * 0.01f))
                     LazyRow(

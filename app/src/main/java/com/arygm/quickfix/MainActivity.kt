@@ -3,7 +3,6 @@ package com.arygm.quickfix
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.location.Geocoder
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
@@ -423,8 +422,7 @@ fun SearchNavHost(
           searchViewModel,
           accountViewModel,
           userProfileViewModel,
-          preferencesViewModel
-      )
+          preferencesViewModel)
     }
     composable(Screen.SEARCH_LOCATION) {
       LocationSearchCustomScreen(

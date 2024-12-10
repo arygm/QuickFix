@@ -10,20 +10,12 @@ import org.junit.Test
 
 class QuickFixStarRatingTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    @Test
-    fun verify_all_stars_are_rendered() {
-        composeTestRule.setContent {
-            RatingBar(
-                rating = 3f,
-                modifier = Modifier.height(20.dp)
-            )
-        }
-        // Check that all 5 stars are present
-        (0..4).forEach { index ->
-            composeTestRule.onNodeWithTag("Star_$index").assertExists()
-        }
-    }
+  @Test
+  fun verify_all_stars_are_rendered() {
+    composeTestRule.setContent { RatingBar(rating = 3f, modifier = Modifier.height(20.dp)) }
+    // Check that all 5 stars are present
+    (0..4).forEach { index -> composeTestRule.onNodeWithTag("Star_$index").assertExists() }
+  }
 }
