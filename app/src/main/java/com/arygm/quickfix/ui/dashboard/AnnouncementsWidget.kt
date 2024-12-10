@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.outlined.ElectricalServices
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -27,21 +28,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.search.Announcement
 import com.arygm.quickfix.model.search.AnnouncementViewModel
+import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @Composable
 fun AnnouncementsWidget(
-    announcementViewModel: AnnouncementViewModel =
-        viewModel(factory = AnnouncementViewModel.Factory),
+    announcementViewModel: AnnouncementViewModel,
+    navigationActions: NavigationActions,
     modifier: Modifier = Modifier,
     itemsToShowDefault: Int = 2
 ) {
   var showAll by remember { mutableStateOf(false) }
   val announcements by announcementViewModel.announcementsForUser.collectAsState()
+  val imagesForAnnouncements = announcementViewModel.announcementImagesMap.collectAsState()
 
   BoxWithConstraints {
     val cardWidth = maxWidth * 0.4f // Customize card width as needed
@@ -78,12 +81,15 @@ fun AnnouncementsWidget(
 
           val itemsToShow = if (showAll) announcements else announcements.take(itemsToShowDefault)
           itemsToShow.forEachIndexed { index, announcement ->
-            announcementViewModel.fetchAnnouncementImagesAsBitmaps(announcement.announcementId)
-            val bitmap = announcementViewModel.selectedAnnouncementImages.value.first()
+            val bitmaps = imagesForAnnouncements.value[announcement.announcementId] ?: emptyList()
+            val bitmapToDisplay = bitmaps.first()
             AnnouncementItem(
                 announcement = announcement,
-                announcementImage = bitmap,
-                onClick = { announcementViewModel.selectAnnouncement(announcement) })
+                announcementImage = bitmapToDisplay,
+                onClick = {
+                  announcementViewModel.selectAnnouncement(announcement)
+                  navigationActions.navigateTo(Screen.ANNOUNCEMENT_DETAIL)
+                })
 
             if (index < itemsToShow.size - 1) {
               Divider(
@@ -102,7 +108,7 @@ fun AnnouncementItem(announcement: Announcement, announcementImage: Bitmap?, onC
               .padding(8.dp)
               .clickable { onClick() }
               .testTag("AnnouncementItem_${announcement.announcementId}"),
-      verticalAlignment = Alignment.CenterVertically) {
+      verticalAlignment = Alignment.Top) {
         // Image
         if (announcementImage != null) {
           Image(
@@ -128,7 +134,8 @@ fun AnnouncementItem(announcement: Announcement, announcementImage: Bitmap?, onC
 
         // Text content
         Column(modifier = Modifier.weight(1f)) {
-          Row(verticalAlignment = Alignment.CenterVertically) {
+          // Title and location row
+          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = announcement.title,
                 style = poppinsTypography.bodyMedium,
@@ -136,27 +143,43 @@ fun AnnouncementItem(announcement: Announcement, announcementImage: Bitmap?, onC
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis)
+
             Spacer(modifier = Modifier.width(4.dp))
+
             Icon(
-                imageVector = Icons.Outlined.ElectricalServices, // Replace this icon
+                imageVector = Icons.Outlined.ElectricalServices,
                 contentDescription = "Category Icon",
                 tint = MaterialTheme.colorScheme.primary)
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Location
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Icon(
+                  imageVector = Icons.Default.LocationOn,
+                  contentDescription = "Location",
+                  tint = MaterialTheme.colorScheme.onSurface,
+                  modifier = Modifier.size(16.dp))
+              Text(
+                  text = announcement.location?.name ?: "Unknown",
+                  fontSize = 9.sp,
+                  color = MaterialTheme.colorScheme.onSurface,
+                  modifier = Modifier.padding(start = 2.dp),
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis)
+            }
           }
 
+          Spacer(modifier = Modifier.height(4.dp))
+
+          // Description row
           Text(
               text = announcement.description,
-              style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
+              style = poppinsTypography.bodyMedium.copy(fontSize = 12.sp),
+              fontWeight = FontWeight.Normal,
               color = MaterialTheme.colorScheme.onSurface,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis)
         }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        // Location
-        Text(
-            text = announcement.location?.name ?: "Unknown",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface)
       }
 }

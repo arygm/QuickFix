@@ -49,6 +49,7 @@ import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.search.Announcement
@@ -58,24 +59,25 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.utils.loadUserId
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun AnnouncementScreen(
-    announcementViewModel: AnnouncementViewModel =
-        viewModel(factory = AnnouncementViewModel.Factory),
+    announcementViewModel: AnnouncementViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel =
         viewModel(factory = LoggedInAccountViewModel.Factory),
     profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
     accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
+    preferencesViewModel: PreferencesViewModel,
     navigationActions: NavigationActions,
     isUser: Boolean = true
 ) {
   val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
-  val userId =
-      loggedInAccount?.uid
-          ?: "Should not happen" // If no user is logged, no announcement can be made
+  var userId by remember { mutableStateOf("") }
+
+  LaunchedEffect(Unit) { userId = loadUserId(preferencesViewModel) }
 
   var title by rememberSaveable { mutableStateOf("") }
   var category by rememberSaveable { mutableStateOf("") }
@@ -126,7 +128,7 @@ fun AnnouncementScreen(
     profileViewModel.fetchUserProfile(userId) { profile ->
       if (profile is UserProfile) {
         val announcementList = profile.announcements + announcement.announcementId
-
+        Log.d("announcement", announcementList.toString())
         profileViewModel.updateProfile(
             UserProfile(profile.locations, announcementList, profile.wallet, profile.uid),
             onSuccess = {
@@ -161,9 +163,11 @@ fun AnnouncementScreen(
 
         // Clear the added pictures
         announcementViewModel.clearUploadedImages()
+        Log.d("announcement", "before profile update")
 
         // Update the user profile with the new announcement
         updateUserProfileWithAnnouncement(announcement)
+        Log.d("announcement", "profile update")
 
         // Reset all parameters after making an announcement
         resetAnnouncementParameters()

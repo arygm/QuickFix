@@ -31,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -49,9 +50,9 @@ fun QuickFixFinderScreen(
         viewModel(factory = LoggedInAccountViewModel.Factory),
     accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
     searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory),
-    announcementViewModel: AnnouncementViewModel =
-        viewModel(factory = AnnouncementViewModel.Factory),
-    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
+    announcementViewModel: AnnouncementViewModel,
+    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
+    preferencesViewModel: PreferencesViewModel,
 ) {
   Scaffold(
       containerColor = colorScheme.background,
@@ -111,6 +112,7 @@ fun QuickFixFinderScreen(
                               loggedInAccountViewModel,
                               profileViewModel,
                               accountViewModel,
+                              preferencesViewModel,
                               navigationActions,
                               isUser)
                       else -> Text("Should never happen !")

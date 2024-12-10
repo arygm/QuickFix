@@ -41,8 +41,11 @@ import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesRepositoryDataStore
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
+import com.arygm.quickfix.model.search.AnnouncementRepositoryFirestore
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
@@ -65,8 +68,12 @@ import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.search.SearchWorkerResult
+import com.arygm.quickfix.ui.search.announcement.AnnouncementDetailScreen
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.utils.LocationHelper
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.delay
 
 val Context.dataStore by preferencesDataStore(name = "quickfix_preferences")
@@ -144,12 +151,26 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
   val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
   val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory)
   val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
-  val announcementViewModel: AnnouncementViewModel =
-      viewModel(factory = AnnouncementViewModel.Factory)
   val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
   val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
   val preferencesViewModel: PreferencesViewModel =
       viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
+
+  // Create required repositories
+  val announcementRepository =
+      AnnouncementRepositoryFirestore(db = Firebase.firestore, storage = Firebase.storage)
+  val preferencesRepository = PreferencesRepositoryDataStore(context.dataStore)
+  val userProfileRepository =
+      UserProfileRepositoryFirestore(db = Firebase.firestore, storage = Firebase.storage)
+
+  // Instantiate AnnouncementViewModel with updated factory
+  val announcementViewModel: AnnouncementViewModel =
+      viewModel(
+          factory =
+              AnnouncementViewModel.Factory(
+                  announcementRepository = announcementRepository,
+                  preferencesRepository = preferencesRepository,
+                  userProfileRepository = userProfileRepository))
 
   // Initialized here because needed for the bottom bar
   val profileNavController = rememberNavController()
@@ -159,6 +180,7 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
   val screen by remember { navigationActionsRoot::currentScreen }
   var screenInProfileNavHost by remember { mutableStateOf<String?>(null) }
   var screenInSearchNavHost by remember { mutableStateOf<String?>(null) }
+  var screenInDashboardNavHost by remember { mutableStateOf<String?>(null) }
 
   // Make `bottomBarVisible` reactive to changes in `screen`
   val shouldShowBottomBar by remember {
@@ -175,7 +197,8 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
           } ?: true &&
           screenInProfileNavHost?.let {
             it != Screen.ACCOUNT_CONFIGURATION && it != Screen.TO_WORKER
-          } ?: true
+          } ?: true &&
+          screenInDashboardNavHost?.let { it != Screen.ANNOUNCEMENT_DETAIL } ?: true
     }
   }
 
@@ -269,14 +292,17 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
                     loggedInAccountViewModel,
                     accountViewModel,
                     announcementViewModel,
-                    { currentScreen ->
-                      screenInSearchNavHost = currentScreen // Mise à jour de l'écran actif
-                    },
+                    { currentScreen -> screenInSearchNavHost = currentScreen },
                     categoryViewModel,
                     preferencesViewModel)
               }
 
-              composable(Route.DASHBOARD) { DashBoardNavHost(announcementViewModel, isUser) }
+              composable(Route.DASHBOARD) {
+                DashBoardNavHost(
+                    announcementViewModel,
+                    { currentScreen -> screenInDashboardNavHost = currentScreen },
+                    isUser)
+              }
 
               composable(Route.PROFILE) {
                 ProfileNavHost(
@@ -370,12 +396,22 @@ fun ProfileNavHost(
 }
 
 @Composable
-fun DashBoardNavHost(announcementViewModel: AnnouncementViewModel, isUser: Boolean) {
+fun DashBoardNavHost(
+    announcementViewModel: AnnouncementViewModel,
+    onScreenChange: (String) -> Unit,
+    isUser: Boolean
+) {
   val dashboardNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(dashboardNavController) }
+  LaunchedEffect(navigationActions.currentScreen) {
+    onScreenChange(navigationActions.currentScreen)
+  }
   NavHost(navController = dashboardNavController, startDestination = Screen.DASHBOARD) {
     composable(Screen.DASHBOARD) {
       DashboardScreen(announcementViewModel, navigationActions, isUser)
+    }
+    composable(Screen.ANNOUNCEMENT_DETAIL) {
+      AnnouncementDetailScreen(announcementViewModel, navigationActions, isUser)
     }
   }
 }
@@ -413,7 +449,8 @@ fun SearchNavHost(
           accountViewModel,
           searchViewModel,
           announcementViewModel,
-          categoryViewModel)
+          categoryViewModel,
+          preferencesViewModel)
     }
     composable(Screen.DISPLAY_UPLOADED_IMAGES) {
       QuickFixDisplayImages(isUser, navigationActions, announcementViewModel)

@@ -51,6 +51,7 @@ object Screen {
   const val SEARCH_WORKER_RESULT = "Search Worker Result Screen"
   const val DISPLAY_UPLOADED_IMAGES = "Displayed images Screen"
   const val SEARCH_LOCATION = "SEARCH_Location Screen"
+  const val ANNOUNCEMENT_DETAIL = "ANNOUNCEMENT_DETAIL_SCREEN"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector?, val textId: String)

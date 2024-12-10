@@ -40,7 +40,7 @@ class AnnouncementRepositoryFirestore(
         onSuccess(announcements)
       } else {
         task.exception?.let { e ->
-          Log.e("TodosRepositoryFirestore", "Error getting documents", e)
+          Log.e("AnnouncementsRepositoryFirestore", "Error getting documents", e)
           onFailure(e)
         }
       }
@@ -52,10 +52,10 @@ class AnnouncementRepositoryFirestore(
       onSuccess: (List<Announcement>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    Log.d("TodosRepositoryFirestore", "getAnnouncements for IDs: $announcements")
+    Log.d("AnnouncementsRepositoryFirestore", "getAnnouncements for IDs: $announcements")
 
     if (announcements.isEmpty()) {
-      Log.d("TodosRepositoryFirestore", "No announcement IDs provided")
+      Log.d("AnnouncementsRepositoryFirestore", "No announcement IDs provided")
       onSuccess(emptyList())
       return
     }
@@ -74,7 +74,7 @@ class AnnouncementRepositoryFirestore(
             onSuccess(fetchedAnnouncements)
           } else {
             task.exception?.let { e ->
-              Log.e("TodosRepositoryFirestore", "Error getting announcements", e)
+              Log.e("AnnouncementsRepositoryFirestore", "Error getting announcements", e)
               onFailure(e)
             }
           }
@@ -239,7 +239,7 @@ class AnnouncementRepositoryFirestore(
           availability = availability,
           quickFixImages = quickFixImages)
     } catch (e: Exception) {
-      Log.e("TodosRepositoryFirestore", "Error converting document to Announcement", e)
+      Log.e("AnnouncementsRepositoryFirestore", "Error converting document to Announcement", e)
       null
     }
   }

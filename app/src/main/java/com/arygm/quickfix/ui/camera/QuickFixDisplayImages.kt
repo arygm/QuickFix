@@ -49,7 +49,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.search.AnnouncementViewModel
@@ -61,8 +60,7 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 fun QuickFixDisplayImages(
     canDelete: Boolean = true,
     navigationActions: NavigationActions, // Navigation actions parameter
-    announcementViewModel: AnnouncementViewModel =
-        viewModel(factory = AnnouncementViewModel.Factory),
+    announcementViewModel: AnnouncementViewModel,
     images: List<Bitmap> = emptyList() // added these for testing
 ) {
   val uploadedImages by announcementViewModel.uploadedImages.collectAsState()
