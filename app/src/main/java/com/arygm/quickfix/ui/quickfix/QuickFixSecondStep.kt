@@ -69,6 +69,7 @@ fun QuickFixSecondStep(quickFixViewModel: QuickFixViewModel, quickFix: QuickFix)
             "",
             "",
             "",
+            "",
             emptyList(),
             Location(0.0, 0.0, "")))
   }

@@ -38,10 +38,16 @@ import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.profile.dataFields.AddOnService
+import com.arygm.quickfix.model.profile.dataFields.IncludedService
+import com.arygm.quickfix.model.quickfix.QuickFix
+import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
@@ -62,11 +68,14 @@ import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
+import com.arygm.quickfix.ui.quickfix.QuickFixThirdStep
 import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.search.SearchWorkerResult
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.utils.LocationHelper
+import com.google.firebase.Timestamp
 import kotlinx.coroutines.delay
+import java.util.Date
 
 val Context.dataStore by preferencesDataStore(name = "quickfix_preferences")
 
@@ -78,11 +87,34 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
 
     locationHelper = LocationHelper(this, this)
+    val fakeQuickFix =
+        QuickFix(
+            "",
+            Status.PENDING,
+            listOf("Image 1 URL", "Image 2 URL"),
+            listOf(Timestamp.now(), Timestamp(Date(2022, 1, 1))),
+            Timestamp.now(),
+            listOf(IncludedService("Service 1"), IncludedService("Service 2")),
+            listOf(AddOnService("Service 1"), AddOnService("Service 2")),
+            "",
+            "PlaceHolder User Name from userId",
+            "",
+            "Painting Bedroom",
+            "",
+            emptyList(),
+            Location(0.0, 0.0, "Fake Location"))
+
+      val fakeWorkerProfile =
+          WorkerProfile(
+              displayName = "PlaceHolder Worker Name",
+              fieldOfWork = "Painting"
+          )
 
     setContent {
       QuickFixTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          QuickFixApp()
+          QuickFixThirdStep(fakeQuickFix, fakeWorkerProfile)
+            //QuickFixApp()
         }
       }
     }

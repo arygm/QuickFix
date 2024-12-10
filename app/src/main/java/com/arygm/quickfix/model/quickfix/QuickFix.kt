@@ -1,6 +1,7 @@
 package com.arygm.quickfix.model.quickfix
 
 import com.arygm.quickfix.model.bill.BillField
+import com.arygm.quickfix.model.categories.WorkerCategory
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.dataFields.Service
 import com.google.firebase.Timestamp
@@ -13,10 +14,11 @@ data class QuickFix(
     val time: Timestamp,
     val includedServices: List<Service>,
     val addOnServices: List<Service>,
-    val workerName: String,
-    val userName: String,
+    val workerId: String,
+    val userId: String,
     val chatUid: String,
     val title: String,
+    val description: String,
     val bill: List<BillField>,
     val location: Location
 )
