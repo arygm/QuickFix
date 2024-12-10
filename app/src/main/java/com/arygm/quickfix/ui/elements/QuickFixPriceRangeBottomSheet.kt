@@ -42,7 +42,9 @@ fun QuickFixPriceRangeBottomSheet(
     onApplyClick: (Int, Int) -> Unit,
     onDismissRequest: () -> Unit,
     onClearClick: () -> Unit,
-    clearEnabled: Boolean
+    clearEnabled: Boolean,
+    start: Int = 500,
+    end: Int = 2500
 ) {
   var range0 by remember { mutableIntStateOf(0) }
   var range1 by remember { mutableIntStateOf(0) }
@@ -113,8 +115,8 @@ fun QuickFixPriceRangeBottomSheet(
                               cornerRadius = CornerRadius(10f, 10f),
                               minValue = 0,
                               maxValue = 3000,
-                              progress1InitialValue = 500,
-                              progress2InitialValue = 2500,
+                              progress1InitialValue = start,
+                              progress2InitialValue = end,
                               tooltipSpacing = 5.dp,
                               tooltipWidth = 50.dp * widthRatio.value,
                               tooltipHeight = 30.dp * heightRatio.value,

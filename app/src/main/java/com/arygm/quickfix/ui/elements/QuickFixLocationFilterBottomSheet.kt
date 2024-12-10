@@ -56,10 +56,12 @@ fun QuickFixLocationFilterBottomSheet(
     showModalBottomSheet: Boolean,
     userProfile: UserProfile,
     phoneLocation: Location,
+    selectedLocationIndex: Int? = null,
     onApplyClick: (Location, Int) -> Unit,
     onDismissRequest: () -> Unit,
     onClearClick: () -> Unit,
-    clearEnabled: Boolean
+    clearEnabled: Boolean,
+    end: Int = 200
 ) {
   var range by remember { mutableIntStateOf(0) }
   if (showModalBottomSheet) {
@@ -102,7 +104,7 @@ fun QuickFixLocationFilterBottomSheet(
 
                   val locationOptions = mutableListOf("Use my Current Location")
                   userProfile.locations.forEach { loc -> locationOptions += loc.name }
-                  val selectedOption = remember { mutableStateOf<Int?>(null) }
+                  val selectedOption = remember { mutableStateOf<Int?>(selectedLocationIndex) }
 
                   val maxListHeight = heightRatio * 800 * 0.5f
 
@@ -208,7 +210,7 @@ fun QuickFixLocationFilterBottomSheet(
                               cornerRadius = CornerRadius(10f, 10f),
                               minValue = 0,
                               maxValue = 800,
-                              progress1InitialValue = 200,
+                              progress1InitialValue = end,
                               progress2InitialValue = 900,
                               tooltipSpacing = 5.dp,
                               tooltipWidth = 50.dp * widthRatio.value,
@@ -296,6 +298,7 @@ fun hehe() {
         showModalBottomSheet = showModal,
         userProfile = userProfile,
         phoneLocation = Location(200.0, 200.0, "Phone Location"),
+        selectedLocationIndex = null,
         onApplyClick = { loc, a ->
           Log.d("Chill Guy", a.toString())
           Log.d("Chill Guy", loc.name)

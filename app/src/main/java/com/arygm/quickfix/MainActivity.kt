@@ -383,7 +383,7 @@ fun SearchNavHost(
     isUser: Boolean,
     navigationActionsRoot: NavigationActions,
     searchViewModel: SearchViewModel,
-    profileViewModel: ProfileViewModel,
+    userProfileViewModel: ProfileViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
     accountViewModel: AccountViewModel,
     announcementViewModel: AnnouncementViewModel,
@@ -406,7 +406,7 @@ fun SearchNavHost(
           navigationActions,
           navigationActionsRoot,
           isUser,
-          profileViewModel,
+          userProfileViewModel,
           loggedInAccountViewModel,
           searchViewModel,
           accountViewModel,
@@ -421,7 +421,7 @@ fun SearchNavHost(
           navigationActions,
           searchViewModel,
           accountViewModel,
-          profileViewModel,
+          userProfileViewModel,
           preferencesViewModel)
     }
     composable(Screen.SEARCH_LOCATION) {

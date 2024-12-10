@@ -35,6 +35,9 @@ open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositor
   val _subCategoryWorkerProfiles = MutableStateFlow<List<WorkerProfile>>(emptyList())
   val subCategoryWorkerProfiles: StateFlow<List<WorkerProfile>> = _subCategoryWorkerProfiles
 
+  val _workerProfilesSuggestions = MutableStateFlow<List<WorkerProfile>>(emptyList())
+  val workerProfilesSuggestions: StateFlow<List<WorkerProfile>> = _workerProfilesSuggestions
+
   private val _errorMessage = MutableStateFlow<String?>(null)
   val errorMessage: StateFlow<String?> = _errorMessage
 
@@ -176,13 +179,39 @@ open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositor
     }
   }
 
-  fun filterWorkersBySubcategory(fieldOfWork: String) {
+  fun filterWorkersBySubcategory(fieldOfWork: String, onComplete: (() -> Unit)? = null) {
+    _subCategoryWorkerProfiles.value = emptyList()
+
     workerProfileRepo.getProfiles(
         onSuccess = { profiles ->
-          val workerProfiles =
-              profiles.filterIsInstance<WorkerProfile>() // Cast profiles to WorkerProfile
+          val workerProfiles = profiles.filterIsInstance<WorkerProfile>()
           val filteredProfiles = workerProfiles.filter { it.fieldOfWork == fieldOfWork }
           _subCategoryWorkerProfiles.value = filteredProfiles
+          onComplete?.invoke()
+        },
+        onFailure = { Log.e("SearchViewModel", "Failed to fetch worker profiles.") })
+  }
+
+  fun searchEngine(query: String) {
+    val queryWords = query.split(" ").map { it.lowercase().trim() }
+
+    workerProfileRepo.getProfiles(
+        onSuccess = { profiles ->
+          val workerProfiles = profiles.filterIsInstance<WorkerProfile>()
+
+          val filteredProfiles =
+              workerProfiles.filter { profile ->
+                queryWords.all { word ->
+                  profile.fieldOfWork.lowercase().contains(word) ||
+                      profile.description.lowercase().contains(word) ||
+                      profile.displayName.lowercase().contains(word) ||
+                      profile.tags.any { it.lowercase().contains(word) } ||
+                      profile.includedServices.any { it.name.lowercase().contains(word) } ||
+                      profile.addOnServices.any { it.name.lowercase().contains(word) }
+                }
+              }
+
+          _workerProfilesSuggestions.value = filteredProfiles
         },
         onFailure = { Log.e("SearchViewModel", "Failed to fetch worker profiles.") })
   }

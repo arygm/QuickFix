@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.search
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,7 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.theme.poppinsFontFamily
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun SearchWorkerProfileResult(
     modifier: Modifier = Modifier,
@@ -48,6 +50,12 @@ fun SearchWorkerProfileResult(
     onBookClick: () -> Unit,
     distance: Int? = null
 ) {
+  val displayLocation =
+      if (location.length <= 10) {
+        location
+      } else {
+        location.take(10) + "..."
+      }
   Card(
       shape = RoundedCornerShape(8.dp),
       modifier = modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 10.dp),
@@ -72,8 +80,9 @@ fun SearchWorkerProfileResult(
                     verticalArrangement = Arrangement.Top,
                 ) {
                   Row(verticalAlignment = Alignment.CenterVertically) {
+                    val roundedRating = String.format("%.2f", rating).toDouble()
                     Text(
-                        text = "$rating ★",
+                        text = "$roundedRating ★",
                         fontFamily = poppinsFontFamily,
                         color = colorScheme.onBackground,
                         fontSize = 15.sp,
@@ -130,7 +139,7 @@ fun SearchWorkerProfileResult(
                             contentDescription = "Location",
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(16.dp))
-                        Text(text = location, fontSize = 9.sp, color = Color.Gray)
+                        Text(text = displayLocation, fontSize = 9.sp, color = Color.Gray)
                       }
                       distance?.let {
                         Text(text = "$distance km away", fontSize = 9.sp, color = Color.Gray)

@@ -134,8 +134,12 @@ fun ExpandableCategoryItem(
                                         .clickable {
                                           searchViewModel.updateSearchQuery(it.name)
                                           searchViewModel.setSearchSubcategory(it)
-                                          searchViewModel.filterWorkersBySubcategory(it.name)
-                                          navigationActions.navigateTo(Screen.SEARCH_WORKER_RESULT)
+                                          searchViewModel.filterWorkersBySubcategory(it.name) {
+                                            // Navigate to SearchWorkerResult after filtering is
+                                            // complete
+                                            navigationActions.navigateTo(
+                                                Screen.SEARCH_WORKER_RESULT)
+                                          }
                                         },
                                 text = it.name,
                                 color = colorScheme.onSecondary,
