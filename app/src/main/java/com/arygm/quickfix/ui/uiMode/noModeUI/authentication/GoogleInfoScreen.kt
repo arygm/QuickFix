@@ -50,7 +50,8 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.UserTopLevelDestinations
+import com.arygm.quickfix.ui.navigation.RootRoute
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
 import com.arygm.quickfix.utils.ANIMATED_BOX_ROTATION
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.loadEmail
@@ -64,10 +65,11 @@ import com.google.firebase.auth.auth
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun GoogleInfoScreen(
-    navigationActions: NavigationActions,
+    rootNavigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
     userViewModel: ProfileViewModel,
-    preferencesViewModel: PreferencesViewModel
+    preferencesViewModel: PreferencesViewModel,
+    navigationActions: NavigationActions
 ) {
 
   var firstName by remember { mutableStateOf("") }
@@ -112,7 +114,7 @@ fun GoogleInfoScreen(
                       userViewModel.deleteProfileById(uid)
                       Firebase.auth.currentUser?.delete()?.addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                          navigationActions.goBack()
+                          rootNavigationActions.goBack()
                         } else {
                           Log.e(
                               "GoogleInfoScreen",
@@ -241,7 +243,8 @@ fun GoogleInfoScreen(
                                 newAccount,
                                 onSuccess = {
                                   setAccountPreferences(preferencesViewModel, newAccount)
-                                  navigationActions.navigateTo(UserTopLevelDestinations.HOME)
+                                  rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
+                                    navigationActions.navigateTo(NoModeRoute.WELCOME)
                                 },
                                 onFailure = {
                                   Log.d("GoogleInfoScreen", "Failed to update account.")

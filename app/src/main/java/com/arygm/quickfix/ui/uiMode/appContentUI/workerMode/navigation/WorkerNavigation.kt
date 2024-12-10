@@ -40,7 +40,7 @@ val WORKER_TOP_LEVEL_DESTINATIONS =
         WorkerTopLevelDestinations.MESSAGES,
         WorkerTopLevelDestinations.PROFILE)
 
-fun getBottomBarIdWorker(route: String, isUser: Boolean): Int {
+fun getBottomBarIdWorker(route: String): Int {
     return when (route) {
         WorkerRoute.HOME -> 1
         WorkerRoute.ANNOUNCEMENT -> 2

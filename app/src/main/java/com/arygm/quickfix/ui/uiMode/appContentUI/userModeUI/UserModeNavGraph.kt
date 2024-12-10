@@ -69,8 +69,7 @@ fun UserModeNavHost(
     // Initialized here because needed for the bottom bar
 
     val isUser = true // TODO: This variable needs to get its value after the authentication
-    var screenInProfileNavHost by remember { mutableStateOf<String?>(null) }
-    var screenInSearchNavHost by remember { mutableStateOf<String?>(null) }
+
     NavHost(
         navController = rootNavControllerUserMode,
         startDestination = UserRoute.HOME,
@@ -126,8 +125,6 @@ fun UserModeNavHost(
 fun HomeNavHost(
     isUser: Boolean,
     onScreenChange: (String) -> Unit = {},
-    // loggedInAccountViewModel: LoggedInAccountViewModel,
-    // chatViewModel: ChatViewModel
 ) {
     val homeNavController = rememberNavController()
     val navigationActions = remember { NavigationActions(homeNavController) }
@@ -140,7 +137,7 @@ fun HomeNavHost(
         startDestination = UserScreen.HOME,
         route = UserRoute.HOME,
     ) {
-        composable(UserScreen.HOME) { HomeScreen(navigationActions, isUser) }
+        composable(UserScreen.HOME) { HomeScreen(navigationActions) }
         // Add MessageScreen as a nested composable within Home
         composable(UserScreen.MESSAGES) {
             //  MessageScreen(

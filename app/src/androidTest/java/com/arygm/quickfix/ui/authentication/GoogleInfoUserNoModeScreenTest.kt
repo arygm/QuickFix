@@ -12,7 +12,7 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.UserTopLevelDestinations
+import com.arygm.quickfix.ui.navigation.RootRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -25,14 +25,14 @@ import org.mockito.kotlin.*
 class GoogleInfoUserNoModeScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
-
+    private lateinit var navigationActions: NavigationActions
   private lateinit var accountRepository: AccountRepository
   private lateinit var accountViewModel: AccountViewModel
   private lateinit var profileRepository: ProfileRepository
   private lateinit var profileViewModel: ProfileViewModel
   private lateinit var preferencesRepository: PreferencesRepository
   private lateinit var preferencesViewModel: PreferencesViewModel
-  private lateinit var navigationActions: NavigationActions
+  private lateinit var rootNavigationActions: NavigationActions
 
   private val USER_ID_KEY = stringPreferencesKey("user_id")
   private val EMAIL_KEY = stringPreferencesKey("email")
@@ -47,7 +47,7 @@ class GoogleInfoUserNoModeScreenTest {
 
     accountViewModel = AccountViewModel(accountRepository)
 
-    navigationActions = mock()
+    rootNavigationActions = mock()
 
     profileViewModel = ProfileViewModel(profileRepository)
     preferencesViewModel = PreferencesViewModel(preferencesRepository)
@@ -89,10 +89,12 @@ class GoogleInfoUserNoModeScreenTest {
   fun testInitialState() {
     composeTestRule.setContent {
       GoogleInfoScreen(
-          navigationActions = navigationActions,
+          rootNavigationActions = rootNavigationActions,
           accountViewModel = accountViewModel,
           userViewModel = profileViewModel,
-          preferencesViewModel = preferencesViewModel)
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions
+          )
     }
 
     composeTestRule.waitForIdle()
@@ -115,10 +117,12 @@ class GoogleInfoUserNoModeScreenTest {
   fun testInvalidDateShowsError() {
     composeTestRule.setContent {
       GoogleInfoScreen(
-          navigationActions = navigationActions,
+          rootNavigationActions = rootNavigationActions,
           accountViewModel = accountViewModel,
           userViewModel = profileViewModel,
-          preferencesViewModel = preferencesViewModel)
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions
+          )
     }
 
     composeTestRule.waitForIdle()
@@ -135,10 +139,12 @@ class GoogleInfoUserNoModeScreenTest {
   fun testNextButtonEnabledWhenFormIsValid() {
     composeTestRule.setContent {
       GoogleInfoScreen(
-          navigationActions = navigationActions,
+          rootNavigationActions = rootNavigationActions,
           accountViewModel = accountViewModel,
           userViewModel = profileViewModel,
-          preferencesViewModel = preferencesViewModel)
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions
+          )
     }
 
     composeTestRule.waitForIdle()
@@ -156,7 +162,7 @@ class GoogleInfoUserNoModeScreenTest {
 
     // Verify account update and navigation
     verify(accountRepository).updateAccount(any(), any(), any())
-    verify(navigationActions).navigateTo(UserTopLevelDestinations.HOME)
+    verify(rootNavigationActions).navigateTo(RootRoute.APP_CONTENT)
   }
 }
 

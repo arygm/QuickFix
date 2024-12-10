@@ -1,10 +1,10 @@
 package com.arygm.quickfix.utils
 
 import android.util.Log
-import com.arygm.quickfix.ui.navigation.SharedRoute
-import com.arygm.quickfix.ui.navigation.SharedScreen
-import com.arygm.quickfix.ui.navigation.UserRoute
-import com.arygm.quickfix.ui.navigation.UserScreen
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeScreen
+import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
+import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -83,16 +83,15 @@ fun routeToScreen(route: String): String {
   return when (route) {
     UserRoute.HOME -> UserScreen.HOME
     UserRoute.CALENDAR -> UserScreen.CALENDAR
-    SharedRoute.WELCOME -> SharedScreen.WELCOME
-    SharedRoute.INFO -> SharedScreen.INFO
-    SharedRoute.LOGIN -> SharedScreen.LOGIN
-    SharedRoute.PASSWORD -> SharedScreen.PASSWORD
+    NoModeRoute.WELCOME -> NoModeScreen.WELCOME
+    NoModeRoute.LOGIN -> NoModeScreen.LOGIN
+    NoModeRoute.PASSWORD -> NoModeScreen.PASSWORD
     UserRoute.SEARCH -> UserScreen.SEARCH
     UserRoute.DASHBOARD -> UserScreen.DASHBOARD
     UserRoute.PROFILE -> UserScreen.PROFILE
     UserRoute.ACCOUNT_CONFIGURATION -> UserScreen.ACCOUNT_CONFIGURATION
     else -> {
-      SharedScreen.WELCOME
+      NoModeScreen.WELCOME
     }
   }
 }

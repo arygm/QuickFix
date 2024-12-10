@@ -19,7 +19,8 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.UserScreen
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
+import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -40,6 +41,7 @@ class WelcomeUserNoModeScreenTest {
 
   @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
+  private lateinit var rootNavigationActions: NavigationActions
   private lateinit var navigationActions: NavigationActions
   private lateinit var mockFirestore: FirebaseFirestore
   private lateinit var accountRepository: AccountRepository
@@ -56,6 +58,7 @@ class WelcomeUserNoModeScreenTest {
 
   @Before
   fun setup() {
+    rootNavigationActions = mock()
     mockFirestore = mock()
     navigationActions = mock()
     mockStorage = Mockito.mock(FirebaseStorage::class.java)
@@ -73,7 +76,7 @@ class WelcomeUserNoModeScreenTest {
     whenever(preferencesRepository.getPreferenceByKey(any<Preferences.Key<Boolean>>()))
         .thenReturn(flowOf(false))
 
-    whenever(navigationActions.currentRoute()).thenReturn(UserScreen.WELCOME)
+    whenever(navigationActions.currentRoute()).thenReturn(NoModeRoute.WELCOME)
   }
 
   @After
@@ -88,7 +91,7 @@ class WelcomeUserNoModeScreenTest {
   @Test
   fun testInitialState() {
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel, rootNavigationActions)
     }
 
     // Check if the background image is displayed
@@ -119,7 +122,7 @@ class WelcomeUserNoModeScreenTest {
   @Test
   fun testLogInButtonClickNavigatesToLogin() {
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel, rootNavigationActions)
     }
 
     // Click the "LOG IN TO QUICKFIX" button
@@ -130,13 +133,13 @@ class WelcomeUserNoModeScreenTest {
     }
 
     // Verify that the navigation action is triggered for the login screen
-    Mockito.verify(navigationActions).navigateTo(UserScreen.LOGIN)
+    Mockito.verify(navigationActions).navigateTo(NoModeRoute.LOGIN)
   }
 
   @Test
   fun testRegistrationButtonClickNavigatesToRegister() {
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel, rootNavigationActions)
     }
 
     // Click the "REGISTER TO QUICKFIX" button
@@ -147,7 +150,7 @@ class WelcomeUserNoModeScreenTest {
     }
 
     // Verify that the navigation action is triggered for the registration/info screen
-    Mockito.verify(navigationActions).navigateTo(UserScreen.REGISTER)
+    Mockito.verify(navigationActions).navigateTo(NoModeRoute.REGISTER)
   }
 
   @Test
@@ -157,7 +160,7 @@ class WelcomeUserNoModeScreenTest {
     intentsInitialized = true // Mark Intents as initialized
 
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel, rootNavigationActions)
     }
 
     // Perform click on the Google Sign-In button

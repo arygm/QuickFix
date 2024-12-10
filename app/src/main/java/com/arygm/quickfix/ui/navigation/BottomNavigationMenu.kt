@@ -34,7 +34,6 @@ import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 @Composable
 fun BottomNavigationMenu(
     onTabSelect: (TopLevelDestination) -> Unit,
-    isUser: Boolean, // Boolean flag to determine the user type
     navigationActions: NavigationActions,
     modeViewModel: ModeViewModel
 ) {
@@ -123,8 +122,8 @@ fun BottomNavigationMenu(
   LaunchedEffect(currentRoute) {
     bottomNavigation.value?.show(
       when (currentMode) {
-      AppMode.USER -> getBottomBarIdUser(currentRoute, isUser)
-      AppMode.WORKER -> getBottomBarIdWorker(currentRoute, isUser)
+      AppMode.USER -> getBottomBarIdUser(currentRoute)
+      AppMode.WORKER -> getBottomBarIdWorker(currentRoute)
     }
       , true)
   }

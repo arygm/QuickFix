@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.test.espresso.Root
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
@@ -18,8 +19,8 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.UserScreen
-import com.arygm.quickfix.ui.navigation.UserTopLevelDestinations
+import com.arygm.quickfix.ui.navigation.RootRoute
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -40,7 +41,7 @@ import org.mockito.kotlin.whenever
 class RegisterUserNoModeScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
-
+  private lateinit var rootNavigationActions: NavigationActions
   private lateinit var mockFirestore: FirebaseFirestore
   private lateinit var accountRepository: AccountRepository
   private lateinit var accountViewModel: AccountViewModel
@@ -55,6 +56,7 @@ class RegisterUserNoModeScreenTest {
 
   @Before
   fun setup() {
+    rootNavigationActions = mock(NavigationActions::class.java)
     mockFirestore = mock(FirebaseFirestore::class.java)
     mockStorage = mock(FirebaseStorage::class.java)
     storageRef = mock(StorageReference::class.java)
@@ -68,13 +70,13 @@ class RegisterUserNoModeScreenTest {
     preferencesRepository = mock(PreferencesRepository::class.java)
     preferencesViewModel = PreferencesViewModel(preferencesRepository)
 
-    `when`(navigationActions.currentRoute()).thenReturn(UserScreen.REGISTER)
+    `when`(navigationActions.currentRoute()).thenReturn(NoModeRoute.REGISTER)
   }
 
   @Test
   fun testInitialUI() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Check that the scaffold and content boxes are displayed
@@ -118,7 +120,7 @@ class RegisterUserNoModeScreenTest {
   @Test
   fun testInvalidEmailShowsError() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Input an invalid email
@@ -132,7 +134,7 @@ class RegisterUserNoModeScreenTest {
   @Test
   fun testInvalidDateShowsError() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Input an invalid birth date
@@ -146,7 +148,7 @@ class RegisterUserNoModeScreenTest {
   @Test
   fun testPasswordMismatch() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Enter different passwords
@@ -189,7 +191,7 @@ class RegisterUserNoModeScreenTest {
 
     composeTestRule.setContent {
       RegisterScreen(
-          navigationActions,
+          rootNavigationActions, navigationActions,
           accountViewModel,
           userViewModel,
           preferencesViewModel,
@@ -214,15 +216,15 @@ class RegisterUserNoModeScreenTest {
     composeTestRule.onNodeWithTag("registerButton").performClick()
 
     composeTestRule.waitUntil(timeoutMillis = 10000) {
-      Mockito.mockingDetails(navigationActions).invocations.isNotEmpty()
+      Mockito.mockingDetails(rootNavigationActions).invocations.isNotEmpty()
     }
-    Mockito.verify(navigationActions).navigateTo(UserTopLevelDestinations.HOME)
+    Mockito.verify(rootNavigationActions).navigateTo(RootRoute.APP_CONTENT)
   }
 
   @Test
   fun testRegisterButtonDisabledWhenFormIncomplete() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Fill only partial inputs
@@ -241,7 +243,7 @@ class RegisterUserNoModeScreenTest {
   @Test
   fun testBackButtonNavigatesBack() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Click the back button
@@ -254,14 +256,14 @@ class RegisterUserNoModeScreenTest {
   @Test
   fun testLoginButtonNavigatesToLogin() {
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     // Click the "Login !" button
     composeTestRule.onNodeWithTag("clickableLoginButtonText").performClick()
 
     // Verify that the navigation action is triggered for the login screen
-    Mockito.verify(navigationActions).navigateTo(UserScreen.LOGIN)
+    Mockito.verify(navigationActions).navigateTo(NoModeRoute.LOGIN)
   }
 
   @Test
@@ -287,7 +289,7 @@ class RegisterUserNoModeScreenTest {
 
     // Act
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("emailInput").performTextInput(existingEmail)
@@ -323,7 +325,7 @@ class RegisterUserNoModeScreenTest {
 
     // Act
     composeTestRule.setContent {
-      RegisterScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("emailInput").performTextInput(newEmail)
@@ -370,7 +372,7 @@ class RegisterUserNoModeScreenTest {
 
     composeTestRule.setContent {
       RegisterScreen(
-          navigationActions,
+          rootNavigationActions, navigationActions,
           accountViewModel,
           userViewModel,
           preferencesViewModel,
@@ -404,7 +406,7 @@ class RegisterUserNoModeScreenTest {
     assertTrue(createAccountFuncCalled)
 
     // Verify that navigation to HOME was triggered
-    Mockito.verify(navigationActions).navigateTo(UserTopLevelDestinations.HOME)
+    Mockito.verify(rootNavigationActions).navigateTo(RootRoute.APP_CONTENT)
   }
 
   @Test
@@ -439,7 +441,7 @@ class RegisterUserNoModeScreenTest {
 
     composeTestRule.setContent {
       RegisterScreen(
-          navigationActions,
+          rootNavigationActions, navigationActions,
           accountViewModel,
           userViewModel,
           preferencesViewModel,
@@ -464,6 +466,6 @@ class RegisterUserNoModeScreenTest {
     assertTrue(createAccountFuncCalled)
 
     // Verify that navigation to HOME was not triggered
-    Mockito.verify(navigationActions, Mockito.never()).navigateTo(UserTopLevelDestinations.HOME)
+    Mockito.verify(rootNavigationActions, Mockito.never()).navigateTo(RootRoute.APP_CONTENT)
   }
 }

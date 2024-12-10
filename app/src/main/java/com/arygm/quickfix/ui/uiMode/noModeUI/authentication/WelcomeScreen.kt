@@ -48,9 +48,8 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.SharedScreen
-import com.arygm.quickfix.ui.navigation.UserScreen
-import com.arygm.quickfix.ui.navigation.UserTopLevelDestinations
+import com.arygm.quickfix.ui.navigation.RootRoute
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
 import com.arygm.quickfix.ui.theme.ButtonPrimary
 import com.arygm.quickfix.utils.loadIsSignIn
 import com.arygm.quickfix.utils.rememberFirebaseAuthLauncher
@@ -64,7 +63,8 @@ fun WelcomeScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
     userViewModel: ProfileViewModel,
-    preferencesViewModel: PreferencesViewModel
+    preferencesViewModel: PreferencesViewModel,
+    rootNavigationActions: NavigationActions
 ) {
   val colorScheme = MaterialTheme.colorScheme
 
@@ -85,11 +85,11 @@ fun WelcomeScreen(
       rememberFirebaseAuthLauncher(
           onAuthCompleteOne = { result ->
             Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
-            navigationActions.navigateTo(UserTopLevelDestinations.HOME)
+              rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
           },
           onAuthCompleteTwo = { result ->
             Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
-            navigationActions.navigateTo(SharedScreen.GOOGLE_INFO)
+            navigationActions.navigateTo(NoModeRoute.GOOGLE_INFO)
           },
           onAuthError = { Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}") },
           accountViewModel,
@@ -103,9 +103,9 @@ fun WelcomeScreen(
     isSignIn = loadIsSignIn(preferencesViewModel)
     if (isSignIn &&
         navigationActions.currentScreen ==
-            SharedScreen.WELCOME) { // Ensure the value is `true` before navigating
+            NoModeRoute.WELCOME) { // Ensure the value is `true` before navigating
       Log.i("SignInScreen", "User is signed in, fast forwarding to home screen")
-      navigationActions.navigateTo(UserTopLevelDestinations.HOME)
+      rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
     } else {
       Log.d("SignInScreen", "User is not signed in or preference not set")
     }
@@ -176,7 +176,7 @@ fun WelcomeScreen(
           QuickFixButton(
               buttonText = "LOG IN TO QUICKFIX",
               onClickAction = {
-                targetScreen = SharedScreen.LOGIN
+                targetScreen = NoModeRoute.LOGIN
                 startAnimation = true
               },
               buttonColor = MaterialTheme.colorScheme.tertiary,
@@ -186,7 +186,7 @@ fun WelcomeScreen(
           QuickFixButton(
               buttonText = "REGISTER TO QUICKFIX",
               onClickAction = {
-                targetScreen = SharedScreen.REGISTER
+                targetScreen = NoModeRoute.REGISTER
                 startAnimation = true
               },
               buttonColor = colorScheme.background,

@@ -60,8 +60,6 @@ import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
-import com.arygm.quickfix.ui.navigation.UserRoute
-import com.arygm.quickfix.ui.navigation.UserScreen
 import com.arygm.quickfix.ui.noModeUI.NoModeNavHost
 import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
 import com.arygm.quickfix.ui.noModeUI.navigation.NoModeScreen
@@ -71,6 +69,7 @@ import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.search.SearchWorkerResult
 import com.arygm.quickfix.ui.theme.QuickFixTheme
+import com.arygm.quickfix.ui.uiMode.appContentUI.AppContentNavGraph
 import com.arygm.quickfix.ui.uiMode.workerMode.WorkerModeNavGraph
 import com.arygm.quickfix.ui.userModeUI.UserModeNavHost
 import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
@@ -149,46 +148,16 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
       viewModel(key = "userViewModel", factory = ProfileViewModel.UserFactory)
   val workerViewModel: ProfileViewModel =
       viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
-  val loggedInAccountViewModel: LoggedInAccountViewModel =
-      viewModel(factory = LoggedInAccountViewModel.Factory)
+
   val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
-  val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory)
-  val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
-  val announcementViewModel: AnnouncementViewModel =
-      viewModel(factory = AnnouncementViewModel.Factory)
+
   val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
   val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
   val preferencesViewModel: PreferencesViewModel =
       viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
 
-  // Initialized here because needed for the bottom bar
-  val profileNavController = rememberNavController()
-  val profileNavigationActions = remember { NavigationActions(profileNavController) }
 
-  val isUser = true // TODO: This variable needs to get its value after the authentication
   var currentScreen by remember { mutableStateOf<String?>(null) }
-
-
-  // Make `bottomBarVisible` reactive to changes in `screen`
-  val shouldShowBottomBar by remember {
-    derivedStateOf {
-      currentScreen != NoModeScreen.WELCOME &&
-          currentScreen != NoModeScreen.LOGIN &&
-          currentScreen != NoModeScreen.INFO &&
-          currentScreen != NoModeScreen.PASSWORD &&
-          currentScreen != NoModeScreen.REGISTER &&
-          currentScreen != NoModeScreen.RESET_PASSWORD &&
-          currentScreen != NoModeScreen.GOOGLE_INFO &&
-          currentScreen?.let {
-            it != UserScreen.DISPLAY_UPLOADED_IMAGES && it != UserScreen.SEARCH_LOCATION
-          } ?: true &&
-              currentScreen?.let {
-            it != UserScreen.ACCOUNT_CONFIGURATION && it != UserScreen.TO_WORKER
-          } ?: true
-    }
-  }
-
-  var showBottomBar by remember { mutableStateOf(false) }
 
   var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
 
@@ -199,89 +168,45 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
       delay(3000) // Poll every 3 seconds
     }
   }
+    NavHost(
+        navController = rootNavController,
+        startDestination = RootRoute.NO_MODE,
+        enterTransition = {
+            // You can change whatever you want for transitions
+            EnterTransition.None
+        },
+        exitTransition = {
+            // You can change whatever you want for transitions
+            ExitTransition.None
+        }) {
 
-  // Delay the appearance of the bottom bar
-  LaunchedEffect(shouldShowBottomBar) {
-    if (shouldShowBottomBar) {
-      delay(200) // Adjust the delay duration (in milliseconds) as needed
-      showBottomBar = true
-    } else {
-      showBottomBar = false
+
+        composable(RootRoute.NO_MODE) {
+            NoModeNavHost(
+                navigationActionsRoot,
+                accountViewModel,
+                preferencesViewModel,
+                userViewModel,
+                isOffline = isOffline
+            )
+            // , loggedInAccountViewModel, chatViewModel)
+        }
+
+        composable(RootRoute.APP_CONTENT) {
+            AppContentNavGraph(
+                testBitmapPP,
+                testLocation,
+                preferencesViewModel,
+                userViewModel,
+                accountViewModel,
+                isOffline,
+                navigationActionsRoot
+            )
+        }
+
+
     }
-  }
 
-  Scaffold(
-      topBar = { QuickFixOfflineBar(isVisible = isOffline) },
-      bottomBar = {
-        // Show BottomNavigationMenu only if the route is not part of the login/registration flow
-        AnimatedVisibility(
-            visible = showBottomBar,
-            enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from the bottom
-            exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to the bottom
-            modifier = Modifier.testTag("BNM")) {
-              BottomNavigationMenu(
-                  modeViewModel = modeViewModel,
-                  onTabSelect = { selectedDestination ->
-                    // Use this block to navigate based on the selected tab
-                    navigationActionsRoot.navigateTo(selectedDestination)
-                    Log.d("user", navigationActionsRoot.currentRoute())
-                  },
-                  isUser = isUser, // Pass the user type to determine the tabs
-                  navigationActions = navigationActionsRoot)
-            }
-      }) { innerPadding ->
-        NavHost(
-            navController = rootNavController,
-            startDestination = NoModeRoute.WELCOME,
-            modifier = Modifier.padding(innerPadding), // Apply padding from the Scaffold
-            enterTransition = {
-              // You can change whatever you want for transitions
-              EnterTransition.None
-            },
-            exitTransition = {
-              // You can change whatever you want for transitions
-              ExitTransition.None
-            }) {
-
-
-              composable(RootRoute.NO_MODE) {
-                NoModeNavHost(
-                    accountViewModel,
-                    preferencesViewModel,
-                    userViewModel,
-                    onScreenChange = {
-                        currentScreen = it
-                    }
-                )
-                // , loggedInAccountViewModel, chatViewModel)
-              }
-
-              composable(RootRoute.USER_MODE) {
-                    UserModeNavHost(
-                        testBitmapPP,
-                        testLocation,
-                        modeViewModel,
-                        userViewModel,
-                        workerViewModel,
-                        accountViewModel,
-                        categoryViewModel,
-                        locationViewModel,
-                        preferencesViewModel,
-                        onScreenChange = {
-                            currentScreen = it
-                        }
-                        )
-              }
-
-              composable(RootRoute.WORKER_MODE) {
-                  WorkerModeNavGraph(
-                      onScreenChange = {
-                          currentScreen = it
-                      }
-                  )
-              }
-            }
-      }
 }
 
 fun isConnectedToInternet(context: Context): Boolean {

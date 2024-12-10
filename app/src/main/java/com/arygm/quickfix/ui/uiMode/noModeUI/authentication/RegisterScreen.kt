@@ -65,9 +65,8 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixCheckBoxRow
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.SharedScreen
-import com.arygm.quickfix.ui.navigation.UserScreen
-import com.arygm.quickfix.ui.navigation.UserTopLevelDestinations
+import com.arygm.quickfix.ui.navigation.RootRoute
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
 import com.arygm.quickfix.utils.ANIMATED_BOX_ROTATION
 import com.arygm.quickfix.utils.createAccountWithEmailAndPassword
 import com.arygm.quickfix.utils.isValidDate
@@ -76,6 +75,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun RegisterScreen(
+    rootNavigationActions: NavigationActions,
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
     userViewModel: ProfileViewModel,
@@ -492,7 +492,8 @@ fun RegisterScreen(
                                           userViewModel,
                                           preferencesViewModel,
                                           {
-                                            navigationActions.navigateTo(UserTopLevelDestinations.HOME)
+                                            rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
+                                              navigationActions.navigateTo(NoModeRoute.WELCOME)
                                           },
                                           {
                                             Toast.makeText(
@@ -532,7 +533,7 @@ fun RegisterScreen(
                                   QuickFixButton(
                                       buttonText = "Login !",
                                       onClickAction = {
-                                        navigationActions.navigateTo(SharedScreen.LOGIN)
+                                        navigationActions.navigateTo(NoModeRoute.LOGIN)
                                       },
                                       buttonColor = Color.Transparent,
                                       textColor = colorScheme.primary,

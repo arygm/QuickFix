@@ -13,7 +13,7 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.UserScreen
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -29,7 +29,7 @@ import org.mockito.kotlin.whenever
 class LogInUserNoModeScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
-
+  private lateinit var rootNavigationActions: NavigationActions
   private lateinit var navigationActions: NavigationActions
   private lateinit var accountRepository: AccountRepository
   private lateinit var userProfileRepo: UserProfileRepositoryFirestore
@@ -43,6 +43,7 @@ class LogInUserNoModeScreenTest {
 
   @Before
   fun setup() {
+    rootNavigationActions = mock(NavigationActions::class.java)
     mockStorage = mock(FirebaseStorage::class.java)
     storageRef = mock(StorageReference::class.java)
     whenever(mockStorage.reference).thenReturn(storageRef)
@@ -55,13 +56,13 @@ class LogInUserNoModeScreenTest {
     preferencesRepository = mock(PreferencesRepository::class.java)
     preferencesViewModel = PreferencesViewModel(preferencesRepository)
 
-    `when`(navigationActions.currentRoute()).thenReturn(UserScreen.LOGIN)
+    `when`(navigationActions.currentRoute()).thenReturn(NoModeRoute.LOGIN)
   }
 
   @Test
   fun testInitialUI() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
+      LogInScreen(navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
     }
 
     // Check that the scaffold and content boxes are displayed
@@ -96,7 +97,7 @@ class LogInUserNoModeScreenTest {
   @Test
   fun testLoginButtonEnabledWhenFieldsAreFilled() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
+      LogInScreen(navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
     }
 
     // Input valid email and password
@@ -110,7 +111,7 @@ class LogInUserNoModeScreenTest {
   @Test
   fun testInvalidEmailShowsError() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
+      LogInScreen(navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
     }
 
     // Input an invalid email
@@ -126,7 +127,7 @@ class LogInUserNoModeScreenTest {
   @Test
   fun testForgotPasswordLinkIsDisplayed() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
+      LogInScreen(navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
     }
 
     // Check that the forgot password text is displayed
@@ -136,20 +137,20 @@ class LogInUserNoModeScreenTest {
   @Test
   fun testForgotPasswordLinkNavigatesToResetPassword() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
+      LogInScreen(navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
     }
 
     // Click the "Forgot your password?" link
     composeTestRule.onNodeWithTag("forgetPasswordButtonText").performClick()
 
     // Verify that the navigation to RESET_PASSWORD was triggered
-    Mockito.verify(navigationActions).navigateTo(UserScreen.RESET_PASSWORD)
+    Mockito.verify(navigationActions).navigateTo(NoModeRoute.RESET_PASSWORD)
   }
 
   @Test
   fun testBackButtonNavigatesBack() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, preferencesViewModel)
+      LogInScreen(navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
     }
 
     // Click the back button

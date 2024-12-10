@@ -10,8 +10,13 @@ import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-enum class AppMode {
-    USER, WORKER
+enum class AppMode(private val modeString: String) {
+    USER("User"),
+    WORKER("Worker");
+
+    override fun toString(): String {
+        return modeString
+    }
 }
 
 class ModeViewModel : ViewModel() {

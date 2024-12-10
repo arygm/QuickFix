@@ -11,10 +11,10 @@ import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.UserRoute
-import com.arygm.quickfix.ui.navigation.UserScreen
-import com.arygm.quickfix.ui.navigation.UserTopLevelDestinations
-import com.arygm.quickfix.ui.navigation.getBottomBarIdUser
+import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
+import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.userModeUI.navigation.UserTopLevelDestinations
+import com.arygm.quickfix.ui.userModeUI.navigation.getBottomBarIdUser
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import org.junit.Before
@@ -152,6 +152,6 @@ class QuickFixFinderUserNoModeScreenTest {
 
     // As the bottom bar get updated only if the currentRoute is updated check that it has the right
     // value
-    assertEquals(1, getBottomBarIdUser(UserRoute.HOME, true))
+    assertEquals(1, getBottomBarIdUser(UserRoute.HOME))
   }
 }

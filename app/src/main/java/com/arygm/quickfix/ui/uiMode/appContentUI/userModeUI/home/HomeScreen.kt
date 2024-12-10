@@ -57,7 +57,7 @@ import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
+fun HomeScreen(navigationActions: NavigationActions) {
   val focusManager = LocalFocusManager.current
   // Sample data for services and quick fixes
   val services =

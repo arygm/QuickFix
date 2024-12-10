@@ -55,9 +55,8 @@ import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.SharedScreen
-import com.arygm.quickfix.ui.navigation.UserScreen
-import com.arygm.quickfix.ui.navigation.UserTopLevelDestinations
+import com.arygm.quickfix.ui.navigation.RootRoute
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
 import com.arygm.quickfix.utils.ANIMATED_BOX_ROTATION
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
@@ -72,7 +71,8 @@ import kotlinx.coroutines.launch
 fun LogInScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
-    preferencesViewModel: PreferencesViewModel
+    preferencesViewModel: PreferencesViewModel,
+    rootNavigationActions: NavigationActions
 ) {
   var errorHasOccurred by remember { mutableStateOf(false) }
   var emailError = false
@@ -250,7 +250,7 @@ fun LogInScreen(
                             QuickFixButton(
                                 buttonText = "Forgot your password?",
                                 onClickAction = {
-                                  navigationActions.navigateTo(SharedScreen.RESET_PASSWORD)
+                                  navigationActions.navigateTo(NoModeRoute.RESET_PASSWORD)
                                 },
                                 buttonColor = Color.Transparent,
                                 textColor = colorScheme.primary,
@@ -277,7 +277,8 @@ fun LogInScreen(
                                             shrinkBox = false
                                             delay(BOX_COLLAPSE_SPEED.toLong())
                                             Log.d("LoginFlow", "Starting login with email: $email")
-                                            navigationActions.navigateTo(UserTopLevelDestinations.HOME)
+                                            rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
+                                              navigationActions.navigateTo(NoModeRoute.WELCOME)
                                           }
                                         } else {
                                           Log.e("LogInScreen", "Error occurred while signing in")
@@ -312,7 +313,9 @@ fun LogInScreen(
 
                               QuickFixButton(
                                   buttonText = "Create one!",
-                                  onClickAction = { navigationActions.navigateTo(SharedScreen.REGISTER) },
+                                  onClickAction = {
+                                      navigationActions.navigateTo(NoModeRoute.REGISTER)
+                                                  },
                                   buttonColor = Color.Transparent,
                                   textColor = colorScheme.primary,
                                   textStyle = MaterialTheme.typography.headlineSmall,

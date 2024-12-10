@@ -9,7 +9,7 @@ import androidx.compose.ui.test.performTextInput
 import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.UserScreen
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -31,7 +31,7 @@ class ResetPasswordUserNoModeScreenTest {
     navigationActions = mock(NavigationActions::class.java)
     accountViewModel = AccountViewModel(accountRepository)
 
-    `when`(navigationActions.currentRoute()).thenReturn(UserScreen.RESET_PASSWORD)
+    `when`(navigationActions.currentRoute()).thenReturn(NoModeRoute.RESET_PASSWORD)
   }
 
   @Test

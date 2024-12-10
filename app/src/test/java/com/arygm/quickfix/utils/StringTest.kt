@@ -1,7 +1,9 @@
 package com.arygm.quickfix.utils
 
-import com.arygm.quickfix.ui.navigation.UserRoute
-import com.arygm.quickfix.ui.navigation.UserScreen
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeScreen
+import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
+import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import com.google.firebase.Timestamp
 import java.util.Calendar
 import java.util.GregorianCalendar
@@ -152,26 +154,20 @@ class StringTest {
 
   @Test
   fun `test routeToScreen with WELCOME route`() {
-    val result = routeToScreen(UserRoute.WELCOME)
-    assertEquals(UserScreen.WELCOME, result)
-  }
-
-  @Test
-  fun `test routeToScreen with INFO route`() {
-    val result = routeToScreen(UserRoute.INFO)
-    assertEquals(UserScreen.INFO, result)
+    val result = routeToScreen(NoModeScreen.WELCOME)
+    assertEquals(NoModeRoute.WELCOME, result)
   }
 
   @Test
   fun `test routeToScreen with LOGIN route`() {
-    val result = routeToScreen(UserRoute.LOGIN)
-    assertEquals(UserScreen.LOGIN, result)
+    val result = routeToScreen(NoModeRoute.LOGIN)
+    assertEquals(NoModeScreen.LOGIN, result)
   }
 
   @Test
   fun `test routeToScreen with PASSWORD route`() {
-    val result = routeToScreen(UserRoute.PASSWORD)
-    assertEquals(UserScreen.PASSWORD, result)
+    val result = routeToScreen(NoModeRoute.PASSWORD)
+    assertEquals(NoModeScreen.PASSWORD, result)
   }
 
   @Test
@@ -195,7 +191,7 @@ class StringTest {
   @Test
   fun `test routeToScreen with invalid route defaults to WELCOME`() {
     val result = routeToScreen("INVALID_ROUTE")
-    assertEquals(UserScreen.WELCOME, result)
+    assertEquals(NoModeScreen.WELCOME, result)
   }
 
   @Test
