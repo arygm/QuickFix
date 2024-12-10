@@ -1,7 +1,7 @@
 package com.arygm.quickfix.utils
 
-import com.arygm.quickfix.ui.navigation.Route
-import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.navigation.UserRoute
+import com.arygm.quickfix.ui.navigation.UserScreen
 import com.google.firebase.Timestamp
 import java.util.Calendar
 import java.util.GregorianCalendar
@@ -140,62 +140,62 @@ class StringTest {
 
   @Test
   fun `test routeToScreen with HOME route`() {
-    val result = routeToScreen(Route.HOME)
-    assertEquals(Screen.HOME, result)
+    val result = routeToScreen(UserRoute.HOME)
+    assertEquals(UserScreen.HOME, result)
   }
 
   @Test
   fun `test routeToScreen with CALENDAR route`() {
-    val result = routeToScreen(Route.CALENDAR)
-    assertEquals(Screen.CALENDAR, result)
+    val result = routeToScreen(UserRoute.CALENDAR)
+    assertEquals(UserScreen.CALENDAR, result)
   }
 
   @Test
   fun `test routeToScreen with WELCOME route`() {
-    val result = routeToScreen(Route.WELCOME)
-    assertEquals(Screen.WELCOME, result)
+    val result = routeToScreen(UserRoute.WELCOME)
+    assertEquals(UserScreen.WELCOME, result)
   }
 
   @Test
   fun `test routeToScreen with INFO route`() {
-    val result = routeToScreen(Route.INFO)
-    assertEquals(Screen.INFO, result)
+    val result = routeToScreen(UserRoute.INFO)
+    assertEquals(UserScreen.INFO, result)
   }
 
   @Test
   fun `test routeToScreen with LOGIN route`() {
-    val result = routeToScreen(Route.LOGIN)
-    assertEquals(Screen.LOGIN, result)
+    val result = routeToScreen(UserRoute.LOGIN)
+    assertEquals(UserScreen.LOGIN, result)
   }
 
   @Test
   fun `test routeToScreen with PASSWORD route`() {
-    val result = routeToScreen(Route.PASSWORD)
-    assertEquals(Screen.PASSWORD, result)
+    val result = routeToScreen(UserRoute.PASSWORD)
+    assertEquals(UserScreen.PASSWORD, result)
   }
 
   @Test
   fun `test routeToScreen with SEARCH route`() {
-    val result = routeToScreen(Route.SEARCH)
-    assertEquals(Screen.SEARCH, result)
+    val result = routeToScreen(UserRoute.SEARCH)
+    assertEquals(UserScreen.SEARCH, result)
   }
 
   @Test
   fun `test routeToScreen with DASHBOARD route`() {
-    val result = routeToScreen(Route.DASHBOARD)
-    assertEquals(Screen.DASHBOARD, result)
+    val result = routeToScreen(UserRoute.DASHBOARD)
+    assertEquals(UserScreen.DASHBOARD, result)
   }
 
   @Test
   fun `test routeToScreen with PROFILE route`() {
-    val result = routeToScreen(Route.PROFILE)
-    assertEquals(Screen.PROFILE, result)
+    val result = routeToScreen(UserRoute.PROFILE)
+    assertEquals(UserScreen.PROFILE, result)
   }
 
   @Test
   fun `test routeToScreen with invalid route defaults to WELCOME`() {
     val result = routeToScreen("INVALID_ROUTE")
-    assertEquals(Screen.WELCOME, result)
+    assertEquals(UserScreen.WELCOME, result)
   }
 
   @Test

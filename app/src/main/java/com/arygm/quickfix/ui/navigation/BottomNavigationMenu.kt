@@ -23,21 +23,32 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arygm.quickfix.BuildConfig
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.switchModes.AppMode
+import com.arygm.quickfix.model.switchModes.ModeViewModel
+import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTINATIONS
+import com.arygm.quickfix.ui.uiMode.workerMode.navigation.getBottomBarIdWorker
+import com.arygm.quickfix.ui.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
+import com.arygm.quickfix.ui.userModeUI.navigation.getBottomBarIdUser
 import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 
 @Composable
 fun BottomNavigationMenu(
     onTabSelect: (TopLevelDestination) -> Unit,
     isUser: Boolean, // Boolean flag to determine the user type
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    modeViewModel: ModeViewModel
 ) {
+  val currentMode by modeViewModel.currentMode.collectAsState()
 
   val colorScheme = colorScheme
   val currentRoute by navigationActions.currentRoute.collectAsState()
 
   // Determine the tab list based on the user type
   val tabList: List<TopLevelDestination> =
-      if (isUser) USER_TOP_LEVEL_DESTINATIONS else WORKER_TOP_LEVEL_DESTINATIONS
+    when (currentMode) {
+      AppMode.USER -> USER_TOP_LEVEL_DESTINATIONS
+      AppMode.WORKER -> WORKER_TOP_LEVEL_DESTINATIONS
+    }  // Create a mutable state to store the MeowBottomNavigation instance
 
   val bottomNavigation = remember { mutableStateOf<MeowBottomNavigation?>(null) }
 
@@ -110,7 +121,12 @@ fun BottomNavigationMenu(
 
   // LaunchedEffect allowing to update the bottom bar accordingly to navigationActions
   LaunchedEffect(currentRoute) {
-    bottomNavigation.value?.show(getBottomBarId(currentRoute, isUser), true)
+    bottomNavigation.value?.show(
+      when (currentMode) {
+      AppMode.USER -> getBottomBarIdUser(currentRoute, isUser)
+      AppMode.WORKER -> getBottomBarIdWorker(currentRoute, isUser)
+    }
+      , true)
   }
 }
 

@@ -45,6 +45,7 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
+import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
 import com.arygm.quickfix.ui.authentication.RegisterScreen
@@ -58,14 +59,22 @@ import com.arygm.quickfix.ui.home.FakeMessageScreen
 import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Route
-import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.navigation.RootRoute
+import com.arygm.quickfix.ui.navigation.UserRoute
+import com.arygm.quickfix.ui.navigation.UserScreen
+import com.arygm.quickfix.ui.noModeUI.NoModeNavHost
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeScreen
 import com.arygm.quickfix.ui.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.search.SearchWorkerResult
 import com.arygm.quickfix.ui.theme.QuickFixTheme
+import com.arygm.quickfix.ui.uiMode.workerMode.WorkerModeNavGraph
+import com.arygm.quickfix.ui.userModeUI.UserModeNavHost
+import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
+import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.utils.LocationHelper
 import kotlinx.coroutines.delay
 
@@ -75,7 +84,7 @@ class MainActivity : ComponentActivity() {
 
   private lateinit var locationHelper: LocationHelper
   private var testBitmapPP = mutableStateOf<Bitmap?>(null)
-  private var testLocation = mutableStateOf<Location?>(Location())
+  private var testLocation = mutableStateOf<Location>(Location())
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -130,11 +139,12 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
+fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
   val context = LocalContext.current
   val rootNavController = rememberNavController()
   val navigationActionsRoot = remember { NavigationActions(rootNavController) }
 
+    val modeViewModel: ModeViewModel = viewModel(factory = ModeViewModel.Factory)
   val userViewModel: ProfileViewModel =
       viewModel(key = "userViewModel", factory = ProfileViewModel.UserFactory)
   val workerViewModel: ProfileViewModel =
@@ -156,25 +166,24 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
   val profileNavigationActions = remember { NavigationActions(profileNavController) }
 
   val isUser = true // TODO: This variable needs to get its value after the authentication
-  val screen by remember { navigationActionsRoot::currentScreen }
-  var screenInProfileNavHost by remember { mutableStateOf<String?>(null) }
-  var screenInSearchNavHost by remember { mutableStateOf<String?>(null) }
+  var currentScreen by remember { mutableStateOf<String?>(null) }
+
 
   // Make `bottomBarVisible` reactive to changes in `screen`
   val shouldShowBottomBar by remember {
     derivedStateOf {
-      screen != Screen.WELCOME &&
-          screen != Screen.LOGIN &&
-          screen != Screen.INFO &&
-          screen != Screen.PASSWORD &&
-          screen != Screen.REGISTER &&
-          screen != Screen.RESET_PASSWORD &&
-          screen != Screen.GOOGLE_INFO &&
-          screenInSearchNavHost?.let {
-            it != Screen.DISPLAY_UPLOADED_IMAGES && it != Screen.SEARCH_LOCATION
+      currentScreen != NoModeScreen.WELCOME &&
+          currentScreen != NoModeScreen.LOGIN &&
+          currentScreen != NoModeScreen.INFO &&
+          currentScreen != NoModeScreen.PASSWORD &&
+          currentScreen != NoModeScreen.REGISTER &&
+          currentScreen != NoModeScreen.RESET_PASSWORD &&
+          currentScreen != NoModeScreen.GOOGLE_INFO &&
+          currentScreen?.let {
+            it != UserScreen.DISPLAY_UPLOADED_IMAGES && it != UserScreen.SEARCH_LOCATION
           } ?: true &&
-          screenInProfileNavHost?.let {
-            it != Screen.ACCOUNT_CONFIGURATION && it != Screen.TO_WORKER
+              currentScreen?.let {
+            it != UserScreen.ACCOUNT_CONFIGURATION && it != UserScreen.TO_WORKER
           } ?: true
     }
   }
@@ -211,6 +220,7 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
             exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to the bottom
             modifier = Modifier.testTag("BNM")) {
               BottomNavigationMenu(
+                  modeViewModel = modeViewModel,
                   onTabSelect = { selectedDestination ->
                     // Use this block to navigate based on the selected tab
                     navigationActionsRoot.navigateTo(selectedDestination)
@@ -222,7 +232,7 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
       }) { innerPadding ->
         NavHost(
             navController = rootNavController,
-            startDestination = Route.WELCOME,
+            startDestination = NoModeRoute.WELCOME,
             modifier = Modifier.padding(innerPadding), // Apply padding from the Scaffold
             enterTransition = {
               // You can change whatever you want for transitions
@@ -232,201 +242,52 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
               // You can change whatever you want for transitions
               ExitTransition.None
             }) {
-              navigation(
-                  startDestination = Screen.WELCOME,
-                  route = Route.WELCOME,
-              ) {
-                composable(Screen.WELCOME) {
-                  WelcomeScreen(
-                      navigationActionsRoot, accountViewModel, userViewModel, preferencesViewModel)
-                }
-                composable(Screen.LOGIN) {
-                  LogInScreen(navigationActionsRoot, accountViewModel, preferencesViewModel)
-                }
-                composable(Screen.REGISTER) {
-                  RegisterScreen(
-                      navigationActionsRoot, accountViewModel, userViewModel, preferencesViewModel)
-                }
-                composable(Screen.GOOGLE_INFO) {
-                  GoogleInfoScreen(
-                      navigationActionsRoot, accountViewModel, userViewModel, preferencesViewModel)
-                }
-                composable(Screen.RESET_PASSWORD) {
-                  ResetPasswordScreen(navigationActionsRoot, accountViewModel)
-                }
-              }
 
-              composable(Route.HOME) {
-                HomeNavHost(isUser) // , loggedInAccountViewModel, chatViewModel)
-              }
 
-              composable(Route.SEARCH) {
-                SearchNavHost(
-                    isUser,
-                    navigationActionsRoot,
-                    searchViewModel,
-                    userViewModel,
-                    loggedInAccountViewModel,
+              composable(RootRoute.NO_MODE) {
+                NoModeNavHost(
                     accountViewModel,
-                    announcementViewModel,
-                    { currentScreen ->
-                      screenInSearchNavHost = currentScreen // Mise à jour de l'écran actif
-                    },
-                    categoryViewModel,
-                    preferencesViewModel)
-              }
-
-              composable(Route.DASHBOARD) { DashBoardNavHost(isUser) }
-
-              composable(Route.PROFILE) {
-                ProfileNavHost(
-                    accountViewModel,
-                    loggedInAccountViewModel,
-                    workerViewModel,
-                    navigationActionsRoot,
-                    onScreenChange = { currentScreen -> screenInProfileNavHost = currentScreen },
-                    categoryViewModel,
                     preferencesViewModel,
-                    locationViewModel,
-                    testBitmapPP)
+                    userViewModel,
+                    onScreenChange = {
+                        currentScreen = it
+                    }
+                )
+                // , loggedInAccountViewModel, chatViewModel)
+              }
+
+              composable(RootRoute.USER_MODE) {
+                    UserModeNavHost(
+                        testBitmapPP,
+                        testLocation,
+                        modeViewModel,
+                        userViewModel,
+                        workerViewModel,
+                        accountViewModel,
+                        categoryViewModel,
+                        locationViewModel,
+                        preferencesViewModel,
+                        onScreenChange = {
+                            currentScreen = it
+                        }
+                        )
+              }
+
+              composable(RootRoute.WORKER_MODE) {
+                  WorkerModeNavGraph(
+                      onScreenChange = {
+                          currentScreen = it
+                      }
+                  )
               }
             }
       }
 }
 
-@Composable
-fun HomeNavHost(
-    isUser: Boolean,
-    // loggedInAccountViewModel: LoggedInAccountViewModel,
-    // chatViewModel: ChatViewModel
-) {
-  val homeNavController = rememberNavController()
-  val navigationActions = remember { NavigationActions(homeNavController) }
-
-  NavHost(
-      navController = homeNavController,
-      startDestination = Screen.HOME,
-      route = Route.HOME,
-  ) {
-    composable(Screen.HOME) { HomeScreen(navigationActions, isUser) }
-    // Add MessageScreen as a nested composable within Home
-    composable(Screen.MESSAGES) {
-      //  MessageScreen(
-      //      loggedInAccountViewModel = loggedInAccountViewModel, chatViewModel =
-      // chatViewModel,navigationActions)
-      FakeMessageScreen(navigationActions)
-    }
-  }
-}
-
 fun isConnectedToInternet(context: Context): Boolean {
-  val connectivityManager =
-      context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-  val network = connectivityManager.activeNetwork ?: return false
-  val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
-  return activeNetwork.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-}
-
-@Composable
-fun ProfileNavHost(
-    accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
-    workerViewModel: ProfileViewModel,
-    navigationActionsRoot: NavigationActions,
-    onScreenChange: (String) -> Unit,
-    categoryViewModel: CategoryViewModel,
-    preferencesViewModel: PreferencesViewModel,
-    locationViewModel: LocationViewModel,
-    testBitmapPP: Bitmap? = null,
-    testLocation: Location = Location()
-) {
-
-  val profileNavController = rememberNavController()
-  val profileNavigationActions = remember { NavigationActions(profileNavController) }
-
-  LaunchedEffect(profileNavigationActions.currentScreen) {
-    onScreenChange(profileNavigationActions.currentScreen)
-  }
-  NavHost(navController = profileNavController, startDestination = Screen.PROFILE) {
-    composable(Screen.PROFILE) {
-      ProfileScreen(profileNavigationActions, navigationActionsRoot, preferencesViewModel)
-    }
-    composable(Screen.ACCOUNT_CONFIGURATION) {
-      AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)
-    }
-    composable(Screen.TO_WORKER) {
-      BusinessScreen(
-          profileNavigationActions,
-          accountViewModel,
-          workerViewModel,
-          loggedInAccountViewModel,
-          preferencesViewModel,
-          categoryViewModel,
-          locationViewModel,
-          testBitmapPP,
-          testLocation)
-    }
-  }
-}
-
-@Composable
-fun DashBoardNavHost(isUser: Boolean) {
-  val dashboardNavController = rememberNavController()
-  val navigationActions = remember { NavigationActions(dashboardNavController) }
-  NavHost(navController = dashboardNavController, startDestination = Screen.DASHBOARD) {
-    composable(Screen.DASHBOARD) { DashboardScreen(navigationActions, isUser) }
-  }
-}
-
-@Composable
-fun SearchNavHost(
-    isUser: Boolean,
-    navigationActionsRoot: NavigationActions,
-    searchViewModel: SearchViewModel,
-    profileViewModel: ProfileViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
-    accountViewModel: AccountViewModel,
-    announcementViewModel: AnnouncementViewModel,
-    onScreenChange: (String) -> Unit,
-    categoryViewModel: CategoryViewModel,
-    preferencesViewModel: PreferencesViewModel
-) {
-  val searchNavController = rememberNavController()
-  val navigationActions = remember { NavigationActions(searchNavController) }
-  LaunchedEffect(navigationActions.currentScreen) {
-    onScreenChange(navigationActions.currentScreen)
-  }
-  val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
-  NavHost(
-      navController = searchNavController,
-      startDestination = Screen.SEARCH,
-  ) {
-    composable(Screen.SEARCH) {
-      QuickFixFinderScreen(
-          navigationActions,
-          navigationActionsRoot,
-          isUser,
-          profileViewModel,
-          loggedInAccountViewModel,
-          accountViewModel,
-          searchViewModel,
-          announcementViewModel,
-          categoryViewModel)
-    }
-    composable(Screen.DISPLAY_UPLOADED_IMAGES) {
-      QuickFixDisplayImages(isUser, navigationActions, announcementViewModel)
-    }
-    composable(Screen.SEARCH_WORKER_RESULT) {
-      SearchWorkerResult(
-          navigationActions,
-          searchViewModel,
-          accountViewModel,
-          profileViewModel,
-          preferencesViewModel)
-    }
-    composable(Screen.SEARCH_LOCATION) {
-      LocationSearchCustomScreen(
-          navigationActions = navigationActions, locationViewModel = locationViewModel)
-    }
-  }
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = connectivityManager.activeNetwork ?: return false
+    val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+    return activeNetwork.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }
