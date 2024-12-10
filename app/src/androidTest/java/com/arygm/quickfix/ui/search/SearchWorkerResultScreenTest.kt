@@ -1358,7 +1358,10 @@ class SearchWorkerResultScreenTest {
     // Clear the Availability filter
     composeTestRule.onNodeWithText("Availability").performClick()
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithText("Clear").performClick()
+    composeTestRule
+        .onAllNodes(hasText("Clear"))
+        .filter(!hasTestTag("filter_button_Clear"))[0]
+        .performClick()
     composeTestRule.waitForIdle()
 
     // With availability cleared and no other filters applied, we should still see 2 workers
