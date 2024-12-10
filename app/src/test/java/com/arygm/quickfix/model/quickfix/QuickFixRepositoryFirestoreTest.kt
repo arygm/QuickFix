@@ -492,6 +492,7 @@ class QuickFixRepositoryFirestoreTest {
     whenever(document.getString("userId")).thenReturn(quickFix.userId)
     whenever(document.getString("chatUid")).thenReturn(quickFix.chatUid)
     whenever(document.getString("title")).thenReturn(quickFix.title)
+    whenever(document.getString("description")).thenReturn(quickFix.description)
     whenever(document.get("bill"))
         .thenReturn(
             quickFix.bill.map {

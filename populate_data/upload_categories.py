@@ -25,7 +25,7 @@ class Category:
 
 def initialize_firestore():
     # Initialize the Firebase app
-    cred = credentials.Certificate('data_loader_service_account_key.json')
+    cred = credentials.Certificate('../data_loader_service_account_key.json')
     firebase_admin.initialize_app(cred)
     return firestore.client()
 
@@ -55,10 +55,7 @@ def upload_data(db, categories: List[Category]):
 
     print("Data uploaded successfully.")
 
-def main():
-    db = initialize_firestore()
-
-    categories = [
+categories = [
         Category(
             id="painting",
             name="Painting",
@@ -67,7 +64,14 @@ def main():
                 Subcategory(
                     id="residential_painting",
                     name="Residential Painting",
-                    tags=["Interior Painting", "Exterior Painting", "Cabinet Painting"],
+                    tags=[
+                        "Interior Painting",
+                        "Exterior Painting",
+                        "Cabinet Painting",
+                        "Ceiling Painting",
+                        "Varnishing",
+                        "Accent Walls"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of painting a 20 m² room.",
                         shortScale="20 m² room equivalent"
@@ -92,7 +96,14 @@ def main():
                 Subcategory(
                     id="commercial_painting",
                     name="Commercial Painting",
-                    tags=["Office Buildings", "Retail Spaces"],
+                    tags=[
+                        "Office Buildings",
+                        "Retail Spaces",
+                        "Warehouse Painting",
+                        "Industrial Facilities",
+                        "High-Rise Buildings",
+                        "Educational Institutions"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of painting a 100 m² commercial space.",
                         shortScale="100 m² commercial space equivalent"
@@ -116,7 +127,14 @@ def main():
                 Subcategory(
                     id="decorative_painting",
                     name="Decorative Painting",
-                    tags=["Faux Finishes", "Murals"],
+                    tags=[
+                        "Faux Finishes",
+                        "Murals",
+                        "Trompe l'oeil",
+                        "Gold Leafing",
+                        "Theme Rooms",
+                        "Artistic Design"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of painting a 20 m² room.",
                         shortScale="20 m² room equivalent"
@@ -150,7 +168,14 @@ def main():
                 Subcategory(
                     id="residential_plumbing",
                     name="Residential Plumbing",
-                    tags=["Leak Repair", "Pipe Installation", "Water Heater Repair"],
+                    tags=[
+                        "Leak Repair",
+                        "Pipe Installation",
+                        "Water Heater Repair",
+                        "Bathroom Plumbing",
+                        "Kitchen Plumbing",
+                        "Plumbing Inspections"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of fixing a standard household leak.",
                         shortScale="Standard leak repair equivalent"
@@ -176,7 +201,14 @@ def main():
                 Subcategory(
                     id="commercial_plumbing",
                     name="Commercial Plumbing",
-                    tags=["Sewer Systems", "Gas Line Installation"],
+                    tags=[
+                        "Sewer Systems",
+                        "Gas Line Installation",
+                        "Industrial Plumbing",
+                        "Medical Facilities",
+                        "Code Compliance",
+                        "24/7 Services"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of servicing a commercial plumbing system.",
                         shortScale="Commercial plumbing service equivalent"
@@ -210,7 +242,14 @@ def main():
                 Subcategory(
                     id="landscaping",
                     name="Landscaping",
-                    tags=["Garden Design", "Lawn Installation"],
+                    tags=[
+                        "Garden Design",
+                        "Lawn Installation",
+                        "Landscape Architecture",
+                        "Sustainable Landscaping",
+                        "Xeriscaping",
+                        "Erosion Control"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of designing a small garden area.",
                         shortScale="Small garden design equivalent"
@@ -236,7 +275,14 @@ def main():
                 Subcategory(
                     id="maintenance",
                     name="Maintenance",
-                    tags=["Weed Control", "Hedge Trimming"],
+                    tags=[
+                        "Weed Control",
+                        "Hedge Trimming",
+                        "Lawn Care",
+                        "Aeration",
+                        "Organic Gardening",
+                        "Plant Health Care"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of monthly garden maintenance.",
                         shortScale="Monthly maintenance equivalent"
@@ -270,7 +316,14 @@ def main():
                 Subcategory(
                     id="residential_electrical",
                     name="Residential Electrical Services",
-                    tags=["Wiring", "Lighting Installation"],
+                    tags=[
+                        "Wiring",
+                        "Lighting Installation",
+                        "Smart Home Integration",
+                        "Energy Efficiency",
+                        "Electrical Safety",
+                        "Emergency Services"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of installing standard home wiring.",
                         shortScale="Standard wiring installation equivalent"
@@ -296,7 +349,14 @@ def main():
                 Subcategory(
                     id="commercial_electrical",
                     name="Commercial Electrical Services",
-                    tags=["Industrial Equipment", "Security Systems"],
+                    tags=[
+                        "Industrial Equipment",
+                        "Security Systems",
+                        "High Voltage Systems",
+                        "UPS Systems",
+                        "Fire Alarm Systems",
+                        "Access Control Systems"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of installing commercial electrical systems.",
                         shortScale="Commercial electrical service equivalent"
@@ -329,7 +389,14 @@ def main():
                 Subcategory(
                     id="general_repairs",
                     name="General Repairs",
-                    tags=["Furniture Assembly", "Fixture Replacement"],
+                    tags=[
+                        "Furniture Assembly",
+                        "Fixture Replacement",
+                        "Home Repairs",
+                        "Installation Services",
+                        "Maintenance Tasks",
+                        "Home Improvements"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of a standard home repair task.",
                         shortScale="Standard repair equivalent"
@@ -355,7 +422,14 @@ def main():
                 Subcategory(
                     id="home_maintenance",
                     name="Home Maintenance",
-                    tags=["Gutter Cleaning", "Pressure Washing"],
+                    tags=[
+                        "Gutter Cleaning",
+                        "Pressure Washing",
+                        "Seasonal Cleanup",
+                        "Pest Control",
+                        "Home Safety Checks",
+                        "Roof Maintenance"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of a standard maintenance task.",
                         shortScale="Standard maintenance equivalent"
@@ -388,7 +462,14 @@ def main():
                 Subcategory(
                     id="residential_cleaning",
                     name="Residential Cleaning",
-                    tags=["Regular Cleaning", "Deep Cleaning"],
+                    tags=[
+                        "Regular Cleaning",
+                        "Deep Cleaning",
+                        "Spring Cleaning",
+                        "Allergen Reduction",
+                        "Pet-friendly Cleaning",
+                        "One-Time Cleaning"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of cleaning a standard 3-bedroom house.",
                         shortScale="Standard house cleaning equivalent"
@@ -414,7 +495,14 @@ def main():
                 Subcategory(
                     id="commercial_cleaning",
                     name="Commercial Cleaning",
-                    tags=["Office Cleaning", "Window Cleaning"],
+                    tags=[
+                        "Office Cleaning",
+                        "Window Cleaning",
+                        "Day Porter Services",
+                        "Retail Spaces",
+                        "Sanitization Services",
+                        "Building Maintenance"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of cleaning a standard office space.",
                         shortScale="Standard office cleaning equivalent"
@@ -447,7 +535,14 @@ def main():
                 Subcategory(
                     id="furniture_carpentry",
                     name="Furniture Carpentry",
-                    tags=["Custom Furniture", "Restoration"],
+                    tags=[
+                        "Custom Furniture",
+                        "Restoration",
+                        "Handcrafted Woodwork",
+                        "Modern Designs",
+                        "Wooden Art Pieces",
+                        "Bespoke Joinery"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of crafting a custom piece of furniture.",
                         shortScale="Custom furniture equivalent"
@@ -473,7 +568,14 @@ def main():
                 Subcategory(
                     id="construction_carpentry",
                     name="Construction Carpentry",
-                    tags=["Framing", "Deck Building"],
+                    tags=[
+                        "Framing",
+                        "Deck Building",
+                        "Structural Repairs",
+                        "Custom Woodwork",
+                        "Building Codes",
+                        "Project Management"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of framing a standard room.",
                         shortScale="Standard room framing equivalent"
@@ -506,7 +608,14 @@ def main():
                 Subcategory(
                     id="local_moving",
                     name="Local Moving",
-                    tags=["Home Moves", "Office Moves"],
+                    tags=[
+                        "Home Moves",
+                        "Office Moves",
+                        "Same-Day Service",
+                        "Senior Moving",
+                        "Affordable Rates",
+                        "Professional Movers"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of moving a standard 2-bedroom apartment locally.",
                         shortScale="Standard local move equivalent"
@@ -532,7 +641,14 @@ def main():
                 Subcategory(
                     id="long_distance_moving",
                     name="Long Distance Moving",
-                    tags=["Interstate Moves", "International Moves"],
+                    tags=[
+                        "Interstate Moves",
+                        "International Moves",
+                        "Cross-Country Moving",
+                        "Corporate Relocation",
+                        "Military Moves",
+                        "Full-Service Moving"
+                    ],
                     scale=Scale(
                         longScale="Prices are displayed relative to the cost of moving a standard household across states.",
                         shortScale="Standard long-distance move equivalent"
@@ -558,6 +674,9 @@ def main():
             ]
         ),
     ]
+
+def main():
+    db = initialize_firestore()
 
     # Upload the data to Firestore
     upload_data(db, categories)

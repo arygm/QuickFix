@@ -2,6 +2,7 @@ package com.arygm.quickfix
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
@@ -28,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -38,6 +38,7 @@ import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
@@ -73,6 +74,8 @@ val Context.dataStore by preferencesDataStore(name = "quickfix_preferences")
 class MainActivity : ComponentActivity() {
 
   private lateinit var locationHelper: LocationHelper
+  private var testBitmapPP = mutableStateOf<Bitmap?>(null)
+  private var testLocation = mutableStateOf<Location?>(Location())
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -82,7 +85,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       QuickFixTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          QuickFixApp()
+          QuickFixApp(testBitmapPP.value, testLocation.value)
         }
       }
     }
@@ -98,6 +101,14 @@ class MainActivity : ComponentActivity() {
     } else {
       locationHelper.requestPermissions()
     }
+  }
+
+  fun setTestBitmap(bitmap: Bitmap) {
+    testBitmapPP.value = bitmap
+  }
+
+  fun setTestLocation(location: Location) {
+    testLocation.value = location
   }
 
   override fun onRequestPermissionsResult(
@@ -119,8 +130,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-@Preview
-fun QuickFixApp() {
+fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
   val context = LocalContext.current
   val rootNavController = rememberNavController()
   val navigationActionsRoot = remember { NavigationActions(rootNavController) }
@@ -137,7 +147,7 @@ fun QuickFixApp() {
   val announcementViewModel: AnnouncementViewModel =
       viewModel(factory = AnnouncementViewModel.Factory)
   val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
-
+  val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
   val preferencesViewModel: PreferencesViewModel =
       viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
 
@@ -276,7 +286,9 @@ fun QuickFixApp() {
                     navigationActionsRoot,
                     onScreenChange = { currentScreen -> screenInProfileNavHost = currentScreen },
                     categoryViewModel,
-                    preferencesViewModel)
+                    preferencesViewModel,
+                    locationViewModel,
+                    testBitmapPP)
               }
             }
       }
@@ -323,7 +335,10 @@ fun ProfileNavHost(
     navigationActionsRoot: NavigationActions,
     onScreenChange: (String) -> Unit,
     categoryViewModel: CategoryViewModel,
-    preferencesViewModel: PreferencesViewModel
+    preferencesViewModel: PreferencesViewModel,
+    locationViewModel: LocationViewModel,
+    testBitmapPP: Bitmap? = null,
+    testLocation: Location = Location()
 ) {
 
   val profileNavController = rememberNavController()
@@ -345,8 +360,11 @@ fun ProfileNavHost(
           accountViewModel,
           workerViewModel,
           loggedInAccountViewModel,
+          preferencesViewModel,
           categoryViewModel,
-      )
+          locationViewModel,
+          testBitmapPP,
+          testLocation)
     }
   }
 }
@@ -390,8 +408,8 @@ fun SearchNavHost(
           isUser,
           profileViewModel,
           loggedInAccountViewModel,
-          accountViewModel,
           searchViewModel,
+          accountViewModel,
           announcementViewModel,
           categoryViewModel)
     }

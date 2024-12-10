@@ -1,8 +1,12 @@
 package com.arygm.quickfix.model.profile
 
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.arygm.quickfix.model.locations.Location
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
@@ -14,17 +18,25 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
+import java.io.ByteArrayOutputStream
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.fail
 import org.junit.After
+import org.junit.Assert
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.MockedStatic
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
@@ -51,6 +63,12 @@ class UserProfileRepositoryFirestoreTest {
   @Mock private lateinit var mockProfileQuerySnapshot: QuerySnapshot
 
   @Mock private lateinit var mockQuery: Query
+
+  @Mock private lateinit var mockStorage: FirebaseStorage
+  @Mock private lateinit var storageRef: StorageReference
+  @Mock private lateinit var storageRef1: StorageReference
+  @Mock private lateinit var storageRef2: StorageReference
+  @Mock private lateinit var workerProfileFolderRef: StorageReference
 
   private lateinit var mockFirebaseAuth: FirebaseAuth
   private lateinit var firebaseAuthMockedStatic: MockedStatic<FirebaseAuth>
@@ -81,7 +99,12 @@ class UserProfileRepositoryFirestoreTest {
         .`when`<FirebaseAuth> { FirebaseAuth.getInstance() }
         .thenReturn(mockFirebaseAuth)
 
-    profileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore)
+    whenever(mockStorage.reference).thenReturn(storageRef)
+    whenever(storageRef.child(anyString())).thenReturn(storageRef1)
+    whenever(storageRef1.child(anyString())).thenReturn(storageRef2)
+    whenever(storageRef2.child(anyString())).thenReturn(workerProfileFolderRef)
+
+    profileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore, mockStorage)
 
     whenever(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     whenever(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
@@ -654,4 +677,112 @@ class UserProfileRepositoryFirestoreTest {
   //    assert(callbackCalled)
   //    assert(returnedException == exception)
   //  }
+  @Test
+  fun uploadWorkerProfileImages_success() {
+    val accountId = "userProfileId"
+    val bitmaps = listOf(mock(Bitmap::class.java), mock(Bitmap::class.java))
+    val expectedUrls = listOf("https://example.com/image1.jpg", "https://example.com/image2.jpg")
+    val baos = ByteArrayOutputStream()
+    bitmaps.forEach { bitmap -> bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos) }
+    val imageData = baos.toByteArray()
+
+    // Mock storageRef.child("workerProfiles/$workerProfileId")
+    Mockito.`when`(storageRef.child("profiles").child(accountId).child("user"))
+        .thenReturn(workerProfileFolderRef)
+
+    // For each image, when workerProfileFolderRef.child(anyString()) is called, return a new
+    // fileRef
+    val fileRef1 = mock(StorageReference::class.java)
+    val fileRef2 = mock(StorageReference::class.java)
+    val fileRefs = listOf(fileRef1, fileRef2)
+    var fileRefIndex = 0
+    Mockito.`when`(workerProfileFolderRef.child(anyString())).thenAnswer {
+      fileRefs[fileRefIndex++]
+    }
+
+    // Mock putBytes
+    val mockUploadTask1 = mock(UploadTask::class.java)
+    val mockUploadTask2 = mock(UploadTask::class.java)
+    val mockUploadTasks = listOf(mockUploadTask1, mockUploadTask2)
+    val imageDatas = listOf(imageData, imageData) // Assuming same data for simplicity
+
+    // Mock fileRef.putBytes(imageData)
+    Mockito.`when`(fileRef1.putBytes(imageDatas[0])).thenReturn(mockUploadTask1)
+    Mockito.`when`(fileRef2.putBytes(imageDatas[1])).thenReturn(mockUploadTask2)
+
+    // Mock mockUploadTask.addOnSuccessListener(...)
+    mockUploadTasks.forEachIndexed { index, mockUploadTask ->
+      Mockito.`when`(mockUploadTask.addOnSuccessListener(org.mockito.kotlin.any())).thenAnswer {
+          invocation ->
+        val listener = invocation.getArgument<OnSuccessListener<UploadTask.TaskSnapshot>>(0)
+        val taskSnapshot = mock(UploadTask.TaskSnapshot::class.java) // Mock the snapshot
+        listener.onSuccess(taskSnapshot)
+        mockUploadTask // continue the chain
+      }
+    }
+
+    // Mock fileRef.downloadUrl
+    Mockito.`when`(fileRef1.downloadUrl).thenReturn(Tasks.forResult(Uri.parse(expectedUrls[0])))
+    Mockito.`when`(fileRef2.downloadUrl).thenReturn(Tasks.forResult(Uri.parse(expectedUrls[1])))
+
+    // Act
+    var resultUrls = listOf<String>()
+    profileRepositoryFirestore.uploadProfileImages(
+        accountId,
+        bitmaps,
+        onSuccess = {
+          resultUrls = it
+          Assert.assertEquals(expectedUrls, resultUrls)
+        },
+        onFailure = { fail("onFailure should not be called") })
+
+    // Wait for tasks to complete
+    shadowOf(Looper.getMainLooper()).idle()
+  }
+
+  @Test
+  fun uploadWorkerProfileImages_failure() {
+    val accountId = "userProfileId"
+    val bitmap1 = mock(Bitmap::class.java)
+    val images = listOf(bitmap1)
+    val exception = Exception("Upload failed")
+
+    // Mock storageRef.child("workerProfiles/$workerProfileId")
+    Mockito.`when`(storageRef.child("profiles").child(accountId).child("user"))
+        .thenReturn(workerProfileFolderRef)
+    // Mock fileRef
+    val fileRef = mock(StorageReference::class.java)
+    whenever(workerProfileFolderRef.child(anyString())).thenReturn(fileRef)
+
+    // Mock putBytes
+    val uploadTask = mock(UploadTask::class.java)
+    whenever(fileRef.putBytes(org.mockito.kotlin.any())).thenReturn(uploadTask)
+
+    // Mock uploadTask.addOnSuccessListener and addOnFailureListener
+    whenever(uploadTask.addOnSuccessListener(org.mockito.kotlin.any())).thenReturn(uploadTask)
+    whenever(uploadTask.addOnFailureListener(org.mockito.kotlin.any())).thenAnswer { invocation ->
+      val listener = invocation.arguments[0] as OnFailureListener
+      listener.onFailure(exception)
+      uploadTask
+    }
+
+    // Act
+    var onFailureCalled = false
+    var exceptionReceived: Exception? = null
+    profileRepositoryFirestore.uploadProfileImages(
+        accountId,
+        images,
+        onSuccess = { fail("onSuccess should not be called when upload fails") },
+        onFailure = { e ->
+          onFailureCalled = true
+          exceptionReceived = e
+        })
+
+    // Wait for tasks to complete
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert
+    assertTrue(onFailureCalled)
+    Assert.assertEquals(exception, exceptionReceived)
+  }
 }

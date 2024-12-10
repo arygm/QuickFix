@@ -245,4 +245,97 @@ class SearchViewModelTest {
     assertEquals(1, result.size)
     assertEquals("worker_127", result[0].uid)
   }
+
+  @Test
+  fun testFilterWorkersBySubcategorySuccess() {
+    // Arrange: Mock a list of workers and simulate repository success callback
+    val workers =
+        listOf(
+            WorkerProfile(uid = "worker_1", fieldOfWork = "Plumbing", displayName = "Worker 1"),
+            WorkerProfile(uid = "worker_2", fieldOfWork = "Electrician", displayName = "Worker 2"),
+            WorkerProfile(uid = "worker_3", fieldOfWork = "Plumbing", displayName = "Worker 3"))
+
+    // Mock the repository's getProfiles behavior
+    doAnswer { invocation ->
+          val onSuccess = invocation.arguments[0] as (List<WorkerProfile>) -> Unit
+          onSuccess(workers) // Simulate success callback
+          null
+        }
+        .`when`(mockRepository)
+        .getProfiles(anyOrNull(), anyOrNull())
+
+    // Act: Call the method to filter workers by subcategory
+    viewModel.filterWorkersBySubcategory("Plumbing")
+
+    // Assert: Check if only the workers matching the subcategory are included
+    val result = viewModel.subCategoryWorkerProfiles.value
+    assertEquals(2, result.size)
+    assertTrue(result.any { it.uid == "worker_1" })
+    assertTrue(result.any { it.uid == "worker_3" })
+    assertTrue(result.none { it.uid == "worker_2" })
+  }
+
+  @Test
+  fun testFilterWorkersBySubcategoryNoMatch() {
+    // Arrange: Mock a list of workers and simulate repository success callback
+    val workers =
+        listOf(
+            WorkerProfile(uid = "worker_1", fieldOfWork = "Electrician", displayName = "Worker 1"),
+            WorkerProfile(uid = "worker_2", fieldOfWork = "Carpentry", displayName = "Worker 2"))
+
+    // Mock the repository's getProfiles behavior
+    doAnswer { invocation ->
+          val onSuccess = invocation.arguments[0] as (List<WorkerProfile>) -> Unit
+          onSuccess(workers) // Simulate success callback
+          null
+        }
+        .`when`(mockRepository)
+        .getProfiles(anyOrNull(), anyOrNull())
+
+    // Act: Call the method to filter workers by subcategory with no matches
+    viewModel.filterWorkersBySubcategory("Plumbing")
+
+    // Assert: Ensure the result list is empty
+    val result = viewModel.subCategoryWorkerProfiles.value
+    assertTrue(result.isEmpty())
+  }
+
+  @Test
+  fun testFilterWorkersBySubcategoryEmptyList() {
+    // Arrange: Simulate repository returning an empty list
+    doAnswer { invocation ->
+          val onSuccess = invocation.arguments[0] as (List<WorkerProfile>) -> Unit
+          onSuccess(emptyList()) // Simulate success callback with no workers
+          null
+        }
+        .`when`(mockRepository)
+        .getProfiles(anyOrNull(), anyOrNull())
+
+    // Act: Call the method to filter workers by subcategory
+    viewModel.filterWorkersBySubcategory("Plumbing")
+
+    // Assert: Ensure the result list is empty
+    val result = viewModel.subCategoryWorkerProfiles.value
+    assertTrue(result.isEmpty())
+  }
+
+  @Test
+  fun testFilterWorkersBySubcategoryFailure() {
+    // Arrange: Simulate repository failure with an exception
+    val errorMessage = "Failed to fetch profiles"
+    doAnswer { invocation ->
+          val onFailure = invocation.arguments[1] as (Exception) -> Unit
+          onFailure(Exception(errorMessage)) // Simulate failure callback
+          null
+        }
+        .`when`(mockRepository)
+        .getProfiles(anyOrNull(), anyOrNull())
+
+    // Act: Call the method to filter workers by subcategory
+    viewModel.filterWorkersBySubcategory("Plumbing")
+
+    // Assert: Ensure no profiles are returned and error message is set
+    val result = viewModel.subCategoryWorkerProfiles.value
+    assertTrue(result.isEmpty())
+  }
 }

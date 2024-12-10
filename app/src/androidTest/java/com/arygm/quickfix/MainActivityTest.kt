@@ -1,5 +1,6 @@
 package com.arygm.quickfix
 
+import android.graphics.Bitmap
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -16,7 +17,9 @@ class MainActivityTest {
 
   @Test
   fun bottomNavigation_isNotVisibleOnLoginScreen() {
-    composeTestRule.setContent { QuickFixTheme { QuickFixApp() } }
+    val testBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+
+    composeTestRule.setContent { QuickFixTheme { QuickFixApp(testBitmap) } }
 
     // Verify that the bottom bar is hidden on the Login screen
     composeTestRule.onNodeWithTag("BNM").assertIsNotDisplayed()
