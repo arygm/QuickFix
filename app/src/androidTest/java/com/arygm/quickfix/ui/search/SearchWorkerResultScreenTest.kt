@@ -619,7 +619,9 @@ class SearchWorkerResultScreenTest {
     textFields[1].performTextReplacement("00")
 
     // Find the node representing today's date and perform a click
-    composeTestRule.onNode(hasText(todayDayOfMonth) and hasClickAction()).performClick()
+    composeTestRule
+        .onNode(hasText(todayDayOfMonth) and hasClickAction() and !hasSetTextAction())
+        .performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 

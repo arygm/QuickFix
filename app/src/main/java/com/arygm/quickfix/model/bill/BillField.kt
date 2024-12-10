@@ -5,5 +5,5 @@ data class BillField(
     val unit: Units = Units.U,
     val amount: Double = 0.0,
     val unitPrice: Double = 0.0,
-    val total: Double = 0.0
+    val total: Double = 0.0,
 )

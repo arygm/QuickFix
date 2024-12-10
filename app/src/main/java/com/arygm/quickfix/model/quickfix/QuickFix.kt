@@ -1,7 +1,6 @@
 package com.arygm.quickfix.model.quickfix
 
 import com.arygm.quickfix.model.bill.BillField
-import com.arygm.quickfix.model.categories.WorkerCategory
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.dataFields.Service
 import com.google.firebase.Timestamp
@@ -27,6 +26,6 @@ enum class Status {
   PENDING,
   UNPAID,
   PAID,
-  IN_PROCESS,
+  UPCOMING,
   COMPLETED
 }

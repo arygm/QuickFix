@@ -71,9 +71,7 @@ import coil.compose.SubcomposeAsyncImageContent
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
-import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
@@ -89,10 +87,8 @@ import com.arygm.quickfix.ui.elements.dashedBorder
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.profile.becomeWorker.views.personal.CameraBottomSheet
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import com.arygm.quickfix.utils.loadUserId
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.firebase.Timestamp
-import kotlinx.coroutines.CoroutineScope
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -108,15 +104,14 @@ fun QuickFixFirstStep(
     chatViewModel: ChatViewModel,
     workerId: String,
     profileViewModel: ProfileViewModel,
-    preferencesViewModel: PreferencesViewModel
 ) {
 
-    var workerProfile by remember { mutableStateOf(WorkerProfile()) }
-    profileViewModel.fetchUserProfile(workerId) {
-        if (it != null && it is WorkerProfile) {
-            workerProfile = it
-        }
+  var workerProfile by remember { mutableStateOf(WorkerProfile()) }
+  profileViewModel.fetchUserProfile(workerId) {
+    if (it != null && it is WorkerProfile) {
+      workerProfile = it
     }
+  }
 
   val focusManager = LocalFocusManager.current
   val context = LocalContext.current
