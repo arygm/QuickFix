@@ -49,7 +49,8 @@ fun AppContentNavGraph(
     accountViewModel: AccountViewModel,
     isOffline: Boolean,
     rootNavigationActions: NavigationActions,
-    modeViewModel: ModeViewModel
+    modeViewModel: ModeViewModel,
+    userPreferencesViewModel: PreferencesViewModel
 ) {
   val appContentNavController = rememberNavController()
   val appContentNavigationActions = remember { NavigationActions(appContentNavController) }
@@ -138,7 +139,8 @@ fun AppContentNavGraph(
                     preferencesViewModel,
                     onScreenChange = { currentScreen = it },
                     rootNavigationActions,
-                    userNavigationActions)
+                    userNavigationActions,
+                    userPreferencesViewModel)
               }
 
               composable(AppContentRoute.WORKER_MODE) {

@@ -31,6 +31,7 @@ import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.search.SearchWorkerResult
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.ProfileScreenRefactor
 import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 
@@ -48,6 +49,7 @@ fun UserModeNavHost(
     onScreenChange: (String) -> Unit,
     rootMainNavigationActions: NavigationActions,
     userNavigationActions: NavigationActions,
+    userPreferencesViewModel: PreferencesViewModel
 ) {
 
   val loggedInAccountViewModel: LoggedInAccountViewModel =
@@ -105,6 +107,7 @@ fun UserModeNavHost(
               testBitmapPP,
               testLocation,
               rootMainNavigationActions,
+              userPreferencesViewModel
           )
         }
       }
@@ -148,7 +151,8 @@ fun ProfileNavHost(
     locationViewModel: LocationViewModel,
     testBitmapPP: Bitmap? = null,
     testLocation: Location = Location(),
-    rootMainNavigationActions: NavigationActions
+    rootMainNavigationActions: NavigationActions,
+    userPreferencesViewModel: PreferencesViewModel
 ) {
 
   val profileNavController = rememberNavController()
@@ -159,7 +163,7 @@ fun ProfileNavHost(
   }
   NavHost(navController = profileNavController, startDestination = UserScreen.PROFILE) {
     composable(UserScreen.PROFILE) {
-      ProfileScreen(profileNavigationActions, rootMainNavigationActions, preferencesViewModel)
+        ProfileScreenRefactor(profileNavigationActions, rootMainNavigationActions, preferencesViewModel, userPreferencesViewModel)
     }
     composable(UserScreen.ACCOUNT_CONFIGURATION) {
       AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)

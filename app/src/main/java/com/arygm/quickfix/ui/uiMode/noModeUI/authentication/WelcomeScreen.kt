@@ -65,7 +65,8 @@ fun WelcomeScreen(
     accountViewModel: AccountViewModel,
     userViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
-    rootNavigationActions: NavigationActions
+    rootNavigationActions: NavigationActions,
+    userPreferencesViewModel: PreferencesViewModel
 ) {
   val colorScheme = MaterialTheme.colorScheme
 
@@ -95,7 +96,8 @@ fun WelcomeScreen(
           onAuthError = { Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}") },
           accountViewModel,
           userViewModel = userViewModel,
-          preferencesViewModel = preferencesViewModel)
+          preferencesViewModel = preferencesViewModel,
+          userPreferencesViewModel = userPreferencesViewModel)
 
   val token = stringResource(com.arygm.quickfix.R.string.default_web_client_id)
 

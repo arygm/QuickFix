@@ -44,7 +44,7 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
 import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
-import com.arygm.quickfix.utils.clearAccountPreferences
+import com.arygm.quickfix.utils.clearPreferences
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -54,6 +54,7 @@ fun ProfileScreen(
     navigationActions: NavigationActions,
     rootMainNavigationActions: NavigationActions,
     preferencesViewModel: PreferencesViewModel,
+    userPreferencesViewModel: PreferencesViewModel
 ) {
 
   // List of options handled by the profile screen
@@ -279,7 +280,8 @@ fun ProfileScreen(
               // Logout Button
               Button(
                   onClick = {
-                    clearAccountPreferences(preferencesViewModel)
+                    clearPreferences(preferencesViewModel)
+                      clearPreferences(userPreferencesViewModel)
                     rootMainNavigationActions.navigateTo(RootRoute.NO_MODE)
                     Log.d("user", Firebase.auth.currentUser.toString())
                   },

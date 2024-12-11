@@ -27,7 +27,8 @@ fun NoModeNavHost(
     accountViewModel: AccountViewModel,
     preferencesViewModel: PreferencesViewModel,
     userViewModel: ProfileViewModel,
-    isOffline: Boolean
+    isOffline: Boolean,
+    userPreferencesViewModel: PreferencesViewModel
 ) {
   val rootSharedModelNavController = rememberNavController()
   val navigationActions = NavigationActions(rootSharedModelNavController)
@@ -53,12 +54,13 @@ fun NoModeNavHost(
                 accountViewModel,
                 userViewModel,
                 preferencesViewModel,
-                rootNavigationActions)
+                rootNavigationActions,
+                userPreferencesViewModel)
           }
 
           composable(NoModeRoute.LOGIN) {
             LogInScreen(
-                navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
+                navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions, userPreferencesViewModel, userViewModel)
           }
           composable(NoModeRoute.REGISTER) {
             RegisterScreen(
@@ -74,7 +76,8 @@ fun NoModeNavHost(
                 accountViewModel,
                 userViewModel,
                 preferencesViewModel,
-                navigationActions)
+                navigationActions,
+                userPreferencesViewModel)
           }
           composable(NoModeRoute.RESET_PASSWORD) {
             ResetPasswordScreen(navigationActions, accountViewModel)

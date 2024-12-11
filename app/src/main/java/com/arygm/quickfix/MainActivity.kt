@@ -119,6 +119,8 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
 
   val preferencesViewModel: PreferencesViewModel =
       viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
+    val userPreferencesViewModel: PreferencesViewModel =
+      viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
 
   var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
 
@@ -167,7 +169,8 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
               accountViewModel,
               preferencesViewModel,
               userViewModel,
-              isOffline = isOffline)
+              isOffline = isOffline,
+              userPreferencesViewModel)
         }
 
         composable(RootRoute.APP_CONTENT) {
@@ -179,7 +182,8 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
               accountViewModel,
               isOffline,
               navigationActionsRoot,
-              modeViewModel)
+              modeViewModel,
+              userPreferencesViewModel)
         }
       }
 }

@@ -32,7 +32,8 @@ fun rememberFirebaseAuthLauncher(
     onAuthError: (ApiException) -> Unit,
     accountViewModel: AccountViewModel,
     userViewModel: ProfileViewModel,
-    preferencesViewModel: PreferencesViewModel
+    preferencesViewModel: PreferencesViewModel,
+    userPreferencesViewModel: PreferencesViewModel
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
   val scope = rememberCoroutineScope()
 
@@ -50,6 +51,10 @@ fun rememberFirebaseAuthLauncher(
           accountViewModel.fetchUserAccount(it.uid) { existingAccount ->
             if (existingAccount != null) {
               setAccountPreferences(preferencesViewModel, existingAccount)
+                userViewModel.fetchUserProfile(it.uid) { userProfile ->
+                  val profileFetched = userProfile as UserProfile
+                    setUserProfilePreferences(userPreferencesViewModel, profileFetched)
+                }
               onAuthCompleteOne(authResult)
             } else {
               // Extract user information from Google account
@@ -73,6 +78,7 @@ fun rememberFirebaseAuthLauncher(
                       uid = it.uid,
                       locations = listOf(defaultLocation),
                       announcements = emptyList())
+                setUserProfilePreferences(userPreferencesViewModel, defaultUserProfile)
               userViewModel.addProfile(
                   defaultUserProfile,
                   onSuccess = {
@@ -97,7 +103,9 @@ fun signInWithEmailAndFetchAccount(
     password: String,
     accountViewModel: AccountViewModel,
     preferencesViewModel: PreferencesViewModel,
-    onResult: (Boolean) -> Unit
+    onResult: (Boolean) -> Unit,
+    userPreferencesViewModel: PreferencesViewModel,
+    userViewModel: ProfileViewModel
 ) {
   FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
       task ->
@@ -109,6 +117,10 @@ fun signInWithEmailAndFetchAccount(
             onResult = { account ->
               if (account != null) {
                 setAccountPreferences(preferencesViewModel, account)
+                    userViewModel.fetchUserProfile(it.uid) { userProfile ->
+                      val profileFetched = userProfile as UserProfile
+                        setUserProfilePreferences(userPreferencesViewModel, profileFetched)
+                    }
                 onResult(true)
               } else {
                 Log.e("Login Screen", "Error Logging in Account.")
@@ -161,7 +173,7 @@ fun createAccountWithEmailAndPassword(
         val defaultUserProfile =
             UserProfile(
                 uid = it.uid, locations = listOf(defaultLocation), announcements = emptyList())
-        userViewModel.addProfile(
+          userViewModel.addProfile(
             defaultUserProfile,
             onSuccess = {
               account?.let { createdAccount ->
@@ -169,7 +181,8 @@ fun createAccountWithEmailAndPassword(
                     createdAccount,
                     onSuccess = {
                       setAccountPreferences(preferencesViewModel, createdAccount)
-                      onSuccess()
+                        setUserProfilePreferences(preferencesViewModel, defaultUserProfile)
+                        onSuccess()
                     },
                     onFailure = {
                       Log.e("Registration", "Failed to save account")
