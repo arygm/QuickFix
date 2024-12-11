@@ -57,6 +57,10 @@ fun getBottomBarIdUser(route: String): Int {
         UserRoute.SEARCH -> 2
         UserRoute.DASHBOARD -> 3
         UserRoute.PROFILE -> 4
+        UserScreen.HOME -> 1
+        UserScreen.SEARCH -> 2
+        UserScreen.DASHBOARD -> 3
+        UserScreen.PROFILE -> 4
         else -> -1 // Should not happen
     }
 }

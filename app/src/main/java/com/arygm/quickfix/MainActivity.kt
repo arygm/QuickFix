@@ -45,6 +45,7 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
+import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
@@ -70,11 +71,13 @@ import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.search.SearchWorkerResult
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.ui.uiMode.appContentUI.AppContentNavGraph
+import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
 import com.arygm.quickfix.ui.uiMode.workerMode.WorkerModeNavGraph
 import com.arygm.quickfix.ui.userModeUI.UserModeNavHost
 import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.utils.LocationHelper
+import com.arygm.quickfix.utils.loadAppMode
 import kotlinx.coroutines.delay
 
 val Context.dataStore by preferencesDataStore(name = "quickfix_preferences")
@@ -139,27 +142,43 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
+
   val context = LocalContext.current
   val rootNavController = rememberNavController()
   val navigationActionsRoot = remember { NavigationActions(rootNavController) }
 
     val modeViewModel: ModeViewModel = viewModel(factory = ModeViewModel.Factory)
+
   val userViewModel: ProfileViewModel =
       viewModel(key = "userViewModel", factory = ProfileViewModel.UserFactory)
-  val workerViewModel: ProfileViewModel =
-      viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
 
   val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
 
-  val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
-  val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
   val preferencesViewModel: PreferencesViewModel =
       viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
 
 
-  var currentScreen by remember { mutableStateOf<String?>(null) }
-
   var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
+
+    var currentAppMode by remember { mutableStateOf<String?>(null) }
+    Log.d("userContent", "Current App Mode is empty: $currentAppMode")
+    LaunchedEffect(Unit) {
+        Log.d("userContent", "Loading App Mode")
+        currentAppMode = when(loadAppMode(preferencesViewModel)){
+            "User" -> AppContentRoute.USER_MODE
+            "Worker" -> AppContentRoute.WORKER_MODE
+            else -> {
+                AppContentRoute.USER_MODE
+            }
+        }
+    }
+
+    modeViewModel.switchMode(when(currentAppMode){
+        AppContentRoute.USER_MODE -> AppMode.USER
+        AppContentRoute.WORKER_MODE -> AppMode.WORKER
+        else -> AppMode.USER
+    })
+
 
   // Simulate monitoring connectivity (replace this with actual monitoring in production)
   LaunchedEffect(Unit) {
@@ -189,7 +208,6 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
                 userViewModel,
                 isOffline = isOffline
             )
-            // , loggedInAccountViewModel, chatViewModel)
         }
 
         composable(RootRoute.APP_CONTENT) {
@@ -200,11 +218,10 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
                 userViewModel,
                 accountViewModel,
                 isOffline,
-                navigationActionsRoot
+                navigationActionsRoot,
+                modeViewModel
             )
         }
-
-
     }
 
 }

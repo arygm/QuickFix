@@ -26,8 +26,8 @@ import com.arygm.quickfix.R
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.UserScreen
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 
 @Composable
 fun WelcomeOnBoardScreen(navigationActions: NavigationActions) {

@@ -59,19 +59,17 @@ fun NoModeNavHost(
                 // You can change whatever you want for transitions
                 ExitTransition.None
             }) {
-            navigation(
-                startDestination = NoModeScreen.WELCOME,
-                route = NoModeRoute.WELCOME,
-            ) {
-                composable(NoModeRoute.WELCOME) {
-                    WelcomeScreen(
-                        navigationActions,
-                        accountViewModel,
-                        userViewModel,
-                        preferencesViewModel,
-                        rootNavigationActions
-                    )
-                }
+
+            composable(NoModeRoute.WELCOME) {
+                WelcomeScreen(
+                    navigationActions,
+                    accountViewModel,
+                    userViewModel,
+                    preferencesViewModel,
+                    rootNavigationActions
+                )
+            }
+
                 composable(NoModeRoute.LOGIN) {
                     LogInScreen(navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
                 }
@@ -86,7 +84,7 @@ fun NoModeNavHost(
                 }
                 composable(NoModeRoute.GOOGLE_INFO) {
                     GoogleInfoScreen(
-                        navigationActions,
+                        rootNavigationActions,
                         accountViewModel,
                         userViewModel,
                         preferencesViewModel,
@@ -99,4 +97,3 @@ fun NoModeNavHost(
             }
         }
     }
-}

@@ -36,7 +36,7 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 import kotlin.random.Random
 
 @Composable
-fun DashboardScreen(navigationActions: NavigationActions, isUser: Boolean = true) {
+fun DashboardScreen(navigationActions: NavigationActions) {
 
   data class QuickFixFilterButtons(
       val title: String,

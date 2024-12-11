@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 open class NavigationActions(
-    private val navController: NavHostController,
+    val navController: NavHostController,
 ) {
   var currentScreen by mutableStateOf(NoModeScreen.WELCOME)
 
@@ -47,6 +47,7 @@ open class NavigationActions(
    * @param screen The screen to navigate to
    */
   open fun navigateTo(screen: String) {
+    Log.d("NavigationActions", "Navigating to $screen")
     currentScreen = screen
     navController.navigate(screen)
     currentRoute_.value = currentRoute()
@@ -90,5 +91,9 @@ open class NavigationActions(
 
   open fun getFromBackStack(key: String): Any? {
     return navController.currentBackStackEntry?.savedStateHandle?.get<Any>(key)
+  }
+
+  open fun setCurrentRoute(route: String) {
+    currentRoute_.value = route
   }
 }

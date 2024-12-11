@@ -57,7 +57,7 @@ import com.arygm.quickfix.ui.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.UserScreen
+import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)

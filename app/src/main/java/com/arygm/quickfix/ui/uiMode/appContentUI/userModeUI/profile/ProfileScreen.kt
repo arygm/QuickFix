@@ -42,8 +42,10 @@ import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.UserScreen
-import com.arygm.quickfix.ui.navigation.UserTopLevelDestinations
+import com.arygm.quickfix.ui.navigation.RootRoute
+import com.arygm.quickfix.ui.navigation.TopLevelDestination
+import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.userModeUI.navigation.UserTopLevelDestinations
 import com.arygm.quickfix.utils.clearAccountPreferences
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -52,8 +54,8 @@ import com.google.firebase.auth.auth
 @Composable
 fun ProfileScreen(
     navigationActions: NavigationActions,
-    navigationActionsRoot: NavigationActions,
-    preferencesViewModel: PreferencesViewModel
+    rootMainNavigationActions: NavigationActions,
+    preferencesViewModel: PreferencesViewModel,
 ) {
 
   // List of options handled by the profile screen
@@ -280,7 +282,7 @@ fun ProfileScreen(
               Button(
                   onClick = {
                     clearAccountPreferences(preferencesViewModel)
-                    navigationActionsRoot.navigateTo(UserTopLevelDestinations.WELCOME)
+                      rootMainNavigationActions.navigateTo(RootRoute.NO_MODE)
                     Log.d("user", Firebase.auth.currentUser.toString())
                   },
                   modifier =

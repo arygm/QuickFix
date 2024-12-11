@@ -1,30 +1,21 @@
 package com.arygm.quickfix.ui.userModeUI
 
-import android.content.Context
 import android.graphics.Bitmap
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.arygm.quickfix.dataStore
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
-import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -55,9 +46,9 @@ fun UserModeNavHost(
     locationViewModel: LocationViewModel,
     preferencesViewModel: PreferencesViewModel,
     onScreenChange: (String) -> Unit,
+    rootMainNavigationActions: NavigationActions,
+    userNavigationActions: NavigationActions,
 ) {
-    val rootNavControllerUserMode = rememberNavController()
-    val navigationActionsRoot = remember { NavigationActions(rootNavControllerUserMode) }
 
 
     val loggedInAccountViewModel: LoggedInAccountViewModel =
@@ -71,7 +62,7 @@ fun UserModeNavHost(
     val isUser = true // TODO: This variable needs to get its value after the authentication
 
     NavHost(
-        navController = rootNavControllerUserMode,
+        navController = userNavigationActions.navController,
         startDestination = UserRoute.HOME,
         enterTransition = {
             // You can change whatever you want for transitions
@@ -84,7 +75,6 @@ fun UserModeNavHost(
 
         composable(UserRoute.HOME) {
             HomeNavHost(
-                isUser,
                 onScreenChange
             ) // , loggedInAccountViewModel, chatViewModel)
         }
@@ -92,7 +82,7 @@ fun UserModeNavHost(
         composable(UserRoute.SEARCH) {
             SearchNavHost(
                 isUser,
-                navigationActionsRoot,
+                userNavigationActions,
                 searchViewModel,
                 userViewModel,
                 loggedInAccountViewModel,
@@ -104,26 +94,27 @@ fun UserModeNavHost(
                 locationViewModel)
         }
 
-        composable(UserRoute.DASHBOARD) { DashBoardNavHost(isUser, onScreenChange) }
+        composable(UserRoute.DASHBOARD) { DashBoardNavHost(onScreenChange) }
 
         composable(UserRoute.PROFILE) {
             ProfileNavHost(
                 accountViewModel,
                 loggedInAccountViewModel,
                 workerViewModel,
-                navigationActionsRoot,
+                userNavigationActions,
                 onScreenChange,
                 categoryViewModel,
                 preferencesViewModel,
                 locationViewModel,
-                testBitmapPP, testLocation)
+                testBitmapPP, testLocation,
+                rootMainNavigationActions,
+                )
         }
     }
 }
 
 @Composable
 fun HomeNavHost(
-    isUser: Boolean,
     onScreenChange: (String) -> Unit = {},
 ) {
     val homeNavController = rememberNavController()
@@ -153,13 +144,14 @@ fun ProfileNavHost(
     accountViewModel: AccountViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
     workerViewModel: ProfileViewModel,
-    navigationActionsRoot: NavigationActions,
+    userNavigationActions: NavigationActions,
     onScreenChange: (String) -> Unit,
     categoryViewModel: CategoryViewModel,
     preferencesViewModel: PreferencesViewModel,
     locationViewModel: LocationViewModel,
     testBitmapPP: Bitmap? = null,
-    testLocation: Location = Location()
+    testLocation: Location = Location(),
+    rootMainNavigationActions: NavigationActions
 ) {
 
     val profileNavController = rememberNavController()
@@ -170,7 +162,7 @@ fun ProfileNavHost(
     }
     NavHost(navController = profileNavController, startDestination = UserScreen.PROFILE) {
         composable(UserScreen.PROFILE) {
-            ProfileScreen(profileNavigationActions, navigationActionsRoot, preferencesViewModel)
+            ProfileScreen(profileNavigationActions, rootMainNavigationActions, preferencesViewModel)
         }
         composable(UserScreen.ACCOUNT_CONFIGURATION) {
             AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)
@@ -191,14 +183,14 @@ fun ProfileNavHost(
 }
 
 @Composable
-fun DashBoardNavHost(isUser: Boolean, onScreenChange: (String) -> Unit) {
+fun DashBoardNavHost(onScreenChange: (String) -> Unit) {
     val dashboardNavController = rememberNavController()
     val navigationActions = remember { NavigationActions(dashboardNavController) }
     LaunchedEffect(navigationActions.currentScreen) {
         onScreenChange(navigationActions.currentScreen)
     }
     NavHost(navController = dashboardNavController, startDestination = UserScreen.DASHBOARD) {
-        composable(UserScreen.DASHBOARD) { DashboardScreen(navigationActions, isUser) }
+        composable(UserScreen.DASHBOARD) { DashboardScreen(navigationActions) }
     }
 }
 
