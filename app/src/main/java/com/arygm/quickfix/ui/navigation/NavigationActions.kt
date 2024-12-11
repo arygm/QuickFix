@@ -30,6 +30,7 @@ object Route {
   const val ACCOUNT_CONFIGURATION = "Account configuration"
   const val TO_WORKER = "To Worker"
   const val RESET_PASSWORD = "Reset password"
+  const val ANNOUNCEMENT_DETAIL = "Announcement detail"
 }
 
 object Screen {
@@ -51,7 +52,7 @@ object Screen {
   const val SEARCH_WORKER_RESULT = "Search Worker Result Screen"
   const val DISPLAY_UPLOADED_IMAGES = "Displayed images Screen"
   const val SEARCH_LOCATION = "SEARCH_Location Screen"
-  const val ANNOUNCEMENT_DETAIL = "ANNOUNCEMENT_DETAIL_SCREEN"
+  const val ANNOUNCEMENT_DETAIL = "Announcement detail screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector?, val textId: String)

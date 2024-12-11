@@ -32,7 +32,7 @@ interface AnnouncementRepository {
 
   fun fetchAnnouncementsImagesAsBitmaps(
       announcementId: String,
-      onSuccess: (List<Bitmap>) -> Unit,
+      onSuccess: (List<Pair<String, Bitmap>>) -> Unit,
       onFailure: (Exception) -> Unit
   )
 

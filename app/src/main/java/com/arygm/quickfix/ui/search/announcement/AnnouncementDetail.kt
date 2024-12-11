@@ -33,6 +33,7 @@ import com.arygm.quickfix.model.search.AvailabilitySlot
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -43,8 +44,7 @@ private const val PADDING_BETWEEN_ELEM = 8
 fun AnnouncementDetailScreen(
     announcementViewModel: AnnouncementViewModel,
     navigationActions: NavigationActions,
-    isUser: Boolean,
-    onUpdateClicked: () -> Unit = {}
+    isUser: Boolean
 ) {
   BoxWithConstraints {
     val widthRatio = maxWidth / 411
@@ -86,11 +86,14 @@ fun AnnouncementDetailScreen(
                                         bottomStart = 10.dp * sizeRatio.value,
                                         bottomEnd =
                                             10.dp * sizeRatio.value)) // Rounded bottom corners
-                                .background(Color.Gray)) {
+                                .background(Color.Gray)
+                                .clickable {
+                                  navigationActions.navigateTo(Screen.DISPLAY_UPLOADED_IMAGES)
+                                }) {
                           // Display the first image or a placeholder
                           if (images.isNotEmpty()) {
                             Image(
-                                bitmap = images.first().asImageBitmap(),
+                                bitmap = images.first().second.asImageBitmap(),
                                 contentDescription = "Announcement Image",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize())
@@ -390,20 +393,22 @@ fun AnnouncementDetailScreen(
                             QuickFixButton(
                                 buttonText = "Update announce",
                                 onClickAction = {
-                                    // Check if description or availability have changed
-                                    val descriptionChanged = description.value != announcement.description
-                                    val availabilityChanged = dates.toList() != announcement.availability
+                                  // Check if description or availability have changed
+                                  val descriptionChanged =
+                                      description.value != announcement.description
+                                  val availabilityChanged =
+                                      dates.toList() != announcement.availability
 
-                                    if (descriptionChanged || availabilityChanged) {
-                                        // Create a new Announcement object with updated fields
-                                        val updatedAnnouncement = announcement.copy(
+                                  if (descriptionChanged || availabilityChanged) {
+                                    // Create a new Announcement object with updated fields
+                                    val updatedAnnouncement =
+                                        announcement.copy(
                                             description = description.value,
-                                            availability = dates.toList()
-                                        )
-                                        announcementViewModel.updateAnnouncement(updatedAnnouncement)
-                                    }
-                                    announcementViewModel.unselectAnnouncement()
-                                    navigationActions.goBack()
+                                            availability = dates.toList())
+                                    announcementViewModel.updateAnnouncement(updatedAnnouncement)
+                                  }
+                                  announcementViewModel.unselectAnnouncement()
+                                  navigationActions.goBack()
                                 },
                                 buttonColor = colorScheme.primary,
                                 textColor = colorScheme.onPrimary,

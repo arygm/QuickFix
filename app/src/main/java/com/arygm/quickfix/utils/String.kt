@@ -78,6 +78,7 @@ fun splitDate(date: String): Triple<Int, Int, Int> {
 }
 
 fun routeToScreen(route: String): String {
+  Log.d("navigation", route)
   return when (route) {
     Route.HOME -> Screen.HOME
     Route.CALENDAR -> Screen.CALENDAR
@@ -89,6 +90,7 @@ fun routeToScreen(route: String): String {
     Route.DASHBOARD -> Screen.DASHBOARD
     Route.PROFILE -> Screen.PROFILE
     Route.ACCOUNT_CONFIGURATION -> Screen.ACCOUNT_CONFIGURATION
+    Route.ANNOUNCEMENT_DETAIL -> Screen.ANNOUNCEMENT_DETAIL
     else -> {
       Screen.WELCOME
     }
@@ -107,6 +109,7 @@ fun screenToRoute(route: String): String {
     Screen.DASHBOARD -> Route.DASHBOARD
     Screen.PROFILE -> Route.PROFILE
     Screen.ACCOUNT_CONFIGURATION -> Route.ACCOUNT_CONFIGURATION
+    Screen.ANNOUNCEMENT_DETAIL -> Route.ANNOUNCEMENT_DETAIL
     else -> {
       Route.WELCOME
     }

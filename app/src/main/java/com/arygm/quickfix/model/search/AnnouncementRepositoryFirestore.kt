@@ -146,13 +146,18 @@ class AnnouncementRepositoryFirestore(
 
   override fun fetchAnnouncementsImagesAsBitmaps(
       announcementId: String,
-      onSuccess: (List<Bitmap>) -> Unit,
+      onSuccess: (List<Pair<String, Bitmap>>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
     fetchAnnouncementsImageUrls(
         announcementId,
         { urls ->
-          val bitmaps = mutableListOf<Bitmap>()
+          if (urls.isEmpty()) {
+            onSuccess(emptyList())
+            return@fetchAnnouncementsImageUrls
+          }
+
+          val urlBitmapPairs = mutableListOf<Pair<String, Bitmap>>()
           var successCount = 0
 
           urls.forEach { url ->
@@ -161,9 +166,11 @@ class AnnouncementRepositoryFirestore(
                 .getBytes(Long.MAX_VALUE)
                 .addOnSuccessListener { bytes ->
                   val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                  bitmaps.add(bitmap)
+                  urlBitmapPairs.add(url to bitmap)
                   successCount++
-                  if (successCount == urls.size) onSuccess(bitmaps)
+                  if (successCount == urls.size) {
+                    onSuccess(urlBitmapPairs)
+                  }
                 }
                 .addOnFailureListener { onFailure(it) }
           }

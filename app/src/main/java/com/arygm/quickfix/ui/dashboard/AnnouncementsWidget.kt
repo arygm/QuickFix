@@ -44,7 +44,8 @@ fun AnnouncementsWidget(
 ) {
   var showAll by remember { mutableStateOf(false) }
   val announcements by announcementViewModel.announcementsForUser.collectAsState()
-  val imagesForAnnouncements = announcementViewModel.announcementImagesMap.collectAsState()
+  // Now announcementImagesMap is Map<String, List<Pair<String, Bitmap>>>
+  val imagesForAnnouncements by announcementViewModel.announcementImagesMap.collectAsState()
 
   BoxWithConstraints {
     val cardWidth = maxWidth * 0.4f // Customize card width as needed
@@ -81,8 +82,9 @@ fun AnnouncementsWidget(
 
           val itemsToShow = if (showAll) announcements else announcements.take(itemsToShowDefault)
           itemsToShow.forEachIndexed { index, announcement ->
-            val bitmaps = imagesForAnnouncements.value[announcement.announcementId] ?: emptyList()
-            val bitmapToDisplay = bitmaps.first()
+            val pairs = imagesForAnnouncements[announcement.announcementId] ?: emptyList()
+            val bitmapToDisplay = pairs.firstOrNull()?.second
+
             AnnouncementItem(
                 announcement = announcement,
                 announcementImage = bitmapToDisplay,
@@ -134,7 +136,7 @@ fun AnnouncementItem(announcement: Announcement, announcementImage: Bitmap?, onC
 
         // Text content
         Column(modifier = Modifier.weight(1f)) {
-          // Title and location row
+          // Title and category icon row
           Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = announcement.title,

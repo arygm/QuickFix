@@ -198,7 +198,9 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location? = Location()) {
           screenInProfileNavHost?.let {
             it != Screen.ACCOUNT_CONFIGURATION && it != Screen.TO_WORKER
           } ?: true &&
-          screenInDashboardNavHost?.let { it != Screen.ANNOUNCEMENT_DETAIL } ?: true
+          screenInDashboardNavHost?.let {
+            it != Screen.ANNOUNCEMENT_DETAIL && it != Screen.DISPLAY_UPLOADED_IMAGES
+          } ?: true
     }
   }
 
@@ -412,6 +414,9 @@ fun DashBoardNavHost(
     }
     composable(Screen.ANNOUNCEMENT_DETAIL) {
       AnnouncementDetailScreen(announcementViewModel, navigationActions, isUser)
+    }
+    composable(Screen.DISPLAY_UPLOADED_IMAGES) {
+      QuickFixDisplayImages(isUser, navigationActions, announcementViewModel)
     }
   }
 }
