@@ -20,7 +20,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,71 +57,93 @@ fun QuickFixFinderScreen(
         viewModel(factory = AnnouncementViewModel.Factory),
     categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
 ) {
-  Scaffold(
-      containerColor = colorScheme.background,
-      topBar = {
-        TopAppBar(
-            title = {
-              Text(
-                  text = "Quickfix",
-                  color = colorScheme.primary,
-                  style = MaterialTheme.typography.headlineLarge,
-                  modifier = Modifier.testTag("QuickFixFinderTopBarTitle"))
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
-            modifier = Modifier.testTag("QuickFixFinderTopBar"))
-      },
-      content = { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().testTag("QuickFixFinderContent").padding(padding),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              val pagerState = rememberPagerState(pageCount = { 2 })
-              val coroutineScope = rememberCoroutineScope()
+    var pager by remember { mutableStateOf(true) }
+    Scaffold(
+        containerColor = colorScheme.background,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Quickfix",
+                        color = colorScheme.primary,
+                        style = MaterialTheme.typography.headlineLarge,
+                        modifier = Modifier.testTag("QuickFixFinderTopBarTitle")
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
+                modifier = Modifier.testTag("QuickFixFinderTopBar")
+            )
+        },
+        content = { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag("QuickFixFinderContent")
+                    .padding(padding),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                val pagerState = rememberPagerState(pageCount = { 2 })
+                val coroutineScope = rememberCoroutineScope()
 
-              Surface(
-                  color = colorScheme.surface,
-                  shape = RoundedCornerShape(20.dp),
-                  modifier = Modifier.padding(horizontal = 40.dp).clip(RoundedCornerShape(20.dp))) {
-                    TabRow(
-                        selectedTabIndex = pagerState.currentPage,
-                        containerColor = Color.Transparent,
-                        divider = {},
-                        indicator = {},
-                        modifier =
-                            Modifier.padding(horizontal = 1.dp, vertical = 1.dp)
+                if (pager) {
+                    Surface(
+                        color = colorScheme.surface,
+                        shape = RoundedCornerShape(20.dp),
+                        modifier = Modifier
+                            .padding(horizontal = 40.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                    ) {
+                        TabRow(
+                            selectedTabIndex = pagerState.currentPage,
+                            containerColor = Color.Transparent,
+                            divider = {},
+                            indicator = {},
+                            modifier =
+                            Modifier
+                                .padding(horizontal = 1.dp, vertical = 1.dp)
                                 .align(Alignment.CenterHorizontally)
-                                .testTag("quickFixSearchTabRow")) {
-                          QuickFixScreenTab(pagerState, coroutineScope, 0, "Search")
-                          QuickFixScreenTab(pagerState, coroutineScope, 1, "Announce")
+                                .testTag("quickFixSearchTabRow")
+                        ) {
+                            QuickFixScreenTab(pagerState, coroutineScope, 0, "Search")
+                            QuickFixScreenTab(pagerState, coroutineScope, 1, "Announce")
                         }
-                  }
-
-              HorizontalPager(
-                  state = pagerState,
-                  userScrollEnabled = false,
-                  modifier = Modifier.testTag("quickFixSearchPager")) { page ->
-                    when (page) {
-                      0 ->
-                          SearchOnBoarding(
-                              navigationActions,
-                              navigationActionsRoot,
-                              searchViewModel,
-                              accountViewModel,
-                              categoryViewModel)
-                      1 ->
-                          AnnouncementScreen(
-                              announcementViewModel,
-                              loggedInAccountViewModel,
-                              profileViewModel,
-                              accountViewModel,
-                              navigationActions,
-                              isUser)
-                      else -> Text("Should never happen !")
                     }
-                  }
+                }
+                HorizontalPager(
+                    state = pagerState,
+                    userScrollEnabled = false,
+                    modifier = Modifier.testTag("quickFixSearchPager")
+                ) { page ->
+                    when (page) {
+                        0 -> {
+                            SearchOnBoarding(
+                                onSearch = { pager = false },
+                                onSearchEmpty = { pager = true },
+                                navigationActions,
+                                navigationActionsRoot,
+                                searchViewModel,
+                                accountViewModel,
+                                categoryViewModel
+                            )
+                        }
+
+                        1 -> {
+                            AnnouncementScreen(
+                                announcementViewModel,
+                                loggedInAccountViewModel,
+                                profileViewModel,
+                                accountViewModel,
+                                navigationActions,
+                                isUser
+                            )
+                        }
+
+                        else -> Text("Should never happen !")
+                    }
+                }
             }
-      })
+        })
 }
 
 @Composable
@@ -127,23 +153,29 @@ fun QuickFixScreenTab(
     currentPage: Int,
     title: String
 ) {
-  Tab(
-      selected = pagerState.currentPage == currentPage,
-      onClick = { coroutineScope.launch { pagerState.scrollToPage(currentPage) } },
-      modifier =
-          Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
-              .clip(RoundedCornerShape(13.dp))
-              .background(
-                  if (pagerState.currentPage == currentPage) colorScheme.primary
-                  else Color.Transparent)
-              .testTag("tab$title")) {
+    Tab(
+        selected = pagerState.currentPage == currentPage,
+        onClick = { coroutineScope.launch { pagerState.scrollToPage(currentPage) } },
+        modifier =
+        Modifier
+            .padding(horizontal = 4.dp, vertical = 4.dp)
+            .clip(RoundedCornerShape(13.dp))
+            .background(
+                if (pagerState.currentPage == currentPage) colorScheme.primary
+                else Color.Transparent
+            )
+            .testTag("tab$title")
+    ) {
         Text(
             title,
             color =
-                if (pagerState.currentPage == currentPage) colorScheme.background
-                else colorScheme.tertiaryContainer,
+            if (pagerState.currentPage == currentPage) colorScheme.background
+            else colorScheme.tertiaryContainer,
             style = MaterialTheme.typography.titleMedium,
             modifier =
-                Modifier.padding(horizontal = 16.dp, vertical = 8.dp).testTag("tabText$title"))
-      }
+            Modifier
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .testTag("tabText$title")
+        )
+    }
 }
