@@ -2,6 +2,7 @@ package com.arygm.quickfix.model.quickfix
 
 import android.util.Log
 import com.arygm.quickfix.model.bill.BillField
+import com.arygm.quickfix.model.bill.Units
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
@@ -159,28 +160,29 @@ class QuickFixRepositoryFirestore(private val db: FirebaseFirestore) : QuickFixR
             }
           } ?: emptyList()
 
-      val workerName = document.getString("workerName") ?: ""
-      val userName = document.getString("userName") ?: ""
+      val workerId = document.getString("workerId") ?: ""
+      val userId = document.getString("userId") ?: ""
       val chatUid = document.getString("chatUid") ?: ""
       val title = document.getString("title") ?: ""
+      val description = document.getString("description") ?: ""
 
       val billAnyList = document.get("bill") as? List<*>
       val bill =
           billAnyList?.mapNotNull {
             val map = it as? Map<*, *> ?: return@mapNotNull null
-            val description = map["description"] as? String ?: return@mapNotNull null
+            val billDescription = map["description"] as? String ?: return@mapNotNull null
             val unitString = map["unit"] as? String ?: return@mapNotNull null
             val unit =
                 try {
-                  com.arygm.quickfix.model.bill.Unit.valueOf(unitString)
+                  Units.valueOf(unitString)
                 } catch (e: IllegalArgumentException) {
                   Log.e("QuickFixRepositoryFirestore", "Unknown unit: $unitString", e)
                   return@mapNotNull null
                 }
-            val amount = (map["amount"] as? Number)?.toInt() ?: return@mapNotNull null
+            val amount = (map["amount"] as? Number)?.toDouble() ?: return@mapNotNull null
             val unitPrice = (map["unitPrice"] as? Number)?.toDouble() ?: return@mapNotNull null
             val total = (map["total"] as? Number)?.toDouble() ?: return@mapNotNull null
-            BillField(description, unit, amount, unitPrice, total)
+            BillField(billDescription, unit, amount, unitPrice, total)
           } ?: emptyList()
 
       val locationMap = document.get("location") as? Map<*, *>
@@ -200,10 +202,11 @@ class QuickFixRepositoryFirestore(private val db: FirebaseFirestore) : QuickFixR
           time = time,
           includedServices = includedServices,
           addOnServices = addOnServices,
-          workerName = workerName,
-          userName = userName,
+          workerId = workerId,
+          userId = userId,
           chatUid = chatUid,
           title = title,
+          description = description,
           bill = bill,
           location = location)
     } catch (e: Exception) {

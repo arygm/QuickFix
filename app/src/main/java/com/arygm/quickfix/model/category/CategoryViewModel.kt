@@ -50,4 +50,13 @@ open class CategoryViewModel(private val categoryRepositoryFirestore: CategoryRe
           Log.e("CategoryViewModel", "Error fetching subcategories for $categoryId", e)
         })
   }
+
+  fun getCategoryBySubcategoryId(subcategoryId: String, onSuccess: (Category?) -> Unit) {
+    categoryRepositoryFirestore.fetchCategoryBySubcategoryId(
+        subcategoryId = subcategoryId,
+        onSuccess = { category -> onSuccess(category) },
+        onFailure = { e ->
+          Log.e("CategoryViewModel", "Error fetching category for subcategory ID $subcategoryId", e)
+        })
+  }
 }

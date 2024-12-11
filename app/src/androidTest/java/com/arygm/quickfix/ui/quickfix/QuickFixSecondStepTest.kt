@@ -39,6 +39,7 @@ class QuickFixSecondStepTest {
             "",
             "",
             "",
+            "",
             emptyList(),
             Location(0.0, 0.0, "Fake Location"))
     quickFixViewModel.setQuickFixes(listOf(fakeQuickFix))

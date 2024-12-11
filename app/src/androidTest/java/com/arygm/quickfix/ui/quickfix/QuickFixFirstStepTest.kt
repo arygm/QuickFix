@@ -1,7 +1,12 @@
 package com.arygm.quickfix.ui.quickfix
 
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
 import com.arygm.quickfix.model.locations.LocationRepository
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatRepository
@@ -53,7 +58,7 @@ class QuickFixFirstStepTest {
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
           profileViewModel = profileViewModel,
-          workerName = "Test Worker",
+          workerId = "Test Worker Id",
           quickFixViewModel = quickFixViewModel)
     }
 
@@ -75,7 +80,7 @@ class QuickFixFirstStepTest {
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
           profileViewModel = profileViewModel,
-          workerName = "Test Worker",
+          workerId = "Test Worker Id",
           quickFixViewModel = quickFixViewModel)
     }
 
@@ -96,7 +101,7 @@ class QuickFixFirstStepTest {
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
           profileViewModel = profileViewModel,
-          workerName = "Test Worker",
+          workerId = "Test Worker Id",
           quickFixViewModel = quickFixViewModel)
     }
 
@@ -114,7 +119,7 @@ class QuickFixFirstStepTest {
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
           profileViewModel = profileViewModel,
-          workerName = "Test Worker",
+          workerId = "Test Worker Id",
           quickFixViewModel = quickFixViewModel)
     }
 

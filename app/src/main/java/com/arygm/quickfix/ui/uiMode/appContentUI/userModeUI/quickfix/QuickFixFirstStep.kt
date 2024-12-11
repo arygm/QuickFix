@@ -1,6 +1,5 @@
 package com.arygm.quickfix.ui.quickfix
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -72,6 +71,7 @@ import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.model.quickfix.QuickFix
@@ -101,9 +101,16 @@ fun QuickFixFirstStep(
     navigationActions: NavigationActions,
     quickFixViewModel: QuickFixViewModel,
     chatViewModel: ChatViewModel,
-    workerName: String,
-    profileViewModel: ProfileViewModel
+    workerId: String,
+    profileViewModel: ProfileViewModel,
 ) {
+
+  var workerProfile by remember { mutableStateOf(WorkerProfile()) }
+  profileViewModel.fetchUserProfile(workerId) {
+    if (it != null && it is WorkerProfile) {
+      workerProfile = it
+    }
+  }
 
   val focusManager = LocalFocusManager.current
   val context = LocalContext.current
@@ -159,7 +166,6 @@ fun QuickFixFirstStep(
             QuickFixDateTimePicker(
                 onDateTimeSelected = { date, time ->
                   listDates = listDates + LocalDateTime.of(date, time)
-                  Log.d("QuickFixFirstStep", "listDates: $listDates")
                   showDateTimePopup = false
                 },
                 onDismissRequest = { showDateTimePopup = false })
@@ -652,9 +658,10 @@ fun QuickFixFirstStep(
                                               checkedStatesAddOnServices[index]
                                             }
                                             .map { AddOnService(it) },
-                                    workerName = workerName,
-                                    userName = "Place Holder, to change",
+                                    workerId = workerId,
+                                    userId = "Place holder, user loadUserId()",
                                     title = quickFixTile,
+                                    description = quickNote,
                                     chatUid = chatViewModel.getRandomUid(),
                                     bill = emptyList(),
                                     location = locationQuickFix),

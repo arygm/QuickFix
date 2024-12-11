@@ -11,4 +11,10 @@ interface CategoryRepository {
       onSuccess: (List<Subcategory?>) -> Unit,
       onFailure: (Exception) -> Unit
   )
+
+  fun fetchCategoryBySubcategoryId(
+      subcategoryId: String,
+      onSuccess: (Category?) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 }
