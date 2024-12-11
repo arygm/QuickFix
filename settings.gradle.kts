@@ -16,6 +16,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
         flatDir {
             dirs("libs")  // Spécifie le dossier contenant le fichier .aar
         }

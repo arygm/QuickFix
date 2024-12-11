@@ -65,11 +65,11 @@ class WorkerProfile(
     val reviews: ArrayDeque<Review> =
         ArrayDeque(
             listOf(
-                Review(username = "User1", review = "Great service!", rating = 5.0),
+                Review(username = "User1", review = "Great service!", rating = 5.0f),
                 Review(
                     username = "User2",
                     review = "Very satisfied",
-                    rating = 4.5))), // Default reviews
+                    rating = 4.5f))), // Default reviews
     val profilePicture: String =
         "https://example.com/default-profile-pic.jpg", // Default profile picture URL
     val bannerPicture: String =

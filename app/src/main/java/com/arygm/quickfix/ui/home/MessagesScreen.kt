@@ -193,7 +193,7 @@ fun MessageScreen(
                                 // UI for waiting for response
                                 if (isUser) {
                                   Text(
-                                      text = "Awaiting confirmation from ${quickFix.workerName}...",
+                                      text = "Awaiting confirmation from ${quickFix.workerId}...",
                                       style = MaterialTheme.typography.bodyMedium,
                                       color = MaterialTheme.colorScheme.onBackground,
                                       textAlign = TextAlign.Center,
@@ -289,7 +289,7 @@ fun MessageScreen(
                                       Text(
                                           text =
                                               if (isUser) {
-                                                "${quickFix.workerName} has accepted the QuickFix! 🎉"
+                                                "${quickFix.workerId} has accepted the QuickFix! 🎉"
                                               } else {
                                                 "You have accepted this request! 🎉"
                                               },
@@ -334,7 +334,7 @@ fun MessageScreen(
                                 Text(
                                     text =
                                         if (isUser) {
-                                          "${quickFix.workerName} has rejected the QuickFix. No big deal! Contact another worker from the search screen! 😊"
+                                          "${quickFix.workerId} has rejected the QuickFix. No big deal! Contact another worker from the search screen! 😊"
                                         } else {
                                           "You have rejected this request. Find your next client on the announcement screen! 😊"
                                         },

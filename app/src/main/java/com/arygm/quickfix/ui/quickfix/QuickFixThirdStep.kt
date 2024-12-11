@@ -485,7 +485,6 @@ fun QuickFixThirdStep(
                         if (it == 0.0) "" else it.toString()
                       }, // Use the raw input
                   onValueChange = { input ->
-                    Log.d("QuickFix", "Input: $input")
                     val trimmedInput = input.trimStart('0').ifEmpty { "0" }
                     if (trimmedInput.matches(numberPattern)) {
                       billUnitPrice = trimmedInput.toDoubleOrNull() ?: 0.0
@@ -667,7 +666,6 @@ fun SuggestedDatesDialog(
             onClick = {
               onDatesSelected(selectedDates)
               onDismissRequest()
-              Log.d("SuggestedDatesDialog", "List Bill Fields: $listBillField")
             },
             modifier = Modifier.testTag("ConfirmSuggestedDatesButton")) {
               Text(text = "OK", fontSize = 16.sp)

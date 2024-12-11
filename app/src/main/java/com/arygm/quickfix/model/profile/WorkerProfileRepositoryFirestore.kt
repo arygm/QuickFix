@@ -223,9 +223,7 @@ open class WorkerProfileRepositoryFirestore(
                   review =
                       reviewMap["review"] as? String
                           ?: "", // Safely cast and fallback to an empty string
-                  rating =
-                      (reviewMap["rating"] as? Number)?.toDouble()
-                          ?: 0.0 // Safely cast rating to Double
+                  rating = (reviewMap["rating"] as? Float) ?: 0.0f // Safely cast rating to Double
                   )
             } catch (e: Exception) {
               Log.e("Firestore", "Error parsing review: $reviewMap", e)
