@@ -91,8 +91,8 @@ class WorkerProfileRepositoryFirestoreTest {
           reviews =
               ArrayDeque(
                   listOf(
-                      Review("ramy", "great job", 4.5),
-                      Review("moha", "Highly Recommended!", 3.0))),
+                      Review("ramy", "great job", 4.5f),
+                      Review("moha", "Highly Recommended!", 3.0f))),
           includedServices = listOf(IncludedService("Service 1"), IncludedService("Service 2")),
           addOnServices = listOf(AddOnService("Service 3"), AddOnService("Service 4")),
           bannerPicture = "bannerPicture",
@@ -114,8 +114,8 @@ class WorkerProfileRepositoryFirestoreTest {
           reviews =
               ArrayDeque(
                   listOf(
-                      Review("ramy", "great job", 4.5),
-                      Review("moha", "Highly Recommended!", 3.0))),
+                      Review("ramy", "great job", 4.5f),
+                      Review("moha", "Highly Recommended!", 3.0f))),
           includedServices = listOf(IncludedService("Service 1"), IncludedService("Service 2")),
           addOnServices = listOf(AddOnService("Service 3"), AddOnService("Service 4")),
           bannerPicture = "bannerPicture",

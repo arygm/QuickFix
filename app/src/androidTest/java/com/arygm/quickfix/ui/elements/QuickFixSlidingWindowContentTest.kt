@@ -43,10 +43,11 @@ class QuickFixSlidingWindowContentTest {
                   mock(Service::class.java).apply {
                     `when`(name).thenReturn("Extra Coats for added Durability")
                   }),
-          workerName = "Worker Name",
-          userName = "User Name",
+          workerId = "Worker Id",
+          userId = "User Id",
           chatUid = "chat_12345",
-          title = "QuickFix Description",
+          title = "QuickFix Title",
+          description = "QuickFix Description",
           bill = emptyList(),
           location = Location(48.8566, 2.3522, "Paris, France"))
 
@@ -56,9 +57,7 @@ class QuickFixSlidingWindowContentTest {
       QuickFixSlidingWindowContent(quickFix = quickFixMock, onDismiss = {}, isVisible = true)
     }
 
-    composeTestRule
-        .onNodeWithText("${quickFixMock.userName}'s QuickFix request")
-        .assertIsDisplayed()
+    composeTestRule.onNodeWithText("${quickFixMock.userId}'s QuickFix request").assertIsDisplayed()
   }
 
   @Test

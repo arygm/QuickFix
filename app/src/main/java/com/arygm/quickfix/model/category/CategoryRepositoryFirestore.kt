@@ -61,6 +61,25 @@ open class CategoryRepositoryFirestore(private val db: FirebaseFirestore) : Cate
     }
   }
 
+  override fun fetchCategoryBySubcategoryId(
+      subcategoryId: String,
+      onSuccess: (Category?) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    CoroutineScope(Dispatchers.IO).launch {
+      try {
+        val categoriesResult = db.collection(collectionPath).get().await()
+        val categories = categoriesResult.documents.mapNotNull { documentToCategory(it) }
+        val category =
+            categories.find { category -> category.subcategories.any { it.name == subcategoryId } }
+        withContext(Dispatchers.Main) { onSuccess(category) }
+      } catch (e: Exception) {
+        Log.e("fetchCategoryBySubcategoryId", "Error fetching category by subcategory ID", e)
+        withContext(Dispatchers.Main) { onFailure(e) }
+      }
+    }
+  }
+
   private suspend fun documentToCategory(document: DocumentSnapshot): Category? {
     val id = document.id
     val name = document.getString("name") ?: return null
@@ -87,6 +106,7 @@ open class CategoryRepositoryFirestore(private val db: FirebaseFirestore) : Cate
   private fun documentToSubcategory(document: DocumentSnapshot): Subcategory? {
     val id = document.id
     val name = document.getString("name") ?: return null
+    val category = document.getString("category") ?: return null
     val tags = document.get("tags") as? List<String> ?: emptyList()
     val setServices = document.get("setService") as? List<String> ?: emptyList()
     val scaleData = document.get("scale") as? Map<*, *>
@@ -100,6 +120,7 @@ open class CategoryRepositoryFirestore(private val db: FirebaseFirestore) : Cate
     return Subcategory(
         id = id,
         name = name,
+        category = category,
         tags = tags,
         scale = scale,
         setServices = setServices,

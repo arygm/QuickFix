@@ -1,6 +1,7 @@
 package com.arygm.quickfix.model.quickfix
 
 import com.arygm.quickfix.model.bill.BillField
+import com.arygm.quickfix.model.bill.Units
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
@@ -31,8 +32,8 @@ class QuickFixViewModelTest {
   private val testBillField =
       BillField(
           description = "Test Service",
-          unit = com.arygm.quickfix.model.bill.Unit.HOURS,
-          amount = 2,
+          unit = Units.H,
+          amount = 2.0,
           unitPrice = 50.0,
           total = 100.0)
   private val testQuickFix =
@@ -44,10 +45,11 @@ class QuickFixViewModelTest {
           time = testTimestamp,
           includedServices = listOf(IncludedService("Painting")),
           addOnServices = listOf(AddOnService("Wall Repair")),
-          workerName = "Worker A",
-          userName = "User B",
+          workerId = "Worker Id A",
+          userId = "User Id B",
           chatUid = "chat123",
           title = "Fix My Wall",
+          description = "I need my wall fixed",
           bill = listOf(testBillField),
           location = testLocation)
 

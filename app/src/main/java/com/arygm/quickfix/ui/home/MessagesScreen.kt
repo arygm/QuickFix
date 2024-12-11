@@ -1,146 +1,395 @@
 package com.arygm.quickfix.ui.home
 
+import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
+import com.arygm.quickfix.model.messaging.ChatStatus
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.messaging.Message
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
+import com.arygm.quickfix.ui.elements.QuickFixDetailsScreen
+import com.arygm.quickfix.ui.elements.QuickFixSlidingWindowContent
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
-import java.util.Locale
+import java.util.*
 import kotlinx.coroutines.launch
 
 @Composable
 fun MessageScreen(
-    loggedInAccountViewModel: LoggedInAccountViewModel,
     chatViewModel: ChatViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    quickFixViewModel: QuickFixViewModel,
+    userId: String,
+    isUser: Boolean,
 ) {
-  val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
+  // Collecting the selected chat from the ViewModel as state
+  val activeChat by chatViewModel.selectedChat.collectAsState()
+  // Collecting the list of QuickFixes from the ViewModel as state
+  val quickFixList by quickFixViewModel.quickFixes.collectAsState()
 
-  val userId = loggedInAccount?.uid ?: return
-  val activeChatId = loggedInAccount?.activeChats?.firstOrNull()
-
-  // If no chat is active, we can display an empty interface. This will be changed later
-  if (activeChatId == null) {
-    Column(
-        modifier =
-            Modifier.fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .testTag("messageScreen")) {
-          // Header avec bouton de retour et photo de profil
-          Header(navigationActions)
-          // Message list vide
-          Box(
-              modifier =
-                  Modifier.weight(1f)
-                      .padding(horizontal = 16.dp, vertical = 8.dp)
-                      .testTag("messageList")) {
-                // Aucune conversation n'est active
-              }
-        }
+  // If no active chat is selected, show a placeholder message and return
+  if (activeChat == null) {
+    Text("No active chat selected.", modifier = Modifier.testTag("noActiveChatPlaceholder"))
     return
   }
+  // Assigning the non-null value of activeChat
+  val chat = activeChat!!
 
+  // Finding the associated QuickFix for the selected chat
+  val chatQuickFix = quickFixList.firstOrNull { it.uid == activeChat?.quickFixUid }
+  if (chatQuickFix == null) {
+    // If no QuickFix is found, show a placeholder message and return
+    Text("QuickFix not found.", modifier = Modifier.testTag("quickFixNotFoundPlaceholder"))
+    return
+  }
+  val quickFix = chatQuickFix!!
+  val chatId = chat.chatId
+
+  // Mutable states to manage input text and sliding window visibility
   var messageText by remember { mutableStateOf("") }
+  var isSlidingWindowVisible by remember { mutableStateOf(false) }
   val coroutineScope = rememberCoroutineScope()
 
-  val chatList by chatViewModel.chats.collectAsState()
-  val chat = chatList.firstOrNull { it.chatId == activeChatId }
+  // Retrieve chat status and prepare suggestions based on user role (User or Worker)
+  val chatStatus = chat.chatStatus
+  val suggestions =
+      if (isUser) {
+        listOf(
+            "How is it going?",
+            "Is the time and day okay for you?",
+            "I can’t wait to work with you!")
+      } else {
+        listOf("How is it going?", "This time doesn’t work for me 🤔", "Yo wassup G")
+      }
+  val listState = rememberLazyListState()
 
-  // Charge les chats lorsqu'un chat actif est défini
-  LaunchedEffect(key1 = activeChatId) { chatViewModel.getChats() }
+  // Fetch chats and QuickFixes when relevant keys change
+  LaunchedEffect(key1 = chatId, key2 = chatStatus, key3 = quickFix) {
+    chatViewModel.getChats()
+    quickFixViewModel.getQuickFixes()
+  }
+  // Automatically scroll to the last message when new messages are added
+  LaunchedEffect(chat.messages) {
+    chat.messages.let {
+      if (it.isNotEmpty()) {
+        listState.animateScrollToItem(it.size - 1)
+      }
+    }
+  }
 
-  Column(
+  BoxWithConstraints(
       modifier =
           Modifier.fillMaxSize()
               .background(MaterialTheme.colorScheme.background)
               .testTag("messageScreen")) {
-        // Header with back button and profile picture
-        Header(navigationActions)
+        val maxWidth = maxWidth
+        val maxHeight = maxHeight
 
-        // Message list
-        LazyColumn(
-            modifier =
-                Modifier.weight(1f)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .testTag("messageList")) {
-              chat?.messages?.let { messages ->
-                itemsIndexed(messages) { index, message ->
-                  val previousMessage = if (index > 0) messages[index - 1] else null
-                  if (shouldShowDateDivider(previousMessage?.timestamp, message.timestamp)) {
-                    DateDivider(timestamp = message.timestamp)
+        Scaffold(
+            topBar = {
+              // Header section with a back button
+              Header(navigationActions, modifier = Modifier.testTag("backButton"))
+            },
+            bottomBar = {
+              // Bottom input bar for entering and sending messages
+              Box(
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .height(maxHeight * 0.1f)
+                          .testTag("messageInputBar")
+                          .background(MaterialTheme.colorScheme.background)) {
+                    // Message input field and send button
+                    MessageInput(
+                        messageText = messageText,
+                        onMessageChange = { messageText = it },
+                        onSendMessage = {
+                          if (chatStatus == ChatStatus.ACCEPTED ||
+                              chatStatus == ChatStatus.GETTING_SUGGESTIONS) {
+                            if (messageText.isNotBlank()) {
+                              val newMessage =
+                                  Message(
+                                      messageId = System.currentTimeMillis().toString(),
+                                      senderId = userId,
+                                      content = messageText,
+                                      timestamp = Timestamp.now())
+                              coroutineScope.launch {
+                                if (chat.chatStatus == ChatStatus.GETTING_SUGGESTIONS) {
+                                  chatViewModel.updateChat(
+                                      chat.copy(chatStatus = ChatStatus.ACCEPTED), {}, {})
+                                }
+                                chatViewModel.sendMessage(chat, newMessage)
+                                messageText = ""
+                              }
+                            }
+                          }
+                        })
                   }
-                  MessageBubble(message = message, isSent = message.senderId == userId)
-                }
-              }
+            }) { paddingValues ->
+              Box(
+                  modifier =
+                      Modifier.fillMaxSize()
+                          .padding(paddingValues)
+                          .testTag("messageListBox")
+                          .background(MaterialTheme.colorScheme.background)) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize().testTag("messageList")) {
+                          // Display QuickFix details at the top
+                          item {
+                            Box(
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .height(maxHeight * 0.52f)
+                                        .padding(
+                                            horizontal = maxWidth * 0.02f,
+                                            vertical = maxHeight * 0.02f)
+                                        .testTag("quickFixDetailsContainer"),
+                                contentAlignment = Alignment.Center) {
+                                  Column(
+                                      horizontalAlignment = Alignment.CenterHorizontally,
+                                      modifier =
+                                          Modifier.fillMaxWidth(0.9f)
+                                              .height(maxHeight * 0.52f)
+                                              .background(
+                                                  MaterialTheme.colorScheme.surface,
+                                                  RoundedCornerShape(16.dp))
+                                              .testTag("quickFixDetails")) {
+                                        QuickFixDetailsScreen(
+                                            quickFix = quickFix,
+                                            isExpanded = false,
+                                            onShowMoreToggle = { isSlidingWindowVisible = it })
+                                      }
+                                }
+                          }
+                          item {
+                            // Display different UI based on the chat status
+                            when (chatStatus) {
+                              ChatStatus.WAITING_FOR_RESPONSE -> {
+                                // UI for waiting for response
+                                if (isUser) {
+                                  Text(
+                                      text = "Awaiting confirmation from ${quickFix.workerId}...",
+                                      style = MaterialTheme.typography.bodyMedium,
+                                      color = MaterialTheme.colorScheme.onBackground,
+                                      textAlign = TextAlign.Center,
+                                      modifier =
+                                          Modifier.padding(vertical = maxHeight * 0.02f)
+                                              .testTag("awaitingConfirmationText"))
+                                } else {
+                                  // Worker response options
+                                  Column(
+                                      horizontalAlignment = Alignment.CenterHorizontally,
+                                      modifier =
+                                          Modifier.fillMaxWidth()
+                                              .padding(horizontal = maxWidth * 0.04f)
+                                              .testTag("workerResponseContainer")) {
+                                        Text(
+                                            text =
+                                                "Would you like to accept this QuickFix request?",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onBackground,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.padding(bottom = maxHeight * 0.02f))
+                                        Row(
+                                            horizontalArrangement =
+                                                Arrangement.spacedBy(maxWidth * 0.1f),
+                                            modifier = Modifier.fillMaxWidth(0.5f)) {
+                                              // Accept button
+                                              IconButton(
+                                                  onClick = {
+                                                    coroutineScope.launch {
+                                                      Log.e("hhaha", " acceptite")
+                                                      chat.let {
+                                                        val updatedChat =
+                                                            it.copy(
+                                                                chatStatus =
+                                                                    ChatStatus.GETTING_SUGGESTIONS)
+                                                        chatViewModel.updateChat(
+                                                            updatedChat, {}, {})
+                                                      }
+                                                    }
+                                                  },
+                                                  modifier =
+                                                      Modifier.weight(0.1f)
+                                                          .aspectRatio(1f)
+                                                          .background(
+                                                              MaterialTheme.colorScheme.surface,
+                                                              CircleShape)
+                                                          .testTag("acceptButton")) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Check,
+                                                        contentDescription = "Accept",
+                                                        tint = colorScheme.primary,
+                                                        modifier = Modifier.fillMaxSize(0.8f))
+                                                  }
+                                              // Reject button
+                                              IconButton(
+                                                  onClick = {
+                                                    coroutineScope.launch {
+                                                      chat.let {
+                                                        val updatedChat =
+                                                            it.copy(
+                                                                chatStatus =
+                                                                    ChatStatus.WORKER_REFUSED)
+                                                        chatViewModel.updateChat(
+                                                            updatedChat, {}, {})
+                                                      }
+                                                    }
+                                                  },
+                                                  modifier =
+                                                      Modifier.weight(0.1f)
+                                                          .aspectRatio(1f)
+                                                          .background(
+                                                              MaterialTheme.colorScheme.surface,
+                                                              CircleShape)
+                                                          .testTag("refuseButton")) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Close,
+                                                        contentDescription = "Reject",
+                                                        tint = colorScheme.primary,
+                                                        modifier = Modifier.fillMaxSize(0.8f))
+                                                  }
+                                            }
+                                      }
+                                }
+                              }
+                              ChatStatus.GETTING_SUGGESTIONS -> {
+                                // UI for suggestions state
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                            .padding(horizontal = maxWidth * 0.04f)
+                                            .testTag("gettingSuggestionsContainer")) {
+                                      Text(
+                                          text =
+                                              if (isUser) {
+                                                "${quickFix.workerId} has accepted the QuickFix! 🎉"
+                                              } else {
+                                                "You have accepted this request! 🎉"
+                                              },
+                                          style = MaterialTheme.typography.bodyMedium,
+                                          color = MaterialTheme.colorScheme.onBackground,
+                                          textAlign = TextAlign.Center,
+                                          modifier = Modifier.padding(bottom = maxHeight * 0.01f))
+                                      SuggestionsRow(
+                                          suggestions = suggestions,
+                                          onSuggestionClick = { suggestion ->
+                                            val newMessage =
+                                                Message(
+                                                    messageId =
+                                                        System.currentTimeMillis().toString(),
+                                                    senderId = userId,
+                                                    content = suggestion,
+                                                    timestamp = Timestamp.now())
+                                            coroutineScope.launch {
+                                              chatViewModel.updateChat(
+                                                  chat.copy(chatStatus = ChatStatus.ACCEPTED),
+                                                  {},
+                                                  {})
+                                              chatViewModel.sendMessage(chat, newMessage)
+                                            }
+                                          })
+                                    }
+                              }
+                              ChatStatus.ACCEPTED -> {
+                                // UI for active conversation
+                                Text(
+                                    text = "Conversation is active. Start messaging!",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    textAlign = TextAlign.Center,
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                            .padding(vertical = maxHeight * 0.02f)
+                                            .testTag("conversationActiveText"))
+                              }
+                              ChatStatus.WORKER_REFUSED -> {
+                                // UI for rejection state
+                                Text(
+                                    text =
+                                        if (isUser) {
+                                          "${quickFix.workerId} has rejected the QuickFix. No big deal! Contact another worker from the search screen! 😊"
+                                        } else {
+                                          "You have rejected this request. Find your next client on the announcement screen! 😊"
+                                        },
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    textAlign = TextAlign.Center,
+                                    modifier =
+                                        Modifier.padding(
+                                                vertical = maxHeight * 0.02f,
+                                                horizontal = maxWidth * 0.02f)
+                                            .testTag("workerRejectedText"))
+                              }
+                            }
+                          }
+                          // Display chat messages with date dividers
+                          chat.messages.let { messages ->
+                            itemsIndexed(messages) { index, message ->
+                              val previousMessage = if (index > 0) messages[index - 1] else null
+
+                              // Add date divider if the message is on a new date
+                              if (shouldShowDateDivider(
+                                  previousMessage?.timestamp, message.timestamp)) {
+                                DateDivider(
+                                    timestamp = message.timestamp,
+                                    modifier =
+                                        Modifier.padding(vertical = maxHeight * 0.01f)
+                                            .testTag("dateDivider_$index"))
+                              }
+
+                              // Display message bubble
+                              MessageBubble(
+                                  message = message,
+                                  isSent = message.senderId == userId,
+                                  modifier =
+                                      Modifier.padding(horizontal = maxWidth * 0.02f)
+                                          .testTag(
+                                              if (message.senderId == userId) "sentMessage_$index"
+                                              else "receivedMessage_$index"))
+                            }
+                          }
+                        }
+                  }
             }
-
-        // Input area for sending messages
-        if (chat != null) {
-          MessageInput(
-              messageText = messageText,
-              onMessageChange = { messageText = it },
-              onSendMessage = {
-                if (messageText.isNotBlank()) {
-                  val newMessage =
-                      Message(
-                          messageId = System.currentTimeMillis().toString(),
-                          senderId = userId,
-                          content = messageText,
-                          timestamp = Timestamp.now())
-                  coroutineScope.launch {
-                    chatViewModel.sendMessage(chat = chat, message = newMessage)
-                    messageText = ""
-                  }
-                }
-              })
+        // Sliding window overlay for additional details
+        if (isSlidingWindowVisible) {
+          QuickFixSlidingWindowContent(
+              quickFix = quickFix,
+              isVisible = isSlidingWindowVisible,
+              onDismiss = { isSlidingWindowVisible = false })
         }
       }
 }
 
 @Composable
-fun Header(navigationActions: NavigationActions) {
+fun Header(navigationActions: NavigationActions, modifier: Modifier = Modifier) {
   Box(
       modifier =
           Modifier.fillMaxWidth()
@@ -149,7 +398,7 @@ fun Header(navigationActions: NavigationActions) {
         // Back button aligned to the start (left)
         IconButton(
             onClick = { navigationActions.goBack() },
-            modifier = Modifier.align(Alignment.CenterStart).testTag("backButton")) {
+            modifier = modifier.align(Alignment.CenterStart)) {
               Icon(
                   imageVector = Icons.Default.ArrowBack,
                   contentDescription = "Back",
@@ -176,9 +425,9 @@ fun Header(navigationActions: NavigationActions) {
 }
 
 @Composable
-fun MessageBubble(message: Message, isSent: Boolean) {
+fun MessageBubble(message: Message, isSent: Boolean, modifier: Modifier = Modifier) {
   Row(
-      modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 8.dp),
+      modifier = modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 8.dp),
       horizontalArrangement = if (isSent) Arrangement.End else Arrangement.Start) {
         val size = 0.6 * LocalConfiguration.current.screenWidthDp
         Box(
@@ -199,13 +448,13 @@ fun MessageBubble(message: Message, isSent: Boolean) {
 
 // Date divider styled with gray color
 @Composable
-fun DateDivider(timestamp: Timestamp) {
+fun DateDivider(timestamp: Timestamp, modifier: Modifier = Modifier) {
   Text(
       text = formatDate(timestamp),
       color = Color.Gray,
       fontSize = 12.sp,
       fontWeight = FontWeight.Bold,
-      modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("dateDivider"),
+      modifier = modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("dateDivider"),
       textAlign = androidx.compose.ui.text.style.TextAlign.Center)
 }
 
@@ -244,7 +493,7 @@ fun MessageInput(
 
         // Send button
         IconButton(
-            onClick = onSendMessage,
+            onClick = { onSendMessage() },
             modifier =
                 Modifier.weight(0.1f)
                     .aspectRatio(1f)
@@ -271,4 +520,25 @@ fun shouldShowDateDivider(previousTimestamp: Timestamp?, currentTimestamp: Times
   val currentDate = currentTimestamp.toDate()
   val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
   return dateFormat.format(previousDate) != dateFormat.format(currentDate)
+}
+
+@Composable
+fun SuggestionsRow(suggestions: List<String>, onSuggestionClick: (String) -> Unit) {
+  LazyRow(
+      modifier = Modifier.fillMaxWidth().padding(vertical = 0.dp),
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
+      contentPadding = PaddingValues(horizontal = 8.dp)) {
+        items(suggestions) { suggestion ->
+          Button(
+              onClick = { onSuggestionClick(suggestion) },
+              colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF800020)),
+              shape = RoundedCornerShape(16.dp),
+              modifier = Modifier.padding(vertical = 8.dp)) {
+                Text(
+                    text = suggestion,
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodySmall)
+              }
+        }
+      }
 }

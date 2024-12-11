@@ -1,9 +1,9 @@
 package com.arygm.quickfix.model.bill
 
 data class BillField(
-    val description: String,
-    val unit: Unit,
-    val amount: Int,
-    val unitPrice: Double,
-    val total: Double
+    val description: String = "",
+    val unit: Units = Units.U,
+    val amount: Double = 0.0,
+    val unitPrice: Double = 0.0,
+    val total: Double = 0.0,
 )

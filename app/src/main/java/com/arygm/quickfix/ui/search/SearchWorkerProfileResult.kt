@@ -103,7 +103,12 @@ fun SearchWorkerProfileResult(
                       fontFamily = poppinsFontFamily,
                       color = colorScheme.onBackground)
 
-                  Text(text = name, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                  Text(
+                      text = name,
+                      fontSize = 9.sp,
+                      fontWeight = FontWeight.Bold,
+                      fontFamily = poppinsFontFamily,
+                      color = colorScheme.onSurface)
                 }
                 Row(verticalAlignment = Alignment.Bottom) {
                   Text(
@@ -139,10 +144,18 @@ fun SearchWorkerProfileResult(
                             contentDescription = "Location",
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(16.dp))
-                        Text(text = displayLocation, fontSize = 9.sp, color = Color.Gray)
+                        Text(
+                            text = displayLocation,
+                            fontSize = 9.sp,
+                            fontFamily = poppinsFontFamily,
+                            color = colorScheme.onSurface)
                       }
                       distance?.let {
-                        Text(text = "$distance km away", fontSize = 9.sp, color = Color.Gray)
+                        Text(
+                            text = "$distance km away",
+                            fontSize = 9.sp,
+                            fontFamily = poppinsFontFamily,
+                            color = colorScheme.onSurface)
                       }
                     }
 

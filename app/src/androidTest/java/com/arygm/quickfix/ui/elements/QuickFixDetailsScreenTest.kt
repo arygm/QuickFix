@@ -45,10 +45,12 @@ class QuickFixDetailsScreenTest {
             time = Timestamp.now(),
             includedServices = includedServices,
             addOnServices = addOnServices,
-            workerName = "Worker Name",
-            userName = "User Name",
+            workerId = "Worker Id",
+            userId = "User Id",
             chatUid = "chat_12345",
             title = "This is a very long description that will be truncated in the collapsed view.",
+            description =
+                "This is a very long description that will be truncated in the collapsed view.",
             bill = emptyList(),
             location = Location(latitude = 48.8566, longitude = 2.3522, name = "Paris, France"))
   }
