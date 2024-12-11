@@ -41,17 +41,16 @@ fun BottomNavigationMenu(
   val currentMode by modeViewModel.currentMode.collectAsState()
   val selectedTabId = remember { mutableIntStateOf(1) } // default tab id
 
-
   val colorScheme = colorScheme
   val currentRoute by navigationActions.currentRoute.collectAsState()
   Log.d("BottomNavigationMenu", "Current route: $currentRoute")
 
   // Determine the tab list based on the user type
   val tabList: List<TopLevelDestination> =
-    when (currentMode) {
-      AppMode.USER -> USER_TOP_LEVEL_DESTINATIONS
-      AppMode.WORKER -> WORKER_TOP_LEVEL_DESTINATIONS
-    }  // Create a mutable state to store the MeowBottomNavigation instance
+      when (currentMode) {
+        AppMode.USER -> USER_TOP_LEVEL_DESTINATIONS
+        AppMode.WORKER -> WORKER_TOP_LEVEL_DESTINATIONS
+      } // Create a mutable state to store the MeowBottomNavigation instance
 
   val bottomNavigation = remember { mutableStateOf<MeowBottomNavigation?>(null) }
 
@@ -118,10 +117,11 @@ fun BottomNavigationMenu(
 
   // LaunchedEffect allowing to update the bottom bar accordingly to navigationActions
   LaunchedEffect(currentRoute) {
-    val selectedItemId = when (currentMode) {
-      AppMode.USER -> getBottomBarIdUser(currentRoute)
-      AppMode.WORKER -> getBottomBarIdWorker(currentRoute)
-    }
+    val selectedItemId =
+        when (currentMode) {
+          AppMode.USER -> getBottomBarIdUser(currentRoute)
+          AppMode.WORKER -> getBottomBarIdWorker(currentRoute)
+        }
     selectedTabId.intValue = selectedItemId
     bottomNavigation.value?.show(selectedItemId, true)
   }

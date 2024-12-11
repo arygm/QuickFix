@@ -2,39 +2,33 @@ package com.arygm.quickfix.model.switchModes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.arygm.quickfix.model.search.AnnouncementRepositoryFirestore
-import com.arygm.quickfix.model.search.AnnouncementViewModel
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.firestore
-import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 enum class AppMode(private val modeString: String) {
-    USER("User"),
-    WORKER("Worker");
+  USER("User"),
+  WORKER("Worker");
 
-    override fun toString(): String {
-        return modeString
-    }
+  override fun toString(): String {
+    return modeString
+  }
 }
 
 class ModeViewModel : ViewModel() {
-    private val _currentMode = MutableStateFlow(AppMode.USER)
-    val currentMode: StateFlow<AppMode> = _currentMode
+  private val _currentMode = MutableStateFlow(AppMode.USER)
+  val currentMode: StateFlow<AppMode> = _currentMode
 
-    companion object {
-        val Factory: ViewModelProvider.Factory =
-            object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return ModeViewModel()
-                            as T
-                }
-            }
-    }
+  companion object {
+    val Factory: ViewModelProvider.Factory =
+        object : ViewModelProvider.Factory {
+          @Suppress("UNCHECKED_CAST")
+          override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return ModeViewModel() as T
+          }
+        }
+  }
 
-    fun switchMode(mode: AppMode) {
-        _currentMode.value = mode
-    }
+  fun switchMode(mode: AppMode) {
+    _currentMode.value = mode
+  }
 }

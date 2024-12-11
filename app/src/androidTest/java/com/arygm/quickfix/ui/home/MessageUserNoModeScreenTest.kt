@@ -24,7 +24,6 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.UserScreen
 import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore

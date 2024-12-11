@@ -493,7 +493,7 @@ fun RegisterScreen(
                                           preferencesViewModel,
                                           {
                                             rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
-                                              navigationActions.navigateTo(NoModeRoute.WELCOME)
+                                            navigationActions.navigateTo(NoModeRoute.WELCOME)
                                           },
                                           {
                                             Toast.makeText(

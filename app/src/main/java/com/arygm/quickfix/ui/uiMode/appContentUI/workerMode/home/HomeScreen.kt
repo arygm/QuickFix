@@ -11,14 +11,11 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @Composable
-fun HomeScreen(
-    navigationActions: NavigationActions
-) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+fun HomeScreen(navigationActions: NavigationActions) {
+  Column(
+      modifier = Modifier.fillMaxSize(),
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Home Screen", style = poppinsTypography.headlineLarge)
-    }
+      }
 }

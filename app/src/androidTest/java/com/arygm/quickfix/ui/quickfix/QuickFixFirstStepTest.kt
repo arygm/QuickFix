@@ -11,7 +11,6 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFixRepository
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.utils.inToMonth
 import java.time.LocalDate
 import org.junit.Before
 import org.junit.Rule
@@ -127,9 +126,7 @@ class QuickFixFirstStepTest {
     composeTestRule.onNodeWithText("Select Date").assertExists()
 
     // Simulate selecting a date
-    composeTestRule.onNodeWithText(inToMonth(today.month.value)).performClick()
-    composeTestRule.onNodeWithText("Jan").performClick()
-    composeTestRule.onNodeWithText("1").performClick()
+    composeTestRule.onNodeWithText(today.dayOfMonth.toString()).performClick()
     composeTestRule.onNodeWithText("OK").performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()

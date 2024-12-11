@@ -39,7 +39,6 @@ import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.utils.inToMonth
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -554,8 +553,8 @@ class SearchWorkerResultUserNoModeScreenTest {
             fieldOfWork = "Painter",
             rating = 4.5,
             workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
-            unavailability_list = listOf(LocalDate.of(LocalDate.now().year, 1, 1)),
-            location = Location(0.0, 0.0))
+            unavailability_list = listOf(LocalDate.now()),
+            location = Location(40.7128, -74.0060))
 
     val worker2 =
         WorkerProfile(
@@ -564,7 +563,7 @@ class SearchWorkerResultUserNoModeScreenTest {
             rating = 4.0,
             workingHours = Pair(LocalTime.of(8, 0), LocalTime.of(16, 0)),
             unavailability_list = emptyList(),
-            location = Location(0.0, 0.0))
+            location = Location(40.7128, -74.0060))
 
     val worker3 =
         WorkerProfile(
@@ -573,7 +572,7 @@ class SearchWorkerResultUserNoModeScreenTest {
             rating = 5.0,
             workingHours = Pair(LocalTime.of(10, 0), LocalTime.of(18, 0)),
             unavailability_list = emptyList(),
-            location = Location(0.0, 0.0))
+            location = Location(40.7128, -74.0060))
 
     // Update the searchViewModel with these test workers
     searchViewModel._subCategoryWorkerProfiles.value = listOf(worker1, worker2, worker3)
@@ -595,8 +594,6 @@ class SearchWorkerResultUserNoModeScreenTest {
     // Simulate clicking the "Availability" filter button
     composeTestRule.onNodeWithText("Availability").performClick()
 
-    // composeTestRule.waitUntil(10000){false}
-
     // Wait for the bottom sheet to appear
     composeTestRule.waitForIdle()
 
@@ -607,7 +604,7 @@ class SearchWorkerResultUserNoModeScreenTest {
     composeTestRule.onNodeWithText("Enter time").assertIsDisplayed()
 
     val today = LocalDate.now()
-    val month = inToMonth(today.month.value)
+    val day = today.dayOfMonth
 
     val textFields =
         composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
@@ -622,9 +619,9 @@ class SearchWorkerResultUserNoModeScreenTest {
     textFields[1].performTextReplacement("00")
 
     // Find the node representing today's date and perform a click
-    composeTestRule.onNode(hasText(month) and hasClickAction()).performClick()
-    composeTestRule.onNode(hasText("Jan") and hasClickAction()).performClick()
-    composeTestRule.onNode(hasText("1") and hasClickAction()).performClick()
+    composeTestRule
+        .onNode(hasText(day.toString()) and hasClickAction() and !hasSetTextAction())
+        .performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 
@@ -644,7 +641,7 @@ class SearchWorkerResultUserNoModeScreenTest {
             rating = 4.5,
             workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
             unavailability_list = emptyList(),
-            location = Location(0.0, 0.0))
+            location = Location(40.7128, -74.0060))
 
     val worker2 =
         WorkerProfile(
@@ -653,7 +650,7 @@ class SearchWorkerResultUserNoModeScreenTest {
             rating = 4.0,
             workingHours = Pair(LocalTime.of(8, 0), LocalTime.of(16, 0)),
             unavailability_list = emptyList(),
-            location = Location(0.0, 0.0))
+            location = Location(40.7128, -74.0060))
 
     val worker3 =
         WorkerProfile(
@@ -662,7 +659,7 @@ class SearchWorkerResultUserNoModeScreenTest {
             rating = 5.0,
             workingHours = Pair(LocalTime.of(10, 0), LocalTime.of(18, 0)),
             unavailability_list = emptyList(),
-            location = Location(0.0, 0.0))
+            location = Location(40.7128, -74.0060))
 
     // Update the searchViewModel with these test workers
     searchViewModel._subCategoryWorkerProfiles.value = listOf(worker1, worker2, worker3)
@@ -684,8 +681,6 @@ class SearchWorkerResultUserNoModeScreenTest {
     // Simulate clicking the "Availability" filter button
     composeTestRule.onNodeWithText("Availability").performClick()
 
-    // composeTestRule.waitUntil(10000){false}
-
     // Wait for the bottom sheet to appear
     composeTestRule.waitForIdle()
 
@@ -696,7 +691,7 @@ class SearchWorkerResultUserNoModeScreenTest {
     composeTestRule.onNodeWithText("Enter time").assertIsDisplayed()
 
     val today = LocalDate.now()
-    val month = inToMonth(today.month.value)
+    val day = today.dayOfMonth
 
     val textFields =
         composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
@@ -711,9 +706,9 @@ class SearchWorkerResultUserNoModeScreenTest {
     textFields[1].performTextReplacement("00")
 
     // Find the node representing today's date and perform a click
-    composeTestRule.onNode(hasText(month) and hasClickAction()).performClick()
-    composeTestRule.onNode(hasText("Jan") and hasClickAction()).performClick()
-    composeTestRule.onNode(hasText("1") and hasClickAction()).performClick()
+    composeTestRule
+        .onNode(hasText(day.toString()) and hasClickAction() and !hasSetTextAction())
+        .performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 
@@ -733,7 +728,7 @@ class SearchWorkerResultUserNoModeScreenTest {
             rating = 4.5,
             workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
             unavailability_list = emptyList(),
-            location = Location(0.0, 0.0))
+            location = Location(40.7128, -74.0060))
 
     val worker2 =
         WorkerProfile(
@@ -742,7 +737,7 @@ class SearchWorkerResultUserNoModeScreenTest {
             rating = 4.0,
             workingHours = Pair(LocalTime.of(8, 30), LocalTime.of(16, 0)),
             unavailability_list = emptyList(),
-            location = Location(0.0, 0.0))
+            location = Location(40.7128, -74.0060))
 
     val worker3 =
         WorkerProfile(
@@ -751,7 +746,7 @@ class SearchWorkerResultUserNoModeScreenTest {
             rating = 5.0,
             workingHours = Pair(LocalTime.of(10, 0), LocalTime.of(18, 0)),
             unavailability_list = emptyList(),
-            location = Location(0.0, 0.0))
+            location = Location(40.7128, -74.0060))
 
     // Update the searchViewModel with these test workers
     searchViewModel._subCategoryWorkerProfiles.value = listOf(worker1, worker2, worker3)
@@ -773,8 +768,6 @@ class SearchWorkerResultUserNoModeScreenTest {
     // Simulate clicking the "Availability" filter button
     composeTestRule.onNodeWithText("Availability").performClick()
 
-    // composeTestRule.waitUntil(10000){false}
-
     // Wait for the bottom sheet to appear
     composeTestRule.waitForIdle()
 
@@ -785,7 +778,7 @@ class SearchWorkerResultUserNoModeScreenTest {
     composeTestRule.onNodeWithText("Enter time").assertIsDisplayed()
 
     val today = LocalDate.now()
-    val month = inToMonth(today.month.value)
+    val day = today.dayOfMonth
 
     val textFields =
         composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
@@ -800,9 +793,9 @@ class SearchWorkerResultUserNoModeScreenTest {
     textFields[1].performTextReplacement("00")
 
     // Find the node representing today's date and perform a click
-    composeTestRule.onNode(hasText(month) and hasClickAction()).performClick()
-    composeTestRule.onNode(hasText("Jan") and hasClickAction()).performClick()
-    composeTestRule.onNode(hasText("1") and hasClickAction()).performClick()
+    composeTestRule
+        .onNode(hasText(day.toString()) and hasClickAction() and !hasSetTextAction())
+        .performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 

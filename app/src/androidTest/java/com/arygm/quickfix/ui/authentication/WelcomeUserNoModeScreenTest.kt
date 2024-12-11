@@ -20,7 +20,6 @@ import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -91,7 +90,12 @@ class WelcomeUserNoModeScreenTest {
   @Test
   fun testInitialState() {
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel, rootNavigationActions)
+      WelcomeScreen(
+          navigationActions,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          rootNavigationActions)
     }
 
     // Check if the background image is displayed
@@ -122,7 +126,12 @@ class WelcomeUserNoModeScreenTest {
   @Test
   fun testLogInButtonClickNavigatesToLogin() {
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel, rootNavigationActions)
+      WelcomeScreen(
+          navigationActions,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          rootNavigationActions)
     }
 
     // Click the "LOG IN TO QUICKFIX" button
@@ -139,7 +148,12 @@ class WelcomeUserNoModeScreenTest {
   @Test
   fun testRegistrationButtonClickNavigatesToRegister() {
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel, rootNavigationActions)
+      WelcomeScreen(
+          navigationActions,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          rootNavigationActions)
     }
 
     // Click the "REGISTER TO QUICKFIX" button
@@ -160,7 +174,12 @@ class WelcomeUserNoModeScreenTest {
     intentsInitialized = true // Mark Intents as initialized
 
     composeTestRule.setContent {
-      WelcomeScreen(navigationActions, accountViewModel, userViewModel, preferencesViewModel, rootNavigationActions)
+      WelcomeScreen(
+          navigationActions,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          rootNavigationActions)
     }
 
     // Perform click on the Google Sign-In button

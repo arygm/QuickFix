@@ -154,8 +154,8 @@ class StringTest {
 
   @Test
   fun `test routeToScreen with WELCOME route`() {
-    val result = routeToScreen(NoModeScreen.WELCOME)
-    assertEquals(NoModeRoute.WELCOME, result)
+    val result = routeToScreen(NoModeRoute.WELCOME)
+    assertEquals(NoModeScreen.WELCOME, result)
   }
 
   @Test

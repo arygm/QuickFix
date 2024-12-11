@@ -43,9 +43,7 @@ import com.arygm.quickfix.R
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
-import com.arygm.quickfix.ui.navigation.TopLevelDestination
 import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
-import com.arygm.quickfix.ui.userModeUI.navigation.UserTopLevelDestinations
 import com.arygm.quickfix.utils.clearAccountPreferences
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -282,7 +280,7 @@ fun ProfileScreen(
               Button(
                   onClick = {
                     clearAccountPreferences(preferencesViewModel)
-                      rootMainNavigationActions.navigateTo(RootRoute.NO_MODE)
+                    rootMainNavigationActions.navigateTo(RootRoute.NO_MODE)
                     Log.d("user", Firebase.auth.currentUser.toString())
                   },
                   modifier =

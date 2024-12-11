@@ -2,7 +2,6 @@ package com.arygm.quickfix.ui.elements
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import com.arygm.quickfix.utils.inToMonth
 import java.time.LocalDate
 import java.time.LocalTime
 import org.junit.Rule
@@ -27,16 +26,14 @@ class QuickFixDateTimePickerTest {
     composeTestRule.onNodeWithText("Select Date").assertIsDisplayed()
 
     // Simulate date selection
-    composeTestRule.onNodeWithText(inToMonth(today.month.value)).performClick()
-    composeTestRule.onNodeWithText("Jan").performClick()
-    composeTestRule.onNodeWithText("1").performClick()
+    composeTestRule.onNodeWithText(today.dayOfMonth.toString()).performClick()
     composeTestRule.onNodeWithText("OK").performClick()
 
     composeTestRule.onNodeWithText("OK").performClick()
 
     // Assert that selectedDate is updated
     assert(selectedDate != null)
-    assert(selectedDate == LocalDate.of(LocalDate.now().year, 1, 1))
+    assert(selectedDate == LocalDate.now())
   }
 
   @Test
@@ -51,16 +48,13 @@ class QuickFixDateTimePickerTest {
     val today = LocalDate.now()
 
     // Simulate date selection to advance to time picker
-    composeTestRule.onNodeWithText(inToMonth(today.month.value)).performClick()
-    composeTestRule.onNodeWithText("Jan").performClick()
-    composeTestRule.onNodeWithText("1").performClick()
+    composeTestRule.onNodeWithText(today.dayOfMonth.toString()).performClick()
     composeTestRule.onNodeWithText("OK").performClick()
 
     // Assert TimePickerDialog is displayed
     composeTestRule.onNodeWithText("Select Time").assertIsDisplayed()
 
     // Simulate time selection (e.g., 14:30)
-
     composeTestRule.onNodeWithContentDescription("14 hours").performClick() // Select hour
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithText("OK").performClick()
@@ -121,9 +115,7 @@ class QuickFixDateTimePickerTest {
     val today = LocalDate.now()
 
     // Select date
-    composeTestRule.onNodeWithText(inToMonth(today.month.value)).performClick()
-    composeTestRule.onNodeWithText("Jan").performClick()
-    composeTestRule.onNodeWithText("1").performClick()
+    composeTestRule.onNodeWithText(today.dayOfMonth.toString()).performClick()
     composeTestRule.onNodeWithText("OK").performClick()
 
     // Select time
@@ -136,7 +128,7 @@ class QuickFixDateTimePickerTest {
 
     // Assert that date and time are passed correctly
     assert(selectedDateTime != null)
-    assert(selectedDateTime?.first == LocalDate.of(LocalDate.now().year, 1, 1))
+    assert(selectedDateTime?.first == LocalDate.now())
     assert(selectedDateTime?.second == LocalTime.of(14, LocalTime.now().minute))
   }
 }

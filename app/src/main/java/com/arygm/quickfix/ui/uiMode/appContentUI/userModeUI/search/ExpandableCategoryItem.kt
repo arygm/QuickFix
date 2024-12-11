@@ -135,7 +135,8 @@ fun ExpandableCategoryItem(
                                           searchViewModel.updateSearchQuery(it.name)
                                           searchViewModel.setSearchSubcategory(it)
                                           searchViewModel.filterWorkersBySubcategory(it.name)
-                                          navigationActions.navigateTo(UserScreen.SEARCH_WORKER_RESULT)
+                                          navigationActions.navigateTo(
+                                              UserScreen.SEARCH_WORKER_RESULT)
                                         },
                                 text = it.name,
                                 color = colorScheme.onSecondary,

@@ -27,7 +27,7 @@ class DashboardUserNoModeScreenTest {
 
   @Test
   fun dashboardDisplaysQuickFixFilterButtons() {
-    composeTestRule.setContent { DashboardScreen(navigationActions, true) }
+    composeTestRule.setContent { DashboardScreen(navigationActions) }
 
     // Verify that the QuickFix filter buttons are displayed
     composeTestRule.onNodeWithText("All").assertIsDisplayed()
@@ -39,7 +39,7 @@ class DashboardUserNoModeScreenTest {
 
   @Test
   fun quickFixFilterButtonsToggleCorrectly() {
-    composeTestRule.setContent { DashboardScreen(navigationActions, true) }
+    composeTestRule.setContent { DashboardScreen(navigationActions) }
 
     // Verify that clicking "Canceled" selects it and deselects "Upcoming"
     composeTestRule.onNodeWithText("Canceled").performClick()
@@ -52,7 +52,7 @@ class DashboardUserNoModeScreenTest {
 
   @Test
   fun quickFixesWidgetDisplaysCorrectly() {
-    composeTestRule.setContent { DashboardScreen(navigationActions, true) }
+    composeTestRule.setContent { DashboardScreen(navigationActions) }
 
     // Verify that the QuickFixesWidget is displayed by default
     composeTestRule.onNodeWithTag("UpcomingQuickFixes").assertIsDisplayed()
@@ -64,7 +64,7 @@ class DashboardUserNoModeScreenTest {
 
   @Test
   fun messagesWidgetDisplaysCorrectly() {
-    composeTestRule.setContent { DashboardScreen(navigationActions, true) }
+    composeTestRule.setContent { DashboardScreen(navigationActions) }
 
     // Verify that the MessagesWidget is displayed
     composeTestRule.onNodeWithTag("MessagesWidget").assertIsDisplayed()
@@ -72,7 +72,7 @@ class DashboardUserNoModeScreenTest {
 
   @Test
   fun billsWidgetDisplaysCorrectly() {
-    composeTestRule.setContent { DashboardScreen(navigationActions, true) }
+    composeTestRule.setContent { DashboardScreen(navigationActions) }
 
     // Verify that the BillsWidget is displayed
     composeTestRule.onNodeWithTag("BillsWidget").assertIsDisplayed()
@@ -80,7 +80,7 @@ class DashboardUserNoModeScreenTest {
 
   @Test
   fun quickFixWidgetInteractsCorrectly() {
-    composeTestRule.setContent { DashboardScreen(navigationActions, true) }
+    composeTestRule.setContent { DashboardScreen(navigationActions) }
 
     // Verify QuickFix item interactions
     composeTestRule.onNodeWithTag("QuickFixItem_Adam").performClick()
@@ -89,7 +89,7 @@ class DashboardUserNoModeScreenTest {
 
   @Test
   fun messagesWidgetInteractsCorrectly() {
-    composeTestRule.setContent { DashboardScreen(navigationActions, true) }
+    composeTestRule.setContent { DashboardScreen(navigationActions) }
 
     // Verify Message item interactions
     composeTestRule.onNodeWithTag("MessageItem_Ramy Hatimy").performClick()
@@ -98,7 +98,7 @@ class DashboardUserNoModeScreenTest {
 
   @Test
   fun billsWidgetInteractsCorrectly() {
-    composeTestRule.setContent { DashboardScreen(navigationActions, true) }
+    composeTestRule.setContent { DashboardScreen(navigationActions) }
 
     // Verify Bill item interactions
     composeTestRule.onNodeWithTag("BillItem_Adam").performClick()

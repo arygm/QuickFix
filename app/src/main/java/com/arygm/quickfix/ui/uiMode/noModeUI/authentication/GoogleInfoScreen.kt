@@ -244,7 +244,7 @@ fun GoogleInfoScreen(
                                 onSuccess = {
                                   setAccountPreferences(preferencesViewModel, newAccount)
                                   rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
-                                    navigationActions.navigateTo(NoModeRoute.WELCOME)
+                                  navigationActions.navigateTo(NoModeRoute.WELCOME)
                                 },
                                 onFailure = {
                                   Log.d("GoogleInfoScreen", "Failed to update account.")

@@ -25,7 +25,7 @@ import org.mockito.kotlin.*
 class GoogleInfoUserNoModeScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
-    private lateinit var navigationActions: NavigationActions
+  private lateinit var navigationActions: NavigationActions
   private lateinit var accountRepository: AccountRepository
   private lateinit var accountViewModel: AccountViewModel
   private lateinit var profileRepository: ProfileRepository
@@ -40,7 +40,7 @@ class GoogleInfoUserNoModeScreenTest {
   @Before
   fun setup() {
     // Initialize the repositories and view models
-
+    navigationActions = mock()
     accountRepository = mock()
     profileRepository = mock()
     preferencesRepository = TestPreferencesRepository()
@@ -93,8 +93,7 @@ class GoogleInfoUserNoModeScreenTest {
           accountViewModel = accountViewModel,
           userViewModel = profileViewModel,
           preferencesViewModel = preferencesViewModel,
-          navigationActions = navigationActions
-          )
+          navigationActions = navigationActions)
     }
 
     composeTestRule.waitForIdle()
@@ -121,8 +120,7 @@ class GoogleInfoUserNoModeScreenTest {
           accountViewModel = accountViewModel,
           userViewModel = profileViewModel,
           preferencesViewModel = preferencesViewModel,
-          navigationActions = navigationActions
-          )
+          navigationActions = navigationActions)
     }
 
     composeTestRule.waitForIdle()
@@ -143,8 +141,7 @@ class GoogleInfoUserNoModeScreenTest {
           accountViewModel = accountViewModel,
           userViewModel = profileViewModel,
           preferencesViewModel = preferencesViewModel,
-          navigationActions = navigationActions
-          )
+          navigationActions = navigationActions)
     }
 
     composeTestRule.waitForIdle()

@@ -51,7 +51,6 @@ import com.arygm.quickfix.ui.profile.becomeWorker.views.personal.PersonalInfoScr
 import com.arygm.quickfix.ui.profile.becomeWorker.views.professional.ProfessionalInfoScreen
 import com.arygm.quickfix.ui.profile.becomeWorker.views.welcome.WelcomeOnBoardScreen
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.utils.loadBirthDate
 import com.arygm.quickfix.utils.loadEmail
 import com.arygm.quickfix.utils.loadFirstName
@@ -184,9 +183,7 @@ fun BusinessScreen(
             },
             navigationIcon = {
               IconButton(
-                  onClick = {
-                      navigationActions.goBack()
-                            },
+                  onClick = { navigationActions.goBack() },
                   modifier = Modifier.testTag("goBackButton")) {
                     Icon(
                         Icons.Outlined.ArrowBack,

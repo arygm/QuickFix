@@ -474,7 +474,8 @@ fun PersonalInfoScreen(
             enabled =
                 displayName.value.isNotEmpty() &&
                     description.value.isNotEmpty() &&
-                    imageBitmapPP.value != null && locationWorker.value.name.isNotEmpty(),
+                    imageBitmapPP.value != null &&
+                    locationWorker.value.name.isNotEmpty(),
             textColor = colorScheme.onPrimary,
             textStyle =
                 poppinsTypography.headlineMedium.copy(

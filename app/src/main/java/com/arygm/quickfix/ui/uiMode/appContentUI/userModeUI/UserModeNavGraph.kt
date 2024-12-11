@@ -50,93 +50,90 @@ fun UserModeNavHost(
     userNavigationActions: NavigationActions,
 ) {
 
+  val loggedInAccountViewModel: LoggedInAccountViewModel =
+      viewModel(factory = LoggedInAccountViewModel.Factory)
+  val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
+  val announcementViewModel: AnnouncementViewModel =
+      viewModel(factory = AnnouncementViewModel.Factory)
 
-    val loggedInAccountViewModel: LoggedInAccountViewModel =
-        viewModel(factory = LoggedInAccountViewModel.Factory)
-    val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
-    val announcementViewModel: AnnouncementViewModel =
-        viewModel(factory = AnnouncementViewModel.Factory)
+  // Initialized here because needed for the bottom bar
 
-    // Initialized here because needed for the bottom bar
+  val isUser = true // TODO: This variable needs to get its value after the authentication
 
-    val isUser = true // TODO: This variable needs to get its value after the authentication
-
-    NavHost(
-        navController = userNavigationActions.navController,
-        startDestination = UserRoute.HOME,
-        enterTransition = {
-            // You can change whatever you want for transitions
-            EnterTransition.None
-        },
-        exitTransition = {
-            // You can change whatever you want for transitions
-            ExitTransition.None
-        }) {
-
+  NavHost(
+      navController = userNavigationActions.navController,
+      startDestination = UserRoute.HOME,
+      enterTransition = {
+        // You can change whatever you want for transitions
+        EnterTransition.None
+      },
+      exitTransition = {
+        // You can change whatever you want for transitions
+        ExitTransition.None
+      }) {
         composable(UserRoute.HOME) {
-            HomeNavHost(
-                onScreenChange
-            ) // , loggedInAccountViewModel, chatViewModel)
+          HomeNavHost(onScreenChange) // , loggedInAccountViewModel, chatViewModel)
         }
 
         composable(UserRoute.SEARCH) {
-            SearchNavHost(
-                isUser,
-                userNavigationActions,
-                searchViewModel,
-                userViewModel,
-                loggedInAccountViewModel,
-                accountViewModel,
-                announcementViewModel,
-                onScreenChange,
-                categoryViewModel,
-                preferencesViewModel,
-                locationViewModel)
+          SearchNavHost(
+              isUser,
+              userNavigationActions,
+              searchViewModel,
+              userViewModel,
+              loggedInAccountViewModel,
+              accountViewModel,
+              announcementViewModel,
+              onScreenChange,
+              categoryViewModel,
+              preferencesViewModel,
+              locationViewModel)
         }
 
         composable(UserRoute.DASHBOARD) { DashBoardNavHost(onScreenChange) }
 
         composable(UserRoute.PROFILE) {
-            ProfileNavHost(
-                accountViewModel,
-                loggedInAccountViewModel,
-                workerViewModel,
-                userNavigationActions,
-                onScreenChange,
-                categoryViewModel,
-                preferencesViewModel,
-                locationViewModel,
-                testBitmapPP, testLocation,
-                rootMainNavigationActions,
-                )
+          ProfileNavHost(
+              accountViewModel,
+              loggedInAccountViewModel,
+              workerViewModel,
+              userNavigationActions,
+              onScreenChange,
+              categoryViewModel,
+              preferencesViewModel,
+              locationViewModel,
+              testBitmapPP,
+              testLocation,
+              rootMainNavigationActions,
+          )
         }
-    }
+      }
 }
 
 @Composable
 fun HomeNavHost(
     onScreenChange: (String) -> Unit = {},
 ) {
-    val homeNavController = rememberNavController()
-    val navigationActions = remember { NavigationActions(homeNavController) }
+  val homeNavController = rememberNavController()
+  val navigationActions = remember { NavigationActions(homeNavController) }
 
-    LaunchedEffect(navigationActions.currentScreen) {
-        onScreenChange(navigationActions.currentScreen)
+  LaunchedEffect(navigationActions.currentScreen) {
+    onScreenChange(navigationActions.currentScreen)
+  }
+  NavHost(
+      navController = homeNavController,
+      startDestination = UserScreen.HOME,
+      route = UserRoute.HOME,
+  ) {
+    composable(UserScreen.HOME) { HomeScreen(navigationActions) }
+    // Add MessageScreen as a nested composable within Home
+    composable(UserScreen.MESSAGES) {
+      //  MessageScreen(
+      //      loggedInAccountViewModel = loggedInAccountViewModel, chatViewModel =
+      // chatViewModel,navigationActions)
+      FakeMessageScreen(navigationActions)
     }
-    NavHost(
-        navController = homeNavController,
-        startDestination = UserScreen.HOME,
-        route = UserRoute.HOME,
-    ) {
-        composable(UserScreen.HOME) { HomeScreen(navigationActions) }
-        // Add MessageScreen as a nested composable within Home
-        composable(UserScreen.MESSAGES) {
-            //  MessageScreen(
-            //      loggedInAccountViewModel = loggedInAccountViewModel, chatViewModel =
-            // chatViewModel,navigationActions)
-            FakeMessageScreen(navigationActions)
-        }
-    }
+  }
 }
 
 @Composable
@@ -154,44 +151,44 @@ fun ProfileNavHost(
     rootMainNavigationActions: NavigationActions
 ) {
 
-    val profileNavController = rememberNavController()
-    val profileNavigationActions = remember { NavigationActions(profileNavController) }
+  val profileNavController = rememberNavController()
+  val profileNavigationActions = remember { NavigationActions(profileNavController) }
 
-    LaunchedEffect(profileNavigationActions.currentScreen) {
-        onScreenChange(profileNavigationActions.currentScreen)
+  LaunchedEffect(profileNavigationActions.currentScreen) {
+    onScreenChange(profileNavigationActions.currentScreen)
+  }
+  NavHost(navController = profileNavController, startDestination = UserScreen.PROFILE) {
+    composable(UserScreen.PROFILE) {
+      ProfileScreen(profileNavigationActions, rootMainNavigationActions, preferencesViewModel)
     }
-    NavHost(navController = profileNavController, startDestination = UserScreen.PROFILE) {
-        composable(UserScreen.PROFILE) {
-            ProfileScreen(profileNavigationActions, rootMainNavigationActions, preferencesViewModel)
-        }
-        composable(UserScreen.ACCOUNT_CONFIGURATION) {
-            AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)
-        }
-        composable(UserScreen.TO_WORKER) {
-            BusinessScreen(
-                profileNavigationActions,
-                accountViewModel,
-                workerViewModel,
-                loggedInAccountViewModel,
-                preferencesViewModel,
-                categoryViewModel,
-                locationViewModel,
-                testBitmapPP,
-                testLocation)
-        }
+    composable(UserScreen.ACCOUNT_CONFIGURATION) {
+      AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)
     }
+    composable(UserScreen.TO_WORKER) {
+      BusinessScreen(
+          profileNavigationActions,
+          accountViewModel,
+          workerViewModel,
+          loggedInAccountViewModel,
+          preferencesViewModel,
+          categoryViewModel,
+          locationViewModel,
+          testBitmapPP,
+          testLocation)
+    }
+  }
 }
 
 @Composable
 fun DashBoardNavHost(onScreenChange: (String) -> Unit) {
-    val dashboardNavController = rememberNavController()
-    val navigationActions = remember { NavigationActions(dashboardNavController) }
-    LaunchedEffect(navigationActions.currentScreen) {
-        onScreenChange(navigationActions.currentScreen)
-    }
-    NavHost(navController = dashboardNavController, startDestination = UserScreen.DASHBOARD) {
-        composable(UserScreen.DASHBOARD) { DashboardScreen(navigationActions) }
-    }
+  val dashboardNavController = rememberNavController()
+  val navigationActions = remember { NavigationActions(dashboardNavController) }
+  LaunchedEffect(navigationActions.currentScreen) {
+    onScreenChange(navigationActions.currentScreen)
+  }
+  NavHost(navController = dashboardNavController, startDestination = UserScreen.DASHBOARD) {
+    composable(UserScreen.DASHBOARD) { DashboardScreen(navigationActions) }
+  }
 }
 
 @Composable
@@ -208,41 +205,41 @@ fun SearchNavHost(
     preferencesViewModel: PreferencesViewModel,
     locationViewModel: LocationViewModel
 ) {
-    val searchNavController = rememberNavController()
-    val navigationActions = remember { NavigationActions(searchNavController) }
-    LaunchedEffect(navigationActions.currentScreen) {
-        onScreenChange(navigationActions.currentScreen)
+  val searchNavController = rememberNavController()
+  val navigationActions = remember { NavigationActions(searchNavController) }
+  LaunchedEffect(navigationActions.currentScreen) {
+    onScreenChange(navigationActions.currentScreen)
+  }
+  NavHost(
+      navController = searchNavController,
+      startDestination = UserScreen.SEARCH,
+  ) {
+    composable(UserScreen.SEARCH) {
+      QuickFixFinderScreen(
+          navigationActions,
+          navigationActionsRoot,
+          isUser,
+          profileViewModel,
+          loggedInAccountViewModel,
+          accountViewModel,
+          searchViewModel,
+          announcementViewModel,
+          categoryViewModel)
     }
-    NavHost(
-        navController = searchNavController,
-        startDestination = UserScreen.SEARCH,
-    ) {
-        composable(UserScreen.SEARCH) {
-            QuickFixFinderScreen(
-                navigationActions,
-                navigationActionsRoot,
-                isUser,
-                profileViewModel,
-                loggedInAccountViewModel,
-                accountViewModel,
-                searchViewModel,
-                announcementViewModel,
-                categoryViewModel)
-        }
-        composable(UserScreen.DISPLAY_UPLOADED_IMAGES) {
-            QuickFixDisplayImages(isUser, navigationActions, announcementViewModel)
-        }
-        composable(UserScreen.SEARCH_WORKER_RESULT) {
-            SearchWorkerResult(
-                navigationActions,
-                searchViewModel,
-                accountViewModel,
-                profileViewModel,
-                preferencesViewModel)
-        }
-        composable(UserScreen.SEARCH_LOCATION) {
-            LocationSearchCustomScreen(
-                navigationActions = navigationActions, locationViewModel = locationViewModel)
-        }
+    composable(UserScreen.DISPLAY_UPLOADED_IMAGES) {
+      QuickFixDisplayImages(isUser, navigationActions, announcementViewModel)
     }
+    composable(UserScreen.SEARCH_WORKER_RESULT) {
+      SearchWorkerResult(
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          profileViewModel,
+          preferencesViewModel)
+    }
+    composable(UserScreen.SEARCH_LOCATION) {
+      LocationSearchCustomScreen(
+          navigationActions = navigationActions, locationViewModel = locationViewModel)
+    }
+  }
 }

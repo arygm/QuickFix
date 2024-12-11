@@ -9,7 +9,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.test.espresso.Root
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
@@ -76,7 +75,12 @@ class RegisterUserNoModeScreenTest {
   @Test
   fun testInitialUI() {
     composeTestRule.setContent {
-      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(
+          rootNavigationActions,
+          navigationActions,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel)
     }
 
     // Check that the scaffold and content boxes are displayed
@@ -120,7 +124,12 @@ class RegisterUserNoModeScreenTest {
   @Test
   fun testInvalidEmailShowsError() {
     composeTestRule.setContent {
-      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(
+          rootNavigationActions,
+          navigationActions,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel)
     }
 
     // Input an invalid email
@@ -134,7 +143,12 @@ class RegisterUserNoModeScreenTest {
   @Test
   fun testInvalidDateShowsError() {
     composeTestRule.setContent {
-      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(
+          rootNavigationActions,
+          navigationActions,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel)
     }
 
     // Input an invalid birth date
@@ -148,7 +162,12 @@ class RegisterUserNoModeScreenTest {
   @Test
   fun testPasswordMismatch() {
     composeTestRule.setContent {
-      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(
+          rootNavigationActions,
+          navigationActions,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel)
     }
 
     // Enter different passwords
@@ -191,7 +210,8 @@ class RegisterUserNoModeScreenTest {
 
     composeTestRule.setContent {
       RegisterScreen(
-          rootNavigationActions, navigationActions,
+          rootNavigationActions,
+          navigationActions,
           accountViewModel,
           userViewModel,
           preferencesViewModel,
@@ -224,7 +244,12 @@ class RegisterUserNoModeScreenTest {
   @Test
   fun testRegisterButtonDisabledWhenFormIncomplete() {
     composeTestRule.setContent {
-      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(
+          rootNavigationActions,
+          navigationActions,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel)
     }
 
     // Fill only partial inputs
@@ -243,7 +268,12 @@ class RegisterUserNoModeScreenTest {
   @Test
   fun testBackButtonNavigatesBack() {
     composeTestRule.setContent {
-      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(
+          rootNavigationActions,
+          navigationActions,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel)
     }
 
     // Click the back button
@@ -256,7 +286,12 @@ class RegisterUserNoModeScreenTest {
   @Test
   fun testLoginButtonNavigatesToLogin() {
     composeTestRule.setContent {
-      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(
+          rootNavigationActions,
+          navigationActions,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel)
     }
 
     // Click the "Login !" button
@@ -289,7 +324,12 @@ class RegisterUserNoModeScreenTest {
 
     // Act
     composeTestRule.setContent {
-      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(
+          rootNavigationActions,
+          navigationActions,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("emailInput").performTextInput(existingEmail)
@@ -325,7 +365,12 @@ class RegisterUserNoModeScreenTest {
 
     // Act
     composeTestRule.setContent {
-      RegisterScreen(rootNavigationActions, navigationActions, accountViewModel, userViewModel, preferencesViewModel)
+      RegisterScreen(
+          rootNavigationActions,
+          navigationActions,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("emailInput").performTextInput(newEmail)
@@ -372,7 +417,8 @@ class RegisterUserNoModeScreenTest {
 
     composeTestRule.setContent {
       RegisterScreen(
-          rootNavigationActions, navigationActions,
+          rootNavigationActions,
+          navigationActions,
           accountViewModel,
           userViewModel,
           preferencesViewModel,
@@ -441,7 +487,8 @@ class RegisterUserNoModeScreenTest {
 
     composeTestRule.setContent {
       RegisterScreen(
-          rootNavigationActions, navigationActions,
+          rootNavigationActions,
+          navigationActions,
           accountViewModel,
           userViewModel,
           preferencesViewModel,

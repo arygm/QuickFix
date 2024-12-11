@@ -50,6 +50,7 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
 import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeScreen
 import com.arygm.quickfix.ui.theme.ButtonPrimary
 import com.arygm.quickfix.utils.loadIsSignIn
 import com.arygm.quickfix.utils.rememberFirebaseAuthLauncher
@@ -85,7 +86,7 @@ fun WelcomeScreen(
       rememberFirebaseAuthLauncher(
           onAuthCompleteOne = { result ->
             Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
-              rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
+            rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
           },
           onAuthCompleteTwo = { result ->
             Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
@@ -103,7 +104,7 @@ fun WelcomeScreen(
     isSignIn = loadIsSignIn(preferencesViewModel)
     if (isSignIn &&
         navigationActions.currentScreen ==
-            NoModeRoute.WELCOME) { // Ensure the value is `true` before navigating
+            NoModeScreen.WELCOME) { // Ensure the value is `true` before navigating
       Log.i("SignInScreen", "User is signed in, fast forwarding to home screen")
       rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
     } else {

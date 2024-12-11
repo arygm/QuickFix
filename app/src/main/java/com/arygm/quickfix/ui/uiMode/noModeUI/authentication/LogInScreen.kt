@@ -278,7 +278,7 @@ fun LogInScreen(
                                             delay(BOX_COLLAPSE_SPEED.toLong())
                                             Log.d("LoginFlow", "Starting login with email: $email")
                                             rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
-                                              navigationActions.navigateTo(NoModeRoute.WELCOME)
+                                            navigationActions.navigateTo(NoModeRoute.WELCOME)
                                           }
                                         } else {
                                           Log.e("LogInScreen", "Error occurred while signing in")
@@ -314,8 +314,8 @@ fun LogInScreen(
                               QuickFixButton(
                                   buttonText = "Create one!",
                                   onClickAction = {
-                                      navigationActions.navigateTo(NoModeRoute.REGISTER)
-                                                  },
+                                    navigationActions.navigateTo(NoModeRoute.REGISTER)
+                                  },
                                   buttonColor = Color.Transparent,
                                   textColor = colorScheme.primary,
                                   textStyle = MaterialTheme.typography.headlineSmall,
