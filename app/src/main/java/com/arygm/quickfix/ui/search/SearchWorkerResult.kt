@@ -419,8 +419,8 @@ fun SearchWorkerResult(
                               reviews =
                                   ArrayDeque(
                                       listOf(
-                                          Review("Bob", "nice work", 4.0),
-                                          Review("Alice", "bad work", 3.5),
+                                          Review("Bob", "nice work", 4.0f),
+                                          Review("Alice", "bad work", 3.5f),
                                       )),
                               profilePicture = "placeholder_worker",
                               price = 130.0,

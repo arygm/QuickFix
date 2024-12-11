@@ -1,6 +1,7 @@
 [versions]
 agp = "8.6.1"
 calendar = "1.3.0"
+composeRatingbar = "1.3.12"
 databindingRuntime = "8.7.0"
 datastorePreferencesCore = "1.1.1"
 kotlin = "1.9.25"
@@ -60,6 +61,7 @@ androidx-datastore-preferences = { module = "androidx.datastore:datastore-prefer
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastorePreferencesCore" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 calendar = { module = "com.maxkeppeler.sheets-compose-dialogs:calendar", version.ref = "calendar" }
+compose-ratingbar = { module = "com.github.a914-gowtham:compose-ratingbar", version.ref = "composeRatingbar" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 json = { module = "org.json:json", version.ref = "json" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }

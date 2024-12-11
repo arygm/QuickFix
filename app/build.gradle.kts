@@ -263,6 +263,7 @@ dependencies {
     androidTestImplementation(libs.mockito.android)
 
     implementation(libs.calendar)
+    implementation(libs.compose.ratingbar)
 }
 
 tasks.withType<Test> {

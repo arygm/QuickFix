@@ -1,6 +1,5 @@
 package com.arygm.quickfix.ui.quickfix
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -167,7 +166,6 @@ fun QuickFixFirstStep(
             QuickFixDateTimePicker(
                 onDateTimeSelected = { date, time ->
                   listDates = listDates + LocalDateTime.of(date, time)
-                  Log.d("QuickFixFirstStep", "listDates: $listDates")
                   showDateTimePopup = false
                 },
                 onDismissRequest = { showDateTimePopup = false })

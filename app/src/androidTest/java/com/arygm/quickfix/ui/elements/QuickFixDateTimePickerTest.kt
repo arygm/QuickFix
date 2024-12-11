@@ -64,13 +64,15 @@ class QuickFixDateTimePickerTest {
 
     // Simulate time selection (e.g., 14:30)
 
-    composeTestRule.onNodeWithContentDescription("14 hours").performClick() // Select hour
+    composeTestRule
+        .onNodeWithContentDescription("${LocalTime.now().hour + 1} hours")
+        .performClick() // Select hour
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithText("OK").performClick()
 
     // Assert that selectedTime is updated
     assert(selectedTime != null)
-    assert(selectedTime == LocalTime.of(14, LocalTime.now().minute))
+    assert(selectedTime == LocalTime.of(LocalTime.now().hour + 1, LocalTime.now().minute))
   }
 
   @Test
@@ -134,12 +136,15 @@ class QuickFixDateTimePickerTest {
     composeTestRule
         .onNodeWithContentDescription("time_picker_button_select_picker_mode")
         .performClick()
-    composeTestRule.onNodeWithContentDescription("14 hours").performClick() // Select hour
+    composeTestRule
+        .onNodeWithContentDescription("${LocalTime.now().hour + 1} hours")
+        .performClick() // Select hour
     composeTestRule.onNodeWithText("OK").performClick()
 
     // Assert that date and time are passed correctly
     assert(selectedDateTime != null)
     assert(selectedDateTime?.first == LocalDate.of(LocalDate.now().year, 1, 7))
-    assert(selectedDateTime?.second == LocalTime.of(14, LocalTime.now().minute))
+    assert(
+        selectedDateTime?.second == LocalTime.of(LocalTime.now().hour + 1, LocalTime.now().minute))
   }
 }

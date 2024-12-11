@@ -7,7 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import com.arygm.quickfix.model.bill.BillField
-import com.arygm.quickfix.model.bill.Unit
+import com.arygm.quickfix.model.bill.Units
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.messaging.*
 import com.arygm.quickfix.model.profile.dataFields.Service
@@ -17,7 +17,6 @@ import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.google.firebase.Timestamp
 import java.util.Date
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.JsonNull.content
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -51,7 +50,7 @@ class MessageScreenTest {
   private val billFields =
       listOf(
           BillField(
-              description = "Labor", unit = Unit.HOURS, amount = 2, unitPrice = 40.0, total = 80.0))
+              description = "Labor", unit = Units.H, amount = 2.0, unitPrice = 40.0, total = 80.0))
 
   private val fakeLocation =
       Location(latitude = 40.7128, longitude = -74.0060, name = "Test Location")
@@ -66,10 +65,11 @@ class MessageScreenTest {
           time = today,
           includedServices = includedServices,
           addOnServices = addOnServices,
-          workerName = "John the Worker",
-          userName = "Jane the User",
+          workerId = "John the Worker",
+          userId = "Jane the User",
           chatUid = "chat_123",
           title = "Fixing the Kitchen Sink",
+          description = "The kitchen sink is clogged and needs fixing.",
           bill = billFields,
           location = fakeLocation)
 
