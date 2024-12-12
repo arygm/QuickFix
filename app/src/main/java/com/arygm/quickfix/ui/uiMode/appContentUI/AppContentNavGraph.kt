@@ -64,60 +64,10 @@ fun AppContentNavGraph(
   val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
   val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
 
-  var currentScreen by remember { mutableStateOf<String?>(null) }
-  val currentAppMode = modeViewModel.currentMode.collectAsState()
-  val currentNavigationActions =
-      when (currentAppMode.value) {
-        AppMode.USER -> userNavigationActions
-        AppMode.WORKER -> workerNavigationActions
-      }
-  // Make `bottomBarVisible` reactive to changes in `screen`
-  val shouldShowBottomBar by remember {
-    derivedStateOf {
-      currentScreen?.let {
-        it != UserScreen.DISPLAY_UPLOADED_IMAGES && it != UserScreen.SEARCH_LOCATION
-      } ?: true &&
-          currentScreen?.let {
-            it != UserScreen.ACCOUNT_CONFIGURATION && it != UserScreen.TO_WORKER
-          } ?: true
-    }
-  }
 
-  var showBottomBar by remember { mutableStateOf(false) }
-
-  // Delay the appearance of the bottom bar
-  LaunchedEffect(shouldShowBottomBar) {
-    if (shouldShowBottomBar) {
-      delay(200) // Adjust the delay duration (in milliseconds) as needed
-      showBottomBar = true
-    } else {
-      showBottomBar = false
-    }
-  }
-
-  Log.d("userContent", "Current App Mode: $currentAppMode")
-  Scaffold(
-      topBar = { QuickFixOfflineBar(isVisible = isOffline) },
-      bottomBar = {
-        // Show BottomNavigationMenu only if the route is not part of the login/registration flow
-        AnimatedVisibility(
-            visible = showBottomBar,
-            enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from the bottom
-            exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to the bottom
-            modifier = Modifier.testTag("BNM")) {
-              BottomNavigationMenu(
-                  modeViewModel = modeViewModel,
-                  onTabSelect = { selectedDestination ->
-                    // Use this block to navigate based on the selected tab
-                    currentNavigationActions.navigateTo(selectedDestination)
-                  },
-                  navigationActions = currentNavigationActions)
-            }
-      }) { innerPadding ->
-        NavHost(
+     NavHost(
             navController = appContentNavigationActions.navController,
-            startDestination = AppContentRoute.USER_MODE,
-            modifier = Modifier.padding(innerPadding), // Apply padding from the Scaffold
+            startDestination = AppContentRoute.USER_MODE, // Apply padding from the Scaffold
             enterTransition = {
               // You can change whatever you want for transitions
               EnterTransition.None
@@ -137,15 +87,15 @@ fun AppContentNavGraph(
                     categoryViewModel,
                     locationViewModel,
                     preferencesViewModel,
-                    onScreenChange = { currentScreen = it },
                     rootNavigationActions,
                     userNavigationActions,
-                    userPreferencesViewModel)
+                    userPreferencesViewModel,
+                    appContentNavigationActions,
+                    isOffline)
               }
 
               composable(AppContentRoute.WORKER_MODE) {
-                WorkerModeNavGraph(onScreenChange = { currentScreen = it }, workerNavigationActions)
+                WorkerModeNavGraph(workerNavigationActions, isOffline = isOffline, modeViewModel = modeViewModel )
               }
             }
       }
-}

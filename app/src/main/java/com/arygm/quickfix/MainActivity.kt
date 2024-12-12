@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       QuickFixTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          QuickFixApp(testBitmapPP.value, testLocation.value)
+            QuickFixApp(testBitmapPP.value, testLocation.value)
         }
       }
     }
@@ -124,26 +124,21 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
 
   var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
 
-  var currentAppMode by remember { mutableStateOf<String?>(null) }
+  var currentAppMode by remember { mutableStateOf(AppMode.USER) }
   Log.d("userContent", "Current App Mode is empty: $currentAppMode")
   LaunchedEffect(Unit) {
     Log.d("userContent", "Loading App Mode")
     currentAppMode =
         when (loadAppMode(preferencesViewModel)) {
-          "User" -> AppContentRoute.USER_MODE
-          "Worker" -> AppContentRoute.WORKER_MODE
+          "User" -> AppMode.USER
+          "Worker" -> AppMode.WORKER
           else -> {
-            AppContentRoute.USER_MODE
+              AppMode.WORKER
           }
         }
   }
 
-  modeViewModel.switchMode(
-      when (currentAppMode) {
-        AppContentRoute.USER_MODE -> AppMode.USER
-        AppContentRoute.WORKER_MODE -> AppMode.WORKER
-        else -> AppMode.USER
-      })
+  modeViewModel.switchMode(currentAppMode)
 
   // Simulate monitoring connectivity (replace this with actual monitoring in production)
   LaunchedEffect(Unit) {
