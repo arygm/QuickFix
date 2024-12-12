@@ -30,7 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -75,7 +75,7 @@ fun QuickFixLastStep(
 
   val focusManager = LocalFocusManager.current
 
-  var rating by remember { mutableFloatStateOf(0f) }
+  var rating by remember { mutableDoubleStateOf(0.0) }
   var feedback by remember { mutableStateOf("") }
 
   var category by remember { mutableStateOf(Category()) }
@@ -370,13 +370,13 @@ fun QuickFixLastStep(
                             horizontalArrangement = Arrangement.Center,
                         ) {
                           RatingBar(
-                              value = rating,
+                              value = rating.toFloat(),
                               style =
                                   RatingBarStyle.Stroke(
                                       activeColor = colorScheme.primary,
                                       strokeColor = colorScheme.onBackground,
                                       width = 2f),
-                              onValueChange = { rating = it },
+                              onValueChange = { rating = it.toDouble() },
                               onRatingChanged = { Log.d("TAG", "onRatingChanged: $it") },
                               stepSize = StepSize.HALF,
                               modifier = Modifier.testTag("RatingBar"))

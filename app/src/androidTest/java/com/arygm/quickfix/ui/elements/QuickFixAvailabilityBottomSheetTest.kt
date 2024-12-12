@@ -14,7 +14,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.arygm.quickfix.utils.inToMonth
 import java.time.LocalDate
 import org.junit.Rule
 import org.junit.Test
@@ -91,7 +90,6 @@ class QuickFixAvailabilityBottomSheetTest {
 
     // Get today's date
     val today = LocalDate.now()
-    val month = inToMonth(today.month.value)
 
     composeTestRule.setContent {
       QuickFixAvailabilityBottomSheet(
@@ -123,9 +121,7 @@ class QuickFixAvailabilityBottomSheetTest {
     textFields[1].performTextReplacement("00")
 
     // Find the node representing today's date and perform a click
-    composeTestRule.onNode(hasText(month) and hasClickAction()).performClick()
-    composeTestRule.onNode(hasText("Jan") and hasClickAction()).performClick()
-    composeTestRule.onNode(hasText("7") and hasClickAction()).performClick()
+    composeTestRule.onNode(hasText(today.dayOfMonth.toString()) and hasClickAction()).performClick()
 
     // Simulate pressing the OK button (if there is one)
     // If the CalendarView has an OK button, we need to perform a click on it
@@ -135,7 +131,7 @@ class QuickFixAvailabilityBottomSheetTest {
     // Assert that onOkClick was called
     composeTestRule.runOnIdle {
       assert(onOkClickCalled)
-      assert(selectedDates.contains(LocalDate.of(today.year, 1, 7)))
+      assert(selectedDates.contains(LocalDate.now()))
       assert(selectedHour == 7)
       assert(selectedMinute == 0)
     }
@@ -205,7 +201,7 @@ class QuickFixAvailabilityBottomSheetTest {
     }
 
     // Simulate the clear action (assume clicking on an element invokes the clear logic)
-    composeTestRule.onNodeWithText("Cancel").performClick()
+    composeTestRule.onNodeWithText("Clear").performClick()
 
     // Assert that onClearClick was called
     composeTestRule.runOnIdle { assert(onClearClickCalled) }
@@ -227,7 +223,7 @@ class QuickFixAvailabilityBottomSheetTest {
     }
 
     // Simulate the clear action (assume clicking on an element invokes the clear logic)
-    composeTestRule.onNodeWithText("Cancel").performClick()
+    composeTestRule.onNodeWithText("Clear").performClick()
 
     // Assert that onClearClick was not called
     composeTestRule.runOnIdle { assert(!onClearClickCalled) }
