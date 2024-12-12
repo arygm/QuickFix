@@ -2,6 +2,7 @@ package com.arygm.quickfix.utils
 
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.google.firebase.Timestamp
 import java.util.Calendar
 import java.util.GregorianCalendar
@@ -57,6 +58,23 @@ class PreferencesTest {
         verify(preferencesViewModel).savePreference(EMAIL_KEY, "alice.smith@example.com")
         verify(preferencesViewModel).savePreference(BIRTH_DATE_KEY, "15/05/1990")
         verify(preferencesViewModel).savePreference(IS_WORKER_KEY, true)
+      }
+    @Test
+    fun setUserProfilePreferencesSavesAllPreferences() =
+      runTest(testDispatcher) {
+        val userProfile =
+            UserProfile(
+                locations = emptyList(),
+                announcements = emptyList(),
+                uid = "user123",
+                wallet = 100.0)
+
+        // Act
+          setUserProfilePreferences(
+                preferencesViewModel, userProfile, dispatcher = testDispatcher)
+
+        // Assert
+        verify(preferencesViewModel).savePreference(WALLET_KEY, 100.0)
       }
 
   @Test

@@ -7,6 +7,7 @@ import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.google.android.gms.tasks.TaskCompletionSource
@@ -27,6 +28,7 @@ import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -50,7 +52,13 @@ class SignInWithEmailAndPasswordTest {
 
   @Mock private lateinit var preferencesRepository: PreferencesRepository
 
-  private lateinit var accountViewModel: AccountViewModel
+  @Mock private lateinit var userPreferencesViewModel: PreferencesViewModel
+
+    @Mock private lateinit var userViewModel: ProfileViewModel
+    @Mock private lateinit var userProfileRepository: UserProfileRepositoryFirestore
+
+
+    private lateinit var accountViewModel: AccountViewModel
 
   private lateinit var preferencesViewModel: PreferencesViewModel
 
@@ -65,7 +73,7 @@ class SignInWithEmailAndPasswordTest {
     if (FirebaseApp.getApps(context).isEmpty()) {
       FirebaseApp.initializeApp(context)
     }
-
+    userProfileRepository = mock()
     // Mock FirebaseAuth.getInstance()
     firebaseAuthMockedStatic = Mockito.mockStatic(FirebaseAuth::class.java)
     firebaseAuth = Mockito.mock(FirebaseAuth::class.java)
@@ -77,6 +85,8 @@ class SignInWithEmailAndPasswordTest {
     // Initialize accountViewModel with the mocked repository
     accountViewModel = AccountViewModel(accountRepository)
     preferencesViewModel = PreferencesViewModel(preferencesRepository)
+      userPreferencesViewModel = PreferencesViewModel(preferencesRepository)
+      userViewModel = ProfileViewModel(userProfileRepository)
 
     // Mock FirebaseAuth.getInstance().currentUser
     whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
@@ -131,7 +141,7 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        })
+        }, userPreferencesViewModel, userViewModel)
 
     // Simulate task completion
     signInTaskCompletionSource.setResult(authResult)
@@ -172,7 +182,7 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        })
+        }, userPreferencesViewModel, userViewModel)
 
     // Simulate task failure
     signInTaskCompletionSource.setException(exception)
@@ -223,7 +233,7 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        })
+        }, userPreferencesViewModel, userViewModel)
 
     // Simulate task completion
     signInTaskCompletionSource.setResult(authResult)
@@ -263,7 +273,7 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        })
+        }, userPreferencesViewModel, userViewModel)
 
     // Simulate task completion
     signInTaskCompletionSource.setResult(authResult)
@@ -315,7 +325,7 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        })
+        }, userPreferencesViewModel, userViewModel)
 
     // Simulate task completion
     signInTaskCompletionSource.setResult(authResult)
@@ -353,7 +363,7 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        })
+        }, userPreferencesViewModel, userViewModel)
 
     // Simulate task failure
     signInTaskCompletionSource.setException(exception)
@@ -394,7 +404,7 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        })
+        }, userPreferencesViewModel, userViewModel)
 
     // Simulate task failure
     signInTaskCompletionSource.setException(exception)
@@ -435,7 +445,7 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        })
+        }, userPreferencesViewModel, userViewModel)
 
     // Simulate task failure
     signInTaskCompletionSource.setException(exception)
