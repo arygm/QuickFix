@@ -41,6 +41,7 @@ import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
@@ -60,10 +61,11 @@ fun SearchOnBoarding(
     navigationActionsRoot: NavigationActions,
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
-    categoryViewModel: CategoryViewModel
+    categoryViewModel: CategoryViewModel,
+    onProfileClick: (WorkerProfile) -> Unit
 ) {
   val context = LocalContext.current
-  val profiles = searchViewModel.workerProfiles.collectAsState().value
+  val workerProfiles by searchViewModel.subCategoryWorkerProfiles.collectAsState()
   var userProfile = UserProfile(locations = emptyList(), announcements = emptyList(), uid = "0")
   val focusManager = LocalFocusManager.current
   val categories = categoryViewModel.categories.collectAsState().value
@@ -79,10 +81,10 @@ fun SearchOnBoarding(
 
   // Filtering logic
   val filterState = rememberSearchFiltersState()
-  var filteredWorkerProfiles by remember { mutableStateOf(profiles) }
+  var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
 
   fun updateFilteredProfiles() {
-    filteredWorkerProfiles = filterState.reapplyFilters(profiles, searchViewModel)
+    filteredWorkerProfiles = filterState.reapplyFilters(workerProfiles, searchViewModel)
   }
 
   var showFilterButtons by remember { mutableStateOf(false) }
@@ -93,7 +95,7 @@ fun SearchOnBoarding(
   // Build filter buttons
   val listOfButtons =
       filterState.getFilterButtons(
-          workerProfiles = profiles,
+          workerProfiles = workerProfiles,
           filteredProfiles = filteredWorkerProfiles,
           searchViewModel = searchViewModel,
           onProfilesUpdated = { updated -> filteredWorkerProfiles = updated },
@@ -136,7 +138,7 @@ fun SearchOnBoarding(
                       .padding(horizontal = 10.dp * widthRatio),
               horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp * heightRatio),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 0.dp * heightRatio),
                     horizontalArrangement = Arrangement.Center) {
                       QuickFixTextFieldCustom(
                           modifier = Modifier.testTag("searchContent"),
@@ -159,7 +161,7 @@ fun SearchOnBoarding(
                               onSearchEmpty()
                               // When search is empty, we can reset filteredWorkerProfiles to
                               // original
-                              filteredWorkerProfiles = profiles
+                              filteredWorkerProfiles = workerProfiles
                             } else {
                               onSearch()
                               // If needed, reapply filters here if filters are set
@@ -228,21 +230,7 @@ fun SearchOnBoarding(
                         searchViewModel = searchViewModel,
                         accountViewModel = accountViewModel,
                         listState = listState,
-                        onBookClick = { selectedProfile ->
-                          // Set up variables for WorkerSlidingWindowContent
-                          bannerImage = R.drawable.moroccan_flag
-                          profilePicture = R.drawable.placeholder_worker
-                          initialSaved = false
-                          workerCategory = selectedProfile.fieldOfWork
-                          workerAddress = selectedProfile.location?.name ?: "Unknown"
-                          description = selectedProfile.description
-                          includedServices = selectedProfile.includedServices.map { it.name }
-                          addonServices = selectedProfile.addOnServices.map { it.name }
-                          workerRating = selectedProfile.rating
-                          tags = selectedProfile.tags
-                          reviews = selectedProfile.reviews.map { it.review }
-                          isWindowVisible = true
-                        })
+                        onBookClick = { selectedProfile -> onProfileClick(selectedProfile) })
                   }
                 }
               }

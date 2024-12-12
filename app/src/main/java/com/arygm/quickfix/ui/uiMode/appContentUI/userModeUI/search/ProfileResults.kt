@@ -1,9 +1,7 @@
 package com.arygm.quickfix.ui.search
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -83,8 +81,6 @@ fun ProfileResults(
             distance = distance,
             onBookClick = { onBookClick(profile) })
       }
-
-      Spacer(modifier = Modifier.height(0.dp))
     }
   }
 }
