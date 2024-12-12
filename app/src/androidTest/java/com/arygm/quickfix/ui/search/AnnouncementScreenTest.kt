@@ -5,6 +5,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
@@ -15,7 +16,6 @@ import com.arygm.quickfix.model.search.AnnouncementRepository
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.ui.search.announcement.AnnouncementScreen
 import com.arygm.quickfix.utils.UID_KEY
 import kotlinx.coroutines.flow.flowOf
@@ -31,8 +31,7 @@ import org.mockito.kotlin.whenever
 
 class AnnouncementScreenTest {
 
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var announcementRepository: AnnouncementRepository
@@ -60,65 +59,68 @@ class AnnouncementScreenTest {
     whenever(preferencesRepository.getPreferenceByKey(UID_KEY)).thenReturn(flowOf(userId))
 
     announcementViewModel =
-      AnnouncementViewModel(announcementRepository, preferencesRepository, profileRepository)
+        AnnouncementViewModel(announcementRepository, preferencesRepository, profileRepository)
 
     // Mock fetchUserProfile to return a UserProfile with wallet = 0.0
     doAnswer { invocation ->
-      val onSuccess = invocation.arguments[1] as (Any?) -> Unit
-      onSuccess(
-        UserProfile(
-          locations = listOf(Location(40.0, -74.0, "Hello")),
-          announcements = emptyList(),
-          wallet = 0.0,
-          uid = "testUserId",
-          quickFixes = emptyList()
-        )
-      )
-      null
-    }.`when`(profileRepository).getProfileById(anyString(), any(), any())
+          val onSuccess = invocation.arguments[1] as (Any?) -> Unit
+          onSuccess(
+              UserProfile(
+                  locations = listOf(Location(40.0, -74.0, "Hello")),
+                  announcements = emptyList(),
+                  wallet = 0.0,
+                  uid = "testUserId",
+                  quickFixes = emptyList()))
+          null
+        }
+        .`when`(profileRepository)
+        .getProfileById(anyString(), any(), any())
 
     // Mock announce success
     doAnswer { invocation ->
-      val onSuccess = invocation.arguments[1] as () -> Unit
-      onSuccess()
-      null
-    }.`when`(announcementRepository).announce(any(), any(), any())
+          val onSuccess = invocation.arguments[1] as () -> Unit
+          onSuccess()
+          null
+        }
+        .`when`(announcementRepository)
+        .announce(any(), any(), any())
 
     // Mock profile update success
     doAnswer { invocation ->
-      val onSuccess = invocation.arguments[1] as () -> Unit
-      onSuccess()
-      null
-    }.`when`(profileViewModel).updateProfile(any(), any(), any())
+          val onSuccess = invocation.arguments[1] as () -> Unit
+          onSuccess()
+          null
+        }
+        .`when`(profileViewModel)
+        .updateProfile(any(), any(), any())
 
     // Mock account fetch
     doAnswer { invocation ->
-      val onSuccess = invocation.arguments[1] as (Account?) -> Unit
-      onSuccess(
-        Account(
-          uid = "testUserId",
-          firstName = "John",
-          lastName = "Doe",
-          email = "john@example.com",
-          birthDate = com.google.firebase.Timestamp.now(),
-          isWorker = false,
-          activeChats = emptyList()
-        )
-      )
-      null
-    }.`when`(accountViewModel).fetchUserAccount(anyString(), any())
+          val onSuccess = invocation.arguments[1] as (Account?) -> Unit
+          onSuccess(
+              Account(
+                  uid = "testUserId",
+                  firstName = "John",
+                  lastName = "Doe",
+                  email = "john@example.com",
+                  birthDate = com.google.firebase.Timestamp.now(),
+                  isWorker = false,
+                  activeChats = emptyList()))
+          null
+        }
+        .`when`(accountViewModel)
+        .fetchUserAccount(anyString(), any())
   }
 
   @Test
   fun announcementScreenDisplaysCorrectly() {
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("titleInput").assertIsDisplayed()
@@ -134,12 +136,11 @@ class AnnouncementScreenTest {
   fun mandatoryFieldsMessageDisplaysCorrectly() {
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("mandatoryText").assertTextEquals("* Mandatory fields")
@@ -149,12 +150,11 @@ class AnnouncementScreenTest {
   fun postButtonDisabledWhenFieldsAreEmpty() {
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("announcementButton").assertIsNotEnabled()
@@ -162,17 +162,17 @@ class AnnouncementScreenTest {
 
   @Test
   fun postButtonEnabledWhenAllMandatoryFieldsAreFilled() {
-    val selectedLocation = Location(name = "New York City", latitude = 40.7128, longitude = -74.0060)
+    val selectedLocation =
+        Location(name = "New York City", latitude = 40.7128, longitude = -74.0060)
     `when`(navigationActions.getFromBackStack("selectedLocation")).thenReturn(selectedLocation)
 
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     // Fill fields
@@ -187,12 +187,11 @@ class AnnouncementScreenTest {
   fun clickingPicturesButtonOpensUploadSheet() {
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("picturesButton").performClick()
@@ -203,16 +202,15 @@ class AnnouncementScreenTest {
   fun addingImagesDisplaysUploadedImagesBox() {
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
-    val bitmap1 = Bitmap.createBitmap(1,1,Bitmap.Config.ARGB_8888)
-    val bitmap2 = Bitmap.createBitmap(1,1,Bitmap.Config.ARGB_8888)
+    val bitmap1 = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+    val bitmap2 = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
 
     composeTestRule.runOnUiThread {
       announcementViewModel.addUploadedImage(bitmap1)
@@ -227,19 +225,16 @@ class AnnouncementScreenTest {
 
   @Test
   fun deletingAnUploadedImageRemovesItFromView() {
-    val bitmap = Bitmap.createBitmap(1,1,Bitmap.Config.ARGB_8888)
-    composeTestRule.runOnUiThread {
-      announcementViewModel.addUploadedImage(bitmap)
-    }
+    val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+    composeTestRule.runOnUiThread { announcementViewModel.addUploadedImage(bitmap) }
 
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.waitForIdle()
@@ -261,12 +256,11 @@ class AnnouncementScreenTest {
 
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     // Fill fields
@@ -295,12 +289,11 @@ class AnnouncementScreenTest {
 
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("titleInput").performTextInput("Title")
@@ -314,11 +307,12 @@ class AnnouncementScreenTest {
 
   @Test
   fun postingAnnouncementWithImagesUploadsAndThenAnnounces() {
-    val selectedLocation = Location(name = "Berlin, Germany", latitude = 52.5200, longitude = 13.4050)
+    val selectedLocation =
+        Location(name = "Berlin, Germany", latitude = 52.5200, longitude = 13.4050)
     `when`(navigationActions.getFromBackStack("selectedLocation")).thenReturn(selectedLocation)
 
-    val bitmap1 = Bitmap.createBitmap(2,2,Bitmap.Config.ARGB_8888)
-    val bitmap2 = Bitmap.createBitmap(2,2,Bitmap.Config.ARGB_8888)
+    val bitmap1 = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888)
+    val bitmap2 = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888)
     composeTestRule.runOnUiThread {
       announcementViewModel.addUploadedImage(bitmap1)
       announcementViewModel.addUploadedImage(bitmap2)
@@ -327,19 +321,20 @@ class AnnouncementScreenTest {
     `when`(announcementRepository.getNewUid()).thenReturn("withImageId")
 
     doAnswer {
-      val onSuccess = it.arguments[2] as (List<String>) -> Unit
-      onSuccess(listOf("imageUrl1", "imageUrl2"))
-      null
-    }.`when`(announcementRepository).uploadAnnouncementImages(anyString(), any(), any(), any())
+          val onSuccess = it.arguments[2] as (List<String>) -> Unit
+          onSuccess(listOf("imageUrl1", "imageUrl2"))
+          null
+        }
+        .`when`(announcementRepository)
+        .uploadAnnouncementImages(anyString(), any(), any(), any())
 
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("titleInput").performTextInput("Title")
@@ -349,7 +344,7 @@ class AnnouncementScreenTest {
     composeTestRule.onNodeWithTag("announcementButton").assertIsEnabled().performClick()
 
     verify(announcementRepository, times(1))
-      .uploadAnnouncementImages(eq("withImageId"), eq(listOf(bitmap1, bitmap2)), any(), any())
+        .uploadAnnouncementImages(eq("withImageId"), eq(listOf(bitmap1, bitmap2)), any(), any())
     verify(announcementRepository, times(1)).announce(any(), any(), any())
   }
 
@@ -358,27 +353,26 @@ class AnnouncementScreenTest {
     val selectedLocation = Location(name = "Tokyo, Japan", latitude = 35.6762, longitude = 139.6503)
     `when`(navigationActions.getFromBackStack("selectedLocation")).thenReturn(selectedLocation)
 
-    val bitmap = Bitmap.createBitmap(2,2,Bitmap.Config.ARGB_8888)
-    composeTestRule.runOnUiThread {
-      announcementViewModel.addUploadedImage(bitmap)
-    }
+    val bitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888)
+    composeTestRule.runOnUiThread { announcementViewModel.addUploadedImage(bitmap) }
 
     `when`(announcementRepository.getNewUid()).thenReturn("failImageId")
 
     doAnswer {
-      val onFailure = it.arguments[3] as (Exception) -> Unit
-      onFailure(Exception("Upload failed"))
-      null
-    }.`when`(announcementRepository).uploadAnnouncementImages(anyString(), any(), any(), any())
+          val onFailure = it.arguments[3] as (Exception) -> Unit
+          onFailure(Exception("Upload failed"))
+          null
+        }
+        .`when`(announcementRepository)
+        .uploadAnnouncementImages(anyString(), any(), any(), any())
 
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("titleInput").performTextInput("Title")
@@ -394,12 +388,11 @@ class AnnouncementScreenTest {
   fun locationInputNavigatesToSearchLocationScreen() {
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("locationInput").performClick()
@@ -408,17 +401,17 @@ class AnnouncementScreenTest {
 
   @Test
   fun locationIsDisplayedIfSelectedLocationInBackStack() {
-    val selectedLocation = Location(name = "Los Angeles, USA", latitude = 34.0522, longitude = -118.2437)
+    val selectedLocation =
+        Location(name = "Los Angeles, USA", latitude = 34.0522, longitude = -118.2437)
     `when`(navigationActions.getFromBackStack("selectedLocation")).thenReturn(selectedLocation)
 
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("locationInput").assertTextContains("Los Angeles, USA")
@@ -432,12 +425,11 @@ class AnnouncementScreenTest {
 
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("titleInput").performTextInput("Title")
@@ -454,12 +446,11 @@ class AnnouncementScreenTest {
   fun dismissingUploadImageSheetWorks() {
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("picturesButton").performClick()
@@ -467,8 +458,9 @@ class AnnouncementScreenTest {
 
     // Assume there's a close button with testTag "uploadImageSheetCloseButton"
     // If not, add such a button in the actual UI code
-    composeTestRule.onNodeWithTag("uploadImageSheetCloseButton", useUnmergedTree = true)
-      .performClick()
+    composeTestRule
+        .onNodeWithTag("uploadImageSheetCloseButton", useUnmergedTree = true)
+        .performClick()
 
     composeTestRule.onNodeWithTag("uploadImageSheet").assertDoesNotExist()
   }
@@ -479,12 +471,11 @@ class AnnouncementScreenTest {
 
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("locationInput").assertTextEquals("Location")
@@ -494,23 +485,24 @@ class AnnouncementScreenTest {
   fun ensureNoCrashIfProfileNotUserProfile() {
     // If getProfileById returns something not a UserProfile
     doAnswer {
-      val onSuccess = it.arguments[1] as (Any?) -> Unit
-      onSuccess(null)
-      null
-    }.`when`(profileRepository).getProfileById(anyString(), any(), any())
+          val onSuccess = it.arguments[1] as (Any?) -> Unit
+          onSuccess(null)
+          null
+        }
+        .`when`(profileRepository)
+        .getProfileById(anyString(), any(), any())
 
-    val selectedLocation = Location( 0.0, 0.0, "Somewhere")
+    val selectedLocation = Location(0.0, 0.0, "Somewhere")
     `when`(navigationActions.getFromBackStack("selectedLocation")).thenReturn(selectedLocation)
     `when`(announcementRepository.getNewUid()).thenReturn("noUserProfileId")
 
     composeTestRule.setContent {
       AnnouncementScreen(
-        announcementViewModel = announcementViewModel,
-        profileViewModel = profileViewModel,
-        accountViewModel = accountViewModel,
-        preferencesViewModel = preferencesViewModel,
-        navigationActions = navigationActions
-      )
+          announcementViewModel = announcementViewModel,
+          profileViewModel = profileViewModel,
+          accountViewModel = accountViewModel,
+          preferencesViewModel = preferencesViewModel,
+          navigationActions = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("titleInput").performTextInput("Title")

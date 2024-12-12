@@ -34,7 +34,6 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.mockStatic
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
@@ -108,9 +107,7 @@ class AnnouncementRepositoryFirestoreTest {
   @Test
   fun init_callsOnSuccess() {
     var onSuccessCalled = false
-    announcementRepositoryFirestore.init {
-      onSuccessCalled = true
-    }
+    announcementRepositoryFirestore.init { onSuccessCalled = true }
     assertTrue(onSuccessCalled)
   }
 
@@ -493,10 +490,9 @@ class AnnouncementRepositoryFirestoreTest {
     var returnedUrls: List<String>? = null
     var failureCalled = false
     announcementRepositoryFirestore.fetchAnnouncementsImageUrls(
-      announcementId = announcementId,
-      onSuccess = { urls -> returnedUrls = urls },
-      onFailure = { failureCalled = true }
-    )
+        announcementId = announcementId,
+        onSuccess = { urls -> returnedUrls = urls },
+        onFailure = { failureCalled = true })
 
     shadowOf(Looper.getMainLooper()).idle()
 
@@ -516,13 +512,12 @@ class AnnouncementRepositoryFirestoreTest {
     var returnedException: Exception? = null
 
     announcementRepositoryFirestore.fetchAnnouncementsImageUrls(
-      announcementId = announcementId,
-      onSuccess = { fail("Should not succeed") },
-      onFailure = { e ->
-        failureCalled = true
-        returnedException = e
-      }
-    )
+        announcementId = announcementId,
+        onSuccess = { fail("Should not succeed") },
+        onFailure = { e ->
+          failureCalled = true
+          returnedException = e
+        })
 
     shadowOf(Looper.getMainLooper()).idle()
 
@@ -547,13 +542,12 @@ class AnnouncementRepositoryFirestoreTest {
     var onFailureCalled = false
 
     announcementRepositoryFirestore.fetchAnnouncementsImageUrls(
-      announcementId = announcementId,
-      onSuccess = { urls ->
-        onSuccessCalled = true
-        returnedUrls = urls
-      },
-      onFailure = { onFailureCalled = true }
-    )
+        announcementId = announcementId,
+        onSuccess = { urls ->
+          onSuccessCalled = true
+          returnedUrls = urls
+        },
+        onFailure = { onFailureCalled = true })
 
     shadowOf(Looper.getMainLooper()).runToEndOfTasks()
 
@@ -563,9 +557,6 @@ class AnnouncementRepositoryFirestoreTest {
     assertNotNull("URLs should not be null", returnedUrls)
     assertTrue("URLs should be empty", returnedUrls!!.isEmpty())
   }
-
-
-
 
   @Test
   fun fetchAnnouncementsImagesAsBitmaps_emptyUrls() {
@@ -582,13 +573,12 @@ class AnnouncementRepositoryFirestoreTest {
 
     // No need for FirebaseStorage mocks since no URLs to fetch
     announcementRepositoryFirestore.fetchAnnouncementsImagesAsBitmaps(
-      announcementId,
-      onSuccess = {
-        successCalled = true
-        resultList = it
-      },
-      onFailure = { fail("Should not fail with empty list") }
-    )
+        announcementId,
+        onSuccess = {
+          successCalled = true
+          resultList = it
+        },
+        onFailure = { fail("Should not fail with empty list") })
 
     shadowOf(Looper.getMainLooper()).idle()
 
@@ -612,13 +602,12 @@ class AnnouncementRepositoryFirestoreTest {
 
     // Since URLs fail to fetch, onFailure should be called directly
     announcementRepositoryFirestore.fetchAnnouncementsImagesAsBitmaps(
-      announcementId,
-      onSuccess = { fail("Should not succeed") },
-      onFailure = {
-        failureCalled = true
-        exceptionReceived = it
-      }
-    )
+        announcementId,
+        onSuccess = { fail("Should not succeed") },
+        onFailure = {
+          failureCalled = true
+          exceptionReceived = it
+        })
 
     shadowOf(Looper.getMainLooper()).idle()
 

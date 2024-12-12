@@ -85,9 +85,7 @@ fun AnnouncementScreen(
   var categoryIsSelected by rememberSaveable {
     mutableStateOf(true)
   } // TODO: add the different categories
-  var locationIsSelected by rememberSaveable {
-    mutableStateOf(false)
-  }
+  var locationIsSelected by rememberSaveable { mutableStateOf(false) }
   var descriptionIsEmpty by rememberSaveable { mutableStateOf(true) }
   val uploadedImages by announcementViewModel.uploadedImages.collectAsState()
 
@@ -129,9 +127,9 @@ fun AnnouncementScreen(
             UserProfile(profile.locations, announcementList, profile.wallet, profile.uid),
             onSuccess = {
               accountViewModel.fetchUserAccount(profile.uid) { account ->
-                  if (account != null) {
-                      setAccountPreferences(preferencesViewModel, account)
-                  }
+                if (account != null) {
+                  setAccountPreferences(preferencesViewModel, account)
+                }
               }
             },
             onFailure = { e ->

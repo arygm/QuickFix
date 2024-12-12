@@ -32,10 +32,9 @@ class DashboardScreenTest {
   fun dashboardDisplaysContentContainer() {
     composeTestRule.setContent {
       DashboardScreen(
-        announcementViewModel = announcementViewModel,
-        navigationActions = navigationActions,
-        isUser = true
-      )
+          announcementViewModel = announcementViewModel,
+          navigationActions = navigationActions,
+          isUser = true)
     }
 
     // Verify main container is displayed
@@ -46,10 +45,9 @@ class DashboardScreenTest {
   fun dashboardDisplaysQuickFixFilterButtons() {
     composeTestRule.setContent {
       DashboardScreen(
-        announcementViewModel = announcementViewModel,
-        navigationActions = navigationActions,
-        isUser = true
-      )
+          announcementViewModel = announcementViewModel,
+          navigationActions = navigationActions,
+          isUser = true)
     }
 
     // Verify that all QuickFix filter buttons are displayed
@@ -64,10 +62,9 @@ class DashboardScreenTest {
   fun quickFixFilterButtonsToggleCorrectly_All() {
     composeTestRule.setContent {
       DashboardScreen(
-        announcementViewModel = announcementViewModel,
-        navigationActions = navigationActions,
-        isUser = true
-      )
+          announcementViewModel = announcementViewModel,
+          navigationActions = navigationActions,
+          isUser = true)
     }
 
     // Click "All"
@@ -79,10 +76,9 @@ class DashboardScreenTest {
   fun quickFixFilterButtonsToggleCorrectly_Upcoming() {
     composeTestRule.setContent {
       DashboardScreen(
-        announcementViewModel = announcementViewModel,
-        navigationActions = navigationActions,
-        isUser = true
-      )
+          announcementViewModel = announcementViewModel,
+          navigationActions = navigationActions,
+          isUser = true)
     }
 
     // "Upcoming" is selected by default in the code, just verify
@@ -101,10 +97,9 @@ class DashboardScreenTest {
   fun quickFixFilterButtonsToggleCorrectly_Canceled() {
     composeTestRule.setContent {
       DashboardScreen(
-        announcementViewModel = announcementViewModel,
-        navigationActions = navigationActions,
-        isUser = true
-      )
+          announcementViewModel = announcementViewModel,
+          navigationActions = navigationActions,
+          isUser = true)
     }
 
     composeTestRule.onNodeWithText("Canceled").performClick()
@@ -115,10 +110,9 @@ class DashboardScreenTest {
   fun quickFixFilterButtonsToggleCorrectly_Unpaid() {
     composeTestRule.setContent {
       DashboardScreen(
-        announcementViewModel = announcementViewModel,
-        navigationActions = navigationActions,
-        isUser = true
-      )
+          announcementViewModel = announcementViewModel,
+          navigationActions = navigationActions,
+          isUser = true)
     }
 
     composeTestRule.onNodeWithText("Unpaid").performClick()
@@ -129,10 +123,9 @@ class DashboardScreenTest {
   fun quickFixFilterButtonsToggleCorrectly_Finished() {
     composeTestRule.setContent {
       DashboardScreen(
-        announcementViewModel = announcementViewModel,
-        navigationActions = navigationActions,
-        isUser = true
-      )
+          announcementViewModel = announcementViewModel,
+          navigationActions = navigationActions,
+          isUser = true)
     }
 
     composeTestRule.onNodeWithText("Finished").performClick()
@@ -143,10 +136,9 @@ class DashboardScreenTest {
   fun announcementsWidgetDisplaysCorrectly() {
     composeTestRule.setContent {
       DashboardScreen(
-        announcementViewModel = announcementViewModel,
-        navigationActions = navigationActions,
-        isUser = true
-      )
+          announcementViewModel = announcementViewModel,
+          navigationActions = navigationActions,
+          isUser = true)
     }
 
     // Verify that the AnnouncementsWidget is displayed
@@ -157,10 +149,9 @@ class DashboardScreenTest {
   fun messagesWidgetDisplaysCorrectly() {
     composeTestRule.setContent {
       DashboardScreen(
-        announcementViewModel = announcementViewModel,
-        navigationActions = navigationActions,
-        isUser = true
-      )
+          announcementViewModel = announcementViewModel,
+          navigationActions = navigationActions,
+          isUser = true)
     }
 
     // Verify that the MessagesWidget is displayed
@@ -171,10 +162,9 @@ class DashboardScreenTest {
   fun billsWidgetDisplaysCorrectly() {
     composeTestRule.setContent {
       DashboardScreen(
-        announcementViewModel = announcementViewModel,
-        navigationActions = navigationActions,
-        isUser = true
-      )
+          announcementViewModel = announcementViewModel,
+          navigationActions = navigationActions,
+          isUser = true)
     }
 
     // Verify that the BillsWidget is displayed
@@ -185,10 +175,9 @@ class DashboardScreenTest {
   fun quickFixesWidgetDisplaysAndInteractsCorrectly() {
     composeTestRule.setContent {
       DashboardScreen(
-        announcementViewModel = announcementViewModel,
-        navigationActions = navigationActions,
-        isUser = true
-      )
+          announcementViewModel = announcementViewModel,
+          navigationActions = navigationActions,
+          isUser = true)
     }
 
     // By default "Upcoming" is selected
@@ -206,10 +195,9 @@ class DashboardScreenTest {
   fun messagesWidgetInteractsCorrectly() {
     composeTestRule.setContent {
       DashboardScreen(
-        announcementViewModel = announcementViewModel,
-        navigationActions = navigationActions,
-        isUser = true
-      )
+          announcementViewModel = announcementViewModel,
+          navigationActions = navigationActions,
+          isUser = true)
     }
 
     // Interact with a Message item (assuming tags like "MessageItem_Ramy Hatimy")
@@ -223,10 +211,9 @@ class DashboardScreenTest {
   fun billsWidgetInteractsCorrectly() {
     composeTestRule.setContent {
       DashboardScreen(
-        announcementViewModel = announcementViewModel,
-        navigationActions = navigationActions,
-        isUser = true
-      )
+          announcementViewModel = announcementViewModel,
+          navigationActions = navigationActions,
+          isUser = true)
     }
 
     // Interact with a Bill item (assuming tags like "BillItem_Adam")

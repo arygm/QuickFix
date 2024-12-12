@@ -49,15 +49,20 @@ class QuickFixDisplayImagesTest {
     // Return a valid userId from preferences
     whenever(mockPreferencesRepository.getPreferenceByKey(UID_KEY)).thenReturn(flowOf("testUserId"))
 
-    // Mock profile fetch to return a UserProfile (not strictly needed here but let's keep it consistent)
+    // Mock profile fetch to return a UserProfile (not strictly needed here but let's keep it
+    // consistent)
     doAnswer { invocation ->
-      val onSuccess = invocation.arguments[1] as (Any?) -> Unit
-      onSuccess(UserProfile(emptyList(), emptyList(), 0.0, "testUserId", emptyList()))
-      null
-    }.whenever(mockProfileRepository).getProfileById(any(), any(), any())
+          val onSuccess = invocation.arguments[1] as (Any?) -> Unit
+          onSuccess(UserProfile(emptyList(), emptyList(), 0.0, "testUserId", emptyList()))
+          null
+        }
+        .whenever(mockProfileRepository)
+        .getProfileById(any(), any(), any())
 
     // Initialize a real AnnouncementViewModel instance
-    announcementViewModel = AnnouncementViewModel(mockAnnouncementRepository, mockPreferencesRepository, mockProfileRepository)
+    announcementViewModel =
+        AnnouncementViewModel(
+            mockAnnouncementRepository, mockPreferencesRepository, mockProfileRepository)
   }
 
   @Test
@@ -65,11 +70,10 @@ class QuickFixDisplayImagesTest {
     // Pass images directly
     composeTestRule.setContent {
       QuickFixDisplayImages(
-        canDelete = true,
-        navigationActions = navigationActions,
-        announcementViewModel = announcementViewModel,
-        images = images
-      )
+          canDelete = true,
+          navigationActions = navigationActions,
+          announcementViewModel = announcementViewModel,
+          images = images)
     }
 
     // Verify the title displays the correct number of images
@@ -80,11 +84,10 @@ class QuickFixDisplayImagesTest {
   fun goBackButtonNavigatesCorrectly_whenSelectingIsOff() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-        canDelete = true,
-        navigationActions = navigationActions,
-        announcementViewModel = announcementViewModel,
-        images = images
-      )
+          canDelete = true,
+          navigationActions = navigationActions,
+          announcementViewModel = announcementViewModel,
+          images = images)
     }
 
     // Click the "Go Back" button
@@ -98,11 +101,10 @@ class QuickFixDisplayImagesTest {
   fun selectImagesButtonTogglesSelectionMode() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-        canDelete = true,
-        navigationActions = navigationActions,
-        announcementViewModel = announcementViewModel,
-        images = images
-      )
+          canDelete = true,
+          navigationActions = navigationActions,
+          announcementViewModel = announcementViewModel,
+          images = images)
     }
 
     // Click the "Select Images" button
@@ -117,11 +119,10 @@ class QuickFixDisplayImagesTest {
   fun selectAllButtonSelectsAllImages() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-        canDelete = true,
-        navigationActions = navigationActions,
-        announcementViewModel = announcementViewModel,
-        images = images
-      )
+          canDelete = true,
+          navigationActions = navigationActions,
+          announcementViewModel = announcementViewModel,
+          images = images)
     }
 
     // Enter selection mode
@@ -138,11 +139,10 @@ class QuickFixDisplayImagesTest {
   fun endSelectionButtonExitsSelectionMode() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-        canDelete = true,
-        navigationActions = navigationActions,
-        announcementViewModel = announcementViewModel,
-        images = images
-      )
+          canDelete = true,
+          navigationActions = navigationActions,
+          announcementViewModel = announcementViewModel,
+          images = images)
     }
 
     // Enter selection mode
@@ -163,11 +163,10 @@ class QuickFixDisplayImagesTest {
 
     composeTestRule.setContent {
       QuickFixDisplayImages(
-        canDelete = true,
-        navigationActions = navigationActions,
-        announcementViewModel = announcementViewModel,
-        images = emptyList()
-      )
+          canDelete = true,
+          navigationActions = navigationActions,
+          announcementViewModel = announcementViewModel,
+          images = emptyList())
     }
 
     // Initially 4 uploaded images means "4 elements"
@@ -190,11 +189,10 @@ class QuickFixDisplayImagesTest {
     // Pass images directly
     composeTestRule.setContent {
       QuickFixDisplayImages(
-        canDelete = true,
-        navigationActions = navigationActions,
-        announcementViewModel = announcementViewModel,
-        images = images
-      )
+          canDelete = true,
+          navigationActions = navigationActions,
+          announcementViewModel = announcementViewModel,
+          images = images)
     }
 
     // Enter selection mode
@@ -213,11 +211,10 @@ class QuickFixDisplayImagesTest {
   fun displaysCorrectIconForSelectedImages() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-        canDelete = true,
-        navigationActions = navigationActions,
-        announcementViewModel = announcementViewModel,
-        images = images
-      )
+          canDelete = true,
+          navigationActions = navigationActions,
+          announcementViewModel = announcementViewModel,
+          images = images)
     }
 
     // Enter selection mode
@@ -234,11 +231,10 @@ class QuickFixDisplayImagesTest {
   fun displaysRadioButtonForUnselectedImages() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-        canDelete = true,
-        navigationActions = navigationActions,
-        announcementViewModel = announcementViewModel,
-        images = images
-      )
+          canDelete = true,
+          navigationActions = navigationActions,
+          announcementViewModel = announcementViewModel,
+          images = images)
     }
 
     // Enter selection mode
@@ -251,32 +247,30 @@ class QuickFixDisplayImagesTest {
   @Test
   fun whenAnnouncementSelected_updatesImagesFromAnnouncementImagesMap() {
     // Setup a selected announcement and images in announcementImagesMap
-    val announcement = Announcement(
-      announcementId = "ann1",
-      userId = "user1",
-      title = "Test",
-      category = "Cat",
-      description = "Desc",
-      location = null,
-      availability = emptyList(),
-      quickFixImages = listOf("gs://bucket/image1", "gs://bucket/image2")
-    )
+    val announcement =
+        Announcement(
+            announcementId = "ann1",
+            userId = "user1",
+            title = "Test",
+            category = "Cat",
+            description = "Desc",
+            location = null,
+            availability = emptyList(),
+            quickFixImages = listOf("gs://bucket/image1", "gs://bucket/image2"))
 
     val bmp1 = createTestBitmap()
     val bmp2 = createTestBitmap()
     // Update the map via viewModel method
     announcementViewModel.setAnnouncementImagesMap(
-      mutableMapOf("ann1" to listOf("gs://bucket/image1" to bmp1, "gs://bucket/image2" to bmp2))
-    )
+        mutableMapOf("ann1" to listOf("gs://bucket/image1" to bmp1, "gs://bucket/image2" to bmp2)))
     announcementViewModel.selectAnnouncement(announcement)
 
     composeTestRule.setContent {
       QuickFixDisplayImages(
-        canDelete = true,
-        navigationActions = navigationActions,
-        announcementViewModel = announcementViewModel,
-        images = emptyList()
-      )
+          canDelete = true,
+          navigationActions = navigationActions,
+          announcementViewModel = announcementViewModel,
+          images = emptyList())
     }
 
     // Verify the title is "2 elements"
@@ -287,11 +281,10 @@ class QuickFixDisplayImagesTest {
   fun canDeleteFalseHidesSelectionFeatures() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-        canDelete = false,
-        navigationActions = navigationActions,
-        announcementViewModel = announcementViewModel,
-        images = images
-      )
+          canDelete = false,
+          navigationActions = navigationActions,
+          announcementViewModel = announcementViewModel,
+          images = images)
     }
 
     // Since canDelete is false, "SelectImagesButton" should not exist
@@ -302,11 +295,10 @@ class QuickFixDisplayImagesTest {
   fun noImagesShowsZeroElements() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-        canDelete = true,
-        navigationActions = navigationActions,
-        announcementViewModel = announcementViewModel,
-        images = emptyList()
-      )
+          canDelete = true,
+          navigationActions = navigationActions,
+          announcementViewModel = announcementViewModel,
+          images = emptyList())
     }
 
     // With no images and no uploadedImages or announcement selected, "0 elements"

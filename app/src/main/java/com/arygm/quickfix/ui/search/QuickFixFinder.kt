@@ -29,7 +29,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
