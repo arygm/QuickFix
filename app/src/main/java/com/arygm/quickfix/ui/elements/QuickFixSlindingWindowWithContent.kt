@@ -62,7 +62,7 @@ fun QuickFixSlidingWindowContent(
                                   vertical = screenHeight * 0.02f), // Relative vertical padding
                       contentAlignment = Alignment.Center) {
                         Text(
-                            text = "${quickFix.userName}'s QuickFix request",
+                            text = "${quickFix.userId}'s QuickFix request",
                             style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.onBackground,
                             textAlign = TextAlign.Center)

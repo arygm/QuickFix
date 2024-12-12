@@ -47,8 +47,8 @@ import com.google.firebase.storage.FirebaseStorage
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen
 import okhttp3.internal.wait
-import org.junit.After
-import org.junit.Before
+import org.junit.AfterClass
+import org.junit.BeforeClass
 import org.junit.FixMethodOrder
 import org.junit.Rule
 import org.junit.Test
@@ -60,7 +60,6 @@ import org.mockito.Mockito
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest : TestCase() {
 
-  private lateinit var navigationActions: NavigationActions
   @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
 
   private val item =
@@ -104,19 +103,6 @@ class MainActivityTest : TestCase() {
                               "Insulation Installation",
                               "Clean-Up"))))
 
-  @Before
-  fun setup() {
-    val firestore = FirebaseFirestore.getInstance()
-    firestore.useEmulator("10.0.2.2", 8080)
-    FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099)
-    FirebaseStorage.getInstance().useEmulator("10.0.2.2", 9199)
-
-    firestore.firestoreSettings =
-        FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build()
-
-    navigationActions = Mockito.mock(NavigationActions::class.java)
-  }
-
   fun allowPermissionsIfNeeded() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
@@ -127,19 +113,36 @@ class MainActivityTest : TestCase() {
     }
   }
 
-  @After
-  fun tearDown() {
-    FirebaseApp.clearInstancesForTest()
-    FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
-    val firestore = FirebaseFirestore.getInstance()
-    firestore.firestoreSettings =
-        FirebaseFirestoreSettings.Builder()
-            .setPersistenceEnabled(
-                true) // Set to true or false as needed for your production environment
-            .build()
+  companion object {
+    private lateinit var navigationActions: NavigationActions
 
-    // Reinitialize FirebaseAuth without the emulator
-    FirebaseAuth.getInstance().signOut()
+    @JvmStatic
+    @BeforeClass
+    fun setup() {
+      val firestore = FirebaseFirestore.getInstance()
+      firestore.useEmulator("10.0.2.2", 8080)
+      FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099)
+      FirebaseStorage.getInstance().useEmulator("10.0.2.2", 9199)
+
+      firestore.firestoreSettings =
+          FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build()
+
+      navigationActions = Mockito.mock(NavigationActions::class.java)
+    }
+
+    @JvmStatic
+    @AfterClass
+    fun tearDownClass() {
+      // Runs once after all tests in this class have finished
+      FirebaseApp.clearInstancesForTest()
+      FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
+      val firestore = FirebaseFirestore.getInstance()
+      firestore.firestoreSettings =
+          FirebaseFirestoreSettings.Builder().setPersistenceEnabled(true).build()
+
+      // Reinitialize FirebaseAuth without the emulator
+      FirebaseAuth.getInstance().signOut()
+    }
   }
 
   @Test
@@ -208,9 +211,11 @@ class MainActivityTest : TestCase() {
       loginToTestAccount()
       // Retry the action until it works with a timeout of 10 seconds
       composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
-        composeTestRule.onAllNodesWithTag("BottomNavMenu").fetchSemanticsNodes().isNotEmpty()
+        composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()
       }
       composeTestRule.onRoot().printToLog("TAG")
+      onView(withText("Search")) // Match the TextView that has the text "Hello World"
+          .perform(click())
       onView(withText("Search")) // Match the TextView that has the text "Hello World"
           .perform(click())
       composeTestRule.waitUntil("find the categories", timeoutMillis = 20000) {

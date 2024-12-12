@@ -19,6 +19,8 @@ val LAST_NAME_KEY = stringPreferencesKey("last_name")
 val EMAIL_KEY = stringPreferencesKey("email")
 val BIRTH_DATE_KEY = stringPreferencesKey("date_of_birth")
 val IS_WORKER_KEY = booleanPreferencesKey("is_worker")
+// =====App Mode Preferences=====//
+val APP_MODE_KEY = stringPreferencesKey("app_mode")
 
 // =====Helper functions======//
 fun setAccountPreferences(
@@ -98,6 +100,14 @@ fun setBirthDate(
   }
 }
 
+fun setAppMode(
+    preferencesViewModel: PreferencesViewModel,
+    appMode: String,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
+) {
+  CoroutineScope(dispatcher).launch { preferencesViewModel.savePreference(APP_MODE_KEY, appMode) }
+}
+
 fun setIsWorker(
     preferencesViewModel: PreferencesViewModel,
     isWorker: Boolean,
@@ -175,6 +185,18 @@ suspend fun loadBirthDate(preferencesViewModel: PreferencesViewModel): String {
       if (!resumed) {
         resumed = true
         cont.resume(value ?: "no_birth_date")
+      }
+    }
+  }
+}
+
+suspend fun loadAppMode(preferencesViewModel: PreferencesViewModel): String {
+  return suspendCoroutine { cont ->
+    var resumed = false
+    preferencesViewModel.loadPreference(APP_MODE_KEY) { value ->
+      if (!resumed) {
+        resumed = true
+        cont.resume(value ?: "User")
       }
     }
   }

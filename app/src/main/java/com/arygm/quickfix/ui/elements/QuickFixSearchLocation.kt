@@ -128,8 +128,7 @@ fun LocationSearchCustomScreen(
                         modifier =
                             Modifier.fillMaxWidth()
                                 .clickable {
-                                  Log.e("LocationSearch", "Position actuelle: haaaaaaaamid")
-
+                                  Log.d("location", "In location selection")
                                   locationHelper.getCurrentLocation { currentLocation ->
                                     Log.e(
                                         "LocationSearch",
@@ -141,6 +140,7 @@ fun LocationSearchCustomScreen(
                                               name = "Position",
                                               latitude = currentLocation.latitude,
                                               longitude = currentLocation.longitude)
+                                      Log.d("location", "${userLocation.latitude}")
                                       Log.e(
                                           "LocationSearch",
                                           "kchacjcnnv r Position actuelle: $userLocation")

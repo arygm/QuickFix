@@ -18,7 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.R
 import com.arygm.quickfix.utils.MyAppTheme
+import com.maxkeppeker.sheets.core.models.base.ButtonStyle
+import com.maxkeppeker.sheets.core.models.base.SelectionButton
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarView
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -60,13 +63,7 @@ fun QuickFixAvailabilityBottomSheet(
                   CalendarView(
                       useCaseState =
                           rememberUseCaseState(
-                              visible = true,
-                              onCloseRequest = {
-                                if (clearEnabled) {
-                                  onClearClick()
-                                }
-                                onDismissRequest()
-                              }),
+                              visible = true, onCloseRequest = { onDismissRequest() }),
                       config =
                           CalendarConfig(
                               yearSelection = true,
@@ -74,10 +71,19 @@ fun QuickFixAvailabilityBottomSheet(
                               style = CalendarStyle.WEEK,
                           ),
                       selection =
-                          CalendarSelection.Dates { newDates ->
-                            onOkClick(newDates, timePickerState.hour, timePickerState.minute)
-                            onDismissRequest()
-                          })
+                          CalendarSelection.Dates(
+                              negativeButton =
+                                  SelectionButton(
+                                      textRes = R.string.clear, type = ButtonStyle.TEXT),
+                              onNegativeClick = {
+                                if (clearEnabled) {
+                                  onClearClick()
+                                }
+                                onDismissRequest()
+                              }) { newDates ->
+                                onOkClick(newDates, timePickerState.hour, timePickerState.minute)
+                                onDismissRequest()
+                              })
                 }
               }
         }

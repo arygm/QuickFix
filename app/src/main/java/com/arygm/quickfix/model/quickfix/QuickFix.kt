@@ -13,10 +13,11 @@ data class QuickFix(
     val time: Timestamp,
     val includedServices: List<Service>,
     val addOnServices: List<Service>,
-    val workerName: String,
-    val userName: String,
+    val workerId: String,
+    val userId: String,
     val chatUid: String,
     val title: String,
+    val description: String,
     val bill: List<BillField>,
     val location: Location
 )
@@ -25,6 +26,7 @@ enum class Status {
   PENDING,
   UNPAID,
   PAID,
-  IN_PROCESS,
-  COMPLETED
+  UPCOMING,
+  COMPLETED,
+  CANCELED
 }

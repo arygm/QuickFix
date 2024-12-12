@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -23,21 +24,33 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arygm.quickfix.BuildConfig
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.switchModes.AppMode
+import com.arygm.quickfix.model.switchModes.ModeViewModel
+import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTINATIONS
+import com.arygm.quickfix.ui.uiMode.workerMode.navigation.getBottomBarIdWorker
+import com.arygm.quickfix.ui.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
+import com.arygm.quickfix.ui.userModeUI.navigation.getBottomBarIdUser
 import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 
 @Composable
 fun BottomNavigationMenu(
     onTabSelect: (TopLevelDestination) -> Unit,
-    isUser: Boolean, // Boolean flag to determine the user type
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    modeViewModel: ModeViewModel
 ) {
+  val currentMode by modeViewModel.currentMode.collectAsState()
+  val selectedTabId = remember { mutableIntStateOf(1) } // default tab id
 
   val colorScheme = colorScheme
   val currentRoute by navigationActions.currentRoute.collectAsState()
+  Log.d("BottomNavigationMenu", "Current route: $currentRoute")
 
   // Determine the tab list based on the user type
   val tabList: List<TopLevelDestination> =
-      if (isUser) USER_TOP_LEVEL_DESTINATIONS else WORKER_TOP_LEVEL_DESTINATIONS
+      when (currentMode) {
+        AppMode.USER -> USER_TOP_LEVEL_DESTINATIONS
+        AppMode.WORKER -> WORKER_TOP_LEVEL_DESTINATIONS
+      } // Create a mutable state to store the MeowBottomNavigation instance
 
   val bottomNavigation = remember { mutableStateOf<MeowBottomNavigation?>(null) }
 
@@ -97,12 +110,6 @@ fun BottomNavigationMenu(
             // You can add a behavior here or just ignore the reselect event
           }
 
-          // Attempt to show the default selected item
-          try {
-            show(1, true) // Immediately show the selected item
-          } catch (e: Exception) {
-            Log.e("MeowBottomNavigation", "Failed to call show(): ${e.message}")
-          }
           contentDescription = "MeowBottomNavigation"
         }
       },
@@ -110,7 +117,13 @@ fun BottomNavigationMenu(
 
   // LaunchedEffect allowing to update the bottom bar accordingly to navigationActions
   LaunchedEffect(currentRoute) {
-    bottomNavigation.value?.show(getBottomBarId(currentRoute, isUser), true)
+    val selectedItemId =
+        when (currentMode) {
+          AppMode.USER -> getBottomBarIdUser(currentRoute)
+          AppMode.WORKER -> getBottomBarIdWorker(currentRoute)
+        }
+    selectedTabId.intValue = selectedItemId
+    bottomNavigation.value?.show(selectedItemId, true)
   }
 }
 

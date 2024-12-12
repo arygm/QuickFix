@@ -32,8 +32,8 @@ import com.arygm.quickfix.R
 import com.arygm.quickfix.model.search.Announcement
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 
 @Composable
 fun AnnouncementsWidget(
@@ -90,7 +90,7 @@ fun AnnouncementsWidget(
                 announcementImage = bitmapToDisplay,
                 onClick = {
                   announcementViewModel.selectAnnouncement(announcement)
-                  navigationActions.navigateTo(Screen.ANNOUNCEMENT_DETAIL)
+                  navigationActions.navigateTo(UserScreen.ANNOUNCEMENT_DETAIL)
                 })
 
             if (index < itemsToShow.size - 1) {

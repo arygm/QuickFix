@@ -5,6 +5,10 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
+import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
+import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.userModeUI.navigation.UserTopLevelDestinations
+import com.arygm.quickfix.ui.userModeUI.navigation.getBottomBarIdUser
 import junit.framework.TestCase.assertEquals
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
@@ -37,11 +41,11 @@ class NavigationActionsTest {
 
   @Test
   fun navigateToCallsController() {
-    navigationActions.navigateTo(TopLevelDestinations.HOME)
-    verify(navHostController).navigate(eq(Route.HOME), any<NavOptionsBuilder.() -> Unit>())
+    navigationActions.navigateTo(UserTopLevelDestinations.HOME)
+    verify(navHostController).navigate(eq(UserRoute.HOME), any<NavOptionsBuilder.() -> Unit>())
 
-    navigationActions.navigateTo(Screen.PROFILE)
-    verify(navHostController).navigate(Screen.PROFILE)
+    navigationActions.navigateTo(UserScreen.PROFILE)
+    verify(navHostController).navigate(UserScreen.PROFILE)
   }
 
   @Test
@@ -53,39 +57,39 @@ class NavigationActionsTest {
   @Test
   fun currentRouteWorksWithDestination() {
     `when`(navHostController.currentDestination).thenReturn(navigationDestination)
-    `when`(navigationDestination.route).thenReturn(Route.HOME)
+    `when`(navigationDestination.route).thenReturn(UserRoute.HOME)
 
-    assertThat(navigationActions.currentRoute(), `is`(Route.HOME))
+    assertThat(navigationActions.currentRoute(), `is`(UserRoute.HOME))
   }
 
   @Test
   fun `test home route returns 1`() {
-    assertEquals(1, getBottomBarId(Route.HOME, true))
-    assertEquals(1, getBottomBarId(Route.HOME, false))
+    assertEquals(1, getBottomBarIdUser(UserRoute.HOME))
+    assertEquals(1, getBottomBarIdUser(UserRoute.HOME))
   }
 
   @Test
   fun `test announcement and calendar routes return 2`() {
-    assertEquals(2, getBottomBarId(Route.SEARCH, true))
-    assertEquals(2, getBottomBarId(Route.SEARCH, false))
+    assertEquals(2, getBottomBarIdUser(UserRoute.SEARCH))
+    assertEquals(2, getBottomBarIdUser(UserRoute.SEARCH))
   }
 
   @Test
   fun `test map route returns 3`() {
-    assertEquals(3, getBottomBarId(Route.DASHBOARD, true))
-    assertEquals(3, getBottomBarId(Route.DASHBOARD, false))
+    assertEquals(3, getBottomBarIdUser(UserRoute.DASHBOARD))
+    assertEquals(3, getBottomBarIdUser(UserRoute.DASHBOARD))
   }
 
   @Test
   fun `test activity route returns 3 for user and 4 for others`() {
-    assertEquals(4, getBottomBarId(Route.PROFILE, true))
-    assertEquals(4, getBottomBarId(Route.PROFILE, false))
+    assertEquals(4, getBottomBarIdUser(UserRoute.PROFILE))
+    assertEquals(4, getBottomBarIdUser(UserRoute.PROFILE))
   }
 
   @Test
   fun `test unknown route returns -1`() {
-    assertEquals(-1, getBottomBarId("unknown_route", true))
-    assertEquals(-1, getBottomBarId("unknown_route", false))
+    assertEquals(-1, getBottomBarIdUser("unknown_route"))
+    assertEquals(-1, getBottomBarIdUser("unknown_route"))
   }
 
   @Test

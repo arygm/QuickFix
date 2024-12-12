@@ -106,6 +106,7 @@ fun QuickFixTextFieldCustom(
     maxHeight: Dp = Dp.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
     heightInEnabled: Boolean = false,
+    scrollable: Boolean = true,
     trailingText: @Composable (() -> Unit)? = {},
     showTrailingText: Boolean = true,
     iconButtonOnClickable: () -> Unit = {},
@@ -212,7 +213,7 @@ fun QuickFixTextFieldCustom(
                               .testTag(C.Tag.text_field_custom)
                               .focusable(isTextField && enabled)
                               .let {
-                                if (singleLine) {
+                                if (singleLine && scrollable) {
                                   it.horizontalScroll(scrollState)
                                 } else it // Enable horizontal scrolling
                               },

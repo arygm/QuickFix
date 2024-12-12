@@ -1,6 +1,5 @@
 package com.arygm.quickfix.ui.elements
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -36,20 +34,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.UserProfile
-import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import com.arygm.quickfix.utils.LocationHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,10 +50,12 @@ fun QuickFixLocationFilterBottomSheet(
     showModalBottomSheet: Boolean,
     userProfile: UserProfile,
     phoneLocation: Location,
+    selectedLocationIndex: Int? = null,
     onApplyClick: (Location, Int) -> Unit,
     onDismissRequest: () -> Unit,
     onClearClick: () -> Unit,
-    clearEnabled: Boolean
+    clearEnabled: Boolean,
+    end: Int = 200
 ) {
   var range by remember { mutableIntStateOf(0) }
   if (showModalBottomSheet) {
@@ -94,16 +89,16 @@ fun QuickFixLocationFilterBottomSheet(
 
                   Spacer(modifier = Modifier.height(verticalSpacing))
 
-                  Divider(
-                      color = colorScheme.onSecondaryContainer,
+                  HorizontalDivider(
+                      modifier = Modifier.fillMaxWidth().testTag("locationFilterDivider"),
                       thickness = 1.dp,
-                      modifier = Modifier.fillMaxWidth().testTag("locationFilterDivider"))
+                      color = colorScheme.onSecondaryContainer)
 
                   Spacer(modifier = Modifier.height(verticalSpacing))
 
                   val locationOptions = mutableListOf("Use my Current Location")
                   userProfile.locations.forEach { loc -> locationOptions += loc.name }
-                  val selectedOption = remember { mutableStateOf<Int?>(null) }
+                  val selectedOption = remember { mutableStateOf<Int?>(selectedLocationIndex) }
 
                   val maxListHeight = heightRatio * 800 * 0.5f
 
@@ -209,7 +204,7 @@ fun QuickFixLocationFilterBottomSheet(
                               cornerRadius = CornerRadius(10f, 10f),
                               minValue = 0,
                               maxValue = 800,
-                              progress1InitialValue = 200,
+                              progress1InitialValue = end,
                               progress2InitialValue = 900,
                               tooltipSpacing = 5.dp,
                               tooltipWidth = 50.dp * widthRatio.value,
@@ -268,43 +263,5 @@ fun QuickFixLocationFilterBottomSheet(
                 }
           }
         }
-  }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun hehe() {
-  var showModal by remember { mutableStateOf(true) }
-  val userProfile =
-      UserProfile(
-          locations =
-              listOf(
-                  Location(0.0, 0.0, "Home"),
-                  Location(0.0, 0.0, "Work"),
-                  Location(0.0, 0.0, "EPFL"),
-                  Location(0.0, 0.0, "Doctor"),
-                  Location(0.0, 0.0, "Dentist"),
-                  Location(0.0, 0.0, "Parents"),
-                  Location(0.0, 0.0, "Friend"),
-                  Location(0.0, 0.0, "Vet"),
-                  Location(0.0, 0.0, "Children")),
-          uid = "1",
-          announcements = emptyList())
-  val locationHelper = LocationHelper(LocalContext.current, MainActivity())
-
-  QuickFixTheme {
-    QuickFixLocationFilterBottomSheet(
-        showModalBottomSheet = showModal,
-        userProfile = userProfile,
-        phoneLocation = Location(200.0, 200.0, "Phone Location"),
-        onApplyClick = { loc, a ->
-          Log.d("Chill Guy", a.toString())
-          Log.d("Chill Guy", loc.name)
-          Log.d("Chill Guy", loc.longitude.toString())
-          Log.d("Chill Guy", loc.latitude.toString())
-        },
-        onDismissRequest = { showModal = false },
-        onClearClick = {},
-        clearEnabled = false)
   }
 }
