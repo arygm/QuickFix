@@ -1,8 +1,10 @@
 package com.arygm.quickfix.utils
 
 import android.util.Log
-import com.arygm.quickfix.ui.navigation.Route
-import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
+import com.arygm.quickfix.ui.noModeUI.navigation.NoModeScreen
+import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
+import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -79,36 +81,17 @@ fun splitDate(date: String): Triple<Int, Int, Int> {
 
 fun routeToScreen(route: String): String {
   return when (route) {
-    Route.HOME -> Screen.HOME
-    Route.CALENDAR -> Screen.CALENDAR
-    Route.WELCOME -> Screen.WELCOME
-    Route.INFO -> Screen.INFO
-    Route.LOGIN -> Screen.LOGIN
-    Route.PASSWORD -> Screen.PASSWORD
-    Route.SEARCH -> Screen.SEARCH
-    Route.DASHBOARD -> Screen.DASHBOARD
-    Route.PROFILE -> Screen.PROFILE
-    Route.ACCOUNT_CONFIGURATION -> Screen.ACCOUNT_CONFIGURATION
+    UserRoute.HOME -> UserScreen.HOME
+    UserRoute.CALENDAR -> UserScreen.CALENDAR
+    NoModeRoute.WELCOME -> NoModeScreen.WELCOME
+    NoModeRoute.LOGIN -> NoModeScreen.LOGIN
+    NoModeRoute.PASSWORD -> NoModeScreen.PASSWORD
+    UserRoute.SEARCH -> UserScreen.SEARCH
+    UserRoute.DASHBOARD -> UserScreen.DASHBOARD
+    UserRoute.PROFILE -> UserScreen.PROFILE
+    UserRoute.ACCOUNT_CONFIGURATION -> UserScreen.ACCOUNT_CONFIGURATION
     else -> {
-      Screen.WELCOME
-    }
-  }
-}
-
-fun screenToRoute(route: String): String {
-  return when (route) {
-    Screen.HOME -> Route.HOME
-    Screen.CALENDAR -> Route.CALENDAR
-    Screen.WELCOME -> Route.WELCOME
-    Screen.INFO -> Route.INFO
-    Screen.LOGIN -> Route.LOGIN
-    Screen.PASSWORD -> Route.PASSWORD
-    Screen.SEARCH -> Route.SEARCH
-    Screen.DASHBOARD -> Route.DASHBOARD
-    Screen.PROFILE -> Route.PROFILE
-    Screen.ACCOUNT_CONFIGURATION -> Route.ACCOUNT_CONFIGURATION
-    else -> {
-      Route.WELCOME
+      NoModeScreen.WELCOME
     }
   }
 }
