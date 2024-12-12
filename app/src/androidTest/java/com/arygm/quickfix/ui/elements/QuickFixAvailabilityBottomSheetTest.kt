@@ -201,7 +201,7 @@ class QuickFixAvailabilityBottomSheetTest {
     }
 
     // Simulate the clear action (assume clicking on an element invokes the clear logic)
-    composeTestRule.onNodeWithText("Cancel").performClick()
+    composeTestRule.onNodeWithText("Clear").performClick()
 
     // Assert that onClearClick was called
     composeTestRule.runOnIdle { assert(onClearClickCalled) }
@@ -223,7 +223,7 @@ class QuickFixAvailabilityBottomSheetTest {
     }
 
     // Simulate the clear action (assume clicking on an element invokes the clear logic)
-    composeTestRule.onNodeWithText("Cancel").performClick()
+    composeTestRule.onNodeWithText("Clear").performClick()
 
     // Assert that onClearClick was not called
     composeTestRule.runOnIdle { assert(!onClearClickCalled) }
