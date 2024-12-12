@@ -36,6 +36,7 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.search.announcement.AnnouncementScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -46,13 +47,11 @@ fun QuickFixFinderScreen(
     navigationActionsRoot: NavigationActions,
     isUser: Boolean = true,
     profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
-    loggedInAccountViewModel: LoggedInAccountViewModel =
-        viewModel(factory = LoggedInAccountViewModel.Factory),
     accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
     searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory),
     announcementViewModel: AnnouncementViewModel,
     categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
-    preferencesViewModel: PreferencesViewModel,
+    preferencesViewModel: PreferencesViewModel
 ) {
   Scaffold(
       containerColor = colorScheme.background,
@@ -109,7 +108,6 @@ fun QuickFixFinderScreen(
                       1 ->
                           AnnouncementScreen(
                               announcementViewModel,
-                              loggedInAccountViewModel,
                               profileViewModel,
                               accountViewModel,
                               preferencesViewModel,

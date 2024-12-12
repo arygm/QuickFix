@@ -450,7 +450,6 @@ fun SearchNavHost(
           navigationActionsRoot,
           isUser,
           profileViewModel,
-          loggedInAccountViewModel,
           accountViewModel,
           searchViewModel,
           announcementViewModel,

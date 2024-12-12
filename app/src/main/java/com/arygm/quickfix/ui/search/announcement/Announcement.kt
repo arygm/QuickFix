@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.search
+package com.arygm.quickfix.ui.search.announcement
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -47,7 +47,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
@@ -60,21 +59,19 @@ import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.utils.loadUserId
+import com.arygm.quickfix.utils.setAccountPreferences
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun AnnouncementScreen(
     announcementViewModel: AnnouncementViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel =
-        viewModel(factory = LoggedInAccountViewModel.Factory),
     profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
     accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
     preferencesViewModel: PreferencesViewModel,
     navigationActions: NavigationActions,
     isUser: Boolean = true
 ) {
-  val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
   var userId by remember { mutableStateOf("") }
 
   LaunchedEffect(Unit) { userId = loadUserId(preferencesViewModel) }
@@ -90,7 +87,7 @@ fun AnnouncementScreen(
   } // TODO: add the different categories
   var locationIsSelected by rememberSaveable {
     mutableStateOf(false)
-  } // TODO: add the implemented location
+  }
   var descriptionIsEmpty by rememberSaveable { mutableStateOf(true) }
   val uploadedImages by announcementViewModel.uploadedImages.collectAsState()
 
@@ -128,12 +125,13 @@ fun AnnouncementScreen(
     profileViewModel.fetchUserProfile(userId) { profile ->
       if (profile is UserProfile) {
         val announcementList = profile.announcements + announcement.announcementId
-        Log.d("announcement", announcementList.toString())
         profileViewModel.updateProfile(
             UserProfile(profile.locations, announcementList, profile.wallet, profile.uid),
             onSuccess = {
               accountViewModel.fetchUserAccount(profile.uid) { account ->
-                loggedInAccountViewModel.setLoggedInAccount(account!!)
+                  if (account != null) {
+                      setAccountPreferences(preferencesViewModel, account)
+                  }
               }
             },
             onFailure = { e ->

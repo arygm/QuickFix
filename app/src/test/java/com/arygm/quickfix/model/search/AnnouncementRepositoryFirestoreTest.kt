@@ -23,6 +23,7 @@ import com.google.firebase.storage.UploadTask
 import java.io.ByteArrayOutputStream
 import junit.framework.TestCase.fail
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -33,6 +34,8 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.mockStatic
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -99,6 +102,16 @@ class AnnouncementRepositoryFirestoreTest {
 
     // Ensure that document calls return proper mocks
     assertNotNull(mockCollectionReference.document("announcement1"))
+  }
+
+  // Init test
+  @Test
+  fun init_callsOnSuccess() {
+    var onSuccessCalled = false
+    announcementRepositoryFirestore.init {
+      onSuccessCalled = true
+    }
+    assertTrue(onSuccessCalled)
   }
 
   // ----- Get New UID Test -----
@@ -464,6 +477,152 @@ class AnnouncementRepositoryFirestoreTest {
 
     // Assert
     assertTrue(onFailureCalled)
+    assertEquals(exception, exceptionReceived)
+  }
+
+  // fetchAnnouncementsImageUrls tests
+  @Test
+  fun fetchAnnouncementsImageUrls_onSuccess_returnsUrls() {
+    val announcementId = "announcement123"
+    val mockDocRef = mock(DocumentReference::class.java)
+    val mockSnapshot = mock(DocumentSnapshot::class.java)
+    whenever(mockCollectionReference.document(announcementId)).thenReturn(mockDocRef)
+    whenever(mockDocRef.get()).thenReturn(Tasks.forResult(mockSnapshot))
+    whenever(mockSnapshot.get("quickFixImages")).thenReturn(listOf("url1", "url2"))
+
+    var returnedUrls: List<String>? = null
+    var failureCalled = false
+    announcementRepositoryFirestore.fetchAnnouncementsImageUrls(
+      announcementId = announcementId,
+      onSuccess = { urls -> returnedUrls = urls },
+      onFailure = { failureCalled = true }
+    )
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assertFalse(failureCalled)
+    assertEquals(listOf("url1", "url2"), returnedUrls)
+  }
+
+  @Test
+  fun fetchAnnouncementsImageUrls_onFailure_callsOnFailure() {
+    val announcementId = "announcementFail"
+    val mockDocRef = mock(DocumentReference::class.java)
+    whenever(mockCollectionReference.document(announcementId)).thenReturn(mockDocRef)
+    val exception = Exception("Fetch URLs failed")
+    whenever(mockDocRef.get()).thenReturn(Tasks.forException(exception))
+
+    var failureCalled = false
+    var returnedException: Exception? = null
+
+    announcementRepositoryFirestore.fetchAnnouncementsImageUrls(
+      announcementId = announcementId,
+      onSuccess = { fail("Should not succeed") },
+      onFailure = { e ->
+        failureCalled = true
+        returnedException = e
+      }
+    )
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assertTrue(failureCalled)
+    assertEquals(exception, returnedException)
+  }
+
+  // fetchAnnouncementsImagesAsBitmaps tests
+  @Test
+  fun fetchAnnouncementsImageUrls_emptyList() {
+    val announcementId = "announcementEmptyUrls"
+
+    // Mock Firestore to return an empty list of quickFixImages
+    val mockDocRef = mock(DocumentReference::class.java)
+    val mockSnapshot = mock(DocumentSnapshot::class.java)
+    whenever(mockCollectionReference.document(announcementId)).thenReturn(mockDocRef)
+    whenever(mockDocRef.get()).thenReturn(Tasks.forResult(mockSnapshot))
+    whenever(mockSnapshot.get("quickFixImages")).thenReturn(emptyList<String>())
+
+    var onSuccessCalled = false
+    var returnedUrls: List<String>? = null
+    var onFailureCalled = false
+
+    announcementRepositoryFirestore.fetchAnnouncementsImageUrls(
+      announcementId = announcementId,
+      onSuccess = { urls ->
+        onSuccessCalled = true
+        returnedUrls = urls
+      },
+      onFailure = { onFailureCalled = true }
+    )
+
+    shadowOf(Looper.getMainLooper()).runToEndOfTasks()
+
+    // Assertions: onSuccess should be called with an empty list
+    assertTrue("onSuccess should be called", onSuccessCalled)
+    assertFalse("onFailure should not be called", onFailureCalled)
+    assertNotNull("URLs should not be null", returnedUrls)
+    assertTrue("URLs should be empty", returnedUrls!!.isEmpty())
+  }
+
+
+
+
+  @Test
+  fun fetchAnnouncementsImagesAsBitmaps_emptyUrls() {
+    val announcementId = "announcementEmpty"
+    // Mock fetchAnnouncementsImageUrls returning empty list
+    val mockDocRef = mock(DocumentReference::class.java)
+    val mockSnapshot = mock(DocumentSnapshot::class.java)
+    whenever(mockCollectionReference.document(announcementId)).thenReturn(mockDocRef)
+    whenever(mockDocRef.get()).thenReturn(Tasks.forResult(mockSnapshot))
+    whenever(mockSnapshot.get("quickFixImages")).thenReturn(emptyList<String>())
+
+    var successCalled = false
+    var resultList: List<Pair<String, Bitmap>>? = null
+
+    // No need for FirebaseStorage mocks since no URLs to fetch
+    announcementRepositoryFirestore.fetchAnnouncementsImagesAsBitmaps(
+      announcementId,
+      onSuccess = {
+        successCalled = true
+        resultList = it
+      },
+      onFailure = { fail("Should not fail with empty list") }
+    )
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assertTrue(successCalled)
+    assertNotNull(resultList)
+    assertTrue(resultList!!.isEmpty())
+  }
+
+  @Test
+  fun fetchAnnouncementsImagesAsBitmaps_failureFetchingUrls() {
+    val announcementId = "announcementFailUrls"
+    val exception = Exception("Failed to fetch URLs")
+
+    // Mock fetchAnnouncementsImageUrls failure
+    val mockDocRef = mock(DocumentReference::class.java)
+    whenever(mockCollectionReference.document(announcementId)).thenReturn(mockDocRef)
+    whenever(mockDocRef.get()).thenReturn(Tasks.forException(exception))
+
+    var failureCalled = false
+    var exceptionReceived: Exception? = null
+
+    // Since URLs fail to fetch, onFailure should be called directly
+    announcementRepositoryFirestore.fetchAnnouncementsImagesAsBitmaps(
+      announcementId,
+      onSuccess = { fail("Should not succeed") },
+      onFailure = {
+        failureCalled = true
+        exceptionReceived = it
+      }
+    )
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assertTrue(failureCalled)
     assertEquals(exception, exceptionReceived)
   }
 }
