@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Send
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
@@ -38,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.quickfix.QuickFix
@@ -50,9 +50,11 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QuickFixSecondStep(quickFixViewModel: QuickFixViewModel, quickFix: QuickFix) {
+fun QuickFixSecondStep(
+    quickFixViewModel: QuickFixViewModel = viewModel(factory = QuickFixViewModel.Factory),
+    quickFix: QuickFix
+) {
   val dateFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM")
   val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
   var testQuickFix by remember {

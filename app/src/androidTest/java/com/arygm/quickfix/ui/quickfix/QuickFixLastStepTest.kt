@@ -98,7 +98,8 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> })
     }
 
     // Assert
@@ -120,7 +121,8 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> })
     }
 
     // Assert
@@ -147,7 +149,8 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> })
     }
 
     // Find and click the Cancel button
@@ -179,7 +182,8 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> })
     }
 
     // Assert
@@ -204,7 +208,8 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> })
     }
 
     // Enter Feedback
@@ -247,7 +252,8 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> })
     }
 
     composeTestRule.onNodeWithTag("FeedbackTextField").performTextInput("a".repeat(1500))
@@ -276,6 +282,7 @@ class QuickFixLastStepTest {
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> },
       )
     }
 
@@ -300,7 +307,8 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> })
     }
 
     // Assert Title
@@ -331,7 +339,8 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> })
     }
 
     // Format dates and times as in the composable
@@ -362,7 +371,8 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> })
     }
 
     // Set rating to 0

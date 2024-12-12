@@ -72,7 +72,8 @@ class QuickFixThirdStepTest {
       QuickFixThirdStep(
           quickFix = mockQuickFix,
           quickFixViewModel = quickFixViewModel,
-          workerProfile = mockWorkerProfile)
+          workerProfile = mockWorkerProfile,
+          onQuickFixChange = { _ -> })
     }
 
     // Click on Add Bill Field Button
@@ -103,7 +104,8 @@ class QuickFixThirdStepTest {
                               unitPrice = 60.0,
                               total = 60.0))),
           quickFixViewModel = quickFixViewModel,
-          workerProfile = mockWorkerProfile)
+          workerProfile = mockWorkerProfile,
+          onQuickFixChange = { _ -> })
     }
 
     // Add a bill field
@@ -130,7 +132,8 @@ class QuickFixThirdStepTest {
       QuickFixThirdStep(
           quickFix = mockQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
-          workerProfile = mockWorkerProfile)
+          workerProfile = mockWorkerProfile,
+          onQuickFixChange = { _ -> })
     }
 
     // Add a bill field
@@ -153,7 +156,8 @@ class QuickFixThirdStepTest {
       QuickFixThirdStep(
           quickFix = mockQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
-          workerProfile = mockWorkerProfile)
+          workerProfile = mockWorkerProfile,
+          onQuickFixChange = { _ -> })
     }
 
     // Add a bill field
@@ -176,7 +180,8 @@ class QuickFixThirdStepTest {
       QuickFixThirdStep(
           quickFix = mockQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
-          workerProfile = mockWorkerProfile)
+          workerProfile = mockWorkerProfile,
+          onQuickFixChange = { _ -> })
     }
 
     // Add a bill field
@@ -199,7 +204,8 @@ class QuickFixThirdStepTest {
       QuickFixThirdStep(
           quickFix = mockQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
-          workerProfile = mockWorkerProfile)
+          workerProfile = mockWorkerProfile,
+          onQuickFixChange = { _ -> })
     }
 
     // Add a bill field
@@ -224,7 +230,8 @@ class QuickFixThirdStepTest {
       QuickFixThirdStep(
           quickFix = mockQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
-          workerProfile = mockWorkerProfile)
+          workerProfile = mockWorkerProfile,
+          onQuickFixChange = { _ -> })
     }
 
     // Click on Select Suggested Dates Button
@@ -291,7 +298,8 @@ class QuickFixThirdStepTest {
       QuickFixThirdStep(
           quickFix = mockQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
-          workerProfile = mockWorkerProfile)
+          workerProfile = mockWorkerProfile,
+          onQuickFixChange = { _ -> })
     }
 
     // Add a bill field
@@ -315,7 +323,8 @@ class QuickFixThirdStepTest {
       QuickFixThirdStep(
           quickFix = testQuickFix,
           quickFixViewModel = quickFixViewModel,
-          workerProfile = mockWorkerProfile)
+          workerProfile = mockWorkerProfile,
+          onQuickFixChange = { _ -> })
     }
 
     // Click on Select Suggested Dates Button
@@ -356,7 +365,8 @@ class QuickFixThirdStepTest {
                               unitPrice = 60.0,
                               total = 60.0))),
           quickFixViewModel = quickFixViewModel,
-          workerProfile = mockWorkerProfile)
+          workerProfile = mockWorkerProfile,
+          onQuickFixChange = { _ -> })
     }
 
     // Add a bill field

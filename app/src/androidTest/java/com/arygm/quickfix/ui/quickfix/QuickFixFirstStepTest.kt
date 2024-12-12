@@ -52,9 +52,10 @@ class QuickFixFirstStepTest {
           navigationActions = navigationActions,
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
-          profileViewModel = profileViewModel,
+          workerViewModel = profileViewModel,
           workerId = "Test Worker Id",
-          quickFixViewModel = quickFixViewModel)
+          quickFixViewModel = quickFixViewModel,
+          onQuickFixChange = { _ -> })
     }
 
     // Verify default UI elements
@@ -74,9 +75,10 @@ class QuickFixFirstStepTest {
           navigationActions = navigationActions,
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
-          profileViewModel = profileViewModel,
+          workerViewModel = profileViewModel,
           workerId = "Test Worker Id",
-          quickFixViewModel = quickFixViewModel)
+          quickFixViewModel = quickFixViewModel,
+          onQuickFixChange = { _ -> })
     }
 
     // Enter text in the title field
@@ -95,9 +97,10 @@ class QuickFixFirstStepTest {
           navigationActions = navigationActions,
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
-          profileViewModel = profileViewModel,
+          workerViewModel = profileViewModel,
           workerId = "Test Worker Id",
-          quickFixViewModel = quickFixViewModel)
+          quickFixViewModel = quickFixViewModel,
+          onQuickFixChange = { _ -> })
     }
 
     // Select a service
@@ -113,9 +116,10 @@ class QuickFixFirstStepTest {
           navigationActions = navigationActions,
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
-          profileViewModel = profileViewModel,
+          workerViewModel = profileViewModel,
           workerId = "Test Worker Id",
-          quickFixViewModel = quickFixViewModel)
+          quickFixViewModel = quickFixViewModel,
+          onQuickFixChange = { _ -> })
     }
 
     val today = LocalDate.now()

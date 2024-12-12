@@ -60,6 +60,8 @@ class MainActivity : ComponentActivity() {
       QuickFixTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
           QuickFixApp(testBitmapPP.value, testLocation.value)
+          // QuickFixOnBoarding(workerId = "1", navigationActions =
+          // NavigationActions(rememberNavController()))
         }
       }
     }

@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.PopupProperties
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.arygm.quickfix.model.locations.Location
@@ -97,16 +98,17 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun QuickFixFirstStep(
-    locationViewModel: LocationViewModel,
-    navigationActions: NavigationActions,
-    quickFixViewModel: QuickFixViewModel,
-    chatViewModel: ChatViewModel,
+    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
+    quickFixViewModel: QuickFixViewModel = viewModel(factory = QuickFixViewModel.Factory),
+    chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory),
+    workerViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.WorkerFactory),
     workerId: String,
-    profileViewModel: ProfileViewModel,
+    onQuickFixChange: (QuickFix) -> Unit,
+    navigationActions: NavigationActions,
 ) {
 
   var workerProfile by remember { mutableStateOf(WorkerProfile()) }
-  profileViewModel.fetchUserProfile(workerId) {
+  workerViewModel.fetchUserProfile(workerId) {
     if (it != null && it is WorkerProfile) {
       workerProfile = it
     }
@@ -627,45 +629,43 @@ fun QuickFixFirstStep(
                               ),
                       )
                       Spacer(modifier = Modifier.width(8.dp))
+                      val createdQuickFix =
+                          QuickFix(
+                              uid = quickFixViewModel.getRandomUid(),
+                              status = Status.PENDING,
+                              imageUrl = listOfImagePath,
+                              date =
+                                  listDates.map {
+                                    Timestamp(it.atZone(ZoneId.systemDefault()).toInstant())
+                                  },
+                              time =
+                                  Timestamp(
+                                      listDates.first().atZone(ZoneId.systemDefault()).toInstant()),
+                              includedServices =
+                                  listServices
+                                      .filterIndexed { index, _ -> checkedStatesServices[index] }
+                                      .map { IncludedService(it) },
+                              addOnServices =
+                                  listAddOnServices
+                                      .filterIndexed { index, _ ->
+                                        checkedStatesAddOnServices[index]
+                                      }
+                                      .map { AddOnService(it) },
+                              workerId = workerId,
+                              userId = "Place holder, user loadUserId()",
+                              title = quickFixTile,
+                              description = quickNote,
+                              chatUid = chatViewModel.getRandomUid(),
+                              bill = emptyList(),
+                              location = locationQuickFix)
                       QuickFixButton(
                           buttonText = "Continue",
                           buttonColor = colorScheme.primary,
                           onClickAction = {
                             quickFixViewModel.addQuickFix(
-                                QuickFix(
-                                    uid = quickFixViewModel.getRandomUid(),
-                                    status = Status.PENDING,
-                                    imageUrl = listOfImagePath,
-                                    date =
-                                        listDates.map {
-                                          Timestamp(it.atZone(ZoneId.systemDefault()).toInstant())
-                                        },
-                                    time =
-                                        Timestamp(
-                                            listDates
-                                                .first()
-                                                .atZone(ZoneId.systemDefault())
-                                                .toInstant()),
-                                    includedServices =
-                                        listServices
-                                            .filterIndexed { index, _ ->
-                                              checkedStatesServices[index]
-                                            }
-                                            .map { IncludedService(it) },
-                                    addOnServices =
-                                        listAddOnServices
-                                            .filterIndexed { index, _ ->
-                                              checkedStatesAddOnServices[index]
-                                            }
-                                            .map { AddOnService(it) },
-                                    workerId = workerId,
-                                    userId = "Place holder, user loadUserId()",
-                                    title = quickFixTile,
-                                    description = quickNote,
-                                    chatUid = chatViewModel.getRandomUid(),
-                                    bill = emptyList(),
-                                    location = locationQuickFix),
+                                createdQuickFix,
                                 onSuccess = {
+                                  onQuickFixChange(createdQuickFix)
                                   /* navigationActions.goToQuickFixSecondStep() */
                                   Toast.makeText(context, "QuickFix added", Toast.LENGTH_SHORT)
                                       .show()

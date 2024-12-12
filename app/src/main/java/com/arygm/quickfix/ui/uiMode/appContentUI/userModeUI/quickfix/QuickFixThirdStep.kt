@@ -54,13 +54,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.bill.BillField
 import com.arygm.quickfix.model.bill.Units
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
-import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.theme.poppinsTypography
@@ -70,9 +70,10 @@ import java.util.Locale
 
 @Composable
 fun QuickFixThirdStep(
+    quickFixViewModel: QuickFixViewModel = viewModel(factory = QuickFixViewModel.Factory),
     quickFix: QuickFix,
-    quickFixViewModel: QuickFixViewModel,
     workerProfile: WorkerProfile,
+    onQuickFixChange: (QuickFix) -> Unit
 ) {
   val focusManager = LocalFocusManager.current
   val dateFormatter = SimpleDateFormat("EEE, dd MMM", Locale.getDefault())
@@ -94,7 +95,7 @@ fun QuickFixThirdStep(
         dateFormatter = dateFormatter,
         timeFormatter = timeFormatter,
         listDates = listDates,
-        listBillField = listBillFields)
+    )
   }
   BoxWithConstraints(
       modifier =
@@ -573,14 +574,16 @@ fun QuickFixThirdStep(
       }
 
       item {
+        val updatedQuickFix = quickFix.copy(date = listDates, bill = listBillFields)
         QuickFixButton(
             buttonText = "Submit the QuickFix",
             buttonColor = colorScheme.primary,
             textColor = colorScheme.onPrimary,
             onClickAction = {
               quickFixViewModel.updateQuickFix(
-                  quickFix.copy(status = Status.UNPAID, date = listDates, bill = listBillFields),
+                  updatedQuickFix,
                   onSuccess = {
+                    onQuickFixChange(updatedQuickFix)
                     /* Make so that the worker cannot edit the quickfix anymore */
                   },
                   onFailure = {
@@ -610,7 +613,6 @@ fun SuggestedDatesDialog(
     dateFormatter: SimpleDateFormat,
     timeFormatter: SimpleDateFormat,
     listDates: List<Timestamp>,
-    listBillField: List<BillField>
 ) {
   var selectedDates by remember { mutableStateOf(listDates) }
 
