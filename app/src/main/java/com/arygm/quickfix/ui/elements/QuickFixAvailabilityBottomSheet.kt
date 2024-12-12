@@ -1,6 +1,5 @@
 package com.arygm.quickfix.ui.elements
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -79,7 +78,6 @@ fun QuickFixAvailabilityBottomSheet(
                               onNegativeClick = {
                                 if (clearEnabled) {
                                   onClearClick()
-                                  Log.d("chill guy", "dontshow")
                                 }
                                 onDismissRequest()
                               }) { newDates ->
