@@ -32,8 +32,8 @@ class QuickFixWorkerOverviewTest {
           reviews =
               ArrayDeque(
                   listOf(
-                      Review(username = "User1", review = "Excellent work!", rating = 5.0f),
-                      Review(username = "User2", review = "Very professional.", rating = 4.5f))),
+                      Review(username = "User1", review = "Excellent work!", rating = 5.0),
+                      Review(username = "User2", review = "Very professional.", rating = 4.5))),
           profilePicture = "https://example.com/jane-smith.jpg",
           bannerPicture = "https://example.com/jane-smith-banner.jpg",
           price = 80.0,

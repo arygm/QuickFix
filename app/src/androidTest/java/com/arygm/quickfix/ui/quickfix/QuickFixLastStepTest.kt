@@ -53,8 +53,8 @@ class QuickFixLastStepTest {
           reviews =
               ArrayDeque(
                   listOf(
-                      Review(username = "User1", review = "Great service!", rating = 5.0f),
-                      Review(username = "User2", review = "Very satisfied", rating = 4.5f))),
+                      Review(username = "User1", review = "Great service!", rating = 5.0),
+                      Review(username = "User2", review = "Very satisfied", rating = 4.5))),
           profilePicture = "https://example.com/john-doe.jpg",
           bannerPicture = "https://example.com/john-doe-banner.jpg",
           price = 75.0,
