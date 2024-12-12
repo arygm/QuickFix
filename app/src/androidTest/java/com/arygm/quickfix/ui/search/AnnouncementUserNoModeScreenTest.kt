@@ -13,6 +13,7 @@ import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.search.AnnouncementRepository
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.AnnouncementScreen
 import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

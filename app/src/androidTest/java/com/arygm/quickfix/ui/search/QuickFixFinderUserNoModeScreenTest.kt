@@ -11,6 +11,7 @@ import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.ui.userModeUI.navigation.UserTopLevelDestinations

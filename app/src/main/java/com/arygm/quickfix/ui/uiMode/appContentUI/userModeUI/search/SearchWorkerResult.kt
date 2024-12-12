@@ -1,6 +1,5 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
-import QuickFixSlidingWindowWorker
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -56,11 +55,6 @@ import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixLocationFilterBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixPriceRangeBottomSheet
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.search.FilterRow
-import com.arygm.quickfix.ui.search.ProfileResults
-import com.arygm.quickfix.ui.search.getFilterButtons
-import com.arygm.quickfix.ui.search.reapplyFilters
-import com.arygm.quickfix.ui.search.rememberSearchFiltersState
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.LocationHelper
 import com.arygm.quickfix.utils.loadUserId

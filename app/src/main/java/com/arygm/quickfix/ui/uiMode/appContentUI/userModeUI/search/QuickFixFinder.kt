@@ -1,6 +1,5 @@
-package com.arygm.quickfix.ui.search
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
-import QuickFixSlidingWindowWorker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -143,7 +142,7 @@ fun QuickFixFinderScreen(
                               searchViewModel,
                               accountViewModel,
                               categoryViewModel,
-                              onProfileClick = { profile_ ->
+                              onProfileClick = { profiles ->
                                 val profile =
                                     WorkerProfile(
                                         rating = 4.8,

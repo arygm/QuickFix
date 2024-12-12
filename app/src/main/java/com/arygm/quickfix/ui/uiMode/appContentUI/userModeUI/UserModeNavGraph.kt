@@ -29,7 +29,7 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
-import com.arygm.quickfix.ui.search.QuickFixFinderScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchWorkerResult
 import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen

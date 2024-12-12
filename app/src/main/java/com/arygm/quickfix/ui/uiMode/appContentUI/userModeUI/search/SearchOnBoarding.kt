@@ -1,6 +1,5 @@
-package com.arygm.quickfix.ui.search
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
-import QuickFixSlidingWindowWorker
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -24,8 +23,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,7 +34,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.profile.UserProfile
@@ -104,21 +100,6 @@ fun SearchOnBoarding(
           onShowPriceRangeBottomSheet = { showPriceRangeBottomSheet = true },
           onShowLocationBottomSheet = { showLocationBottomSheet = true },
       )
-
-  var isWindowVisible by remember { mutableStateOf(false) }
-
-  // Variables for WorkerSlidingWindowContent
-  var bannerImage by remember { mutableIntStateOf(R.drawable.moroccan_flag) }
-  var profilePicture by remember { mutableIntStateOf(R.drawable.placeholder_worker) }
-  var initialSaved by remember { mutableStateOf(false) }
-  var workerCategory by remember { mutableStateOf("Exterior Painter") }
-  var workerAddress by remember { mutableStateOf("Ecublens, VD") }
-  var description by remember { mutableStateOf("Worker description goes here.") }
-  var includedServices by remember { mutableStateOf(listOf("Service 1", "Service 2")) }
-  var addonServices by remember { mutableStateOf(listOf("Add-on 1", "Add-on 2")) }
-  var workerRating by remember { mutableDoubleStateOf(4.5) }
-  var tags by remember { mutableStateOf(listOf("Tag1", "Tag2")) }
-  var reviews by remember { mutableStateOf(listOf("Review 1", "Review 2")) }
 
   BoxWithConstraints {
     val widthRatio = maxWidth.value / 411f
@@ -318,23 +299,5 @@ fun SearchOnBoarding(
           updateFilteredProfiles()
         },
         clearEnabled = filterState.locationFilterApplied)
-
-    QuickFixSlidingWindowWorker(
-        isVisible = isWindowVisible,
-        onDismiss = { isWindowVisible = false },
-        bannerImage = bannerImage,
-        profilePicture = profilePicture,
-        initialSaved = initialSaved,
-        workerCategory = workerCategory,
-        workerAddress = workerAddress,
-        description = description,
-        includedServices = includedServices,
-        addonServices = addonServices,
-        workerRating = workerRating,
-        tags = tags,
-        reviews = reviews,
-        screenHeight = screenHeight,
-        screenWidth = screenWidth,
-        onContinueClick = { /* Handle continue */})
   }
 }

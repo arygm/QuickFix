@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.search
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.PaddingValues
