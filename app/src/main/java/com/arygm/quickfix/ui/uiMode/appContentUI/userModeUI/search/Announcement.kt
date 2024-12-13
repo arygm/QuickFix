@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.search
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -77,33 +78,44 @@ fun AnnouncementScreen(
     profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
     accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
     categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
+    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     navigationActions: NavigationActions,
     isUser: Boolean = true,
-    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
+    initialTitle: String = "",
+    initialSubcategoryTitle: String = "",
+    initialDescription: String = "",
+    initialLocation: Location? = null,
+    initialAvailability: List<Pair<Long, Long>> = emptyList(),
+    initialUploadedImages: List<Bitmap> = emptyList()
 ) {
+  var title by rememberSaveable { mutableStateOf(initialTitle) }
+  var subcategoryTitle by rememberSaveable { mutableStateOf(initialSubcategoryTitle) }
+  var description by rememberSaveable { mutableStateOf(initialDescription) }
+
+  var locationLat by rememberSaveable { mutableStateOf(initialLocation?.latitude) }
+  var locationLon by rememberSaveable { mutableStateOf(initialLocation?.longitude) }
+  var locationName by rememberSaveable { mutableStateOf(initialLocation?.name) }
+  var locationTitle by rememberSaveable { mutableStateOf(initialLocation?.name ?: "") }
+  var locationIsSelected by rememberSaveable { mutableStateOf(initialLocation != null) }
+
   val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
   val userId = loggedInAccount?.uid ?: "Should not happen"
 
   var selectedSubcategoryName by rememberSaveable { mutableStateOf("") }
-  var title by rememberSaveable { mutableStateOf("") }
-  var subcategoryTitle by rememberSaveable { mutableStateOf("") }
-  var description by rememberSaveable { mutableStateOf("") }
 
-  var locationLat by rememberSaveable { mutableStateOf<Double?>(null) }
-  var locationLon by rememberSaveable { mutableStateOf<Double?>(null) }
-  var locationName by rememberSaveable { mutableStateOf<String?>(null) }
-
+  LaunchedEffect(Unit) {
+    // Charger les images initiales
+    initialUploadedImages.forEach { announcementViewModel.addUploadedImage(it) }
+  }
   val location =
       if (locationLat != null && locationLon != null && locationName != null) {
         Location(latitude = locationLat!!, longitude = locationLon!!, name = locationName!!)
       } else null
 
-  var locationTitle by rememberSaveable { mutableStateOf("") }
   var locationExpanded by remember { mutableStateOf(false) }
   val locationSuggestions by locationViewModel.locationSuggestions.collectAsState()
 
   var titleIsEmpty by rememberSaveable { mutableStateOf(true) }
-  var locationIsSelected by rememberSaveable { mutableStateOf(false) }
   var descriptionIsEmpty by rememberSaveable { mutableStateOf(true) }
 
   fun LocalDateTime.toMillis(): Long =
@@ -115,11 +127,6 @@ fun AnnouncementScreen(
       androidx.compose.runtime.saveable.Saver<List<Pair<Long, Long>>, List<List<Long>>>(
           save = { list -> list.map { pair -> listOf(pair.first, pair.second) } },
           restore = { saved -> saved.mapNotNull { if (it.size == 2) it[0] to it[1] else null } })
-
-  var listAvailability by
-      rememberSaveable(stateSaver = availabilitySaver) {
-        mutableStateOf(emptyList<Pair<Long, Long>>())
-      }
 
   var isEditingIndex by rememberSaveable { mutableStateOf<Int?>(null) }
   var showStartAvailabilityPopup by remember { mutableStateOf(false) }
@@ -140,20 +147,11 @@ fun AnnouncementScreen(
   val selectedSubcategory = allSubcategories.find { it.name == selectedSubcategoryName }
   val categoryIsSelected = selectedSubcategory != null
 
-  LaunchedEffect(Unit) {
-    categoryViewModel.getCategories()
-    val selectedLocation = navigationActions.getFromBackStack("selectedLocation") as? Location
-    if (selectedLocation != null) {
-      locationLat = selectedLocation.latitude
-      locationLon = selectedLocation.longitude
-      locationName = selectedLocation.name
-      locationIsSelected = true
-      locationTitle = selectedLocation.name
-    }
-  }
+  LaunchedEffect(Unit) { categoryViewModel.getCategories() }
 
   val sheetState = rememberModalBottomSheetState()
-
+  var listAvailability by
+      rememberSaveable(stateSaver = availabilitySaver) { mutableStateOf(initialAvailability) }
   val resetAnnouncementParameters = {
     title = ""
     subcategoryTitle = ""
@@ -217,6 +215,7 @@ fun AnnouncementScreen(
 
   if (showStartAvailabilityPopup) {
     Dialog(onDismissRequest = { showStartAvailabilityPopup = false }) {
+      println("showStartAvailabilityPopup")
       QuickFixDateTimePicker(
           onDateTimeSelected = { date, time ->
             val start = LocalDateTime.of(date, time)
@@ -224,7 +223,8 @@ fun AnnouncementScreen(
             showStartAvailabilityPopup = false
             showEndAvailabilityPopup = true
           },
-          onDismissRequest = { showStartAvailabilityPopup = false })
+          onDismissRequest = { showStartAvailabilityPopup = false },
+          modifier = Modifier.testTag("startAvailabilityPicker"))
     }
   }
 
@@ -246,7 +246,8 @@ fun AnnouncementScreen(
             tempStartMillis = null
             showEndAvailabilityPopup = false
           },
-          onDismissRequest = { showEndAvailabilityPopup = false })
+          onDismissRequest = { showEndAvailabilityPopup = false },
+          modifier = Modifier.testTag("endAvailabilityPicker"))
     }
   }
 
@@ -363,7 +364,9 @@ fun AnnouncementScreen(
                                 subcategoryTitle = sub.name
                                 selectedSubcategoryName = sub.name
                               },
-                              modifier = Modifier.height(30.dp * heightRatio.value))
+                              modifier =
+                                  Modifier.height(30.dp * heightRatio.value)
+                                      .testTag("subcategoryItem$index"))
                           if (index < filteredSubcategories.size - 1) {
                             HorizontalDivider(
                                 color = colorScheme.onSecondaryContainer, thickness = 1.5.dp)
@@ -479,7 +482,8 @@ fun AnnouncementScreen(
                               fontWeight = FontWeight.Medium,
                               color = colorScheme.onBackground,
                               modifier = Modifier.padding(horizontal = 4.dp))
-                        })
+                        },
+                        modifier = Modifier.testTag("locationSuggestionItem"))
                     if (index < locationSuggestions.size - 1) {
                       HorizontalDivider(
                           color = colorScheme.onSecondaryContainer, thickness = 1.5.dp)
@@ -560,7 +564,10 @@ fun AnnouncementScreen(
 
                         IconButton(
                             onClick = startAvailability,
-                            modifier = Modifier.padding(top = 16.dp, end = 4.dp).weight(0.2f),
+                            modifier =
+                                Modifier.testTag("Add Availability Button")
+                                    .padding(top = 16.dp, end = 4.dp)
+                                    .weight(0.2f),
                             content = {
                               Icon(
                                   imageVector = Icons.Default.Add,
@@ -599,7 +606,10 @@ fun AnnouncementScreen(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .padding(horizontal = 4.dp)
+                                .testTag("availabilitySlot")) {
                           Text(
                               text = dayText,
                               style = poppinsTypography.labelSmall,
