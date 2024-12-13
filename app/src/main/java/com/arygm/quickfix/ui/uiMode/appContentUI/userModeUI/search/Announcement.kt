@@ -193,8 +193,8 @@ fun AnnouncementScreen(
       { announcementId, uploadedImageUrls ->
         val availabilitySlots =
             listAvailability.map { (startMillis, endMillis) ->
-              val start = Timestamp(startMillis / 1000, ((startMillis % 1000) * 1000000).toInt())
-              val end = Timestamp(endMillis / 1000, ((endMillis % 1000) * 1000000).toInt())
+              val start = millisToTimestamp(startMillis)
+              val end = millisToTimestamp(endMillis)
               AvailabilitySlot(start = start, end = end)
             }
 
@@ -273,7 +273,10 @@ fun AnnouncementScreen(
               modifier =
                   Modifier.fillMaxSize()
                       .padding(padding)
-                      .padding(start = 14.dp, end = 14.dp, top = 30.dp)
+                      .padding(
+                          start = 14.dp * widthRatio.value,
+                          end = 14.dp * widthRatio.value,
+                          top = 30.dp * heightRatio.value)
                       .verticalScroll(rememberScrollState()),
               horizontalAlignment = Alignment.Start,
               verticalArrangement = Arrangement.Top) {
@@ -288,7 +291,7 @@ fun AnnouncementScreen(
                     placeHolderColor = colorScheme.onSecondaryContainer,
                     shape = RoundedCornerShape(8.dp),
                     moveContentHorizontal = 10.dp,
-                    heightField = 40.dp,
+                    heightField = 40.dp * heightRatio.value,
                     widthField = 380.dp * widthRatio.value,
                     showLabel = true,
                     label = {
@@ -310,7 +313,7 @@ fun AnnouncementScreen(
                     borderColor = colorScheme.tertiaryContainer,
                     modifier = Modifier.testTag("titleInput"))
 
-                Spacer(modifier = Modifier.height(17.dp))
+                Spacer(modifier = Modifier.height(17.dp * heightRatio.value))
 
                 // Subcategory
                 Text(
@@ -336,7 +339,7 @@ fun AnnouncementScreen(
                       placeHolderColor = colorScheme.onSecondaryContainer,
                       shape = RoundedCornerShape(8.dp),
                       moveContentHorizontal = 10.dp,
-                      heightField = 40.dp,
+                      heightField = 40.dp * heightRatio.value,
                       widthField = 380.dp * widthRatio.value,
                       showLabel = false,
                       hasShadow = false,
@@ -375,7 +378,7 @@ fun AnnouncementScreen(
                       }
                 }
 
-                Spacer(modifier = Modifier.height(17.dp))
+                Spacer(modifier = Modifier.height(17.dp * heightRatio.value))
 
                 // Description
                 QuickFixTextFieldCustom(
@@ -388,7 +391,7 @@ fun AnnouncementScreen(
                     placeHolderColor = colorScheme.onSecondaryContainer,
                     shape = RoundedCornerShape(8.dp),
                     moveContentHorizontal = 10.dp,
-                    heightField = 150.dp,
+                    heightField = 150.dp * heightRatio.value,
                     widthField = 380.dp * widthRatio.value,
                     showLabel = true,
                     label = {
@@ -418,7 +421,7 @@ fun AnnouncementScreen(
                     charCounterColor = colorScheme.onSecondaryContainer,
                     modifier = Modifier.testTag("descriptionInput"))
 
-                Spacer(modifier = Modifier.height(17.dp))
+                Spacer(modifier = Modifier.height(17.dp * heightRatio.value))
 
                 // Location
                 Text(
@@ -491,7 +494,7 @@ fun AnnouncementScreen(
                   }
                 }
 
-                Spacer(modifier = Modifier.height(17.dp))
+                Spacer(modifier = Modifier.height(17.dp * heightRatio.value))
 
                 // Availability
                 val startAvailability = {
@@ -505,7 +508,7 @@ fun AnnouncementScreen(
                       modifier = Modifier.fillMaxWidth()) {
                         Button(
                             onClick = startAvailability,
-                            modifier = Modifier.padding(vertical = 16.dp),
+                            modifier = Modifier.padding(vertical = 16.dp * heightRatio.value),
                             shape = RoundedCornerShape(10.dp),
                         ) {
                           Row(
@@ -534,7 +537,7 @@ fun AnnouncementScreen(
                         Column(
                             modifier =
                                 Modifier.fillMaxWidth()
-                                    .padding(top = 16.dp, start = 4.dp)
+                                    .padding(top = 16.dp * heightRatio.value, start = 4.dp)
                                     .weight(0.8f),
                             horizontalAlignment = Alignment.Start) {
                               Text(
@@ -543,7 +546,7 @@ fun AnnouncementScreen(
                                   color = colorScheme.onBackground,
                                   fontWeight = FontWeight.SemiBold,
                                   fontSize = 16.sp,
-                                  modifier = Modifier.padding(bottom = 16.dp))
+                                  modifier = Modifier.padding(bottom = 16.dp * heightRatio.value))
                               Row(
                                   modifier = Modifier.fillMaxWidth(0.8f).padding(bottom = 4.dp),
                               ) {
@@ -566,7 +569,7 @@ fun AnnouncementScreen(
                             onClick = startAvailability,
                             modifier =
                                 Modifier.testTag("Add Availability Button")
-                                    .padding(top = 16.dp, end = 4.dp)
+                                    .padding(top = 16.dp * heightRatio.value, end = 4.dp)
                                     .weight(0.2f),
                             content = {
                               Icon(
@@ -661,7 +664,7 @@ fun AnnouncementScreen(
                   }
                 }
 
-                Spacer(modifier = Modifier.height(17.dp))
+                Spacer(modifier = Modifier.height(17.dp * heightRatio.value))
 
                 // Upload images section
                 Text(
@@ -669,13 +672,15 @@ fun AnnouncementScreen(
                     style = poppinsTypography.labelSmall,
                     color = colorScheme.onBackground,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(start = 4.dp, bottom = 8.dp, top = 16.dp))
+                    modifier =
+                        Modifier.padding(
+                            start = 4.dp, bottom = 8.dp, top = 16.dp * heightRatio.value))
 
                 if (uploadedImages.isEmpty()) {
                   Column(
                       modifier =
                           Modifier.fillMaxWidth()
-                              .height(100.dp)
+                              .height(100.dp * heightRatio.value)
                               .testTag(
                                   "picturesButton") // Tag for the upload pictures button scenario
                               .dashedBorder(
@@ -708,7 +713,7 @@ fun AnnouncementScreen(
                   Box(
                       modifier =
                           Modifier.fillMaxWidth()
-                              .height(100.dp)
+                              .height(100.dp * heightRatio.value)
                               .padding(horizontal = 16.dp)
                               .testTag("uploadedImagesBox"), // Tag the uploaded images box
                       contentAlignment = Alignment.Center) {
@@ -717,7 +722,7 @@ fun AnnouncementScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier =
                                 Modifier.fillMaxWidth()
-                                    .height(100.dp)
+                                    .height(100.dp * heightRatio.value)
                                     .testTag("uploadedImagesLazyRow")) {
                               val visibleImages = uploadedImages.take(3)
                               val remainingImageCount = uploadedImages.size - 3
@@ -787,7 +792,7 @@ fun AnnouncementScreen(
                             buttonText = "Add more pictures",
                             buttonColor = colorScheme.primary,
                             onClickAction = { showUploadImageSheet = true },
-                            height = 50.dp,
+                            height = 50.dp * heightRatio.value,
                             textColor = colorScheme.onPrimary,
                             textStyle =
                                 poppinsTypography.labelSmall.copy(
@@ -801,7 +806,7 @@ fun AnnouncementScreen(
                       }
                 }
 
-                Spacer(modifier = Modifier.height(17.dp))
+                Spacer(modifier = Modifier.height(17.dp * heightRatio.value))
 
                 // Mandatory fields message
                 Text(
@@ -818,7 +823,7 @@ fun AnnouncementScreen(
                             fontSize = 10.sp, fontWeight = FontWeight.Medium),
                     modifier = Modifier.testTag("mandatoryText"))
 
-                Spacer(modifier = Modifier.height(17.dp))
+                Spacer(modifier = Modifier.height(17.dp * heightRatio.value))
 
                 // Post announcement button
                 QuickFixButton(
@@ -849,7 +854,7 @@ fun AnnouncementScreen(
                             fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
                     modifier =
                         Modifier.width(380.dp * widthRatio.value)
-                            .height(50.dp)
+                            .height(50.dp * heightRatio.value)
                             .testTag("announcementButton"),
                     enabled =
                         !titleIsEmpty &&
@@ -866,4 +871,8 @@ fun AnnouncementScreen(
         onShowBottomSheetChange = { showUploadImageSheet = it },
         onActionRequest = { value -> announcementViewModel.addUploadedImage(value) })
   }
+}
+
+fun millisToTimestamp(millis: Long): Timestamp {
+  return Timestamp(millis / 1000, ((millis % 1000) * 1000000).toInt())
 }
