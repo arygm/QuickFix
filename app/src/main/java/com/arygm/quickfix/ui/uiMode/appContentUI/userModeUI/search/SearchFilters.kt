@@ -20,6 +20,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -203,26 +204,28 @@ fun FilterRow(
   Spacer(modifier = Modifier.width(10.dp))
 
   AnimatedVisibility(visible = showFilterButtons) {
-    LazyRow(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-      items(listOfButtons.size) { index ->
-        val button = listOfButtons[index]
-        QuickFixButton(
-            buttonText = button.text,
-            onClickAction = button.onClick,
-            buttonColor = if (button.applied) colorScheme.primary else colorScheme.surface,
-            textColor = if (button.applied) colorScheme.onPrimary else colorScheme.onBackground,
-            textStyle = poppinsTypography.labelSmall.copy(fontWeight = FontWeight.Medium),
-            height = screenHeight * 0.05f,
-            leadingIcon = button.leadingIcon,
-            trailingIcon = button.trailingIcon,
-            leadingIconTint =
-                if (button.applied) colorScheme.onPrimary else colorScheme.onBackground,
-            trailingIconTint =
-                if (button.applied) colorScheme.onPrimary else colorScheme.onBackground,
-            contentPadding = PaddingValues(vertical = 0.dp, horizontal = screenWidth * 0.02f),
-            modifier = Modifier.testTag("filter_button_${button.text}"))
-        Spacer(modifier = Modifier.width(screenHeight * 0.01f))
-      }
-    }
+    LazyRow(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.testTag("filter_buttons_row")) {
+          items(listOfButtons.size) { index ->
+            val button = listOfButtons[index]
+            QuickFixButton(
+                buttonText = button.text,
+                onClickAction = button.onClick,
+                buttonColor = if (button.applied) colorScheme.primary else colorScheme.surface,
+                textColor = if (button.applied) colorScheme.onPrimary else colorScheme.onBackground,
+                textStyle = poppinsTypography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                height = screenHeight * 0.05f,
+                leadingIcon = button.leadingIcon,
+                trailingIcon = button.trailingIcon,
+                leadingIconTint =
+                    if (button.applied) colorScheme.onPrimary else colorScheme.onBackground,
+                trailingIconTint =
+                    if (button.applied) colorScheme.onPrimary else colorScheme.onBackground,
+                contentPadding = PaddingValues(vertical = 0.dp, horizontal = screenWidth * 0.02f),
+                modifier = Modifier.testTag("filter_button_${button.text}"))
+            Spacer(modifier = Modifier.width(screenHeight * 0.01f))
+          }
+        }
   }
 }

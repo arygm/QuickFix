@@ -26,11 +26,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
@@ -49,6 +46,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixSlidingWindow
+import com.arygm.quickfix.ui.elements.RatingBar
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -317,65 +315,53 @@ fun QuickFixSlidingWindowWorker(
                     modifier =
                         Modifier.padding(horizontal = screenWidth * 0.04f)
                             .testTag("sliding_window_star_rating_row")) {
-                      val filledStars = workerRating.toInt()
-                      val unfilledStars = 5 - filledStars
-                      repeat(filledStars) {
-                        Icon(
-                            imageVector = Icons.Filled.Star,
-                            contentDescription = null,
-                            tint = colorScheme.onBackground)
-                      }
-                      repeat(unfilledStars) {
-                        Icon(
-                            imageVector = Icons.Outlined.StarOutline,
-                            contentDescription = null,
-                            tint = colorScheme.onBackground,
-                        )
-                      }
+                      RatingBar(
+                          workerRating.toFloat(),
+                          modifier = Modifier.height(20.dp).testTag("starsRow"))
                     }
-                Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-                LazyRow(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(horizontal = screenWidth * 0.04f)
-                            .testTag("sliding_window_reviews_row")) {
-                      itemsIndexed(reviews) { index, review ->
-                        var isExpanded by remember { mutableStateOf(false) }
-                        val displayText =
-                            if (isExpanded || review.length <= 100) {
-                              review
-                            } else {
-                              review.take(100) + "..."
-                            }
-
-                        Box(
-                            modifier =
-                                Modifier.padding(end = screenWidth * 0.02f)
-                                    .width(screenWidth * 0.6f)
-                                    .clip(RoundedCornerShape(25f))
-                                    .background(colorScheme.background)) {
-                              Column(modifier = Modifier.padding(screenWidth * 0.02f)) {
-                                Text(
-                                    text = displayText,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = colorScheme.onSurface)
-                                if (review.length > 100) {
-                                  Text(
-                                      text = if (isExpanded) "See less" else "See more",
-                                      style =
-                                          MaterialTheme.typography.bodySmall.copy(
-                                              color = colorScheme.primary),
-                                      modifier =
-                                          Modifier.clickable { isExpanded = !isExpanded }
-                                              .padding(top = screenHeight * 0.01f))
-                                }
-                              }
-                            }
-                      }
-                    }
-
-                Spacer(modifier = Modifier.height(screenHeight * 0.02f))
               }
+          Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+          LazyRow(
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(horizontal = screenWidth * 0.04f)
+                      .testTag("sliding_window_reviews_row")) {
+                itemsIndexed(reviews) { index, review ->
+                  var isExpanded by remember { mutableStateOf(false) }
+                  val displayText =
+                      if (isExpanded || review.length <= 100) {
+                        review
+                      } else {
+                        review.take(100) + "..."
+                      }
+
+                  Box(
+                      modifier =
+                          Modifier.padding(end = screenWidth * 0.02f)
+                              .width(screenWidth * 0.6f)
+                              .clip(RoundedCornerShape(25f))
+                              .background(colorScheme.background)) {
+                        Column(modifier = Modifier.padding(screenWidth * 0.02f)) {
+                          Text(
+                              text = displayText,
+                              style = MaterialTheme.typography.bodySmall,
+                              color = colorScheme.onSurface)
+                          if (review.length > 100) {
+                            Text(
+                                text = if (isExpanded) "See less" else "See more",
+                                style =
+                                    MaterialTheme.typography.bodySmall.copy(
+                                        color = colorScheme.primary),
+                                modifier =
+                                    Modifier.clickable { isExpanded = !isExpanded }
+                                        .padding(top = screenHeight * 0.01f))
+                          }
+                        }
+                      }
+                }
+              }
+
+          Spacer(modifier = Modifier.height(screenHeight * 0.02f))
         }
   }
 }

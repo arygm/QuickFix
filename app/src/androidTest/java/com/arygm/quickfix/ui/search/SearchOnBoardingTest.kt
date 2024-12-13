@@ -53,11 +53,15 @@ class SearchOnBoardingTest {
   fun searchOnBoarding_displaysSearchInput() {
     composeTestRule.setContent {
       SearchOnBoarding(
-          navigationActions = navigationActions,
+          onSearch = {},
+          onSearchEmpty = {},
+          navigationActions,
           navigationActionsRoot,
           searchViewModel,
           accountViewModel,
-          categoryViewModel)
+          categoryViewModel,
+          onProfileClick = { _ -> },
+      )
     }
 
     // Check that the search input field is displayed
@@ -72,11 +76,15 @@ class SearchOnBoardingTest {
   fun searchOnBoarding_clearsTextOnTrailingIconClick() {
     composeTestRule.setContent {
       SearchOnBoarding(
-          navigationActions = navigationActions,
+          onSearch = {},
+          onSearchEmpty = {},
+          navigationActions,
           navigationActionsRoot,
           searchViewModel,
           accountViewModel,
-          categoryViewModel)
+          categoryViewModel,
+          onProfileClick = { _ -> },
+      )
     }
 
     // Input text into the search field
@@ -100,11 +108,15 @@ class SearchOnBoardingTest {
   fun searchOnBoarding_switchesFromCategoriesToProfiles() {
     composeTestRule.setContent {
       SearchOnBoarding(
-          navigationActions = navigationActions,
-          navigationActionsRoot = navigationActionsRoot,
-          searchViewModel = searchViewModel,
-          accountViewModel = accountViewModel,
-          categoryViewModel = categoryViewModel)
+          onSearch = {},
+          onSearchEmpty = {},
+          navigationActions,
+          navigationActionsRoot,
+          searchViewModel,
+          accountViewModel,
+          categoryViewModel,
+          onProfileClick = { _ -> },
+      )
     }
 
     // Verify initial state (Categories are displayed)

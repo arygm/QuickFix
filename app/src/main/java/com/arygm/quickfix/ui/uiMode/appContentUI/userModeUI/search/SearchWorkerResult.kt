@@ -213,8 +213,7 @@ fun SearchWorkerResult(
                     modifier =
                         Modifier.fillMaxWidth()
                             .padding(top = screenHeight * 0.02f, bottom = screenHeight * 0.01f)
-                            .padding(horizontal = screenWidth * 0.02f)
-                            .testTag("filter_buttons_row"),
+                            .padding(horizontal = screenWidth * 0.02f),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                   FilterRow(
