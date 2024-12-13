@@ -20,6 +20,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.printToLog
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
@@ -445,5 +446,13 @@ class MainActivityTest : TestCase() {
     }
     // Verify that the profile name has been updated correctly
     composeTestRule.onNodeWithTag("ProfileName").assertTextEquals(expectedProfileName)
+  }
+
+  private fun searchEngine() {
+    composeTestRule.onNodeWithTag("searchContent").performTextReplacement("Jane")
+    composeTestRule.waitForIdle()
+    // Assert: "Jane Smith" is displayed
+    composeTestRule.onNodeWithText("Jane Smith").assertIsDisplayed()
+    composeTestRule.onNodeWithText("book_button").performClick()
   }
 }

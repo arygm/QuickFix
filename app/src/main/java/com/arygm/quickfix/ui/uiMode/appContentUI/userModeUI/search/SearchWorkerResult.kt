@@ -334,14 +334,14 @@ fun SearchWorkerResult(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top) {
                       Text(
-                          text = searchSubcategory!!.name,
+                          text = searchSubcategory?.name ?: "Unknown",
                           style = poppinsTypography.labelMedium,
                           fontSize = 24.sp,
                           fontWeight = FontWeight.SemiBold,
                           textAlign = TextAlign.Center,
                       )
                       Text(
-                          text = searchCategory!!.description,
+                          text = searchCategory?.description ?: "Unknown",
                           style = poppinsTypography.labelSmall,
                           fontWeight = FontWeight.Medium,
                           fontSize = 12.sp,
