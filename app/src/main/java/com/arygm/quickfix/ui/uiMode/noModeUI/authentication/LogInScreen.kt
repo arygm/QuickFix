@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
@@ -74,7 +75,7 @@ fun LogInScreen(
     accountViewModel: AccountViewModel,
     preferencesViewModel: PreferencesViewModel,
     rootNavigationActions: NavigationActions,
-    userPreferencesViewModel: PreferencesViewModel,
+    userPreferencesViewModel: PreferencesViewModelUserProfile,
     userViewModel: ProfileViewModel
 ) {
   var errorHasOccurred by remember { mutableStateOf(false) }

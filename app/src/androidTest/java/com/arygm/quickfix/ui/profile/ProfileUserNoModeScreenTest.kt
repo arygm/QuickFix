@@ -1,16 +1,10 @@
 package com.arygm.quickfix.ui.profile
 
-import android.util.Log
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import com.arygm.quickfix.model.account.Account
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
-import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.switchModes.AppMode
@@ -20,22 +14,25 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
 import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.ProfileScreen
+import com.arygm.quickfix.utils.BIRTH_DATE_KEY
 import com.arygm.quickfix.utils.EMAIL_KEY
 import com.arygm.quickfix.utils.FIRST_NAME_KEY
+import com.arygm.quickfix.utils.IS_SIGN_IN_KEY
 import com.arygm.quickfix.utils.IS_WORKER_KEY
 import com.arygm.quickfix.utils.LAST_NAME_KEY
+import com.arygm.quickfix.utils.UID_KEY
 import com.arygm.quickfix.utils.WALLET_KEY
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 
 class ProfileScreenTest {
@@ -43,21 +40,24 @@ class ProfileScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   // Declare lateinit variables for dependencies
-  private lateinit var mockFirestore: FirebaseFirestore
   private lateinit var navigationActions: NavigationActions
+  private lateinit var rootMainNavigationActions: NavigationActions
+  private lateinit var appContentNavigationActions: NavigationActions
+  private lateinit var mockStorage: FirebaseStorage
+  private lateinit var mockReference: StorageReference
+
+  // Fake repositories
+  private lateinit var preferencesRepository: FakePreferencesRepository
+  private lateinit var userPreferencesRepository: FakePreferencesRepository
+
+  // ViewModels
+  private lateinit var preferencesViewModel: PreferencesViewModel
+  private lateinit var userPreferencesViewModel: PreferencesViewModelUserProfile
+  private lateinit var modeViewModel: ModeViewModel
+
+  // Firestore repositories (if needed)
   private lateinit var userProfileRepositoryFirestore: UserProfileRepositoryFirestore
   private lateinit var workerProfileRepositoryFirestore: WorkerProfileRepositoryFirestore
-  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
-  private lateinit var firebaseAuth: FirebaseAuth
-  private lateinit var rootMainNavigationActions: NavigationActions
-  private lateinit var preferencesViewModel: PreferencesViewModel
-  private lateinit var preferencesRepository: PreferencesRepository
-  private lateinit var userPreferencesViewModel: PreferencesViewModel
-  private lateinit var userPreferencesRepository: PreferencesRepository
-  private lateinit var mockStorage: FirebaseStorage
-  private lateinit var appContentNavigationActions: NavigationActions
-  private lateinit var modeViewModel: ModeViewModel
-  private lateinit var mockReference: StorageReference
 
   private val account =
       Account(
@@ -79,60 +79,63 @@ class ProfileScreenTest {
 
   @Before
   fun setup() {
-    // Mock dependencies
-    mockReference = mock(StorageReference::class.java)
+    // Initialize Mockito mocks for NavigationActions and FirebaseStorage
+    navigationActions = mock(NavigationActions::class.java)
+    rootMainNavigationActions = mock(NavigationActions::class.java)
     appContentNavigationActions = mock(NavigationActions::class.java)
     mockStorage = mock(FirebaseStorage::class.java)
-    userPreferencesRepository = mock(PreferencesRepository::class.java)
-    preferencesRepository = mock(PreferencesRepository::class.java)
-    userPreferencesViewModel = PreferencesViewModel(userPreferencesRepository)
+    mockReference = mock(StorageReference::class.java)
+
+    // Initialize FakePreferencesRepository
+    preferencesRepository = FakePreferencesRepository()
+    userPreferencesRepository = FakePreferencesRepository()
+
+    // Set initial preferences using Preferences.Key<T> keys
+    runBlocking {
+      preferencesRepository.setPreference(IS_WORKER_KEY, false)
+      preferencesRepository.setPreference(EMAIL_KEY, "mail@example.com")
+      preferencesRepository.setPreference(FIRST_NAME_KEY, "John")
+      preferencesRepository.setPreference(LAST_NAME_KEY, "Doe")
+      preferencesRepository.setPreference(BIRTH_DATE_KEY, "01-01-1990")
+      preferencesRepository.setPreference(IS_SIGN_IN_KEY, true)
+      preferencesRepository.setPreference(UID_KEY, "1")
+
+      userPreferencesRepository.setPreference(WALLET_KEY, 0.0)
+    }
+
+    // Instantiate ViewModels with fake repositories
     preferencesViewModel = PreferencesViewModel(preferencesRepository)
-    rootMainNavigationActions = mock(NavigationActions::class.java)
-    mockFirestore = mock(FirebaseFirestore::class.java)
-    navigationActions = mock(NavigationActions::class.java)
-    firebaseAuth = mock(FirebaseAuth::class.java) // Mock FirebaseAuth
+    userPreferencesViewModel = PreferencesViewModelUserProfile(userPreferencesRepository)
+
+    // Initialize ModeViewModel
     modeViewModel = ModeViewModel()
 
-    whenever(mockStorage.reference).thenReturn(mockReference)
-    // Create real repository instances using mocked Firestore
+    // Stub FirebaseStorage methods
+    runBlocking {
+      // Assuming FirebaseStorage methods are suspend functions; adjust if not
+      whenever(mockStorage.reference).thenReturn(mockReference)
+      whenever(mockStorage.getReference()).thenReturn(mockReference)
+      whenever(mockStorage.getReference(any<String>())).thenReturn(mockReference)
+    }
+
+    // Initialize Firestore repositories if needed
+    // If UserProfileRepositoryFirestore and WorkerProfileRepositoryFirestore are used in tests,
+    // instantiate them with mocked Firestore and Storage
+    val mockFirestore = mock(FirebaseFirestore::class.java)
     userProfileRepositoryFirestore = UserProfileRepositoryFirestore(mockFirestore, mockStorage)
     workerProfileRepositoryFirestore = WorkerProfileRepositoryFirestore(mockFirestore, mockStorage)
-
-    // Create the actual LoggedInAccountViewModel with the repositories
-    loggedInAccountViewModel =
-        LoggedInAccountViewModel(
-            userProfileRepo = userProfileRepositoryFirestore,
-            workerProfileRepo = workerProfileRepositoryFirestore)
-
-    // Explicitly mock specific keys if needed
-    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.FIRST_NAME_KEY))
-        .thenReturn(flowOf("John"))
-    Log.d("ProfileTest", "setup: first name key")
-    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.LAST_NAME_KEY))
-        .thenReturn(flowOf("Doe"))
-    Log.d("ProfileTest", "setup: last name key")
-    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.EMAIL_KEY))
-        .thenReturn(flowOf("mail"))
-    Log.d("ProfileTest", "setup: email key")
-    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.IS_WORKER_KEY))
-        .thenReturn(flowOf(false))
-    Log.d("ProfileTest", "setup: is worker key")
-    whenever(userPreferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.WALLET_KEY))
-        .thenReturn(flowOf(0.0))
-    Log.d("ProfileTest", "setup: wallet key")
-    // Mock navigation actions for testing navigation behavior
   }
 
   @Test
   fun profileScreenDisplaysCorrectly() {
     composeTestRule.setContent {
       ProfileScreen(
-          navigationActions,
-          rootMainNavigationActions,
-          preferencesViewModel,
-          userPreferencesViewModel,
-          appContentNavigationActions,
-          modeViewModel)
+          navigationActions = navigationActions,
+          rootMainNavigationActions = rootMainNavigationActions,
+          preferencesViewModel = preferencesViewModel,
+          userPreferencesViewModel = userPreferencesViewModel,
+          appContentNavigationActions = appContentNavigationActions,
+          modeViewModel = modeViewModel)
     }
 
     // Assert components are displayed
@@ -151,12 +154,12 @@ class ProfileScreenTest {
   fun logoutButtonClickNavigatesCorrectly() {
     composeTestRule.setContent {
       ProfileScreen(
-          navigationActions,
-          rootMainNavigationActions,
-          preferencesViewModel,
-          userPreferencesViewModel,
-          appContentNavigationActions,
-          modeViewModel)
+          navigationActions = navigationActions,
+          rootMainNavigationActions = rootMainNavigationActions,
+          preferencesViewModel = preferencesViewModel,
+          userPreferencesViewModel = userPreferencesViewModel,
+          appContentNavigationActions = appContentNavigationActions,
+          modeViewModel = modeViewModel)
     }
 
     // Perform click on logout button
@@ -170,12 +173,12 @@ class ProfileScreenTest {
   fun settingsOptionsAreDisplayedCorrectly() {
     composeTestRule.setContent {
       ProfileScreen(
-          navigationActions,
-          rootMainNavigationActions,
-          preferencesViewModel,
-          userPreferencesViewModel,
-          appContentNavigationActions,
-          modeViewModel)
+          navigationActions = navigationActions,
+          rootMainNavigationActions = rootMainNavigationActions,
+          preferencesViewModel = preferencesViewModel,
+          userPreferencesViewModel = userPreferencesViewModel,
+          appContentNavigationActions = appContentNavigationActions,
+          modeViewModel = modeViewModel)
     }
 
     // Verify settings options
@@ -187,12 +190,12 @@ class ProfileScreenTest {
   fun resourcesOptionsAreDisplayedCorrectly() {
     composeTestRule.setContent {
       ProfileScreen(
-          navigationActions,
-          rootMainNavigationActions,
-          preferencesViewModel,
-          userPreferencesViewModel,
-          appContentNavigationActions,
-          modeViewModel)
+          navigationActions = navigationActions,
+          rootMainNavigationActions = rootMainNavigationActions,
+          preferencesViewModel = preferencesViewModel,
+          userPreferencesViewModel = userPreferencesViewModel,
+          appContentNavigationActions = appContentNavigationActions,
+          modeViewModel = modeViewModel)
     }
 
     // Verify resources options
@@ -202,8 +205,8 @@ class ProfileScreenTest {
 
   @Test
   fun workerModeSwitchIsNotDisplayedWhenUserIsNotWorker() {
-    // Arrange: Mock IS_WORKER_KEY to return false to simulate a user who is not a worker
-    whenever(preferencesRepository.getPreferenceByKey(IS_WORKER_KEY)).thenReturn(flowOf(false))
+    // Arrange: User is not a worker
+    runBlocking { preferencesRepository.setPreference(IS_WORKER_KEY, false) }
 
     // Act
     composeTestRule.setContent {
@@ -226,8 +229,8 @@ class ProfileScreenTest {
 
   @Test
   fun workerModeSwitchIsDisplayedWhenUserIsWorker() {
-    // Arrange: Mock IS_WORKER_KEY to return true so the user is considered a worker
-    whenever(preferencesRepository.getPreferenceByKey(IS_WORKER_KEY)).thenReturn(flowOf(true))
+    // Arrange: User is a worker
+    runBlocking { preferencesRepository.setPreference(IS_WORKER_KEY, true) }
 
     // Act
     composeTestRule.setContent {
@@ -252,8 +255,9 @@ class ProfileScreenTest {
 
   @Test
   fun togglingWorkerModeSwitchNavigatesToWorkerModeAndChangesMode() {
-    // Arrange: Mock IS_WORKER_KEY to true to ensure the switch is displayed
-    whenever(preferencesRepository.getPreferenceByKey(IS_WORKER_KEY)).thenReturn(flowOf(true))
+    // Arrange: User is a worker
+    runBlocking { preferencesRepository.setPreference(IS_WORKER_KEY, true) }
+
     // Act
     composeTestRule.setContent {
       ProfileScreen(

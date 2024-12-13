@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
@@ -72,7 +73,7 @@ fun GoogleInfoScreen(
     userViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
     navigationActions: NavigationActions,
-    userPreferencesViewModel: PreferencesViewModel
+    userPreferencesViewModel: PreferencesViewModelUserProfile
 ) {
 
   var firstName by remember { mutableStateOf("") }

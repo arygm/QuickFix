@@ -12,6 +12,7 @@ import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -33,7 +34,7 @@ fun rememberFirebaseAuthLauncher(
     accountViewModel: AccountViewModel,
     userViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
-    userPreferencesViewModel: PreferencesViewModel
+    userPreferencesViewModel: PreferencesViewModelUserProfile
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
   val scope = rememberCoroutineScope()
 
@@ -104,7 +105,7 @@ fun signInWithEmailAndFetchAccount(
     accountViewModel: AccountViewModel,
     preferencesViewModel: PreferencesViewModel,
     onResult: (Boolean) -> Unit,
-    userPreferencesViewModel: PreferencesViewModel,
+    userPreferencesViewModel: PreferencesViewModelUserProfile,
     userViewModel: ProfileViewModel
 ) {
   FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
@@ -149,6 +150,7 @@ fun createAccountWithEmailAndPassword(
     accountViewModel: AccountViewModel,
     userViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
+    userPreferencesViewModel: PreferencesViewModelUserProfile,
     onSuccess: () -> Unit,
     onFailure: () -> Unit
 ) {
@@ -181,7 +183,7 @@ fun createAccountWithEmailAndPassword(
                     createdAccount,
                     onSuccess = {
                       setAccountPreferences(preferencesViewModel, createdAccount)
-                      setUserProfilePreferences(preferencesViewModel, defaultUserProfile)
+                      setUserProfilePreferences(userPreferencesViewModel, defaultUserProfile)
                       onSuccess()
                     },
                     onFailure = {

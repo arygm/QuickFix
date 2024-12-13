@@ -55,7 +55,8 @@ import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class SearchWorkerResultScreenTest {
-
+  // there is one failing test in the CI that doesn't normally exist locally on my branch and the
+  // number of tests in not the same (here 333, in the CI 331)
   private lateinit var navigationActions: NavigationActions
   private lateinit var searchViewModel: SearchViewModel
   private lateinit var workerRepository: WorkerProfileRepositoryFirestore

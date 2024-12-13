@@ -27,6 +27,7 @@ import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -63,7 +64,7 @@ fun UserModeNavHost(
     preferencesViewModel: PreferencesViewModel,
     rootMainNavigationActions: NavigationActions,
     userNavigationActions: NavigationActions,
-    userPreferencesViewModel: PreferencesViewModel,
+    userPreferencesViewModel: PreferencesViewModelUserProfile,
     appContentNavigationActions: NavigationActions,
     isOffline: Boolean
 ) {
@@ -217,7 +218,7 @@ fun ProfileNavHost(
     testBitmapPP: Bitmap? = null,
     testLocation: Location = Location(),
     rootMainNavigationActions: NavigationActions,
-    userPreferencesViewModel: PreferencesViewModel,
+    userPreferencesViewModel: PreferencesViewModelUserProfile,
     appContentNavigationActions: NavigationActions,
     modeViewModel: ModeViewModel
 ) {

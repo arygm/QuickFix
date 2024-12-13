@@ -7,6 +7,7 @@ import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
@@ -51,8 +52,9 @@ class SignInWithEmailAndPasswordTest {
   @Mock private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
 
   @Mock private lateinit var preferencesRepository: PreferencesRepository
+  @Mock private lateinit var userPreferencesRepository: PreferencesRepository
 
-  @Mock private lateinit var userPreferencesViewModel: PreferencesViewModel
+  @Mock private lateinit var userPreferencesViewModel: PreferencesViewModelUserProfile
 
   @Mock private lateinit var userViewModel: ProfileViewModel
   @Mock private lateinit var userProfileRepository: UserProfileRepositoryFirestore
@@ -66,7 +68,7 @@ class SignInWithEmailAndPasswordTest {
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
-
+    userPreferencesRepository = mock()
     // Initialize FirebaseApp if necessary
     val context = ApplicationProvider.getApplicationContext<android.content.Context>()
     if (FirebaseApp.getApps(context).isEmpty()) {
@@ -84,7 +86,7 @@ class SignInWithEmailAndPasswordTest {
     // Initialize accountViewModel with the mocked repository
     accountViewModel = AccountViewModel(accountRepository)
     preferencesViewModel = PreferencesViewModel(preferencesRepository)
-    userPreferencesViewModel = PreferencesViewModel(preferencesRepository)
+    userPreferencesViewModel = PreferencesViewModelUserProfile(userPreferencesRepository)
     userViewModel = ProfileViewModel(userProfileRepository)
 
     // Mock FirebaseAuth.getInstance().currentUser

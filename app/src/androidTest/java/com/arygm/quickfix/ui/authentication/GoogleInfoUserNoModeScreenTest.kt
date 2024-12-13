@@ -9,6 +9,7 @@ import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -33,7 +34,7 @@ class GoogleInfoUserNoModeScreenTest {
   private lateinit var preferencesRepository: PreferencesRepository
   private lateinit var preferencesViewModel: PreferencesViewModel
   private lateinit var rootNavigationActions: NavigationActions
-  private lateinit var userPreferencesViewModel: PreferencesViewModel
+  private lateinit var userPreferencesViewModel: PreferencesViewModelUserProfile
   private lateinit var userPreferencesRepository: PreferencesRepository
 
   private val USER_ID_KEY = stringPreferencesKey("user_id")
@@ -47,7 +48,7 @@ class GoogleInfoUserNoModeScreenTest {
     accountRepository = mock()
     profileRepository = mock()
     preferencesRepository = TestPreferencesRepository()
-    userPreferencesViewModel = PreferencesViewModel(userPreferencesRepository)
+    userPreferencesViewModel = PreferencesViewModelUserProfile(userPreferencesRepository)
 
     accountViewModel = AccountViewModel(accountRepository)
 

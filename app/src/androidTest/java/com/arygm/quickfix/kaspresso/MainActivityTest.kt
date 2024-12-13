@@ -208,7 +208,6 @@ class MainActivityTest : TestCase() {
 
       // Attempt to grant permissions
       allowPermissionsIfNeeded()
-      loginToTestAccount()
       // Retry the action until it works with a timeout of 10 seconds
       composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()
@@ -318,11 +317,26 @@ class MainActivityTest : TestCase() {
       }
       composeTestRule.onNodeWithTag(C.Tag.professionalInfoScreencontinueButton).performClick()
       composeTestRule.onNodeWithTag(C.Tag.welcomeOnBoardScreenStayUserButton).performClick()
+      composeTestRule.waitUntil("find the switch", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithTag(C.Tag.buttonSwitch).fetchSemanticsNodes().isNotEmpty()
+      }
+      composeTestRule.onNodeWithTag(C.Tag.buttonSwitch, useUnmergedTree = true).performClick()
+      composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()
+      }
+      onView(withText("Home")) // Match the TextView that has the text "Hello World"
+          .perform(click())
+      onView(withText("Announcement")) // Match the TextView that has the text "Hello World"
+          .perform(click())
+      onView(withText("Messages")) // Match the TextView that has the text "Hello World"
+          .perform(click())
+      onView(withText("Profile")) // Match the TextView that has the text "Hello World"
+          .perform(click())
     }
   }
 
   @Test
-  fun shouldBeAbleToLogin() = run {
+  fun BshouldBeAbleToLogin() = run {
     step("Set up the WelcomeScreen and transit to the register") {
       composeTestRule.activity
 
@@ -331,6 +345,7 @@ class MainActivityTest : TestCase() {
 
       // Attempt to grant permissions
       allowPermissionsIfNeeded()
+      loginToTestAccount()
       // Retry the action until it works with a timeout of 10 seconds
       composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("BottomNavMenu").fetchSemanticsNodes().isNotEmpty()

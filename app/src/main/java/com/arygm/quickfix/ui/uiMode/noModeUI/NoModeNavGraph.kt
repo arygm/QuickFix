@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
 import com.arygm.quickfix.ui.authentication.LogInScreen
@@ -28,7 +29,7 @@ fun NoModeNavHost(
     preferencesViewModel: PreferencesViewModel,
     userViewModel: ProfileViewModel,
     isOffline: Boolean,
-    userPreferencesViewModel: PreferencesViewModel
+    userPreferencesViewModel: PreferencesViewModelUserProfile
 ) {
   val rootSharedModelNavController = rememberNavController()
   val navigationActions = NavigationActions(rootSharedModelNavController)
@@ -73,7 +74,8 @@ fun NoModeNavHost(
                 navigationActions,
                 accountViewModel,
                 userViewModel,
-                preferencesViewModel)
+                preferencesViewModel,
+                userPreferencesViewModel)
           }
           composable(NoModeRoute.GOOGLE_INFO) {
             GoogleInfoScreen(

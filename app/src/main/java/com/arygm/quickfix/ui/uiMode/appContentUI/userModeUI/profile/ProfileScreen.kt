@@ -47,7 +47,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,6 +68,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ressources.C
@@ -77,7 +78,7 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
 import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.utils.clearPreferences
-import com.arygm.quickfix.utils.loadIsWorker
+import com.arygm.quickfix.utils.clearUserProfilePreferences
 import com.arygm.quickfix.utils.setAppMode
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -88,34 +89,19 @@ fun ProfileScreen(
     navigationActions: NavigationActions,
     rootMainNavigationActions: NavigationActions,
     preferencesViewModel: PreferencesViewModel,
-    userPreferencesViewModel: PreferencesViewModel,
+    userPreferencesViewModel: PreferencesViewModelUserProfile,
     appContentNavigationActions: NavigationActions,
     modeViewModel: ModeViewModel
 ) {
-  val displayName = remember { mutableStateOf("Loading...") }
-  val email = remember { mutableStateOf("Loading...") }
-  val wallet = remember { mutableStateOf("Loading...") }
-  val isWorker = remember { mutableStateOf(false) }
-  var isChecked by remember { mutableStateOf(false) } // State to track the switch state
+  val firstName by preferencesViewModel.firstName.collectAsState(initial = "")
+  val lastName by preferencesViewModel.lastName.collectAsState(initial = "")
+  val email by preferencesViewModel.email.collectAsState(initial = "")
+  val wallet by userPreferencesViewModel.wallet.collectAsState(initial = "")
+  val isWorker by preferencesViewModel.isWorkerFlow.collectAsState(initial = false)
 
-  LaunchedEffect(Unit) {
-    preferencesViewModel.loadPreference(key = com.arygm.quickfix.utils.FIRST_NAME_KEY) { firstName
-      ->
-      Log.d("user", "First name: $firstName")
-      preferencesViewModel.loadPreference(key = com.arygm.quickfix.utils.LAST_NAME_KEY) { lastName
-        ->
-        Log.d("user", "Last name: $lastName")
-        displayName.value = capitalizeName(firstName, lastName)
-      }
-    }
-    isWorker.value = loadIsWorker(preferencesViewModel)
-    preferencesViewModel.loadPreference(key = com.arygm.quickfix.utils.EMAIL_KEY) {
-      email.value = it.toString()
-    }
-    userPreferencesViewModel.loadPreference(key = com.arygm.quickfix.utils.WALLET_KEY) {
-      wallet.value = it.toString()
-    }
-  }
+  // Compute display name using the collected first and last names
+  val displayName = capitalizeName(firstName, lastName)
+  var isChecked by remember { mutableStateOf(false) } // State to track the switch state
 
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     val screenWidth = maxWidth
@@ -134,14 +120,14 @@ fun ProfileScreen(
                     horizontalAlignment = Alignment.Start) {
                       Spacer(modifier = Modifier.height(screenHeight * 0.02f))
                       Text(
-                          text = displayName.value,
+                          text = displayName,
                           style = typography.headlineMedium,
                           fontWeight = FontWeight.Bold,
                           fontSize = 32.sp,
                           color = colorScheme.onBackground,
                           modifier = Modifier.testTag("ProfileDisplayName"))
                       Text(
-                          text = email.value,
+                          text = email,
                           style = typography.bodyMedium,
                           color = colorScheme.onSurface,
                           fontSize = 10.sp,
@@ -200,7 +186,7 @@ fun ProfileScreen(
                             Spacer(modifier = Modifier.height(screenHeight * 0.0001f))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                               Text(
-                                  text = "CHF ${wallet.value}",
+                                  text = "CHF ${wallet}",
                                   style =
                                       poppinsTypography.headlineLarge.copy(
                                           fontWeight = FontWeight.Bold, fontSize = 35.sp),
@@ -256,7 +242,7 @@ fun ProfileScreen(
                     }
 
                 Spacer(modifier = Modifier.height(screenHeight * 0.025f))
-                if (isWorker.value) {
+                if (isWorker) {
                   Box(
                       modifier =
                           Modifier.fillMaxWidth()
@@ -379,7 +365,7 @@ fun ProfileScreen(
                             testTag = "Legal",
                             screenWidth = screenWidth,
                         ) { /* Action */}
-                        if (!isWorker.value) {
+                        if (!isWorker) {
                           HorizontalDivider(color = colorScheme.tertiaryContainer)
                           SettingsItem(
                               icon = Icons.Outlined.WorkOutline,
@@ -398,7 +384,7 @@ fun ProfileScreen(
                 Button(
                     onClick = {
                       clearPreferences(preferencesViewModel)
-                      clearPreferences(userPreferencesViewModel)
+                      clearUserProfilePreferences(userPreferencesViewModel)
                       rootMainNavigationActions.navigateTo(RootRoute.NO_MODE)
                       Log.d("user", Firebase.auth.currentUser.toString())
                     },

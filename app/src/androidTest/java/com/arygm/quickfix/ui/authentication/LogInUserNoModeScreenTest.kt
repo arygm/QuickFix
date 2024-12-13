@@ -10,6 +10,7 @@ import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
@@ -40,7 +41,7 @@ class LogInUserNoModeScreenTest {
   private lateinit var mockStorage: FirebaseStorage
   private lateinit var preferencesRepository: PreferencesRepository
   private lateinit var preferencesViewModel: PreferencesViewModel
-  private lateinit var userPreferencesViewModel: PreferencesViewModel
+  private lateinit var userPreferencesViewModel: PreferencesViewModelUserProfile
   private lateinit var userPreferencesRepository: PreferencesRepository
   private lateinit var userViewModel: ProfileViewModel
   private lateinit var userProfileRepository: UserProfileRepositoryFirestore
@@ -51,7 +52,7 @@ class LogInUserNoModeScreenTest {
     userProfileRepository = mock(UserProfileRepositoryFirestore::class.java)
     userViewModel = ProfileViewModel(userProfileRepository)
     userPreferencesRepository = mock(PreferencesRepository::class.java)
-    userPreferencesViewModel = PreferencesViewModel(userPreferencesRepository)
+    userPreferencesViewModel = PreferencesViewModelUserProfile(userPreferencesRepository)
     rootNavigationActions = mock(NavigationActions::class.java)
     mockStorage = mock(FirebaseStorage::class.java)
     storageRef = mock(StorageReference::class.java)

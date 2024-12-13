@@ -15,6 +15,7 @@ import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
@@ -51,7 +52,7 @@ class WelcomeUserNoModeScreenTest {
   private lateinit var preferencesRepository: PreferencesRepository
   private lateinit var preferencesViewModel: PreferencesViewModel
   private lateinit var mockStorage: FirebaseStorage
-  private lateinit var userPreferencesViewModel: PreferencesViewModel
+  private lateinit var userPreferencesViewModel: PreferencesViewModelUserProfile
   private lateinit var userPreferencesRepository: PreferencesRepository
   @Mock private lateinit var storageRef: StorageReference
 
@@ -60,7 +61,7 @@ class WelcomeUserNoModeScreenTest {
   @Before
   fun setup() {
     userPreferencesRepository = mock()
-    userPreferencesViewModel = PreferencesViewModel(userPreferencesRepository)
+    userPreferencesViewModel = PreferencesViewModelUserProfile(userPreferencesRepository)
     rootNavigationActions = mock()
     mockFirestore = mock()
     navigationActions = mock()

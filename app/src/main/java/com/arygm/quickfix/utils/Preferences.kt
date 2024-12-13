@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.UserProfile
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -44,7 +45,7 @@ fun setAccountPreferences(
 }
 
 fun setUserProfilePreferences(
-    preferencesViewModel: PreferencesViewModel,
+    preferencesViewModel: PreferencesViewModelUserProfile,
     userProfile: UserProfile,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
@@ -55,6 +56,13 @@ fun setUserProfilePreferences(
 
 fun clearPreferences(
     preferencesViewModel: PreferencesViewModel,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
+) {
+  CoroutineScope(dispatcher).launch { preferencesViewModel.clearAllPreferences() }
+}
+
+fun clearUserProfilePreferences(
+    preferencesViewModel: PreferencesViewModelUserProfile,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
   CoroutineScope(dispatcher).launch { preferencesViewModel.clearAllPreferences() }

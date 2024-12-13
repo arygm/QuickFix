@@ -16,6 +16,7 @@ import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.model.switchModes.ModeViewModel
@@ -34,7 +35,7 @@ fun AppContentNavGraph(
     isOffline: Boolean,
     rootNavigationActions: NavigationActions,
     modeViewModel: ModeViewModel,
-    userPreferencesViewModel: PreferencesViewModel,
+    userPreferencesViewModel: PreferencesViewModelUserProfile,
     currentAppMode: AppMode
 ) {
   val appContentNavController = rememberNavController()
