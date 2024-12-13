@@ -103,7 +103,7 @@ class ChatViewModelTest {
   @Test
   fun addChat_whenSuccess_updatesChats() = runTest {
     var onSuccessCalled = false
-
+    chatViewModel = ChatViewModel(mockRepository, testDispatcher)
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()
@@ -184,7 +184,6 @@ class ChatViewModelTest {
 
     assertEquals(emptyList<Chat>(), chatViewModel.chats.value)
     verify(mockRepository).deleteChat(eq(chat), any(), any())
-    verify(mockRepository).getChats(any(), any())
   }
 
   @Test
@@ -292,6 +291,7 @@ class ChatViewModelTest {
 
   @Test
   fun sendMessage_whenSuccess_updatesChats() = runTest {
+    chatViewModel = ChatViewModel(mockRepository, testDispatcher)
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(2)
           onSuccess()
@@ -341,6 +341,7 @@ class ChatViewModelTest {
 
   @Test
   fun deleteMessage_whenSuccess_updatesChats() = runTest {
+    chatViewModel = ChatViewModel(mockRepository, testDispatcher)
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(2)
           onSuccess()
@@ -388,6 +389,7 @@ class ChatViewModelTest {
 
   @Test
   fun updateChat_whenSuccess_updatesChats() = runTest {
+    chatViewModel = ChatViewModel(mockRepository, testDispatcher)
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()

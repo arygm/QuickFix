@@ -1,42 +1,55 @@
 package com.arygm.quickfix.model.messaging
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.arygm.quickfix.model.offline.large.QuickFixRoomDatabase
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
+class ChatViewModel(
+    private val repository: ChatRepository,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
+) : ViewModel() {
 
-  private val chats_ = MutableStateFlow<List<Chat>>(emptyList())
-  val chats: StateFlow<List<Chat>> = chats_.asStateFlow()
-  private val selectedChat_ = MutableStateFlow<Chat?>(null)
-  val selectedChat: StateFlow<Chat?> = selectedChat_.asStateFlow()
+  private val _chats = MutableStateFlow<List<Chat>>(emptyList())
+  val chats: StateFlow<List<Chat>> = _chats.asStateFlow()
+  private val _selectedChat = MutableStateFlow<Chat?>(null)
+  val selectedChat: StateFlow<Chat?> = _selectedChat.asStateFlow()
+  private val viewModelScope = CoroutineScope(dispatcher)
 
-  fun getChats() {
+  suspend fun getChats() {
     repository.getChats(
-        onSuccess = { chats_.value = it },
+        onSuccess = { _chats.value = it },
         onFailure = { e -> Log.e("ChatViewModel", "Failed to fetch chats: ${e.message}") })
   }
 
   companion object {
-    val Factory: ViewModelProvider.Factory =
+    fun Factory(context: Context): ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ChatViewModel(ChatRepositoryFirestore(Firebase.firestore)) as T
+            return ChatViewModel(
+                ChatRepositoryFirestore(
+                    QuickFixRoomDatabase.getInstance(context).chatDao(), Firebase.firestore))
+                as T
           }
         }
   }
 
-  fun addChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+  suspend fun addChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     repository.createChat(
         chat = chat,
         onSuccess = {
-          getChats()
+          viewModelScope.launch { getChats() }
           onSuccess()
         },
         onFailure = { e ->
@@ -45,14 +58,14 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
         })
   }
 
-  fun deleteChat(chat: Chat) {
+  suspend fun deleteChat(chat: Chat) {
     repository.deleteChat(
         chat = chat,
-        onSuccess = { getChats() },
+        onSuccess = { viewModelScope.launch { getChats() } },
         onFailure = { e -> Log.e("ChatViewModel", "Failed to delete chat: ${e.message}") })
   }
 
-  fun chatExists(userId: String, workerId: String, onResult: (Boolean, Chat?) -> Unit) {
+  suspend fun chatExists(userId: String, workerId: String, onResult: (Boolean, Chat?) -> Unit) {
     repository.chatExists(
         userId = userId,
         workerId = workerId,
@@ -71,19 +84,19 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
         })
   }
 
-  fun sendMessage(chat: Chat, message: Message) {
+  suspend fun sendMessage(chat: Chat, message: Message) {
     repository.sendMessage(
         chat = chat,
         message = message,
-        onSuccess = { getChats() },
+        onSuccess = { viewModelScope.launch { getChats() } },
         onFailure = { e -> Log.e("ChatViewModel", "Failed to send message: ${e.message}") })
   }
 
-  fun deleteMessage(chat: Chat, message: Message) {
+  suspend fun deleteMessage(chat: Chat, message: Message) {
     repository.deleteMessage(
         chat = chat,
         message = message,
-        onSuccess = { getChats() },
+        onSuccess = { viewModelScope.launch { getChats() } },
         onFailure = { e -> Log.e("ChatViewModel", "Failed to delete message: ${e.message}") })
   }
 
@@ -91,11 +104,11 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     return repository.getRandomUid()
   }
 
-  fun updateChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+  suspend fun updateChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     repository.updateChat(
         chat = chat,
         onSuccess = {
-          getChats()
+          viewModelScope.launch { getChats() }
           onSuccess()
         },
         onFailure = { e ->
@@ -105,10 +118,10 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
   }
 
   fun selectChat(chat: Chat) {
-    selectedChat_.value = chat
+    _selectedChat.value = chat
   }
 
   fun clearSelectedChat() {
-    selectedChat_.value = null
+    _selectedChat.value = null
   }
 }

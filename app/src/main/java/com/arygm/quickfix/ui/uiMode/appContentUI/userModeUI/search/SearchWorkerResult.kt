@@ -652,7 +652,7 @@ fun SearchWorkerResult(
                         contentScale = ContentScale.Crop)
                   }
 
-              // Worker Field and Address under the profile picture
+              // Worker Field and Address under the profile picture.
               Column(
                   modifier =
                       Modifier.fillMaxWidth()

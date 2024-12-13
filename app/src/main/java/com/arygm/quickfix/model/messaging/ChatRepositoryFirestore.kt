@@ -1,11 +1,21 @@
 package com.arygm.quickfix.model.messaging
 
 import android.util.Log
+import com.arygm.quickfix.model.offline.large.messaging.ChatDao
 import com.arygm.quickfix.utils.performFirestoreOperation
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
-class ChatRepositoryFirestore(private val db: FirebaseFirestore) : ChatRepository {
+class ChatRepositoryFirestore(
+    private val dao: ChatDao,
+    private val db: FirebaseFirestore,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+) : ChatRepository {
   private val collectionPath = "chats"
   private val chats by lazy { db.collection(collectionPath) }
 
@@ -17,21 +27,70 @@ class ChatRepositoryFirestore(private val db: FirebaseFirestore) : ChatRepositor
     return db.collection(collectionPath).document().id
   }
 
-  override fun createChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+  override suspend fun createChat(
+      chat: Chat,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    // Add to Room first
+    try {
+      dao.insertChat(chat.toChatEntity())
+      onSuccess()
+    } catch (e: Exception) {
+      onFailure(e)
+      return
+    }
+
     performFirestoreOperation(chats.document(chat.chatId).set(chat), onSuccess, onFailure)
   }
 
-  override fun deleteChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+  override suspend fun deleteChat(
+      chat: Chat,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    // Delete from Room first
+    try {
+      dao.deleteChat(chat.chatId)
+      onSuccess()
+    } catch (e: Exception) {
+      onFailure(e)
+      return
+    }
+
     performFirestoreOperation(chats.document(chat.chatId).delete(), onSuccess, onFailure)
   }
 
-  override fun getChats(onSuccess: (List<Chat>) -> Unit, onFailure: (Exception) -> Unit) {
+  override suspend fun getChats(onSuccess: (List<Chat>) -> Unit, onFailure: (Exception) -> Unit) {
+    var isCached = false
+    try {
+      // Fetch chats from Room (local database)
+      val cachedChatsFlow =
+          dao.getAllChats().map { entities ->
+            entities.map { it.toChat() } // Convert each ChatEntity to Chat
+          }
+
+      // Collect the flow to get the data
+      cachedChatsFlow.collect { cachedChats ->
+        if (cachedChats.isNotEmpty()) {
+          onSuccess(cachedChats)
+          isCached = true
+          return@collect
+        }
+      }
+    } catch (localError: Exception) {
+      Log.e("ChatRepositoryFirestore", "Error fetching local chats: ${localError.message}")
+    }
+    if (isCached) return
     chats
         .get()
         .addOnSuccessListener { result ->
           try {
             val chats = result.documents.mapNotNull { document -> documentToChat(document) }
             Log.d("FirebaseData", "Chats fetched: $chats")
+            CoroutineScope(dispatcher).launch {
+              chats.forEach { chat -> dao.insertChat(chat.toChatEntity()) }
+            }
             onSuccess(chats)
           } catch (e: Exception) {
             Log.e("FirebaseError", "Error deserializing chats: ${e.message}")
@@ -44,23 +103,35 @@ class ChatRepositoryFirestore(private val db: FirebaseFirestore) : ChatRepositor
         }
   }
 
-  override fun chatExists(
+  override suspend fun chatExists(
       userId: String,
       workerId: String,
       onSuccess: (Pair<Boolean, Chat?>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
+    try {
+      // Check locally first
+      val cachedChat = dao.getChatById(userId + workerId)?.toChat()
+      if (cachedChat != null) {
+        onSuccess(Pair(true, cachedChat))
+        return
+      }
+    } catch (localError: Exception) {
+      Log.e("ChatRepositoryFirestore", "Error checking chat locally: ${localError.message}")
+    }
+
+    // Fallback to Firestore if local check fails
     chats
         .whereEqualTo("chatId", userId + workerId)
         .get()
         .addOnSuccessListener { result ->
           val chat = result.toObjects(Chat::class.java).firstOrNull()
-          onSuccess(Pair(result.size() > 0, chat))
+          onSuccess(Pair(chat != null, chat))
         }
         .addOnFailureListener { onFailure(it) }
   }
 
-  override fun sendMessage(
+  override suspend fun sendMessage(
       chat: Chat,
       message: Message,
       onSuccess: () -> Unit,
@@ -68,6 +139,21 @@ class ChatRepositoryFirestore(private val db: FirebaseFirestore) : ChatRepositor
   ) {
     Log.e("ChatRepositoryFirestore", "sendMessage: $message")
     Log.e("ChatRepositoryFirestore", "sendChat: $chat")
+    try {
+      val updatedMessages = chat.messages + message
+      val updatedChat =
+          Chat(
+              chat.chatId,
+              chat.workeruid,
+              chat.useruid,
+              chat.quickFixUid,
+              updatedMessages,
+              chat.chatStatus)
+      dao.insertChat(updatedChat.toChatEntity())
+    } catch (e: Exception) {
+      onFailure(e)
+      return
+    }
 
     val messageData =
         mapOf(
@@ -89,21 +175,52 @@ class ChatRepositoryFirestore(private val db: FirebaseFirestore) : ChatRepositor
         }
   }
 
-  override fun deleteMessage(
+  override suspend fun deleteMessage(
       chat: Chat,
       message: Message,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
+    // Delete from Room first
+    try {
+      val updatedMessages = chat.messages.filter { it.messageId != message.messageId }
+      val updatedChat =
+          Chat(
+              chat.chatId,
+              chat.workeruid,
+              chat.useruid,
+              chat.quickFixUid,
+              updatedMessages,
+              chat.chatStatus)
+      dao.insertChat(updatedChat.toChatEntity())
+      onSuccess()
+    } catch (e: Exception) {
+      onFailure(e)
+      return
+    }
+
     performFirestoreOperation(
         chats.document(chat.chatId).collection("messages").document(message.messageId).delete(),
         onSuccess,
         onFailure)
   }
 
-  override fun updateChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-    performFirestoreOperation(
-        db.collection(collectionPath).document(chat.chatId).set(chat), onSuccess, onFailure)
+  override suspend fun updateChat(
+      chat: Chat,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    // Update Room first
+    try {
+      dao.insertChat(chat.toChatEntity())
+      onSuccess()
+    } catch (e: Exception) {
+      onFailure(e)
+      return
+    }
+
+    // Sync to Firestore
+    performFirestoreOperation(chats.document(chat.chatId).set(chat), onSuccess, onFailure)
   }
 
   private fun documentToChat(document: DocumentSnapshot): Chat? {
