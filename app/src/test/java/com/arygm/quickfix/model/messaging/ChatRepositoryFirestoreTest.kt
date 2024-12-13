@@ -3,6 +3,7 @@ package com.arygm.quickfix.model.messaging
 import androidx.test.core.app.ApplicationProvider
 import com.arygm.quickfix.model.offline.large.messaging.ChatDao
 import com.arygm.quickfix.model.offline.large.messaging.ChatEntity
+import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -355,6 +356,217 @@ class ChatRepositoryFirestoreTest {
       // Verify Firestore set
       verify(mockChatDocument).set(eq(chat))
       assertTrue(successCalled)
+    }
+  }
+
+  @Test
+  fun test_createChat_failure_inRoom() {
+    runBlocking {
+      // Simulate DAO failure
+      whenever(mockDao.insertChat(any())).thenThrow(RuntimeException("Room insert failed"))
+
+      var successCalled = false
+      var failureCalled: Exception? = null
+
+      chatRepositoryFirestore.createChat(
+          chat = chat, onSuccess = { successCalled = true }, onFailure = { failureCalled = it })
+
+      assertFalse(successCalled)
+      assertNotNull(failureCalled)
+      assertEquals("Room insert failed", failureCalled?.message)
+
+      // Firestore should NOT have been called because Room failed first
+      verify(mockChatDocument, times(0)).set(any())
+    }
+  }
+
+  @Test
+  fun test_getChats_failure_fromFirestore() {
+    runBlocking {
+      // Empty local cache
+      whenever(mockDao.getAllChats()).thenReturn(flowOf(emptyList()))
+
+      // Firestore returns failure
+      val failureException = RuntimeException("Firestore get failed")
+      val mockGetTask: Task<QuerySnapshot> = Mockito.mock(Task::class.java) as Task<QuerySnapshot>
+      whenever(mockChatsCollection.get()).thenReturn(mockGetTask)
+      whenever(mockGetTask.addOnSuccessListener(any())).thenReturn(mockGetTask)
+      whenever(mockGetTask.addOnFailureListener(any())).thenAnswer { invocation ->
+        val listener = invocation.arguments[0] as OnFailureListener
+        listener.onFailure(failureException)
+        mockGetTask
+      }
+
+      var returnedChats: List<Chat>? = null
+      var failureCalled: Exception? = null
+
+      chatRepositoryFirestore.getChats(
+          onSuccess = { returnedChats = it }, onFailure = { failureCalled = it })
+
+      assertNull(returnedChats)
+      assertNotNull(failureCalled)
+      assertEquals("Firestore get failed", failureCalled?.message)
+    }
+  }
+
+  @Test
+  fun test_deleteChat_failure_inRoom() {
+    runBlocking {
+      // Simulate DAO failure
+      whenever(mockDao.deleteChat(chat.chatId)).thenThrow(RuntimeException("Room delete failed"))
+
+      var successCalled = false
+      var failureCalled: Exception? = null
+
+      chatRepositoryFirestore.deleteChat(
+          chat = chat, onSuccess = { successCalled = true }, onFailure = { failureCalled = it })
+
+      assertFalse(successCalled)
+      assertNotNull(failureCalled)
+      assertEquals("Room delete failed", failureCalled?.message)
+
+      // Firestore should NOT have been called since Room failed first
+      verify(mockChatDocument, times(0)).delete()
+    }
+  }
+
+  @Test
+  fun test_chatExists_failure_inFirestore() {
+    runBlocking {
+      // No local chat
+      whenever(mockDao.getChatById(chat.chatId)).thenReturn(null)
+
+      // Firestore query fails
+      val failureException = RuntimeException("Firestore query failed")
+      val mockQuery = Mockito.mock(Query::class.java)
+      whenever(mockChatsCollection.whereEqualTo("chatId", chat.chatId)).thenReturn(mockQuery)
+
+      @Suppress("UNCHECKED_CAST")
+      val mockTask: Task<QuerySnapshot> = Mockito.mock(Task::class.java) as Task<QuerySnapshot>
+      whenever(mockQuery.get()).thenReturn(mockTask)
+      whenever(mockTask.addOnSuccessListener(any())).thenReturn(mockTask)
+      whenever(mockTask.addOnFailureListener(any())).thenAnswer { invocation ->
+        val listener = invocation.arguments[0] as OnFailureListener
+        listener.onFailure(failureException)
+        mockTask
+      }
+
+      var result: Pair<Boolean, Chat?>? = null
+      var failureCalled: Exception? = null
+
+      chatRepositoryFirestore.chatExists(
+          userId = "user1",
+          workerId = "worker1",
+          onSuccess = { result = it },
+          onFailure = { failureCalled = it })
+
+      assertNull(result)
+      assertNotNull(failureCalled)
+      assertEquals("Firestore query failed", failureCalled?.message)
+    }
+  }
+
+  @Test
+  fun test_sendMessage_failure_inRoom() {
+    runBlocking {
+      // Simulate DAO insert failure
+      whenever(mockDao.insertChat(any())).thenThrow(RuntimeException("Room insert failed"))
+
+      val message = Message("msg1", "user1", "Hello", com.google.firebase.Timestamp.now())
+
+      var successCalled = false
+      var failureCalled: Exception? = null
+
+      chatRepositoryFirestore.sendMessage(
+          chat = chat,
+          message = message,
+          onSuccess = { successCalled = true },
+          onFailure = { failureCalled = it })
+
+      assertFalse(successCalled)
+      assertNotNull(failureCalled)
+      assertEquals("Room insert failed", failureCalled?.message)
+
+      // Firestore should NOT be updated since Room failed first
+      verify(mockChatDocument, times(0)).update(eq("messages"), any())
+    }
+  }
+
+  @Test
+  fun test_sendMessage_failure_inFirestore() {
+    runBlocking {
+      // DAO insert succeeds
+      whenever(mockDao.insertChat(any())).thenReturn(Unit)
+
+      val failureException = RuntimeException("Firestore update failed")
+      val message = Message("msg1", "user1", "Hello", com.google.firebase.Timestamp.now())
+      val mockUpdateTask: Task<Void> = Mockito.mock(Task::class.java) as Task<Void>
+      whenever(mockChatDocument.update(eq("messages"), any())).thenReturn(mockUpdateTask)
+      whenever(mockUpdateTask.addOnSuccessListener(any())).thenReturn(mockUpdateTask)
+      whenever(mockUpdateTask.addOnFailureListener(any())).thenAnswer { invocation ->
+        val listener = invocation.arguments[0] as OnFailureListener
+        listener.onFailure(failureException)
+        mockUpdateTask
+      }
+
+      var successCalled = false
+      var failureCalled: Exception? = null
+
+      chatRepositoryFirestore.sendMessage(
+          chat = chat,
+          message = message,
+          onSuccess = { successCalled = true },
+          onFailure = { failureCalled = it })
+
+      assertFalse(successCalled)
+      assertNotNull(failureCalled)
+      assertEquals("Firestore update failed", failureCalled?.message)
+    }
+  }
+
+  @Test
+  fun test_deleteMessage_failure_inRoom() {
+    runBlocking {
+      val message =
+          Message("msgToDelete", "user1", "To be deleted", com.google.firebase.Timestamp.now())
+      val chatWithMessage = chat.copy(messages = listOf(message))
+
+      // Simulate DAO failure
+      whenever(mockDao.insertChat(any())).thenThrow(RuntimeException("Room insert failed"))
+
+      var successCalled = false
+      var failureCalled: Exception? = null
+
+      chatRepositoryFirestore.deleteMessage(
+          chat = chatWithMessage,
+          message = message,
+          onSuccess = { successCalled = true },
+          onFailure = { failureCalled = it })
+
+      assertFalse(successCalled)
+      assertNotNull(failureCalled)
+      assertEquals("Room insert failed", failureCalled?.message)
+    }
+  }
+
+  @Test
+  fun test_updateChat_failure_inRoom() {
+    runBlocking {
+      // Simulate DAO failure
+      whenever(mockDao.insertChat(any())).thenThrow(RuntimeException("Room insert failed"))
+
+      var successCalled = false
+      var failureCalled: Exception? = null
+
+      chatRepositoryFirestore.updateChat(
+          chat = chat, onSuccess = { successCalled = true }, onFailure = { failureCalled = it })
+
+      assertFalse(successCalled)
+      assertNotNull(failureCalled)
+      assertEquals("Room insert failed", failureCalled?.message)
+
+      // Firestore should NOT be called since Room failed first
+      verify(mockChatDocument, times(0)).set(any())
     }
   }
 }
