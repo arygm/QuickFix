@@ -33,9 +33,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
@@ -51,7 +53,7 @@ fun SearchOnBoarding(
     accountViewModel: AccountViewModel,
     categoryViewModel: CategoryViewModel
 ) {
-  val profiles = searchViewModel.workerProfiles.collectAsState().value
+  val profiles = searchViewModel.workerProfilesSuggestions.collectAsState()
   val focusManager = LocalFocusManager.current
   val categories = categoryViewModel.categories.collectAsState().value
   Log.d("SearchOnBoarding", "Categories: $categories")
@@ -63,20 +65,14 @@ fun SearchOnBoarding(
 
   var searchQuery by remember { mutableStateOf("") }
   var isWindowVisible by remember { mutableStateOf(false) }
+  var selectedWorker by remember { mutableStateOf<WorkerProfile?>(null) }
 
   // Variables for WorkerSlidingWindowContent
   // These will be set when a worker profile is selected
   var bannerImage by remember { mutableStateOf(R.drawable.moroccan_flag) }
   var profilePicture by remember { mutableStateOf(R.drawable.placeholder_worker) }
   var initialSaved by remember { mutableStateOf(false) }
-  var workerCategory by remember { mutableStateOf("Exterior Painter") }
-  var workerAddress by remember { mutableStateOf("Ecublens, VD") }
-  var description by remember { mutableStateOf("Worker description goes here.") }
-  var includedServices by remember { mutableStateOf(listOf("Service 1", "Service 2")) }
-  var addonServices by remember { mutableStateOf(listOf("Add-on 1", "Add-on 2")) }
-  var workerRating by remember { mutableStateOf(4.5) }
-  var tags by remember { mutableStateOf(listOf("Tag1", "Tag2")) }
-  var reviews by remember { mutableStateOf(listOf("Review 1", "Review 2")) }
+  var workerAddress by remember { mutableStateOf("") }
 
   BoxWithConstraints {
     val widthRatio = maxWidth.value / 411f
@@ -91,10 +87,7 @@ fun SearchOnBoarding(
         content = { padding ->
           Column(
               modifier =
-                  Modifier.fillMaxWidth()
-                      .padding(padding)
-                      .padding(top = 40.dp * heightRatio)
-                      .padding(horizontal = 10.dp * widthRatio),
+                  Modifier.fillMaxWidth().padding(padding).padding(top = 40.dp * heightRatio),
               horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp * heightRatio),
@@ -115,7 +108,7 @@ fun SearchOnBoarding(
                           value = searchQuery,
                           onValueChange = {
                             searchQuery = it
-                            searchViewModel.updateSearchQuery(it)
+                            searchViewModel.searchEngine(it)
                           },
                           shape = CircleShape,
                           textStyle = poppinsTypography.bodyMedium,
@@ -158,26 +151,46 @@ fun SearchOnBoarding(
                 } else {
                   // Show Profiles
                   ProfileResults(
-                      profiles = profiles,
+                      profiles = profiles.value,
                       searchViewModel = searchViewModel,
                       accountViewModel = accountViewModel,
                       listState = listState,
                       heightRatio = heightRatio,
-                      onBookClick = { selectedProfile ->
+                      onBookClick = { selectedProfile, locName ->
+                        selectedWorker = selectedProfile as WorkerProfile
                         // Set up variables for WorkerSlidingWindowContent
                         bannerImage = R.drawable.moroccan_flag
                         profilePicture = R.drawable.placeholder_worker
                         initialSaved = false
-                        workerCategory = selectedProfile.fieldOfWork
-                        workerAddress = selectedProfile.location?.name ?: "Unknown"
-                        description = selectedProfile.description
-                        includedServices = selectedProfile.includedServices.map { it.name }
-                        addonServices = selectedProfile.addOnServices.map { it.name }
-                        workerRating = selectedProfile.rating
-                        tags = selectedProfile.tags
-                        reviews = selectedProfile.reviews.map { it.review }
+                        workerAddress = locName
                         isWindowVisible = true
                       })
+
+                  if (isWindowVisible) {
+                    Popup(
+                        onDismissRequest = { isWindowVisible = false },
+                        alignment = Alignment.Center) {
+                          selectedWorker?.let {
+                            QuickFixSlidingWindowWorker(
+                                isVisible = isWindowVisible,
+                                onDismiss = { isWindowVisible = false },
+                                bannerImage = bannerImage,
+                                profilePicture = profilePicture,
+                                initialSaved = initialSaved,
+                                workerCategory = it.fieldOfWork,
+                                workerAddress = workerAddress,
+                                description = it.description,
+                                includedServices = it.includedServices.map { it.name },
+                                addonServices = it.addOnServices.map { it.name },
+                                workerRating = it.reviews.map { it1 -> it1.rating }.average(),
+                                tags = it.tags,
+                                reviews = it.reviews.map { it.review },
+                                screenHeight = screenHeight,
+                                screenWidth = screenWidth,
+                                onContinueClick = { /* Handle continue */})
+                          }
+                        }
+                  }
                 }
               }
         },
@@ -185,23 +198,5 @@ fun SearchOnBoarding(
             Modifier.pointerInput(Unit) {
               detectTapGestures(onTap = { focusManager.clearFocus() })
             })
-
-    QuickFixSlidingWindowWorker(
-        isVisible = isWindowVisible,
-        onDismiss = { isWindowVisible = false },
-        bannerImage = bannerImage,
-        profilePicture = profilePicture,
-        initialSaved = initialSaved,
-        workerCategory = workerCategory,
-        workerAddress = workerAddress,
-        description = description,
-        includedServices = includedServices,
-        addonServices = addonServices,
-        workerRating = workerRating,
-        tags = tags,
-        reviews = reviews,
-        screenHeight = screenHeight,
-        screenWidth = screenWidth,
-        onContinueClick = { /* Handle continue */})
   }
 }

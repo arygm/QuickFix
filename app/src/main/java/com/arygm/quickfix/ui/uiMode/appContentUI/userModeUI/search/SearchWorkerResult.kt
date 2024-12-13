@@ -97,6 +97,7 @@ import com.arygm.quickfix.utils.GeocoderWrapper
 import com.arygm.quickfix.utils.LocationHelper
 import com.arygm.quickfix.utils.loadUserId
 import java.time.LocalDate
+import kotlin.math.roundToInt
 
 data class SearchFilterButtons(
     val onClick: () -> Unit,
@@ -162,6 +163,7 @@ fun SearchWorkerResult(
   val workerProfiles by searchViewModel.subCategoryWorkerProfiles.collectAsState()
   var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
   val searchSubcategory by searchViewModel.searchSubcategory.collectAsState()
+  val searchCategory by searchViewModel.searchCategory.collectAsState()
 
   var availabilityFilterApplied by remember { mutableStateOf(false) }
   var servicesFilterApplied by remember { mutableStateOf(false) }
@@ -290,7 +292,6 @@ fun SearchWorkerResult(
 
   var isWindowVisible by remember { mutableStateOf(false) }
   var saved by remember { mutableStateOf(false) }
-  val searchQuery by searchViewModel.searchQuery.collectAsState()
 
   // Wrap everything in a Box to allow overlay
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -333,14 +334,14 @@ fun SearchWorkerResult(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top) {
                       Text(
-                          text = searchQuery,
+                          text = searchSubcategory!!.name,
                           style = poppinsTypography.labelMedium,
                           fontSize = 24.sp,
                           fontWeight = FontWeight.SemiBold,
                           textAlign = TextAlign.Center,
                       )
                       Text(
-                          text = "This is a sample description for the $searchQuery result",
+                          text = searchCategory!!.description,
                           style = poppinsTypography.labelSmall,
                           fontWeight = FontWeight.Medium,
                           fontSize = 12.sp,
@@ -461,7 +462,7 @@ fun SearchWorkerResult(
                               rating = profile.reviews.map { review -> review.rating }.average(),
                               reviewCount = profile.reviews.size,
                               location = it1,
-                              price = profile.price.toString(),
+                              price = profile.price.roundToInt().toString(),
                               onBookClick = {
                                 selectedWorker = profile
                                 selectedCityName = cityName
@@ -852,7 +853,7 @@ fun SearchWorkerResult(
                                 .testTag("sliding_window_star_rating_row")) {
                           RatingBar(
                               selectedWorker.rating.toFloat(),
-                              modifier = Modifier.height(20.dp).testTag("starsRow"))
+                              modifier = Modifier.height(screenHeight * 0.03f).testTag("starsRow"))
                         }
                     Spacer(modifier = Modifier.height(screenHeight * 0.01f))
                     LazyRow(

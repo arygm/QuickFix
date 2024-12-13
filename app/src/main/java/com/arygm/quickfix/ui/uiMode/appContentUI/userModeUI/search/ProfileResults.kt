@@ -1,10 +1,7 @@
 package com.arygm.quickfix.ui.search
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
@@ -16,14 +13,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.search.SearchViewModel
+import com.arygm.quickfix.utils.GeocoderWrapper
 import com.arygm.quickfix.utils.LocationHelper
+import kotlin.math.roundToInt
 
 @Composable
 fun ProfileResults(
@@ -33,9 +31,16 @@ fun ProfileResults(
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
     heightRatio: Float,
-    onBookClick: (WorkerProfile) -> Unit
+    geocoderWrapper: GeocoderWrapper = GeocoderWrapper(LocalContext.current),
+    onBookClick: (WorkerProfile, String) -> Unit
 ) {
-  // LazyColumn for displaying profiles
+  fun getCityNameFromCoordinates(latitude: Double, longitude: Double): String? {
+    val addresses = geocoderWrapper.getFromLocation(latitude, longitude, 1)
+    return addresses?.firstOrNull()?.locality
+        ?: addresses?.firstOrNull()?.subAdminArea
+        ?: addresses?.firstOrNull()?.adminArea
+  }
+
   LazyColumn(modifier = modifier.fillMaxWidth(), state = listState) {
     items(profiles.size) { index ->
       val profile = profiles[index]
@@ -68,24 +73,29 @@ fun ProfileResults(
 
       // Render profile card if account data is available
       account?.let { acc ->
-        SearchWorkerProfileResult(
-            modifier =
-                Modifier.padding(vertical = 10.dp * heightRatio)
-                    .fillMaxWidth()
-                    .testTag("worker_profile_result_$index")
-                    .clickable {},
-            profileImage = R.drawable.placeholder_worker,
-            name = "${acc.firstName} ${acc.lastName}",
-            category = profile.fieldOfWork,
-            rating = profile.rating,
-            reviewCount = profile.reviews.size,
-            location = profile.location?.name ?: "Unknown",
-            price = profile.price.toString(),
-            distance = distance,
-            onBookClick = { onBookClick(profile) })
+        var cityName by remember { mutableStateOf<String?>(null) }
+        profile.location.let {
+          cityName =
+              profile.location?.let { it1 ->
+                getCityNameFromCoordinates(it1.latitude, profile.location.longitude)
+              }
+          val displayLoc = if (cityName != null) cityName else "Unknown"
+          if (displayLoc != null) {
+            SearchWorkerProfileResult(
+                modifier =
+                    Modifier.fillMaxWidth().testTag("worker_profile_result_$index").clickable {},
+                profileImage = R.drawable.placeholder_worker,
+                name = "${acc.firstName} ${acc.lastName}",
+                category = profile.fieldOfWork,
+                rating = profile.rating,
+                reviewCount = profile.reviews.size,
+                location = displayLoc,
+                price = profile.price.roundToInt().toString(),
+                distance = distance,
+                onBookClick = { onBookClick(profile, displayLoc) })
+          }
+        }
       }
-
-      Spacer(modifier = Modifier.height(10.dp * heightRatio))
     }
   }
 }

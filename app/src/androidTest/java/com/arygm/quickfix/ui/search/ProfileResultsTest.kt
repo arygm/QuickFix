@@ -100,7 +100,7 @@ class ProfileResultsTest {
           searchViewModel = searchViewModel,
           accountViewModel = accountViewModel,
           heightRatio = 1.0f,
-          onBookClick = { _ -> })
+          onBookClick = { _, _ -> })
     }
 
     // Allow coroutines to complete

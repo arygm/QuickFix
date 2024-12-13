@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,6 +30,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -50,10 +52,22 @@ fun SearchWorkerProfileResult(
     distance: Int? = null
 ) {
   val displayLocation =
-      if (location.length <= 10) {
+      if (location.length <= 9) {
         location
       } else {
-        location.take(10) + "..."
+        location.take(9) + "..."
+      }
+  val displayName =
+      if (name.length <= 25) {
+        name
+      } else {
+        name.take(25) + "..."
+      }
+  val displayCateg =
+      if (category.length <= 21) {
+        category
+      } else {
+        category.take(21) + "..."
       }
   Card(
       shape = RoundedCornerShape(8.dp),
@@ -96,14 +110,14 @@ fun SearchWorkerProfileResult(
                   }
 
                   Text(
-                      text = category,
+                      text = displayCateg,
                       fontSize = 12.sp,
                       fontWeight = FontWeight.SemiBold,
                       fontFamily = poppinsFontFamily,
                       color = colorScheme.onBackground)
 
                   Text(
-                      text = name,
+                      text = displayName,
                       fontSize = 9.sp,
                       fontWeight = FontWeight.Bold,
                       fontFamily = poppinsFontFamily,
@@ -135,28 +149,38 @@ fun SearchWorkerProfileResult(
               Column(
                   horizontalAlignment = Alignment.End,
                   verticalArrangement = Arrangement.SpaceBetween,
-                  modifier = Modifier.weight(0.4f).height(100.dp).padding(end = 8.dp)) {
-                    Column {
-                      Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = "Location",
-                            tint = colorScheme.onSurface,
-                            modifier = Modifier.size(16.dp))
-                        Text(
-                            text = displayLocation,
-                            fontSize = 9.sp,
-                            fontFamily = poppinsFontFamily,
-                            color = colorScheme.onSurface)
-                      }
-                      distance?.let {
-                        Text(
-                            text = "$distance km away",
-                            fontSize = 9.sp,
-                            fontFamily = poppinsFontFamily,
-                            color = colorScheme.onSurface)
-                      }
-                    }
+                  modifier =
+                      Modifier.weight(0.4f)
+                          .height(100.dp)
+                          .padding(end = 8.dp)
+                          .width(IntrinsicSize.Min)) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(0.8f),
+                        horizontalAlignment = Alignment.Start) {
+                          Row(
+                              verticalAlignment = Alignment.CenterVertically,
+                              horizontalArrangement = Arrangement.SpaceBetween) {
+                                Icon(
+                                    imageVector = Icons.Default.LocationOn,
+                                    contentDescription = "Location",
+                                    tint = colorScheme.onSurface,
+                                    modifier = Modifier.size(16.dp))
+                                Text(
+                                    text = displayLocation,
+                                    fontSize = 9.sp,
+                                    fontFamily = poppinsFontFamily,
+                                    color = colorScheme.onSurface,
+                                )
+                              }
+                          distance?.let {
+                            Text(
+                                text = "$distance km away",
+                                fontSize = 9.sp,
+                                fontFamily = poppinsFontFamily,
+                                color = colorScheme.onSurface,
+                                textAlign = TextAlign.End)
+                          }
+                        }
 
                     Row(verticalAlignment = Alignment.Bottom) {
                       QuickFixButton(
