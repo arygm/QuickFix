@@ -11,14 +11,13 @@ data class Chat(
     val messages: List<Message> = emptyList(), // Default empty list
     val chatStatus: ChatStatus = ChatStatus.WAITING_FOR_RESPONSE // Default to waiting for response
 ) {
-    fun toChatEntity(): ChatEntity {
-        return ChatEntity(
-            chatId = chatId,
-            workeruid = workeruid,
-            useruid = useruid,
-            messages = Converters().fromMessagesList(messages)
-        )
-    }
+  fun toChatEntity(): ChatEntity {
+    return ChatEntity(
+        chatId = chatId,
+        workeruid = workeruid,
+        useruid = useruid,
+        messages = Converters().fromMessagesList(messages))
+  }
 }
 
 enum class ChatStatus {

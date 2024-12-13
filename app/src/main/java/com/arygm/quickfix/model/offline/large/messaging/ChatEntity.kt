@@ -12,12 +12,11 @@ data class ChatEntity(
     val useruid: String,
     val messages: String // Serialized List<Message>
 ) {
-    fun toChat(): Chat {
-        return Chat(
-            chatId = chatId,
-            workeruid = workeruid,
-            useruid = useruid,
-            messages = Converters().toMessagesList(messages)
-        )
-    }
+  fun toChat(): Chat {
+    return Chat(
+        chatId = chatId,
+        workeruid = workeruid,
+        useruid = useruid,
+        messages = Converters().toMessagesList(messages))
+  }
 }
