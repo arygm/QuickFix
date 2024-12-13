@@ -38,7 +38,6 @@ import com.arygm.quickfix.ui.navigation.RootRoute
 import com.arygm.quickfix.ui.noModeUI.NoModeNavHost
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.ui.uiMode.appContentUI.AppContentNavGraph
-import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
 import com.arygm.quickfix.utils.LocationHelper
 import com.arygm.quickfix.utils.loadAppMode
 import kotlinx.coroutines.delay
@@ -59,7 +58,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       QuickFixTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            QuickFixApp(testBitmapPP.value, testLocation.value)
+          QuickFixApp(testBitmapPP.value, testLocation.value)
         }
       }
     }
@@ -119,7 +118,7 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
 
   val preferencesViewModel: PreferencesViewModel =
       viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
-    val userPreferencesViewModel: PreferencesViewModel =
+  val userPreferencesViewModel: PreferencesViewModel =
       viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
 
   var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
@@ -133,7 +132,7 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
           "User" -> AppMode.USER
           "Worker" -> AppMode.WORKER
           else -> {
-              AppMode.WORKER
+            AppMode.WORKER
           }
         }
   }
@@ -178,7 +177,8 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
               isOffline,
               navigationActionsRoot,
               modeViewModel,
-              userPreferencesViewModel)
+              userPreferencesViewModel,
+              currentAppMode)
         }
       }
 }

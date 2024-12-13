@@ -10,6 +10,7 @@ import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -39,10 +40,18 @@ class LogInUserNoModeScreenTest {
   private lateinit var mockStorage: FirebaseStorage
   private lateinit var preferencesRepository: PreferencesRepository
   private lateinit var preferencesViewModel: PreferencesViewModel
+  private lateinit var userPreferencesViewModel: PreferencesViewModel
+  private lateinit var userPreferencesRepository: PreferencesRepository
+  private lateinit var userViewModel: ProfileViewModel
+  private lateinit var userProfileRepository: UserProfileRepositoryFirestore
   @Mock private lateinit var storageRef: StorageReference
 
   @Before
   fun setup() {
+    userProfileRepository = mock(UserProfileRepositoryFirestore::class.java)
+    userViewModel = ProfileViewModel(userProfileRepository)
+    userPreferencesRepository = mock(PreferencesRepository::class.java)
+    userPreferencesViewModel = PreferencesViewModel(userPreferencesRepository)
     rootNavigationActions = mock(NavigationActions::class.java)
     mockStorage = mock(FirebaseStorage::class.java)
     storageRef = mock(StorageReference::class.java)
@@ -62,7 +71,13 @@ class LogInUserNoModeScreenTest {
   @Test
   fun testInitialUI() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
+      LogInScreen(
+          navigationActions,
+          accountViewModel,
+          preferencesViewModel,
+          rootNavigationActions,
+          userPreferencesViewModel,
+          userViewModel)
     }
 
     // Check that the scaffold and content boxes are displayed
@@ -97,7 +112,13 @@ class LogInUserNoModeScreenTest {
   @Test
   fun testLoginButtonEnabledWhenFieldsAreFilled() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
+      LogInScreen(
+          navigationActions,
+          accountViewModel,
+          preferencesViewModel,
+          rootNavigationActions,
+          userPreferencesViewModel,
+          userViewModel)
     }
 
     // Input valid email and password
@@ -111,7 +132,13 @@ class LogInUserNoModeScreenTest {
   @Test
   fun testInvalidEmailShowsError() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
+      LogInScreen(
+          navigationActions,
+          accountViewModel,
+          preferencesViewModel,
+          rootNavigationActions,
+          userPreferencesViewModel,
+          userViewModel)
     }
 
     // Input an invalid email
@@ -127,7 +154,13 @@ class LogInUserNoModeScreenTest {
   @Test
   fun testForgotPasswordLinkIsDisplayed() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
+      LogInScreen(
+          navigationActions,
+          accountViewModel,
+          preferencesViewModel,
+          rootNavigationActions,
+          userPreferencesViewModel,
+          userViewModel)
     }
 
     // Check that the forgot password text is displayed
@@ -137,7 +170,13 @@ class LogInUserNoModeScreenTest {
   @Test
   fun testForgotPasswordLinkNavigatesToResetPassword() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
+      LogInScreen(
+          navigationActions,
+          accountViewModel,
+          preferencesViewModel,
+          rootNavigationActions,
+          userPreferencesViewModel,
+          userViewModel)
     }
 
     // Click the "Forgot your password?" link
@@ -150,7 +189,13 @@ class LogInUserNoModeScreenTest {
   @Test
   fun testBackButtonNavigatesBack() {
     composeTestRule.setContent {
-      LogInScreen(navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
+      LogInScreen(
+          navigationActions,
+          accountViewModel,
+          preferencesViewModel,
+          rootNavigationActions,
+          userPreferencesViewModel,
+          userViewModel)
     }
 
     // Click the back button

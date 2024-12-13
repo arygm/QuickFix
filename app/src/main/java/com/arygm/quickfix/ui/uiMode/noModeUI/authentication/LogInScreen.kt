@@ -75,7 +75,7 @@ fun LogInScreen(
     preferencesViewModel: PreferencesViewModel,
     rootNavigationActions: NavigationActions,
     userPreferencesViewModel: PreferencesViewModel,
-userViewModel: ProfileViewModel
+    userViewModel: ProfileViewModel
 ) {
   var errorHasOccurred by remember { mutableStateOf(false) }
   var emailError = false
@@ -287,7 +287,9 @@ userViewModel: ProfileViewModel
                                           Log.e("LogInScreen", "Error occurred while signing in")
                                           errorHasOccurred = true
                                         }
-                                      }, userPreferencesViewModel, userViewModel)
+                                      },
+                                      userPreferencesViewModel,
+                                      userViewModel)
                                 },
                                 buttonColor = colorScheme.primary,
                                 textColor = colorScheme.onPrimary,

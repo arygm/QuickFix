@@ -14,7 +14,7 @@ enum class AppMode(private val modeString: String) {
   }
 }
 
-class ModeViewModel : ViewModel() {
+open class ModeViewModel : ViewModel() {
   private val _currentMode = MutableStateFlow(AppMode.USER)
   val currentMode: StateFlow<AppMode> = _currentMode
 

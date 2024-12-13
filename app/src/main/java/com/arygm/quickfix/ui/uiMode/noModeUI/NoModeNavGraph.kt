@@ -60,7 +60,12 @@ fun NoModeNavHost(
 
           composable(NoModeRoute.LOGIN) {
             LogInScreen(
-                navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions, userPreferencesViewModel, userViewModel)
+                navigationActions,
+                accountViewModel,
+                preferencesViewModel,
+                rootNavigationActions,
+                userPreferencesViewModel,
+                userViewModel)
           }
           composable(NoModeRoute.REGISTER) {
             RegisterScreen(

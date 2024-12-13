@@ -28,12 +28,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arygm.quickfix.BuildConfig
 import com.arygm.quickfix.R
-import com.arygm.quickfix.model.switchModes.AppMode
-import com.arygm.quickfix.model.switchModes.ModeViewModel
-import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTINATIONS
-import com.arygm.quickfix.ui.uiMode.workerMode.navigation.getBottomBarIdWorker
-import com.arygm.quickfix.ui.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
-import com.arygm.quickfix.ui.userModeUI.navigation.getBottomBarIdUser
 import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 
 @Composable
@@ -61,9 +55,7 @@ fun BottomNavigationMenu(
           // Add menu items using the tabList
           tabList.forEachIndexed { index, tab ->
             // Get the drawable resource from the ImageVector
-            val drawableId = tab.icon?.let {
-                convertImageVectorToDrawableId(it)
-            }
+            val drawableId = tab.icon?.let { convertImageVectorToDrawableId(it) }
             val model = drawableId?.let { MeowBottomNavigation.Model(index + 1, it) }
             if (drawableId != null) {
               if (model != null) {
@@ -117,8 +109,7 @@ fun BottomNavigationMenu(
 
   // LaunchedEffect allowing to update the bottom bar accordingly to navigationActions
   LaunchedEffect(currentRoute) {
-    val selectedItemId =
-        getBottomBarId(currentRoute) // Get the ID of the selected item
+    val selectedItemId = getBottomBarId(currentRoute) // Get the ID of the selected item
     selectedTabId.intValue = selectedItemId
     bottomNavigation.value?.show(selectedItemId, true)
   }
@@ -133,11 +124,10 @@ fun convertImageVectorToDrawableId(imageVector: ImageVector): Int {
     Icons.Default.MoreVert -> R.drawable.icon_other
     Icons.Default.Menu -> R.drawable.dashboard
     Icons.Default.Search -> R.drawable.logo
-      Icons.Outlined.Home -> R.drawable.icon_home_vector
-      Icons.Outlined.Campaign -> R.drawable.cmpaign
-      Icons.Filled.MailOutline -> R.drawable.mail
-      Icons.Filled.PersonOutline -> R.drawable.profile
+    Icons.Outlined.Home -> R.drawable.icon_home_vector
+    Icons.Outlined.Campaign -> R.drawable.cmpaign
+    Icons.Filled.MailOutline -> R.drawable.mail
+    Icons.Filled.PersonOutline -> R.drawable.profile
     else -> R.drawable.ic_launcher_background // Default fallback icon
   }
 }
-

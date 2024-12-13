@@ -11,7 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
 
-class UserProfileRepositoryFirestore(
+open class UserProfileRepositoryFirestore(
     private val db: FirebaseFirestore,
     private val storage: FirebaseStorage
 ) : ProfileRepository {

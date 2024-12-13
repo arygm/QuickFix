@@ -96,5 +96,6 @@ object C {
     // Profile screen
     const val workerModeSwitch = "workerModeSwitch"
     const val workerModeSwitchText = "workerModeSwitchText"
+    const val buttonSwitch = "buttonSwitch"
   }
 }

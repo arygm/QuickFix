@@ -54,11 +54,10 @@ class SignInWithEmailAndPasswordTest {
 
   @Mock private lateinit var userPreferencesViewModel: PreferencesViewModel
 
-    @Mock private lateinit var userViewModel: ProfileViewModel
-    @Mock private lateinit var userProfileRepository: UserProfileRepositoryFirestore
+  @Mock private lateinit var userViewModel: ProfileViewModel
+  @Mock private lateinit var userProfileRepository: UserProfileRepositoryFirestore
 
-
-    private lateinit var accountViewModel: AccountViewModel
+  private lateinit var accountViewModel: AccountViewModel
 
   private lateinit var preferencesViewModel: PreferencesViewModel
 
@@ -85,8 +84,8 @@ class SignInWithEmailAndPasswordTest {
     // Initialize accountViewModel with the mocked repository
     accountViewModel = AccountViewModel(accountRepository)
     preferencesViewModel = PreferencesViewModel(preferencesRepository)
-      userPreferencesViewModel = PreferencesViewModel(preferencesRepository)
-      userViewModel = ProfileViewModel(userProfileRepository)
+    userPreferencesViewModel = PreferencesViewModel(preferencesRepository)
+    userViewModel = ProfileViewModel(userProfileRepository)
 
     // Mock FirebaseAuth.getInstance().currentUser
     whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
@@ -141,7 +140,9 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        }, userPreferencesViewModel, userViewModel)
+        },
+        userPreferencesViewModel,
+        userViewModel)
 
     // Simulate task completion
     signInTaskCompletionSource.setResult(authResult)
@@ -182,7 +183,9 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        }, userPreferencesViewModel, userViewModel)
+        },
+        userPreferencesViewModel,
+        userViewModel)
 
     // Simulate task failure
     signInTaskCompletionSource.setException(exception)
@@ -233,7 +236,9 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        }, userPreferencesViewModel, userViewModel)
+        },
+        userPreferencesViewModel,
+        userViewModel)
 
     // Simulate task completion
     signInTaskCompletionSource.setResult(authResult)
@@ -273,7 +278,9 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        }, userPreferencesViewModel, userViewModel)
+        },
+        userPreferencesViewModel,
+        userViewModel)
 
     // Simulate task completion
     signInTaskCompletionSource.setResult(authResult)
@@ -325,7 +332,9 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        }, userPreferencesViewModel, userViewModel)
+        },
+        userPreferencesViewModel,
+        userViewModel)
 
     // Simulate task completion
     signInTaskCompletionSource.setResult(authResult)
@@ -363,7 +372,9 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        }, userPreferencesViewModel, userViewModel)
+        },
+        userPreferencesViewModel,
+        userViewModel)
 
     // Simulate task failure
     signInTaskCompletionSource.setException(exception)
@@ -404,7 +415,9 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        }, userPreferencesViewModel, userViewModel)
+        },
+        userPreferencesViewModel,
+        userViewModel)
 
     // Simulate task failure
     signInTaskCompletionSource.setException(exception)
@@ -445,7 +458,9 @@ class SignInWithEmailAndPasswordTest {
         onResult = { result ->
           onResultCalled = true
           resultValue = result
-        }, userPreferencesViewModel, userViewModel)
+        },
+        userPreferencesViewModel,
+        userViewModel)
 
     // Simulate task failure
     signInTaskCompletionSource.setException(exception)

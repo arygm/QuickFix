@@ -44,13 +44,10 @@ import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.search.SearchWorkerResult
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.ProfileScreen
-import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTINATIONS
-import com.arygm.quickfix.ui.uiMode.workerMode.navigation.getBottomBarIdWorker
 import com.arygm.quickfix.ui.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.ui.userModeUI.navigation.getBottomBarIdUser
-import com.firebase.ui.auth.data.model.User
 import kotlinx.coroutines.delay
 
 @Composable
@@ -80,66 +77,68 @@ fun UserModeNavHost(
   // Initialized here because needed for the bottom bar
 
   val isUser = true // TODO: This variable needs to get its value after the authentication
-    var currentScreen by remember { mutableStateOf<String?>(null) }
-    val shouldShowBottomBar by remember {
-        derivedStateOf {
-                    currentScreen?.let {
-                        it != UserScreen.DISPLAY_UPLOADED_IMAGES && it != UserScreen.SEARCH_LOCATION
-                    } ?: true &&
-                    currentScreen?.let {
-                        it != UserScreen.ACCOUNT_CONFIGURATION && it != UserScreen.TO_WORKER
-                    } ?: true
-        }
+  var currentScreen by remember { mutableStateOf<String?>(null) }
+  val shouldShowBottomBar by remember {
+    derivedStateOf {
+      currentScreen?.let {
+        it != UserScreen.DISPLAY_UPLOADED_IMAGES && it != UserScreen.SEARCH_LOCATION
+      } ?: true &&
+          currentScreen?.let {
+            it != UserScreen.ACCOUNT_CONFIGURATION && it != UserScreen.TO_WORKER
+          } ?: true
     }
+  }
 
-    var showBottomBar by remember { mutableStateOf(false) }
+  var showBottomBar by remember { mutableStateOf(false) }
 
-    // Delay the appearance of the bottom bar
-    LaunchedEffect(shouldShowBottomBar) {
-        if (shouldShowBottomBar) {
-            delay(200) // Adjust the delay duration (in milliseconds) as needed
-            showBottomBar = true
-        } else {
-            showBottomBar = false
-        }
+  // Delay the appearance of the bottom bar
+  LaunchedEffect(shouldShowBottomBar) {
+    if (shouldShowBottomBar) {
+      delay(200) // Adjust the delay duration (in milliseconds) as needed
+      showBottomBar = true
+    } else {
+      showBottomBar = false
     }
-    Scaffold(
-        topBar = { QuickFixOfflineBar(isVisible = isOffline) },
-        bottomBar = {
-            // Show BottomNavigationMenu only if the route is not part of the login/registration flow
-            AnimatedVisibility(
-                visible = showBottomBar,
-                enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from the bottom
-                exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to the bottom
-                modifier = Modifier.testTag("BNM")) {
-                BottomNavigationMenu(
-                    onTabSelect = { selectedDestination ->
-                        // Use this block to navigate based on the selected tab
-                        userNavigationActions.navigateTo(selectedDestination)
-                    },
-                    navigationActions = userNavigationActions,
-                    tabList = USER_TOP_LEVEL_DESTINATIONS,
-                    getBottomBarId = getBottomBarIdUser
-                )
+  }
+  Scaffold(
+      topBar = { QuickFixOfflineBar(isVisible = isOffline) },
+      bottomBar = {
+        // Show BottomNavigationMenu only if the route is not part of the login/registration flow
+        AnimatedVisibility(
+            visible = showBottomBar,
+            enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from the bottom
+            exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to the bottom
+            modifier = Modifier.testTag("BNM")) {
+              BottomNavigationMenu(
+                  onTabSelect = { selectedDestination ->
+                    // Use this block to navigate based on the selected tab
+                    userNavigationActions.navigateTo(selectedDestination)
+                  },
+                  navigationActions = userNavigationActions,
+                  tabList = USER_TOP_LEVEL_DESTINATIONS,
+                  getBottomBarId = getBottomBarIdUser)
             }
-        }) { innerPadding ->
+      }) { innerPadding ->
         NavHost(
             navController = userNavigationActions.navController,
             startDestination = UserRoute.HOME,
             modifier = Modifier.padding(innerPadding),
             enterTransition = {
-                // You can change whatever you want for transitions
-                EnterTransition.None
+              // You can change whatever you want for transitions
+              EnterTransition.None
             },
             exitTransition = {
-                // You can change whatever you want for transitions
-                ExitTransition.None
+              // You can change whatever you want for transitions
+              ExitTransition.None
             }) {
-            composable(UserRoute.HOME) {
-                HomeNavHost(onScreenChange = { currentScreen = it }) // , loggedInAccountViewModel, chatViewModel)
-            }
+              composable(UserRoute.HOME) {
+                HomeNavHost(
+                    onScreenChange = {
+                      currentScreen = it
+                    }) // , loggedInAccountViewModel, chatViewModel)
+              }
 
-            composable(UserRoute.SEARCH) {
+              composable(UserRoute.SEARCH) {
                 SearchNavHost(
                     isUser,
                     userNavigationActions,
@@ -151,13 +150,14 @@ fun UserModeNavHost(
                     onScreenChange = { currentScreen = it },
                     categoryViewModel,
                     preferencesViewModel,
-                    locationViewModel
-                )
-            }
+                    locationViewModel)
+              }
 
-            composable(UserRoute.DASHBOARD) { DashBoardNavHost(onScreenChange = { currentScreen = it }) }
+              composable(UserRoute.DASHBOARD) {
+                DashBoardNavHost(onScreenChange = { currentScreen = it })
+              }
 
-            composable(UserRoute.PROFILE) {
+              composable(UserRoute.PROFILE) {
                 ProfileNavHost(
                     accountViewModel,
                     loggedInAccountViewModel,
@@ -171,11 +171,11 @@ fun UserModeNavHost(
                     testLocation,
                     rootMainNavigationActions,
                     userPreferencesViewModel,
-                    appContentNavigationActions, modeViewModel
-                )
+                    appContentNavigationActions,
+                    modeViewModel)
+              }
             }
-        }
-    }
+      }
 }
 
 @Composable
@@ -230,7 +230,13 @@ fun ProfileNavHost(
   }
   NavHost(navController = profileNavController, startDestination = UserScreen.PROFILE) {
     composable(UserScreen.PROFILE) {
-        ProfileScreen(profileNavigationActions, rootMainNavigationActions, preferencesViewModel, userPreferencesViewModel, appContentNavigationActions,modeViewModel)
+      ProfileScreen(
+          profileNavigationActions,
+          rootMainNavigationActions,
+          preferencesViewModel,
+          userPreferencesViewModel,
+          appContentNavigationActions,
+          modeViewModel)
     }
     composable(UserScreen.ACCOUNT_CONFIGURATION) {
       AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)

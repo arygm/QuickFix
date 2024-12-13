@@ -318,14 +318,14 @@ tasks.register("connectedCheckWithEmulators") {
                 println("Running on Windows")
                 commandLine = listOf(
                     "cmd", "/c",
-                    "firebase emulators:exec --debug --inspect-functions --project quickfix-1fd34 --import=./end2end-data --only firestore,auth \"gradlew.bat connectedCheck\""
+                    "firebase emulators:exec --debug --inspect-functions --project quickfix-1fd34 --import=./end2end-data --only firestore,auth,storage \"gradlew.bat connectedCheck\""
                 )
             } else {
                 // Unix-like command (macOS, Linux)
                 println("Running on Unix-like OS")
                 commandLine = listOf(
                     "/bin/sh", "-c",
-                    "firebase emulators:exec --debug --inspect-functions --project quickfix-1fd34 --import=./end2end-data --only firestore,auth './gradlew connectedCheck'"
+                    "firebase emulators:exec --debug --inspect-functions --project quickfix-1fd34 --import=./end2end-data --only firestore,auth,storage './gradlew connectedCheck'"
                 )
             }
 

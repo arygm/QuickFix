@@ -53,14 +53,12 @@ fun setUserProfilePreferences(
   }
 }
 
-
 fun clearPreferences(
     preferencesViewModel: PreferencesViewModel,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
   CoroutineScope(dispatcher).launch { preferencesViewModel.clearAllPreferences() }
 }
-
 
 // Setter functions
 fun setSignIn(

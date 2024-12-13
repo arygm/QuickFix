@@ -11,10 +11,10 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @Composable
 fun ProfileScreen() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally) {
+  Column(
+      modifier = Modifier.fillMaxSize(),
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Profile Screen", style = poppinsTypography.headlineLarge)
-    }
+      }
 }

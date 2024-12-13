@@ -51,12 +51,16 @@ class WelcomeUserNoModeScreenTest {
   private lateinit var preferencesRepository: PreferencesRepository
   private lateinit var preferencesViewModel: PreferencesViewModel
   private lateinit var mockStorage: FirebaseStorage
+  private lateinit var userPreferencesViewModel: PreferencesViewModel
+  private lateinit var userPreferencesRepository: PreferencesRepository
   @Mock private lateinit var storageRef: StorageReference
 
   private var intentsInitialized = false // Keep track of Intents initialization
 
   @Before
   fun setup() {
+    userPreferencesRepository = mock()
+    userPreferencesViewModel = PreferencesViewModel(userPreferencesRepository)
     rootNavigationActions = mock()
     mockFirestore = mock()
     navigationActions = mock()
@@ -95,7 +99,8 @@ class WelcomeUserNoModeScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          rootNavigationActions)
+          rootNavigationActions,
+          userPreferencesViewModel)
     }
 
     // Check if the background image is displayed
@@ -131,7 +136,8 @@ class WelcomeUserNoModeScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          rootNavigationActions)
+          rootNavigationActions,
+          userPreferencesViewModel)
     }
 
     // Click the "LOG IN TO QUICKFIX" button
@@ -153,7 +159,8 @@ class WelcomeUserNoModeScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          rootNavigationActions)
+          rootNavigationActions,
+          userPreferencesViewModel)
     }
 
     // Click the "REGISTER TO QUICKFIX" button
@@ -179,7 +186,8 @@ class WelcomeUserNoModeScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          rootNavigationActions)
+          rootNavigationActions,
+          userPreferencesViewModel)
     }
 
     // Perform click on the Google Sign-In button

@@ -11,10 +11,10 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @Composable
 fun MessagesScreen() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally) {
+  Column(
+      modifier = Modifier.fillMaxSize(),
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Messages Screen", style = poppinsTypography.headlineLarge)
-    }
+      }
 }

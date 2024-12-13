@@ -246,10 +246,11 @@ fun GoogleInfoScreen(
                                 newAccount,
                                 onSuccess = {
                                   setAccountPreferences(preferencesViewModel, newAccount)
-                                    userViewModel.fetchUserProfile(uid){ userProfile ->
-                                        val profileFetched = userProfile as UserProfile
-                                        setUserProfilePreferences(userPreferencesViewModel, profileFetched)
-                                    }
+                                  userViewModel.fetchUserProfile(uid) { userProfile ->
+                                    val profileFetched = userProfile as UserProfile
+                                    setUserProfilePreferences(
+                                        userPreferencesViewModel, profileFetched)
+                                  }
                                   rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
                                   navigationActions.navigateTo(NoModeRoute.WELCOME)
                                 },

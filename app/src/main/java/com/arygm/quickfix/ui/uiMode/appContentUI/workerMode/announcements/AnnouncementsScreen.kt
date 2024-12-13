@@ -11,10 +11,10 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @Composable
 fun AnnouncementsScreen() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally) {
+  Column(
+      modifier = Modifier.fillMaxSize(),
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Announcements Screen", style = poppinsTypography.headlineLarge)
-    }
+      }
 }
