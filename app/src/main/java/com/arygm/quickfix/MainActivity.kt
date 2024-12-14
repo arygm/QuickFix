@@ -28,7 +28,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
@@ -122,6 +124,11 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
   val userPreferencesViewModel: PreferencesViewModelUserProfile =
       viewModel(factory = PreferencesViewModelUserProfile.Factory(LocalContext.current.dataStore))
 
+  val workerViewModel: ProfileViewModel =
+      viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
+  val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
+  val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
+
   var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
 
   var currentAppMode by remember { mutableStateOf(AppMode.USER) }
@@ -179,7 +186,10 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
               navigationActionsRoot,
               modeViewModel,
               userPreferencesViewModel,
-              currentAppMode)
+              currentAppMode,
+              workerViewModel,
+              categoryViewModel,
+              locationViewModel)
         }
       }
 }

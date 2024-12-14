@@ -35,6 +35,8 @@ import com.arygm.quickfix.kaspresso.screen.WelcomeScreen
 import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.category.Scale
 import com.arygm.quickfix.model.category.Subcategory
+import com.arygm.quickfix.model.switchModes.AppMode
+import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ressources.C.Tag.professionalInfoScreenCategoryField
 import com.arygm.quickfix.ressources.C.Tag.professionalInfoScreenSubcategoryField
@@ -128,6 +130,8 @@ class MainActivityTest : TestCase() {
           FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build()
 
       navigationActions = Mockito.mock(NavigationActions::class.java)
+      val modeViewModel = ModeViewModel()
+      modeViewModel.switchMode(AppMode.USER)
     }
 
     @JvmStatic
@@ -331,6 +335,10 @@ class MainActivityTest : TestCase() {
           .perform(click())
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
+      composeTestRule.waitUntil("find the switch", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithTag(C.Tag.buttonSwitch).fetchSemanticsNodes().isNotEmpty()
+      }
+      composeTestRule.onNodeWithTag(C.Tag.buttonSwitch, useUnmergedTree = true).performClick()
     }
   }
 

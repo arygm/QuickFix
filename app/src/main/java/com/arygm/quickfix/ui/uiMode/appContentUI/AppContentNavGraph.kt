@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -36,19 +35,14 @@ fun AppContentNavGraph(
     rootNavigationActions: NavigationActions,
     modeViewModel: ModeViewModel,
     userPreferencesViewModel: PreferencesViewModelUserProfile,
-    currentAppMode: AppMode
+    currentAppMode: AppMode,
+    workerViewModel: ProfileViewModel,
+    categoryViewModel: CategoryViewModel,
+    locationViewModel: LocationViewModel
 ) {
   val appContentNavController = rememberNavController()
   val appContentNavigationActions = remember { NavigationActions(appContentNavController) }
-  val userNavController = rememberNavController()
-  val userNavigationActions = remember { NavigationActions(userNavController) }
-  val workerNavController = rememberNavController()
-  val workerNavigationActions = remember { NavigationActions(workerNavController) }
 
-  val workerViewModel: ProfileViewModel =
-      viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
-  val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
-  val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
   val startDestination =
       when (currentAppMode) {
         AppMode.USER -> AppContentRoute.USER_MODE
@@ -77,7 +71,6 @@ fun AppContentNavGraph(
               locationViewModel,
               preferencesViewModel,
               rootNavigationActions,
-              userNavigationActions,
               userPreferencesViewModel,
               appContentNavigationActions,
               isOffline)
@@ -85,7 +78,7 @@ fun AppContentNavGraph(
 
         composable(AppContentRoute.WORKER_MODE) {
           WorkerModeNavGraph(
-              workerNavigationActions, isOffline = isOffline, modeViewModel = modeViewModel)
+              modeViewModel, isOffline, appContentNavigationActions, preferencesViewModel)
         }
       }
 }

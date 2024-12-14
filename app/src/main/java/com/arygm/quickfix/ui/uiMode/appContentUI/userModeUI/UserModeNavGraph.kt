@@ -63,11 +63,12 @@ fun UserModeNavHost(
     locationViewModel: LocationViewModel,
     preferencesViewModel: PreferencesViewModel,
     rootMainNavigationActions: NavigationActions,
-    userNavigationActions: NavigationActions,
     userPreferencesViewModel: PreferencesViewModelUserProfile,
     appContentNavigationActions: NavigationActions,
     isOffline: Boolean
 ) {
+  val userNavController = rememberNavController()
+  val userNavigationActions = remember { NavigationActions(userNavController) }
 
   val loggedInAccountViewModel: LoggedInAccountViewModel =
       viewModel(factory = LoggedInAccountViewModel.Factory)

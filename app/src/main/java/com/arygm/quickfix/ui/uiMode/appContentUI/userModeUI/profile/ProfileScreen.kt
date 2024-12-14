@@ -280,9 +280,9 @@ fun ProfileScreen(
                               modifier = Modifier.testTag(C.Tag.buttonSwitch),
                               onCheckedChange = {
                                 isChecked = it
-                                appContentNavigationActions.navigateTo(AppContentRoute.WORKER_MODE)
                                 setAppMode(preferencesViewModel, AppMode.WORKER.name)
                                 modeViewModel.switchMode(AppMode.WORKER)
+                                appContentNavigationActions.navigateTo(AppContentRoute.WORKER_MODE)
                               },
                               colors =
                                   SwitchDefaults.colors(

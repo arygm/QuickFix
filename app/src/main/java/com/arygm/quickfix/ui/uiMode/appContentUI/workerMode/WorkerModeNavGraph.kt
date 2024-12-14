@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
@@ -33,10 +34,13 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun WorkerModeNavGraph(
-    workerNavigationActions: NavigationActions,
     modeViewModel: ModeViewModel,
     isOffline: Boolean,
+    appContentNavigationActions: NavigationActions,
+    preferencesViewModel: PreferencesViewModel
 ) {
+  val workerNavController = rememberNavController()
+  val workerNavigationActions = remember { NavigationActions(workerNavController) }
   var currentScreen by remember { mutableStateOf<String?>(null) }
   val shouldShowBottomBar by remember { derivedStateOf { true } }
 
@@ -82,7 +86,11 @@ fun WorkerModeNavGraph(
                 AnnouncementsNavHost(onScreenChange = { currentScreen = it })
               }
               composable(WorkerRoute.PROFILE) {
-                ProfileNavHost(onScreenChange = { currentScreen = it })
+                ProfileNavHost(
+                    onScreenChange = { currentScreen = it },
+                    appContentNavigationActions,
+                    preferencesViewModel,
+                    modeViewModel)
               }
             }
       }
@@ -135,6 +143,9 @@ fun HomeNavHost(
 @Composable
 fun ProfileNavHost(
     onScreenChange: (String) -> Unit,
+    appContentNavigationActions: NavigationActions,
+    preferencesViewModel: PreferencesViewModel,
+    modeViewModel: ModeViewModel
 ) {
   val profileNavController = rememberNavController()
   val profileNavigationActions = remember { NavigationActions(profileNavController) }
@@ -143,6 +154,12 @@ fun ProfileNavHost(
     onScreenChange(profileNavigationActions.currentScreen)
   }
   NavHost(navController = profileNavController, startDestination = WorkerScreen.PROFILE) {
-    composable(WorkerScreen.PROFILE) { ProfileScreen() }
+    composable(WorkerScreen.PROFILE) {
+      ProfileScreen(
+          preferencesViewModel,
+          modeViewModel,
+          appContentNavigationActions,
+      )
+    }
   }
 }
