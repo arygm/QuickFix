@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -180,5 +181,51 @@ class QuickFixFinderUserNoModeScreenTest {
 
     // Verify SearchOnBoarding is displayed
     composeTestRule.onNodeWithTag("searchContent").assertExists()
+  }
+
+  @Test
+  fun quickFixFinderScreen_searchHidesPagerAndTabRow() {
+    composeTestRule.setContent {
+      QuickFixFinderScreen(
+          navigationActions,
+          navigationActionsRoot,
+          isUser = true,
+          searchViewModel = searchViewModel)
+    }
+
+    // Initially, pager and tabs are visible (Search tab is shown)
+    composeTestRule.onNodeWithTag("quickFixSearchTabRow").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("searchContent").assertIsDisplayed()
+
+    // Perform a search that triggers onSearch callback and sets pager = false
+    composeTestRule.onNodeWithTag("searchContent").performTextInput("Painter")
+
+    // After performing a search, pager is false, so TabRow should no longer be visible
+    // Since we know that onSearch sets pager to false, we check if tab row disappears
+    composeTestRule.onNodeWithTag("quickFixSearchTabRow").assertDoesNotExist()
+  }
+
+  @Test
+  fun quickFixFinderScreen_emptySearchShowsPagerAndTabRow() {
+    composeTestRule.setContent {
+      QuickFixFinderScreen(
+          navigationActions,
+          navigationActionsRoot,
+          isUser = true,
+          searchViewModel = searchViewModel)
+    }
+
+    // Perform a search first
+    composeTestRule.onNodeWithTag("searchContent").performTextInput("Painter")
+    composeTestRule.waitForIdle()
+    // Tab row should be hidden now
+    composeTestRule.onNodeWithTag("quickFixSearchTabRow").assertDoesNotExist()
+
+    // Clear the search input to trigger onSearchEmpty, setting pager = true again
+    composeTestRule.onNodeWithTag("clearSearchIcon", useUnmergedTree = true).performClick()
+    composeTestRule.waitForIdle()
+
+    // Now tab row should be visible again
+    composeTestRule.onNodeWithTag("quickFixSearchTabRow").assertIsDisplayed()
   }
 }

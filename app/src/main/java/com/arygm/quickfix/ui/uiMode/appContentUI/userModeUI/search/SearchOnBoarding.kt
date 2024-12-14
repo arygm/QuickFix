@@ -131,6 +131,7 @@ fun SearchOnBoarding(
                                 imageVector = Icons.Filled.Clear,
                                 contentDescription = "Clear search query",
                                 tint = colorScheme.onBackground,
+                                modifier = Modifier.testTag("clearSearchIcon"),
                             )
                           },
                           placeHolderText = "Find your perfect fix with QuickFix",
@@ -195,8 +196,7 @@ fun SearchOnBoarding(
                         modifier =
                             Modifier.fillMaxWidth()
                                 .padding(top = screenHeight * 0.02f, bottom = screenHeight * 0.01f)
-                                .padding(horizontal = screenWidth * 0.02f)
-                                .testTag("filter_buttons_row"),
+                                .padding(horizontal = screenWidth * 0.02f),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                       FilterRow(
@@ -242,24 +242,22 @@ fun SearchOnBoarding(
         },
         clearEnabled = filterState.availabilityFilterApplied)
 
-    searchSubcategory?.let {
-      ChooseServiceTypeSheet(
-          showServicesBottomSheet,
-          it.tags,
-          selectedServices = filterState.selectedServices,
-          onApplyClick = { services ->
-            filterState.selectedServices = services
-            filterState.servicesFilterApplied = true
-            updateFilteredProfiles()
-          },
-          onDismissRequest = { showServicesBottomSheet = false },
-          onClearClick = {
-            filterState.selectedServices = emptyList()
-            filterState.servicesFilterApplied = false
-            updateFilteredProfiles()
-          },
-          clearEnabled = filterState.servicesFilterApplied)
-    }
+    ChooseServiceTypeSheet(
+        showServicesBottomSheet,
+        emptyList(),
+        selectedServices = filterState.selectedServices,
+        onApplyClick = { services ->
+          filterState.selectedServices = services
+          filterState.servicesFilterApplied = true
+          updateFilteredProfiles()
+        },
+        onDismissRequest = { showServicesBottomSheet = false },
+        onClearClick = {
+          filterState.selectedServices = emptyList()
+          filterState.servicesFilterApplied = false
+          updateFilteredProfiles()
+        },
+        clearEnabled = filterState.servicesFilterApplied)
 
     QuickFixPriceRangeBottomSheet(
         showPriceRangeBottomSheet,
