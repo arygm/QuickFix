@@ -228,7 +228,6 @@ class MainActivityTest : TestCase() {
             .fetchSemanticsNodes()
             .isNotEmpty()
       }
-      composeTestRule.onNodeWithText(item.subcategories[0].name).performClick()
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
       composeTestRule.onNodeWithTag("SetupyourbusinessaccountOption").performClick()

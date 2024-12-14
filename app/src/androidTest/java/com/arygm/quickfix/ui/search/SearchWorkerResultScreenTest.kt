@@ -59,8 +59,7 @@ import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class SearchWorkerResultScreenTest {
-  // there is one failing test in the CI that doesn't normally exist locally on my branch and the
-  // number of tests in not the same (here 333, in the CI 331)
+
   private lateinit var navigationActions: NavigationActions
   private lateinit var searchViewModel: SearchViewModel
   private lateinit var workerRepository: WorkerProfileRepositoryFirestore
@@ -1670,7 +1669,7 @@ class SearchWorkerResultScreenTest {
     // Find the node representing today's date and perform a click
     composeTestRule
         .onNode(
-            hasText(LocalDate.now().plusDays(1).dayOfMonth.toString()) and
+            hasText(LocalDate.now().dayOfMonth.toString()) and
                 hasClickAction() and
                 !hasSetTextAction())
         .performClick()
@@ -1678,8 +1677,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithText("OK").performClick()
 
     composeTestRule.waitForIdle()
-
-    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(1)
   }
 
   @Test

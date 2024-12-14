@@ -160,6 +160,7 @@ fun SearchWorkerResult(
   var showPriceRangeBottomSheet by remember { mutableStateOf(false) }
   var showLocationBottomSheet by remember { mutableStateOf(false) }
   val workerProfiles by searchViewModel.subCategoryWorkerProfiles.collectAsState()
+  Log.d("Chill guy", workerProfiles.size.toString())
   var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
   val searchSubcategory by searchViewModel.searchSubcategory.collectAsState()
 
@@ -452,6 +453,7 @@ fun SearchWorkerResult(
                             profile.location?.let { it1 ->
                               getCityNameFromCoordinates(it1.latitude, profile.location.longitude)
                             }
+                        Log.d("Chill guy", cityName.toString())
                         cityName?.let { it1 ->
                           SearchWorkerProfileResult(
                               modifier = Modifier.testTag("worker_profile_result$index"),
