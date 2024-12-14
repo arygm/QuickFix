@@ -122,7 +122,6 @@ fun WelcomeScreen(
     // Navigate to RegistrationScreen
   }
   // Animation sequence when the Register button is clicked
-  @Composable
   if (startAnimation) {
     LaunchedEffect(Unit) {
       fadeOut = true // Start fade-out animation

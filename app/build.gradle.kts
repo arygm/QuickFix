@@ -10,6 +10,8 @@ plugins {
     alias(libs.plugins.gms)
     id("jacoco")
     id("kotlin-parcelize")
+    id("com.google.devtools.ksp")
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -198,12 +200,16 @@ dependencies {
     implementation(libs.androidx.espresso.intents)
     implementation(libs.mockk.android)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.mockk.agent)
     globalTestImplementation(libs.androidx.espresso.core)
+    ksp(libs.androidx.room.compiler.v250)
+
 
     // ------------- Jetpack Compose ------------------
     val composeBom = platform(libs.compose.bom)
