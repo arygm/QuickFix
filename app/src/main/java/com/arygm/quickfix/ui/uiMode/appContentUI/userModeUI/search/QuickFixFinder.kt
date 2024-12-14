@@ -48,9 +48,9 @@ import com.arygm.quickfix.model.profile.dataFields.Review
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import java.time.LocalTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,187 +67,166 @@ fun QuickFixFinderScreen(
         viewModel(factory = AnnouncementViewModel.Factory),
     categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
 ) {
-    var isWindowVisible by remember { mutableStateOf(false) }
+  var isWindowVisible by remember { mutableStateOf(false) }
 
-    var pager by remember { mutableStateOf(true) }
-    var bannerImage by remember { mutableIntStateOf(R.drawable.moroccan_flag) }
-    var profilePicture by remember { mutableIntStateOf(R.drawable.placeholder_worker) }
-    var initialSaved by remember { mutableStateOf(false) }
-    var workerCategory by remember { mutableStateOf("Exterior Painter") }
-    var workerAddress by remember { mutableStateOf("Ecublens, VD") }
-    var description by remember { mutableStateOf("Worker description goes here.") }
-    var includedServices by remember { mutableStateOf(listOf<String>()) }
-    var addonServices by remember { mutableStateOf(listOf<String>()) }
-    var workerRating by remember { mutableDoubleStateOf(4.5) }
-    var tags by remember { mutableStateOf(listOf<String>()) }
-    var reviews by remember { mutableStateOf(listOf<String>()) }
-    val pagerState = rememberPagerState(pageCount = { 2 })
-    val colorBackground =
-        if (pagerState.currentPage == 0) colorScheme.background else colorScheme.surface
-    val colorButton =
-        if (pagerState.currentPage == 1) colorScheme.background else colorScheme.surface
+  var pager by remember { mutableStateOf(true) }
+  var bannerImage by remember { mutableIntStateOf(R.drawable.moroccan_flag) }
+  var profilePicture by remember { mutableIntStateOf(R.drawable.placeholder_worker) }
+  var initialSaved by remember { mutableStateOf(false) }
+  var workerCategory by remember { mutableStateOf("Exterior Painter") }
+  var workerAddress by remember { mutableStateOf("Ecublens, VD") }
+  var description by remember { mutableStateOf("Worker description goes here.") }
+  var includedServices by remember { mutableStateOf(listOf<String>()) }
+  var addonServices by remember { mutableStateOf(listOf<String>()) }
+  var workerRating by remember { mutableDoubleStateOf(4.5) }
+  var tags by remember { mutableStateOf(listOf<String>()) }
+  var reviews by remember { mutableStateOf(listOf<String>()) }
+  val pagerState = rememberPagerState(pageCount = { 2 })
+  val colorBackground =
+      if (pagerState.currentPage == 0) colorScheme.background else colorScheme.surface
+  val colorButton = if (pagerState.currentPage == 1) colorScheme.background else colorScheme.surface
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val screenHeight = maxHeight
-        val screenWidth = maxWidth
+  BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    val screenHeight = maxHeight
+    val screenWidth = maxWidth
 
-        Scaffold(
-            containerColor = colorBackground,
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = "Quickfix",
-                            color = colorScheme.primary,
-                            style = MaterialTheme.typography.headlineLarge,
-                            modifier = Modifier.testTag("QuickFixFinderTopBarTitle")
-                        )
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = colorBackground),
-                    modifier = Modifier.testTag("QuickFixFinderTopBar")
-                )
-            },
-            content = { padding ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .testTag("QuickFixFinderContent")
-                        .padding(padding),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    val coroutineScope = rememberCoroutineScope()
+    Scaffold(
+        containerColor = colorBackground,
+        topBar = {
+          TopAppBar(
+              title = {
+                Text(
+                    text = "Quickfix",
+                    color = colorScheme.primary,
+                    style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier.testTag("QuickFixFinderTopBarTitle"))
+              },
+              colors = TopAppBarDefaults.topAppBarColors(containerColor = colorBackground),
+              modifier = Modifier.testTag("QuickFixFinderTopBar"))
+        },
+        content = { padding ->
+          Column(
+              modifier = Modifier.fillMaxSize().testTag("QuickFixFinderContent").padding(padding),
+              verticalArrangement = Arrangement.Center,
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                val coroutineScope = rememberCoroutineScope()
 
-
-                    if (pager) {
-                        Surface(
-                            color = colorButton,
-                            shape = RoundedCornerShape(20.dp),
-                            modifier = Modifier
-                                .padding(horizontal = 40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                        ) {
-                            TabRow(
-                                selectedTabIndex = pagerState.currentPage,
-                                containerColor = Color.Transparent,
-                                divider = {},
-                                indicator = {},
-                                modifier =
-                                Modifier
-                                    .padding(horizontal = 1.dp, vertical = 1.dp)
+                if (pager) {
+                  Surface(
+                      color = colorButton,
+                      shape = RoundedCornerShape(20.dp),
+                      modifier =
+                          Modifier.padding(horizontal = 40.dp).clip(RoundedCornerShape(20.dp))) {
+                        TabRow(
+                            selectedTabIndex = pagerState.currentPage,
+                            containerColor = Color.Transparent,
+                            divider = {},
+                            indicator = {},
+                            modifier =
+                                Modifier.padding(horizontal = 1.dp, vertical = 1.dp)
                                     .align(Alignment.CenterHorizontally)
-                                    .testTag("quickFixSearchTabRow")
-                            ) {
-                                QuickFixScreenTab(pagerState, coroutineScope, 0, "Search")
-                                QuickFixScreenTab(pagerState, coroutineScope, 1, "Announce")
+                                    .testTag("quickFixSearchTabRow")) {
+                              QuickFixScreenTab(pagerState, coroutineScope, 0, "Search")
+                              QuickFixScreenTab(pagerState, coroutineScope, 1, "Announce")
                             }
-                        }
-                    }
-
-                    HorizontalPager(
-                        state = pagerState,
-                        userScrollEnabled = false,
-                        modifier = Modifier.testTag("quickFixSearchPager")
-                    ) { page ->
-                        when (page) {
-                            0 -> {
-                                SearchOnBoarding(
-                                    onSearch = { pager = false },
-                                    onSearchEmpty = { pager = true },
-                                    navigationActions,
-                                    navigationActionsRoot,
-                                    searchViewModel,
-                                    accountViewModel,
-                                    categoryViewModel,
-                                    onProfileClick = { profiles ->
-                                        val profile =
-                                            WorkerProfile(
-                                                rating = 4.8,
-                                                fieldOfWork = "Exterior Painter",
-                                                description = "Worker description goes here.",
-                                                location = Location(12.0, 12.0, "Ecublens, VD"),
-                                                quickFixes = listOf("Painting", "Gardening"),
-                                                includedServices =
-                                                listOf(
-                                                    IncludedService("Painting"),
-                                                    IncludedService("Gardening"),
-                                                ),
-                                                addOnServices =
-                                                listOf(
-                                                    AddOnService("Furniture Assembly"),
-                                                    AddOnService("Window Cleaning"),
-                                                ),
-                                                reviews =
-                                                ArrayDeque(
-                                                    listOf(
-                                                        Review("Bob", "nice work", 4.0),
-                                                        Review("Alice", "bad work", 3.5),
-                                                    )
-                                                ),
-                                                profilePicture = "placeholder_worker",
-                                                price = 130.0,
-                                                displayName = "John Doe",
-                                                unavailability_list = emptyList(),
-                                                workingHours = Pair(
-                                                    LocalTime.now(),
-                                                    LocalTime.now()
-                                                ),
-                                                uid = "1234",
-                                                tags = listOf("Painter", "Gardener"),
-                                            )
-
-                                        bannerImage = R.drawable.moroccan_flag
-                                        profilePicture = R.drawable.placeholder_worker
-                                        initialSaved = false
-                                        workerCategory = profile.fieldOfWork
-                                        workerAddress = profile.location?.name ?: "Unknown"
-                                        description = profile.description
-                                        includedServices = profile.includedServices.map { it.name }
-                                        addonServices = profile.addOnServices.map { it.name }
-                                        workerRating = profile.rating
-                                        tags = profile.tags
-                                        reviews = profile.reviews.map { it.review }
-
-                                        isWindowVisible = true
-                                    })
-                            }
-
-                            1 -> {
-                                AnnouncementScreen(
-                                    announcementViewModel,
-                                    loggedInAccountViewModel,
-                                    profileViewModel,
-                                    accountViewModel,
-                                    categoryViewModel,
-                                    navigationActions = navigationActions,
-                                    isUser = isUser
-                                )
-
-                            }
-
-                            else -> Text("Should never happen !")
-                        }
-                    }
+                      }
                 }
-            })
-        QuickFixSlidingWindowWorker(
-            isVisible = isWindowVisible,
-            onDismiss = { isWindowVisible = false },
-            bannerImage = bannerImage,
-            profilePicture = profilePicture,
-            initialSaved = initialSaved,
-            workerCategory = workerCategory,
-            workerAddress = workerAddress,
-            description = description,
-            includedServices = includedServices,
-            addonServices = addonServices,
-            workerRating = workerRating,
-            tags = tags,
-            reviews = reviews,
-            screenHeight = screenHeight,
-            screenWidth = screenWidth,
-            onContinueClick = { /* Handle continue */ })
-    }
+
+                HorizontalPager(
+                    state = pagerState,
+                    userScrollEnabled = false,
+                    modifier = Modifier.testTag("quickFixSearchPager")) { page ->
+                      when (page) {
+                        0 -> {
+                          SearchOnBoarding(
+                              onSearch = { pager = false },
+                              onSearchEmpty = { pager = true },
+                              navigationActions,
+                              navigationActionsRoot,
+                              searchViewModel,
+                              accountViewModel,
+                              categoryViewModel,
+                              onProfileClick = { profiles ->
+                                val profile =
+                                    WorkerProfile(
+                                        rating = 4.8,
+                                        fieldOfWork = "Exterior Painter",
+                                        description = "Worker description goes here.",
+                                        location = Location(12.0, 12.0, "Ecublens, VD"),
+                                        quickFixes = listOf("Painting", "Gardening"),
+                                        includedServices =
+                                            listOf(
+                                                IncludedService("Painting"),
+                                                IncludedService("Gardening"),
+                                            ),
+                                        addOnServices =
+                                            listOf(
+                                                AddOnService("Furniture Assembly"),
+                                                AddOnService("Window Cleaning"),
+                                            ),
+                                        reviews =
+                                            ArrayDeque(
+                                                listOf(
+                                                    Review("Bob", "nice work", 4.0),
+                                                    Review("Alice", "bad work", 3.5),
+                                                )),
+                                        profilePicture = "placeholder_worker",
+                                        price = 130.0,
+                                        displayName = "John Doe",
+                                        unavailability_list = emptyList(),
+                                        workingHours = Pair(LocalTime.now(), LocalTime.now()),
+                                        uid = "1234",
+                                        tags = listOf("Painter", "Gardener"),
+                                    )
+
+                                bannerImage = R.drawable.moroccan_flag
+                                profilePicture = R.drawable.placeholder_worker
+                                initialSaved = false
+                                workerCategory = profile.fieldOfWork
+                                workerAddress = profile.location?.name ?: "Unknown"
+                                description = profile.description
+                                includedServices = profile.includedServices.map { it.name }
+                                addonServices = profile.addOnServices.map { it.name }
+                                workerRating = profile.rating
+                                tags = profile.tags
+                                reviews = profile.reviews.map { it.review }
+
+                                isWindowVisible = true
+                              })
+                        }
+                        1 -> {
+                          AnnouncementScreen(
+                              announcementViewModel,
+                              loggedInAccountViewModel,
+                              profileViewModel,
+                              accountViewModel,
+                              categoryViewModel,
+                              navigationActions = navigationActions,
+                              isUser = isUser)
+                        }
+                        else -> Text("Should never happen !")
+                      }
+                    }
+              }
+        })
+    QuickFixSlidingWindowWorker(
+        isVisible = isWindowVisible,
+        onDismiss = { isWindowVisible = false },
+        bannerImage = bannerImage,
+        profilePicture = profilePicture,
+        initialSaved = initialSaved,
+        workerCategory = workerCategory,
+        workerAddress = workerAddress,
+        description = description,
+        includedServices = includedServices,
+        addonServices = addonServices,
+        workerRating = workerRating,
+        tags = tags,
+        reviews = reviews,
+        screenHeight = screenHeight,
+        screenWidth = screenWidth,
+        onContinueClick = { /* Handle continue */})
+  }
 }
 
 @Composable
@@ -257,29 +236,23 @@ fun QuickFixScreenTab(
     currentPage: Int,
     title: String
 ) {
-    Tab(
-        selected = pagerState.currentPage == currentPage,
-        onClick = { coroutineScope.launch { pagerState.scrollToPage(currentPage) } },
-        modifier =
-        Modifier
-            .padding(horizontal = 4.dp, vertical = 4.dp)
-            .clip(RoundedCornerShape(13.dp))
-            .background(
-                if (pagerState.currentPage == currentPage) colorScheme.primary
-                else Color.Transparent
-            )
-            .testTag("tab$title")
-    ) {
+  Tab(
+      selected = pagerState.currentPage == currentPage,
+      onClick = { coroutineScope.launch { pagerState.scrollToPage(currentPage) } },
+      modifier =
+          Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+              .clip(RoundedCornerShape(13.dp))
+              .background(
+                  if (pagerState.currentPage == currentPage) colorScheme.primary
+                  else Color.Transparent)
+              .testTag("tab$title")) {
         Text(
             title,
             color =
-            if (pagerState.currentPage == currentPage) colorScheme.background
-            else colorScheme.tertiaryContainer,
+                if (pagerState.currentPage == currentPage) colorScheme.background
+                else colorScheme.tertiaryContainer,
             style = MaterialTheme.typography.titleMedium,
             modifier =
-            Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .testTag("tabText$title")
-        )
-    }
+                Modifier.padding(horizontal = 16.dp, vertical = 8.dp).testTag("tabText$title"))
+      }
 }

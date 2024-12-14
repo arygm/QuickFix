@@ -62,134 +62,116 @@ fun ExpandableCategoryItem(
     searchViewModel: SearchViewModel,
     navigationActions: NavigationActions
 ) {
-    val subCategories = remember { item.subcategories }
-    val interactionSource = remember { MutableInteractionSource() }
-    val rotationAngle by animateFloatAsState(targetValue = if (isExpanded) 180f else 0f, label = "")
+  val subCategories = remember { item.subcategories }
+  val interactionSource = remember { MutableInteractionSource() }
+  val rotationAngle by animateFloatAsState(targetValue = if (isExpanded) 180f else 0f, label = "")
 
-    Column(
-        modifier =
-        Modifier
-            .fillMaxWidth()
-            .shadow(5.dp, shape = RoundedCornerShape(8.dp), clip = false)
-            .background(color = colorScheme.surface, shape = RoundedCornerShape(12.dp))
-            .clickable(interactionSource = interactionSource, indication = null) {
+  Column(
+      modifier =
+          Modifier.fillMaxWidth()
+              .shadow(5.dp, shape = RoundedCornerShape(8.dp), clip = false)
+              .background(color = colorScheme.surface, shape = RoundedCornerShape(12.dp))
+              .clickable(interactionSource = interactionSource, indication = null) {
                 onExpandedChange(!isExpanded)
-            }
-            .semantics { testTag = C.Tag.expandableCategoryItem }) {
+              }
+              .semantics { testTag = C.Tag.expandableCategoryItem }) {
         Row(
             modifier =
-            Modifier
-                .padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
-                .background(backgroundColor),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Icon
-            nameToIcon(item.name)?.let {
+                Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
+                    .background(backgroundColor),
+            verticalAlignment = Alignment.CenterVertically) {
+              // Icon
+              nameToIcon(item.name)?.let {
                 Icon(
                     imageVector = it,
                     contentDescription = null,
                     tint = colorScheme.primary,
-                    modifier = Modifier.testTag("categoryIcon")
-                )
-            }
+                    modifier = Modifier.testTag("categoryIcon"))
+              }
 
-            Spacer(modifier = Modifier.width(10.dp))
+              Spacer(modifier = Modifier.width(10.dp))
 
-            // Text Column
-            Column(modifier = Modifier.weight(7f)) {
+              // Text Column
+              Column(modifier = Modifier.weight(7f)) {
                 Text(
                     text = item.name,
                     color = colorScheme.onBackground,
                     fontWeight = FontWeight.SemiBold,
                     fontFamily = poppinsFontFamily,
-                    fontSize = 16.sp
-                )
+                    fontSize = 16.sp)
                 Text(
                     text = item.description,
                     color = colorScheme.onSecondary,
                     fontWeight = FontWeight.Medium,
                     fontFamily = poppinsFontFamily,
                     fontSize = 11.sp,
-                    lineHeight = 16.sp
-                )
+                    lineHeight = 16.sp)
+              }
+              Icon(
+                  imageVector = Icons.Filled.KeyboardArrowDown,
+                  contentDescription = if (isExpanded) "Collapse" else "Expand",
+                  modifier = Modifier.graphicsLayer(rotationZ = rotationAngle).weight(1f))
             }
-            Icon(
-                imageVector = Icons.Filled.KeyboardArrowDown,
-                contentDescription = if (isExpanded) "Collapse" else "Expand",
-                modifier = Modifier
-                    .graphicsLayer(rotationZ = rotationAngle)
-                    .weight(1f)
-            )
-        }
         AnimatedVisibility(
             visible = isExpanded,
             enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            Column(
-                modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 3.dp)
-                    .semantics {
+            exit = shrinkVertically() + fadeOut()) {
+              Column(
+                  modifier =
+                      Modifier.fillMaxWidth().padding(top = 3.dp).semantics {
                         testTag = C.Tag.subCategories
-                    }) {
-                subCategories.forEach {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 0.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            modifier =
-                            Modifier
-                                .weight(10f)
-                                .semantics {
-                                    testTag = "${C.Tag.subCategoryName}_${it.name}"
-                                }
-                                .clickable {
-                                    searchViewModel.updateSearchQuery(it.name)
-                                    searchViewModel.setSearchSubcategory(it)
-                                    searchViewModel.filterWorkersBySubcategory(it.name) {
-                                        navigationActions.navigateTo(
-                                            UserScreen.SEARCH_WORKER_RESULT
-                                        )
-                                    }
-                                },
-                            text = it.name,
-                            color = colorScheme.onSecondary,
-                            fontWeight = FontWeight.Medium,
-                            fontFamily = poppinsFontFamily,
-                            fontSize = 11.sp,
-                            lineHeight = 16.sp
-                        )
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = if (isExpanded) "Collapse" else "Expand",
-                            modifier =
-                            Modifier
-                                .weight(1f)
-                                .clickable {}
-                                .semantics {
-                                    testTag = "${C.Tag.enterSubCateIcon}_${it.name}"
-                                })
-                        Spacer(modifier = Modifier.height(10.dp))
+                      }) {
+                    subCategories.forEach {
+                      Row(
+                          modifier = Modifier.padding(horizontal = 10.dp, vertical = 0.dp),
+                          verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                modifier =
+                                    Modifier.weight(10f)
+                                        .semantics {
+                                          testTag = "${C.Tag.subCategoryName}_${it.name}"
+                                        }
+                                        .clickable {
+                                          searchViewModel.updateSearchQuery(it.name)
+                                          searchViewModel.setSearchSubcategory(it)
+                                          searchViewModel.filterWorkersBySubcategory(it.name) {
+                                            navigationActions.navigateTo(
+                                                UserScreen.SEARCH_WORKER_RESULT)
+                                          }
+                                        },
+                                text = it.name,
+                                color = colorScheme.onSecondary,
+                                fontWeight = FontWeight.Medium,
+                                fontFamily = poppinsFontFamily,
+                                fontSize = 11.sp,
+                                lineHeight = 16.sp)
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = if (isExpanded) "Collapse" else "Expand",
+                                modifier =
+                                    Modifier.weight(1f)
+                                        .clickable {}
+                                        .semantics {
+                                          testTag = "${C.Tag.enterSubCateIcon}_${it.name}"
+                                        })
+                            Spacer(modifier = Modifier.height(10.dp))
+                          }
                     }
-                }
+                  }
             }
-        }
-    }
+      }
 }
 
 private fun nameToIcon(displayName: String?): ImageVector? {
-    return when (displayName) {
-        "Painting" -> Icons.Outlined.ImagesearchRoller
-        "Plumbing" -> Icons.Outlined.Plumbing
-        "Gardening" -> Icons.Outlined.NaturePeople
-        "Electrical Work" -> Icons.Outlined.ElectricalServices
-        "Handyman Services" -> Icons.Outlined.Handyman
-        "Cleaning Services" -> Icons.Outlined.CleaningServices
-        "Carpentry" -> Icons.Outlined.Carpenter
-        "Moving Services" -> Icons.Outlined.LocalShipping
-        else -> null
-    }
+  return when (displayName) {
+    "Painting" -> Icons.Outlined.ImagesearchRoller
+    "Plumbing" -> Icons.Outlined.Plumbing
+    "Gardening" -> Icons.Outlined.NaturePeople
+    "Electrical Work" -> Icons.Outlined.ElectricalServices
+    "Handyman Services" -> Icons.Outlined.Handyman
+    "Cleaning Services" -> Icons.Outlined.CleaningServices
+    "Carpentry" -> Icons.Outlined.Carpenter
+    "Moving Services" -> Icons.Outlined.LocalShipping
+    else -> null
+  }
 }

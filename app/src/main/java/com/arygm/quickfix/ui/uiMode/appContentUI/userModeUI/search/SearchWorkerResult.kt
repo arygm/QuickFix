@@ -84,6 +84,7 @@ fun SearchWorkerResult(
   var showServicesBottomSheet by remember { mutableStateOf(false) }
   var showPriceRangeBottomSheet by remember { mutableStateOf(false) }
   var showLocationBottomSheet by remember { mutableStateOf(false) }
+  var selectedLocationIndex by remember { mutableStateOf<Int?>(null) }
 
   var isWindowVisible by remember { mutableStateOf(false) }
   var saved by remember { mutableStateOf(false) }
@@ -288,8 +289,14 @@ fun SearchWorkerResult(
           filterState.selectedDays = days
           filterState.selectedHour = hour
           filterState.selectedMinute = minute
+          if (filterState.availabilityFilterApplied) {
+            updateFilteredProfiles()
+          } else {
+            filteredWorkerProfiles =
+                searchViewModel.filterWorkersByAvailability(
+                    filteredWorkerProfiles, days, hour, minute)
+          }
           filterState.availabilityFilterApplied = true
-          updateFilteredProfiles()
         },
         onClearClick = {
           filterState.availabilityFilterApplied = false
@@ -340,7 +347,10 @@ fun SearchWorkerResult(
         showLocationBottomSheet,
         userProfile = userProfile,
         phoneLocation = filterState.phoneLocation,
+        selectedLocationIndex = selectedLocationIndex,
         onApplyClick = { location, max ->
+          selectedLocationIndex = userProfile.locations.indexOf(location) + 1
+
           filterState.selectedLocation = location
           if (location == Location(0.0, 0.0, "Default")) {
             Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
@@ -357,6 +367,7 @@ fun SearchWorkerResult(
           filterState.maxDistance = 0
           filterState.locationFilterApplied = false
           updateFilteredProfiles()
+          selectedLocationIndex = null
         },
         clearEnabled = filterState.locationFilterApplied)
 

@@ -19,11 +19,9 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.printToLog
 import androidx.datastore.preferences.core.Preferences
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.model.account.Account
@@ -483,7 +481,6 @@ class SearchWorkerResultScreenTest {
     // Check for each tag
     val tags = listOf("Painter", "Gardener")
 
-    composeTestRule.onRoot().printToLog("root")
     tags.forEach { tag -> composeTestRule.onNodeWithText(tag).assertExists().assertIsDisplayed() }
   }
 
@@ -1670,7 +1667,7 @@ class SearchWorkerResultScreenTest {
     // Find the node representing today's date and perform a click
     composeTestRule
         .onNode(
-            hasText(LocalDate.now().plusDays(1).dayOfMonth.toString()) and
+            hasText(LocalDate.now().plusDays(0).dayOfMonth.toString()) and
                 hasClickAction() and
                 !hasSetTextAction())
         .performClick()
@@ -1679,7 +1676,7 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.waitForIdle()
 
-    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(1)
   }
 
   @Test
@@ -1729,7 +1726,6 @@ class SearchWorkerResultScreenTest {
 
     // Click Apply
     composeTestRule.onNodeWithTag("applyButton").performClick()
-    composeTestRule.waitForIdle()
 
     // Verify that only the worker at "Home" is displayed (worker1)
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(1)
@@ -1744,7 +1740,7 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.onNodeWithTag("applyButton").assertIsEnabled()
 
-    composeTestRule.onNodeWithTag("locationOptionRow1").performClick()
+    composeTestRule.onNodeWithTag("locationOptionRow0").performClick()
 
     // Clear the filter
     composeTestRule.onNodeWithTag("resetButton").performClick()
