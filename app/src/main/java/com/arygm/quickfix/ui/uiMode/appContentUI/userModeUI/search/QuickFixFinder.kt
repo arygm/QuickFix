@@ -33,7 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
@@ -68,7 +68,6 @@ fun QuickFixFinderScreen(
     categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
 ) {
   var isWindowVisible by remember { mutableStateOf(false) }
-
   var pager by remember { mutableStateOf(true) }
   var bannerImage by remember { mutableIntStateOf(R.drawable.moroccan_flag) }
   var profilePicture by remember { mutableIntStateOf(R.drawable.placeholder_worker) }
@@ -114,20 +113,25 @@ fun QuickFixFinderScreen(
                 if (pager) {
                   Surface(
                       color = colorButton,
-                      shape = RoundedCornerShape(20.dp),
+                      shape = RoundedCornerShape(screenWidth * 0.05f),
                       modifier =
-                          Modifier.padding(horizontal = 40.dp).clip(RoundedCornerShape(20.dp))) {
+                          Modifier.padding(horizontal = screenWidth * 0.1f)
+                              .clip(RoundedCornerShape(screenWidth * 0.05f))) {
                         TabRow(
                             selectedTabIndex = pagerState.currentPage,
                             containerColor = Color.Transparent,
                             divider = {},
                             indicator = {},
                             modifier =
-                                Modifier.padding(horizontal = 1.dp, vertical = 1.dp)
+                                Modifier.padding(
+                                        horizontal = screenWidth * 0.0025f,
+                                        vertical = screenWidth * 0.0025f)
                                     .align(Alignment.CenterHorizontally)
                                     .testTag("quickFixSearchTabRow")) {
-                              QuickFixScreenTab(pagerState, coroutineScope, 0, "Search")
-                              QuickFixScreenTab(pagerState, coroutineScope, 1, "Announce")
+                              QuickFixScreenTab(
+                                  pagerState, coroutineScope, 0, "Search", screenWidth)
+                              QuickFixScreenTab(
+                                  pagerState, coroutineScope, 1, "Announce", screenWidth)
                             }
                       }
                 }
@@ -145,8 +149,7 @@ fun QuickFixFinderScreen(
                               navigationActionsRoot,
                               searchViewModel,
                               accountViewModel,
-                              categoryViewModel,
-                              onProfileClick = { profiles ->
+                              categoryViewModel) { profiles ->
                                 val profile =
                                     WorkerProfile(
                                         rating = 4.8,
@@ -192,7 +195,7 @@ fun QuickFixFinderScreen(
                                 reviews = profile.reviews.map { it.review }
 
                                 isWindowVisible = true
-                              })
+                              }
                         }
                         1 -> {
                           AnnouncementScreen(
@@ -209,6 +212,7 @@ fun QuickFixFinderScreen(
                     }
               }
         })
+
     QuickFixSlidingWindowWorker(
         isVisible = isWindowVisible,
         onDismiss = { isWindowVisible = false },
@@ -234,14 +238,15 @@ fun QuickFixScreenTab(
     pagerState: PagerState,
     coroutineScope: CoroutineScope,
     currentPage: Int,
-    title: String
+    title: String,
+    screenWidth: Dp
 ) {
   Tab(
       selected = pagerState.currentPage == currentPage,
       onClick = { coroutineScope.launch { pagerState.scrollToPage(currentPage) } },
       modifier =
-          Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
-              .clip(RoundedCornerShape(13.dp))
+          Modifier.padding(horizontal = screenWidth * 0.01f, vertical = screenWidth * 0.01f)
+              .clip(RoundedCornerShape(screenWidth * 0.0325f))
               .background(
                   if (pagerState.currentPage == currentPage) colorScheme.primary
                   else Color.Transparent)
@@ -253,6 +258,7 @@ fun QuickFixScreenTab(
                 else colorScheme.tertiaryContainer,
             style = MaterialTheme.typography.titleMedium,
             modifier =
-                Modifier.padding(horizontal = 16.dp, vertical = 8.dp).testTag("tabText$title"))
+                Modifier.padding(horizontal = screenWidth * 0.04f, vertical = screenWidth * 0.02f)
+                    .testTag("tabText$title"))
       }
 }

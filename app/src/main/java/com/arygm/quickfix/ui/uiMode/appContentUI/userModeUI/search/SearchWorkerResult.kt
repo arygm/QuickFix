@@ -60,9 +60,7 @@ import com.arygm.quickfix.utils.LocationHelper
 import com.arygm.quickfix.utils.loadUserId
 import java.time.LocalTime
 
-@OptIn(
-    ExperimentalMaterial3Api::class,
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchWorkerResult(
     navigationActions: NavigationActions,
@@ -74,6 +72,7 @@ fun SearchWorkerResult(
   val context = LocalContext.current
   val locationHelper = LocationHelper(context, MainActivity())
 
+  // State that manages all filters and their applied logic
   val filterState = rememberSearchFiltersState()
 
   val workerProfiles by searchViewModel.subCategoryWorkerProfiles.collectAsState()
@@ -87,7 +86,6 @@ fun SearchWorkerResult(
   var selectedLocationIndex by remember { mutableStateOf<Int?>(null) }
 
   var isWindowVisible by remember { mutableStateOf(false) }
-  var saved by remember { mutableStateOf(false) }
 
   var bannerImage by remember { mutableIntStateOf(R.drawable.moroccan_flag) }
   var profilePicture by remember { mutableIntStateOf(R.drawable.placeholder_worker) }
@@ -101,14 +99,13 @@ fun SearchWorkerResult(
   var tags by remember { mutableStateOf(listOf<String>()) }
   var reviews by remember { mutableStateOf(listOf<String>()) }
 
-  // User and location setup
   var userProfile = UserProfile(locations = emptyList(), announcements = emptyList(), uid = "0")
   var uid by remember { mutableStateOf("Loading...") }
 
   val searchQuery by searchViewModel.searchQuery.collectAsState()
   val searchSubcategory by searchViewModel.searchSubcategory.collectAsState()
 
-  // Fetch user id and profile
+  // Fetch user and set base location
   LaunchedEffect(Unit) {
     uid = loadUserId(preferencesViewModel)
     userProfileViewModel.fetchUserProfile(uid) { profile ->
@@ -120,7 +117,6 @@ fun SearchWorkerResult(
     }
   }
 
-  // Location initialization
   LaunchedEffect(Unit) {
     if (locationHelper.checkPermissions()) {
       locationHelper.getCurrentLocation { location ->
@@ -139,6 +135,7 @@ fun SearchWorkerResult(
 
   val listState = rememberLazyListState()
 
+  // Update the displayed profiles after filters have changed
   fun updateFilteredProfiles() {
     filteredWorkerProfiles = filterState.reapplyFilters(workerProfiles, searchViewModel)
   }
@@ -174,7 +171,7 @@ fun SearchWorkerResult(
                 }
               },
               actions = {
-                IconButton(onClick = { /* Handle search */}) {
+                IconButton(onClick = {}) {
                   Icon(
                       imageVector = Icons.Default.Search,
                       contentDescription = "Search",
@@ -221,7 +218,9 @@ fun SearchWorkerResult(
                       showFilterButtons = showFilterButtons,
                       toggleFilterButtons = { showFilterButtons = !showFilterButtons },
                       listOfButtons = listOfButtons,
-                      modifier = Modifier.padding(bottom = screenHeight * 0.01f))
+                      modifier = Modifier.padding(bottom = screenHeight * 0.01f),
+                      screenWidth = screenWidth,
+                      screenHeight = screenHeight)
                 }
 
                 ProfileResults(
@@ -231,7 +230,7 @@ fun SearchWorkerResult(
                     searchViewModel = searchViewModel,
                     accountViewModel = accountViewModel,
                     onBookClick = { selectedProfile ->
-                      // Mock data for demonstration, replace with actual data
+                      // Mock data for demonstration
                       val profile =
                           WorkerProfile(
                               rating = 4.8,
@@ -289,14 +288,8 @@ fun SearchWorkerResult(
           filterState.selectedDays = days
           filterState.selectedHour = hour
           filterState.selectedMinute = minute
-          if (filterState.availabilityFilterApplied) {
-            updateFilteredProfiles()
-          } else {
-            filteredWorkerProfiles =
-                searchViewModel.filterWorkersByAvailability(
-                    filteredWorkerProfiles, days, hour, minute)
-          }
           filterState.availabilityFilterApplied = true
+          updateFilteredProfiles()
         },
         onClearClick = {
           filterState.availabilityFilterApplied = false
@@ -350,11 +343,7 @@ fun SearchWorkerResult(
         selectedLocationIndex = selectedLocationIndex,
         onApplyClick = { location, max ->
           selectedLocationIndex = userProfile.locations.indexOf(location) + 1
-
           filterState.selectedLocation = location
-          if (location == Location(0.0, 0.0, "Default")) {
-            Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
-          }
           filterState.baseLocation = location
           filterState.maxDistance = max
           filterState.locationFilterApplied = true
@@ -376,7 +365,7 @@ fun SearchWorkerResult(
         onDismiss = { isWindowVisible = false },
         bannerImage = bannerImage,
         profilePicture = profilePicture,
-        initialSaved = saved,
+        initialSaved = initialSaved,
         workerCategory = workerCategory,
         workerAddress = workerAddress,
         description = description,

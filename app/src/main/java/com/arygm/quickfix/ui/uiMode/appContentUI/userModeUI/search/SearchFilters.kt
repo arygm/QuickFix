@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.WorkerProfile
@@ -182,10 +183,10 @@ fun FilterRow(
     showFilterButtons: Boolean,
     toggleFilterButtons: () -> Unit,
     listOfButtons: List<SearchFilterButtons>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    screenWidth: Dp,
+    screenHeight: Dp
 ) {
-  val screenHeight = 800.dp // These could be replaced with actual dimension calculations
-  val screenWidth = 400.dp
 
   IconButton(
       onClick = { toggleFilterButtons() },

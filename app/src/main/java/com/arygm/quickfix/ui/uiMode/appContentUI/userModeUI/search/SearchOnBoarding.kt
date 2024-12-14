@@ -203,7 +203,9 @@ fun SearchOnBoarding(
                           showFilterButtons = showFilterButtons,
                           toggleFilterButtons = { showFilterButtons = !showFilterButtons },
                           listOfButtons = listOfButtons,
-                          modifier = Modifier.padding(bottom = screenHeight * 0.01f))
+                          modifier = Modifier.padding(bottom = screenHeight * 0.01f),
+                          screenWidth = screenWidth,
+                          screenHeight = screenHeight)
                     }
 
                     ProfileResults(
