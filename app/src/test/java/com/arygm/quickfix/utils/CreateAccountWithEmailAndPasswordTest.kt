@@ -7,6 +7,7 @@ import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepositoryDataStore
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
@@ -29,6 +30,7 @@ import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -50,10 +52,12 @@ class CreateAccountWithEmailAndPasswordTest {
   @Mock private lateinit var workerProfileRepository: WorkerProfileRepositoryFirestore
 
   @Mock private lateinit var preferencesRepository: PreferencesRepositoryDataStore
+  @Mock private lateinit var userProfilePreferencesRepository: PreferencesRepositoryDataStore
 
   private lateinit var accountViewModel: AccountViewModel
   private lateinit var profileViewModel: ProfileViewModel
   private lateinit var preferencesViewModel: PreferencesViewModel
+  private lateinit var userPreferencesViewModel: PreferencesViewModelUserProfile
 
   private lateinit var firebaseAuthMockedStatic: MockedStatic<FirebaseAuth>
 
@@ -78,10 +82,10 @@ class CreateAccountWithEmailAndPasswordTest {
     // Initialize accountViewModel and profileViewModel with the mocked repositories
     accountViewModel = AccountViewModel(accountRepository)
     profileViewModel = ProfileViewModel(userProfileRepository)
-
+    userProfilePreferencesRepository = mock()
     // Initialize preferencesViewModel with the mocked repository
     preferencesViewModel = PreferencesViewModel(preferencesRepository)
-
+    userPreferencesViewModel = PreferencesViewModelUserProfile(userProfilePreferencesRepository)
     // Mock FirebaseAuth.getInstance().currentUser
     whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
   }
@@ -139,6 +143,7 @@ class CreateAccountWithEmailAndPasswordTest {
         accountViewModel = accountViewModel,
         userViewModel = profileViewModel,
         preferencesViewModel = preferencesViewModel,
+        userPreferencesViewModel = userPreferencesViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -199,6 +204,7 @@ class CreateAccountWithEmailAndPasswordTest {
         accountViewModel = accountViewModel,
         userViewModel = profileViewModel,
         preferencesViewModel = preferencesViewModel,
+        userPreferencesViewModel = userPreferencesViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -254,6 +260,7 @@ class CreateAccountWithEmailAndPasswordTest {
         accountViewModel = accountViewModel,
         userViewModel = profileViewModel,
         preferencesViewModel = preferencesViewModel,
+        userPreferencesViewModel = userPreferencesViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -301,6 +308,7 @@ class CreateAccountWithEmailAndPasswordTest {
         accountViewModel = accountViewModel,
         userViewModel = profileViewModel,
         preferencesViewModel = preferencesViewModel,
+        userPreferencesViewModel = userPreferencesViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -358,6 +366,7 @@ class CreateAccountWithEmailAndPasswordTest {
         accountViewModel = accountViewModel,
         userViewModel = profileViewModel,
         preferencesViewModel = preferencesViewModel,
+        userPreferencesViewModel = userPreferencesViewModel,
         onSuccess = {},
         onFailure = {})
 
@@ -400,6 +409,7 @@ class CreateAccountWithEmailAndPasswordTest {
         accountViewModel = accountViewModel,
         userViewModel = profileViewModel,
         preferencesViewModel = preferencesViewModel,
+        userPreferencesViewModel = userPreferencesViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
@@ -444,6 +454,7 @@ class CreateAccountWithEmailAndPasswordTest {
         accountViewModel = accountViewModel,
         userViewModel = profileViewModel,
         preferencesViewModel = preferencesViewModel,
+        userPreferencesViewModel = userPreferencesViewModel,
         onSuccess = { successCalled = true },
         onFailure = { failureCalled = true })
 
