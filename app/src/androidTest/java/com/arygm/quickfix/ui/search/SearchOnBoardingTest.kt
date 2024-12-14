@@ -126,4 +126,26 @@ class SearchOnBoardingTest {
     // Verify state after query input (Categories disappear, Profiles appear)
     composeTestRule.onNodeWithText("Categories").assertDoesNotExist()
   }
+
+  @Test
+  fun searchOnBoarding_showsFilterButtonsWhenQueryIsNotEmpty() {
+    composeTestRule.setContent {
+      SearchOnBoarding(
+          onSearch = {},
+          onSearchEmpty = {},
+          navigationActions,
+          navigationActionsRoot,
+          searchViewModel,
+          accountViewModel,
+          categoryViewModel,
+          onProfileClick = { _ -> },
+      )
+    }
+
+    // Input text to simulate non-empty search
+    composeTestRule.onNodeWithTag("searchContent").performTextInput("Painter")
+
+    // Verify that the filter row becomes visible
+    composeTestRule.onNodeWithTag("filter_buttons_row").assertIsDisplayed()
+  }
 }

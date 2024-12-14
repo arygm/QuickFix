@@ -155,4 +155,30 @@ class QuickFixFinderUserNoModeScreenTest {
     // value
     assertEquals(1, getBottomBarIdUser(UserRoute.HOME))
   }
+
+  @Test
+  fun tabSelectionUpdatesUIStateCorrectly() {
+    composeTestRule.setContent {
+      QuickFixFinderScreen(
+          navigationActions,
+          navigationActionsRoot,
+          isUser = true,
+          searchViewModel = searchViewModel)
+    }
+
+    // Verify initial state
+    composeTestRule.onNodeWithTag("tabSearch").assertExists().assertIsDisplayed()
+
+    // Switch to Announce tab
+    composeTestRule.onNodeWithTag("tabAnnounce").performClick()
+
+    // Verify AnnouncementScreen is displayed
+    composeTestRule.onNodeWithTag("AnnouncementContent").assertIsDisplayed()
+
+    // Switch back to Search tab
+    composeTestRule.onNodeWithTag("tabSearch").performClick()
+
+    // Verify SearchOnBoarding is displayed
+    composeTestRule.onNodeWithTag("searchContent").assertExists()
+  }
 }
