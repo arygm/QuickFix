@@ -1,5 +1,6 @@
 package com.arygm.quickfix.utils
 
+import android.util.Log
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -229,7 +230,7 @@ suspend fun loadAppMode(preferencesViewModel: PreferencesViewModel): String {
     preferencesViewModel.loadPreference(APP_MODE_KEY) { value ->
       if (!resumed) {
         resumed = true
-        cont.resume(value ?: "User")
+        cont.resume(value ?: "USER")
       }
     }
   }

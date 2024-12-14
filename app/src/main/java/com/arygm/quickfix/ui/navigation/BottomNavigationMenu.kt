@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arygm.quickfix.BuildConfig
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 
 @Composable

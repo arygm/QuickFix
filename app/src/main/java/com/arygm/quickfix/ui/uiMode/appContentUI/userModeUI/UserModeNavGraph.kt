@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,7 +45,7 @@ import com.arygm.quickfix.ui.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.search.SearchWorkerResult
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.ProfileScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.UserProfileScreen
 import com.arygm.quickfix.ui.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
@@ -77,7 +78,8 @@ fun UserModeNavHost(
       viewModel(factory = AnnouncementViewModel.Factory)
 
   // Initialized here because needed for the bottom bar
-
+    val startDestination by modeViewModel.onSwitchStartDestUser.collectAsState()
+    userNavigationActions.setCurrentRoute(startDestination)
   val isUser = true // TODO: This variable needs to get its value after the authentication
   var currentScreen by remember { mutableStateOf<String?>(null) }
   val shouldShowBottomBar by remember {
@@ -123,7 +125,7 @@ fun UserModeNavHost(
       }) { innerPadding ->
         NavHost(
             navController = userNavigationActions.navController,
-            startDestination = UserRoute.HOME,
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding),
             enterTransition = {
               // You can change whatever you want for transitions
@@ -232,7 +234,7 @@ fun ProfileNavHost(
   }
   NavHost(navController = profileNavController, startDestination = UserScreen.PROFILE) {
     composable(UserScreen.PROFILE) {
-      ProfileScreen(
+      UserProfileScreen(
           profileNavigationActions,
           rootMainNavigationActions,
           preferencesViewModel,

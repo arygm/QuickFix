@@ -13,7 +13,7 @@ import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
 import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.ProfileScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.UserProfileScreen
 import com.arygm.quickfix.utils.BIRTH_DATE_KEY
 import com.arygm.quickfix.utils.EMAIL_KEY
 import com.arygm.quickfix.utils.FIRST_NAME_KEY
@@ -129,7 +129,7 @@ class ProfileScreenTest {
   @Test
   fun profileScreenDisplaysCorrectly() {
     composeTestRule.setContent {
-      ProfileScreen(
+      UserProfileScreen(
           navigationActions = navigationActions,
           rootMainNavigationActions = rootMainNavigationActions,
           preferencesViewModel = preferencesViewModel,
@@ -153,7 +153,7 @@ class ProfileScreenTest {
   @Test
   fun logoutButtonClickNavigatesCorrectly() {
     composeTestRule.setContent {
-      ProfileScreen(
+      UserProfileScreen(
           navigationActions = navigationActions,
           rootMainNavigationActions = rootMainNavigationActions,
           preferencesViewModel = preferencesViewModel,
@@ -172,7 +172,7 @@ class ProfileScreenTest {
   @Test
   fun settingsOptionsAreDisplayedCorrectly() {
     composeTestRule.setContent {
-      ProfileScreen(
+      UserProfileScreen(
           navigationActions = navigationActions,
           rootMainNavigationActions = rootMainNavigationActions,
           preferencesViewModel = preferencesViewModel,
@@ -189,7 +189,7 @@ class ProfileScreenTest {
   @Test
   fun resourcesOptionsAreDisplayedCorrectly() {
     composeTestRule.setContent {
-      ProfileScreen(
+      UserProfileScreen(
           navigationActions = navigationActions,
           rootMainNavigationActions = rootMainNavigationActions,
           preferencesViewModel = preferencesViewModel,
@@ -210,7 +210,7 @@ class ProfileScreenTest {
 
     // Act
     composeTestRule.setContent {
-      ProfileScreen(
+      UserProfileScreen(
           navigationActions = navigationActions,
           rootMainNavigationActions = rootMainNavigationActions,
           preferencesViewModel = preferencesViewModel,
@@ -234,7 +234,7 @@ class ProfileScreenTest {
 
     // Act
     composeTestRule.setContent {
-      ProfileScreen(
+      UserProfileScreen(
           navigationActions = navigationActions,
           rootMainNavigationActions = rootMainNavigationActions,
           preferencesViewModel = preferencesViewModel,
@@ -260,7 +260,7 @@ class ProfileScreenTest {
 
     // Act
     composeTestRule.setContent {
-      ProfileScreen(
+      UserProfileScreen(
           navigationActions = navigationActions,
           rootMainNavigationActions = rootMainNavigationActions,
           preferencesViewModel = preferencesViewModel,

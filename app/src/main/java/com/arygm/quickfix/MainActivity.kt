@@ -131,21 +131,7 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
 
   var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
 
-  var currentAppMode by remember { mutableStateOf(AppMode.USER) }
-  Log.d("userContent", "Current App Mode is empty: $currentAppMode")
-  LaunchedEffect(Unit) {
-    Log.d("userContent", "Loading App Mode")
-    currentAppMode =
-        when (loadAppMode(preferencesViewModel)) {
-          "User" -> AppMode.USER
-          "Worker" -> AppMode.WORKER
-          else -> {
-            AppMode.WORKER
-          }
-        }
-  }
 
-  modeViewModel.switchMode(currentAppMode)
 
   // Simulate monitoring connectivity (replace this with actual monitoring in production)
   LaunchedEffect(Unit) {
@@ -186,7 +172,6 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
               navigationActionsRoot,
               modeViewModel,
               userPreferencesViewModel,
-              currentAppMode,
               workerViewModel,
               categoryViewModel,
               locationViewModel)
