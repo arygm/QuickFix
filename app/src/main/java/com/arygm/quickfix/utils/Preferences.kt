@@ -1,9 +1,12 @@
 package com.arygm.quickfix.utils
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
+import com.arygm.quickfix.model.profile.UserProfile
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineDispatcher
@@ -21,7 +24,8 @@ val BIRTH_DATE_KEY = stringPreferencesKey("date_of_birth")
 val IS_WORKER_KEY = booleanPreferencesKey("is_worker")
 // =====App Mode Preferences=====//
 val APP_MODE_KEY = stringPreferencesKey("app_mode")
-
+// =====Profile Preferences=====//
+val WALLET_KEY = doublePreferencesKey("wallet")
 // =====Helper functions======//
 fun setAccountPreferences(
     preferencesViewModel: PreferencesViewModel,
@@ -40,8 +44,25 @@ fun setAccountPreferences(
   }
 }
 
-fun clearAccountPreferences(
+fun setUserProfilePreferences(
+    preferencesViewModel: PreferencesViewModelUserProfile,
+    userProfile: UserProfile,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
+) {
+  CoroutineScope(dispatcher).launch {
+    preferencesViewModel.savePreference(WALLET_KEY, userProfile.wallet)
+  }
+}
+
+fun clearPreferences(
     preferencesViewModel: PreferencesViewModel,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
+) {
+  CoroutineScope(dispatcher).launch { preferencesViewModel.clearAllPreferences() }
+}
+
+fun clearUserProfilePreferences(
+    preferencesViewModel: PreferencesViewModelUserProfile,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
   CoroutineScope(dispatcher).launch { preferencesViewModel.clearAllPreferences() }
@@ -114,6 +135,18 @@ fun setIsWorker(
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
   CoroutineScope(dispatcher).launch { preferencesViewModel.savePreference(IS_WORKER_KEY, isWorker) }
+}
+
+suspend fun loadWallet(preferencesViewModel: PreferencesViewModel): Double {
+  return suspendCoroutine { cont ->
+    var resumed = false
+    preferencesViewModel.loadPreference(WALLET_KEY) { value ->
+      if (!resumed) {
+        resumed = true
+        cont.resume(value ?: 0.0)
+      }
+    }
+  }
 }
 
 // Loader functions

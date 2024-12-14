@@ -92,5 +92,10 @@ object C {
     const val welcomeOnBoardScreenStayUserButton = "welcomeOnBoardScreenStayUserButton"
     const val welcomeOnBoardScreenSwitchWorkerButton = "welcomeOnBoardScreenSwitchWorkerButton"
     const val welcomeOnBoardScreenImage = "welcomeOnBoardScreenImage"
+
+    // Profile screen
+    const val workerModeSwitch = "workerModeSwitch"
+    const val workerModeSwitchText = "workerModeSwitchText"
+    const val buttonSwitch = "buttonSwitch"
   }
 }

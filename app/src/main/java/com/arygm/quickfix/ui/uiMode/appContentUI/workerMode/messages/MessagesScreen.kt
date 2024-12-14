@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.uiMode.workerMode.home
+package com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.messages
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,11 +10,11 @@ import androidx.compose.ui.Modifier
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @Composable
-fun HomeScreen() {
+fun MessagesScreen() {
   Column(
       modifier = Modifier.fillMaxSize(),
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Home Screen", style = poppinsTypography.headlineLarge)
+        Text("Messages Screen", style = poppinsTypography.headlineLarge)
       }
 }

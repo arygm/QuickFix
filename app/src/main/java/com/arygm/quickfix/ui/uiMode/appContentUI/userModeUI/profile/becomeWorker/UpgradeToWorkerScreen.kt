@@ -229,7 +229,7 @@ fun BusinessScreen(
                       categories)
                 }
                 2 -> {
-                  WelcomeOnBoardScreen(navigationActions)
+                  WelcomeOnBoardScreen(navigationActions, preferencesViewModel)
                 }
               }
             }
