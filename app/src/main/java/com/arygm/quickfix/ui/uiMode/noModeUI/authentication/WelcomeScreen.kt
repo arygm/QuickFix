@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.authentication
+package com.arygm.quickfix.ui.uiMode.noModeUI.authentication
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -49,9 +49,9 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
-import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
-import com.arygm.quickfix.ui.noModeUI.navigation.NoModeScreen
 import com.arygm.quickfix.ui.theme.ButtonPrimary
+import com.arygm.quickfix.ui.uiMode.noModeUI.navigation.NoModeRoute
+import com.arygm.quickfix.ui.uiMode.noModeUI.navigation.NoModeScreen
 import com.arygm.quickfix.utils.loadIsSignIn
 import com.arygm.quickfix.utils.rememberFirebaseAuthLauncher
 import com.google.android.gms.auth.api.signin.GoogleSignIn

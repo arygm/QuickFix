@@ -18,9 +18,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -124,7 +124,7 @@ fun QuickFixDisplayImages(
                     onClick = { navigationActions.goBack() },
                     modifier = Modifier.testTag("goBackButton")) {
                       Icon(
-                          Icons.Outlined.ArrowBack,
+                          Icons.AutoMirrored.Outlined.ArrowBack,
                           contentDescription = "Back",
                           tint = colorScheme.primary)
                     }

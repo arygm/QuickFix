@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.search
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -53,11 +53,11 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.search.Announcement
 import com.arygm.quickfix.model.search.AnnouncementViewModel
-import com.arygm.quickfix.ui.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixUploadImageSheet
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -281,14 +281,14 @@ fun AnnouncementScreen(
                   text = "Location *",
                   modifier = Modifier.testTag("locationText").padding(start = 3.dp),
                   style = MaterialTheme.typography.headlineSmall,
-                  color = MaterialTheme.colorScheme.onBackground,
+                  color = colorScheme.onBackground,
                   textAlign = TextAlign.Start)
               Box(
                   modifier =
                       Modifier.testTag("locationInput")
                           .shadow(elevation = 2.dp, shape = RoundedCornerShape(12.dp), clip = false)
                           .clip(RoundedCornerShape(12.dp))
-                          .background(MaterialTheme.colorScheme.surface)
+                          .background(colorScheme.surface)
                           .border(1.dp, Color.Transparent, RoundedCornerShape(12.dp))
                           .width(360.dp)
                           .height(42.dp)

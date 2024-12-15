@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
@@ -81,10 +81,10 @@ fun QuickFixPriceRangeBottomSheet(
                   Spacer(modifier = Modifier.height(verticalSpacing))
 
                   // Full-width divider under the title
-                  Divider(
-                      color = colorScheme.onSecondaryContainer,
-                      thickness = 1.dp,
-                      modifier = Modifier.fillMaxWidth())
+                HorizontalDivider(
+                    modifier = Modifier.fillMaxWidth(), thickness = 1.dp,
+                    color = colorScheme.onSecondaryContainer
+                )
 
                   Spacer(modifier = Modifier.height(verticalSpacing))
 

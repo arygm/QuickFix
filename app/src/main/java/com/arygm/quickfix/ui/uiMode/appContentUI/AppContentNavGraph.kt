@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -27,17 +28,19 @@ import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
+import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.UserModeNavHost
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.ui.uiMode.workerMode.WorkerModeNavGraph
-import com.arygm.quickfix.ui.userModeUI.UserModeNavHost
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import kotlinx.coroutines.delay
 
 @Composable
@@ -51,6 +54,7 @@ fun AppContentNavGraph(
     rootNavigationActions: NavigationActions,
     modeViewModel: ModeViewModel
 ) {
+  val context = LocalContext.current
   val appContentNavController = rememberNavController()
   val appContentNavigationActions = remember { NavigationActions(appContentNavController) }
   val userNavController = rememberNavController()
@@ -62,6 +66,8 @@ fun AppContentNavGraph(
       viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
   val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
   val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
+  val quickFixViewModel: QuickFixViewModel = viewModel(factory = QuickFixViewModel.Factory)
+  val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory(context))
 
   var currentScreen by remember { mutableStateOf<String?>(null) }
   val currentAppMode = modeViewModel.currentMode.collectAsState()
@@ -78,7 +84,9 @@ fun AppContentNavGraph(
       } ?: true &&
           currentScreen?.let {
             it != UserScreen.ACCOUNT_CONFIGURATION && it != UserScreen.TO_WORKER
-          } ?: true
+          } ?: true &&
+          currentScreen?.let { it != UserScreen.QUICKFIX_ONBOARDING } ?: true &&
+          currentScreen?.let { it != UserScreen.MESSAGES } ?: true
     }
   }
 
@@ -138,7 +146,9 @@ fun AppContentNavGraph(
                     preferencesViewModel,
                     onScreenChange = { currentScreen = it },
                     rootNavigationActions,
-                    userNavigationActions)
+                    userNavigationActions,
+                    quickFixViewModel,
+                    chatViewModel)
               }
 
               composable(AppContentRoute.WORKER_MODE) {

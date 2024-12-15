@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.profile.becomeWorker.views.welcome
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.welcome
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +26,7 @@ import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 
 @Composable
 fun WelcomeOnBoardScreen(navigationActions: NavigationActions) {
@@ -43,7 +42,7 @@ fun WelcomeOnBoardScreen(navigationActions: NavigationActions) {
           "Welcome on board !!",
           style =
               poppinsTypography.headlineLarge.copy(
-                  color = MaterialTheme.colorScheme.onBackground, fontSize = 26.sp))
+                  color = colorScheme.onBackground, fontSize = 26.sp))
       Spacer(modifier = Modifier.weight(0.2f))
       Row(modifier = Modifier.weight(0.9f)) {
         Image(

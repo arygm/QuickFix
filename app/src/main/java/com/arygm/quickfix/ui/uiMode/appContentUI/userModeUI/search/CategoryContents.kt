@@ -18,6 +18,7 @@ import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.ExpandableCategoryItem
 
 @Composable
 fun CategoryContent(

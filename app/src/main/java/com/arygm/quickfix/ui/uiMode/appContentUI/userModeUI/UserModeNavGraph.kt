@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.userModeUI
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI
 
 import android.graphics.Bitmap
 import androidx.compose.animation.EnterTransition
@@ -15,24 +15,27 @@ import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
+import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.camera.QuickFixDisplayImages
 import com.arygm.quickfix.ui.dashboard.DashboardScreen
 import com.arygm.quickfix.ui.elements.LocationSearchCustomScreen
-import com.arygm.quickfix.ui.home.FakeMessageScreen
-import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.profile.AccountConfigurationScreen
-import com.arygm.quickfix.ui.profile.ProfileScreen
 import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
-import com.arygm.quickfix.ui.search.QuickFixFinderScreen
-import com.arygm.quickfix.ui.search.SearchWorkerResult
-import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.HomeScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.MessageScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.ProfileScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixOnBoarding
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.QuickFixFinderScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchWorkerResult
 
 @Composable
 fun UserModeNavHost(
@@ -48,6 +51,8 @@ fun UserModeNavHost(
     onScreenChange: (String) -> Unit,
     rootMainNavigationActions: NavigationActions,
     userNavigationActions: NavigationActions,
+    quickFixViewModel: QuickFixViewModel,
+    chatViewModel: ChatViewModel
 ) {
 
   val loggedInAccountViewModel: LoggedInAccountViewModel =
@@ -72,7 +77,12 @@ fun UserModeNavHost(
         ExitTransition.None
       }) {
         composable(UserRoute.HOME) {
-          HomeNavHost(onScreenChange) // , loggedInAccountViewModel, chatViewModel)
+          HomeNavHost(
+              onScreenChange,
+              chatViewModel,
+              quickFixViewModel,
+              modeViewModel,
+              preferencesViewModel) // , loggedInAccountViewModel, chatViewModel)
         }
 
         composable(UserRoute.SEARCH) {
@@ -87,7 +97,10 @@ fun UserModeNavHost(
               onScreenChange,
               categoryViewModel,
               preferencesViewModel,
-              locationViewModel)
+              locationViewModel,
+              modeViewModel,
+              quickFixViewModel,
+              chatViewModel)
         }
 
         composable(UserRoute.DASHBOARD) { DashBoardNavHost(onScreenChange) }
@@ -113,6 +126,10 @@ fun UserModeNavHost(
 @Composable
 fun HomeNavHost(
     onScreenChange: (String) -> Unit = {},
+    chatViewModel: ChatViewModel,
+    quickFixViewModel: QuickFixViewModel,
+    modeViewModel: ModeViewModel,
+    preferencesViewModel: PreferencesViewModel
 ) {
   val homeNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(homeNavController) }
@@ -128,10 +145,12 @@ fun HomeNavHost(
     composable(UserScreen.HOME) { HomeScreen(navigationActions) }
     // Add MessageScreen as a nested composable within Home
     composable(UserScreen.MESSAGES) {
-      //  MessageScreen(
-      //      loggedInAccountViewModel = loggedInAccountViewModel, chatViewModel =
-      // chatViewModel,navigationActions)
-      FakeMessageScreen(navigationActions)
+      MessageScreen(
+          chatViewModel = chatViewModel,
+          navigationActions = navigationActions,
+          quickFixViewModel = quickFixViewModel,
+          modeViewModel = modeViewModel,
+          preferencesViewModel = preferencesViewModel)
     }
   }
 }
@@ -203,7 +222,10 @@ fun SearchNavHost(
     onScreenChange: (String) -> Unit,
     categoryViewModel: CategoryViewModel,
     preferencesViewModel: PreferencesViewModel,
-    locationViewModel: LocationViewModel
+    locationViewModel: LocationViewModel,
+    modeViewModel: ModeViewModel,
+    quickFixViewModel: QuickFixViewModel,
+    chatViewModel: ChatViewModel
 ) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
@@ -235,11 +257,30 @@ fun SearchNavHost(
           searchViewModel,
           accountViewModel,
           profileViewModel,
-          preferencesViewModel)
+          preferencesViewModel,
+          quickFixViewModel)
     }
     composable(UserScreen.SEARCH_LOCATION) {
       LocationSearchCustomScreen(
           navigationActions = navigationActions, locationViewModel = locationViewModel)
+    }
+
+    composable(UserScreen.QUICKFIX_ONBOARDING) {
+      QuickFixOnBoarding(
+          navigationActions = navigationActions,
+          modeViewModel = modeViewModel,
+          quickFixViewModel = quickFixViewModel,
+          preferencesViewModel = preferencesViewModel,
+          chatViewModel = chatViewModel)
+    }
+
+    composable(UserScreen.MESSAGES) {
+      MessageScreen(
+          chatViewModel = chatViewModel,
+          navigationActions = navigationActions,
+          quickFixViewModel = quickFixViewModel,
+          modeViewModel = modeViewModel,
+          preferencesViewModel = preferencesViewModel)
     }
   }
 }

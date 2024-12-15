@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.profile
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -43,7 +43,7 @@ import com.arygm.quickfix.R
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.utils.clearAccountPreferences
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth

@@ -26,10 +26,10 @@ import com.arygm.quickfix.BuildConfig
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.model.switchModes.ModeViewModel
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.getBottomBarIdUser
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.getBottomBarIdWorker
-import com.arygm.quickfix.ui.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
-import com.arygm.quickfix.ui.userModeUI.navigation.getBottomBarIdUser
 import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 
 @Composable
