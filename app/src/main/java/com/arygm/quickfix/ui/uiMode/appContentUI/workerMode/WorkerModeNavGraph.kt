@@ -34,7 +34,6 @@ import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTI
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerRoute
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerScreen
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.getBottomBarIdWorker
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import kotlinx.coroutines.delay
 
 @Composable
@@ -50,9 +49,10 @@ fun WorkerModeNavGraph(
   val workerNavController = rememberNavController()
   val workerNavigationActions = remember { NavigationActions(workerNavController) }
   var currentScreen by remember { mutableStateOf<String?>(null) }
-  val shouldShowBottomBar by remember { derivedStateOf { true } }
-    val startDestination by modeViewModel.onSwitchStartDestWorker.collectAsState()
-    workerNavigationActions.setCurrentRoute(startDestination)
+  val shouldShowBottomBar by remember {
+    derivedStateOf { currentScreen?.let { it != WorkerScreen.ACCOUNT_CONFIGURATION } ?: true }
+  }
+  val startDestination by modeViewModel.onSwitchStartDestWorker.collectAsState()
   var showBottomBar by remember { mutableStateOf(false) }
 
   // Delay the appearance of the bottom bar
@@ -99,7 +99,11 @@ fun WorkerModeNavGraph(
                     onScreenChange = { currentScreen = it },
                     appContentNavigationActions,
                     preferencesViewModel,
-                    modeViewModel, accountViewModel, workerNavigationActions, rootMainNavigationActions, userPreferencesViewModel)
+                    modeViewModel,
+                    accountViewModel,
+                    workerNavigationActions,
+                    rootMainNavigationActions,
+                    userPreferencesViewModel)
               }
             }
       }
@@ -169,12 +173,16 @@ fun ProfileNavHost(
   NavHost(navController = profileNavController, startDestination = WorkerScreen.PROFILE) {
     composable(WorkerScreen.PROFILE) {
       WorkerProfileScreen(
+          workerNavigationActions,
           profileNavigationActions,
-          rootMainNavigationActions,preferencesViewModel,userPreferencesViewModel, appContentNavigationActions, modeViewModel
-      )
+          rootMainNavigationActions,
+          preferencesViewModel,
+          userPreferencesViewModel,
+          appContentNavigationActions,
+          modeViewModel)
     }
-      composable(WorkerScreen.ACCOUNT_CONFIGURATION) {
-          AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)
-      }
+    composable(WorkerScreen.ACCOUNT_CONFIGURATION) {
+      AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)
+    }
   }
 }

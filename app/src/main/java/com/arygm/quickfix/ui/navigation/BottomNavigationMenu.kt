@@ -28,7 +28,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arygm.quickfix.BuildConfig
 import com.arygm.quickfix.R
-import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 
 @Composable
@@ -110,7 +109,8 @@ fun BottomNavigationMenu(
 
   // LaunchedEffect allowing to update the bottom bar accordingly to navigationActions
   LaunchedEffect(currentRoute) {
-    val selectedItemId = getBottomBarId(currentRoute) // Get the ID of the selected item
+    val selectedItemId =
+        getBottomBarId(navigationActions.currentRoute()) // Get the ID of the selected item
     selectedTabId.intValue = selectedItemId
     bottomNavigation.value?.show(selectedItemId, true)
   }

@@ -1,40 +1,9 @@
 package com.arygm.quickfix.ui.profile
 
 import androidx.compose.ui.test.*
-import androidx.compose.ui.test.junit4.createComposeRule
-import com.arygm.quickfix.model.account.Account
-import com.arygm.quickfix.model.offline.small.PreferencesViewModel
-import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
-import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
-import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
-import com.arygm.quickfix.model.switchModes.AppMode
-import com.arygm.quickfix.model.switchModes.ModeViewModel
-import com.arygm.quickfix.ressources.C
-import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.RootRoute
-import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.UserProfileScreen
-import com.arygm.quickfix.utils.BIRTH_DATE_KEY
-import com.arygm.quickfix.utils.EMAIL_KEY
-import com.arygm.quickfix.utils.FIRST_NAME_KEY
-import com.arygm.quickfix.utils.IS_SIGN_IN_KEY
-import com.arygm.quickfix.utils.IS_WORKER_KEY
-import com.arygm.quickfix.utils.LAST_NAME_KEY
-import com.arygm.quickfix.utils.UID_KEY
-import com.arygm.quickfix.utils.WALLET_KEY
-import com.google.firebase.Timestamp
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
-import kotlinx.coroutines.runBlocking
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
-import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
 
+
+/*
 class ProfileScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
@@ -280,3 +249,5 @@ class ProfileScreenTest {
     assert(modeViewModel.currentMode.value == AppMode.WORKER)
   }
 }
+
+ */

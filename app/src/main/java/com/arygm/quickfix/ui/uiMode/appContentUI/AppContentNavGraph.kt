@@ -45,22 +45,22 @@ fun AppContentNavGraph(
 ) {
   val appContentNavController = rememberNavController()
   val appContentNavigationActions = remember { NavigationActions(appContentNavController) }
-    var currentAppMode by remember { mutableStateOf(AppMode.USER) }
-    Log.d("userContent", "Current App Mode is empty: $currentAppMode")
-    LaunchedEffect(Unit) {
-        Log.d("userContent", "Loading App Mode")
-        currentAppMode =
-            when (loadAppMode(preferencesViewModel)) {
-                "USER" -> AppMode.USER
-                "WORKER" -> AppMode.WORKER
-                else -> {
-                    AppMode.WORKER
-                }
-            }
-    }
+  var currentAppMode by remember { mutableStateOf(AppMode.USER) }
+  Log.d("userContent", "Current App Mode is empty: $currentAppMode")
+  LaunchedEffect(Unit) {
+    Log.d("userContent", "Loading App Mode")
+    currentAppMode =
+        when (loadAppMode(preferencesViewModel)) {
+          "USER" -> AppMode.USER
+          "WORKER" -> AppMode.WORKER
+          else -> {
+            AppMode.WORKER
+          }
+        }
+  }
 
-    modeViewModel.switchMode(currentAppMode)
-    Log.d("MainActivity", "$currentAppMode")
+  modeViewModel.switchMode(currentAppMode)
+  Log.d("MainActivity", "$currentAppMode")
   val startDestination =
       when (currentAppMode) {
         AppMode.USER -> AppContentRoute.USER_MODE
@@ -102,8 +102,7 @@ fun AppContentNavGraph(
               preferencesViewModel,
               accountViewModel,
               rootNavigationActions,
-              userPreferencesViewModel
-          )
+              userPreferencesViewModel)
         }
       }
 }

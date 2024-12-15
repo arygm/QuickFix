@@ -1,6 +1,7 @@
 package com.arygm.quickfix.ui.userModeUI
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -68,6 +69,7 @@ fun UserModeNavHost(
     appContentNavigationActions: NavigationActions,
     isOffline: Boolean
 ) {
+  Log.d("UserModeNavHost", "UserModeNavHost is recomposed")
   val userNavController = rememberNavController()
   val userNavigationActions = remember { NavigationActions(userNavController) }
 
@@ -78,8 +80,7 @@ fun UserModeNavHost(
       viewModel(factory = AnnouncementViewModel.Factory)
 
   // Initialized here because needed for the bottom bar
-    val startDestination by modeViewModel.onSwitchStartDestUser.collectAsState()
-    userNavigationActions.setCurrentRoute(startDestination)
+  val startDestination by modeViewModel.onSwitchStartDestUser.collectAsState()
   val isUser = true // TODO: This variable needs to get its value after the authentication
   var currentScreen by remember { mutableStateOf<String?>(null) }
   val shouldShowBottomBar by remember {
@@ -235,6 +236,7 @@ fun ProfileNavHost(
   NavHost(navController = profileNavController, startDestination = UserScreen.PROFILE) {
     composable(UserScreen.PROFILE) {
       UserProfileScreen(
+          userNavigationActions,
           profileNavigationActions,
           rootMainNavigationActions,
           preferencesViewModel,
