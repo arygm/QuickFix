@@ -131,7 +131,9 @@ open class UserProfileRepositoryFirestore(
                 name = map["name"] as? String ?: "")
           }
       val announcements = document.get("announcements") as? List<String> ?: emptyList()
-      UserProfile(uid = uid, locations = locations, announcements = announcements)
+      val quickfixes = document.get("quickfixes") as? List<String> ?: emptyList()
+      UserProfile(
+          uid = uid, locations = locations, announcements = announcements, quickFixes = quickfixes)
     } catch (e: Exception) {
       Log.e("UserProfileRepositoryFirestore", "Error converting document to UserProfile", e)
       null
@@ -147,6 +149,7 @@ open class UserProfileRepositoryFirestore(
         .document(uid)
         .get()
         .addOnSuccessListener { document ->
+          Log.d("UserProfileRepositoryFirestore", "getProfileById: $document")
           if (document.exists()) {
             val profile = documentToUser(document)
             onSuccess(profile)

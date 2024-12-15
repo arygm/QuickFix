@@ -155,6 +155,7 @@ fun UserModeNavHost(
                     userNavigationActions,
                     searchViewModel,
                     userViewModel,
+                    workerViewModel,
                     loggedInAccountViewModel,
                     accountViewModel,
                     announcementViewModel,
@@ -294,7 +295,8 @@ fun SearchNavHost(
     isUser: Boolean,
     navigationActionsRoot: NavigationActions,
     searchViewModel: SearchViewModel,
-    profileViewModel: ProfileViewModel,
+    userViewModel: ProfileViewModel,
+    workerViewModel: ProfileViewModel,
     loggedInAccountViewModel: LoggedInAccountViewModel,
     accountViewModel: AccountViewModel,
     announcementViewModel: AnnouncementViewModel,
@@ -320,7 +322,7 @@ fun SearchNavHost(
           navigationActions,
           navigationActionsRoot,
           isUser,
-          profileViewModel,
+          userViewModel,
           loggedInAccountViewModel,
           searchViewModel,
           accountViewModel,
@@ -335,7 +337,7 @@ fun SearchNavHost(
           navigationActions,
           searchViewModel,
           accountViewModel,
-          profileViewModel,
+          userViewModel,
           preferencesViewModel,
           quickFixViewModel)
     }
@@ -350,7 +352,11 @@ fun SearchNavHost(
           modeViewModel = modeViewModel,
           quickFixViewModel = quickFixViewModel,
           preferencesViewModel = preferencesViewModel,
-          chatViewModel = chatViewModel)
+          chatViewModel = chatViewModel,
+          userViewModel = userViewModel,
+          workerViewModel = workerViewModel,
+          locationViewModel = locationViewModel,
+          accountViewModel = accountViewModel)
     }
 
     composable(UserScreen.MESSAGES) {

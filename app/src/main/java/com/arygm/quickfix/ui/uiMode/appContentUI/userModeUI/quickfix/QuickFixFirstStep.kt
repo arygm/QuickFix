@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -66,13 +67,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.PopupProperties
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.dataFields.Service
 import com.arygm.quickfix.model.quickfix.QuickFix
@@ -96,11 +98,13 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun QuickFixFirstStep(
-    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
+    locationViewModel: LocationViewModel,
     quickFixViewModel: QuickFixViewModel,
     chatViewModel: ChatViewModel,
     preferencesViewModel: PreferencesViewModel,
     workerProfile: WorkerProfile,
+    workerViewModel: ProfileViewModel,
+    userViewModel: ProfileViewModel,
     onQuickFixChange: (QuickFix) -> Unit,
 ) {
 
@@ -603,6 +607,8 @@ fun QuickFixFirstStep(
                     modifier =
                         Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp),
                     horizontalArrangement = Arrangement.SpaceAround) {
+                      var user by remember { mutableStateOf<UserProfile?>(null) }
+                      var worker by remember { mutableStateOf<WorkerProfile?>(null) }
                       QuickFixButton(
                           buttonText = "Cancel",
                           buttonColor = Color.Transparent,
@@ -653,7 +659,39 @@ fun QuickFixFirstStep(
                             quickFixViewModel.addQuickFix(
                                 createdQuickFix,
                                 onSuccess = {
-                                  onQuickFixChange(createdQuickFix)
+                                  userViewModel.fetchUserProfile(userId) { userProfile ->
+                                    user = userProfile as UserProfile
+                                  }
+                                  workerViewModel.fetchUserProfile(workerProfile.uid) {
+                                      workerProfile ->
+                                    worker = workerProfile as WorkerProfile
+                                  }
+                                  user
+                                      ?.apply { quickFixes = quickFixes + createdQuickFix.uid }
+                                      ?.let {
+                                        userViewModel.updateProfile(
+                                            it,
+                                            onSuccess = {
+                                              worker
+                                                  ?.apply {
+                                                    quickFixes = quickFixes + createdQuickFix.uid
+                                                  }
+                                                  ?.let { it1 ->
+                                                    workerViewModel.updateProfile(
+                                                        it1,
+                                                        onSuccess = {
+                                                          onQuickFixChange(createdQuickFix)
+                                                        },
+                                                        onFailure = {
+                                                          Log.d(
+                                                              "QuickFixFirstStep",
+                                                              "Failed to update pofiles")
+                                                        })
+                                                  }
+                                            },
+                                            onFailure = { /* Handle failure */})
+                                      }
+
                                   Toast.makeText(context, "QuickFix added", Toast.LENGTH_SHORT)
                                       .show()
                                 },

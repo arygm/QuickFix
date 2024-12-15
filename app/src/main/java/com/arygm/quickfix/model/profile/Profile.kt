@@ -9,7 +9,7 @@ import java.time.LocalTime
 
 open class Profile(
     val uid: String,
-    val quickFixes: List<String> = emptyList(), // common field
+    var quickFixes: List<String> = emptyList(), // common field
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

@@ -24,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,7 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewModelScope
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
@@ -54,11 +53,12 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScree
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.launch
 
 @Composable
 fun QuickFixSecondStep(
     quickFixViewModel: QuickFixViewModel,
-    accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
+    accountViewModel: AccountViewModel,
     chatViewModel: ChatViewModel,
     navigationActions: NavigationActions,
     onQuickFixMakeBill: () -> Unit,
@@ -71,37 +71,7 @@ fun QuickFixSecondStep(
   accountViewModel.fetchUserAccount(quickFix.userId) { userAccount = it }
   var workerAccount by remember { mutableStateOf<Account?>(null) }
   accountViewModel.fetchUserAccount(quickFix.workerId) { workerAccount = it }
-  var addChatBool by remember { mutableStateOf(false) }
-  Log.d("QuickFixSecondStep", "addChatBool added: $addChatBool")
   var chat by remember { mutableStateOf<Chat?>(null) }
-
-  if (addChatBool) {
-    LaunchedEffect(Unit) {
-      chat?.let {
-        chatViewModel.addChat(
-            it,
-            onSuccess = {
-              chatViewModel.selectChat(chat!!)
-              accountViewModel.updateAccount(
-                  userAccount!!.copy(activeChats = userAccount!!.activeChats + chat!!.chatId),
-                  onSuccess = {
-                    accountViewModel.updateAccount(
-                        workerAccount!!.copy(
-                            activeChats = workerAccount!!.activeChats + chat!!.chatId),
-                        onSuccess = { Log.d("QuickFixSecondStep", "Chat added to user") },
-                        onFailure = { Log.d("QuickFixSecondStep", "Chat not added to worker") })
-                  },
-                  onFailure = { Log.d("QuickFixSecondStep", "Chat not added to user") })
-              navigationActions.navigateTo(UserScreen.MESSAGES)
-              addChatBool = false
-            },
-            onFailure = {
-              Log.d("QuickFixSecondStep", "Chat not added")
-              addChatBool = false
-            })
-      }
-    }
-  }
 
   BoxWithConstraints(
       modifier = Modifier.background(colorScheme.surface),
@@ -340,7 +310,28 @@ fun QuickFixSecondStep(
                       workeruid = quickFix.workerId,
                       useruid = quickFix.userId,
                   )
-              addChatBool = true
+              chatViewModel.viewModelScope.launch {
+                chatViewModel.addChat(
+                    chat!!,
+                    onSuccess = {
+                      chatViewModel.selectChat(chat!!)
+                      accountViewModel.updateAccount(
+                          userAccount!!.copy(
+                              activeChats = userAccount!!.activeChats + chat!!.chatId),
+                          onSuccess = {
+                            accountViewModel.updateAccount(
+                                workerAccount!!.copy(
+                                    activeChats = workerAccount!!.activeChats + chat!!.chatId),
+                                onSuccess = { Log.d("QuickFixSecondStep", "Chat added to user") },
+                                onFailure = {
+                                  Log.d("QuickFixSecondStep", "Chat not added to worker")
+                                })
+                          },
+                          onFailure = { Log.d("QuickFixSecondStep", "Chat not added to user") })
+                      navigationActions.navigateTo(UserScreen.MESSAGES)
+                    },
+                    onFailure = { Log.d("QuickFixSecondStep", "Chat not added") })
+              }
             },
             buttonColor = colorScheme.surface,
             textColor = colorScheme.primary,

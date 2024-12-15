@@ -38,6 +38,7 @@ import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.elements.QuickFixDetailsScreen
 import com.arygm.quickfix.ui.elements.QuickFixSlidingWindowContent
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.utils.loadAppMode
 import com.arygm.quickfix.utils.loadUserId
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
@@ -53,11 +54,13 @@ fun MessageScreen(
     preferencesViewModel: PreferencesViewModel,
 ) {
   var userId by remember { mutableStateOf("") }
-  LaunchedEffect(Unit) { userId = loadUserId(preferencesViewModel) }
+  var mode by remember { mutableStateOf("") }
+  LaunchedEffect(Unit) {
+    userId = loadUserId(preferencesViewModel)
+    mode = loadAppMode(preferencesViewModel)
+  }
   // Collecting the selected chat from the ViewModel as state
   val activeChat = chatViewModel.selectedChat.collectAsState().value
-
-  val mode by modeViewModel.currentMode.collectAsState()
 
   // If no active chat is selected, show a placeholder message and return
   if (activeChat == null) {
@@ -85,7 +88,7 @@ fun MessageScreen(
   // Retrieve chat status and prepare suggestions based on user role (User or Worker)
   val chatStatus = chat.chatStatus
   val suggestions =
-      if (mode == AppMode.USER) {
+      if (mode == AppMode.USER.name) {
         listOf(
             "How is it going?",
             "Is the time and day okay for you?",
@@ -195,7 +198,7 @@ fun MessageScreen(
                             when (chatStatus) {
                               ChatStatus.WAITING_FOR_RESPONSE -> {
                                 // UI for waiting for response
-                                if (mode == AppMode.USER) {
+                                if (mode == AppMode.USER.name) {
                                   Text(
                                       text = "Awaiting confirmation from ${quickFix!!.workerId}...",
                                       style = MaterialTheme.typography.bodyMedium,
@@ -290,7 +293,7 @@ fun MessageScreen(
                                             .testTag("gettingSuggestionsContainer")) {
                                       Text(
                                           text =
-                                              if (mode == AppMode.USER) {
+                                              if (mode == AppMode.USER.name) {
                                                 "${quickFix!!.workerId} has accepted the QuickFix! 🎉"
                                               } else {
                                                 "You have accepted this request! 🎉"
@@ -335,7 +338,7 @@ fun MessageScreen(
                                 // UI for rejection state
                                 Text(
                                     text =
-                                        if (mode == AppMode.USER) {
+                                        if (mode == AppMode.USER.name) {
                                           "${quickFix!!.workerId} has rejected the QuickFix. No big deal! Contact another worker from the search screen! 😊"
                                         } else {
                                           "You have rejected this request. Find your next client on the announcement screen! 😊"

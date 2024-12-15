@@ -23,8 +23,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.model.switchModes.ModeViewModel
@@ -38,6 +41,10 @@ fun QuickFixOnBoarding(
     modeViewModel: ModeViewModel,
     quickFixViewModel: QuickFixViewModel,
     preferencesViewModel: PreferencesViewModel,
+    userViewModel: ProfileViewModel,
+    workerViewModel: ProfileViewModel,
+    locationViewModel: LocationViewModel,
+    accountViewModel: AccountViewModel,
     chatViewModel: ChatViewModel
 ) {
   val workerProfile by quickFixViewModel.selectedWorkerProfile.collectAsState()
@@ -90,6 +97,9 @@ fun QuickFixOnBoarding(
                       coroutineScope.launch { pagerState.animateScrollToPage(1) }
                       step++
                     },
+                    userViewModel = userViewModel,
+                    workerViewModel = workerViewModel,
+                    locationViewModel = locationViewModel,
                 )
               }
               1 -> {
@@ -104,11 +114,13 @@ fun QuickFixOnBoarding(
                     },
                     navigationActions = navigationActions,
                     chatViewModel = chatViewModel,
-                    quickFixViewModel = quickFixViewModel)
+                    quickFixViewModel = quickFixViewModel,
+                    accountViewModel = accountViewModel)
               }
               2 -> {
                 QuickFixThirdStep(
                     quickFix = quickFix,
+                    quickFixViewModel = quickFixViewModel,
                     workerProfile = workerProfile,
                     onQuickFixChange = { updatedQuickFix ->
                       quickFixViewModel.setUpdateQuickFix(updatedQuickFix)

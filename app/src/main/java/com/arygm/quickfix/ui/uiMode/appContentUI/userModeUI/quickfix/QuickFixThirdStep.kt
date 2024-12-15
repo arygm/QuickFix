@@ -54,7 +54,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.bill.BillField
 import com.arygm.quickfix.model.bill.Units
@@ -72,7 +71,7 @@ import java.util.Locale
 
 @Composable
 fun QuickFixThirdStep(
-    quickFixViewModel: QuickFixViewModel = viewModel(factory = QuickFixViewModel.Factory),
+    quickFixViewModel: QuickFixViewModel,
     quickFix: QuickFix,
     workerProfile: WorkerProfile,
     onQuickFixChange: (QuickFix) -> Unit,
@@ -638,7 +637,8 @@ fun QuickFixThirdStep(
             textColor = colorScheme.onPrimary,
             onClickAction = {
               if (mode == AppMode.WORKER) {
-                val updatedQuickFix = quickFix.copy(date = listDates, bill = listBillFields)
+                val updatedQuickFix =
+                    quickFix.copy(date = listDates, bill = listBillFields, status = Status.UNPAID)
                 quickFixViewModel.updateQuickFix(
                     updatedQuickFix,
                     onSuccess = {

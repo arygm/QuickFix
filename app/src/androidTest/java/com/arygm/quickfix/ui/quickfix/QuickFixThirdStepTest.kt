@@ -1,11 +1,20 @@
 package com.arygm.quickfix.ui.quickfix
 
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.arygm.quickfix.model.bill.BillField
+import androidx.compose.ui.text.AnnotatedString
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.arygm.quickfix.model.bill.Units
 import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.locations.LocationRepository
+import com.arygm.quickfix.model.locations.LocationViewModel
+import com.arygm.quickfix.model.messaging.ChatRepository
+import com.arygm.quickfix.model.messaging.ChatViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesRepository
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
@@ -14,393 +23,432 @@ import com.arygm.quickfix.model.quickfix.QuickFixRepository
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.model.switchModes.AppMode
+import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixThirdStep
 import com.google.firebase.Timestamp
-import io.mockk.*
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotNull
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.Mockito.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.capture
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.whenever
 
-@RunWith(AndroidJUnit4::class)
 class QuickFixThirdStepTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
+  // Mocked dependencies
+  private lateinit var navigationActions: NavigationActions
+  private lateinit var locationRepository: LocationRepository
+  private lateinit var locationViewModel: LocationViewModel
+  private lateinit var chatRepository: ChatRepository
+  private lateinit var chatViewModel: ChatViewModel
+  private lateinit var profileRepository: ProfileRepository
+  private lateinit var profileViewModel: ProfileViewModel
   private lateinit var quickFixRepository: QuickFixRepository
   private lateinit var quickFixViewModel: QuickFixViewModel
+  private lateinit var preferencesRepositoryDataStore: PreferencesRepository
+  private lateinit var preferencesViewModel: PreferencesViewModel
 
-  // Sample data for QuickFix
-  private val mockQuickFix =
+  // Fake data setup
+  private val fakeQuickFixUid = "qf_123"
+  private val fakeQuickFix =
       QuickFix(
-          uid = "quickfix123",
+          uid = fakeQuickFixUid,
           status = Status.PENDING,
           imageUrl = listOf("https://example.com/image1.png", "https://example.com/image2.png"),
           date = listOf(Timestamp.now(), Timestamp(1234567890, 0)),
           time = Timestamp.now(),
           includedServices = listOf(IncludedService("Service A"), IncludedService("Service B")),
-          addOnServices = listOf(AddOnService("AddOn A")),
+          addOnServices = listOf(AddOnService("AddOn A"), AddOnService("AddOn B")),
           workerId = "worker123",
           userId = "user123",
           chatUid = "chat123",
           title = "Fix the Sink",
           description = "Replace the leaking sink in the kitchen.",
-          bill =
-              listOf(
-                  BillField(
-                      description = "Sink Replacement",
-                      unit = Units.H,
-                      amount = 2.0,
-                      unitPrice = 50.0,
-                      total = 100.0)),
+          bill = emptyList(),
           location = Location(name = "123 Main St"))
 
   private val mockWorkerProfile =
       WorkerProfile(
+          uid = "worker123",
           displayName = "John Doe",
           fieldOfWork = "Plumbing",
-          // Initialize other fields as necessary
-      )
+          includedServices = listOf(IncludedService("Service A"), IncludedService("Service B")),
+          addOnServices = listOf(AddOnService("AddOn A"), AddOnService("AddOn B")))
 
   @Before
-  fun setup() {
-    quickFixViewModel = mockk<QuickFixViewModel>(relaxed = true)
-    every { quickFixViewModel.updateQuickFix(any(), any(), any()) } just Runs
+  fun setUp() {
+    // Initialize mocks using Mockito
+    navigationActions = mock(NavigationActions::class.java)
+    locationRepository = mock(LocationRepository::class.java)
+    locationViewModel = LocationViewModel(locationRepository)
+    chatRepository = mock(ChatRepository::class.java)
+    chatViewModel = ChatViewModel(chatRepository)
+    profileRepository = mock(ProfileRepository::class.java)
+    profileViewModel = ProfileViewModel(profileRepository)
+    quickFixRepository = mock(QuickFixRepository::class.java)
+    quickFixViewModel = QuickFixViewModel(quickFixRepository)
+    preferencesRepositoryDataStore = mock(PreferencesRepository::class.java)
+    preferencesViewModel = PreferencesViewModel(preferencesRepositoryDataStore)
+
+    // Mock getPreferenceByKey for user_id
+    val userIdKey = stringPreferencesKey("user_id")
+    whenever(preferencesRepositoryDataStore.getPreferenceByKey(userIdKey))
+        .thenReturn(MutableStateFlow("user123"))
+
+    // Mock getPreferenceByKey for app_mode
+    val appModeKey = stringPreferencesKey("app_mode")
+    whenever(preferencesRepositoryDataStore.getPreferenceByKey(appModeKey))
+        .thenReturn(MutableStateFlow("USER"))
+
+    runBlocking {
+      // Mock QuickFixRepository's addQuickFix method to simulate success
+      doAnswer { invocation ->
+            val quickFix = invocation.getArgument<QuickFix>(0)
+            val onSuccess = invocation.getArgument<() -> Unit>(1)
+            val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
+            onSuccess()
+            null
+          }
+          .whenever(quickFixRepository)
+          .addQuickFix(any(), any(), any())
+
+      // Mock QuickFixViewModel's getRandomUid
+      whenever(quickFixViewModel.getRandomUid()).thenReturn("randomUid123")
+
+      // Mock QuickFixRepository's updateQuickFix method to simulate success
+      doAnswer { invocation ->
+            val updatedQuickFix = invocation.getArgument<QuickFix>(0)
+            val onSuccess = invocation.getArgument<() -> Unit>(1)
+            val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
+            onSuccess()
+            null
+          }
+          .whenever(quickFixRepository)
+          .updateQuickFix(any(), any(), any())
+
+      // Mock ProfileRepository's fetch and update methods if necessary
+      // For example:
+      // whenever(profileRepository.fetchUserProfile(any())).thenReturn(fakeUserProfile)
+    }
   }
 
   @Test
-  fun addBillField_updatesList() {
+  fun addBillField_updatesList() = runTest {
+    // Arrange: Set the composable content
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = mockQuickFix,
+          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> },
-          onQuickFixPay = {},
-          mode = AppMode.USER)
+          onQuickFixChange = { /* No-op for testing */},
+          onQuickFixPay = { /* No-op for testing */},
+          mode = AppMode.WORKER)
     }
 
-    // Click on Add Bill Field Button
+    // Act: Click on Add Bill Field Button
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
 
-    // Verify that a new bill field is added by checking the description TextField
+    // Assert: Verify that a new bill field is added by checking the description TextField
     composeTestRule.onNodeWithTag("DescriptionTextField_0").assertExists()
   }
 
   @Test
-  fun deleteBillField_removesFromList() {
+  fun deleteBillField_removesFromList() = runTest {
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix =
-              mockQuickFix.copy(
-                  bill =
-                      listOf(
-                          BillField(
-                              description = "Sink Replacement",
-                              unit = Units.H,
-                              amount = 2.0,
-                              unitPrice = 50.0,
-                              total = 100.0),
-                          BillField(
-                              description = "Pipe Fix",
-                              unit = Units.H,
-                              amount = 1.0,
-                              unitPrice = 60.0,
-                              total = 60.0))),
+          quickFix = fakeQuickFix,
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> },
-          onQuickFixPay = {},
-          mode = AppMode.USER)
+          onQuickFixChange = { /* No-op for testing */},
+          onQuickFixPay = { /* No-op for testing */},
+          mode = AppMode.WORKER)
     }
 
     // Add a bill field
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
 
-    // Verify initial bill fields
-    composeTestRule.onNodeWithTag("DescriptionTextField_0").assertExists()
-    composeTestRule.onNodeWithTag("DescriptionTextField_1").assertExists()
-
-    // Delete the first bill field
+    // Act: Delete the first bill field
     composeTestRule.onNodeWithTag("DeleteBillFieldButton_0").performClick()
 
-    // Verify that the first bill field is removed and the second becomes first
+    // Assert:
     composeTestRule
         .onNodeWithTag("DescriptionTextField_0")
-        .assertExists() // Now the second bill field should be at index 0
+        .assert(SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("")))
+    // - The second bill field should no longer exist
     composeTestRule.onNodeWithTag("DescriptionTextField_1").assertDoesNotExist()
   }
 
   @Test
-  fun enterDescription_updatesBillField() {
+  fun enterDescription_updatesBillField() = runTest {
+    // Arrange: Add a bill field
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = mockQuickFix.copy(bill = emptyList()),
+          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> },
-          onQuickFixPay = {},
-          mode = AppMode.USER)
+          onQuickFixChange = { /* No-op for testing */},
+          onQuickFixPay = { /* No-op for testing */},
+          mode = AppMode.WORKER)
     }
 
-    // Add a bill field
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
 
-    // Enter text into the description field
+    // Act: Enter text into the description field
     val description = "Replace pipes"
     composeTestRule.onNodeWithTag("DescriptionTextField_0").performTextInput(description)
 
-    // Simulate focus loss
+    // Simulate focus loss to trigger any listeners
     composeTestRule.onRoot().performClick()
 
-    // Verify that the text is correctly entered
+    // Assert: Verify that the text is correctly entered
     composeTestRule.onNodeWithTag("DescriptionTextField_0").assertTextEquals(description)
   }
 
   @Test
-  fun enterAmount_updatesBillField() {
+  fun enterAmount_updatesBillField() = runTest {
+    // Arrange: Add a bill field
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = mockQuickFix.copy(bill = emptyList()),
+          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> },
-          onQuickFixPay = {},
-          mode = AppMode.USER)
+          onQuickFixChange = { /* No-op for testing */},
+          onQuickFixPay = { /* No-op for testing */},
+          mode = AppMode.WORKER)
     }
 
-    // Add a bill field
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
 
-    // Enter amount
+    // Act: Enter amount
     val amount = "3.0"
     composeTestRule.onNodeWithTag("AmountTextField_0").performTextInput(amount)
 
     // Simulate focus loss
     composeTestRule.onRoot().performClick()
 
-    // Verify that the amount is correctly entered
+    // Assert: Verify that the amount is correctly entered
     composeTestRule.onNodeWithTag("AmountTextField_0").assertTextEquals(amount)
   }
 
   @Test
-  fun enterUnitPrice_updatesBillField() {
+  fun enterUnitPrice_updatesBillField() = runTest {
+    // Arrange: Add a bill field
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = mockQuickFix.copy(bill = emptyList()),
+          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> },
-          onQuickFixPay = {},
-          mode = AppMode.USER)
+          onQuickFixChange = { /* No-op for testing */},
+          onQuickFixPay = { /* No-op for testing */},
+          mode = AppMode.WORKER)
     }
 
-    // Add a bill field
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
 
-    // Enter unit price
+    // Act: Enter unit price
     val unitPrice = "50.0"
     composeTestRule.onNodeWithTag("UnitPriceTextField_0").performTextInput(unitPrice)
 
     // Simulate focus loss
     composeTestRule.onRoot().performClick()
 
-    // Verify that the unit price is correctly entered
+    // Assert: Verify that the unit price is correctly entered
     composeTestRule.onNodeWithTag("UnitPriceTextField_0").assertTextEquals(unitPrice)
   }
 
   @Test
-  fun selectUnit_updatesBillField() {
+  fun selectUnit_updatesBillField() = runTest {
+    // Arrange: Add a bill field
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = mockQuickFix.copy(bill = emptyList()),
+          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> },
-          onQuickFixPay = {},
-          mode = AppMode.USER)
+          onQuickFixChange = { /* No-op for testing */},
+          onQuickFixPay = { /* No-op for testing */},
+          mode = AppMode.WORKER)
     }
 
-    // Add a bill field
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
 
-    // Click on the Unit Dropdown
+    // Act: Click on the Unit Dropdown
     composeTestRule.onNodeWithTag("UnitDropdown_0").performClick()
 
-    // Select a unit from the dropdown (e.g., "H")
-    composeTestRule
-        .onNodeWithTag("UnitDropdownMenu_0")
-        .onChildAt(1) // Assuming "H" is the second item
-        .performClick()
+    // Select a unit from the dropdown (e.g., "M2")
+    composeTestRule.onNodeWithTag("UnitDropdownMenu_0").onChildAt(0).performClick()
 
-    // Verify that the unit is updated
-    composeTestRule.onNodeWithTag("UnitDropdown_0").assertTextContains("H")
+    // Assert: Verify that the unit is updated
+    composeTestRule.onNodeWithTag("UnitDropdown_0").assertTextContains("M2")
   }
 
   @Test
-  fun addAndSubmitQuickFix() {
+  fun addAndSubmitQuickFix_success() = runTest {
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = mockQuickFix.copy(bill = emptyList()),
+          quickFix = fakeQuickFix,
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> },
-          onQuickFixPay = {},
-          mode = AppMode.USER)
+          onQuickFixChange = { /* Verify changes if needed */},
+          onQuickFixPay = { /* No-op for testing */},
+          mode = AppMode.WORKER)
     }
 
-    // Click on Select Suggested Dates Button
+    // Act:
+    // 1. Select Suggested Dates
     composeTestRule.onNodeWithTag("SelectSuggestedDatesButton").performClick()
 
-    // Wait for the dialog to appear
+    // 2. Interact with the date dialog
     composeTestRule.onNodeWithTag("SuggestedDatesDialogTitle").assertIsDisplayed()
-
-    // Select the first date
     composeTestRule.onNodeWithTag("RadioButton_0").performClick()
-
-    // Click on OK button
     composeTestRule.onNodeWithTag("ConfirmSuggestedDatesButton").performClick()
 
-    // Add a bill field
+    // 3. Add a bill field
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
 
-    // Enter description
+    // 4. Enter description
     composeTestRule.onNodeWithTag("DescriptionTextField_0").performTextInput("Replace sink")
 
-    // Select unit
+    // 5. Select unit
     composeTestRule.onNodeWithTag("UnitDropdown_0").performClick()
     composeTestRule
         .onNodeWithTag("UnitDropdownMenu_0")
-        .onChildAt(0) // Assuming "M2" is the first item
-        .performClick()
+        .onChildAt(0)
+        .performClick() // Assuming "M2" is first
 
-    // Enter amount
+    // 6. Enter amount
     composeTestRule.onNodeWithTag("AmountTextField_0").performTextInput("2")
 
-    // Enter unit price
+    // 7. Enter unit price
     composeTestRule.onNodeWithTag("UnitPriceTextField_0").performTextInput("100")
+
+    // Simulate focus loss to trigger any listeners
+    composeTestRule.onRoot().performClick()
+
+    // 8. Verify that the submit button is enabled
+    composeTestRule.onNodeWithTag("SubmitQuickFixButton").assertIsEnabled()
+
+    // 9. Click submit
+    composeTestRule.onNodeWithTag("SubmitQuickFixButton").performClick()
+
+    // Assert: Verify that the ViewModel's updateQuickFix was called with correct parameters
+    val quickFixCaptor: ArgumentCaptor<QuickFix> = ArgumentCaptor.forClass(QuickFix::class.java)
+    verify(quickFixRepository, times(1)).updateQuickFix(capture(quickFixCaptor), any(), any())
+
+    val capturedQuickFix = quickFixCaptor.value
+    assertNotNull(capturedQuickFix)
+    assertEquals(Status.UNPAID, capturedQuickFix.status)
+    assertEquals(fakeQuickFix.date.first(), capturedQuickFix.date.first())
+    assertEquals(1, capturedQuickFix.bill.size)
+    assertEquals("Replace sink", capturedQuickFix.bill[0].description)
+    assertEquals(Units.M2, capturedQuickFix.bill[0].unit)
+    assertEquals(2.0, capturedQuickFix.bill[0].amount, 0.001)
+    assertEquals(100.0, capturedQuickFix.bill[0].unitPrice, 0.001)
+    assertEquals(200.0, capturedQuickFix.bill[0].total, 0.001)
+  }
+
+  @Test
+  fun submitButton_disabledWhenFieldsIncomplete() = runTest {
+    // Arrange: Initialize QuickFix with no bill fields
+    composeTestRule.setContent {
+      QuickFixThirdStep(
+          quickFix = fakeQuickFix.copy(bill = emptyList()),
+          quickFixViewModel = quickFixViewModel,
+          workerProfile = mockWorkerProfile,
+          onQuickFixChange = { /* No-op for testing */},
+          onQuickFixPay = { /* No-op for testing */},
+          mode = AppMode.WORKER)
+    }
+
+    // Act: Add a bill field and enter incomplete data (only description)
+    composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
+    composeTestRule.onNodeWithTag("DescriptionTextField_0").performTextInput("Fix leak")
 
     // Simulate focus loss
     composeTestRule.onRoot().performClick()
 
-    // Verify that the submit button is enabled
-    composeTestRule.onNodeWithTag("SubmitQuickFixButton").assertIsEnabled()
-
-    // Click submit
-    composeTestRule.onNodeWithTag("SubmitQuickFixButton").performClick()
-
-    // Verify that the ViewModel's update function was called with correct parameters
-    verify {
-      quickFixViewModel.updateQuickFix(
-          match {
-            it.status == Status.UNPAID &&
-                it.date == mockQuickFix.date &&
-                it.bill.size == 1 &&
-                it.bill[0].description == "Replace sink" &&
-                it.bill[0].unit == Units.M2 &&
-                it.bill[0].amount == 2.0 &&
-                it.bill[0].unitPrice == 100.0
-            it.bill[0].total == 200.0
-          },
-          any(),
-          any())
-    }
-  }
-
-  @Test
-  fun submitButton_disabledWhenFieldsIncomplete() {
-    composeTestRule.setContent {
-      QuickFixThirdStep(
-          quickFix = mockQuickFix.copy(bill = emptyList()),
-          quickFixViewModel = quickFixViewModel,
-          workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> },
-          onQuickFixPay = {},
-          mode = AppMode.USER)
-    }
-
-    // Add a bill field
-    composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
-
-    // Enter incomplete data: only description
-    composeTestRule.onNodeWithTag("DescriptionTextField_0").performTextInput("Fix leak")
-
-    // Submit button should still be disabled
+    // Assert: Submit button should still be disabled
     composeTestRule.onNodeWithTag("SubmitQuickFixButton").assertIsNotEnabled()
   }
 
   @Test
-  fun openAndSelectSuggestedDates() {
-    // Create a QuickFix with specific dates
+  fun openAndSelectSuggestedDates() = runTest {
+    // Arrange: Initialize QuickFix with specific dates
     val date1 = Timestamp.now()
     val date2 = Timestamp(1234567890, 0)
-    val testQuickFix = mockQuickFix.copy(date = listOf(date1, date2))
+    val testQuickFix = fakeQuickFix.copy(date = listOf(date1, date2))
 
     composeTestRule.setContent {
       QuickFixThirdStep(
           quickFix = testQuickFix,
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> },
-          onQuickFixPay = {},
-          mode = AppMode.USER)
+          onQuickFixChange = { /* No-op for testing */},
+          onQuickFixPay = { /* No-op for testing */},
+          mode = AppMode.WORKER)
     }
 
-    // Click on Select Suggested Dates Button
+    // Act: Open Suggested Dates Dialog and select the first date
     composeTestRule.onNodeWithTag("SelectSuggestedDatesButton").performClick()
-
-    // Wait for the dialog to appear
     composeTestRule.onNodeWithTag("SuggestedDatesDialogTitle").assertIsDisplayed()
-
-    // Select the first date
     composeTestRule.onNodeWithTag("RadioButton_0").performClick()
-
-    // Click on OK button
     composeTestRule.onNodeWithTag("ConfirmSuggestedDatesButton").performClick()
 
-    // Verify that the selected date is displayed in the main screen
+    // Assert: Verify that the selected date is displayed in the main screen
     composeTestRule.onNodeWithTag("DateText_0").assertExists()
     composeTestRule.onNodeWithTag("TimeText_0").assertExists()
   }
 
   @Test
-  fun overallTotal_calculatesCorrectly() {
+  fun overallTotal_calculatesCorrectly() = runTest {
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix =
-              mockQuickFix.copy(
-                  bill =
-                      listOf(
-                          BillField(
-                              description = "Sink Replacement",
-                              unit = Units.H,
-                              amount = 2.0,
-                              unitPrice = 50.0,
-                              total = 100.0),
-                          BillField(
-                              description = "Pipe Fix",
-                              unit = Units.H,
-                              amount = 1.0,
-                              unitPrice = 60.0,
-                              total = 60.0))),
+          quickFix = fakeQuickFix,
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> },
-          onQuickFixPay = {},
-          mode = AppMode.USER)
+          onQuickFixChange = { /* No-op for testing */},
+          onQuickFixPay = { /* No-op for testing */},
+          mode = AppMode.WORKER)
     }
 
-    // Add a bill field
+    // Act: Add two more bill fields
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
 
-    composeTestRule.onNodeWithTag("UnitPriceTextField_0").performTextInput("50.0")
-    composeTestRule.onNodeWithTag("UnitPriceTextField_1").performTextInput("60.0")
-    composeTestRule.onNodeWithTag("AmountTextField_0").performTextInput("2.0")
+    // Enter data for first new bill field
+    composeTestRule.onNodeWithTag("DescriptionTextField_0").performTextInput("Electrical Fix")
+    composeTestRule.onNodeWithTag("UnitDropdown_0").performClick()
+    composeTestRule
+        .onNodeWithTag("UnitDropdownMenu_0")
+        .onChildAt(0)
+        .performClick() // Assuming "M2" is first
+    composeTestRule.onNodeWithTag("AmountTextField_0").performTextInput("3.0")
+    composeTestRule.onNodeWithTag("UnitPriceTextField_0").performTextInput("100")
+
+    // Enter data for second new bill field
+    composeTestRule.onNodeWithTag("DescriptionTextField_1").performTextInput("Painting")
+    composeTestRule.onNodeWithTag("UnitDropdown_1").performClick()
+    composeTestRule
+        .onNodeWithTag("UnitDropdownMenu_1")
+        .onChildAt(0)
+        .performClick() // Assuming "M2" is first
     composeTestRule.onNodeWithTag("AmountTextField_1").performTextInput("1.0")
+    composeTestRule.onNodeWithTag("UnitPriceTextField_1").performTextInput("150")
 
-    // Verify that the overall total is calculated correctly: 100 + 60 = 160
-    composeTestRule.onNodeWithTag("OverallTotalValue").assertTextEquals("160.00 CHF")
+    // Simulate focus loss
+    composeTestRule.onRoot().performClick()
+
+    // Assert: Verify that the overall total is calculated correctly: 300 + 150 = 450
+    composeTestRule.onNodeWithTag("OverallTotalValue").assertTextEquals("450.00 CHF")
   }
 }
