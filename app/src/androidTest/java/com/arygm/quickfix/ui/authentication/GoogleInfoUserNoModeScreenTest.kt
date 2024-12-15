@@ -9,6 +9,7 @@ import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -33,6 +34,8 @@ class GoogleInfoUserNoModeScreenTest {
   private lateinit var preferencesRepository: PreferencesRepository
   private lateinit var preferencesViewModel: PreferencesViewModel
   private lateinit var rootNavigationActions: NavigationActions
+  private lateinit var userPreferencesViewModel: PreferencesViewModelUserProfile
+  private lateinit var userPreferencesRepository: PreferencesRepository
 
   private val USER_ID_KEY = stringPreferencesKey("user_id")
   private val EMAIL_KEY = stringPreferencesKey("email")
@@ -40,10 +43,12 @@ class GoogleInfoUserNoModeScreenTest {
   @Before
   fun setup() {
     // Initialize the repositories and view models
+    userPreferencesRepository = mock()
     navigationActions = mock()
     accountRepository = mock()
     profileRepository = mock()
     preferencesRepository = TestPreferencesRepository()
+    userPreferencesViewModel = PreferencesViewModelUserProfile(userPreferencesRepository)
 
     accountViewModel = AccountViewModel(accountRepository)
 
@@ -93,7 +98,8 @@ class GoogleInfoUserNoModeScreenTest {
           accountViewModel = accountViewModel,
           userViewModel = profileViewModel,
           preferencesViewModel = preferencesViewModel,
-          navigationActions = navigationActions)
+          navigationActions = navigationActions,
+          userPreferencesViewModel = userPreferencesViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -120,9 +126,9 @@ class GoogleInfoUserNoModeScreenTest {
           accountViewModel = accountViewModel,
           userViewModel = profileViewModel,
           preferencesViewModel = preferencesViewModel,
-          navigationActions = navigationActions)
+          navigationActions = navigationActions,
+          userPreferencesViewModel = userPreferencesViewModel)
     }
-
     composeTestRule.waitForIdle()
 
     // Enter an invalid date
@@ -141,9 +147,9 @@ class GoogleInfoUserNoModeScreenTest {
           accountViewModel = accountViewModel,
           userViewModel = profileViewModel,
           preferencesViewModel = preferencesViewModel,
-          navigationActions = navigationActions)
+          navigationActions = navigationActions,
+          userPreferencesViewModel = userPreferencesViewModel)
     }
-
     composeTestRule.waitForIdle()
 
     // Fill out the form

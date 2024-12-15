@@ -28,8 +28,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.model.switchModes.ModeViewModel
@@ -38,7 +41,6 @@ import com.arygm.quickfix.ui.navigation.RootRoute
 import com.arygm.quickfix.ui.noModeUI.NoModeNavHost
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.ui.uiMode.appContentUI.AppContentNavGraph
-import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
 import com.arygm.quickfix.utils.LocationHelper
 import com.arygm.quickfix.utils.loadAppMode
 import kotlinx.coroutines.delay
@@ -119,29 +121,31 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
 
   val preferencesViewModel: PreferencesViewModel =
       viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
+  val userPreferencesViewModel: PreferencesViewModelUserProfile =
+      viewModel(factory = PreferencesViewModelUserProfile.Factory(LocalContext.current.dataStore))
+
+  val workerViewModel: ProfileViewModel =
+      viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
+  val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
+  val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
 
   var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
 
-  var currentAppMode by remember { mutableStateOf<String?>(null) }
+  var currentAppMode by remember { mutableStateOf(AppMode.USER) }
   Log.d("userContent", "Current App Mode is empty: $currentAppMode")
   LaunchedEffect(Unit) {
     Log.d("userContent", "Loading App Mode")
     currentAppMode =
         when (loadAppMode(preferencesViewModel)) {
-          "User" -> AppContentRoute.USER_MODE
-          "Worker" -> AppContentRoute.WORKER_MODE
+          "User" -> AppMode.USER
+          "Worker" -> AppMode.WORKER
           else -> {
-            AppContentRoute.USER_MODE
+            AppMode.WORKER
           }
         }
   }
 
-  modeViewModel.switchMode(
-      when (currentAppMode) {
-        AppContentRoute.USER_MODE -> AppMode.USER
-        AppContentRoute.WORKER_MODE -> AppMode.WORKER
-        else -> AppMode.USER
-      })
+  modeViewModel.switchMode(currentAppMode)
 
   // Simulate monitoring connectivity (replace this with actual monitoring in production)
   LaunchedEffect(Unit) {
@@ -167,7 +171,8 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
               accountViewModel,
               preferencesViewModel,
               userViewModel,
-              isOffline = isOffline)
+              isOffline = isOffline,
+              userPreferencesViewModel)
         }
 
         composable(RootRoute.APP_CONTENT) {
@@ -179,7 +184,12 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
               accountViewModel,
               isOffline,
               navigationActionsRoot,
-              modeViewModel)
+              modeViewModel,
+              userPreferencesViewModel,
+              currentAppMode,
+              workerViewModel,
+              categoryViewModel,
+              locationViewModel)
         }
       }
 }

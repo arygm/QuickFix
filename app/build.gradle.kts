@@ -10,6 +10,8 @@ plugins {
     alias(libs.plugins.gms)
     id("jacoco")
     id("kotlin-parcelize")
+    id("com.google.devtools.ksp")
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -198,12 +200,16 @@ dependencies {
     implementation(libs.androidx.espresso.intents)
     implementation(libs.mockk.android)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.mockk.agent)
     globalTestImplementation(libs.androidx.espresso.core)
+    ksp(libs.androidx.room.compiler.v250)
+
 
     // ------------- Jetpack Compose ------------------
     val composeBom = platform(libs.compose.bom)
@@ -318,14 +324,14 @@ tasks.register("connectedCheckWithEmulators") {
                 println("Running on Windows")
                 commandLine = listOf(
                     "cmd", "/c",
-                    "firebase emulators:exec --debug --inspect-functions --project quickfix-1fd34 --import=./end2end-data --only firestore,auth \"gradlew.bat connectedCheck\""
+                    "firebase emulators:exec --debug --inspect-functions --project quickfix-1fd34 --import=./end2end-data --only firestore,auth,storage \"gradlew.bat connectedCheck\""
                 )
             } else {
                 // Unix-like command (macOS, Linux)
                 println("Running on Unix-like OS")
                 commandLine = listOf(
                     "/bin/sh", "-c",
-                    "firebase emulators:exec --debug --inspect-functions --project quickfix-1fd34 --import=./end2end-data --only firestore,auth './gradlew connectedCheck'"
+                    "firebase emulators:exec --debug --inspect-functions --project quickfix-1fd34 --import=./end2end-data --only firestore,auth,storage './gradlew connectedCheck'"
                 )
             }
 

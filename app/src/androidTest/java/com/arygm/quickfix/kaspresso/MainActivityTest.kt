@@ -36,6 +36,8 @@ import com.arygm.quickfix.kaspresso.screen.WelcomeScreen
 import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.category.Scale
 import com.arygm.quickfix.model.category.Subcategory
+import com.arygm.quickfix.model.switchModes.AppMode
+import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ressources.C.Tag.professionalInfoScreenCategoryField
 import com.arygm.quickfix.ressources.C.Tag.professionalInfoScreenSubcategoryField
@@ -129,6 +131,8 @@ class MainActivityTest : TestCase() {
           FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build()
 
       navigationActions = Mockito.mock(NavigationActions::class.java)
+      val modeViewModel = ModeViewModel()
+      modeViewModel.switchMode(AppMode.USER)
     }
 
     @JvmStatic
@@ -209,7 +213,6 @@ class MainActivityTest : TestCase() {
 
       // Attempt to grant permissions
       allowPermissionsIfNeeded()
-      loginToTestAccount()
       // Retry the action until it works with a timeout of 10 seconds
       composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()
@@ -230,7 +233,6 @@ class MainActivityTest : TestCase() {
             .fetchSemanticsNodes()
             .isNotEmpty()
       }
-      composeTestRule.onNodeWithText(item.subcategories[0].name).performClick()
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
       composeTestRule.onNodeWithTag("SetupyourbusinessaccountOption").performClick()
@@ -319,11 +321,30 @@ class MainActivityTest : TestCase() {
       }
       composeTestRule.onNodeWithTag(C.Tag.professionalInfoScreencontinueButton).performClick()
       composeTestRule.onNodeWithTag(C.Tag.welcomeOnBoardScreenStayUserButton).performClick()
+      composeTestRule.waitUntil("find the switch", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithTag(C.Tag.buttonSwitch).fetchSemanticsNodes().isNotEmpty()
+      }
+      composeTestRule.onNodeWithTag(C.Tag.buttonSwitch, useUnmergedTree = true).performClick()
+      composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()
+      }
+      onView(withText("Home")) // Match the TextView that has the text "Hello World"
+          .perform(click())
+      onView(withText("Announcement")) // Match the TextView that has the text "Hello World"
+          .perform(click())
+      onView(withText("Messages")) // Match the TextView that has the text "Hello World"
+          .perform(click())
+      onView(withText("Profile")) // Match the TextView that has the text "Hello World"
+          .perform(click())
+      composeTestRule.waitUntil("find the switch", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithTag(C.Tag.buttonSwitch).fetchSemanticsNodes().isNotEmpty()
+      }
+      composeTestRule.onNodeWithTag(C.Tag.buttonSwitch, useUnmergedTree = true).performClick()
     }
   }
 
   @Test
-  fun shouldBeAbleToLogin() = run {
+  fun BshouldBeAbleToLogin() = run {
     step("Set up the WelcomeScreen and transit to the register") {
       composeTestRule.activity
 
@@ -332,6 +353,7 @@ class MainActivityTest : TestCase() {
 
       // Attempt to grant permissions
       allowPermissionsIfNeeded()
+      loginToTestAccount()
       // Retry the action until it works with a timeout of 10 seconds
       composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("BottomNavMenu").fetchSemanticsNodes().isNotEmpty()
@@ -437,7 +459,7 @@ class MainActivityTest : TestCase() {
     }
 
     composeTestRule.waitUntil(20000) {
-      val profileNode = composeTestRule.onAllNodesWithTag("ProfileName")
+      val profileNode = composeTestRule.onAllNodesWithTag("ProfileDisplayName")
       // Check if there's at least one node with the expected text
       profileNode.fetchSemanticsNodes().any { semanticsNode ->
         val text = semanticsNode.config.getOrNull(SemanticsProperties.Text)?.joinToString()
@@ -445,7 +467,7 @@ class MainActivityTest : TestCase() {
       }
     }
     // Verify that the profile name has been updated correctly
-    composeTestRule.onNodeWithTag("ProfileName").assertTextEquals(expectedProfileName)
+    composeTestRule.onNodeWithTag("ProfileDisplayName").assertTextEquals(expectedProfileName)
   }
 
   private fun searchEngine() {

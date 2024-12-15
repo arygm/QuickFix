@@ -46,7 +46,9 @@ import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -57,6 +59,7 @@ import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.loadEmail
 import com.arygm.quickfix.utils.loadUserId
 import com.arygm.quickfix.utils.setAccountPreferences
+import com.arygm.quickfix.utils.setUserProfilePreferences
 import com.arygm.quickfix.utils.stringToTimestamp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -69,7 +72,8 @@ fun GoogleInfoScreen(
     accountViewModel: AccountViewModel,
     userViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    userPreferencesViewModel: PreferencesViewModelUserProfile
 ) {
 
   var firstName by remember { mutableStateOf("") }
@@ -243,6 +247,11 @@ fun GoogleInfoScreen(
                                 newAccount,
                                 onSuccess = {
                                   setAccountPreferences(preferencesViewModel, newAccount)
+                                  userViewModel.fetchUserProfile(uid) { userProfile ->
+                                    val profileFetched = userProfile as UserProfile
+                                    setUserProfilePreferences(
+                                        userPreferencesViewModel, profileFetched)
+                                  }
                                   rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
                                   navigationActions.navigateTo(NoModeRoute.WELCOME)
                                 },
