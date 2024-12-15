@@ -12,6 +12,7 @@ import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -32,7 +33,8 @@ fun rememberFirebaseAuthLauncher(
     onAuthError: (ApiException) -> Unit,
     accountViewModel: AccountViewModel,
     userViewModel: ProfileViewModel,
-    preferencesViewModel: PreferencesViewModel
+    preferencesViewModel: PreferencesViewModel,
+    userPreferencesViewModel: PreferencesViewModelUserProfile
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
   val scope = rememberCoroutineScope()
 
@@ -50,6 +52,10 @@ fun rememberFirebaseAuthLauncher(
           accountViewModel.fetchUserAccount(it.uid) { existingAccount ->
             if (existingAccount != null) {
               setAccountPreferences(preferencesViewModel, existingAccount)
+              userViewModel.fetchUserProfile(it.uid) { userProfile ->
+                val profileFetched = userProfile as UserProfile
+                setUserProfilePreferences(userPreferencesViewModel, profileFetched)
+              }
               onAuthCompleteOne(authResult)
             } else {
               // Extract user information from Google account
@@ -73,6 +79,7 @@ fun rememberFirebaseAuthLauncher(
                       uid = it.uid,
                       locations = listOf(defaultLocation),
                       announcements = emptyList())
+              setUserProfilePreferences(userPreferencesViewModel, defaultUserProfile)
               userViewModel.addProfile(
                   defaultUserProfile,
                   onSuccess = {
@@ -97,7 +104,9 @@ fun signInWithEmailAndFetchAccount(
     password: String,
     accountViewModel: AccountViewModel,
     preferencesViewModel: PreferencesViewModel,
-    onResult: (Boolean) -> Unit
+    onResult: (Boolean) -> Unit,
+    userPreferencesViewModel: PreferencesViewModelUserProfile,
+    userViewModel: ProfileViewModel
 ) {
   FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
       task ->
@@ -109,6 +118,10 @@ fun signInWithEmailAndFetchAccount(
             onResult = { account ->
               if (account != null) {
                 setAccountPreferences(preferencesViewModel, account)
+                userViewModel.fetchUserProfile(it.uid) { userProfile ->
+                  val profileFetched = userProfile as UserProfile
+                  setUserProfilePreferences(userPreferencesViewModel, profileFetched)
+                }
                 onResult(true)
               } else {
                 Log.e("Login Screen", "Error Logging in Account.")
@@ -137,6 +150,7 @@ fun createAccountWithEmailAndPassword(
     accountViewModel: AccountViewModel,
     userViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
+    userPreferencesViewModel: PreferencesViewModelUserProfile,
     onSuccess: () -> Unit,
     onFailure: () -> Unit
 ) {
@@ -169,6 +183,7 @@ fun createAccountWithEmailAndPassword(
                     createdAccount,
                     onSuccess = {
                       setAccountPreferences(preferencesViewModel, createdAccount)
+                      setUserProfilePreferences(userPreferencesViewModel, defaultUserProfile)
                       onSuccess()
                     },
                     onFailure = {

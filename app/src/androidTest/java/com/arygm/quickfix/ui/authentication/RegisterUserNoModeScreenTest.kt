@@ -14,6 +14,7 @@ import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
@@ -53,9 +54,13 @@ class RegisterUserNoModeScreenTest {
   private lateinit var preferencesViewModel: PreferencesViewModel
   private lateinit var mockStorage: FirebaseStorage
   @Mock private lateinit var storageRef: StorageReference
+  private lateinit var userPreferencesViewModelUserProfile: PreferencesViewModelUserProfile
+  private lateinit var userPreferencesRepository: PreferencesRepository
 
   @Before
   fun setup() {
+    userPreferencesRepository = mock(PreferencesRepository::class.java)
+    userPreferencesViewModelUserProfile = PreferencesViewModelUserProfile(userPreferencesRepository)
     rootNavigationActions = mock(NavigationActions::class.java)
     mockFirestore = mock(FirebaseFirestore::class.java)
     mockStorage = mock(FirebaseStorage::class.java)
@@ -81,7 +86,8 @@ class RegisterUserNoModeScreenTest {
           navigationActions,
           accountViewModel,
           userViewModel,
-          preferencesViewModel)
+          preferencesViewModel,
+          userPreferencesViewModelUserProfile)
     }
 
     // Check that the scaffold and content boxes are displayed
@@ -130,7 +136,8 @@ class RegisterUserNoModeScreenTest {
           navigationActions,
           accountViewModel,
           userViewModel,
-          preferencesViewModel)
+          preferencesViewModel,
+          userPreferencesViewModelUserProfile)
     }
 
     // Input an invalid email
@@ -149,7 +156,8 @@ class RegisterUserNoModeScreenTest {
           navigationActions,
           accountViewModel,
           userViewModel,
-          preferencesViewModel)
+          preferencesViewModel,
+          userPreferencesViewModelUserProfile)
     }
 
     // Input an invalid birth date
@@ -168,7 +176,8 @@ class RegisterUserNoModeScreenTest {
           navigationActions,
           accountViewModel,
           userViewModel,
-          preferencesViewModel)
+          preferencesViewModel,
+          userPreferencesViewModelUserProfile)
     }
 
     // Enter different passwords
@@ -196,6 +205,7 @@ class RegisterUserNoModeScreenTest {
             _: AccountViewModel,
             _: ProfileViewModel,
             _: PreferencesViewModel,
+            _: PreferencesViewModelUserProfile,
             onSuccess: () -> Unit,
             _: () -> Unit ->
           createAccountFuncCalled = true
@@ -216,6 +226,7 @@ class RegisterUserNoModeScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
+          userPreferencesViewModelUserProfile,
           createAccountFunc = testCreateAccountFunc)
     }
 
@@ -250,7 +261,8 @@ class RegisterUserNoModeScreenTest {
           navigationActions,
           accountViewModel,
           userViewModel,
-          preferencesViewModel)
+          preferencesViewModel,
+          userPreferencesViewModelUserProfile)
     }
 
     // Fill only partial inputs
@@ -274,7 +286,8 @@ class RegisterUserNoModeScreenTest {
           navigationActions,
           accountViewModel,
           userViewModel,
-          preferencesViewModel)
+          preferencesViewModel,
+          userPreferencesViewModelUserProfile)
     }
 
     // Click the back button
@@ -292,7 +305,8 @@ class RegisterUserNoModeScreenTest {
           navigationActions,
           accountViewModel,
           userViewModel,
-          preferencesViewModel)
+          preferencesViewModel,
+          userPreferencesViewModelUserProfile)
     }
 
     // Click the "Login !" button
@@ -330,7 +344,8 @@ class RegisterUserNoModeScreenTest {
           navigationActions,
           accountViewModel,
           userViewModel,
-          preferencesViewModel)
+          preferencesViewModel,
+          userPreferencesViewModelUserProfile)
     }
 
     composeTestRule.onNodeWithTag("emailInput").performTextInput(existingEmail)
@@ -371,7 +386,8 @@ class RegisterUserNoModeScreenTest {
           navigationActions,
           accountViewModel,
           userViewModel,
-          preferencesViewModel)
+          preferencesViewModel,
+          userPreferencesViewModelUserProfile)
     }
 
     composeTestRule.onNodeWithTag("emailInput").performTextInput(newEmail)
@@ -410,6 +426,7 @@ class RegisterUserNoModeScreenTest {
             _: AccountViewModel,
             _: ProfileViewModel,
             _: PreferencesViewModel,
+            _: PreferencesViewModelUserProfile,
             onSuccess: () -> Unit,
             _: () -> Unit ->
           createAccountFuncCalled = true
@@ -423,6 +440,7 @@ class RegisterUserNoModeScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
+          userPreferencesViewModelUserProfile,
           createAccountFunc = testCreateAccountFunc)
     }
 
@@ -480,6 +498,7 @@ class RegisterUserNoModeScreenTest {
             _: AccountViewModel,
             _: ProfileViewModel,
             _: PreferencesViewModel,
+            _: PreferencesViewModelUserProfile,
             _: () -> Unit,
             onFailure: () -> Unit ->
           createAccountFuncCalled = true
@@ -493,6 +512,7 @@ class RegisterUserNoModeScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
+          userPreferencesViewModelUserProfile,
           createAccountFunc = testCreateAccountFunc)
     }
     // Fill out valid inputs

@@ -1841,7 +1841,7 @@ class SearchWorkerResultScreenTest {
     // Find the node representing today's date and perform a click
     composeTestRule
         .onNode(
-            hasText(LocalDate.now().plusDays(1).dayOfMonth.toString()) and
+            hasText(LocalDate.now().dayOfMonth.toString()) and
                 hasClickAction() and
                 !hasSetTextAction())
         .performClick()
@@ -1849,8 +1849,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithText("OK").performClick()
 
     composeTestRule.waitForIdle()
-
-    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(1)
   }
 
   @Test

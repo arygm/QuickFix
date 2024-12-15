@@ -1,11 +1,22 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI
 
 import android.graphics.Bitmap
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,25 +28,31 @@ import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.model.switchModes.ModeViewModel
-import com.arygm.quickfix.ui.camera.QuickFixDisplayImages
-import com.arygm.quickfix.ui.dashboard.DashboardScreen
 import com.arygm.quickfix.ui.elements.LocationSearchCustomScreen
+import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
+import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixDisplayImages
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.DashboardScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.HomeScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.MessageScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.getBottomBarIdUser
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.ProfileScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixOnBoarding
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchWorkerResult
+import kotlinx.coroutines.delay
 
 @Composable
 fun UserModeNavHost(
@@ -48,12 +65,15 @@ fun UserModeNavHost(
     categoryViewModel: CategoryViewModel,
     locationViewModel: LocationViewModel,
     preferencesViewModel: PreferencesViewModel,
-    onScreenChange: (String) -> Unit,
     rootMainNavigationActions: NavigationActions,
-    userNavigationActions: NavigationActions,
+    userPreferencesViewModel: PreferencesViewModelUserProfile,
+    appContentNavigationActions: NavigationActions,
+    chatViewModel: ChatViewModel,
     quickFixViewModel: QuickFixViewModel,
-    chatViewModel: ChatViewModel
+    isOffline: Boolean
 ) {
+  val userNavController = rememberNavController()
+  val userNavigationActions = remember { NavigationActions(userNavController) }
 
   val loggedInAccountViewModel: LoggedInAccountViewModel =
       viewModel(factory = LoggedInAccountViewModel.Factory)
@@ -64,62 +84,111 @@ fun UserModeNavHost(
   // Initialized here because needed for the bottom bar
 
   val isUser = true // TODO: This variable needs to get its value after the authentication
+  var currentScreen by remember { mutableStateOf<String?>(null) }
+  val shouldShowBottomBar by remember {
+    derivedStateOf {
+      currentScreen?.let {
+        it != UserScreen.DISPLAY_UPLOADED_IMAGES && it != UserScreen.SEARCH_LOCATION
+      } ?: true &&
+          currentScreen?.let {
+            it != UserScreen.ACCOUNT_CONFIGURATION && it != UserScreen.TO_WORKER
+          } ?: true &&
+          currentScreen?.let { it != UserScreen.QUICKFIX_ONBOARDING && it != UserScreen.MESSAGES }
+              ?: true
+    }
+  }
 
-  NavHost(
-      navController = userNavigationActions.navController,
-      startDestination = UserRoute.HOME,
-      enterTransition = {
-        // You can change whatever you want for transitions
-        EnterTransition.None
-      },
-      exitTransition = {
-        // You can change whatever you want for transitions
-        ExitTransition.None
-      }) {
-        composable(UserRoute.HOME) {
-          HomeNavHost(
-              onScreenChange,
-              chatViewModel,
-              quickFixViewModel,
-              modeViewModel,
-              preferencesViewModel) // , loggedInAccountViewModel, chatViewModel)
-        }
+  var showBottomBar by remember { mutableStateOf(false) }
 
-        composable(UserRoute.SEARCH) {
-          SearchNavHost(
-              isUser,
-              userNavigationActions,
-              searchViewModel,
-              userViewModel,
-              loggedInAccountViewModel,
-              accountViewModel,
-              announcementViewModel,
-              onScreenChange,
-              categoryViewModel,
-              preferencesViewModel,
-              locationViewModel,
-              modeViewModel,
-              quickFixViewModel,
-              chatViewModel)
-        }
+  // Delay the appearance of the bottom bar
+  LaunchedEffect(shouldShowBottomBar) {
+    if (shouldShowBottomBar) {
+      delay(200) // Adjust the delay duration (in milliseconds) as needed
+      showBottomBar = true
+    } else {
+      showBottomBar = false
+    }
+  }
+  Scaffold(
+      topBar = { QuickFixOfflineBar(isVisible = isOffline) },
+      bottomBar = {
+        // Show BottomNavigationMenu only if the route is not part of the login/registration flow
+        AnimatedVisibility(
+            visible = showBottomBar,
+            enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from the bottom
+            exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to the bottom
+            modifier = Modifier.testTag("BNM")) {
+              BottomNavigationMenu(
+                  onTabSelect = { selectedDestination ->
+                    // Use this block to navigate based on the selected tab
+                    userNavigationActions.navigateTo(selectedDestination)
+                  },
+                  navigationActions = userNavigationActions,
+                  tabList = USER_TOP_LEVEL_DESTINATIONS,
+                  getBottomBarId = getBottomBarIdUser)
+            }
+      }) { innerPadding ->
+        NavHost(
+            navController = userNavigationActions.navController,
+            startDestination = UserRoute.HOME,
+            modifier = Modifier.padding(innerPadding),
+            enterTransition = {
+              // You can change whatever you want for transitions
+              EnterTransition.None
+            },
+            exitTransition = {
+              // You can change whatever you want for transitions
+              ExitTransition.None
+            }) {
+              composable(UserRoute.HOME) {
+                HomeNavHost(
+                    onScreenChange = { currentScreen = it },
+                    chatViewModel,
+                    quickFixViewModel,
+                    modeViewModel,
+                    preferencesViewModel) // , loggedInAccountViewModel, chatViewModel)
+              }
 
-        composable(UserRoute.DASHBOARD) { DashBoardNavHost(onScreenChange) }
+              composable(UserRoute.SEARCH) {
+                SearchNavHost(
+                    isUser,
+                    userNavigationActions,
+                    searchViewModel,
+                    userViewModel,
+                    loggedInAccountViewModel,
+                    accountViewModel,
+                    announcementViewModel,
+                    onScreenChange = { currentScreen = it },
+                    categoryViewModel,
+                    preferencesViewModel,
+                    locationViewModel,
+                    quickFixViewModel,
+                    chatViewModel,
+                    modeViewModel)
+              }
 
-        composable(UserRoute.PROFILE) {
-          ProfileNavHost(
-              accountViewModel,
-              loggedInAccountViewModel,
-              workerViewModel,
-              userNavigationActions,
-              onScreenChange,
-              categoryViewModel,
-              preferencesViewModel,
-              locationViewModel,
-              testBitmapPP,
-              testLocation,
-              rootMainNavigationActions,
-          )
-        }
+              composable(UserRoute.DASHBOARD) {
+                DashBoardNavHost(onScreenChange = { currentScreen = it })
+              }
+
+              composable(UserRoute.PROFILE) {
+                ProfileNavHost(
+                    accountViewModel,
+                    loggedInAccountViewModel,
+                    workerViewModel,
+                    userNavigationActions,
+                    onScreenChange = { currentScreen = it },
+                    categoryViewModel,
+                    preferencesViewModel,
+                    locationViewModel,
+                    testBitmapPP,
+                    testLocation,
+                    rootMainNavigationActions,
+                    userPreferencesViewModel,
+                    appContentNavigationActions,
+                    modeViewModel)
+              }
+            }
       }
 }
 
@@ -150,7 +219,8 @@ fun HomeNavHost(
           navigationActions = navigationActions,
           quickFixViewModel = quickFixViewModel,
           modeViewModel = modeViewModel,
-          preferencesViewModel = preferencesViewModel)
+          preferencesViewModel = preferencesViewModel,
+      )
     }
   }
 }
@@ -167,7 +237,10 @@ fun ProfileNavHost(
     locationViewModel: LocationViewModel,
     testBitmapPP: Bitmap? = null,
     testLocation: Location = Location(),
-    rootMainNavigationActions: NavigationActions
+    rootMainNavigationActions: NavigationActions,
+    userPreferencesViewModel: PreferencesViewModelUserProfile,
+    appContentNavigationActions: NavigationActions,
+    modeViewModel: ModeViewModel
 ) {
 
   val profileNavController = rememberNavController()
@@ -178,7 +251,13 @@ fun ProfileNavHost(
   }
   NavHost(navController = profileNavController, startDestination = UserScreen.PROFILE) {
     composable(UserScreen.PROFILE) {
-      ProfileScreen(profileNavigationActions, rootMainNavigationActions, preferencesViewModel)
+      ProfileScreen(
+          profileNavigationActions,
+          rootMainNavigationActions,
+          preferencesViewModel,
+          userPreferencesViewModel,
+          appContentNavigationActions,
+          modeViewModel)
     }
     composable(UserScreen.ACCOUNT_CONFIGURATION) {
       AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)
@@ -223,9 +302,9 @@ fun SearchNavHost(
     categoryViewModel: CategoryViewModel,
     preferencesViewModel: PreferencesViewModel,
     locationViewModel: LocationViewModel,
-    modeViewModel: ModeViewModel,
     quickFixViewModel: QuickFixViewModel,
-    chatViewModel: ChatViewModel
+    chatViewModel: ChatViewModel,
+    modeViewModel: ModeViewModel
 ) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
@@ -280,7 +359,8 @@ fun SearchNavHost(
           navigationActions = navigationActions,
           quickFixViewModel = quickFixViewModel,
           modeViewModel = modeViewModel,
-          preferencesViewModel = preferencesViewModel)
+          preferencesViewModel = preferencesViewModel,
+      )
     }
   }
 }

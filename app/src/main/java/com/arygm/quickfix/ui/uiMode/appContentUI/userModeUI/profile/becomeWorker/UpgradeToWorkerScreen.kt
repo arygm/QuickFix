@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.profile.becomeWorker
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker
 
 import android.graphics.Bitmap
 import android.util.Log
@@ -229,7 +229,7 @@ fun BusinessScreen(
                       categories)
                 }
                 2 -> {
-                  WelcomeOnBoardScreen(navigationActions)
+                  WelcomeOnBoardScreen(navigationActions, preferencesViewModel)
                 }
               }
             }

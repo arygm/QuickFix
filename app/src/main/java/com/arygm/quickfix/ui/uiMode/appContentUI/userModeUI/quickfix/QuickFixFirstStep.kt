@@ -84,8 +84,8 @@ import com.arygm.quickfix.ui.elements.QuickFixCheckedListElement
 import com.arygm.quickfix.ui.elements.QuickFixDateTimePicker
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.dashedBorder
-import com.arygm.quickfix.ui.profile.becomeWorker.views.personal.CameraBottomSheet
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.personal.CameraBottomSheet
 import com.arygm.quickfix.utils.loadUserId
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.firebase.Timestamp

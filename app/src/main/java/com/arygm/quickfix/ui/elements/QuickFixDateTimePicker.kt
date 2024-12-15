@@ -100,7 +100,7 @@ fun DatePickerDialog(
                 onNegativeClick = { onDismissRequest() }),
         config =
             CalendarConfig(
-                locale = Locale.getDefault(),
+                locale = Locale.UK,
                 style = CalendarStyle.WEEK,
                 cameraDate = LocalDate.now(),
                 yearSelection = true,
@@ -167,7 +167,8 @@ fun TimePickerDialog(
                         timeSelectorSelectedContentColor = colorScheme.onBackground,
                         clockDialColor = colorScheme.primary.copy(alpha = 0.1f),
                         timeSelectorUnselectedContainerColor = TimeSelectorUnselectedContainerColor,
-                        timeSelectorUnselectedContentColor = colorScheme.onSecondaryContainer,
+                        timeSelectorUnselectedContentColor =
+                            colorScheme.onBackground.copy(alpha = 0.7f),
                         clockDialUnselectedContentColor = colorScheme.onBackground),
             )
           } else {
@@ -180,7 +181,8 @@ fun TimePickerDialog(
                         timeSelectorSelectedContentColor = colorScheme.onBackground,
                         clockDialColor = colorScheme.primary.copy(alpha = 0.1f),
                         timeSelectorUnselectedContainerColor = TimeSelectorUnselectedContainerColor,
-                        timeSelectorUnselectedContentColor = colorScheme.onSecondaryContainer,
+                        timeSelectorUnselectedContentColor =
+                            colorScheme.onBackground.copy(alpha = 0.7f),
                         clockDialUnselectedContentColor = colorScheme.onBackground),
             )
           }

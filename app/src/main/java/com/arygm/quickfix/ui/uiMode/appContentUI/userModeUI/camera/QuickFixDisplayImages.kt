@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.camera
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera
 
 import android.graphics.Bitmap
 import android.util.Log

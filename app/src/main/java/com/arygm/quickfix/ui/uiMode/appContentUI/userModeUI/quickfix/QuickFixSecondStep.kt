@@ -81,7 +81,6 @@ fun QuickFixSecondStep(
         chatViewModel.addChat(
             it,
             onSuccess = {
-              Log.d("QuickFixSecondStep", "Chat added: $chat")
               chatViewModel.selectChat(chat!!)
               accountViewModel.updateAccount(
                   userAccount!!.copy(activeChats = userAccount!!.activeChats + chat!!.chatId),

@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -27,7 +28,8 @@ fun NoModeNavHost(
     accountViewModel: AccountViewModel,
     preferencesViewModel: PreferencesViewModel,
     userViewModel: ProfileViewModel,
-    isOffline: Boolean
+    isOffline: Boolean,
+    userPreferencesViewModel: PreferencesViewModelUserProfile
 ) {
   val rootSharedModelNavController = rememberNavController()
   val navigationActions = NavigationActions(rootSharedModelNavController)
@@ -53,12 +55,18 @@ fun NoModeNavHost(
                 accountViewModel,
                 userViewModel,
                 preferencesViewModel,
-                rootNavigationActions)
+                rootNavigationActions,
+                userPreferencesViewModel)
           }
 
           composable(NoModeRoute.LOGIN) {
             LogInScreen(
-                navigationActions, accountViewModel, preferencesViewModel, rootNavigationActions)
+                navigationActions,
+                accountViewModel,
+                preferencesViewModel,
+                rootNavigationActions,
+                userPreferencesViewModel,
+                userViewModel)
           }
           composable(NoModeRoute.REGISTER) {
             RegisterScreen(
@@ -66,7 +74,8 @@ fun NoModeNavHost(
                 navigationActions,
                 accountViewModel,
                 userViewModel,
-                preferencesViewModel)
+                preferencesViewModel,
+                userPreferencesViewModel)
           }
           composable(NoModeRoute.GOOGLE_INFO) {
             GoogleInfoScreen(
@@ -74,7 +83,8 @@ fun NoModeNavHost(
                 accountViewModel,
                 userViewModel,
                 preferencesViewModel,
-                navigationActions)
+                navigationActions,
+                userPreferencesViewModel)
           }
           composable(NoModeRoute.RESET_PASSWORD) {
             ResetPasswordScreen(navigationActions, accountViewModel)

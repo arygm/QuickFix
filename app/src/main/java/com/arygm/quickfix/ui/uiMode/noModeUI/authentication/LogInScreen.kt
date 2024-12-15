@@ -50,6 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -72,7 +74,9 @@ fun LogInScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
     preferencesViewModel: PreferencesViewModel,
-    rootNavigationActions: NavigationActions
+    rootNavigationActions: NavigationActions,
+    userPreferencesViewModel: PreferencesViewModelUserProfile,
+    userViewModel: ProfileViewModel
 ) {
   var errorHasOccurred by remember { mutableStateOf(false) }
   var emailError = false
@@ -284,7 +288,9 @@ fun LogInScreen(
                                           Log.e("LogInScreen", "Error occurred while signing in")
                                           errorHasOccurred = true
                                         }
-                                      })
+                                      },
+                                      userPreferencesViewModel,
+                                      userViewModel)
                                 },
                                 buttonColor = colorScheme.primary,
                                 textColor = colorScheme.onPrimary,
