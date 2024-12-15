@@ -1,5 +1,5 @@
-package com.arygm.quickfix.ui.elements
-
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -9,6 +9,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,6 +21,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun QuickFixStepper(
@@ -27,7 +31,13 @@ fun QuickFixStepper(
     currentStep: Int, // 1-based index for the active step
     heightRatio: Dp, // Height ratio of the stepper
     widthRatio: Dp, // Width ratio of the stepper
+    coroutineScope: CoroutineScope
 ) {
+  LaunchedEffect(Unit) {
+    coroutineScope.launch {
+      // Do something
+    }
+  }
   Row(
       modifier =
           Modifier.fillMaxWidth()
@@ -39,6 +49,25 @@ fun QuickFixStepper(
           val isDone = index + 1 < currentStep
           val isToDo = index + 1 > currentStep
 
+          // Animated Border Color
+          val borderColor by
+              animateColorAsState(
+                  targetValue =
+                      when {
+                        isDone -> colorScheme.primary // Color for done
+                        isCurrent -> colorScheme.primary // Color for current
+                        else -> colorScheme.tertiaryContainer // Color for ToDo
+                      },
+                  animationSpec = tween(durationMillis = 600),
+                  label = "Border Animation")
+
+          // Animated Divider Color
+          val dividerColor by
+              animateColorAsState(
+                  targetValue = if (isDone) colorScheme.primary else colorScheme.tertiaryContainer,
+                  animationSpec = tween(durationMillis = 600),
+                  label = "Divider Animation")
+
           // Step
           Column(
               horizontalAlignment = Alignment.CenterHorizontally,
@@ -49,15 +78,7 @@ fun QuickFixStepper(
                     modifier =
                         Modifier.size(48.dp * widthRatio.value)
                             .clip(CircleShape)
-                            .border(
-                                width = 1.25.dp,
-                                color =
-                                    when {
-                                      isDone -> colorScheme.primary // Color for done
-                                      isCurrent -> colorScheme.primary // Color for current
-                                      else -> colorScheme.tertiaryContainer // Color for ToDo
-                                    },
-                                shape = CircleShape)
+                            .border(width = 1.25.dp, color = borderColor, shape = CircleShape)
                             .background(
                                 when {
                                   isDone -> colorScheme.primary // Background for done
@@ -94,7 +115,7 @@ fun QuickFixStepper(
           // Connector Line (except after the last step)
           if (index < steps.size - 1) {
             HorizontalDivider(
-                color = if (isDone) colorScheme.primary else colorScheme.tertiaryContainer,
+                color = dividerColor,
                 thickness = 2.dp,
                 modifier = Modifier.weight(1f).padding(bottom = 38.dp * heightRatio.value))
           }
