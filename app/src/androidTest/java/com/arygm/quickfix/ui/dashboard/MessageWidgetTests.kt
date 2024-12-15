@@ -10,6 +10,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.arygm.quickfix.R
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.ChatWidget
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.MessageSneakPeak
 import org.junit.Rule
 import org.junit.Test
 
@@ -55,8 +57,8 @@ class MessageWidgetTests {
                 Icons.Default.Call))
 
     composeTestRule.setContent {
-      MessagesWidget(
-          messageList = testMessages, onShowAllClick = {}, onItemClick = {}, itemsToShowDefault = 3)
+      ChatWidget(
+          chatList = testMessages, onShowAllClick = {}, onItemClick = {}, itemsToShowDefault = 3)
     }
 
     // Verify that only the default number of items (3) are displayed initially
@@ -106,8 +108,8 @@ class MessageWidgetTests {
                 Icons.Default.Call))
 
     composeTestRule.setContent {
-      MessagesWidget(
-          messageList = testMessages, onShowAllClick = {}, onItemClick = {}, itemsToShowDefault = 3)
+      ChatWidget(
+          chatList = testMessages, onShowAllClick = {}, onItemClick = {}, itemsToShowDefault = 3)
     }
 
     // Click the "Show All" button

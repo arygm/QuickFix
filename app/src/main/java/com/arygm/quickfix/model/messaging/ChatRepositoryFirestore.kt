@@ -223,6 +223,21 @@ class ChatRepositoryFirestore(
     performFirestoreOperation(chats.document(chat.chatId).set(chat), onSuccess, onFailure)
   }
 
+  override suspend fun getChatByChatUid(
+      chatUid: String,
+      onSuccess: (Chat?) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    chats
+        .document(chatUid)
+        .get()
+        .addOnSuccessListener { document ->
+          val chat = documentToChat(document)
+          onSuccess(chat)
+        }
+        .addOnFailureListener { exception -> onFailure(exception) }
+  }
+
   private fun documentToChat(document: DocumentSnapshot): Chat? {
     return try {
       val chatId = document.getString("chatId") ?: return null

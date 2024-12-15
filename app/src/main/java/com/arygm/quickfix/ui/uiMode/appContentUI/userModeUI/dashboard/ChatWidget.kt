@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.dashboard
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -38,27 +37,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.messaging.Chat
 import com.arygm.quickfix.ui.theme.poppinsTypography
-
-// Data class for QuickFix item
-data class MessageSneakPeak(
-    val name: String,
-    val messageOverview: String,
-    val date: String,
-    val profileImage: Int,
-    val isRead: Boolean,
-    val notificationCount: Int,
-    val serviceIcon: ImageVector
-)
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @Composable
-fun MessagesWidget(
-    messageList: List<MessageSneakPeak>,
+fun ChatWidget(
+    chatList: List<Chat>,
     onShowAllClick: () -> Unit,
-    onItemClick: (MessageSneakPeak) -> Unit,
+    onItemClick: (Chat) -> Unit,
     modifier: Modifier = Modifier,
-    itemsToShowDefault: Int = 3
+    itemsToShowDefault: Int = 3,
+    uid: String
 ) {
   var showAll by remember { mutableStateOf(false) } // Toggle for showing all items
   BoxWithConstraints {
@@ -104,9 +100,9 @@ fun MessagesWidget(
           HorizontalDivider(
               thickness = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
 
-          val itemsToShow = if (showAll) messageList else messageList.take(itemsToShowDefault)
-          messageList.take(itemsToShow.size).forEachIndexed { index, message ->
-            MessageItem(messageSneakPeak = message, onClick = { onItemClick(message) })
+          val itemsToShow = if (showAll) chatList else chatList.take(itemsToShowDefault)
+          chatList.take(itemsToShow.size).forEachIndexed { index, chat ->
+            ChatItem(chat = chat, onClick = { onItemClick(chat) }, uid = uid)
 
             // Divider between items
             if (index < itemsToShow.size - 1) {
@@ -121,13 +117,18 @@ fun MessagesWidget(
 }
 
 @Composable
-fun MessageItem(messageSneakPeak: MessageSneakPeak, onClick: () -> Unit) {
+fun ChatItem(
+    chat: Chat,
+    onClick: () -> Unit,
+    uid: String,
+    accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
+) {
   Row(
       modifier =
           Modifier.fillMaxWidth()
               .padding(horizontal = 12.dp, vertical = 8.dp)
               .clickable { onClick() }
-              .testTag("MessageItem_${messageSneakPeak.name}"), // Added testTag
+              .testTag("MessageItem_${chat.chatId}"), // Added testTag
       verticalAlignment = Alignment.CenterVertically) {
         Column(modifier = Modifier.weight(0.15f)) {
           // Profile image placeholder
@@ -148,8 +149,21 @@ fun MessageItem(messageSneakPeak: MessageSneakPeak, onClick: () -> Unit) {
           // Row for name and task description on the same line
           Row(verticalAlignment = Alignment.Bottom) {
             Text(
-                text = messageSneakPeak.name,
-                modifier = Modifier.testTag(messageSneakPeak.name), // Added testTag
+                text =
+                    if (uid == chat.messages.last().senderId) {
+                      "You"
+                    } else {
+                      var name by remember { mutableStateOf("") }
+                      accountViewModel.fetchUserAccount(
+                          chat.messages.last().senderId,
+                          onResult = {
+                            if (it != null) {
+                              name = it.firstName + it.lastName
+                            }
+                          })
+                      name
+                    },
+                modifier = Modifier.testTag(chat.messages.last().senderId), // Added testTag
                 style = poppinsTypography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold,
@@ -158,17 +172,17 @@ fun MessageItem(messageSneakPeak: MessageSneakPeak, onClick: () -> Unit) {
                 overflow = TextOverflow.Ellipsis)
             Spacer(modifier = Modifier.width(4.dp))
             Icon(
-                imageVector = messageSneakPeak.serviceIcon,
+                painter = painterResource(R.drawable.quickfix), // TODO Replace with actual icon
                 contentDescription = "Service Icon",
                 tint = MaterialTheme.colorScheme.primary)
           }
           Text(
-              text = messageSneakPeak.messageOverview, // Removed leading comma for clarity
-              modifier = Modifier.testTag(messageSneakPeak.messageOverview), // Added testTag
+              text = chat.messages.last().content, // Removed leading comma for clarity
+              modifier = Modifier.testTag(chat.messages.last().content), // Added testTag
               style = poppinsTypography.bodyMedium.copy(fontSize = 12.sp),
               fontWeight = FontWeight.Normal,
               color =
-                  if (messageSneakPeak.isRead) MaterialTheme.colorScheme.onSurface
+                  if (chat.messages.last().isRead) MaterialTheme.colorScheme.onSurface
                   else MaterialTheme.colorScheme.onBackground,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis)
@@ -179,12 +193,13 @@ fun MessageItem(messageSneakPeak: MessageSneakPeak, onClick: () -> Unit) {
             modifier = Modifier.weight(0.15f).align(Alignment.Top),
             verticalArrangement = Arrangement.SpaceBetween) {
               Text(
-                  text = messageSneakPeak.date,
+                  text = formatCustomDate(chat.messages.last().timestamp),
                   modifier =
-                      Modifier.testTag(messageSneakPeak.date).align(Alignment.End), // Added testTag
+                      Modifier.testTag(formatCustomDate(chat.messages.last().timestamp))
+                          .align(Alignment.End), // Added testTag
                   style = MaterialTheme.typography.labelSmall,
                   color = MaterialTheme.colorScheme.onSurface)
-              if (messageSneakPeak.notificationCount > 0) {
+              if (chat.messages.any { it.isRead }) {
                 Spacer(modifier = Modifier.height(3.dp))
                 Box(
                     modifier =
@@ -193,7 +208,7 @@ fun MessageItem(messageSneakPeak: MessageSneakPeak, onClick: () -> Unit) {
                             .background(MaterialTheme.colorScheme.primary)
                             .align(Alignment.End)) {
                       Text(
-                          text = messageSneakPeak.notificationCount.toString(),
+                          text = chat.messages.filter { it.isRead }.size.toString(),
                           color = MaterialTheme.colorScheme.onPrimary,
                           style = MaterialTheme.typography.bodySmall,
                           modifier = Modifier.align(Alignment.Center))
@@ -201,4 +216,31 @@ fun MessageItem(messageSneakPeak: MessageSneakPeak, onClick: () -> Unit) {
               }
             }
       }
+}
+
+fun formatCustomDate(timestamp: Timestamp): String {
+  val now = Calendar.getInstance()
+  val lastMessageDate = Calendar.getInstance().apply { time = timestamp.toDate() }
+
+  return when {
+    // Check if the date is today
+    now.get(Calendar.YEAR) == lastMessageDate.get(Calendar.YEAR) &&
+        now.get(Calendar.DAY_OF_YEAR) == lastMessageDate.get(Calendar.DAY_OF_YEAR) -> {
+      SimpleDateFormat("HH:mm", Locale.getDefault()).format(lastMessageDate.time)
+    }
+    // Check if the date is yesterday
+    now.get(Calendar.YEAR) == lastMessageDate.get(Calendar.YEAR) &&
+        now.get(Calendar.DAY_OF_YEAR) - lastMessageDate.get(Calendar.DAY_OF_YEAR) == 1 -> {
+      "Yesterday"
+    }
+    // Check if the date is within the same week
+    now.get(Calendar.WEEK_OF_YEAR) == lastMessageDate.get(Calendar.WEEK_OF_YEAR) &&
+        now.get(Calendar.YEAR) == lastMessageDate.get(Calendar.YEAR) -> {
+      SimpleDateFormat("EEEE", Locale.getDefault()).format(lastMessageDate.time)
+    }
+    // Otherwise, return the date in the format "dd.MM.yy"
+    else -> {
+      SimpleDateFormat("dd.MM.yy", Locale.getDefault()).format(lastMessageDate.time)
+    }
+  }
 }
