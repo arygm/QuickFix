@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile
 
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Info
@@ -66,31 +67,35 @@ fun WorkerProfileScreen(
               action = { /* Action */}))
 
   // Pass sections as lambdas to `QuickFixProfileScreenElement`
-  QuickFixProfileScreenElement(
-      modeNavigationActions = workerNavigationActions,
-      navigationActions = navigationActions,
-      rootMainNavigationActions = rootMainNavigationActions,
-      preferencesViewModel = preferencesViewModel,
-      userPreferencesViewModel = userPreferencesViewModel,
-      appContentNavigationActions = appContentNavigationActions,
-      modeViewModel = modeViewModel,
-      true,
-      AppMode.USER,
-      sections =
-          listOf(
-              { modifier ->
-                SettingsSection(
-                    title = "Personal Settings",
-                    items = personalSettings,
-                    screenWidth = 360.dp,
-                    cardCornerRadius = 16.dp)
-              },
-              { modifier ->
-                SettingsSection(
-                    title = "Resources",
-                    items = resources,
-                    screenWidth = 360.dp,
-                    cardCornerRadius = 16.dp,
-                )
-              }))
+  BoxWithConstraints {
+    val screenWidth = maxWidth
+    val screenHeight = maxHeight
+    QuickFixProfileScreenElement(
+        modeNavigationActions = workerNavigationActions,
+        navigationActions = navigationActions,
+        rootMainNavigationActions = rootMainNavigationActions,
+        preferencesViewModel = preferencesViewModel,
+        userPreferencesViewModel = userPreferencesViewModel,
+        appContentNavigationActions = appContentNavigationActions,
+        modeViewModel = modeViewModel,
+        true,
+        AppMode.USER,
+        sections =
+            listOf(
+                { modifier ->
+                  SettingsSection(
+                      title = "Personal Settings",
+                      items = personalSettings,
+                      screenWidth = screenWidth,
+                      cardCornerRadius = 16.dp)
+                },
+                { modifier ->
+                  SettingsSection(
+                      title = "Resources",
+                      items = resources,
+                      screenWidth = screenWidth,
+                      cardCornerRadius = 16.dp,
+                  )
+                }))
+  }
 }
