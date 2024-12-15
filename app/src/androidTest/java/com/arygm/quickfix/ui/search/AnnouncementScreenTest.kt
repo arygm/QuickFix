@@ -15,8 +15,8 @@ import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.search.AnnouncementRepository
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Screen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.AnnouncementScreen
+import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.utils.UID_KEY
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.assertTrue
@@ -396,7 +396,7 @@ class AnnouncementScreenTest {
     }
 
     composeTestRule.onNodeWithTag("locationInput").performClick()
-    verify(navigationActions, times(1)).navigateTo(Screen.SEARCH_LOCATION)
+    verify(navigationActions, times(1)).navigateTo(UserScreen.SEARCH_LOCATION)
   }
 
   @Test

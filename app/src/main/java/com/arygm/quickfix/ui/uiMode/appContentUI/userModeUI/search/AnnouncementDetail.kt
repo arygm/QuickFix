@@ -391,7 +391,7 @@ fun AnnouncementDetailScreen(
                         if (isUser) {
                           if (isEditing) {
                             QuickFixButton(
-                                buttonText = "Update announce",
+                                buttonText = "Update announcement",
                                 onClickAction = {
                                   // Check if description or availability have changed
                                   val descriptionChanged =

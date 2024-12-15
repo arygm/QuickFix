@@ -8,7 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.navigation.Screen
+import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -25,7 +25,7 @@ class DashboardScreenTest {
   fun setup() {
     navigationActions = mock(NavigationActions::class.java)
     announcementViewModel = mock(AnnouncementViewModel::class.java)
-    `when`(navigationActions.currentRoute()).thenReturn(Screen.DASHBOARD)
+    `when`(navigationActions.currentRoute()).thenReturn(UserScreen.DASHBOARD)
   }
 
   @Test
