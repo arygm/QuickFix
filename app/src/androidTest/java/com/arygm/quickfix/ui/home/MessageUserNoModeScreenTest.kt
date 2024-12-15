@@ -19,8 +19,10 @@ import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixRepository
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
+import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.QuickFixTheme
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.MessageScreen
 import com.google.firebase.Timestamp
 import java.util.Date
 import kotlinx.coroutines.runBlocking
@@ -35,7 +37,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-class MessageScreenTest {
+class MessageUserNoModeScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -44,6 +46,7 @@ class MessageScreenTest {
   private lateinit var quickFixRepository: QuickFixRepository
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var quickFixViewModel: QuickFixViewModel
+  private lateinit var modeViewModel: ModeViewModel
 
   // Implémentation de test pour Service
   data class TestService(override val name: String) : Service
@@ -99,6 +102,7 @@ class MessageScreenTest {
     navigationActions = mock(NavigationActions::class.java)
     chatRepository = mock(ChatRepository::class.java)
     quickFixRepository = mock(QuickFixRepository::class.java)
+    modeViewModel = mock(ModeViewModel::class.java)
 
     // Mock du init pour quickFixRepository (si nécessaire)
     whenever(quickFixRepository.init(any())).thenAnswer { invocation ->
@@ -149,8 +153,8 @@ class MessageScreenTest {
             chatViewModel = chatViewModel,
             navigationActions = navigationActions,
             quickFixViewModel = quickFixViewModel,
-            userId = testUserId,
-            isUser = true)
+            modeViewModel = modeViewModel,
+            preferencesViewModel = mock())
       }
     }
 
@@ -166,8 +170,8 @@ class MessageScreenTest {
             chatViewModel = chatViewModel,
             navigationActions = navigationActions,
             quickFixViewModel = quickFixViewModel,
-            userId = testUserId,
-            isUser = true)
+            modeViewModel = modeViewModel,
+            preferencesViewModel = mock())
       }
     }
 
@@ -185,8 +189,8 @@ class MessageScreenTest {
             chatViewModel = chatViewModel,
             navigationActions = navigationActions,
             quickFixViewModel = quickFixViewModel,
-            userId = testUserId,
-            isUser = true)
+            modeViewModel = modeViewModel,
+            preferencesViewModel = mock())
       }
     }
 
@@ -220,8 +224,8 @@ class MessageScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              userId = testUserId,
-              isUser = true)
+              modeViewModel = modeViewModel,
+              preferencesViewModel = mock())
         }
       }
 
@@ -259,8 +263,8 @@ class MessageScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              userId = testUserId,
-              isUser = true)
+              modeViewModel = modeViewModel,
+              preferencesViewModel = mock())
         }
       }
 
@@ -296,8 +300,8 @@ class MessageScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              userId = testUserId,
-              isUser = true)
+              modeViewModel = modeViewModel,
+              preferencesViewModel = mock())
         }
       }
 
@@ -339,8 +343,8 @@ class MessageScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              userId = testUserId,
-              isUser = true)
+              modeViewModel = modeViewModel,
+              preferencesViewModel = mock())
         }
       }
 
@@ -377,9 +381,8 @@ class MessageScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              userId = testUserId,
-              isUser = false // Le worker
-              )
+              modeViewModel = modeViewModel,
+              preferencesViewModel = mock())
         }
       }
 
@@ -446,8 +449,8 @@ class MessageScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              userId = testUserId,
-              isUser = true)
+              modeViewModel = modeViewModel,
+              preferencesViewModel = mock())
         }
       }
 

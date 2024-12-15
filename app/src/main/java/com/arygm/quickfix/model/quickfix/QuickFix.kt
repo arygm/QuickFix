@@ -28,5 +28,6 @@ enum class Status {
   PAID,
   UPCOMING,
   COMPLETED,
-  CANCELED
+  CANCELED,
+  FINISHED
 }

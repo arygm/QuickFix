@@ -5,12 +5,17 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.messaging.ChatRepository
+import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixRepository
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
+import com.arygm.quickfix.model.switchModes.AppMode
+import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixSecondStep
 import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
@@ -21,11 +26,17 @@ class QuickFixSecondStepTest {
 
   private lateinit var quickFixRepository: QuickFixRepository
   private lateinit var quickFixViewModel: QuickFixViewModel
+  private lateinit var chatRepository: ChatRepository
+  private lateinit var chatViewModel: ChatViewModel
+  private lateinit var navigationActions: NavigationActions
 
   @Before
   fun setUp() {
     quickFixRepository = mock(QuickFixRepository::class.java)
     quickFixViewModel = QuickFixViewModel(quickFixRepository)
+    chatRepository = mock(ChatRepository::class.java)
+    chatViewModel = ChatViewModel(chatRepository)
+    navigationActions = NavigationActions(mock())
     val fakeQuickFix =
         QuickFix(
             "",
@@ -43,7 +54,15 @@ class QuickFixSecondStepTest {
             emptyList(),
             Location(0.0, 0.0, "Fake Location"))
     quickFixViewModel.setQuickFixes(listOf(fakeQuickFix))
-    composeTestRule.setContent { QuickFixSecondStep(quickFixViewModel, fakeQuickFix) }
+    composeTestRule.setContent {
+      QuickFixSecondStep(
+          quickFixViewModel = quickFixViewModel,
+          chatViewModel = chatViewModel,
+          navigationActions = navigationActions,
+          onQuickFixMakeBill = {},
+          quickFix = fakeQuickFix,
+          mode = AppMode.USER)
+    }
   }
 
   @get:Rule val composeTestRule = createComposeRule()
@@ -80,12 +99,12 @@ class QuickFixSecondStepTest {
 
     composeTestRule.onNodeWithTag("DatesLazyColumn").assertIsDisplayed()
 
-    quickFixViewModel.quickFixes.value[0].date.forEachIndexed() { index, date ->
+    quickFixViewModel.quickFixes.value[0].date.forEachIndexed { index, date ->
       composeTestRule.onNodeWithTag("DateText_$index").assertIsDisplayed()
       composeTestRule.onNodeWithTag("TimeText_$index").assertIsDisplayed()
     }
 
-    quickFixViewModel.quickFixes.value[0].imageUrl.forEachIndexed() { index, date ->
+    quickFixViewModel.quickFixes.value[0].imageUrl.forEachIndexed { index, date ->
       composeTestRule.onNodeWithTag("DateText_$index").assertIsDisplayed()
       composeTestRule.onNodeWithTag("TimeText_$index").assertIsDisplayed()
     }

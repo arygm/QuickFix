@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.quickfix
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -71,10 +72,9 @@ import coil.compose.SubcomposeAsyncImageContent
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
-import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.WorkerProfile
-import com.arygm.quickfix.model.profile.dataFields.AddOnService
-import com.arygm.quickfix.model.profile.dataFields.IncludedService
+import com.arygm.quickfix.model.profile.dataFields.Service
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
@@ -84,14 +84,12 @@ import com.arygm.quickfix.ui.elements.QuickFixCheckedListElement
 import com.arygm.quickfix.ui.elements.QuickFixDateTimePicker
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.dashedBorder
-import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.profile.becomeWorker.views.personal.CameraBottomSheet
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.utils.loadUserId
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.firebase.Timestamp
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -99,36 +97,25 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun QuickFixFirstStep(
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
-    quickFixViewModel: QuickFixViewModel = viewModel(factory = QuickFixViewModel.Factory),
-    chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory),
-    workerViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.WorkerFactory),
-    workerId: String,
+    quickFixViewModel: QuickFixViewModel,
+    chatViewModel: ChatViewModel,
+    preferencesViewModel: PreferencesViewModel,
+    workerProfile: WorkerProfile,
     onQuickFixChange: (QuickFix) -> Unit,
-    navigationActions: NavigationActions,
 ) {
-
-  var workerProfile by remember { mutableStateOf(WorkerProfile()) }
-  workerViewModel.fetchUserProfile(workerId) {
-    if (it != null && it is WorkerProfile) {
-      workerProfile = it
-    }
-  }
 
   val focusManager = LocalFocusManager.current
   val context = LocalContext.current
-  var quickFixTile by remember { mutableStateOf("") }
-  val listServices = listOf("Service 1", "Service 2", "Service 3", "Service 4", "Service 5")
-  val checkedStatesServices = remember { mutableStateListOf(*Array(listServices.size) { false }) }
 
-  val listAddOnServices =
-      listOf(
-          "Add-on Service 1",
-          "Add-on Service 2",
-          "Add-on Service 3",
-          "Add-on Service 4",
-          "Add-on Service 5")
+  var userId by remember { mutableStateOf("") }
+  LaunchedEffect(Unit) { userId = loadUserId(preferencesViewModel) }
+
+  var quickFixTile by remember { mutableStateOf("") }
+  val checkedStatesServices = remember {
+    mutableStateListOf(*Array(workerProfile.includedServices.size) { false })
+  }
   val checkedStatesAddOnServices = remember {
-    mutableStateListOf(*Array(listAddOnServices.size) { false })
+    mutableStateListOf(*Array(workerProfile.addOnServices.size) { false })
   }
 
   var quickNote by remember { mutableStateOf("") }
@@ -140,8 +127,6 @@ fun QuickFixFirstStep(
 
   var listDates by remember { mutableStateOf(emptyList<LocalDateTime>()) }
   var showDateTimePopup by remember { mutableStateOf(false) }
-  var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
-  var selectedTime by remember { mutableStateOf<LocalTime?>(null) }
   val dateFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM")
   val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
 
@@ -162,7 +147,6 @@ fun QuickFixFirstStep(
           }) {
         val widthRatio = maxWidth / 411
         val heightRatio = maxHeight / 860
-        val sizeRatio = minOf(widthRatio, heightRatio)
         if (showDateTimePopup) {
           Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
             QuickFixDateTimePicker(
@@ -230,9 +214,9 @@ fun QuickFixFirstStep(
                     modifier = Modifier.padding(start = 4.dp, bottom = 8.dp, top = 10.dp))
               }
 
-              items(listServices.size) { index ->
+              items(workerProfile.includedServices.size) { index ->
                 QuickFixCheckedListElement(
-                    listServices,
+                    workerProfile.includedServices.map(Service::name),
                     checkedStatesServices,
                     index,
                     widthRatio = widthRatio,
@@ -248,8 +232,11 @@ fun QuickFixFirstStep(
                     modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 4.dp))
               }
 
-              items(listAddOnServices.size) { index ->
-                QuickFixCheckedListElement(listAddOnServices, checkedStatesAddOnServices, index)
+              items(workerProfile.addOnServices.size) { index ->
+                QuickFixCheckedListElement(
+                    workerProfile.addOnServices.map(Service::name),
+                    checkedStatesAddOnServices,
+                    index)
               }
 
               item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -629,44 +616,44 @@ fun QuickFixFirstStep(
                               ),
                       )
                       Spacer(modifier = Modifier.width(8.dp))
-                      val createdQuickFix =
-                          QuickFix(
-                              uid = quickFixViewModel.getRandomUid(),
-                              status = Status.PENDING,
-                              imageUrl = listOfImagePath,
-                              date =
-                                  listDates.map {
-                                    Timestamp(it.atZone(ZoneId.systemDefault()).toInstant())
-                                  },
-                              time =
-                                  Timestamp(
-                                      listDates.first().atZone(ZoneId.systemDefault()).toInstant()),
-                              includedServices =
-                                  listServices
-                                      .filterIndexed { index, _ -> checkedStatesServices[index] }
-                                      .map { IncludedService(it) },
-                              addOnServices =
-                                  listAddOnServices
-                                      .filterIndexed { index, _ ->
-                                        checkedStatesAddOnServices[index]
-                                      }
-                                      .map { AddOnService(it) },
-                              workerId = workerId,
-                              userId = "Place holder, user loadUserId()",
-                              title = quickFixTile,
-                              description = quickNote,
-                              chatUid = chatViewModel.getRandomUid(),
-                              bill = emptyList(),
-                              location = locationQuickFix)
                       QuickFixButton(
                           buttonText = "Continue",
                           buttonColor = colorScheme.primary,
                           onClickAction = {
+                            val createdQuickFix =
+                                QuickFix(
+                                    uid = quickFixViewModel.getRandomUid(),
+                                    status = Status.PENDING,
+                                    imageUrl = listOfImagePath,
+                                    date =
+                                        listDates.map {
+                                          Timestamp(it.atZone(ZoneId.systemDefault()).toInstant())
+                                        },
+                                    time =
+                                        Timestamp(
+                                            listDates
+                                                .first()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toInstant()),
+                                    includedServices =
+                                        workerProfile.includedServices.filterIndexed { index, _ ->
+                                          checkedStatesServices[index]
+                                        },
+                                    addOnServices =
+                                        workerProfile.addOnServices.filterIndexed { index, _ ->
+                                          checkedStatesAddOnServices[index]
+                                        },
+                                    workerId = workerProfile.uid,
+                                    userId = userId,
+                                    title = quickFixTile,
+                                    description = quickNote,
+                                    chatUid = chatViewModel.getRandomUid(),
+                                    bill = emptyList(),
+                                    location = locationQuickFix)
                             quickFixViewModel.addQuickFix(
                                 createdQuickFix,
                                 onSuccess = {
                                   onQuickFixChange(createdQuickFix)
-                                  /* navigationActions.goToQuickFixSecondStep() */
                                   Toast.makeText(context, "QuickFix added", Toast.LENGTH_SHORT)
                                       .show()
                                 },

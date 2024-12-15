@@ -120,7 +120,7 @@ fun LocationSearchCustomScreen(
                               tint = MaterialTheme.colorScheme.onBackground,
                               modifier = Modifier.size(screenWidth * 0.06f))
                         }
-                      HorizontalDivider(color = MaterialTheme.colorScheme.secondary)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.secondary)
                   }
                 } else if (locationQuery.isEmpty()) {
                   item {

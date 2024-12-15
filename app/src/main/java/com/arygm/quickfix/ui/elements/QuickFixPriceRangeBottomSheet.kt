@@ -81,10 +81,10 @@ fun QuickFixPriceRangeBottomSheet(
                   Spacer(modifier = Modifier.height(verticalSpacing))
 
                   // Full-width divider under the title
-                HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth(), thickness = 1.dp,
-                    color = colorScheme.onSecondaryContainer
-                )
+                  HorizontalDivider(
+                      modifier = Modifier.fillMaxWidth(),
+                      thickness = 1.dp,
+                      color = colorScheme.onSecondaryContainer)
 
                   Spacer(modifier = Modifier.height(verticalSpacing))
 

@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.quickfix
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -61,6 +61,8 @@ import com.arygm.quickfix.model.bill.Units
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
+import com.arygm.quickfix.model.quickfix.Status
+import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.theme.poppinsTypography
@@ -73,7 +75,9 @@ fun QuickFixThirdStep(
     quickFixViewModel: QuickFixViewModel = viewModel(factory = QuickFixViewModel.Factory),
     quickFix: QuickFix,
     workerProfile: WorkerProfile,
-    onQuickFixChange: (QuickFix) -> Unit
+    onQuickFixChange: (QuickFix) -> Unit,
+    onQuickFixPay: () -> Unit,
+    mode: AppMode
 ) {
   val focusManager = LocalFocusManager.current
   val dateFormatter = SimpleDateFormat("EEE, dd MMM", Locale.getDefault())
@@ -162,7 +166,7 @@ fun QuickFixThirdStep(
               }
         }
       }
-      items(listDates.size) { index ->
+      items(if (mode == AppMode.WORKER) listDates.size else quickFix.date.size) { index ->
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -172,49 +176,58 @@ fun QuickFixThirdStep(
                         horizontal = 8.dp * widthRatio.value,
                         vertical = 4.dp * heightRatio.value)) {
               Text(
-                  text = dateFormatter.format(listDates[index].toDate()),
+                  text =
+                      dateFormatter.format(
+                          if (mode == AppMode.WORKER) listDates[index].toDate()
+                          else quickFix.date[index].toDate()),
                   style = poppinsTypography.labelSmall,
                   color = colorScheme.onBackground,
                   fontWeight = FontWeight.Medium,
                   modifier = Modifier.weight(0.5f).testTag("DateText_$index"))
               Text(
-                  text = timeFormatter.format(listDates[index].toDate()),
+                  text =
+                      timeFormatter.format(
+                          if (mode == AppMode.WORKER) listDates[index].toDate()
+                          else quickFix.date[index].toDate()),
                   style = poppinsTypography.labelSmall,
                   color = colorScheme.onBackground,
                   fontWeight = FontWeight.Medium,
                   modifier = Modifier.weight(0.5f).testTag("TimeText_$index"))
             }
       }
-      item {
-        Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-          Button(
-              onClick = { showSuggestedDates = true },
-              modifier =
-                  Modifier.padding(vertical = 8.dp * heightRatio.value)
-                      .testTag("SelectSuggestedDatesButton"),
-              shape = RoundedCornerShape(10.dp),
-          ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End,
-                modifier = Modifier.wrapContentWidth()) {
-                  Icon(
-                      imageVector = Icons.Default.Event,
-                      contentDescription = "Event",
-                      tint = colorScheme.onPrimary,
-                  )
-                  Spacer(modifier = Modifier.width(8.dp))
-                  Text(
-                      text =
-                          if (listDates.isEmpty()) "Select from Suggested Date(s)"
-                          else "Change Suggested Date(s)",
-                      style = poppinsTypography.labelSmall,
-                      color = colorScheme.onPrimary,
-                      fontWeight = FontWeight.Bold)
-                }
+      if (mode == AppMode.WORKER) {
+        item {
+          Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = { showSuggestedDates = true },
+                modifier =
+                    Modifier.padding(vertical = 8.dp * heightRatio.value)
+                        .testTag("SelectSuggestedDatesButton"),
+                shape = RoundedCornerShape(10.dp),
+            ) {
+              Row(
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.End,
+                  modifier = Modifier.wrapContentWidth()) {
+                    Icon(
+                        imageVector = Icons.Default.Event,
+                        contentDescription = "Event",
+                        tint = colorScheme.onPrimary,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text =
+                            if (listDates.isEmpty()) "Select from Suggested Date(s)"
+                            else "Change Suggested Date(s)",
+                        style = poppinsTypography.labelSmall,
+                        color = colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold)
+                  }
+            }
           }
         }
       }
+
       item {
         Row(
             modifier =
@@ -341,207 +354,248 @@ fun QuickFixThirdStep(
         }
       }
 
-      items(listBillFields.size, key = { it.hashCode() }) { index ->
-        val billField = listBillFields[index]
-        var dropDownUnitExpanded by remember { mutableStateOf(false) }
-        var billDescription by remember { mutableStateOf(billField.description) }
-        var billAmount by remember { mutableDoubleStateOf(billField.amount) }
-        var billUnitPrice by remember { mutableDoubleStateOf(billField.unitPrice) }
-        var billUnit by remember { mutableStateOf(billField.unit) }
-        val total = billUnitPrice.let { billAmount.times(it) }
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp * widthRatio.value)) {
-              Box(
-                  contentAlignment = Alignment.TopStart,
-                  modifier = Modifier.width(150.dp * widthRatio.value)) {
-                    IconButton(
-                        onClick = { listBillFields = listBillFields - billField },
-                        modifier =
-                            Modifier.size(16.dp * widthRatio.value)
-                                .zIndex(1f)
-                                .offset(
-                                    y = (-2).dp * widthRatio.value, x = (-2).dp * widthRatio.value)
-                                .testTag("DeleteBillFieldButton_$index"),
-                    ) {
-                      Icon(
-                          imageVector = Icons.Outlined.Cancel,
-                          contentDescription = "Delete Bill Field",
-                          tint = colorScheme.primary,
-                      )
-                    }
-                    QuickFixTextFieldCustom(
-                        value = billDescription,
-                        onValueChange = { it ->
-                          billDescription = it
-                          updateBillField(index, listBillFields) {
-                            it.copy(description = billDescription)
-                          }
-                        },
-                        widthField = 150.dp * widthRatio.value,
-                        alwaysShowTrailingIcon = false,
-                        singleLine = false,
-                        placeHolderText = "Add a description",
-                        shape = RoundedCornerShape(10.dp),
-                        showTrailingIcon = { false },
-                        hasShadow = false,
-                        borderColor = colorScheme.onSecondaryContainer,
-                        borderThickness = 1.dp,
-                        heightInEnabled = true,
-                        modifier = Modifier.testTag("DescriptionTextField_$index"))
-                  }
-              Spacer(modifier = Modifier.width(8.dp * widthRatio.value))
-              Box {
-                QuickFixTextFieldCustom(
-                    value = billUnit.name,
-                    onValueChange = {},
-                    widthField = 40.dp * widthRatio.value,
-                    shape = RoundedCornerShape(10.dp),
-                    trailingIcon = {
-                      Icon(
-                          imageVector = Icons.Default.KeyboardArrowDown,
-                          tint = colorScheme.onBackground,
-                          contentDescription = "Expand Dropdown",
-                          modifier =
-                              Modifier.clickable { dropDownUnitExpanded = true }
-                                  .size(16.dp * widthRatio.value))
-                    },
-                    modifier = Modifier.testTag("UnitDropdown_$index"),
-                    showTrailingIcon = { true },
-                    showLeadingIcon = { false },
-                    hasShadow = false,
-                    enabled = true,
-                    borderColor = colorScheme.onSecondaryContainer,
-                    borderThickness = 1.dp,
-                    scrollable = false,
-                    alwaysShowTrailingIcon = true,
-                    isTextField = false,
-                    onTextFieldClick = { dropDownUnitExpanded = true },
-                    moveTrailingIconLeft = 4.dp * widthRatio.value,
-                    sizeIconGroup = 16.dp * widthRatio.value,
-                )
-                DropdownMenu(
-                    expanded = dropDownUnitExpanded,
-                    onDismissRequest = { dropDownUnitExpanded = false },
-                    containerColor = colorScheme.background,
-                    modifier =
-                        Modifier.border(
-                                1.dp, colorScheme.onSecondaryContainer, RoundedCornerShape(10.dp))
-                            .background(colorScheme.surface)
-                            .width(70.dp * widthRatio.value)
-                            .testTag("UnitDropdownMenu_$index")) {
-                      Units.entries.forEach { unit ->
-                        DropdownMenuItem(
-                            text = {
-                              Text(
-                                  text = unit.name,
-                                  style = poppinsTypography.bodyMedium,
-                                  color = colorScheme.onBackground,
-                              )
-                            },
-                            onClick = {
-                              billUnit = unit
-                              updateBillField(index, listBillFields) { it ->
-                                it.copy(
-                                    unit = billUnit,
-                                    total = billUnitPrice.let { billAmount.times(it) })
-                              }
-                              dropDownUnitExpanded = false
-                            },
-                            colors =
-                                MenuDefaults.itemColors(
-                                    textColor = colorScheme.onBackground,
-                                ))
-                      }
-                    }
-              }
-              Spacer(modifier = Modifier.width(6.dp * widthRatio.value))
-              QuickFixTextFieldCustom(
-                  value =
-                      billAmount.let { if (it == 0.0) "" else it.toString() }, // Use the raw input
-                  onValueChange = { input ->
-                    val trimmedInput = input.trimStart('0').ifEmpty { "0" }
-                    if (trimmedInput.matches(numberPattern)) {
-                      billAmount = trimmedInput.toDoubleOrNull() ?: 0.0
-                      updateBillField(index, listBillFields) {
-                        it.copy(amount = billAmount, total = billAmount.times(it.unitPrice))
-                      }
-                    }
-                  },
-                  modifier = Modifier.testTag("AmountTextField_$index"),
-                  widthField = 50.dp * widthRatio.value,
-                  showTrailingIcon = { false },
-                  hasShadow = false,
-                  borderColor = colorScheme.onSecondaryContainer,
-                  shape = RoundedCornerShape(10.dp),
-                  borderThickness = 1.dp,
-                  scrollable = false,
-              )
-
-              Spacer(modifier = Modifier.width(6.dp * widthRatio.value))
-              QuickFixTextFieldCustom(
-                  value =
-                      billUnitPrice.let {
-                        if (it == 0.0) "" else it.toString()
-                      }, // Use the raw input
-                  onValueChange = { input ->
-                    val trimmedInput = input.trimStart('0').ifEmpty { "0" }
-                    if (trimmedInput.matches(numberPattern)) {
-                      billUnitPrice = trimmedInput.toDoubleOrNull() ?: 0.0
-                      updateBillField(index, listBillFields) {
-                        it.copy(unitPrice = billUnitPrice, total = it.amount.times(billUnitPrice))
-                      }
-                    }
-                  },
-                  modifier = Modifier.testTag("UnitPriceTextField_$index"),
-                  widthField = 50.dp * widthRatio.value,
-                  showTrailingIcon = { false },
-                  hasShadow = false,
-                  borderColor = colorScheme.onSecondaryContainer,
-                  shape = RoundedCornerShape(10.dp),
-                  borderThickness = 1.dp,
-                  scrollable = false,
-              )
-              Spacer(modifier = Modifier.width(2.dp * widthRatio.value))
-              Text(
-                  text =
-                      if (total == 0.0 || total.isNaN()) "Total CHF"
-                      else "%.2f".format(total).plus(" CHF"),
-                  style = poppinsTypography.labelSmall,
-                  color = colorScheme.onBackground,
-                  fontWeight = FontWeight.Medium,
-                  textAlign = TextAlign.End,
-                  modifier = Modifier.weight(1f).testTag("TotalText_$index"))
-            }
-      }
-
-      item {
-        Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-          Button(
-              onClick = { listBillFields = listBillFields + BillField("", Units.U, 0.0, 0.0, 0.0) },
-              modifier =
-                  Modifier.padding(vertical = 8.dp * heightRatio.value)
-                      .testTag("AddBillFieldButton"),
-              shape = RoundedCornerShape(10.dp),
-          ) {
+      items(
+          if (mode == AppMode.WORKER) listBillFields.size else quickFix.bill.size,
+          key = { it.hashCode() }) { index ->
+            val billField = listBillFields[index]
+            var dropDownUnitExpanded by remember { mutableStateOf(false) }
+            var billDescription by remember { mutableStateOf(billField.description) }
+            var billAmount by remember { mutableDoubleStateOf(billField.amount) }
+            var billUnitPrice by remember { mutableDoubleStateOf(billField.unitPrice) }
+            var billUnit by remember { mutableStateOf(billField.unit) }
+            val total = billUnitPrice.let { billAmount.times(it) }
             Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End,
-                modifier = Modifier.wrapContentWidth()) {
-                  Icon(
-                      imageVector = Icons.AutoMirrored.Filled.ReceiptLong,
-                      contentDescription = "ReceiptLong",
-                      tint = colorScheme.onPrimary,
-                      modifier = Modifier.testTag("AddBillFieldIcon"))
-                  Spacer(modifier = Modifier.width(8.dp))
+                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp * widthRatio.value)) {
+                  Box(
+                      contentAlignment = Alignment.TopStart,
+                      modifier = Modifier.width(150.dp * widthRatio.value)) {
+                        if (mode == AppMode.WORKER) {
+                          IconButton(
+                              onClick = { listBillFields = listBillFields - billField },
+                              modifier =
+                                  Modifier.size(16.dp * widthRatio.value)
+                                      .zIndex(1f)
+                                      .offset(
+                                          y = (-2).dp * widthRatio.value,
+                                          x = (-2).dp * widthRatio.value)
+                                      .testTag("DeleteBillFieldButton_$index"),
+                          ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Cancel,
+                                contentDescription = "Delete Bill Field",
+                                tint = colorScheme.primary,
+                            )
+                          }
+                        }
+                        QuickFixTextFieldCustom(
+                            value =
+                                if (mode == AppMode.WORKER) billDescription
+                                else quickFix.bill[index].description,
+                            onValueChange = { it ->
+                              if (mode == AppMode.WORKER) {
+                                billDescription = it
+                                updateBillField(index, listBillFields) {
+                                  it.copy(description = billDescription)
+                                }
+                              }
+                            },
+                            widthField = 150.dp * widthRatio.value,
+                            alwaysShowTrailingIcon = false,
+                            singleLine = false,
+                            placeHolderText = "Add a description",
+                            enabled = mode == AppMode.WORKER,
+                            shape = RoundedCornerShape(10.dp),
+                            showTrailingIcon = { false },
+                            hasShadow = false,
+                            borderColor =
+                                if (mode == AppMode.WORKER) colorScheme.onSecondaryContainer
+                                else colorScheme.surface,
+                            borderThickness = if (mode == AppMode.WORKER) 1.dp else 0.dp,
+                            heightInEnabled = true,
+                            modifier = Modifier.testTag("DescriptionTextField_$index"))
+                      }
+                  Spacer(modifier = Modifier.width(8.dp * widthRatio.value))
+                  Box {
+                    QuickFixTextFieldCustom(
+                        value =
+                            if (mode == AppMode.WORKER) billUnit.name
+                            else quickFix.bill[index].unit.name,
+                        onValueChange = {},
+                        widthField = 40.dp * widthRatio.value,
+                        shape = RoundedCornerShape(10.dp),
+                        trailingIcon = {
+                          Icon(
+                              imageVector = Icons.Default.KeyboardArrowDown,
+                              tint = colorScheme.onBackground,
+                              contentDescription = "Expand Dropdown",
+                              modifier =
+                                  Modifier.clickable { dropDownUnitExpanded = true }
+                                      .size(16.dp * widthRatio.value))
+                        },
+                        modifier = Modifier.testTag("UnitDropdown_$index"),
+                        showTrailingIcon = { mode == AppMode.WORKER },
+                        showLeadingIcon = { false },
+                        hasShadow = false,
+                        enabled = mode == AppMode.WORKER,
+                        borderColor =
+                            if (mode == AppMode.WORKER) colorScheme.onSecondaryContainer
+                            else colorScheme.surface,
+                        borderThickness = if (mode == AppMode.WORKER) 1.dp else 0.dp,
+                        scrollable = false,
+                        alwaysShowTrailingIcon = mode == AppMode.WORKER,
+                        isTextField = false,
+                        onTextFieldClick = { dropDownUnitExpanded = true },
+                        moveTrailingIconLeft = 4.dp * widthRatio.value,
+                        sizeIconGroup = 16.dp * widthRatio.value,
+                    )
+                    if (mode == AppMode.WORKER) {
+                      DropdownMenu(
+                          expanded = dropDownUnitExpanded,
+                          onDismissRequest = { dropDownUnitExpanded = false },
+                          containerColor = colorScheme.background,
+                          modifier =
+                              Modifier.border(
+                                      1.dp,
+                                      colorScheme.onSecondaryContainer,
+                                      RoundedCornerShape(10.dp))
+                                  .background(colorScheme.surface)
+                                  .width(70.dp * widthRatio.value)
+                                  .testTag("UnitDropdownMenu_$index")) {
+                            Units.entries.forEach { unit ->
+                              DropdownMenuItem(
+                                  text = {
+                                    Text(
+                                        text = unit.name,
+                                        style = poppinsTypography.bodyMedium,
+                                        color = colorScheme.onBackground,
+                                    )
+                                  },
+                                  onClick = {
+                                    billUnit = unit
+                                    updateBillField(index, listBillFields) { it ->
+                                      it.copy(
+                                          unit = billUnit,
+                                          total = billUnitPrice.let { billAmount.times(it) })
+                                    }
+                                    dropDownUnitExpanded = false
+                                  },
+                                  colors =
+                                      MenuDefaults.itemColors(
+                                          textColor = colorScheme.onBackground,
+                                      ))
+                            }
+                          }
+                    }
+                  }
+                  Spacer(modifier = Modifier.width(6.dp * widthRatio.value))
+                  QuickFixTextFieldCustom(
+                      value =
+                          if (mode == AppMode.WORKER)
+                              billAmount.let { if (it == 0.0) "" else it.toString() }
+                          else quickFix.bill[index].amount.toString(), // Use the raw input
+                      onValueChange = { input ->
+                        if (mode == AppMode.WORKER) {
+                          val trimmedInput = input.trimStart('0').ifEmpty { "0" }
+                          if (trimmedInput.matches(numberPattern)) {
+                            billAmount = trimmedInput.toDoubleOrNull() ?: 0.0
+                            updateBillField(index, listBillFields) {
+                              it.copy(amount = billAmount, total = billAmount.times(it.unitPrice))
+                            }
+                          }
+                        }
+                      },
+                      modifier = Modifier.testTag("AmountTextField_$index"),
+                      widthField = 50.dp * widthRatio.value,
+                      showTrailingIcon = { false },
+                      hasShadow = false,
+                      enabled = mode == AppMode.WORKER,
+                      borderColor =
+                          if (mode == AppMode.WORKER) colorScheme.onSecondaryContainer
+                          else colorScheme.surface,
+                      shape = RoundedCornerShape(10.dp),
+                      borderThickness = if (mode == AppMode.WORKER) 1.dp else 0.dp,
+                      scrollable = false,
+                  )
+
+                  Spacer(modifier = Modifier.width(6.dp * widthRatio.value))
+                  QuickFixTextFieldCustom(
+                      value =
+                          if (mode == AppMode.WORKER)
+                              billUnitPrice.let { if (it == 0.0) "" else it.toString() }
+                          else quickFix.bill[index].unitPrice.toString(), // Use the raw input
+                      onValueChange = { input ->
+                        if (mode == AppMode.WORKER) {
+                          val trimmedInput = input.trimStart('0').ifEmpty { "0" }
+                          if (trimmedInput.matches(numberPattern)) {
+                            billUnitPrice = trimmedInput.toDoubleOrNull() ?: 0.0
+                            updateBillField(index, listBillFields) {
+                              it.copy(
+                                  unitPrice = billUnitPrice, total = it.amount.times(billUnitPrice))
+                            }
+                          }
+                        }
+                      },
+                      modifier = Modifier.testTag("UnitPriceTextField_$index"),
+                      widthField = 50.dp * widthRatio.value,
+                      showTrailingIcon = { false },
+                      hasShadow = false,
+                      borderColor =
+                          if (mode == AppMode.WORKER) colorScheme.onSecondaryContainer
+                          else colorScheme.surface,
+                      shape = RoundedCornerShape(10.dp),
+                      borderThickness = if (mode == AppMode.WORKER) 1.dp else 0.dp,
+                      scrollable = false,
+                      enabled = mode == AppMode.WORKER,
+                  )
+                  Spacer(modifier = Modifier.width(2.dp * widthRatio.value))
                   Text(
-                      text = "Add A Bill Field",
+                      text =
+                          if (mode == AppMode.WORKER) {
+                            if (total == 0.0 || total.isNaN()) "Total CHF"
+                            else "%.2f".format(total).plus(" CHF")
+                          } else {
+                            "%.2f".format(quickFix.bill[index].total).plus(" CHF")
+                          },
                       style = poppinsTypography.labelSmall,
-                      color = colorScheme.onPrimary,
-                      fontWeight = FontWeight.Bold,
-                      modifier = Modifier.testTag("AddBillFieldText"))
+                      color = colorScheme.onBackground,
+                      fontWeight = FontWeight.Medium,
+                      textAlign = TextAlign.End,
+                      modifier = Modifier.weight(1f).testTag("TotalText_$index"))
                 }
+          }
+
+      if (mode == AppMode.WORKER) {
+        item {
+          Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = {
+                  listBillFields = listBillFields + BillField("", Units.U, 0.0, 0.0, 0.0)
+                },
+                modifier =
+                    Modifier.padding(vertical = 8.dp * heightRatio.value)
+                        .testTag("AddBillFieldButton"),
+                shape = RoundedCornerShape(10.dp),
+            ) {
+              Row(
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.End,
+                  modifier = Modifier.wrapContentWidth()) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ReceiptLong,
+                        contentDescription = "ReceiptLong",
+                        tint = colorScheme.onPrimary,
+                        modifier = Modifier.testTag("AddBillFieldIcon"))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Add A Bill Field",
+                        style = poppinsTypography.labelSmall,
+                        color = colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.testTag("AddBillFieldText"))
+                  }
+            }
           }
         }
       }
@@ -558,13 +612,17 @@ fun QuickFixThirdStep(
                   modifier = Modifier.weight(1f).testTag("OverallTotalLabel"))
               Text(
                   text =
-                      listBillFields
-                          .map { it.amount.times(it.unitPrice) }
-                          .sum()
-                          .let {
-                            if (it == 0.0 || it.isNaN()) "Total CHF"
-                            else "%.2f".format(it).plus(" CHF")
-                          },
+                      if (mode == AppMode.WORKER) {
+                        listBillFields
+                            .map { it.amount.times(it.unitPrice) }
+                            .sum()
+                            .let {
+                              if (it == 0.0 || it.isNaN()) "Total CHF"
+                              else "%.2f".format(it).plus(" CHF")
+                            }
+                      } else {
+                        "%.2f".format(quickFix.bill.sumOf { it.total }).plus(" CHF")
+                      },
                   style = poppinsTypography.labelSmall,
                   color = colorScheme.onBackground,
                   fontWeight = FontWeight.Medium,
@@ -574,32 +632,43 @@ fun QuickFixThirdStep(
       }
 
       item {
-        val updatedQuickFix = quickFix.copy(date = listDates, bill = listBillFields)
         QuickFixButton(
-            buttonText = "Submit the QuickFix",
+            buttonText = if (mode == AppMode.WORKER) "Submit the QuickFix" else "Pay",
             buttonColor = colorScheme.primary,
             textColor = colorScheme.onPrimary,
             onClickAction = {
-              quickFixViewModel.updateQuickFix(
-                  updatedQuickFix,
-                  onSuccess = {
-                    onQuickFixChange(updatedQuickFix)
-                    /* Make so that the worker cannot edit the quickfix anymore */
-                  },
-                  onFailure = {
-                    Log.e("QuickFixThirdStep", "Failed to update QuickFix: ${it.message}")
-                  })
+              if (mode == AppMode.WORKER) {
+                val updatedQuickFix = quickFix.copy(date = listDates, bill = listBillFields)
+                quickFixViewModel.updateQuickFix(
+                    updatedQuickFix,
+                    onSuccess = {
+                      onQuickFixChange(updatedQuickFix)
+                      /* Make so that the worker cannot edit the quickfix anymore */
+                    },
+                    onFailure = {
+                      Log.e("QuickFixThirdStep", "Failed to update QuickFix: ${it.message}")
+                    })
+              } else {
+                quickFixViewModel.updateQuickFix(
+                    quickFix.copy(status = Status.UPCOMING),
+                    onSuccess = { onQuickFixPay() },
+                    onFailure = {
+                      Log.e("QuickFixThirdStep", "Failed to update QuickFix: ${it.message}")
+                    })
+              }
             },
             modifier =
                 Modifier.fillMaxWidth()
                     .padding(top = 16.dp * heightRatio.value)
                     .testTag("SubmitQuickFixButton"),
             enabled =
-                listDates.isNotEmpty() &&
-                    listBillFields.isNotEmpty() &&
-                    listBillFields.all {
-                      it.amount != 0.0 && it.unitPrice != 0.0 && it.description.isNotBlank()
-                    })
+                if (mode == AppMode.WORKER) {
+                  listDates.isNotEmpty() &&
+                      listBillFields.isNotEmpty() &&
+                      listBillFields.all {
+                        it.amount != 0.0 && it.unitPrice != 0.0 && it.description.isNotBlank()
+                      }
+                } else true)
       }
     }
   }

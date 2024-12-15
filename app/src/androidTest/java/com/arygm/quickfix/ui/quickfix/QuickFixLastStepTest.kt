@@ -15,6 +15,8 @@ import com.arygm.quickfix.model.profile.dataFields.Review
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
+import com.arygm.quickfix.model.switchModes.AppMode
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixLastStep
 import com.google.firebase.Timestamp
 import io.mockk.*
 import java.time.LocalDate
@@ -99,7 +101,8 @@ class QuickFixLastStepTest {
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Assert
@@ -122,7 +125,8 @@ class QuickFixLastStepTest {
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Assert
@@ -150,7 +154,8 @@ class QuickFixLastStepTest {
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Find and click the Cancel button
@@ -183,7 +188,8 @@ class QuickFixLastStepTest {
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Assert
@@ -209,7 +215,8 @@ class QuickFixLastStepTest {
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Enter Feedback
@@ -253,7 +260,8 @@ class QuickFixLastStepTest {
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     composeTestRule.onNodeWithTag("FeedbackTextField").performTextInput("a".repeat(1500))
@@ -283,6 +291,7 @@ class QuickFixLastStepTest {
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
+          mode = AppMode.USER,
       )
     }
 
@@ -308,7 +317,8 @@ class QuickFixLastStepTest {
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Assert Title
@@ -340,7 +350,8 @@ class QuickFixLastStepTest {
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Format dates and times as in the composable
@@ -372,7 +383,8 @@ class QuickFixLastStepTest {
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Set rating to 0

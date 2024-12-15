@@ -1,3 +1,5 @@
+package com.arygm.quickfix.ui.elements
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -15,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -42,7 +45,8 @@ fun QuickFixStepper(
       modifier =
           Modifier.fillMaxWidth()
               .height(IntrinsicSize.Min)
-              .padding(vertical = 16.dp, horizontal = 16.dp),
+              .padding(vertical = 16.dp, horizontal = 16.dp)
+              .testTag("QuickFixStepper"), // Test tag for the entire stepper
       verticalAlignment = Alignment.CenterVertically) {
         steps.forEachIndexed { index, step ->
           val isCurrent = index + 1 == currentStep
@@ -71,7 +75,11 @@ fun QuickFixStepper(
           // Step
           Column(
               horizontalAlignment = Alignment.CenterHorizontally,
-              modifier = Modifier.width(48.dp * widthRatio.value).fillMaxHeight()) {
+              modifier =
+                  Modifier.width(48.dp * widthRatio.value)
+                      .fillMaxHeight()
+                      .testTag("Step_$index") // Test tag for each step
+              ) {
                 // Circle with Icon
                 Box(
                     contentAlignment = Alignment.Center,
@@ -83,7 +91,9 @@ fun QuickFixStepper(
                                 when {
                                   isDone -> colorScheme.primary // Background for done
                                   else -> colorScheme.surface // Background for ToDo and Current
-                                })) {
+                                })
+                            .testTag("StepIcon_$index") // Test tag for step icon
+                    ) {
                       Icon(
                           imageVector = icons[index],
                           contentDescription = "Step Icon",
@@ -101,7 +111,9 @@ fun QuickFixStepper(
                 Text(
                     text = "STEP ${index + 1}",
                     style = poppinsTypography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                    color = colorScheme.onSecondaryContainer)
+                    color = colorScheme.onSecondaryContainer,
+                    modifier = Modifier.testTag("StepLabel_$index") // Test tag for step label
+                    )
                 Text(
                     text = step,
                     style =
@@ -109,7 +121,9 @@ fun QuickFixStepper(
                             fontWeight = FontWeight.Medium, fontSize = 8.sp),
                     color = colorScheme.onBackground,
                     textAlign = TextAlign.Center,
-                )
+                    modifier =
+                        Modifier.testTag("StepDescription_$index") // Test tag for step description
+                    )
               }
 
           // Connector Line (except after the last step)
@@ -117,7 +131,11 @@ fun QuickFixStepper(
             HorizontalDivider(
                 color = dividerColor,
                 thickness = 2.dp,
-                modifier = Modifier.weight(1f).padding(bottom = 38.dp * heightRatio.value))
+                modifier =
+                    Modifier.weight(1f)
+                        .padding(bottom = 38.dp * heightRatio.value)
+                        .testTag("Connector_$index") // Test tag for connector
+                )
           }
         }
       }

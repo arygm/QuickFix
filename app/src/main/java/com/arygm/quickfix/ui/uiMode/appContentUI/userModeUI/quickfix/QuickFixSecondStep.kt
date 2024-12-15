@@ -1,5 +1,6 @@
-package com.arygm.quickfix.ui.quickfix
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,11 +20,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,49 +40,70 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
-import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.account.Account
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.messaging.Chat
+import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
-import com.arygm.quickfix.model.quickfix.Status
+import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.ui.elements.QuickFixButton
+import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import com.google.firebase.Timestamp
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun QuickFixSecondStep(
-    quickFixViewModel: QuickFixViewModel = viewModel(factory = QuickFixViewModel.Factory),
-    quickFix: QuickFix
+    quickFixViewModel: QuickFixViewModel,
+    accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
+    chatViewModel: ChatViewModel,
+    navigationActions: NavigationActions,
+    onQuickFixMakeBill: () -> Unit,
+    quickFix: QuickFix,
+    mode: AppMode
 ) {
   val dateFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM")
   val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
-  var testQuickFix by remember {
-    mutableStateOf(
-        QuickFix(
-            "",
-            Status.PENDING,
-            emptyList(),
-            emptyList(),
-            Timestamp.now(),
-            emptyList(),
-            emptyList(),
-            "",
-            "",
-            "",
-            "",
-            "",
-            emptyList(),
-            Location(0.0, 0.0, "")))
+  var userAccount by remember { mutableStateOf<Account?>(null) }
+  accountViewModel.fetchUserAccount(quickFix.userId) { userAccount = it }
+  var workerAccount by remember { mutableStateOf<Account?>(null) }
+  accountViewModel.fetchUserAccount(quickFix.workerId) { workerAccount = it }
+  var addChatBool by remember { mutableStateOf(false) }
+  Log.d("QuickFixSecondStep", "addChatBool added: $addChatBool")
+  var chat by remember { mutableStateOf<Chat?>(null) }
+
+  if (addChatBool) {
+    LaunchedEffect(Unit) {
+      chat?.let {
+        chatViewModel.addChat(
+            it,
+            onSuccess = {
+              Log.d("QuickFixSecondStep", "Chat added: $chat")
+              chatViewModel.selectChat(chat!!)
+              accountViewModel.updateAccount(
+                  userAccount!!.copy(activeChats = userAccount!!.activeChats + chat!!.chatId),
+                  onSuccess = {
+                    accountViewModel.updateAccount(
+                        workerAccount!!.copy(
+                            activeChats = workerAccount!!.activeChats + chat!!.chatId),
+                        onSuccess = { Log.d("QuickFixSecondStep", "Chat added to user") },
+                        onFailure = { Log.d("QuickFixSecondStep", "Chat not added to worker") })
+                  },
+                  onFailure = { Log.d("QuickFixSecondStep", "Chat not added to user") })
+              navigationActions.navigateTo(UserScreen.MESSAGES)
+              addChatBool = false
+            },
+            onFailure = {
+              Log.d("QuickFixSecondStep", "Chat not added")
+              addChatBool = false
+            })
+      }
+    }
   }
-  quickFixViewModel.fetchQuickFix(
-      "hLC196FnN8GPdTZZbnyV",
-      onResult = { result ->
-        if (result != null) {
-          testQuickFix = result
-        }
-      })
+
   BoxWithConstraints(
       modifier = Modifier.background(colorScheme.surface),
   ) {
@@ -97,7 +119,9 @@ fun QuickFixSecondStep(
       ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
           Text(
-              text = "The worker has been contacted...",
+              text =
+                  if (mode == AppMode.USER) "The worker has been contacted..."
+                  else "${userAccount!!.firstName} ${userAccount!!.lastName}has contacted you...",
               style =
                   poppinsTypography.bodyMedium.copy(fontSize = 30.sp, fontWeight = FontWeight.Bold),
               color = colorScheme.onBackground,
@@ -310,7 +334,14 @@ fun QuickFixSecondStep(
             height = 75.dp * heightRatio.value,
             modifier = Modifier.fillMaxWidth().testTag("ConsultDiscussionButton"),
             onClickAction = {
-              /* navigateToChat(quickFix.chatUid) */
+              chat =
+                  Chat(
+                      chatId = quickFix.userId + quickFix.workerId,
+                      quickFixUid = quickFix.uid,
+                      workeruid = quickFix.workerId,
+                      useruid = quickFix.userId,
+                  )
+              addChatBool = true
             },
             buttonColor = colorScheme.surface,
             textColor = colorScheme.primary,
@@ -318,6 +349,26 @@ fun QuickFixSecondStep(
             leadingIconTint = colorScheme.primary,
         )
       }
+
+      if (mode == AppMode.WORKER)
+          Row(
+              modifier = Modifier.weight(0.15f),
+          ) {
+            QuickFixButton(
+                buttonText = "Make the bill",
+                textStyle =
+                    poppinsTypography.bodyMedium.copy(
+                        fontSize = 24.sp, fontWeight = FontWeight.SemiBold),
+                contentPadding = PaddingValues(0.dp),
+                height = 75.dp * heightRatio.value,
+                modifier = Modifier.fillMaxWidth().testTag("MakethebillButton"),
+                onClickAction = { onQuickFixMakeBill() },
+                buttonColor = colorScheme.surface,
+                textColor = colorScheme.primary,
+                leadingIcon = Icons.AutoMirrored.Outlined.Send,
+                leadingIconTint = colorScheme.primary,
+            )
+          }
     }
   }
 }

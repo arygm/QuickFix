@@ -6,11 +6,15 @@ import com.arygm.quickfix.model.locations.LocationRepository
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatRepository
 import com.arygm.quickfix.model.messaging.ChatViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesRepository
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.quickfix.QuickFixRepository
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixFirstStep
 import java.time.LocalDate
 import org.junit.Before
 import org.junit.Rule
@@ -28,6 +32,8 @@ class QuickFixFirstStepTest {
   private lateinit var profileViewModel: ProfileViewModel
   private lateinit var quickFixRepository: QuickFixRepository
   private lateinit var quickFixViewModel: QuickFixViewModel
+  private lateinit var preferencesViewModel: PreferencesViewModel
+  private lateinit var preferencesRepositoryDataStore: PreferencesRepository
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -42,6 +48,8 @@ class QuickFixFirstStepTest {
     profileViewModel = ProfileViewModel(profileRepository)
     quickFixRepository = mock(QuickFixRepository::class.java)
     quickFixViewModel = QuickFixViewModel(quickFixRepository)
+    preferencesRepositoryDataStore = mock(PreferencesRepository::class.java)
+    preferencesViewModel = PreferencesViewModel(preferencesRepositoryDataStore)
   }
 
   @Test
@@ -49,12 +57,11 @@ class QuickFixFirstStepTest {
 
     composeTestRule.setContent {
       QuickFixFirstStep(
-          navigationActions = navigationActions,
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
-          workerViewModel = profileViewModel,
-          workerId = "Test Worker Id",
           quickFixViewModel = quickFixViewModel,
+          preferencesViewModel = preferencesViewModel,
+          workerProfile = WorkerProfile(),
           onQuickFixChange = { _ -> })
     }
 
@@ -72,12 +79,11 @@ class QuickFixFirstStepTest {
   fun textInputBehavior() {
     composeTestRule.setContent {
       QuickFixFirstStep(
-          navigationActions = navigationActions,
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
-          workerViewModel = profileViewModel,
-          workerId = "Test Worker Id",
           quickFixViewModel = quickFixViewModel,
+          preferencesViewModel = preferencesViewModel,
+          workerProfile = WorkerProfile(),
           onQuickFixChange = { _ -> })
     }
 
@@ -94,12 +100,11 @@ class QuickFixFirstStepTest {
   fun serviceSelection() {
     composeTestRule.setContent {
       QuickFixFirstStep(
-          navigationActions = navigationActions,
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
-          workerViewModel = profileViewModel,
-          workerId = "Test Worker Id",
           quickFixViewModel = quickFixViewModel,
+          preferencesViewModel = preferencesViewModel,
+          workerProfile = WorkerProfile(),
           onQuickFixChange = { _ -> })
     }
 
@@ -113,12 +118,11 @@ class QuickFixFirstStepTest {
   fun datePickerIntegration() {
     composeTestRule.setContent {
       QuickFixFirstStep(
-          navigationActions = navigationActions,
           locationViewModel = locationViewModel,
           chatViewModel = chatViewModel,
-          workerViewModel = profileViewModel,
-          workerId = "Test Worker Id",
           quickFixViewModel = quickFixViewModel,
+          preferencesViewModel = preferencesViewModel,
+          workerProfile = WorkerProfile(),
           onQuickFixChange = { _ -> })
     }
 

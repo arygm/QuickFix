@@ -13,6 +13,8 @@ import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixRepository
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
+import com.arygm.quickfix.model.switchModes.AppMode
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixThirdStep
 import com.google.firebase.Timestamp
 import io.mockk.*
 import org.junit.Before
@@ -73,7 +75,9 @@ class QuickFixThirdStepTest {
           quickFix = mockQuickFix,
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          onQuickFixPay = {},
+          mode = AppMode.USER)
     }
 
     // Click on Add Bill Field Button
@@ -105,7 +109,9 @@ class QuickFixThirdStepTest {
                               total = 60.0))),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          onQuickFixPay = {},
+          mode = AppMode.USER)
     }
 
     // Add a bill field
@@ -133,7 +139,9 @@ class QuickFixThirdStepTest {
           quickFix = mockQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          onQuickFixPay = {},
+          mode = AppMode.USER)
     }
 
     // Add a bill field
@@ -157,7 +165,9 @@ class QuickFixThirdStepTest {
           quickFix = mockQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          onQuickFixPay = {},
+          mode = AppMode.USER)
     }
 
     // Add a bill field
@@ -181,7 +191,9 @@ class QuickFixThirdStepTest {
           quickFix = mockQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          onQuickFixPay = {},
+          mode = AppMode.USER)
     }
 
     // Add a bill field
@@ -205,7 +217,9 @@ class QuickFixThirdStepTest {
           quickFix = mockQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          onQuickFixPay = {},
+          mode = AppMode.USER)
     }
 
     // Add a bill field
@@ -231,7 +245,9 @@ class QuickFixThirdStepTest {
           quickFix = mockQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          onQuickFixPay = {},
+          mode = AppMode.USER)
     }
 
     // Click on Select Suggested Dates Button
@@ -299,7 +315,9 @@ class QuickFixThirdStepTest {
           quickFix = mockQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          onQuickFixPay = {},
+          mode = AppMode.USER)
     }
 
     // Add a bill field
@@ -324,7 +342,9 @@ class QuickFixThirdStepTest {
           quickFix = testQuickFix,
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          onQuickFixPay = {},
+          mode = AppMode.USER)
     }
 
     // Click on Select Suggested Dates Button
@@ -366,7 +386,9 @@ class QuickFixThirdStepTest {
                               total = 60.0))),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
-          onQuickFixChange = { _ -> })
+          onQuickFixChange = { _ -> },
+          onQuickFixPay = {},
+          mode = AppMode.USER)
     }
 
     // Add a bill field

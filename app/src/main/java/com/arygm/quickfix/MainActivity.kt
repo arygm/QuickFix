@@ -35,10 +35,10 @@ import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
-import com.arygm.quickfix.ui.noModeUI.NoModeNavHost
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.ui.uiMode.appContentUI.AppContentNavGraph
 import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
+import com.arygm.quickfix.ui.uiMode.noModeUI.NoModeNavHost
 import com.arygm.quickfix.utils.LocationHelper
 import com.arygm.quickfix.utils.loadAppMode
 import kotlinx.coroutines.delay
@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
 
   private lateinit var locationHelper: LocationHelper
   private var testBitmapPP = mutableStateOf<Bitmap?>(null)
-  private var testLocation = mutableStateOf<Location>(Location())
+  private var testLocation = mutableStateOf(Location())
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -60,8 +60,6 @@ class MainActivity : ComponentActivity() {
       QuickFixTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
           QuickFixApp(testBitmapPP.value, testLocation.value)
-          // QuickFixOnBoarding(workerId = "1", navigationActions =
-          // NavigationActions(rememberNavController()))
         }
       }
     }
