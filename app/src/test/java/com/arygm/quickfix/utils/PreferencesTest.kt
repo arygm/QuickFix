@@ -63,7 +63,7 @@ class PreferencesTest {
   fun clearAccountPreferencesClearsAllPreferences() =
       runTest(testDispatcher) {
         // Act
-        clearAccountPreferences(preferencesViewModel, dispatcher = testDispatcher)
+        clearPreferences(preferencesViewModel, dispatcher = testDispatcher)
         testScheduler.advanceUntilIdle()
 
         // Assert

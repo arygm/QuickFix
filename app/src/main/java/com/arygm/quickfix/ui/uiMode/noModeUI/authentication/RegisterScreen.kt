@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButtonTopBar
@@ -80,6 +81,7 @@ fun RegisterScreen(
     accountViewModel: AccountViewModel,
     userViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
+    userProfilePreferencesViewModel: PreferencesViewModelUserProfile,
     firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(), // Injected dependency
     createAccountFunc:
         (
@@ -92,6 +94,7 @@ fun RegisterScreen(
             accountViewModel: AccountViewModel,
             userViewModel: ProfileViewModel,
             preferencesViewModel: PreferencesViewModel,
+            userProfilePreferencesViewModel: PreferencesViewModelUserProfile,
             onSuccess: () -> Unit,
             onFailure: () -> Unit) -> Unit =
         ::createAccountWithEmailAndPassword // Default implementation
@@ -491,6 +494,7 @@ fun RegisterScreen(
                                           accountViewModel,
                                           userViewModel,
                                           preferencesViewModel,
+                                          userProfilePreferencesViewModel,
                                           {
                                             rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
                                             navigationActions.navigateTo(NoModeRoute.WELCOME)

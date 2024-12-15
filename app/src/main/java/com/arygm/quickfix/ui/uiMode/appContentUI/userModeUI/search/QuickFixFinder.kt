@@ -52,8 +52,13 @@ fun QuickFixFinderScreen(
     categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
     preferencesViewModel: PreferencesViewModel
 ) {
+  val pagerState = rememberPagerState(pageCount = { 2 })
+  val colorBackground =
+      if (pagerState.currentPage == 0) colorScheme.background else colorScheme.surface
+  val colorButton = if (pagerState.currentPage == 1) colorScheme.background else colorScheme.surface
+
   Scaffold(
-      containerColor = colorScheme.background,
+      containerColor = colorBackground,
       topBar = {
         TopAppBar(
             title = {
@@ -63,7 +68,7 @@ fun QuickFixFinderScreen(
                   style = MaterialTheme.typography.headlineLarge,
                   modifier = Modifier.testTag("QuickFixFinderTopBarTitle"))
             },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorBackground),
             modifier = Modifier.testTag("QuickFixFinderTopBar"))
       },
       content = { padding ->
@@ -71,11 +76,10 @@ fun QuickFixFinderScreen(
             modifier = Modifier.fillMaxSize().testTag("QuickFixFinderContent").padding(padding),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
-              val pagerState = rememberPagerState(pageCount = { 2 })
               val coroutineScope = rememberCoroutineScope()
 
               Surface(
-                  color = colorScheme.surface,
+                  color = colorButton,
                   shape = RoundedCornerShape(20.dp),
                   modifier = Modifier.padding(horizontal = 40.dp).clip(RoundedCornerShape(20.dp))) {
                     TabRow(
@@ -110,8 +114,9 @@ fun QuickFixFinderScreen(
                               profileViewModel,
                               accountViewModel,
                               preferencesViewModel,
-                              navigationActions,
-                              isUser)
+                              categoryViewModel,
+                              navigationActions = navigationActions,
+                              isUser = isUser)
                       else -> Text("Should never happen !")
                     }
                   }

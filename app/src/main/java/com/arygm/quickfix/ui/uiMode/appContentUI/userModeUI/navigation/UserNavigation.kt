@@ -51,8 +51,8 @@ val USER_TOP_LEVEL_DESTINATIONS =
         UserTopLevelDestinations.PROFILE,
     )
 
-fun getBottomBarIdUser(route: String): Int {
-  return when (route) {
+val getBottomBarIdUser: (String) -> Int = { route ->
+  when (route) {
     UserRoute.HOME -> 1
     UserRoute.SEARCH -> 2
     UserRoute.DASHBOARD -> 3
