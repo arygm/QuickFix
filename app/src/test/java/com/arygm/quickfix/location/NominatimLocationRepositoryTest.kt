@@ -5,6 +5,7 @@ import com.arygm.quickfix.model.locations.NominatimLocationRepository
 import java.io.IOException
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -35,9 +36,8 @@ class NominatimLocationRepositoryTest {
 
     // Prepare a successful response
     val mockResponseBody =
-        ResponseBody.create(
-            "application/json".toMediaTypeOrNull(),
-            """[{"display_name": "Lausanne, Switzerland", "lat": "46.5191", "lon": "6.6323"}]""")
+        """[{"display_name": "Lausanne, Switzerland", "lat": "46.5191", "lon": "6.6323"}]"""
+            .toResponseBody("application/json".toMediaTypeOrNull())
     val mockResponse =
         Response.Builder()
             .code(200)
@@ -124,7 +124,7 @@ class NominatimLocationRepositoryTest {
     whenever(mockOkHttpClient.newCall(any())).thenReturn(mockCall)
 
     // Prepare a successful response with empty JSON array
-    val mockResponseBody = ResponseBody.create("application/json".toMediaTypeOrNull(), """[]""")
+    val mockResponseBody = """[]""".toResponseBody("application/json".toMediaTypeOrNull())
     val mockResponse =
         Response.Builder()
             .code(200)

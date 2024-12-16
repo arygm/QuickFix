@@ -1,4 +1,4 @@
-// WorkerSlidingWindowContent.kt
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

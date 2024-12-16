@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.profile.becomeWorker.views.professional
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.professional
 
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState

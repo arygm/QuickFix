@@ -11,7 +11,8 @@ import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.profile.FakePreferencesRepository
 import com.arygm.quickfix.ui.theme.QuickFixTheme
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.welcome.WelcomeOnBoardScreen
 import com.arygm.quickfix.utils.IS_WORKER_KEY
 import kotlinx.coroutines.runBlocking
 import org.junit.Before

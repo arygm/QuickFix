@@ -102,7 +102,8 @@ open class AccountRepositoryFirestore(
       Log.d("AccountRepositoryFirestore", "birthDate: $birthDate")
       val isWorker = document.getBoolean("worker") ?: return null
       Log.d("AccountRepositoryFirestore", "isWorker: $isWorker")
-      val profilePicture = document.getString("profilePicture") ?: return null
+      val profilePicture = document.getString("profilePicture") ?: ""
+      Log.d("AccountRepositoryFirestore", "profilePicture: $profilePicture")
 
       val account =
           Account(

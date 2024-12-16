@@ -13,7 +13,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
-class QuickFixRepositoryFirestore(private val db: FirebaseFirestore) : QuickFixRepository {
+open class QuickFixRepositoryFirestore(private val db: FirebaseFirestore) : QuickFixRepository {
 
   val collectionPath = "quickFix"
 
