@@ -253,7 +253,7 @@ suspend fun loadAppMode(preferencesViewModel: PreferencesViewModel): String {
     preferencesViewModel.loadPreference(APP_MODE_KEY) { value ->
       if (!resumed) {
         resumed = true
-        cont.resume(value ?: "User")
+        cont.resume(value ?: "USER")
       }
     }
   }

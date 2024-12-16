@@ -58,6 +58,7 @@ open class NavigationActions(
     navController.popBackStack()
     currentScreen = routeToScreen(currentRoute())
     currentRoute_.value = currentRoute()
+    Log.d("NavigationActions", "Navigating back to ${currentRoute()}")
   }
 
   /**

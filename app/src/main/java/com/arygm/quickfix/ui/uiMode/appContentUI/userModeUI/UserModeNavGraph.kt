@@ -1,6 +1,7 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,7 +49,7 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.getBottomBarIdUser
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.ProfileScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.UserProfileScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixOnBoarding
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.QuickFixFinderScreen
@@ -72,6 +74,7 @@ fun UserModeNavHost(
     quickFixViewModel: QuickFixViewModel,
     isOffline: Boolean
 ) {
+  Log.d("UserModeNavHost", "UserModeNavHost is recomposed")
   val userNavController = rememberNavController()
   val userNavigationActions = remember { NavigationActions(userNavController) }
 
@@ -82,7 +85,7 @@ fun UserModeNavHost(
       viewModel(factory = AnnouncementViewModel.Factory)
 
   // Initialized here because needed for the bottom bar
-
+  val startDestination by modeViewModel.onSwitchStartDestUser.collectAsState()
   val isUser = true // TODO: This variable needs to get its value after the authentication
   var currentScreen by remember { mutableStateOf<String?>(null) }
   val shouldShowBottomBar by remember {
@@ -130,7 +133,7 @@ fun UserModeNavHost(
       }) { innerPadding ->
         NavHost(
             navController = userNavigationActions.navController,
-            startDestination = UserRoute.HOME,
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding),
             enterTransition = {
               // You can change whatever you want for transitions
@@ -252,7 +255,8 @@ fun ProfileNavHost(
   }
   NavHost(navController = profileNavController, startDestination = UserScreen.PROFILE) {
     composable(UserScreen.PROFILE) {
-      ProfileScreen(
+      UserProfileScreen(
+          userNavigationActions,
           profileNavigationActions,
           rootMainNavigationActions,
           preferencesViewModel,
