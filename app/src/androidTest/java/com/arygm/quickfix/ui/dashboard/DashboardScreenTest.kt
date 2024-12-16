@@ -6,6 +6,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.arygm.quickfix.model.offline.small.PreferencesRepository
+import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.search.AnnouncementRepository
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.DashboardScreen
@@ -20,12 +23,19 @@ class DashboardScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
+  private lateinit var preferencesRepository: PreferencesRepository
+  private lateinit var announcementRepository: AnnouncementRepository
+  private lateinit var userProfileRepository: ProfileRepository
   private lateinit var announcementViewModel: AnnouncementViewModel
 
   @Before
   fun setup() {
     navigationActions = mock(NavigationActions::class.java)
-    announcementViewModel = mock(AnnouncementViewModel::class.java)
+    preferencesRepository = mock(PreferencesRepository::class.java)
+    announcementRepository = mock(AnnouncementRepository::class.java)
+    userProfileRepository = mock(ProfileRepository::class.java)
+    announcementViewModel =
+        AnnouncementViewModel(announcementRepository, preferencesRepository, userProfileRepository)
     `when`(navigationActions.currentRoute()).thenReturn(UserScreen.DASHBOARD)
   }
 
