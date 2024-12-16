@@ -4,13 +4,26 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.outlined.ElectricalServices
-import androidx.compose.material3.*
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -28,7 +42,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.category.Category
+import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.category.getCategoryIcon
 import com.arygm.quickfix.model.search.Announcement
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -38,6 +56,7 @@ import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 @Composable
 fun AnnouncementsWidget(
     announcementViewModel: AnnouncementViewModel,
+    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
     navigationActions: NavigationActions,
     modifier: Modifier = Modifier,
     itemsToShowDefault: Int = 2
@@ -89,10 +108,21 @@ fun AnnouncementsWidget(
           itemsToShow.forEachIndexed { index, announcement ->
             val pairs = imagesForAnnouncements[announcement.announcementId] ?: emptyList()
             val bitmapToDisplay = pairs.firstOrNull()?.second
+            var category by remember { mutableStateOf(Category()) }
+            LaunchedEffect(Unit) {
+              categoryViewModel.getCategoryBySubcategoryId(
+                  announcement.category,
+                  onSuccess = {
+                    if (it != null) {
+                      category = it
+                    }
+                  })
+            }
 
             AnnouncementItem(
                 announcement = announcement,
                 announcementImage = bitmapToDisplay,
+                categoryIcon = getCategoryIcon(category),
                 onClick = {
                   announcementViewModel.selectAnnouncement(announcement)
                   navigationActions.navigateTo(UserScreen.ANNOUNCEMENT_DETAIL)
@@ -110,7 +140,13 @@ fun AnnouncementsWidget(
 }
 
 @Composable
-fun AnnouncementItem(announcement: Announcement, announcementImage: Bitmap?, onClick: () -> Unit) {
+fun AnnouncementItem(
+    announcement: Announcement,
+    announcementImage: Bitmap?,
+    categoryIcon: ImageVector,
+    onClick: () -> Unit
+) {
+
   Row(
       modifier =
           Modifier.fillMaxWidth()
@@ -163,7 +199,7 @@ fun AnnouncementItem(announcement: Announcement, announcementImage: Bitmap?, onC
                 Spacer(modifier = Modifier.width(4.dp))
 
                 Icon(
-                    imageVector = Icons.Outlined.ElectricalServices,
+                    imageVector = categoryIcon,
                     contentDescription = "Category Icon",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.testTag("CategoryIcon_${announcement.announcementId}"))

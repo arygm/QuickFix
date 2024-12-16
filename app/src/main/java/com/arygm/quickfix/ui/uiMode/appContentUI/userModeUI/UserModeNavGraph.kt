@@ -179,7 +179,10 @@ fun UserModeNavHost(
 
               composable(UserRoute.DASHBOARD) {
                 DashBoardNavHost(
-                    announcementViewModel, onScreenChange = { currentScreen = it }, isUser)
+                    announcementViewModel,
+                    categoryViewModel,
+                    onScreenChange = { currentScreen = it },
+                    isUser)
               }
 
               composable(UserRoute.PROFILE) {
@@ -284,6 +287,7 @@ fun ProfileNavHost(
 @Composable
 fun DashBoardNavHost(
     announcementViewModel: AnnouncementViewModel,
+    categoryViewModel: CategoryViewModel,
     onScreenChange: (String) -> Unit,
     isUser: Boolean
 ) {
@@ -294,7 +298,7 @@ fun DashBoardNavHost(
   }
   NavHost(navController = dashboardNavController, startDestination = UserScreen.DASHBOARD) {
     composable(UserScreen.DASHBOARD) {
-      DashboardScreen(announcementViewModel, navigationActions, isUser)
+      DashboardScreen(announcementViewModel, categoryViewModel, navigationActions, isUser)
     }
     composable(UserScreen.ANNOUNCEMENT_DETAIL) {
       AnnouncementDetailScreen(announcementViewModel, navigationActions, isUser)
