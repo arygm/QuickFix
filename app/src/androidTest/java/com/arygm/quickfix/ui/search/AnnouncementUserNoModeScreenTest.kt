@@ -20,8 +20,8 @@ import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.search.AnnouncementRepository
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.AnnouncementScreen
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId

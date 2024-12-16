@@ -15,6 +15,7 @@ import com.arygm.quickfix.model.search.AnnouncementRepository
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.QuickFixFinderScreen
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
