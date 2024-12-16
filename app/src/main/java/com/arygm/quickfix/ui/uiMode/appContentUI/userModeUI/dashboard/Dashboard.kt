@@ -27,7 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.search.AnnouncementViewModel
+import com.arygm.quickfix.ui.dashboard.AnnouncementsWidget
 import com.arygm.quickfix.ui.elements.QuickFix
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixesWidget
@@ -36,7 +40,12 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 import kotlin.random.Random
 
 @Composable
-fun DashboardScreen(navigationActions: NavigationActions) {
+fun DashboardScreen(
+    announcementViewModel: AnnouncementViewModel,
+    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
+    navigationActions: NavigationActions,
+    isUser: Boolean = true
+) {
 
   data class QuickFixFilterButtons(
       val title: String,
@@ -195,6 +204,14 @@ fun DashboardScreen(navigationActions: NavigationActions) {
                     }
                   }
                 }
+              }
+              item {
+                AnnouncementsWidget(
+                    announcementViewModel = announcementViewModel,
+                    navigationActions = navigationActions,
+                    categoryViewModel = categoryViewModel,
+                    itemsToShowDefault = 3,
+                )
               }
 
               item {

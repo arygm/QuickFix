@@ -1,6 +1,7 @@
 package com.arygm.quickfix.model.search
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.utils.performFirestoreOperation
@@ -39,7 +40,7 @@ class AnnouncementRepositoryFirestore(
         onSuccess(announcements)
       } else {
         task.exception?.let { e ->
-          Log.e("TodosRepositoryFirestore", "Error getting documents", e)
+          Log.e("AnnouncementsRepositoryFirestore", "Error getting documents", e)
           onFailure(e)
         }
       }
@@ -51,10 +52,8 @@ class AnnouncementRepositoryFirestore(
       onSuccess: (List<Announcement>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    Log.d("TodosRepositoryFirestore", "getAnnouncements for IDs: $announcements")
 
     if (announcements.isEmpty()) {
-      Log.d("TodosRepositoryFirestore", "No announcement IDs provided")
       onSuccess(emptyList())
       return
     }
@@ -67,13 +66,12 @@ class AnnouncementRepositoryFirestore(
           if (task.isSuccessful) {
             val fetchedAnnouncements =
                 task.result?.mapNotNull { document ->
-                  Log.d("Mapping", "Trying to map announcement with ID: ${document.id}")
                   documentToAnnouncement(document) // Convert document to Announcement object
                 } ?: emptyList()
             onSuccess(fetchedAnnouncements)
           } else {
             task.exception?.let { e ->
-              Log.e("TodosRepositoryFirestore", "Error getting announcements", e)
+              Log.e("AnnouncementsRepositoryFirestore", "Error getting announcements", e)
               onFailure(e)
             }
           }
@@ -86,7 +84,6 @@ class AnnouncementRepositoryFirestore(
       onFailure: (Exception) -> Unit
   ) {
     val announcementId = announcement.announcementId
-    announcement.quickFixImages.forEach { uri -> Log.d("UploadingImages", uri) }
     val announcementDocRef = db.collection(collectionPath).document(announcementId)
     performFirestoreOperation(announcementDocRef.set(announcement), onSuccess, onFailure)
   }
@@ -123,6 +120,58 @@ class AnnouncementRepositoryFirestore(
           }
           .addOnFailureListener { exception -> onFailure(exception) }
     }
+  }
+
+  override fun fetchAnnouncementsImageUrls(
+      announcementId: String,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val firestore = db
+    val collection = firestore.collection(collectionPath)
+
+    collection
+        .document(announcementId)
+        .get()
+        .addOnSuccessListener { document ->
+          val imageUrls = document["quickFixImages"] as? List<String> ?: emptyList()
+          onSuccess(imageUrls)
+        }
+        .addOnFailureListener { onFailure(it) }
+  }
+
+  override fun fetchAnnouncementsImagesAsBitmaps(
+      announcementId: String,
+      onSuccess: (List<Pair<String, Bitmap>>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    fetchAnnouncementsImageUrls(
+        announcementId,
+        { urls ->
+          if (urls.isEmpty()) {
+            onSuccess(emptyList())
+            return@fetchAnnouncementsImageUrls
+          }
+
+          val urlBitmapPairs = mutableListOf<Pair<String, Bitmap>>()
+          var successCount = 0
+
+          urls.forEach { url ->
+            val imageRef = storage.getReferenceFromUrl(url)
+            imageRef
+                .getBytes(Long.MAX_VALUE)
+                .addOnSuccessListener { bytes ->
+                  val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                  urlBitmapPairs.add(url to bitmap)
+                  successCount++
+                  if (successCount == urls.size) {
+                    onSuccess(urlBitmapPairs)
+                  }
+                }
+                .addOnFailureListener { onFailure(it) }
+          }
+        },
+        onFailure)
   }
 
   override fun updateAnnouncement(
@@ -193,7 +242,7 @@ class AnnouncementRepositoryFirestore(
           availability = availability,
           quickFixImages = quickFixImages)
     } catch (e: Exception) {
-      Log.e("TodosRepositoryFirestore", "Error converting document to Announcement", e)
+      Log.e("AnnouncementsRepositoryFirestore", "Error converting document to Announcement", e)
       null
     }
   }

@@ -29,8 +29,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -45,13 +45,11 @@ fun QuickFixFinderScreen(
     navigationActionsRoot: NavigationActions,
     isUser: Boolean = true,
     profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
-    loggedInAccountViewModel: LoggedInAccountViewModel =
-        viewModel(factory = LoggedInAccountViewModel.Factory),
-    searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory),
     accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
-    announcementViewModel: AnnouncementViewModel =
-        viewModel(factory = AnnouncementViewModel.Factory),
-    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
+    searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory),
+    announcementViewModel: AnnouncementViewModel,
+    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
+    preferencesViewModel: PreferencesViewModel
 ) {
   val pagerState = rememberPagerState(pageCount = { 2 })
   val colorBackground =
@@ -112,9 +110,9 @@ fun QuickFixFinderScreen(
                       1 ->
                           AnnouncementScreen(
                               announcementViewModel,
-                              loggedInAccountViewModel,
                               profileViewModel,
                               accountViewModel,
+                              preferencesViewModel,
                               categoryViewModel,
                               navigationActions = navigationActions,
                               isUser = isUser)
