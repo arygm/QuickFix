@@ -40,7 +40,6 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.MockedStatic
-import org.mockito.Mockito
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyDouble
 import org.mockito.Mockito.doNothing
@@ -1286,7 +1285,7 @@ class WorkerProfileRepositoryFirestoreTest {
     val imageData = baos.toByteArray()
 
     // Mock storageRef.child("workerProfiles/$workerProfileId")
-    Mockito.`when`(storageRef.child("profiles").child(accountId).child("worker"))
+    `when`(storageRef.child("profiles").child(accountId).child("worker"))
         .thenReturn(workerProfileFolderRef)
 
     // For each image, when workerProfileFolderRef.child(anyString()) is called, return a new
@@ -1295,9 +1294,7 @@ class WorkerProfileRepositoryFirestoreTest {
     val fileRef2 = mock(StorageReference::class.java)
     val fileRefs = listOf(fileRef1, fileRef2)
     var fileRefIndex = 0
-    Mockito.`when`(workerProfileFolderRef.child(anyString())).thenAnswer {
-      fileRefs[fileRefIndex++]
-    }
+    `when`(workerProfileFolderRef.child(anyString())).thenAnswer { fileRefs[fileRefIndex++] }
 
     // Mock putBytes
     val mockUploadTask1 = mock(UploadTask::class.java)
@@ -1306,13 +1303,13 @@ class WorkerProfileRepositoryFirestoreTest {
     val imageDatas = listOf(imageData, imageData) // Assuming same data for simplicity
 
     // Mock fileRef.putBytes(imageData)
-    Mockito.`when`(fileRef1.putBytes(imageDatas[0])).thenReturn(mockUploadTask1)
-    Mockito.`when`(fileRef2.putBytes(imageDatas[1])).thenReturn(mockUploadTask2)
+    `when`(fileRef1.putBytes(imageDatas[0])).thenReturn(mockUploadTask1)
+    `when`(fileRef2.putBytes(imageDatas[1])).thenReturn(mockUploadTask2)
 
     // Mock mockUploadTask.addOnSuccessListener(...)
     mockUploadTasks.forEachIndexed { index, mockUploadTask ->
-      Mockito.`when`(mockUploadTask.addOnSuccessListener(org.mockito.kotlin.any())).thenAnswer {
-          invocation ->
+      `when`(mockUploadTask.addOnSuccessListener(org.mockito.kotlin.any())).thenAnswer { invocation
+        ->
         val listener = invocation.getArgument<OnSuccessListener<UploadTask.TaskSnapshot>>(0)
         val taskSnapshot = mock(UploadTask.TaskSnapshot::class.java) // Mock the snapshot
         listener.onSuccess(taskSnapshot)
@@ -1321,8 +1318,8 @@ class WorkerProfileRepositoryFirestoreTest {
     }
 
     // Mock fileRef.downloadUrl
-    Mockito.`when`(fileRef1.downloadUrl).thenReturn(Tasks.forResult(Uri.parse(expectedUrls[0])))
-    Mockito.`when`(fileRef2.downloadUrl).thenReturn(Tasks.forResult(Uri.parse(expectedUrls[1])))
+    `when`(fileRef1.downloadUrl).thenReturn(Tasks.forResult(Uri.parse(expectedUrls[0])))
+    `when`(fileRef2.downloadUrl).thenReturn(Tasks.forResult(Uri.parse(expectedUrls[1])))
 
     // Act
     var resultUrls = listOf<String>()
@@ -1347,7 +1344,7 @@ class WorkerProfileRepositoryFirestoreTest {
     val exception = Exception("Upload failed")
 
     // Mock storageRef.child("workerProfiles/$workerProfileId")
-    Mockito.`when`(storageRef.child("profiles").child(accountId).child("worker"))
+    `when`(storageRef.child("profiles").child(accountId).child("worker"))
         .thenReturn(workerProfileFolderRef)
     // Mock fileRef
     val fileRef = mock(StorageReference::class.java)

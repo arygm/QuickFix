@@ -20,7 +20,8 @@ import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
-import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
+import com.arygm.quickfix.ui.uiMode.noModeUI.authentication.RegisterScreen
+import com.arygm.quickfix.ui.uiMode.noModeUI.navigation.NoModeRoute
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore

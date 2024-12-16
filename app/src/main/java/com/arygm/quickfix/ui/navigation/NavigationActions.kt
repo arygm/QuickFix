@@ -6,8 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import com.arygm.quickfix.ui.noModeUI.navigation.NoModeScreen
-import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
+import com.arygm.quickfix.ui.uiMode.noModeUI.navigation.NoModeScreen
 import com.arygm.quickfix.utils.routeToScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,7 +58,7 @@ open class NavigationActions(
     navController.popBackStack()
     currentScreen = currentRoute()
     currentRoute_.value = currentRoute()
-    Log.d("currentScreenWhenGoBack", currentScreen)
+    Log.d("NavigationActions", "Navigating back to ${currentRoute()}")
   }
 
   /**

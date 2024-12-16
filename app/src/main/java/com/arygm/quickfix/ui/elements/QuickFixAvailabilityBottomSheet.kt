@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TimeInput
+import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -19,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.R
+import com.arygm.quickfix.ui.theme.TimeSelectorUnselectedContainerColor
 import com.arygm.quickfix.utils.MyAppTheme
 import com.maxkeppeker.sheets.core.models.base.ButtonStyle
 import com.maxkeppeker.sheets.core.models.base.SelectionButton
@@ -29,6 +32,7 @@ import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import java.time.LocalDate
 import java.util.Calendar
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,6 +70,8 @@ fun QuickFixAvailabilityBottomSheet(
                               visible = true, onCloseRequest = { onDismissRequest() }),
                       config =
                           CalendarConfig(
+                              locale = Locale.UK,
+                              cameraDate = LocalDate.now(),
                               yearSelection = true,
                               monthSelection = true,
                               style = CalendarStyle.WEEK,
@@ -102,6 +108,17 @@ fun QuickFixTimePicker(timePickerState: TimePickerState) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // TimeInput for selecting time
-        TimeInput(state = timePickerState, modifier = Modifier.testTag("timeInput"))
+        TimeInput(
+            state = timePickerState,
+            modifier = Modifier.testTag("timeInput"),
+            colors =
+                TimePickerDefaults.colors(
+                    timeSelectorSelectedContainerColor = colorScheme.primary.copy(alpha = 0.3f),
+                    timeSelectorSelectedContentColor = colorScheme.onBackground,
+                    clockDialColor = colorScheme.primary.copy(alpha = 0.1f),
+                    timeSelectorUnselectedContainerColor = TimeSelectorUnselectedContainerColor,
+                    timeSelectorUnselectedContentColor =
+                        colorScheme.onBackground.copy(alpha = 0.7f),
+                    clockDialUnselectedContentColor = colorScheme.onBackground))
       }
 }

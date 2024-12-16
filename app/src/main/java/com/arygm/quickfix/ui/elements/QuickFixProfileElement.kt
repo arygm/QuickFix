@@ -1,10 +1,9 @@
-package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile
+package com.arygm.quickfix.ui.elements
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,18 +22,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
-import androidx.compose.material.icons.automirrored.outlined.HelpOutline
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.WorkOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
@@ -56,14 +50,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.R
@@ -75,8 +67,8 @@ import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
+import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerRoute
 import com.arygm.quickfix.utils.clearPreferences
 import com.arygm.quickfix.utils.clearUserProfilePreferences
 import com.arygm.quickfix.utils.setAppMode
@@ -85,13 +77,17 @@ import com.google.firebase.ktx.Firebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(
+fun QuickFixProfileScreenElement(
+    modeNavigationActions: NavigationActions,
     navigationActions: NavigationActions,
     rootMainNavigationActions: NavigationActions,
     preferencesViewModel: PreferencesViewModel,
     userPreferencesViewModel: PreferencesViewModelUserProfile,
     appContentNavigationActions: NavigationActions,
-    modeViewModel: ModeViewModel
+    modeViewModel: ModeViewModel,
+    initialState: Boolean,
+    switchMode: AppMode,
+    sections: List<@Composable (Modifier) -> Unit>, // Dynamic sections
 ) {
   val firstName by preferencesViewModel.firstName.collectAsState(initial = "")
   val lastName by preferencesViewModel.lastName.collectAsState(initial = "")
@@ -101,7 +97,7 @@ fun ProfileScreen(
 
   // Compute display name using the collected first and last names
   val displayName = capitalizeName(firstName, lastName)
-  var isChecked by remember { mutableStateOf(false) } // State to track the switch state
+  var isChecked by remember { mutableStateOf(initialState) } // State to track the switch state
 
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     val screenWidth = maxWidth
@@ -216,27 +212,55 @@ fun ProfileScreen(
                               }
                             }
                             Spacer(modifier = Modifier.height(screenHeight * 0.0125f))
-                            Row() {
-                              Box(
-                                  modifier =
-                                      Modifier.fillMaxWidth()
-                                          .height(screenHeight * 0.04f)
-                                          .clip(RoundedCornerShape(buttonCornerRadius))
-                                          .testTag("AddFundsButton")
-                                          .background(
-                                              color = colorScheme.onPrimary,
-                                              shape = RoundedCornerShape(buttonCornerRadius))
-                                          .weight(0.35f),
-                              ) {
-                                Text(
-                                    text = "+ Add funds",
-                                    color = colorScheme.onBackground,
-                                    style =
-                                        poppinsTypography.headlineSmall.copy(
-                                            fontWeight = FontWeight.SemiBold, fontSize = 16.sp),
-                                    modifier = Modifier.clickable {}.align(Alignment.Center))
+                            when (switchMode) {
+                              AppMode.WORKER -> {
+                                Row() {
+                                  Box(
+                                      modifier =
+                                          Modifier.fillMaxWidth()
+                                              .height(screenHeight * 0.04f)
+                                              .clip(RoundedCornerShape(buttonCornerRadius))
+                                              .testTag("AddFundsButton")
+                                              .background(
+                                                  color = colorScheme.onPrimary,
+                                                  shape = RoundedCornerShape(buttonCornerRadius))
+                                              .weight(0.35f),
+                                  ) {
+                                    Text(
+                                        text = "+ Add funds",
+                                        color = colorScheme.onBackground,
+                                        style =
+                                            poppinsTypography.headlineSmall.copy(
+                                                fontWeight = FontWeight.SemiBold, fontSize = 16.sp),
+                                        modifier = Modifier.clickable {}.align(Alignment.Center))
+                                  }
+                                  Spacer(modifier = Modifier.weight(0.65f))
+                                }
                               }
-                              Spacer(modifier = Modifier.weight(0.65f))
+                              AppMode.USER -> {
+                                Row() {
+                                  Box(
+                                      modifier =
+                                          Modifier.fillMaxWidth()
+                                              .height(screenHeight * 0.04f)
+                                              .clip(RoundedCornerShape(buttonCornerRadius))
+                                              .testTag("WithdrawFundsButton")
+                                              .background(
+                                                  color = colorScheme.onPrimary,
+                                                  shape = RoundedCornerShape(buttonCornerRadius))
+                                              .weight(0.46f),
+                                  ) {
+                                    Text(
+                                        text = "- Withdraw funds",
+                                        color = colorScheme.onBackground,
+                                        style =
+                                            poppinsTypography.headlineSmall.copy(
+                                                fontWeight = FontWeight.SemiBold, fontSize = 16.sp),
+                                        modifier = Modifier.clickable {}.align(Alignment.Center))
+                                  }
+                                  Spacer(modifier = Modifier.weight(0.54f))
+                                }
+                              }
                             }
                           }
                     }
@@ -260,13 +284,21 @@ fun ProfileScreen(
                                 .align(Alignment.CenterStart),
                         verticalAlignment = Alignment.CenterVertically) {
                           Icon(
-                              imageVector = Icons.Outlined.WorkOutline,
+                              imageVector =
+                                  when (switchMode) {
+                                    AppMode.USER -> Icons.Outlined.Person
+                                    AppMode.WORKER -> Icons.Outlined.WorkOutline
+                                  },
                               contentDescription = "worker Icon",
                               tint = colorScheme.tertiaryContainer,
                               modifier = Modifier.size(screenWidth * 0.06f))
                           Spacer(modifier = Modifier.width(screenWidth * 0.04f))
                           Text(
-                              text = "Worker Mode",
+                              text =
+                                  when (switchMode) {
+                                    AppMode.USER -> "User Mode"
+                                    AppMode.WORKER -> "Worker Mode"
+                                  },
                               style =
                                   poppinsTypography.bodyMedium.copy(
                                       fontWeight = FontWeight.Medium, fontSize = 16.sp),
@@ -280,9 +312,20 @@ fun ProfileScreen(
                               modifier = Modifier.testTag(C.Tag.buttonSwitch),
                               onCheckedChange = {
                                 isChecked = it
-                                setAppMode(preferencesViewModel, AppMode.WORKER.name)
-                                modeViewModel.switchMode(AppMode.WORKER)
-                                appContentNavigationActions.navigateTo(AppContentRoute.WORKER_MODE)
+                                when (switchMode) {
+                                  AppMode.USER -> {
+                                    modeViewModel.setonSwitchStartDestUser(
+                                        UserRoute.PROFILE, modeNavigationActions)
+                                  }
+                                  AppMode.WORKER -> {
+                                    modeViewModel.setonSwitchStartDestWorker(
+                                        WorkerRoute.PROFILE, modeNavigationActions)
+                                  }
+                                }
+                                setAppMode(preferencesViewModel, switchMode.name)
+                                modeViewModel.switchMode(switchMode)
+
+                                appContentNavigationActions.navigateTo(switchMode.route)
                               },
                               colors =
                                   SwitchDefaults.colors(
@@ -297,92 +340,18 @@ fun ProfileScreen(
                 }
                 Spacer(modifier = Modifier.height(screenHeight * 0.025f))
 
-                Text(
-                    text = "Personal Settings",
-                    style =
-                        poppinsTypography.headlineSmall.copy(
-                            fontWeight = FontWeight.SemiBold, fontSize = 16.sp),
-                    color = colorScheme.onBackground,
-                    modifier = Modifier.testTag("PersonalSettingsHeader"))
-                Spacer(modifier = Modifier.height(screenHeight * 0.0125f))
-
-                Card(
-                    modifier = Modifier.fillMaxWidth().testTag("PersonalSettingsCard"),
-                    shape = RoundedCornerShape(cardCornerRadius),
-                    colors = CardDefaults.cardColors(containerColor = colorScheme.surface)) {
-                      Column {
-                        SettingsItem(
-                            icon = Icons.Outlined.Person,
-                            label = "My Account",
-                            testTag = "AccountconfigurationOption",
-                            screenWidth = screenWidth,
-                        ) {
-                          navigationActions.navigateTo(UserScreen.ACCOUNT_CONFIGURATION)
-                        }
-                        HorizontalDivider(color = colorScheme.tertiaryContainer)
-                        SettingsItem(
-                            icon = Icons.Outlined.Settings,
-                            label = "Preferences",
-                            testTag = "Preferences",
-                            screenWidth = screenWidth,
-                        ) { /* Action */}
-                        HorizontalDivider(color = colorScheme.tertiaryContainer)
-                        SettingsItem(
-                            icon = Icons.Outlined.FavoriteBorder,
-                            label = "Saved lists",
-                            testTag = "SavedLists",
-                            screenWidth = screenWidth,
-                        ) { /* Action */}
-                      }
-                    }
-
-                Spacer(modifier = Modifier.height(screenHeight * 0.025f))
-
-                Text(
-                    text = "Resources",
-                    style =
-                        poppinsTypography.headlineSmall.copy(
-                            fontWeight = FontWeight.SemiBold, fontSize = 16.sp),
-                    color = colorScheme.onBackground,
-                    modifier = Modifier.testTag("ResourcesHeader"))
-                Spacer(modifier = Modifier.height(screenHeight * 0.0125f))
-
-                Card(
-                    modifier = Modifier.fillMaxWidth().testTag("ResourcesCard"),
-                    shape = RoundedCornerShape(cardCornerRadius),
-                    colors = CardDefaults.cardColors(containerColor = colorScheme.surface)) {
-                      Column {
-                        SettingsItem(
-                            icon = Icons.AutoMirrored.Outlined.HelpOutline,
-                            label = "Support",
-                            testTag = "Support",
-                            screenWidth = screenWidth,
-                        ) { /* Action */}
-                        HorizontalDivider(color = colorScheme.tertiaryContainer)
-                        SettingsItem(
-                            icon = Icons.Outlined.Info,
-                            label = "Legal",
-                            testTag = "Legal",
-                            screenWidth = screenWidth,
-                        ) { /* Action */}
-                        if (!isWorker) {
-                          HorizontalDivider(color = colorScheme.tertiaryContainer)
-                          SettingsItem(
-                              icon = Icons.Outlined.WorkOutline,
-                              label = "Become a Worker",
-                              testTag = "SetupyourbusinessaccountOption",
-                              screenWidth = screenWidth,
-                          ) {
-                            navigationActions.navigateTo(UserScreen.TO_WORKER)
-                          }
-                        }
-                      }
-                    }
+                sections.forEach { section ->
+                  section(Modifier.padding(vertical = 8.dp))
+                  Spacer(modifier = Modifier.height(screenHeight * 0.025f))
+                }
 
                 Spacer(modifier = Modifier.height(screenHeight * 0.025f))
 
                 Button(
                     onClick = {
+                      modeViewModel.setonSwitchStartDestUser(UserRoute.HOME, modeNavigationActions)
+                      Log.d("QuickFixProfileElement", modeViewModel.onSwitchStartDestUser.value)
+                      setAppMode(preferencesViewModel, AppMode.USER.name)
                       clearPreferences(preferencesViewModel)
                       clearUserProfilePreferences(userPreferencesViewModel)
                       rootMainNavigationActions.navigateTo(RootRoute.NO_MODE)
@@ -403,44 +372,6 @@ fun ProfileScreen(
               }
         })
   }
-}
-
-@Composable
-fun SettingsItem(
-    icon: ImageVector,
-    label: String,
-    testTag: String,
-    screenWidth: Dp,
-    onClick: () -> Unit,
-) {
-  Card(
-      modifier = Modifier.fillMaxWidth().testTag(testTag),
-      shape = RoundedCornerShape(0.dp),
-      colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-      onClick = onClick) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = screenWidth * 0.02f),
-            verticalAlignment = Alignment.CenterVertically) {
-              Icon(
-                  imageVector = icon,
-                  contentDescription = "$label Icon",
-                  tint = colorScheme.tertiaryContainer,
-                  modifier = Modifier.size(screenWidth * 0.06f))
-              Spacer(modifier = Modifier.width(screenWidth * 0.04f))
-              Text(
-                  text = label,
-                  style =
-                      poppinsTypography.bodyMedium.copy(
-                          fontWeight = FontWeight.Medium, fontSize = 16.sp),
-                  color = colorScheme.onBackground,
-                  modifier = Modifier.weight(1f).testTag(label.replace(" ", "") + "Text"))
-              Icon(
-                  imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
-                  contentDescription = "Forward Icon",
-                  tint = colorScheme.tertiaryContainer,
-                  modifier = Modifier.size(screenWidth * 0.04f))
-            }
-      }
 }
 
 private fun capitalizeName(firstName: String?, lastName: String?): String {

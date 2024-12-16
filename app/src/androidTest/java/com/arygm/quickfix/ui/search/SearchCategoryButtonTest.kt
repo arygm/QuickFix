@@ -13,6 +13,7 @@ import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.ExpandableCategoryItem
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock

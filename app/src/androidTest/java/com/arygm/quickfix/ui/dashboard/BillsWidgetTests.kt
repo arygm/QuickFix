@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.BillSneakPeak
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.BillsWidget
 import org.junit.Rule
 import org.junit.Test
 
