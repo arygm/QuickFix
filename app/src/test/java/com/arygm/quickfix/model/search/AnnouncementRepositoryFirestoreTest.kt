@@ -321,7 +321,7 @@ class AnnouncementRepositoryFirestoreTest {
 
   @Test
   fun documentToAnnouncement_validDocument_returnsAnnouncement() {
-    val document = Mockito.mock(DocumentSnapshot::class.java)
+    val document = mock(DocumentSnapshot::class.java)
     whenever(document.id).thenReturn("id1")
     whenever(document.getString("userId")).thenReturn("user1")
     whenever(document.getString("title")).thenReturn("Test Title")
@@ -353,7 +353,7 @@ class AnnouncementRepositoryFirestoreTest {
 
   @Test
   fun documentToAnnouncement_invalidDocument_returnsNull() {
-    val document = Mockito.mock(DocumentSnapshot::class.java)
+    val document = mock(DocumentSnapshot::class.java)
     whenever(document.getString("userId")).thenReturn(null) // Missing required field
 
     val result = invokeDocumentToAnnouncement(document)

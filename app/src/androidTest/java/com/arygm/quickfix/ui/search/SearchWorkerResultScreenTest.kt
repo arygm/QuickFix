@@ -40,8 +40,11 @@ import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.dataFields.Review
+import com.arygm.quickfix.model.quickfix.QuickFixRepositoryFirestore
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchWorkerResult
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,6 +73,8 @@ class SearchWorkerResultScreenTest {
   private lateinit var userViewModel: ProfileViewModel
   private lateinit var preferencesViewModel: PreferencesViewModel
   private lateinit var preferencesRepositoryDataStore: PreferencesRepository
+  private lateinit var quickFixRepositoryFirestore: QuickFixRepositoryFirestore
+  private lateinit var quickFixViewModel: QuickFixViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -83,6 +88,7 @@ class SearchWorkerResultScreenTest {
     workerRepository = mock(WorkerProfileRepositoryFirestore::class.java)
     categoryRepository = mock(CategoryRepositoryFirestore::class.java)
     accountRepository = mock(AccountRepositoryFirestore::class.java)
+    quickFixRepositoryFirestore = mock(QuickFixRepositoryFirestore::class.java)
     userProfileRepositoryFirestore = mock(ProfileRepository::class.java)
     preferencesRepositoryDataStore = mock(PreferencesRepository::class.java)
 
@@ -97,6 +103,7 @@ class SearchWorkerResultScreenTest {
     // Initialize other ViewModels with mocked repositories
     searchViewModel = SearchViewModel(workerRepository)
     accountViewModel = AccountViewModel(accountRepository)
+    quickFixViewModel = QuickFixViewModel(quickFixRepositoryFirestore)
     userViewModel = ProfileViewModel(userProfileRepositoryFirestore)
 
     // Provide test data to SearchViewModel
@@ -156,7 +163,12 @@ class SearchWorkerResultScreenTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
     // Verify that Back and Search icons are present in the top bar
     composeTestRule.onNodeWithContentDescription("Back").assertExists().assertIsDisplayed()
@@ -168,7 +180,12 @@ class SearchWorkerResultScreenTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
     // Set the search query and verify that the title and description match the query
     searchViewModel.setSearchQuery("Construction Carpentry")
@@ -188,7 +205,12 @@ class SearchWorkerResultScreenTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Wait for the UI to settle
@@ -222,7 +244,12 @@ class SearchWorkerResultScreenTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
     // Verify that the filter icon button is displayed and has a click action
     composeTestRule
@@ -237,7 +264,12 @@ class SearchWorkerResultScreenTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
     // Scroll through the LazyColumn and verify each profile result is displayed
     val workerProfilesList = composeTestRule.onNodeWithTag("worker_profiles_list")
@@ -256,7 +288,12 @@ class SearchWorkerResultScreenTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
     // Perform click on the back button and verify goBack() is called
     composeTestRule.onNodeWithContentDescription("Back").performClick()
@@ -268,7 +305,12 @@ class SearchWorkerResultScreenTest {
     // Set up the content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Wait for the UI to settle
@@ -292,7 +334,12 @@ class SearchWorkerResultScreenTest {
     // Set up the content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -313,7 +360,12 @@ class SearchWorkerResultScreenTest {
     // Set up the content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -337,7 +389,12 @@ class SearchWorkerResultScreenTest {
     // Set up the content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -369,7 +426,12 @@ class SearchWorkerResultScreenTest {
     // Set up the content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -400,7 +462,12 @@ class SearchWorkerResultScreenTest {
     // Set up the content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -431,7 +498,12 @@ class SearchWorkerResultScreenTest {
     // Set up the content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -464,7 +536,12 @@ class SearchWorkerResultScreenTest {
     // Set up the content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -490,7 +567,12 @@ class SearchWorkerResultScreenTest {
     // Set up the content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -572,7 +654,12 @@ class SearchWorkerResultScreenTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Initially, all workers should be displayed
@@ -659,7 +746,12 @@ class SearchWorkerResultScreenTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Initially, all workers should be displayed
@@ -746,7 +838,12 @@ class SearchWorkerResultScreenTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Initially, all workers should be displayed
@@ -825,7 +922,12 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -887,7 +989,12 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -949,7 +1056,12 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1013,7 +1125,12 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1035,7 +1152,12 @@ class SearchWorkerResultScreenTest {
     // Set the content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1079,7 +1201,12 @@ class SearchWorkerResultScreenTest {
     // Set the content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1134,7 +1261,12 @@ class SearchWorkerResultScreenTest {
     // Set the content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1167,12 +1299,12 @@ class SearchWorkerResultScreenTest {
         listOf(
             WorkerProfile(
                 uid = "worker1",
-                location = com.arygm.quickfix.model.locations.Location(40.0, -74.0, "Home"),
+                location = Location(40.0, -74.0, "Home"),
                 fieldOfWork = "Painter",
                 rating = 4.5),
             WorkerProfile(
                 uid = "worker2",
-                location = com.arygm.quickfix.model.locations.Location(45.0, -75.0, "Far"),
+                location = Location(45.0, -75.0, "Far"),
                 fieldOfWork = "Electrician",
                 rating = 4.0))
 
@@ -1182,7 +1314,12 @@ class SearchWorkerResultScreenTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Initially, both workers should be displayed
@@ -1234,19 +1371,19 @@ class SearchWorkerResultScreenTest {
                 uid = "worker1",
                 fieldOfWork = "Painter",
                 rating = 4.5,
-                location = com.arygm.quickfix.model.locations.Location(40.0, -74.0, "Home"),
+                location = Location(40.0, -74.0, "Home"),
                 tags = listOf("Interior Painter")),
             WorkerProfile(
                 uid = "worker2",
                 fieldOfWork = "Electrician",
                 rating = 4.0,
-                location = com.arygm.quickfix.model.locations.Location(45.0, -75.0, "Far"),
+                location = Location(45.0, -75.0, "Far"),
                 tags = listOf("Electrician")),
             WorkerProfile(
                 uid = "worker3",
                 fieldOfWork = "Plumber",
                 rating = 3.5,
-                location = com.arygm.quickfix.model.locations.Location(42.0, -74.5, "Work"),
+                location = Location(42.0, -74.5, "Work"),
                 tags = listOf("Plumber")))
 
     searchViewModel._subCategoryWorkerProfiles.value = workers
@@ -1255,7 +1392,12 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -1322,7 +1464,12 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -1400,7 +1547,12 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -1443,7 +1595,12 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -1470,7 +1627,12 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -1516,7 +1678,12 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1600,7 +1767,12 @@ class SearchWorkerResultScreenTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Initially, all workers should be displayed
@@ -1687,12 +1859,12 @@ class SearchWorkerResultScreenTest {
         listOf(
             WorkerProfile(
                 uid = "worker1",
-                location = com.arygm.quickfix.model.locations.Location(40.0, -74.0, "Home"),
+                location = Location(40.0, -74.0, "Home"),
                 fieldOfWork = "Painter",
                 rating = 4.5),
             WorkerProfile(
                 uid = "worker2",
-                location = com.arygm.quickfix.model.locations.Location(45.0, -75.0, "Far"),
+                location = Location(45.0, -75.0, "Far"),
                 fieldOfWork = "Electrician",
                 rating = 4.0))
 
@@ -1702,7 +1874,12 @@ class SearchWorkerResultScreenTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchWorkerResult(
-          navigationActions, searchViewModel, accountViewModel, userViewModel, preferencesViewModel)
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
     }
 
     // Initially, both workers should be displayed

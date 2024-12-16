@@ -18,7 +18,7 @@ import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationRepository
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.ressources.C
-import com.arygm.quickfix.ui.profile.becomeWorker.views.personal.PersonalInfoScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.personal.PersonalInfoScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Assert.assertEquals
@@ -29,7 +29,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 
 @RunWith(AndroidJUnit4::class)
-class PersonalInfoUserNoModeScreenTest() {
+class PersonalInfoUserNoModeScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 

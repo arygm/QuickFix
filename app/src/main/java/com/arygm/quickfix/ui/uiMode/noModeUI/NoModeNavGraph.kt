@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.noModeUI
+package com.arygm.quickfix.ui.uiMode.noModeUI
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -13,14 +13,14 @@ import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
-import com.arygm.quickfix.ui.authentication.GoogleInfoScreen
-import com.arygm.quickfix.ui.authentication.LogInScreen
-import com.arygm.quickfix.ui.authentication.RegisterScreen
-import com.arygm.quickfix.ui.authentication.ResetPasswordScreen
-import com.arygm.quickfix.ui.authentication.WelcomeScreen
 import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
+import com.arygm.quickfix.ui.uiMode.noModeUI.authentication.GoogleInfoScreen
+import com.arygm.quickfix.ui.uiMode.noModeUI.authentication.LogInScreen
+import com.arygm.quickfix.ui.uiMode.noModeUI.authentication.RegisterScreen
+import com.arygm.quickfix.ui.uiMode.noModeUI.authentication.ResetPasswordScreen
+import com.arygm.quickfix.ui.uiMode.noModeUI.authentication.WelcomeScreen
+import com.arygm.quickfix.ui.uiMode.noModeUI.navigation.NoModeRoute
 
 @Composable
 fun NoModeNavHost(

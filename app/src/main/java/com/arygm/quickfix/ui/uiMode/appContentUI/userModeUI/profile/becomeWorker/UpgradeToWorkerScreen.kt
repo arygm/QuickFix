@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.profile.becomeWorker
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker
 
 import android.graphics.Bitmap
 import android.util.Log
@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,10 +47,10 @@ import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.profile.becomeWorker.views.personal.PersonalInfoScreen
-import com.arygm.quickfix.ui.profile.becomeWorker.views.professional.ProfessionalInfoScreen
-import com.arygm.quickfix.ui.profile.becomeWorker.views.welcome.WelcomeOnBoardScreen
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.personal.PersonalInfoScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.professional.ProfessionalInfoScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.welcome.WelcomeOnBoardScreen
 import com.arygm.quickfix.utils.loadBirthDate
 import com.arygm.quickfix.utils.loadEmail
 import com.arygm.quickfix.utils.loadFirstName
@@ -186,7 +186,7 @@ fun BusinessScreen(
                   onClick = { navigationActions.goBack() },
                   modifier = Modifier.testTag("goBackButton")) {
                     Icon(
-                        Icons.Outlined.ArrowBack,
+                        Icons.AutoMirrored.Outlined.ArrowBack,
                         contentDescription = "Back",
                         tint = colorScheme.primary)
                   }

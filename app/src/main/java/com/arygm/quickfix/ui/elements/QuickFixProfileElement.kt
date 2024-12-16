@@ -67,8 +67,8 @@ import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerRoute
-import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.utils.clearPreferences
 import com.arygm.quickfix.utils.clearUserProfilePreferences
 import com.arygm.quickfix.utils.setAppMode

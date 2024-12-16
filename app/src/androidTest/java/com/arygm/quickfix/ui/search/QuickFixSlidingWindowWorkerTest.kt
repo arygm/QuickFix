@@ -1,12 +1,12 @@
 package com.arygm.quickfix.ui.search
 
-import QuickFixSlidingWindowWorker
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.R
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.QuickFixSlidingWindowWorker
 import org.junit.Rule
 import org.junit.Test
 
