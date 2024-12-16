@@ -47,7 +47,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun DashboardScreen(
     navigationActions: NavigationActions,
-    profileViewModel: ProfileViewModel,
+    userViewModel: ProfileViewModel,
+    workerViewModel: ProfileViewModel,
     accountViewModel: AccountViewModel,
     quickFixViewModel: QuickFixViewModel,
     chatViewModel: ChatViewModel,
@@ -61,7 +62,7 @@ fun DashboardScreen(
   LaunchedEffect(Unit) {
     mode = loadAppMode(preferencesViewModel)
     uid = loadUserId(preferencesViewModel)
-    profileViewModel.fetchUserProfile(uid) { profile ->
+    userViewModel.fetchUserProfile(uid) { profile ->
       if (profile != null) {
         Log.d("DashboardScreen", "profile quickfixes: ${profile.quickFixes}")
       }
@@ -105,9 +106,13 @@ fun DashboardScreen(
 
   var quickFixFilterButtons by remember {
     mutableStateOf(
-        Status.entries.map { status ->
-          QuickFixFilterButtons(status.name, status == Status.UPCOMING, {})
-        })
+        listOf(QuickFixFilterButtons("All", true, {})) +
+            Status.entries
+                .filter { it != Status.FINISHED }
+                .map { status ->
+                  QuickFixFilterButtons(
+                      status.name.lowercase().replaceFirstChar { it.uppercase() }, false, {})
+                })
   }
 
   Scaffold(
@@ -136,6 +141,7 @@ fun DashboardScreen(
 
                   LazyRow(
                       horizontalArrangement = Arrangement.spacedBy(4.dp),
+                      modifier = Modifier.testTag("QuickFixFilterButtons"),
                   ) {
                     items(quickFixFilterButtons.size) { index ->
                       QuickFixButton(
@@ -165,43 +171,69 @@ fun DashboardScreen(
                   }
                   val buttonTitle = quickFixFilterButtons.firstOrNull { it.isSelected }?.title
                   when (buttonTitle) {
-                    "Upcoming" ->
+                    "Pending" ->
                         QuickFixesWidget(
-                            status = "Upcoming",
-                            quickFixList = quickFixes,
+                            status = "Pending",
+                            quickFixList = quickFixes.filter { it.status == Status.PENDING },
                             onShowAllClick = { /* Handle Show All Click */},
                             onItemClick = { /* Handle QuickFix Item Click */},
                             modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                             itemsToShowDefault = 3,
+                            workerViewModel = workerViewModel,
                         )
-                    "Canceled" -> {
-                      QuickFixesWidget(
-                          status = "Canceled",
-                          quickFixList = quickFixes,
-                          onShowAllClick = { /* Handle Show All Click */},
-                          onItemClick = { /* Handle QuickFix Item Click */},
-                          modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
-                          itemsToShowDefault = 3,
-                      )
-                    }
                     "Unpaid" -> {
                       QuickFixesWidget(
                           status = "Unpaid",
-                          quickFixList = quickFixes,
+                          quickFixList = quickFixes.filter { it.status == Status.UNPAID },
                           onShowAllClick = { /* Handle Show All Click */},
                           onItemClick = { /* Handle QuickFix Item Click */},
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
+                          workerViewModel = workerViewModel,
                       )
                     }
-                    "Finished" -> {
+                    "Paid" -> {
                       QuickFixesWidget(
-                          status = "Finished",
-                          quickFixList = quickFixes,
+                          status = "Paid",
+                          quickFixList = quickFixes.filter { it.status == Status.PAID },
                           onShowAllClick = { /* Handle Show All Click */},
                           onItemClick = { /* Handle QuickFix Item Click */},
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
+                          workerViewModel = workerViewModel,
+                      )
+                    }
+                    "Upcoming" -> {
+                      QuickFixesWidget(
+                          status = "Upcoming",
+                          quickFixList = quickFixes.filter { it.status == Status.UPCOMING },
+                          onShowAllClick = { /* Handle Show All Click */},
+                          onItemClick = { /* Handle QuickFix Item Click */},
+                          modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
+                          itemsToShowDefault = 3,
+                          workerViewModel = workerViewModel,
+                      )
+                    }
+                    "Completed" -> {
+                      QuickFixesWidget(
+                          status = "Completed",
+                          quickFixList = quickFixes.filter { it.status == Status.COMPLETED },
+                          onShowAllClick = { /* Handle Show All Click */},
+                          onItemClick = { /* Handle QuickFix Item Click */},
+                          modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
+                          itemsToShowDefault = 3,
+                          workerViewModel = workerViewModel,
+                      )
+                    }
+                    "Canceled" -> {
+                      QuickFixesWidget(
+                          status = "Canceled",
+                          quickFixList = quickFixes.filter { it.status == Status.CANCELED },
+                          onShowAllClick = { /* Handle Show All Click */},
+                          onItemClick = { /* Handle QuickFix Item Click */},
+                          modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
+                          itemsToShowDefault = 3,
+                          workerViewModel = workerViewModel,
                       )
                     }
                     "All" -> {
@@ -211,6 +243,7 @@ fun DashboardScreen(
                           onItemClick = { /* Handle QuickFix Item Click */},
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
+                          workerViewModel = workerViewModel,
                       )
                     }
                   }

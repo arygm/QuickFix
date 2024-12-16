@@ -142,6 +142,7 @@ fun UserModeNavHost(
                     onScreenChange = { currentScreen = it },
                     preferencesViewModel,
                     userViewModel,
+                    workerViewModel,
                     quickFixViewModel) // , loggedInAccountViewModel, chatViewModel)
               }
 
@@ -164,6 +165,7 @@ fun UserModeNavHost(
                 DashBoardNavHost(
                     onScreenChange = { currentScreen = it },
                     userViewModel,
+                    workerViewModel,
                     accountViewModel,
                     quickFixViewModel,
                     chatViewModel,
@@ -196,6 +198,7 @@ fun HomeNavHost(
     onScreenChange: (String) -> Unit = {},
     preferencesViewModel: PreferencesViewModel,
     userViewModel: ProfileViewModel,
+    workerViewModel: ProfileViewModel,
     quickFixViewModel: QuickFixViewModel
 ) {
   val homeNavController = rememberNavController()
@@ -210,7 +213,12 @@ fun HomeNavHost(
       route = UserRoute.HOME,
   ) {
     composable(UserScreen.HOME) {
-      HomeScreen(navigationActions, preferencesViewModel, userViewModel, quickFixViewModel)
+      HomeScreen(
+          navigationActions,
+          preferencesViewModel,
+          userViewModel,
+          workerViewModel,
+          quickFixViewModel)
     }
     // Add MessageScreen as a nested composable within Home
     composable(UserScreen.MESSAGES) {
@@ -277,7 +285,8 @@ fun ProfileNavHost(
 @Composable
 fun DashBoardNavHost(
     onScreenChange: (String) -> Unit,
-    profileViewModel: ProfileViewModel,
+    userViewModel: ProfileViewModel,
+    workerViewModel: ProfileViewModel,
     accountViewModel: AccountViewModel,
     quickFixViewModel: QuickFixViewModel,
     chatViewModel: ChatViewModel,
@@ -292,7 +301,8 @@ fun DashBoardNavHost(
     composable(UserScreen.DASHBOARD) {
       DashboardScreen(
           navigationActions,
-          profileViewModel,
+          userViewModel,
+          workerViewModel,
           accountViewModel,
           quickFixViewModel,
           chatViewModel,

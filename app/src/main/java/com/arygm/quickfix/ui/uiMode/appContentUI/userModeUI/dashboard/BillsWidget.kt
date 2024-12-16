@@ -99,11 +99,12 @@ fun BillsWidget(
               .map { it to it.bill }
               .take(itemsToShow.size)
               .forEachIndexed { index, (quickFix, bill) ->
-                BillItem(
-                    billField = bill[index],
-                    onClick = { onItemClick(bill[index]) },
-                    quickFix = quickFix)
-
+                if (bill.isNotEmpty()) {
+                  BillItem(
+                      billField = bill[index],
+                      onClick = { onItemClick(bill[index]) },
+                      quickFix = quickFix)
+                }
                 // Divider between items
                 if (index < itemsToShow.size - 1) {
                   HorizontalDivider(
@@ -153,15 +154,9 @@ fun BillItem(billField: BillField, onClick: () -> Unit, quickFix: QuickFix) {
           // Date text on a separate line
           Text(
               text =
-                  quickFix.date
-                      .forEachIndexed { index, timestamp ->
-                        if (index < quickFix.date.size - 1) {
-                          "${formatter.format(timestamp)} - "
-                        } else {
-                          formatter.format(timestamp)
-                        }
-                      }
-                      .toString(),
+                  quickFix.date.joinToString(" - ") { timestamp ->
+                    formatter.format(timestamp.toDate())
+                  },
               modifier = Modifier.testTag(quickFix.date.toString()), // Added testTag
               style = poppinsTypography.bodyMedium,
               fontSize = 15.sp,

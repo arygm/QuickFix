@@ -65,7 +65,8 @@ import com.arygm.quickfix.utils.loadUserId
 fun HomeScreen(
     navigationActions: NavigationActions,
     preferencesViewModel: PreferencesViewModel,
-    profileViewModel: ProfileViewModel,
+    userViewModel: ProfileViewModel,
+    workerViewModel: ProfileViewModel,
     quickFixViewModel: QuickFixViewModel
 ) {
   val focusManager = LocalFocusManager.current
@@ -82,7 +83,7 @@ fun HomeScreen(
   LaunchedEffect(Unit) {
     mode = loadAppMode(preferencesViewModel)
     uid = loadUserId(preferencesViewModel)
-    profileViewModel.fetchUserProfile(uid) { profile ->
+    userViewModel.fetchUserProfile(uid) { profile ->
       profile?.quickFixes?.forEach { quickFix ->
         quickFixViewModel.fetchQuickFix(quickFix) {
           if (it != null) {
@@ -206,7 +207,9 @@ fun HomeScreen(
                         quickFixList = quickFixes,
                         onShowAllClick = { /* Handle Show All Click */},
                         onItemClick = { /* Handle QuickFix Item Click */},
-                        modifier = Modifier.testTag("UpcomingQuickFixes"))
+                        modifier = Modifier.testTag("UpcomingQuickFixes"),
+                        workerViewModel = workerViewModel,
+                    )
                   }
             }
       })

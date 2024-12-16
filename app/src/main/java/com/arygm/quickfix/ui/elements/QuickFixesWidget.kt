@@ -39,6 +39,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import java.text.SimpleDateFormat
@@ -50,6 +52,7 @@ fun QuickFixesWidget(
     quickFixList: List<QuickFix>,
     onShowAllClick: () -> Unit,
     onItemClick: (QuickFix) -> Unit,
+    workerViewModel: ProfileViewModel,
     modifier: Modifier = Modifier,
     itemsToShowDefault: Int = 3
 ) {
@@ -101,7 +104,7 @@ fun QuickFixesWidget(
 
           val itemsToShow = if (showAll) quickFixList else quickFixList.take(itemsToShowDefault)
           quickFixList.take(itemsToShow.size).forEachIndexed { index, quickFix ->
-            QuickFixItem(quickFix = quickFix, onClick = { onItemClick(quickFix) })
+            QuickFixItem(quickFix = quickFix, onClick = { onItemClick(quickFix) }, workerViewModel)
             // Divider between items
             if (index < itemsToShow.size - 1) {
               HorizontalDivider(
@@ -115,8 +118,12 @@ fun QuickFixesWidget(
 }
 
 @Composable
-fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
+fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit, workerViewModel: ProfileViewModel) {
   val formatter = SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault())
+  var workerName by remember { mutableStateOf("") }
+  workerViewModel.fetchUserProfile(quickFix.workerId) { profile ->
+    workerName = (profile as WorkerProfile).displayName
+  }
   Row(
       modifier =
           Modifier.fillMaxWidth()
@@ -140,7 +147,7 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
           // Row for name and task description on the same line
           Row(verticalAlignment = Alignment.Bottom) {
             Text(
-                text = quickFix.title,
+                text = workerName,
                 modifier = Modifier.testTag(quickFix.title), // Added testTag
                 style = poppinsTypography.bodyMedium,
                 fontSize = 15.sp,
@@ -150,8 +157,8 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
                 overflow = TextOverflow.Ellipsis)
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = quickFix.description, // Removed leading comma for clarity
-                modifier = Modifier.testTag(quickFix.description), // Added testTag
+                text = quickFix.title, // Removed leading comma for clarity
+                modifier = Modifier.testTag(quickFix.title), // Added testTag
                 style = poppinsTypography.bodyMedium,
                 fontSize = 15.sp,
                 color = colorScheme.onBackground.copy(alpha = 0.7f),
@@ -162,15 +169,9 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
           // Date text on a separate line
           Text(
               text =
-                  quickFix.date
-                      .forEachIndexed { index, timestamp ->
-                        if (index < quickFix.date.size - 1) {
-                          "${formatter.format(timestamp)} - "
-                        } else {
-                          formatter.format(timestamp)
-                        }
-                      }
-                      .toString(),
+                  quickFix.date.joinToString(" - ") { timestamp ->
+                    formatter.format(timestamp.toDate())
+                  },
               modifier = Modifier.testTag(quickFix.date.toString()), // Added testTag
               style = poppinsTypography.bodyMedium,
               fontSize = 15.sp,
