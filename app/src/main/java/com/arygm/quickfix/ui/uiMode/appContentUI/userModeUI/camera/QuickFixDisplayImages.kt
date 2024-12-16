@@ -43,7 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
@@ -265,7 +264,7 @@ fun QuickFixDisplayImages(
                         contentDescription = null,
                         tint =
                             if (selectedImages.contains(imagePair)) colorScheme.primary
-                            else Color.Gray,
+                            else colorScheme.onSurface,
                         modifier =
                             Modifier.size(24.dp)
                                 .align(Alignment.TopStart)

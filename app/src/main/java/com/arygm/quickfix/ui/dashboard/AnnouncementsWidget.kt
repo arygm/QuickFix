@@ -19,7 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -75,7 +75,7 @@ fun AnnouncementsWidget(
                 .fillMaxWidth()
                 .padding(horizontalSpacing)
                 .shadow(5.dp, RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+                .background(colorScheme.surface, RoundedCornerShape(12.dp))
                 .testTag("AnnouncementsWidget")) {
           // Header with Show All button
           Row(
@@ -84,7 +84,7 @@ fun AnnouncementsWidget(
               verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "Announcements",
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = colorScheme.onBackground,
                     style = poppinsTypography.headlineMedium,
                     fontSize = 19.sp,
                     modifier = Modifier.testTag("AnnouncementsTitle"))
@@ -93,14 +93,14 @@ fun AnnouncementsWidget(
                     modifier = Modifier.testTag("ShowAllButton")) {
                       Text(
                           text = if (showAll) "Show Less" else "Show All",
-                          color = MaterialTheme.colorScheme.onSurface,
-                          style = MaterialTheme.typography.bodyMedium,
+                          color = colorScheme.onSurface,
+                          style = poppinsTypography.bodyMedium,
                           fontWeight = FontWeight.SemiBold)
                     }
               }
 
           Divider(
-              color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+              color = colorScheme.onSurface.copy(alpha = 0.2f),
               thickness = 1.dp,
               modifier = Modifier.testTag("AnnouncementsDivider"))
 
@@ -130,7 +130,7 @@ fun AnnouncementsWidget(
 
             if (index < itemsToShow.size - 1) {
               Divider(
-                  color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                  color = colorScheme.onSurface.copy(alpha = 0.2f),
                   thickness = 1.dp,
                   modifier = Modifier.testTag("AnnouncementDivider_$index"))
             }
@@ -163,7 +163,7 @@ fun AnnouncementItem(
               modifier =
                   Modifier.size(40.dp)
                       .clip(RoundedCornerShape(8.dp))
-                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                      .background(colorScheme.onSurface.copy(alpha = 0.1f))
                       .testTag("AnnouncementImage_${announcement.announcementId}"))
         } else {
           Image(
@@ -173,7 +173,7 @@ fun AnnouncementItem(
               modifier =
                   Modifier.size(40.dp)
                       .clip(RoundedCornerShape(8.dp))
-                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                      .background(colorScheme.onSurface.copy(alpha = 0.1f))
                       .testTag("PlaceholderImage_${announcement.announcementId}"))
         }
 
@@ -190,7 +190,7 @@ fun AnnouncementItem(
                 Text(
                     text = announcement.title,
                     style = poppinsTypography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = colorScheme.onBackground,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -201,7 +201,7 @@ fun AnnouncementItem(
                 Icon(
                     imageVector = categoryIcon,
                     contentDescription = "Category Icon",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = colorScheme.primary,
                     modifier = Modifier.testTag("CategoryIcon_${announcement.announcementId}"))
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -213,14 +213,14 @@ fun AnnouncementItem(
                       Icon(
                           imageVector = Icons.Default.LocationOn,
                           contentDescription = "Location",
-                          tint = MaterialTheme.colorScheme.onSurface,
+                          tint = colorScheme.onSurface,
                           modifier =
                               Modifier.size(16.dp)
                                   .testTag("LocationIcon_${announcement.announcementId}"))
                       Text(
                           text = announcement.location?.name ?: "Unknown",
                           fontSize = 9.sp,
-                          color = MaterialTheme.colorScheme.onSurface,
+                          color = colorScheme.onSurface,
                           modifier =
                               Modifier.padding(start = 2.dp)
                                   .testTag("LocationText_${announcement.announcementId}"),
@@ -236,7 +236,7 @@ fun AnnouncementItem(
               text = announcement.description,
               style = poppinsTypography.bodyMedium.copy(fontSize = 12.sp),
               fontWeight = FontWeight.Normal,
-              color = MaterialTheme.colorScheme.onSurface,
+              color = colorScheme.onSurface,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
               modifier = Modifier.testTag("AnnouncementDescription_${announcement.announcementId}"))

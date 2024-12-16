@@ -74,10 +74,7 @@ open class AnnouncementViewModel(
         onSuccess = { allAnnouncements ->
           announcements_.value = allAnnouncements // Update all announcements
         },
-        onFailure = { e ->
-          Log.d("AnnouncementsRepositoryFirestore", "init failed")
-          Log.e("Failed to fetch all announcements", e.toString())
-        })
+        onFailure = { e -> Log.e("Failed to fetch all announcements", e.toString()) })
   }
 
   /** Gets all announcements documents for a certain user. */
@@ -86,7 +83,6 @@ open class AnnouncementViewModel(
         announcements = announcementIds,
         onSuccess = { announcements ->
           announcementsForUser_.value = announcements
-          Log.d("AnnouncementViewModel", "Fetched announcements: ${announcements.size}")
 
           // Fetch images for each announcement
           announcements.forEach { announcement ->
@@ -115,9 +111,7 @@ open class AnnouncementViewModel(
                 if (profile is UserProfile) {
                   // Step 3: Use the profile's announcements field to fetch announcements
                   val announcementIds = profile.announcements
-                  if (announcementIds.isEmpty()) {
-                    Log.d("AnnouncementViewModel", "No announcements found for user")
-                  } else {
+                  if (announcementIds.isNotEmpty()) {
                     getAnnouncementsForUser(announcementIds)
                   }
                 } else {
@@ -160,7 +154,6 @@ open class AnnouncementViewModel(
       onSuccess: (List<String>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    Log.d("UploadingImages", "$images.size")
     announcementRepository.uploadAnnouncementImages(
         announcementId = announcementId,
         images = images,
@@ -177,7 +170,6 @@ open class AnnouncementViewModel(
     announcementRepository.fetchAnnouncementsImagesAsBitmaps(
         announcementId = announcementId,
         onSuccess = { bitmaps ->
-          Log.d("Announcement", "Fetched ${bitmaps.size} images for $announcementId")
           // Update the map with the new images
           announcementImagesMap_.value =
               announcementImagesMap_.value.toMutableMap().apply { this[announcementId] = bitmaps }

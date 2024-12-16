@@ -52,10 +52,8 @@ class AnnouncementRepositoryFirestore(
       onSuccess: (List<Announcement>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    Log.d("AnnouncementsRepositoryFirestore", "getAnnouncements for IDs: $announcements")
 
     if (announcements.isEmpty()) {
-      Log.d("AnnouncementsRepositoryFirestore", "No announcement IDs provided")
       onSuccess(emptyList())
       return
     }
@@ -68,7 +66,6 @@ class AnnouncementRepositoryFirestore(
           if (task.isSuccessful) {
             val fetchedAnnouncements =
                 task.result?.mapNotNull { document ->
-                  Log.d("Mapping", "Trying to map announcement with ID: ${document.id}")
                   documentToAnnouncement(document) // Convert document to Announcement object
                 } ?: emptyList()
             onSuccess(fetchedAnnouncements)
@@ -87,7 +84,6 @@ class AnnouncementRepositoryFirestore(
       onFailure: (Exception) -> Unit
   ) {
     val announcementId = announcement.announcementId
-    announcement.quickFixImages.forEach { uri -> Log.d("UploadingImages", uri) }
     val announcementDocRef = db.collection(collectionPath).document(announcementId)
     performFirestoreOperation(announcementDocRef.set(announcement), onSuccess, onFailure)
   }
