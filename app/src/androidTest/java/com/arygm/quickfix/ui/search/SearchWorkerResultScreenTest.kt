@@ -97,7 +97,7 @@ class SearchWorkerResultScreenTest {
     preferencesViewModel = PreferencesViewModel(preferencesRepositoryDataStore)
 
     // Initialize other ViewModels with mocked repositories
-    searchViewModel = SearchViewModel(workerRepository)
+    searchViewModel = SearchViewModel(workerRepository, accountRepository)
     accountViewModel = AccountViewModel(accountRepository)
     userViewModel = ProfileViewModel(userProfileRepositoryFirestore)
 

@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -31,6 +32,7 @@ class QuickFixFinderUserNoModeScreenTest {
   private lateinit var navigationActionsRoot: NavigationActions
   private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
   private lateinit var categoryRepo: CategoryRepositoryFirestore
+    private lateinit var accountRepositoryFirestore: AccountRepositoryFirestore
   private lateinit var searchViewModel: SearchViewModel
 
   @Before
@@ -40,7 +42,8 @@ class QuickFixFinderUserNoModeScreenTest {
     navigationActionsRoot = mock(NavigationActions::class.java)
     workerProfileRepo = mockk(relaxed = true)
     categoryRepo = mockk(relaxed = true)
-    searchViewModel = SearchViewModel(workerProfileRepo)
+      accountRepositoryFirestore = mock(AccountRepositoryFirestore::class.java)
+    searchViewModel = SearchViewModel(workerProfileRepo, accountRepositoryFirestore)
   }
 
   @OptIn(ExperimentalTestApi::class)

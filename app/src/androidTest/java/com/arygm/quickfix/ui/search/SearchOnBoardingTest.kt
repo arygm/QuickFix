@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.text.AnnotatedString
+import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.category.CategoryViewModel
@@ -29,6 +30,7 @@ class SearchOnBoardingTest {
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
+    private lateinit var accountRepositoryFirestore: AccountRepositoryFirestore
   private lateinit var categoryRepo: CategoryRepositoryFirestore
   private lateinit var searchViewModel: SearchViewModel
   private lateinit var accountViewModel: AccountViewModel
@@ -43,7 +45,8 @@ class SearchOnBoardingTest {
     navigationActionsRoot = mock(NavigationActions::class.java)
     workerProfileRepo = mockk(relaxed = true)
     categoryRepo = mockk(relaxed = true)
-    searchViewModel = SearchViewModel(workerProfileRepo)
+      accountRepositoryFirestore = mock(AccountRepositoryFirestore::class.java)
+    searchViewModel = SearchViewModel(workerProfileRepo, accountRepositoryFirestore)
     categoryViewModel = CategoryViewModel(categoryRepo)
     accountViewModel = mockk(relaxed = true)
   }
