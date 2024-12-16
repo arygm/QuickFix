@@ -16,8 +16,8 @@ import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFixRepository
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
-import com.arygm.quickfix.ui.home.HomeScreen
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.HomeScreen
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.profile.becomeWorker.views.welcome
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.welcome
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -36,7 +36,7 @@ import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 
 @Composable
 fun WelcomeOnBoardScreen(

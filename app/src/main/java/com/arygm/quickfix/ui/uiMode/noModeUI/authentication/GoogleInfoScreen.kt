@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.authentication
+package com.arygm.quickfix.ui.uiMode.noModeUI.authentication
 
 import QuickFixTextField
 import android.annotation.SuppressLint
@@ -53,7 +53,7 @@ import com.arygm.quickfix.ui.elements.QuickFixAnimatedBox
 import com.arygm.quickfix.ui.elements.QuickFixBackButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
-import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
+import com.arygm.quickfix.ui.uiMode.noModeUI.navigation.NoModeRoute
 import com.arygm.quickfix.utils.ANIMATED_BOX_ROTATION
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.loadEmail

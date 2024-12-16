@@ -3,13 +3,20 @@ package com.arygm.quickfix.model.quickfix
 import com.arygm.quickfix.model.bill.BillField
 import com.arygm.quickfix.model.bill.Units
 import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.google.firebase.Timestamp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -53,8 +60,12 @@ class QuickFixViewModelTest {
           bill = listOf(testBillField),
           location = testLocation)
 
+  private val testDispatcher = StandardTestDispatcher()
+
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Before
   fun setUp() {
+    Dispatchers.setMain(testDispatcher)
     quickFixRepository = mock()
     quickFixViewModel = QuickFixViewModel(quickFixRepository)
 
@@ -66,6 +77,12 @@ class QuickFixViewModelTest {
 
     // Simulate repository calling the init callback
     initCaptor.firstValue.invoke()
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @After
+  fun tearDown() {
+    Dispatchers.resetMain()
   }
 
   @Test
@@ -321,5 +338,34 @@ class QuickFixViewModelTest {
     val onResultMock = mock<(QuickFix?) -> Unit>()
     quickFixViewModel.fetchQuickFix(uid, onResultMock)
     verify(quickFixRepository).getQuickFixById(eq(uid), any(), any())
+  }
+
+  @Test
+  fun setQuickFixes_updatesQuickFixesStateFlow() = runTest {
+    val quickFixesList = listOf(testQuickFix)
+    quickFixViewModel.setQuickFixes(quickFixesList)
+
+    val result = quickFixViewModel.quickFixes.first()
+    assertThat(result, `is`(quickFixesList))
+  }
+
+  @Test
+  fun setSelectedWorkerProfile_updatesSelectedWorkerProfileStateFlow() = runTest {
+    val workerProfile = WorkerProfile(uid = "worker1", displayName = "John Doe")
+    quickFixViewModel.setSelectedWorkerProfile(workerProfile)
+
+    val result = quickFixViewModel.selectedWorkerProfile.first()
+    assertThat(result, `is`(workerProfile))
+  }
+
+  @Test
+  fun setUpdateQuickFix_updatesCurrentQuickFixStateFlow() = runTest {
+    val updatedQuickFix = testQuickFix.copy(title = "Updated Title")
+    quickFixViewModel.setUpdateQuickFix(updatedQuickFix)
+
+    testDispatcher.scheduler.advanceUntilIdle() // Ensure all coroutines have completed
+
+    val result = quickFixViewModel.currentQuickFix.first()
+    assertThat(result, `is`(updatedQuickFix))
   }
 }

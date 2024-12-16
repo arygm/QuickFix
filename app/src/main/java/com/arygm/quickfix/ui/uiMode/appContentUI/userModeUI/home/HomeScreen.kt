@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.home
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -56,7 +56,7 @@ import com.arygm.quickfix.ui.elements.QuickFixesWidget
 import com.arygm.quickfix.ui.elements.Service
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.utils.loadAppMode
 import com.arygm.quickfix.utils.loadUserId
 
@@ -153,10 +153,10 @@ fun HomeScreen(
                     placeHolderText = "Find your perfect fix with QuickFix",
                     shape = CircleShape,
                     textStyle = poppinsTypography.bodyMedium,
-                    textColor = MaterialTheme.colorScheme.onBackground,
-                    placeHolderColor = MaterialTheme.colorScheme.onBackground,
-                    leadIconColor = MaterialTheme.colorScheme.onBackground,
-                    trailIconColor = MaterialTheme.colorScheme.onBackground,
+                    textColor = colorScheme.onBackground,
+                    placeHolderColor = colorScheme.onBackground,
+                    leadIconColor = colorScheme.onBackground,
+                    trailIconColor = colorScheme.onBackground,
                     widthField = 330.dp, // unchanged width
                     heightField = 40.dp, // unchanged height
                     onValueChange = {},
@@ -170,13 +170,13 @@ fun HomeScreen(
                     modifier =
                         Modifier.size(40.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surface)
+                            .background(colorScheme.surface)
                             .padding(8.dp)
                             .testTag(C.Tag.notification)) {
                       Icon(
                           painter = painterResource(id = R.drawable.bell),
                           contentDescription = "notifications",
-                          tint = MaterialTheme.colorScheme.primary)
+                          tint = colorScheme.primary)
                     }
               }
 

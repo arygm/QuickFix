@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.R
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchWorkerProfileResult
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

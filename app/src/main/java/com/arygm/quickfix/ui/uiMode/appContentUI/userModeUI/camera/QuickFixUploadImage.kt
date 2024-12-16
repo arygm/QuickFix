@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.camera
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera
 
 import android.Manifest
 import android.graphics.Bitmap
@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -125,10 +125,10 @@ fun QuickFixUploadImageSheet(
                     style = MaterialTheme.typography.headlineLarge,
                     color = colorScheme.onBackground,
                     modifier = Modifier.testTag("picturesText"))
-                Divider(
-                    color = colorScheme.onSecondaryContainer,
+                HorizontalDivider(
+                    modifier = Modifier.testTag("divider"),
                     thickness = 1.dp,
-                    modifier = Modifier.testTag("divider"))
+                    color = colorScheme.onSecondaryContainer)
 
                 // Option to take a photo
                 Row(
@@ -163,7 +163,7 @@ fun QuickFixUploadImageSheet(
                                   .testTag("cameraText"))
                     }
 
-                Divider(color = colorScheme.onSecondaryContainer, thickness = 1.dp)
+                HorizontalDivider(thickness = 1.dp, color = colorScheme.onSecondaryContainer)
 
                 // Option to choose from library
                 Row(
@@ -190,7 +190,7 @@ fun QuickFixUploadImageSheet(
                                   .testTag("libraryText"))
                     }
 
-                Divider(color = colorScheme.onSecondaryContainer, thickness = 1.dp)
+                HorizontalDivider(thickness = 1.dp, color = colorScheme.onSecondaryContainer)
               }
         }
   }
