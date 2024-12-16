@@ -12,6 +12,8 @@ import androidx.compose.ui.test.performScrollToIndex
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
+import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.messaging.ChatRepository
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepositoryDataStore
@@ -20,6 +22,8 @@ import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFixRepository
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
+import com.arygm.quickfix.model.search.AnnouncementRepository
+import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.DashboardScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
@@ -31,7 +35,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.whenever
 
-class DashboardUserNoModeScreenTest {
+class DashboardScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   // Class-level MutableStateFlows for userId and appMode
@@ -50,6 +54,10 @@ class DashboardUserNoModeScreenTest {
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var accountRepository: AccountRepository
   private lateinit var accountViewModel: AccountViewModel
+  private lateinit var announcementRepository: AnnouncementRepository
+  private lateinit var announcementViewModel: AnnouncementViewModel
+  private lateinit var categoryRepositoryFirestore: CategoryRepositoryFirestore
+  private lateinit var categoryViewModel: CategoryViewModel
 
   @Before
   fun setup() {
@@ -67,6 +75,12 @@ class DashboardUserNoModeScreenTest {
     chatViewModel = ChatViewModel(chatViewRepository)
     accountRepository = mock(AccountRepository::class.java)
     accountViewModel = AccountViewModel(accountRepository)
+    announcementRepository = mock(AnnouncementRepository::class.java)
+    announcementViewModel =
+        AnnouncementViewModel(
+            announcementRepository, preferencesRepositoryDataStore, profileRepository)
+    categoryRepositoryFirestore = mock(CategoryRepositoryFirestore::class.java)
+    categoryViewModel = CategoryViewModel(categoryRepositoryFirestore)
 
     // Mock getPreferenceByKey for user_id
     val userIdKey = stringPreferencesKey("user_id")
@@ -83,7 +97,9 @@ class DashboardUserNoModeScreenTest {
           accountViewModel,
           quickFixViewModel,
           chatViewModel,
-          preferencesViewModel)
+          preferencesViewModel,
+          announcementViewModel,
+          categoryViewModel)
     }
   }
 
@@ -108,12 +124,28 @@ class DashboardUserNoModeScreenTest {
   @Test
   fun quickFixFilterButtonsToggleCorrectly() {
     // Verify that clicking "Pending" selects it and deselects "All"
-    composeTestRule.onNodeWithText("Pending").performClick()
-    composeTestRule.onNodeWithText("Pending").assertHasClickAction()
-    composeTestRule.onNodeWithText("Pending").assertExists()
-
+    composeTestRule.onNodeWithText("All").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Pending").assertIsDisplayed().performClick()
     composeTestRule.onNodeWithText("All").assertHasClickAction().assertIsNotFocused()
     composeTestRule.onNodeWithText("All").assertExists()
+    composeTestRule.onNodeWithText("Unpaid").assertIsDisplayed().performClick()
+    composeTestRule.onNodeWithText("Pending").assertHasClickAction().assertIsNotFocused()
+    composeTestRule.onNodeWithText("Pending").assertExists()
+    composeTestRule.onNodeWithText("Paid").assertIsDisplayed().performClick()
+    composeTestRule.onNodeWithText("Unpaid").assertHasClickAction().assertIsNotFocused()
+    composeTestRule.onNodeWithText("Unpaid").assertExists()
+    composeTestRule.onNodeWithTag("QuickFixFilterButtons").performScrollToIndex(4)
+    composeTestRule.onNodeWithText("Upcoming").assertIsDisplayed().performClick()
+    composeTestRule.onNodeWithText("Paid").assertHasClickAction().assertIsNotFocused()
+    composeTestRule.onNodeWithText("Paid").assertExists()
+    composeTestRule.onNodeWithTag("QuickFixFilterButtons").performScrollToIndex(5)
+    composeTestRule.onNodeWithText("Completed").assertIsDisplayed().performClick()
+    composeTestRule.onNodeWithText("Upcoming").assertHasClickAction().assertIsNotFocused()
+    composeTestRule.onNodeWithText("Upcoming").assertExists()
+    composeTestRule.onNodeWithTag("QuickFixFilterButtons").performScrollToIndex(6)
+    composeTestRule.onNodeWithText("Canceled").assertIsDisplayed().performClick()
+    composeTestRule.onNodeWithText("Completed").assertHasClickAction().assertIsNotFocused()
+    composeTestRule.onNodeWithText("Completed").assertExists()
   }
 
   @Test
@@ -136,5 +168,11 @@ class DashboardUserNoModeScreenTest {
   fun billsWidgetDisplaysCorrectly() {
     // Verify that the BillsWidget is displayed
     composeTestRule.onNodeWithTag("BillsWidget").assertIsDisplayed()
+  }
+
+  @Test
+  fun announcementsWidgetDisplaysCorrectly() {
+    // Verify that the AnnouncementsWidget is displayed
+    composeTestRule.onNodeWithTag("AnnouncementsWidget").assertIsDisplayed()
   }
 }

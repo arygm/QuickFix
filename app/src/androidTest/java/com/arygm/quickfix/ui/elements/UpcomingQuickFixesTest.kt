@@ -8,11 +8,13 @@ import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfile
@@ -91,8 +93,8 @@ class UpcomingQuickFixesTest {
     workerViewRepository = mock(ProfileRepository::class.java)
     workerViewModel = ProfileViewModel(workerViewRepository)
     doAnswer { invocation ->
-          val callback = invocation.arguments[2] as (Any) -> Unit
-          callback(WorkerProfile())
+          val onSuccess = invocation.arguments[1] as (Profile?) -> Unit
+          onSuccess(WorkerProfile(displayName = "Anonymous Worker"))
           null
         }
         .whenever(workerViewRepository)
@@ -108,22 +110,24 @@ class UpcomingQuickFixesTest {
           quickFixList = sampleData,
           onShowAllClick = {},
           onItemClick = {},
-          workerViewModel = workerViewModel)
+          workerViewModel = workerViewModel,
+          itemsToShowDefault = 3)
     }
     // Verify that the first three items are displayed
+    composeTestRule.onAllNodesWithText("Anonymous Worker").assertCountEquals(3)
+    composeTestRule
+        .onAllNodesWithText(formatter.format(sampleData[0].date.first().toDate()))
+        .assertCountEquals(3)
     sampleData.forEachIndexed { index, it ->
-      composeTestRule.onNodeWithText("Anonymous Worker").assertIsDisplayed()
       composeTestRule.onNodeWithText(it.title).assertIsDisplayed()
-      composeTestRule.onNodeWithText(formatter.format(it.date.first().toDate())).assertIsDisplayed()
     }
   }
 
   @Test
   fun testShowAllButtonTogglesItemCount() {
-    val repeatedSampleData = List(3) { sampleData }.flatten()
     composeTestRule.setContent {
       QuickFixesWidget(
-          quickFixList = repeatedSampleData,
+          quickFixList = sampleData + sampleData,
           onShowAllClick = {},
           onItemClick = {},
           workerViewModel = workerViewModel)
@@ -136,7 +140,7 @@ class UpcomingQuickFixesTest {
     composeTestRule.onNodeWithTag("ShowAllButton").performClick()
 
     // Verify all items are displayed
-    composeTestRule.onAllNodesWithTagPrefix("QuickFixItem_").assertCountEquals(5)
+    composeTestRule.onAllNodesWithTagPrefix("QuickFixItem_").assertCountEquals(6)
 
     // Click on "Show Less" button
     composeTestRule.onNodeWithTag("ShowAllButton").performClick()
@@ -158,7 +162,7 @@ class UpcomingQuickFixesTest {
     }
 
     // Perform click on the item
-    composeTestRule.onNodeWithTag("QuickFixItem_Ramy").performClick()
+    composeTestRule.onNodeWithTag("QuickFixItem_${sampleData.get(0).title}").performClick()
 
     // Verify that the clicked item is correct
     assert(clickedItem == sampleData[0])

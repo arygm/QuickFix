@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.messaging.Chat
 import com.arygm.quickfix.model.messaging.ChatStatus
 import com.arygm.quickfix.model.messaging.ChatViewModel
@@ -36,6 +37,8 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
+import com.arygm.quickfix.model.search.AnnouncementViewModel
+import com.arygm.quickfix.ui.dashboard.AnnouncementsWidget
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixesWidget
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -52,7 +55,9 @@ fun DashboardScreen(
     accountViewModel: AccountViewModel,
     quickFixViewModel: QuickFixViewModel,
     chatViewModel: ChatViewModel,
-    preferencesViewModel: PreferencesViewModel
+    preferencesViewModel: PreferencesViewModel,
+    announcementViewModel: AnnouncementViewModel,
+    categoryViewModel: CategoryViewModel
 ) {
 
   var mode by remember { mutableStateOf("") }
@@ -249,6 +254,14 @@ fun DashboardScreen(
                   }
                 }
               }
+              item {
+                AnnouncementsWidget(
+                    announcementViewModel = announcementViewModel,
+                    navigationActions = navigationActions,
+                    categoryViewModel = categoryViewModel,
+                    itemsToShowDefault = 3,
+                )
+              }
 
               item {
                 ChatWidget(
@@ -261,6 +274,9 @@ fun DashboardScreen(
                     onShowAllClick = { /*Handle Show All Click*/},
                     itemsToShowDefault = 3,
                     uid = uid,
+                    accountViewModel = accountViewModel,
+                    categoryViewModel = categoryViewModel,
+                    workerViewModel = workerViewModel,
                 )
               }
 

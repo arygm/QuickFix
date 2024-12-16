@@ -38,7 +38,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
@@ -59,7 +58,10 @@ fun ChatWidget(
     onItemClick: (Chat) -> Unit,
     modifier: Modifier = Modifier,
     itemsToShowDefault: Int = 3,
-    uid: String
+    uid: String,
+    accountViewModel: AccountViewModel,
+    categoryViewModel: CategoryViewModel,
+    workerViewModel: ProfileViewModel
 ) {
   var showAll by remember { mutableStateOf(false) } // Toggle for showing all items
   BoxWithConstraints {
@@ -107,7 +109,13 @@ fun ChatWidget(
 
           val itemsToShow = if (showAll) chatList else chatList.take(itemsToShowDefault)
           chatList.take(itemsToShow.size).forEachIndexed { index, chat ->
-            ChatItem(chat = chat, onClick = { onItemClick(chat) }, uid = uid)
+            ChatItem(
+                chat = chat,
+                onClick = { onItemClick(chat) },
+                uid = uid,
+                accountViewModel = accountViewModel,
+                categoryViewModel = categoryViewModel,
+                workerViewModel = workerViewModel)
 
             // Divider between items
             if (index < itemsToShow.size - 1) {
@@ -126,9 +134,9 @@ fun ChatItem(
     chat: Chat,
     onClick: () -> Unit,
     uid: String,
-    accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
-    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
-    workerViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.WorkerFactory)
+    accountViewModel: AccountViewModel,
+    categoryViewModel: CategoryViewModel,
+    workerViewModel: ProfileViewModel
 ) {
   var workerProfile by remember { mutableStateOf(WorkerProfile()) }
   workerViewModel.fetchUserProfile(
