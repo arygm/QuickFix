@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -40,7 +41,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.category.getCategoryIcon
 import com.arygm.quickfix.model.messaging.Chat
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
@@ -121,8 +126,17 @@ fun ChatItem(
     chat: Chat,
     onClick: () -> Unit,
     uid: String,
-    accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
+    accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
+    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
+    workerViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.WorkerFactory)
 ) {
+  var workerProfile by remember { mutableStateOf(WorkerProfile()) }
+  workerViewModel.fetchUserProfile(
+      chat.workeruid, onResult = { workerProfile = it as WorkerProfile })
+  var image by remember { mutableStateOf<ImageVector?>(null) }
+  categoryViewModel.getCategoryBySubcategoryId(workerProfile.fieldOfWork) {
+    image = it?.let { it1 -> getCategoryIcon(it1) }
+  }
   Row(
       modifier =
           Modifier.fillMaxWidth()
@@ -171,10 +185,12 @@ fun ChatItem(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis)
             Spacer(modifier = Modifier.width(4.dp))
-            Icon(
-                painter = painterResource(R.drawable.quickfix), // TODO Replace with actual icon
-                contentDescription = "Service Icon",
-                tint = MaterialTheme.colorScheme.primary)
+            image?.let {
+              Icon(
+                  imageVector = it,
+                  contentDescription = "Service Icon",
+                  tint = MaterialTheme.colorScheme.primary)
+            }
           }
           Text(
               text = chat.messages.last().content, // Removed leading comma for clarity

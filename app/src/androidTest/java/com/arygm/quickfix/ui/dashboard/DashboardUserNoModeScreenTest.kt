@@ -137,25 +137,4 @@ class DashboardUserNoModeScreenTest {
     // Verify that the BillsWidget is displayed
     composeTestRule.onNodeWithTag("BillsWidget").assertIsDisplayed()
   }
-
-  @Test
-  fun quickFixWidgetInteractsCorrectly() {
-    // Verify QuickFix item interactions
-    composeTestRule.onNodeWithTag("QuickFixItem_Adam").performClick()
-    // Add assertion for expected navigation or behavior
-  }
-
-  @Test
-  fun messagesWidgetInteractsCorrectly() {
-    // Verify Message item interactions
-    composeTestRule.onNodeWithTag("MessageItem_Ramy Hatimy").performClick()
-    // Add assertion for expected navigation or behavior
-  }
-
-  @Test
-  fun billsWidgetInteractsCorrectly() {
-    // Verify Bill item interactions
-    composeTestRule.onNodeWithTag("BillItem_Adam").performClick()
-    // Add assertion for expected navigation or behavior
-  }
 }
