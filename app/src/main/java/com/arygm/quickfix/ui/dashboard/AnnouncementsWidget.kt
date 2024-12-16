@@ -44,12 +44,11 @@ fun AnnouncementsWidget(
 ) {
   var showAll by remember { mutableStateOf(false) }
   val announcements by announcementViewModel.announcementsForUser.collectAsState()
-  // Now announcementImagesMap is Map<String, List<Pair<String, Bitmap>>>
   val imagesForAnnouncements by announcementViewModel.announcementImagesMap.collectAsState()
 
   BoxWithConstraints {
-    val cardWidth = maxWidth * 0.4f // Customize card width as needed
-    val horizontalSpacing = maxWidth * 0.025f // Horizontal spacing between items
+    val cardWidth = maxWidth * 0.4f // 40% of the available width for each card
+    val horizontalSpacing = maxWidth * 0.025f // 2.5% of the available width for spacing
 
     Column(
         modifier =
@@ -68,17 +67,23 @@ fun AnnouncementsWidget(
                     text = "Announcements",
                     color = MaterialTheme.colorScheme.onBackground,
                     style = poppinsTypography.headlineMedium,
-                    fontSize = 19.sp)
-                TextButton(onClick = { showAll = !showAll }) {
-                  Text(
-                      text = if (showAll) "Show Less" else "Show All",
-                      color = MaterialTheme.colorScheme.onSurface,
-                      style = MaterialTheme.typography.bodyMedium,
-                      fontWeight = FontWeight.SemiBold)
-                }
+                    fontSize = 19.sp,
+                    modifier = Modifier.testTag("AnnouncementsTitle"))
+                TextButton(
+                    onClick = { showAll = !showAll },
+                    modifier = Modifier.testTag("ShowAllButton")) {
+                      Text(
+                          text = if (showAll) "Show Less" else "Show All",
+                          color = MaterialTheme.colorScheme.onSurface,
+                          style = MaterialTheme.typography.bodyMedium,
+                          fontWeight = FontWeight.SemiBold)
+                    }
               }
 
-          Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f), thickness = 1.dp)
+          Divider(
+              color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+              thickness = 1.dp,
+              modifier = Modifier.testTag("AnnouncementsDivider"))
 
           val itemsToShow = if (showAll) announcements else announcements.take(itemsToShowDefault)
           itemsToShow.forEachIndexed { index, announcement ->
@@ -95,7 +100,9 @@ fun AnnouncementsWidget(
 
             if (index < itemsToShow.size - 1) {
               Divider(
-                  color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f), thickness = 1.dp)
+                  color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                  thickness = 1.dp,
+                  modifier = Modifier.testTag("AnnouncementDivider_$index"))
             }
           }
         }
@@ -120,7 +127,8 @@ fun AnnouncementItem(announcement: Announcement, announcementImage: Bitmap?, onC
               modifier =
                   Modifier.size(40.dp)
                       .clip(RoundedCornerShape(8.dp))
-                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                      .testTag("AnnouncementImage_${announcement.announcementId}"))
         } else {
           Image(
               painter = painterResource(id = R.drawable.placeholder_worker),
@@ -129,7 +137,8 @@ fun AnnouncementItem(announcement: Announcement, announcementImage: Bitmap?, onC
               modifier =
                   Modifier.size(40.dp)
                       .clip(RoundedCornerShape(8.dp))
-                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                      .testTag("PlaceholderImage_${announcement.announcementId}"))
         }
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -137,40 +146,52 @@ fun AnnouncementItem(announcement: Announcement, announcementImage: Bitmap?, onC
         // Text content
         Column(modifier = Modifier.weight(1f)) {
           // Title and category icon row
-          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = announcement.title,
-                style = poppinsTypography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis)
+          Row(
+              verticalAlignment = Alignment.CenterVertically,
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .testTag("AnnouncementRow_${announcement.announcementId}")) {
+                Text(
+                    text = announcement.title,
+                    style = poppinsTypography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.testTag("AnnouncementTitle_${announcement.announcementId}"))
 
-            Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(4.dp))
 
-            Icon(
-                imageVector = Icons.Outlined.ElectricalServices,
-                contentDescription = "Category Icon",
-                tint = MaterialTheme.colorScheme.primary)
+                Icon(
+                    imageVector = Icons.Outlined.ElectricalServices,
+                    contentDescription = "Category Icon",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.testTag("CategoryIcon_${announcement.announcementId}"))
 
-            Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.weight(1f))
 
-            // Location
-            Row(verticalAlignment = Alignment.CenterVertically) {
-              Icon(
-                  imageVector = Icons.Default.LocationOn,
-                  contentDescription = "Location",
-                  tint = MaterialTheme.colorScheme.onSurface,
-                  modifier = Modifier.size(16.dp))
-              Text(
-                  text = announcement.location?.name ?: "Unknown",
-                  fontSize = 9.sp,
-                  color = MaterialTheme.colorScheme.onSurface,
-                  modifier = Modifier.padding(start = 2.dp),
-                  maxLines = 1,
-                  overflow = TextOverflow.Ellipsis)
-            }
-          }
+                // Location
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.testTag("LocationRow_${announcement.announcementId}")) {
+                      Icon(
+                          imageVector = Icons.Default.LocationOn,
+                          contentDescription = "Location",
+                          tint = MaterialTheme.colorScheme.onSurface,
+                          modifier =
+                              Modifier.size(16.dp)
+                                  .testTag("LocationIcon_${announcement.announcementId}"))
+                      Text(
+                          text = announcement.location?.name ?: "Unknown",
+                          fontSize = 9.sp,
+                          color = MaterialTheme.colorScheme.onSurface,
+                          modifier =
+                              Modifier.padding(start = 2.dp)
+                                  .testTag("LocationText_${announcement.announcementId}"),
+                          maxLines = 1,
+                          overflow = TextOverflow.Ellipsis)
+                    }
+              }
 
           Spacer(modifier = Modifier.height(4.dp))
 
@@ -181,7 +202,8 @@ fun AnnouncementItem(announcement: Announcement, announcementImage: Bitmap?, onC
               fontWeight = FontWeight.Normal,
               color = MaterialTheme.colorScheme.onSurface,
               maxLines = 1,
-              overflow = TextOverflow.Ellipsis)
+              overflow = TextOverflow.Ellipsis,
+              modifier = Modifier.testTag("AnnouncementDescription_${announcement.announcementId}"))
         }
       }
 }

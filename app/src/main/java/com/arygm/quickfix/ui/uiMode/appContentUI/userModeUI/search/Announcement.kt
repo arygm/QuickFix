@@ -43,11 +43,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.Location
-import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.locations.LocationViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.search.Announcement
@@ -101,8 +100,6 @@ fun AnnouncementScreen(
   var locationName by rememberSaveable { mutableStateOf(initialLocation?.name) }
   var locationTitle by rememberSaveable { mutableStateOf(initialLocation?.name ?: "") }
   var locationIsSelected by rememberSaveable { mutableStateOf(initialLocation != null) }
-
-
 
   var selectedSubcategoryName by rememberSaveable { mutableStateOf("") }
 

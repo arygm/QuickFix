@@ -16,8 +16,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -50,15 +50,15 @@ import com.arygm.quickfix.ui.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.search.SearchWorkerResult
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.ProfileScreen
-import com.arygm.quickfix.ui.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.AnnouncementDetailScreen
+import com.arygm.quickfix.ui.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.ui.userModeUI.navigation.getBottomBarIdUser
-import kotlinx.coroutines.delay
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
+import kotlinx.coroutines.delay
 
 @Composable
 fun UserModeNavHost(
@@ -109,7 +109,8 @@ fun UserModeNavHost(
       } ?: true &&
           currentScreen?.let {
             it != UserScreen.ACCOUNT_CONFIGURATION && it != UserScreen.TO_WORKER
-          } ?: true
+          } ?: true &&
+          currentScreen?.let { it != UserScreen.ANNOUNCEMENT_DETAIL } ?: true
     }
   }
 
@@ -176,9 +177,10 @@ fun UserModeNavHost(
                     locationViewModel)
               }
 
-        composable(UserRoute.DASHBOARD) {
-          DashBoardNavHost(announcementViewModel, onScreenChange = { currentScreen = it }, isUser)
-        }
+              composable(UserRoute.DASHBOARD) {
+                DashBoardNavHost(
+                    announcementViewModel, onScreenChange = { currentScreen = it }, isUser)
+              }
 
               composable(UserRoute.PROFILE) {
                 ProfileNavHost(

@@ -161,7 +161,7 @@ class AnnouncementRepositoryFirestore(
           var successCount = 0
 
           urls.forEach { url ->
-            val imageRef = FirebaseStorage.getInstance().getReferenceFromUrl(url)
+            val imageRef = storage.getReferenceFromUrl(url)
             imageRef
                 .getBytes(Long.MAX_VALUE)
                 .addOnSuccessListener { bytes ->
