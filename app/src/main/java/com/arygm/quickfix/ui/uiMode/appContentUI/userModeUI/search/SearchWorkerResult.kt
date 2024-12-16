@@ -1,6 +1,7 @@
 package com.arygm.quickfix.ui.search
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -66,17 +67,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.MainActivity
-import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
@@ -115,7 +116,8 @@ fun SearchWorkerResult(
     accountViewModel: AccountViewModel,
     userProfileViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
-    geocoderWrapper: GeocoderWrapper = GeocoderWrapper(LocalContext.current)
+    geocoderWrapper: GeocoderWrapper = GeocoderWrapper(LocalContext.current),
+    workerViewModel: ProfileViewModel
 ) {
   fun getCityNameFromCoordinates(latitude: Double, longitude: Double): String? {
     val addresses = geocoderWrapper.getFromLocation(latitude, longitude, 1)
@@ -282,8 +284,8 @@ fun SearchWorkerResult(
   // ============ TODO: REMOVE NO-DATA WHEN BACKEND IS IMPLEMENTED ============//
   // ==========================================================================//
 
-  val bannerImage = R.drawable.moroccan_flag
-  val profilePicture = R.drawable.placeholder_worker
+  var bannerPicture by remember { mutableStateOf<Bitmap?>(null) }
+  var profilePicture by remember { mutableStateOf<Bitmap?>(null) }
 
   // ==========================================================================//
   // ==========================================================================//
@@ -425,7 +427,19 @@ fun SearchWorkerResult(
                     var account by remember { mutableStateOf<Account?>(null) }
                     var distance by remember { mutableStateOf<Int?>(null) }
                     var cityName by remember { mutableStateOf<String?>(null) }
-
+                    var profileImage by remember { mutableStateOf<Bitmap?>(null) }
+                    var bannerImage by remember { mutableStateOf<Bitmap?>(null) }
+                    workerViewModel.fetchProfileImageAsBitmap(
+                        profile.uid,
+                        {
+                          Log.d("ProfileResults", "Fetched profile image: $it")
+                          profileImage = it
+                        },
+                        { Log.e("ProfileResults", "Failed to fetch profile image: $it") })
+                    workerViewModel.fetchBannerImageAsBitmap(
+                        profile.uid,
+                        { bannerImage = it },
+                        { Log.e("ProfileResults", "Failed to fetch banner image: $it") })
                     distance =
                         profile.location
                             ?.let { workerLocation ->
@@ -455,22 +469,26 @@ fun SearchWorkerResult(
                             }
                         Log.d("Chill guy", cityName.toString())
                         cityName?.let { it1 ->
-                          SearchWorkerProfileResult(
-                              modifier = Modifier.testTag("worker_profile_result$index"),
-                              profileImage = R.drawable.placeholder_worker,
-                              name = "${acc.firstName} ${acc.lastName}",
-                              category = profile.fieldOfWork,
-                              rating = profile.reviews.map { review -> review.rating }.average(),
-                              reviewCount = profile.reviews.size,
-                              location = it1,
-                              price = profile.price.toString(),
-                              onBookClick = {
-                                selectedWorker = profile
-                                selectedCityName = cityName
-                                isWindowVisible = true
-                              },
-                              distance = distance,
-                          )
+                          profileImage?.let { it2 ->
+                            SearchWorkerProfileResult(
+                                modifier = Modifier.testTag("worker_profile_result$index"),
+                                profileImage = it2,
+                                name = "${acc.firstName} ${acc.lastName}",
+                                category = profile.fieldOfWork,
+                                rating = profile.reviews.map { review -> review.rating }.average(),
+                                reviewCount = profile.reviews.size,
+                                location = it1,
+                                price = profile.price.toString(),
+                                onBookClick = {
+                                  selectedWorker = profile
+                                  selectedCityName = cityName
+                                  isWindowVisible = true
+                                  profilePicture = profileImage!!
+                                  bannerPicture = bannerImage!!
+                                },
+                                distance = distance,
+                            )
+                          }
                         }
                       }
                     }
@@ -615,7 +633,7 @@ fun SearchWorkerResult(
                           .testTag("sliding_window_top_bar")) {
                     // Banner Image
                     Image(
-                        painter = painterResource(id = bannerImage),
+                        painter = BitmapPainter(bannerPicture!!.asImageBitmap()),
                         contentDescription = "Banner",
                         modifier =
                             Modifier.fillMaxWidth()
@@ -642,7 +660,7 @@ fun SearchWorkerResult(
 
                     // Profile picture overlapping the banner image
                     Image(
-                        painter = painterResource(id = profilePicture),
+                        painter = BitmapPainter(profilePicture!!.asImageBitmap()),
                         contentDescription = "Profile Picture",
                         modifier =
                             Modifier.size(screenHeight * 0.1f)

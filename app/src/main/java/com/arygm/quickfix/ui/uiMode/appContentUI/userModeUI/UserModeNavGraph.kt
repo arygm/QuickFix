@@ -155,7 +155,8 @@ fun UserModeNavHost(
                     onScreenChange = { currentScreen = it },
                     categoryViewModel,
                     preferencesViewModel,
-                    locationViewModel)
+                    locationViewModel,
+                    workerViewModel)
               }
 
               composable(UserRoute.DASHBOARD) {
@@ -286,7 +287,8 @@ fun SearchNavHost(
     onScreenChange: (String) -> Unit,
     categoryViewModel: CategoryViewModel,
     preferencesViewModel: PreferencesViewModel,
-    locationViewModel: LocationViewModel
+    locationViewModel: LocationViewModel,
+    workerViewModel: ProfileViewModel
 ) {
   val searchNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(searchNavController) }
@@ -307,7 +309,8 @@ fun SearchNavHost(
           searchViewModel,
           accountViewModel,
           announcementViewModel,
-          categoryViewModel)
+          categoryViewModel,
+          workerViewModel)
     }
     composable(UserScreen.DISPLAY_UPLOADED_IMAGES) {
       QuickFixDisplayImages(isUser, navigationActions, announcementViewModel)
@@ -318,7 +321,8 @@ fun SearchNavHost(
           searchViewModel,
           accountViewModel,
           profileViewModel,
-          preferencesViewModel)
+          preferencesViewModel,
+          workerViewModel = workerViewModel)
     }
     composable(UserScreen.SEARCH_LOCATION) {
       LocationSearchCustomScreen(

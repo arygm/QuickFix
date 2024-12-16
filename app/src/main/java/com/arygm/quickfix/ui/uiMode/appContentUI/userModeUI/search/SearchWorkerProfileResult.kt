@@ -1,6 +1,7 @@
 package com.arygm.quickfix.ui.search
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,9 +26,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,7 +41,7 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 @Composable
 fun SearchWorkerProfileResult(
     modifier: Modifier = Modifier,
-    profileImage: Int,
+    profileImage: Bitmap,
     name: String,
     category: String,
     rating: Double,
@@ -64,7 +66,7 @@ fun SearchWorkerProfileResult(
             modifier = Modifier.fillMaxWidth().padding(8.dp),
             verticalAlignment = Alignment.CenterVertically) {
               Image(
-                  painter = painterResource(id = profileImage),
+                  painter = BitmapPainter(profileImage.asImageBitmap()),
                   contentDescription = "Profile image of $name, $category",
                   modifier = Modifier.clip(RoundedCornerShape(8.dp)).size(100.dp).aspectRatio(1f),
                   contentScale = ContentScale.FillBounds)

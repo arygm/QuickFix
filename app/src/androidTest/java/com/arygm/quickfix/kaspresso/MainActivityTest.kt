@@ -212,6 +212,7 @@ class MainActivityTest : TestCase() {
 
       // Attempt to grant permissions
       allowPermissionsIfNeeded()
+      loginToTestAccount()
       // Retry the action until it works with a timeout of 10 seconds
       composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()

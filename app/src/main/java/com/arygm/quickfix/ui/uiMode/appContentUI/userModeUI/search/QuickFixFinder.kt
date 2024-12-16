@@ -51,7 +51,8 @@ fun QuickFixFinderScreen(
     accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
     announcementViewModel: AnnouncementViewModel =
         viewModel(factory = AnnouncementViewModel.Factory),
-    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
+    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
+    workerViewModel: ProfileViewModel
 ) {
   val pagerState = rememberPagerState(pageCount = { 2 })
   val colorBackground =
@@ -108,7 +109,8 @@ fun QuickFixFinderScreen(
                               navigationActionsRoot,
                               searchViewModel,
                               accountViewModel,
-                              categoryViewModel)
+                              categoryViewModel,
+                              workerViewModel)
                       1 ->
                           AnnouncementScreen(
                               announcementViewModel,

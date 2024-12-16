@@ -113,4 +113,20 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
         onSuccess = { onSuccess(it) },
         onFailure = { e -> onFailure(e) })
   }
+
+  fun fetchProfileImageAsBitmap(
+      accountId: String,
+      onSuccess: (Bitmap) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    repository.fetchProfileImageAsBitmap(accountId, onSuccess, onFailure)
+  }
+
+  fun fetchBannerImageAsBitmap(
+      accountId: String,
+      onSuccess: (Bitmap) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    repository.fetchBannerImageAsBitmap(accountId, onSuccess, onFailure)
+  }
 }

@@ -1,6 +1,9 @@
 package com.arygm.quickfix.model.profile
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.util.Log
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
@@ -329,4 +332,97 @@ open class WorkerProfileRepositoryFirestore(
         }
         .addOnFailureListener { exception -> onFailure(exception) }
   }
+
+  private fun fetchProfileImageUrl(
+      accountId: String,
+      onSuccess: (String) -> Unit,
+      onFailure: (Exception) -> Unit,
+      documentId: String
+  ) {
+    val firestore = db
+    val collection = firestore.collection(collectionPath)
+    collection
+        .document(accountId)
+        .get()
+        .addOnSuccessListener { document ->
+          val imageUrl = document[documentId] as? String ?: ""
+          onSuccess(imageUrl)
+        }
+        .addOnFailureListener { onFailure(it) }
+  }
+
+  override fun fetchProfileImageAsBitmap(
+      accountId: String,
+      onSuccess: (Bitmap) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    fetchProfileImageUrl(
+        accountId,
+        { url ->
+          if (url.isEmpty()) {
+            Log.d(
+                "WorkerProfileRepositoryFirestore",
+                "No profile image found for account ID: $accountId")
+            val defaultProfileBitmap =
+                createSolidColorBitmap(
+                    width = 200, // Adjust the width in pixels
+                    height = 200, // Adjust the height in pixels
+                    color = 0xFF66001A.toInt())
+            onSuccess(defaultProfileBitmap)
+          } else {
+            val imageRef = storage.getReferenceFromUrl(url)
+            Log.d("WorkerProfileRepositoryFirestore", "Fetching profile image from URL: $url")
+            imageRef
+                .getBytes(Long.MAX_VALUE)
+                .addOnSuccessListener { bytes ->
+                  val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                  onSuccess(bitmap)
+                }
+                .addOnFailureListener {
+                  Log.e("WorkerProfileRepositoryFirestore", "Failed to fetch profile image", it)
+                  onFailure(it)
+                }
+          }
+        },
+        onFailure,
+        "profileImageUrl")
+  }
+
+  override fun fetchBannerImageAsBitmap(
+      accountId: String,
+      onSuccess: (Bitmap) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    fetchProfileImageUrl(
+        accountId,
+        { url ->
+          if (url.isEmpty()) {
+            val defaultBannerBitmap =
+                createSolidColorBitmap(
+                    width = 800, // Adjust the width in pixels
+                    height = 400, // Adjust the height in pixels
+                    color = 0xFF66001A.toInt())
+            onSuccess(defaultBannerBitmap)
+          } else {
+            val imageRef = storage.getReferenceFromUrl(url)
+            imageRef
+                .getBytes(Long.MAX_VALUE)
+                .addOnSuccessListener { bytes ->
+                  val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                  onSuccess(bitmap)
+                }
+                .addOnFailureListener { onFailure(it) }
+          }
+        },
+        onFailure,
+        "bannerImageUrl")
+  }
+}
+
+fun createSolidColorBitmap(width: Int, height: Int, color: Int): Bitmap {
+  val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+  val canvas = Canvas(bitmap)
+  val paint = Paint().apply { this.color = color }
+  canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
+  return bitmap
 }

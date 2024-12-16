@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
@@ -49,7 +50,8 @@ fun SearchOnBoarding(
     navigationActionsRoot: NavigationActions,
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
-    categoryViewModel: CategoryViewModel
+    categoryViewModel: CategoryViewModel,
+    workerViewModel: ProfileViewModel
 ) {
   val profiles = searchViewModel.workerProfiles.collectAsState().value
   val focusManager = LocalFocusManager.current
@@ -177,7 +179,8 @@ fun SearchOnBoarding(
                         tags = selectedProfile.tags
                         reviews = selectedProfile.reviews.map { it.review }
                         isWindowVisible = true
-                      })
+                      },
+                      workerViewModel = workerViewModel)
                 }
               }
         },
