@@ -42,7 +42,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.category.getCategoryIcon
@@ -67,9 +66,9 @@ import java.util.Locale
 fun QuickFixLastStep(
     quickFix: QuickFix,
     workerProfile: WorkerProfile,
-    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
-    quickFixViewModel: QuickFixViewModel = viewModel(factory = QuickFixViewModel.Factory),
-    workerViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.WorkerFactory),
+    categoryViewModel: CategoryViewModel,
+    quickFixViewModel: QuickFixViewModel,
+    workerViewModel: ProfileViewModel,
     onQuickFixChange: (QuickFix) -> Unit,
     mode: AppMode
 ) {

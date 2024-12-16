@@ -150,6 +150,24 @@ class QuickFixFirstStepTest {
           .getQuickFixById(any(), any(), any())
     }
 
+    doAnswer { invocation ->
+          val query = invocation.getArgument<String>(0)
+          val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
+          val onError = invocation.getArgument<(Throwable) -> Unit>(2)
+
+          // Mock response based on the query
+          val mockLocations =
+              listOf(
+                  Location(latitude = 40.7128, longitude = -74.0060, name = "New York"),
+                  Location(latitude = 34.0522, longitude = -118.2437, name = "123 Main St"))
+
+          // Call onSuccess with the mock data
+          onSuccess(mockLocations)
+          null
+        }
+        .whenever(locationRepository)
+        .search(any(), any(), any())
+
     // Initialize ViewModels with mocked repositories
     chatViewModel = ChatViewModel(chatRepository)
     quickFixViewModel = QuickFixViewModel(quickFixRepository)
@@ -183,7 +201,7 @@ class QuickFixFirstStepTest {
           onQuickFixChange = { _ -> },
           userViewModel = userViewModel,
           workerViewModel = workerViewModel,
-      )
+          navigationActions = navigationActions)
     }
 
     // Assert: Verify default UI elements
@@ -216,7 +234,8 @@ class QuickFixFirstStepTest {
                   addOnServices = listOf(AddOnService("Add-on Service 1"))),
           onQuickFixChange = { _ -> },
           userViewModel = userViewModel,
-          workerViewModel = workerViewModel)
+          workerViewModel = workerViewModel,
+          navigationActions = navigationActions)
     }
 
     // Enter text in the title field
@@ -248,7 +267,8 @@ class QuickFixFirstStepTest {
                   addOnServices = listOf(AddOnService("Add-on Service 1"))),
           onQuickFixChange = { _ -> },
           userViewModel = userViewModel,
-          workerViewModel = workerViewModel)
+          workerViewModel = workerViewModel,
+          navigationActions = navigationActions)
     }
 
     // Select a service
@@ -278,7 +298,8 @@ class QuickFixFirstStepTest {
                   addOnServices = listOf(AddOnService("Add-on Service 1"))),
           onQuickFixChange = { _ -> },
           userViewModel = userViewModel,
-          workerViewModel = workerViewModel)
+          workerViewModel = workerViewModel,
+          navigationActions = navigationActions)
     }
 
     // Open the date picker
@@ -300,5 +321,35 @@ class QuickFixFirstStepTest {
 
     // Assert the selected date is displayed
     composeTestRule.onNodeWithText("Suggested Date").assertExists()
+  }
+
+  @Test
+  fun testLocationInput() = runTest {
+    // Arrange: Set userId and AppMode if necessary
+    userIdFlow.value = "testUserId"
+    appModeFlow.value = "USER" // or "WORKER"
+
+    // Act: Set the composable content
+    composeTestRule.setContent {
+      QuickFixFirstStep(
+          locationViewModel = locationViewModel,
+          chatViewModel = chatViewModel,
+          quickFixViewModel = quickFixViewModel,
+          preferencesViewModel = preferencesViewModel,
+          workerProfile =
+              WorkerProfile(
+                  uid = "worker_123",
+                  includedServices = listOf(IncludedService("Service 1")),
+                  addOnServices = listOf(AddOnService("Add-on Service 1"))),
+          onQuickFixChange = { _ -> },
+          userViewModel = userViewModel,
+          workerViewModel = workerViewModel,
+          navigationActions = navigationActions)
+    }
+
+    // Enter text in the location field
+    composeTestRule.onNodeWithText("Enter a location ...").performTextInput("123 Main St")
+    composeTestRule.onNodeWithTag("locationItem_1", true).performClick()
+    composeTestRule.onNodeWithText("123 Main St").assertExists()
   }
 }

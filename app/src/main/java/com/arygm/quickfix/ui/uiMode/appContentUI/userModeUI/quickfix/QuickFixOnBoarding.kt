@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
@@ -45,7 +46,8 @@ fun QuickFixOnBoarding(
     workerViewModel: ProfileViewModel,
     locationViewModel: LocationViewModel,
     accountViewModel: AccountViewModel,
-    chatViewModel: ChatViewModel
+    chatViewModel: ChatViewModel,
+    categoryViewModel: CategoryViewModel
 ) {
   val workerProfile by quickFixViewModel.selectedWorkerProfile.collectAsState()
   val quickFix by quickFixViewModel.currentQuickFix.collectAsState()
@@ -100,6 +102,7 @@ fun QuickFixOnBoarding(
                     userViewModel = userViewModel,
                     workerViewModel = workerViewModel,
                     locationViewModel = locationViewModel,
+                    navigationActions = navigationActions,
                 )
               }
               1 -> {
@@ -136,7 +139,10 @@ fun QuickFixOnBoarding(
                       quickFixViewModel.setUpdateQuickFix(updatedQuickFix)
                       step++
                     },
-                    mode = mode)
+                    mode = mode,
+                    quickFixViewModel = quickFixViewModel,
+                    workerViewModel = workerViewModel,
+                    categoryViewModel = categoryViewModel)
               }
             }
           }

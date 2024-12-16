@@ -356,7 +356,8 @@ fun SearchNavHost(
           userViewModel = userViewModel,
           workerViewModel = workerViewModel,
           locationViewModel = locationViewModel,
-          accountViewModel = accountViewModel)
+          accountViewModel = accountViewModel,
+          categoryViewModel = categoryViewModel)
     }
 
     composable(UserScreen.MESSAGES) {

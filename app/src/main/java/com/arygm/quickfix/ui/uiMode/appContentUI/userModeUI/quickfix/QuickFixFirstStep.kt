@@ -57,6 +57,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.SpanStyle
@@ -86,6 +87,7 @@ import com.arygm.quickfix.ui.elements.QuickFixCheckedListElement
 import com.arygm.quickfix.ui.elements.QuickFixDateTimePicker
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.dashedBorder
+import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.personal.CameraBottomSheet
 import com.arygm.quickfix.utils.loadUserId
@@ -98,6 +100,7 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun QuickFixFirstStep(
+    navigationActions: NavigationActions,
     locationViewModel: LocationViewModel,
     quickFixViewModel: QuickFixViewModel,
     chatViewModel: ChatViewModel,
@@ -112,7 +115,15 @@ fun QuickFixFirstStep(
   val context = LocalContext.current
 
   var userId by remember { mutableStateOf("") }
-  LaunchedEffect(Unit) { userId = loadUserId(preferencesViewModel) }
+  var user by remember { mutableStateOf<UserProfile?>(null) }
+  var worker by remember { mutableStateOf<WorkerProfile?>(null) }
+  LaunchedEffect(Unit) {
+    userId = loadUserId(preferencesViewModel)
+    userViewModel.fetchUserProfile(userId) { userProfile -> user = userProfile as UserProfile }
+    workerViewModel.fetchUserProfile(workerProfile.uid) { workerPr ->
+      worker = workerPr as WorkerProfile
+    }
+  }
 
   var quickFixTile by remember { mutableStateOf("") }
   val checkedStatesServices = remember {
@@ -174,7 +185,9 @@ fun QuickFixFirstStep(
         }
 
         LazyColumn(
-            modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 8.dp)) {
+            modifier =
+                Modifier.padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 8.dp)
+                    .testTag("quickFixFirstStep")) {
               item {
                 QuickFixTextFieldCustom(
                     value = quickFixTile,
@@ -485,7 +498,9 @@ fun QuickFixFirstStep(
                               style = poppinsTypography.labelSmall,
                               fontWeight = FontWeight.Medium,
                               color = colorScheme.onBackground,
-                              modifier = Modifier.padding(horizontal = 4.dp))
+                              modifier =
+                                  Modifier.padding(horizontal = 4.dp)
+                                      .testTag("locationItem_$index"))
                         })
                     if (index < locationSuggestions.size - 1) {
                       HorizontalDivider(
@@ -573,7 +588,7 @@ fun QuickFixFirstStep(
                             buttonText = "Upload Pictures",
                             buttonColor = colorScheme.background,
                             onClickAction = { cameraBottomSheet = true },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().testTag("uploadPicturesButton"),
                             height = 100.dp,
                             textColor = colorScheme.onBackground,
                             textStyle =
@@ -607,12 +622,10 @@ fun QuickFixFirstStep(
                     modifier =
                         Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp),
                     horizontalArrangement = Arrangement.SpaceAround) {
-                      var user by remember { mutableStateOf<UserProfile?>(null) }
-                      var worker by remember { mutableStateOf<WorkerProfile?>(null) }
                       QuickFixButton(
                           buttonText = "Cancel",
                           buttonColor = Color.Transparent,
-                          onClickAction = { /* navigationActions.goBack() */},
+                          onClickAction = { navigationActions.goBack() },
                           modifier = Modifier.weight(0.5f),
                           textColor = colorScheme.onSecondaryContainer,
                           textStyle =
@@ -659,13 +672,6 @@ fun QuickFixFirstStep(
                             quickFixViewModel.addQuickFix(
                                 createdQuickFix,
                                 onSuccess = {
-                                  userViewModel.fetchUserProfile(userId) { userProfile ->
-                                    user = userProfile as UserProfile
-                                  }
-                                  workerViewModel.fetchUserProfile(workerProfile.uid) {
-                                      workerProfile ->
-                                    worker = workerProfile as WorkerProfile
-                                  }
                                   user
                                       ?.apply { quickFixes = quickFixes + createdQuickFix.uid }
                                       ?.let {
@@ -681,23 +687,31 @@ fun QuickFixFirstStep(
                                                         it1,
                                                         onSuccess = {
                                                           onQuickFixChange(createdQuickFix)
+                                                          Toast.makeText(
+                                                                  context,
+                                                                  "QuickFix added",
+                                                                  Toast.LENGTH_SHORT)
+                                                              .show()
                                                         },
                                                         onFailure = {
                                                           Log.d(
                                                               "QuickFixFirstStep",
-                                                              "Failed to update pofiles")
+                                                              "Failed to update worker profile")
                                                         })
                                                   }
                                             },
-                                            onFailure = { /* Handle failure */})
+                                            onFailure = {
+                                              Log.d(
+                                                  "QuickFixFirstStep",
+                                                  "Failed to update user profile")
+                                            })
                                       }
-
-                                  Toast.makeText(context, "QuickFix added", Toast.LENGTH_SHORT)
-                                      .show()
                                 },
-                                onFailure = { /* Handle failure */})
+                                onFailure = {
+                                  Log.d("QuickFixFirstStep", "Failed to add quick fix")
+                                })
                           },
-                          modifier = Modifier.weight(0.5f),
+                          modifier = Modifier.weight(0.5f).testTag("continueButton"),
                           textColor = colorScheme.onPrimary,
                           textStyle =
                               poppinsTypography.labelMedium.copy(

@@ -282,7 +282,6 @@ fun LogInScreen(
                                             delay(BOX_COLLAPSE_SPEED.toLong())
                                             Log.d("LoginFlow", "Starting login with email: $email")
                                             rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
-                                            navigationActions.navigateTo(NoModeRoute.WELCOME)
                                           }
                                         } else {
                                           Log.e("LogInScreen", "Error occurred while signing in")
