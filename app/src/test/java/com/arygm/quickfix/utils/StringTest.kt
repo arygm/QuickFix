@@ -1,9 +1,9 @@
 package com.arygm.quickfix.utils
 
-import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
-import com.arygm.quickfix.ui.noModeUI.navigation.NoModeScreen
-import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.noModeUI.navigation.NoModeRoute
+import com.arygm.quickfix.ui.uiMode.noModeUI.navigation.NoModeScreen
 import com.google.firebase.Timestamp
 import java.util.Calendar
 import java.util.GregorianCalendar
@@ -144,12 +144,6 @@ class StringTest {
   fun `test routeToScreen with HOME route`() {
     val result = routeToScreen(UserRoute.HOME)
     assertEquals(UserScreen.HOME, result)
-  }
-
-  @Test
-  fun `test routeToScreen with CALENDAR route`() {
-    val result = routeToScreen(UserRoute.CALENDAR)
-    assertEquals(UserScreen.CALENDAR, result)
   }
 
   @Test

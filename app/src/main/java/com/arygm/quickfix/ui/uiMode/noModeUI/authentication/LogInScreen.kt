@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.authentication
+package com.arygm.quickfix.ui.uiMode.noModeUI.authentication
 
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
@@ -58,7 +58,7 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
-import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
+import com.arygm.quickfix.ui.uiMode.noModeUI.navigation.NoModeRoute
 import com.arygm.quickfix.utils.ANIMATED_BOX_ROTATION
 import com.arygm.quickfix.utils.BOX_COLLAPSE_SPEED
 import com.arygm.quickfix.utils.BOX_OFFSET_X_EXPANDED
@@ -282,7 +282,6 @@ fun LogInScreen(
                                             delay(BOX_COLLAPSE_SPEED.toLong())
                                             Log.d("LoginFlow", "Starting login with email: $email")
                                             rootNavigationActions.navigateTo(RootRoute.APP_CONTENT)
-                                            navigationActions.navigateTo(NoModeRoute.WELCOME)
                                           }
                                         } else {
                                           Log.e("LogInScreen", "Error occurred while signing in")

@@ -1,7 +1,6 @@
 package com.arygm.quickfix.kaspresso
 
 import android.graphics.Bitmap
-import android.location.Location
 import android.os.Build
 import android.util.Log
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -18,6 +17,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToLog
@@ -48,7 +49,6 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.storage.FirebaseStorage
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen
-import okhttp3.internal.wait
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.FixMethodOrder
@@ -189,7 +189,7 @@ class MainActivityTest : TestCase() {
   }
 
   @Test
-  fun becomeAWorker() = run {
+  fun DbecomeAWorker() = run {
     step("Set up the WelcomeScreen and transit to the register") {
       val indicesIncludedServices =
           (0 until item.subcategories[0].setServices.size / 2 step 2).toList()
@@ -343,7 +343,78 @@ class MainActivityTest : TestCase() {
   }
 
   @Test
-  fun BshouldBeAbleToLogin() = run {
+  fun BquickFixOnBoarding() = run {
+    step("Set up the WelcomeScreen and transit to the register") {
+      val testLocation =
+          com.arygm.quickfix.model.locations.Location(
+              latitude = 0.0, longitude = 0.0, name = "Test Location")
+      val testBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+      composeTestRule.activityRule.scenario.onActivity { activity ->
+        (activity as MainActivity).setTestBitmap(testBitmap)
+        activity.setTestLocation(testLocation)
+      }
+
+      // Wait for the UI to settle
+      composeTestRule.waitForIdle()
+
+      // Attempt to grant permissions
+      allowPermissionsIfNeeded()
+      loginToTestAccount()
+      composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()
+      }
+
+      composeTestRule.waitForIdle()
+      // Navigate to search
+      onView(withText("Search")).perform(click())
+      onView(withText("Search")).perform(click())
+      composeTestRule.waitUntil("find the categories", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithText("Carpentry").fetchSemanticsNodes().isNotEmpty()
+      }
+      composeTestRule.onNodeWithText("Carpentry").performClick()
+      composeTestRule.waitUntil("find the subcategories", timeoutMillis = 20000) {
+        composeTestRule
+            .onAllNodesWithText("Construction Carpentry")
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      }
+
+      composeTestRule.onNodeWithText("Construction Carpentry").performClick()
+      composeTestRule.waitUntil("find the Book button", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithText("Book").fetchSemanticsNodes().isNotEmpty()
+      }
+
+      composeTestRule.onNodeWithText("Book").performClick()
+      composeTestRule.waitUntil("find the continue Button", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithText("Continue").fetchSemanticsNodes().isNotEmpty()
+      }
+      composeTestRule.onNodeWithText("Continue").performClick()
+
+      // Enter QuickFixFirstStep
+      composeTestRule.onNodeWithText("Enter a title ...").performTextInput("Test Title")
+      composeTestRule.onNodeWithText("Type a description...").performTextInput("Test Note")
+      composeTestRule.onNodeWithText("Framing").performClick()
+      composeTestRule.onNodeWithText("Add Suggested Date").performClick()
+      composeTestRule.onNodeWithText(java.time.LocalDate.now().dayOfMonth.toString()).performClick()
+      composeTestRule.onNodeWithText("OK").performClick()
+      composeTestRule.onNodeWithText("OK").performClick()
+      composeTestRule
+          .onNodeWithText("Enter a location ...")
+          .performScrollTo()
+          .performTextInput("Test Location")
+      composeTestRule.onNodeWithTag("quickFixFirstStep").performScrollToIndex(index = 21)
+      composeTestRule.onNodeWithTag("continueButton").performScrollTo().performClick()
+      composeTestRule.waitUntil("find the continue Button", timeoutMillis = 20000) {
+        composeTestRule
+            .onAllNodesWithText("Consult the discussion")
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      }
+    }
+  }
+
+  @Test
+  fun CshouldBeAbleToLogin() = run {
     step("Set up the WelcomeScreen and transit to the register") {
       composeTestRule.activity
 
@@ -352,7 +423,6 @@ class MainActivityTest : TestCase() {
 
       // Attempt to grant permissions
       allowPermissionsIfNeeded()
-      loginToTestAccount()
       // Retry the action until it works with a timeout of 10 seconds
       composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("BottomNavMenu").fetchSemanticsNodes().isNotEmpty()
@@ -413,7 +483,7 @@ class MainActivityTest : TestCase() {
     composeTestRule.onNodeWithTag("inputPassword").performTextClearance()
 
     composeTestRule.onNodeWithTag("inputEmail").performTextInput("main.activity@test.com")
-    composeTestRule.onNodeWithTag("inputPassword").performTextInput("246890357Asefthuk")
+    composeTestRule.onNodeWithTag("inputPassword").performTextInput("@@Test1234@@")
     composeTestRule.onNodeWithTag("logInButton").assertIsEnabled()
     composeTestRule.onNodeWithTag("logInButton").performClick()
   }

@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.profile
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile
 
 import android.annotation.SuppressLint
 import android.widget.Toast
@@ -51,10 +51,10 @@ import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
-import com.arygm.quickfix.ui.authentication.CustomTextField
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.noModeUI.authentication.CustomTextField
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.isValidEmail
 import com.arygm.quickfix.utils.loadBirthDate

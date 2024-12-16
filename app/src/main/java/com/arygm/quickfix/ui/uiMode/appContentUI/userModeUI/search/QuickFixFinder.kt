@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.search
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
