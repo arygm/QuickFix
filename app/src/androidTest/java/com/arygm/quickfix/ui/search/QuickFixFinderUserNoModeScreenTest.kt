@@ -8,8 +8,14 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.arygm.quickfix.model.account.AccountRepositoryFirestore
+import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
+import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
+import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
@@ -33,8 +39,14 @@ class QuickFixFinderUserNoModeScreenTest {
   private lateinit var navigationActionsRoot: NavigationActions
   private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
   private lateinit var categoryRepo: CategoryRepositoryFirestore
-    private lateinit var accountRepositoryFirestore: AccountRepositoryFirestore
+  private lateinit var accountRepositoryFirestore: AccountRepositoryFirestore
   private lateinit var searchViewModel: SearchViewModel
+  private lateinit var accountViewModel: AccountViewModel
+  private lateinit var announcementViewModel: AnnouncementViewModel
+  private lateinit var categoryViewModel: CategoryViewModel
+  private lateinit var loggedInAccountViewModel: LoggedInAccountViewModel
+  private lateinit var quickFixViewModel: QuickFixViewModel
+  private lateinit var userViewModel: ProfileViewModel
 
   @Before
   fun setup() {
@@ -43,8 +55,14 @@ class QuickFixFinderUserNoModeScreenTest {
     navigationActionsRoot = mock(NavigationActions::class.java)
     workerProfileRepo = mockk(relaxed = true)
     categoryRepo = mockk(relaxed = true)
-      accountRepositoryFirestore = mock(AccountRepositoryFirestore::class.java)
-    searchViewModel = SearchViewModel(workerProfileRepo, accountRepositoryFirestore)
+    accountRepositoryFirestore = mock(AccountRepositoryFirestore::class.java)
+    searchViewModel = SearchViewModel(workerProfileRepo)
+    accountViewModel = AccountViewModel(mock())
+    announcementViewModel = AnnouncementViewModel(mock())
+    categoryViewModel = CategoryViewModel(categoryRepo)
+    loggedInAccountViewModel = LoggedInAccountViewModel(mock(), mock())
+    quickFixViewModel = QuickFixViewModel(mock())
+    userViewModel = ProfileViewModel(mock())
   }
 
   @OptIn(ExperimentalTestApi::class)
@@ -54,6 +72,12 @@ class QuickFixFinderUserNoModeScreenTest {
       QuickFixFinderScreen(
           navigationActions,
           navigationActionsRoot,
+          userViewModel = userViewModel,
+          accountViewModel = accountViewModel,
+          quickFixViewModel = quickFixViewModel,
+          categoryViewModel = categoryViewModel,
+          announcementViewModel = announcementViewModel,
+          loggedInAccountViewModel = loggedInAccountViewModel,
           isUser = true,
           searchViewModel = searchViewModel)
     }
@@ -89,7 +113,13 @@ class QuickFixFinderUserNoModeScreenTest {
       QuickFixFinderScreen(
           navigationActions,
           navigationActionsRoot,
-          isUser = false,
+          userViewModel = userViewModel,
+          accountViewModel = accountViewModel,
+          quickFixViewModel = quickFixViewModel,
+          categoryViewModel = categoryViewModel,
+          announcementViewModel = announcementViewModel,
+          loggedInAccountViewModel = loggedInAccountViewModel,
+          isUser = true,
           searchViewModel = searchViewModel)
     }
 
@@ -124,6 +154,12 @@ class QuickFixFinderUserNoModeScreenTest {
       QuickFixFinderScreen(
           navigationActions,
           navigationActionsRoot,
+          userViewModel = userViewModel,
+          accountViewModel = accountViewModel,
+          quickFixViewModel = quickFixViewModel,
+          categoryViewModel = categoryViewModel,
+          announcementViewModel = announcementViewModel,
+          loggedInAccountViewModel = loggedInAccountViewModel,
           isUser = true,
           searchViewModel = searchViewModel)
     }
@@ -144,6 +180,12 @@ class QuickFixFinderUserNoModeScreenTest {
       QuickFixFinderScreen(
           navigationActions,
           navigationActionsRoot,
+          userViewModel = userViewModel,
+          accountViewModel = accountViewModel,
+          quickFixViewModel = quickFixViewModel,
+          categoryViewModel = categoryViewModel,
+          announcementViewModel = announcementViewModel,
+          loggedInAccountViewModel = loggedInAccountViewModel,
           isUser = true,
           searchViewModel = searchViewModel)
     }

@@ -37,11 +37,13 @@ import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserTopLevelDestinations
 
 @Composable
@@ -50,7 +52,8 @@ fun SearchOnBoarding(
     navigationActionsRoot: NavigationActions,
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
-    categoryViewModel: CategoryViewModel
+    categoryViewModel: CategoryViewModel,
+    quickFixViewModel: QuickFixViewModel
 ) {
   val profiles = searchViewModel.workerProfilesSuggestions.collectAsState()
   val focusManager = LocalFocusManager.current
@@ -186,7 +189,10 @@ fun SearchOnBoarding(
                                 reviews = it.reviews.map { it.review },
                                 screenHeight = screenHeight,
                                 screenWidth = screenWidth,
-                                onContinueClick = { /* Handle continue */})
+                                onContinueClick = {
+                                  quickFixViewModel.setSelectedWorkerProfile(it)
+                                  navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
+                                })
                           }
                         }
                   }

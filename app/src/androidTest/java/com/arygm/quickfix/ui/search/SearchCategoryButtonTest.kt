@@ -156,7 +156,7 @@ class SearchCategoryButtonTest {
     // Step 2: Set up the initial state
     val isExpandedState = mutableStateOf(false)
     navigationActions = mock(NavigationActions::class.java)
-    searchViewModel = SearchViewModel(mock(),mock())
+    searchViewModel = SearchViewModel(mock())
     composeTestRule.setContent {
       // Provide LocalInspectionMode if you prefer to disable animations
       // CompositionLocalProvider(LocalInspectionMode provides true) {

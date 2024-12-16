@@ -4,15 +4,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.arygm.quickfix.model.account.Account
-import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.google.firebase.Firebase
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
 import java.time.LocalDate
@@ -24,8 +21,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositoryFirestore, private val accountRepositoryFirestore: AccountRepositoryFirestore) :
-    ViewModel() {
+open class SearchViewModel(
+    private val workerProfileRepo: WorkerProfileRepositoryFirestore,
+) : ViewModel() {
 
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery
@@ -56,7 +54,7 @@ open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositor
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return SearchViewModel(
-                WorkerProfileRepositoryFirestore(firestoreInstance, storageInstance), AccountRepositoryFirestore(firestoreInstance))
+                WorkerProfileRepositoryFirestore(firestoreInstance, storageInstance))
                 as T
           }
         }
@@ -212,29 +210,13 @@ open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositor
 
           val filteredProfiles =
               workerProfiles.filter { profile ->
-                  var account: Account? = null
-                  accountRepositoryFirestore.accountExists(profile.uid, onSuccess = { (b,a) ->
-                      if(b){
-                          if (a != null) {
-                              account = a
-                          }
-                      }
-                  }, onFailure = {
-                      Log.d("SearchViewModel", "Error fetching account for this worker")
-                  })
                 queryWords.all { word ->
                   profile.fieldOfWork.lowercase().contains(word) ||
                       profile.description.lowercase().contains(word) ||
                       profile.displayName.lowercase().contains(word) ||
                       profile.tags.any { it.lowercase().contains(word) } ||
                       profile.includedServices.any { it.name.lowercase().contains(word) } ||
-                      profile.addOnServices.any { it.name.lowercase().contains(word) } ||
-                      if(account!= null){
-                          account!!.firstName.lowercase().contains(word) ||
-                          account!!.lastName.lowercase().contains(word)
-                      }else{
-                          false
-                      }
+                      profile.addOnServices.any { it.name.lowercase().contains(word) }
                 }
               }
 

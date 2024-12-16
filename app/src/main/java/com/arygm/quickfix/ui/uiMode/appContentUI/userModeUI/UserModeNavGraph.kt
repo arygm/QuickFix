@@ -331,7 +331,8 @@ fun SearchNavHost(
           searchViewModel,
           accountViewModel,
           announcementViewModel,
-          categoryViewModel)
+          categoryViewModel,
+          quickFixViewModel)
     }
     composable(UserScreen.DISPLAY_UPLOADED_IMAGES) {
       QuickFixDisplayImages(isUser, navigationActions, announcementViewModel)
