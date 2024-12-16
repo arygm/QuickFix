@@ -11,6 +11,7 @@ import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.QuickFixTheme
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
 import com.google.firebase.Timestamp
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.assertEquals
@@ -149,9 +150,8 @@ class ProfileConfigurationUserNoModeScreenTest {
               invocation.getArgument<(List<String>) -> Unit>(
                   2) // Third argument is the success callback
           onSuccess(
-              listOf(
-                  "https://example.com/new-profile.jpg")) // Simulate success with a new profile
-                                                          // picture URL
+              listOf("https://example.com/new-profile.jpg")) // Simulate success with a new profile
+          // picture URL
           null
         }
         .whenever(accountRepository)

@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.dashboard
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement

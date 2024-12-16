@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.profile
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
@@ -55,10 +55,10 @@ import coil.compose.SubcomposeAsyncImage
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
-import com.arygm.quickfix.ui.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.isValidEmail
 import com.arygm.quickfix.utils.loadBirthDate

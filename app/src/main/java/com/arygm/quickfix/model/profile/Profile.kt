@@ -9,7 +9,7 @@ import java.time.LocalTime
 
 open class Profile(
     val uid: String,
-    val quickFixes: List<String> = emptyList(), // common field
+    var quickFixes: List<String> = emptyList(), // common field
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -50,10 +50,7 @@ class WorkerProfile(
     val description: String = "No description available", // Default description
     val location: Location? =
         Location(0.0, 0.0, "Unknown Location"), // Default to an empty Location
-    quickFixes: List<String> =
-        listOf(
-            "Fix a leaking faucet",
-            "Assemble a furniture piece"), // Default list with realistic examples
+    quickFixes: List<String> = emptyList(),
     val includedServices: List<IncludedService> =
         listOf(
             IncludedService(name = "Basic Consultation"),
@@ -62,27 +59,19 @@ class WorkerProfile(
         listOf(
             AddOnService(name = "Express Delivery"),
             AddOnService(name = "Premium Materials")), // Default add-on services
-    val reviews: ArrayDeque<Review> =
-        ArrayDeque(
-            listOf(
-                Review(username = "User1", review = "Great service!", rating = 5.0),
-                Review(
-                    username = "User2",
-                    review = "Very satisfied",
-                    rating = 4.5))), // Default reviews
-    val profilePicture: String =
-        "https://example.com/default-profile-pic.jpg", // Default profile picture URL
+    val reviews: ArrayDeque<Review> = ArrayDeque(emptyList()), // Default reviews
+    val profilePicture: String = "", // Default profile picture URL
     val bannerPicture: String =
         "https://example.com/default-banner-pic.jpg", // Default banner picture URL
-    val price: Double = 50.0, // Default price
-    val displayName: String = "Anonymous Worker", // Default display name
+    val price: Double = 0.0, // Default price
+    val displayName: String = "", // Default display name
     val unavailability_list: List<LocalDate> =
         listOf(
             LocalDate.now().plusDays(1),
             LocalDate.now().plusDays(3)), // Default unavailability dates
     val workingHours: Pair<LocalTime, LocalTime> =
         Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)), // Default working hours (9 AM to 5 PM)
-    uid: String = "default-uid", // Default UID
+    uid: String = "", // Default UID
     val tags: List<String> = listOf("Reliable", "Experienced", "Professional"), // Default tags
     val rating: Double = reviews.map { it.rating }.average(),
 ) : Profile(uid, quickFixes) {

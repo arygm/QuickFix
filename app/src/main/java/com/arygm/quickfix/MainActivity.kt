@@ -31,16 +31,18 @@ import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
+import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
-import com.arygm.quickfix.ui.noModeUI.NoModeNavHost
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.ui.uiMode.appContentUI.AppContentNavGraph
+import com.arygm.quickfix.ui.uiMode.noModeUI.NoModeNavHost
 import com.arygm.quickfix.utils.LocationHelper
 import com.arygm.quickfix.utils.loadAppMode
 import kotlinx.coroutines.delay
@@ -128,6 +130,9 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
       viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
   val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
   val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
+  val chatViewModel: ChatViewModel =
+      viewModel(factory = ChatViewModel.Factory(LocalContext.current))
+  val quickFixViewModel: QuickFixViewModel = viewModel(factory = QuickFixViewModel.Factory)
 
   var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
 
@@ -189,7 +194,9 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
               currentAppMode,
               workerViewModel,
               categoryViewModel,
-              locationViewModel)
+              locationViewModel,
+              chatViewModel,
+              quickFixViewModel)
         }
       }
 }
