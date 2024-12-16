@@ -64,6 +64,7 @@ import com.arygm.quickfix.utils.isValidEmail
 import com.arygm.quickfix.utils.loadBirthDate
 import com.arygm.quickfix.utils.loadEmail
 import com.arygm.quickfix.utils.loadFirstName
+import com.arygm.quickfix.utils.loadIsWorker
 import com.arygm.quickfix.utils.loadLastName
 import com.arygm.quickfix.utils.loadProfilePicture
 import com.arygm.quickfix.utils.loadUserId
@@ -81,7 +82,7 @@ fun AccountConfigurationScreen(
     preferencesViewModel: PreferencesViewModel
 ) {
   var uid by remember { mutableStateOf("Loading...") }
-
+  var isWorker = false
   // State to store saved data
   var savedFirstName by remember { mutableStateOf("Loading...") }
   var savedLastName by remember { mutableStateOf("Loading...") }
@@ -109,6 +110,7 @@ fun AccountConfigurationScreen(
   LaunchedEffect(Unit) {
     // Load saved data
     uid = loadUserId(preferencesViewModel)
+    isWorker = loadIsWorker(preferencesViewModel)
     savedFirstName = loadFirstName(preferencesViewModel)
     savedLastName = loadLastName(preferencesViewModel)
     savedEmail = loadEmail(preferencesViewModel)
@@ -121,6 +123,7 @@ fun AccountConfigurationScreen(
     inputEmail = savedEmail
     inputBirthDate = savedBirthDate
     inputProfilePicture = savedProfilePicture
+
   }
 
   var emailError by remember { mutableStateOf(false) }
@@ -324,7 +327,14 @@ fun AccountConfigurationScreen(
                                                 inputBirthDate.split("/")[1].toInt() - 1,
                                                 inputBirthDate.split("/")[0].toInt())
                                             .time),
+                                isWorker = isWorker,
                                 profilePicture = newProfilePicture)
+
+                                firstName = firstName,
+                                lastName = lastName,
+                                email = email,
+                                birthDate = Timestamp(calendar.time),
+                                isWorker = isWorker)
                         accountViewModel.updateAccount(
                             updatedAccount,
                             onSuccess = {

@@ -12,6 +12,7 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
+import com.arygm.quickfix.utils.IS_WORKER_KEY
 import com.google.firebase.Timestamp
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.assertEquals
@@ -67,6 +68,7 @@ class ProfileConfigurationUserNoModeScreenTest {
         .thenReturn(flowOf("01/01/1990"))
     whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.PROFILE_PICTURE_KEY))
         .thenReturn(flowOf("https://example.com/profile.jpg"))
+    whenever(preferencesRepository.getPreferenceByKey(IS_WORKER_KEY)).thenReturn(flowOf(true))
   }
 
   @Test
