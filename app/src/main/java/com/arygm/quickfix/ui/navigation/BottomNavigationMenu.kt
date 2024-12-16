@@ -109,7 +109,8 @@ fun BottomNavigationMenu(
 
   // LaunchedEffect allowing to update the bottom bar accordingly to navigationActions
   LaunchedEffect(currentRoute) {
-    val selectedItemId = getBottomBarId(currentRoute) // Get the ID of the selected item
+    val selectedItemId =
+        getBottomBarId(navigationActions.currentRoute()) // Get the ID of the selected item
     selectedTabId.intValue = selectedItemId
     bottomNavigation.value?.show(selectedItemId, true)
   }

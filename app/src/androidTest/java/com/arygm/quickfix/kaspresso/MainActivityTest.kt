@@ -234,7 +234,7 @@ class MainActivityTest : TestCase() {
       }
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
-      composeTestRule.onNodeWithTag("SetupyourbusinessaccountOption").performClick()
+      composeTestRule.onNodeWithTag("SetupYourBusinessAccountOption").performClick()
       composeTestRule
           .onNodeWithTag(C.Tag.personalInfoScreendisplayNameField)
           .performTextInput("ramy")
@@ -320,6 +320,19 @@ class MainActivityTest : TestCase() {
       }
       composeTestRule.onNodeWithTag(C.Tag.professionalInfoScreencontinueButton).performClick()
       composeTestRule.onNodeWithTag(C.Tag.welcomeOnBoardScreenStayUserButton).performClick()
+      composeTestRule.waitUntil("find the wallet", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithText("+ Add funds").fetchSemanticsNodes().isNotEmpty()
+      }
+      composeTestRule.onNodeWithText("+ Add funds").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Worker Mode").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Personal Settings").assertIsDisplayed()
+      composeTestRule.onNodeWithText("My Account").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Preferences").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Saved Lists").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Resources").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Support").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Legal").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Log out").assertIsDisplayed()
       composeTestRule.waitUntil("find the switch", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag(C.Tag.buttonSwitch).fetchSemanticsNodes().isNotEmpty()
       }
@@ -335,6 +348,24 @@ class MainActivityTest : TestCase() {
           .perform(click())
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
+      composeTestRule.onNodeWithText("- Withdraw funds").assertIsDisplayed()
+      composeTestRule.onNodeWithText("User Mode").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Personal Settings").assertIsDisplayed()
+      composeTestRule.onNodeWithText("My Account").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Preferences").assertIsDisplayed()
+      composeTestRule.onNodeWithText("My Profile").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Resources").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Support").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Legal").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Log out").assertIsDisplayed()
+      composeTestRule.waitUntil("find the AccountConfigurationOption", timeoutMillis = 20000) {
+        composeTestRule
+            .onAllNodesWithTag("AccountConfigurationOption")
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      }
+      updateAccountConfigurationAndVerify(
+          composeTestRule, "Ramo", "Hatimo", "28/10/2004", "Ramo Hatimo", 2)
       composeTestRule.waitUntil("find the switch", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag(C.Tag.buttonSwitch).fetchSemanticsNodes().isNotEmpty()
       }
@@ -436,9 +467,9 @@ class MainActivityTest : TestCase() {
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
 
-      composeTestRule.waitUntil("find the AccountconfigurationOption", timeoutMillis = 20000) {
+      composeTestRule.waitUntil("find the AccountConfigurationOption", timeoutMillis = 20000) {
         composeTestRule
-            .onAllNodesWithTag("AccountconfigurationOption")
+            .onAllNodesWithTag("AccountConfigurationOption")
             .fetchSemanticsNodes()
             .isNotEmpty()
       }
@@ -448,20 +479,20 @@ class MainActivityTest : TestCase() {
       updateAccountConfigurationAndVerify(
           composeTestRule, "Ramo", "Hatimo", "28/10/2004", "Ramo Hatimo", 2)
 
-      composeTestRule.onNodeWithTag("AccountconfigurationOption").performClick()
+      composeTestRule.onNodeWithTag("AccountConfigurationOption").performClick()
       composeTestRule.waitUntil(timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("birthDateInput").fetchSemanticsNodes().isNotEmpty()
       }
       composeTestRule.onNodeWithTag("birthDateInput").assertTextEquals("28/10/2004")
       composeTestRule.onNodeWithTag("goBackButton").performClick()
 
-      composeTestRule.waitUntil("find the SetupyourbusinessaccountOption", timeoutMillis = 20000) {
+      composeTestRule.waitUntil("find the SetupYourBusinessAccountOption", timeoutMillis = 20000) {
         composeTestRule
-            .onAllNodesWithTag("SetupyourbusinessaccountOption")
+            .onAllNodesWithTag("SetupYourBusinessAccountOption")
             .fetchSemanticsNodes()
             .isNotEmpty()
       }
-      composeTestRule.onNodeWithTag("SetupyourbusinessaccountOption").performClick()
+      composeTestRule.onNodeWithTag("SetupYourBusinessAccountOption").performClick()
 
       composeTestRule.waitUntil("find the goBackButton", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("goBackButton").fetchSemanticsNodes().isNotEmpty()
@@ -497,7 +528,7 @@ class MainActivityTest : TestCase() {
       log: Int
   ) {
     // Click on account configuration option
-    composeTestRule.onNodeWithTag("AccountconfigurationOption").performClick()
+    composeTestRule.onNodeWithTag("AccountConfigurationOption").performClick()
 
     // Wait until the first name input is visible
     composeTestRule.waitUntil("find the firstNameInput $log", timeoutMillis = 20000) {
@@ -520,9 +551,9 @@ class MainActivityTest : TestCase() {
     // Click on save button
     composeTestRule.onNodeWithTag("SaveButton").performClick()
 
-    composeTestRule.waitUntil("find the AccountconfigurationOption $log", timeoutMillis = 20000) {
+    composeTestRule.waitUntil("find the AccountConfigurationOption $log", timeoutMillis = 20000) {
       composeTestRule
-          .onAllNodesWithTag("AccountconfigurationOption")
+          .onAllNodesWithTag("AccountConfigurationOption")
           .fetchSemanticsNodes()
           .isNotEmpty()
     }
