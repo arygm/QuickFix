@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.search
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image

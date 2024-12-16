@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.authentication
+package com.arygm.quickfix.ui.uiMode.noModeUI.authentication
 
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState

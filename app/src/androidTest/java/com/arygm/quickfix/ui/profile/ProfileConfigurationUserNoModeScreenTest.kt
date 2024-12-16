@@ -11,6 +11,8 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.*
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.QuickFixTheme
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
+import com.arygm.quickfix.utils.IS_WORKER_KEY
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Calendar
@@ -74,6 +76,7 @@ class ProfileConfigurationUserNoModeScreenTest {
         .thenReturn(flowOf("john.doe@example.com"))
     whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.BIRTH_DATE_KEY))
         .thenReturn(flowOf("01/01/1990"))
+    whenever(preferencesRepository.getPreferenceByKey(IS_WORKER_KEY)).thenReturn(flowOf(true))
   }
 
   @Test

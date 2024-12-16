@@ -20,6 +20,7 @@ import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchOnBoarding
 import io.mockk.mockk
 import org.junit.Before
 import org.junit.Rule

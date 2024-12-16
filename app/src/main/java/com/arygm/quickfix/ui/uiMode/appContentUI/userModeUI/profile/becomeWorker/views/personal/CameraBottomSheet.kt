@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.profile.becomeWorker.views.personal
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.personal
 
 import android.Manifest
 import android.net.Uri

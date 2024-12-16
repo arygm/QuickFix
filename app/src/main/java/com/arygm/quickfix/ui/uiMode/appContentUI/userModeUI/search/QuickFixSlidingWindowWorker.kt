@@ -1,4 +1,4 @@
-// WorkerSlidingWindowContent.kt
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
 import android.widget.RatingBar
 import androidx.compose.foundation.Image

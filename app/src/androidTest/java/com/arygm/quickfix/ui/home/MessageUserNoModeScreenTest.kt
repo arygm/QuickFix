@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.arygm.quickfix.model.bill.BillField
 import com.arygm.quickfix.model.bill.Units
 import com.arygm.quickfix.model.locations.Location
@@ -14,15 +15,20 @@ import com.arygm.quickfix.model.messaging.ChatRepository
 import com.arygm.quickfix.model.messaging.ChatStatus
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.messaging.Message
+import com.arygm.quickfix.model.offline.small.PreferencesRepositoryDataStore
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.dataFields.Service
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixRepository
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
+import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.QuickFixTheme
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.MessageScreen
 import com.google.firebase.Timestamp
 import java.util.Date
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -35,7 +41,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-class MessageScreenTest {
+class MessageUserNoModeScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -44,9 +50,16 @@ class MessageScreenTest {
   private lateinit var quickFixRepository: QuickFixRepository
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var quickFixViewModel: QuickFixViewModel
+  private lateinit var modeViewModel: ModeViewModel
+  private lateinit var preferencesViewModel: PreferencesViewModel
+  private lateinit var preferencesRepositoryDataStore: PreferencesRepositoryDataStore
 
   // Implémentation de test pour Service
   data class TestService(override val name: String) : Service
+
+  // Class-level flows
+  private val appModeFlow = MutableStateFlow("USER")
+  private val userIdFlow = MutableStateFlow("testUserId")
 
   private val yesterday = Timestamp(Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000))
   private val today = Timestamp(Date(System.currentTimeMillis()))
@@ -95,21 +108,29 @@ class MessageScreenTest {
 
   @Before
   fun setup() {
-
     navigationActions = mock(NavigationActions::class.java)
     chatRepository = mock(ChatRepository::class.java)
     quickFixRepository = mock(QuickFixRepository::class.java)
+    modeViewModel = mock(ModeViewModel::class.java)
+    preferencesRepositoryDataStore = mock(PreferencesRepositoryDataStore::class.java)
+    preferencesViewModel = PreferencesViewModel(preferencesRepositoryDataStore)
 
-    // Mock du init pour quickFixRepository (si nécessaire)
-    whenever(quickFixRepository.init(any())).thenAnswer { invocation ->
-      val onSuccess = invocation.getArgument<() -> Unit>(0)
+    // Mock repository methods
+    whenever(quickFixRepository.init(any())).thenAnswer {
+      val onSuccess = it.getArgument<() -> Unit>(0)
       onSuccess()
-
       null
     }
 
+    // Mock userId and appMode preferences
+    val userIdKey = stringPreferencesKey("user_id")
+    whenever(preferencesRepositoryDataStore.getPreferenceByKey(userIdKey)).thenReturn(userIdFlow)
+
+    val appModeKey = stringPreferencesKey("app_mode")
+    whenever(preferencesRepositoryDataStore.getPreferenceByKey(appModeKey)).thenReturn(appModeFlow)
+
     runBlocking {
-      // Simule getChats : on retourne toujours notre fakeChat
+      // Mock getChats to return fakeChat
       doAnswer { invocation ->
             val onSuccess = invocation.getArgument<(List<Chat>) -> Unit>(0)
             onSuccess(listOf(fakeChat))
@@ -117,44 +138,49 @@ class MessageScreenTest {
           }
           .whenever(chatRepository)
           .getChats(any(), any())
-    }
-    // Simule getQuickFixes : on retourne toujours notre fakeQuickFix
-    doAnswer { invocation ->
-          val onSuccess = invocation.getArgument<(List<QuickFix>) -> Unit>(0)
-          onSuccess(listOf(fakeQuickFix))
-          null
-        }
-        .whenever(quickFixRepository)
-        .getQuickFixes(any(), any())
 
-    // Création des ViewModels réels
+      // Mock getQuickFixByUid to return fakeQuickFix when called with fakeQuickFixUid
+      doAnswer { invocation ->
+            val uid = invocation.getArgument<String>(0)
+            val onResult = invocation.getArgument<(QuickFix?) -> Unit>(1)
+            if (uid == fakeQuickFixUid) {
+              onResult(fakeQuickFix)
+            } else {
+              onResult(null)
+            }
+            null
+          }
+          .whenever(quickFixRepository)
+          .getQuickFixById(any(), any(), any())
+    }
+
+    // Initialize ViewModels with mocked repositories
     chatViewModel = ChatViewModel(chatRepository)
     quickFixViewModel = QuickFixViewModel(quickFixRepository)
 
-    // Maintenant, on force le chargement des données pour éviter les cas nuls.
     runBlocking {
-      chatViewModel.getChats() // Charge le chat
-      quickFixViewModel.getQuickFixes() // Charge le QuickFix
+      chatViewModel.getChats() // Load chats
+      quickFixViewModel.getQuickFixes() // Load QuickFixes if necessary
     }
 
-    // Sélection du chat si nécessaire
     chatViewModel.selectChat(fakeChat)
   }
 
   @Test
   fun testQuickFixDetailsAreDisplayed() {
+    // Ensure the QuickFixViewModel has the QuickFix data
     composeTestRule.setContent {
       QuickFixTheme {
         MessageScreen(
             chatViewModel = chatViewModel,
             navigationActions = navigationActions,
             quickFixViewModel = quickFixViewModel,
-            userId = testUserId,
-            isUser = true)
+            modeViewModel = modeViewModel,
+            preferencesViewModel = preferencesViewModel)
       }
     }
 
-    // Vérifier l'affichage de quickFixDetails
+    // Verify the display of quickFixDetails
     composeTestRule.onNodeWithTag("quickFixDetails").assertIsDisplayed()
   }
 
@@ -166,8 +192,8 @@ class MessageScreenTest {
             chatViewModel = chatViewModel,
             navigationActions = navigationActions,
             quickFixViewModel = quickFixViewModel,
-            userId = testUserId,
-            isUser = true)
+            modeViewModel = modeViewModel,
+            preferencesViewModel = preferencesViewModel)
       }
     }
 
@@ -185,8 +211,8 @@ class MessageScreenTest {
             chatViewModel = chatViewModel,
             navigationActions = navigationActions,
             quickFixViewModel = quickFixViewModel,
-            userId = testUserId,
-            isUser = true)
+            modeViewModel = modeViewModel,
+            preferencesViewModel = preferencesViewModel)
       }
     }
 
@@ -220,8 +246,8 @@ class MessageScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              userId = testUserId,
-              isUser = true)
+              modeViewModel = modeViewModel,
+              preferencesViewModel = preferencesViewModel)
         }
       }
 
@@ -259,8 +285,8 @@ class MessageScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              userId = testUserId,
-              isUser = true)
+              modeViewModel = modeViewModel,
+              preferencesViewModel = preferencesViewModel)
         }
       }
 
@@ -296,8 +322,8 @@ class MessageScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              userId = testUserId,
-              isUser = true)
+              modeViewModel = modeViewModel,
+              preferencesViewModel = preferencesViewModel)
         }
       }
 
@@ -339,8 +365,8 @@ class MessageScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              userId = testUserId,
-              isUser = true)
+              modeViewModel = modeViewModel,
+              preferencesViewModel = preferencesViewModel)
         }
       }
 
@@ -364,6 +390,9 @@ class MessageScreenTest {
           .whenever(chatRepository)
           .getChats(any(), any())
 
+      // Set AppMode to WORKER
+      appModeFlow.value = "WORKER"
+
       runBlocking {
         chatViewModel.getChats()
         chatViewModel.selectChat(waitingChat)
@@ -377,9 +406,8 @@ class MessageScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              userId = testUserId,
-              isUser = false // Le worker
-              )
+              modeViewModel = modeViewModel,
+              preferencesViewModel = preferencesViewModel)
         }
       }
 
@@ -446,8 +474,8 @@ class MessageScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              userId = testUserId,
-              isUser = true)
+              modeViewModel = modeViewModel,
+              preferencesViewModel = preferencesViewModel)
         }
       }
 

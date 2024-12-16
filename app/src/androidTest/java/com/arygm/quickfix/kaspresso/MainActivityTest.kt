@@ -1,7 +1,6 @@
 package com.arygm.quickfix.kaspresso
 
 import android.graphics.Bitmap
-import android.location.Location
 import android.os.Build
 import android.util.Log
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -18,6 +17,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
@@ -49,7 +50,6 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.storage.FirebaseStorage
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen
-import okhttp3.internal.wait
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.FixMethodOrder
@@ -190,7 +190,7 @@ class MainActivityTest : TestCase() {
   }
 
   @Test
-  fun becomeAWorker() = run {
+  fun DbecomeAWorker() = run {
     step("Set up the WelcomeScreen and transit to the register") {
       val indicesIncludedServices =
           (0 until item.subcategories[0].setServices.size / 2 step 2).toList()
@@ -235,7 +235,7 @@ class MainActivityTest : TestCase() {
       }
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
-      composeTestRule.onNodeWithTag("SetupyourbusinessaccountOption").performClick()
+      composeTestRule.onNodeWithTag("SetupYourBusinessAccountOption").performClick()
       composeTestRule
           .onNodeWithTag(C.Tag.personalInfoScreendisplayNameField)
           .performTextInput("ramy")
@@ -321,6 +321,19 @@ class MainActivityTest : TestCase() {
       }
       composeTestRule.onNodeWithTag(C.Tag.professionalInfoScreencontinueButton).performClick()
       composeTestRule.onNodeWithTag(C.Tag.welcomeOnBoardScreenStayUserButton).performClick()
+      composeTestRule.waitUntil("find the wallet", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithText("+ Add funds").fetchSemanticsNodes().isNotEmpty()
+      }
+      composeTestRule.onNodeWithText("+ Add funds").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Worker Mode").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Personal Settings").assertIsDisplayed()
+      composeTestRule.onNodeWithText("My Account").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Preferences").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Saved Lists").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Resources").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Support").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Legal").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Log out").assertIsDisplayed()
       composeTestRule.waitUntil("find the switch", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag(C.Tag.buttonSwitch).fetchSemanticsNodes().isNotEmpty()
       }
@@ -336,6 +349,24 @@ class MainActivityTest : TestCase() {
           .perform(click())
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
+      composeTestRule.onNodeWithText("- Withdraw funds").assertIsDisplayed()
+      composeTestRule.onNodeWithText("User Mode").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Personal Settings").assertIsDisplayed()
+      composeTestRule.onNodeWithText("My Account").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Preferences").assertIsDisplayed()
+      composeTestRule.onNodeWithText("My Profile").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Resources").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Support").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Legal").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Log out").assertIsDisplayed()
+      composeTestRule.waitUntil("find the AccountConfigurationOption", timeoutMillis = 20000) {
+        composeTestRule
+            .onAllNodesWithTag("AccountConfigurationOption")
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      }
+      updateAccountConfigurationAndVerify(
+          composeTestRule, "Ramo", "Hatimo", "28/10/2004", "Ramo Hatimo", 2)
       composeTestRule.waitUntil("find the switch", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag(C.Tag.buttonSwitch).fetchSemanticsNodes().isNotEmpty()
       }
@@ -344,7 +375,78 @@ class MainActivityTest : TestCase() {
   }
 
   @Test
-  fun BshouldBeAbleToLogin() = run {
+  fun BquickFixOnBoarding() = run {
+    step("Set up the WelcomeScreen and transit to the register") {
+      val testLocation =
+          com.arygm.quickfix.model.locations.Location(
+              latitude = 0.0, longitude = 0.0, name = "Test Location")
+      val testBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+      composeTestRule.activityRule.scenario.onActivity { activity ->
+        (activity as MainActivity).setTestBitmap(testBitmap)
+        activity.setTestLocation(testLocation)
+      }
+
+      // Wait for the UI to settle
+      composeTestRule.waitForIdle()
+
+      // Attempt to grant permissions
+      allowPermissionsIfNeeded()
+      loginToTestAccount()
+      composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()
+      }
+
+      composeTestRule.waitForIdle()
+      // Navigate to search
+      onView(withText("Search")).perform(click())
+      onView(withText("Search")).perform(click())
+      composeTestRule.waitUntil("find the categories", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithText("Carpentry").fetchSemanticsNodes().isNotEmpty()
+      }
+      composeTestRule.onNodeWithText("Carpentry").performClick()
+      composeTestRule.waitUntil("find the subcategories", timeoutMillis = 20000) {
+        composeTestRule
+            .onAllNodesWithText("Construction Carpentry")
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      }
+
+      composeTestRule.onNodeWithText("Construction Carpentry").performClick()
+      composeTestRule.waitUntil("find the Book button", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithText("Book").fetchSemanticsNodes().isNotEmpty()
+      }
+
+      composeTestRule.onNodeWithText("Book").performClick()
+      composeTestRule.waitUntil("find the continue Button", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithText("Continue").fetchSemanticsNodes().isNotEmpty()
+      }
+      composeTestRule.onNodeWithText("Continue").performClick()
+
+      // Enter QuickFixFirstStep
+      composeTestRule.onNodeWithText("Enter a title ...").performTextInput("Test Title")
+      composeTestRule.onNodeWithText("Type a description...").performTextInput("Test Note")
+      composeTestRule.onNodeWithText("Framing").performClick()
+      composeTestRule.onNodeWithText("Add Suggested Date").performClick()
+      composeTestRule.onNodeWithText(java.time.LocalDate.now().dayOfMonth.toString()).performClick()
+      composeTestRule.onNodeWithText("OK").performClick()
+      composeTestRule.onNodeWithText("OK").performClick()
+      composeTestRule
+          .onNodeWithText("Enter a location ...")
+          .performScrollTo()
+          .performTextInput("Test Location")
+      composeTestRule.onNodeWithTag("quickFixFirstStep").performScrollToIndex(index = 21)
+      composeTestRule.onNodeWithTag("continueButton").performScrollTo().performClick()
+      composeTestRule.waitUntil("find the continue Button", timeoutMillis = 20000) {
+        composeTestRule
+            .onAllNodesWithText("Consult the discussion")
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      }
+    }
+  }
+
+  @Test
+  fun CshouldBeAbleToLogin() = run {
     step("Set up the WelcomeScreen and transit to the register") {
       composeTestRule.activity
 
@@ -353,7 +455,6 @@ class MainActivityTest : TestCase() {
 
       // Attempt to grant permissions
       allowPermissionsIfNeeded()
-      loginToTestAccount()
       // Retry the action until it works with a timeout of 10 seconds
       composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("BottomNavMenu").fetchSemanticsNodes().isNotEmpty()
@@ -367,9 +468,9 @@ class MainActivityTest : TestCase() {
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
 
-      composeTestRule.waitUntil("find the AccountconfigurationOption", timeoutMillis = 20000) {
+      composeTestRule.waitUntil("find the AccountConfigurationOption", timeoutMillis = 20000) {
         composeTestRule
-            .onAllNodesWithTag("AccountconfigurationOption")
+            .onAllNodesWithTag("AccountConfigurationOption")
             .fetchSemanticsNodes()
             .isNotEmpty()
       }
@@ -379,20 +480,20 @@ class MainActivityTest : TestCase() {
       updateAccountConfigurationAndVerify(
           composeTestRule, "Ramo", "Hatimo", "28/10/2004", "Ramo Hatimo", 2)
 
-      composeTestRule.onNodeWithTag("AccountconfigurationOption").performClick()
+      composeTestRule.onNodeWithTag("AccountConfigurationOption").performClick()
       composeTestRule.waitUntil(timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("birthDateInput").fetchSemanticsNodes().isNotEmpty()
       }
       composeTestRule.onNodeWithTag("birthDateInput").assertTextEquals("28/10/2004")
       composeTestRule.onNodeWithTag("goBackButton").performClick()
 
-      composeTestRule.waitUntil("find the SetupyourbusinessaccountOption", timeoutMillis = 20000) {
+      composeTestRule.waitUntil("find the SetupYourBusinessAccountOption", timeoutMillis = 20000) {
         composeTestRule
-            .onAllNodesWithTag("SetupyourbusinessaccountOption")
+            .onAllNodesWithTag("SetupYourBusinessAccountOption")
             .fetchSemanticsNodes()
             .isNotEmpty()
       }
-      composeTestRule.onNodeWithTag("SetupyourbusinessaccountOption").performClick()
+      composeTestRule.onNodeWithTag("SetupYourBusinessAccountOption").performClick()
 
       composeTestRule.waitUntil("find the goBackButton", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("goBackButton").fetchSemanticsNodes().isNotEmpty()
@@ -414,7 +515,7 @@ class MainActivityTest : TestCase() {
     composeTestRule.onNodeWithTag("inputPassword").performTextClearance()
 
     composeTestRule.onNodeWithTag("inputEmail").performTextInput("main.activity@test.com")
-    composeTestRule.onNodeWithTag("inputPassword").performTextInput("246890357Asefthuk")
+    composeTestRule.onNodeWithTag("inputPassword").performTextInput("@@Test1234@@")
     composeTestRule.onNodeWithTag("logInButton").assertIsEnabled()
     composeTestRule.onNodeWithTag("logInButton").performClick()
   }
@@ -428,7 +529,7 @@ class MainActivityTest : TestCase() {
       log: Int
   ) {
     // Click on account configuration option
-    composeTestRule.onNodeWithTag("AccountconfigurationOption").performClick()
+    composeTestRule.onNodeWithTag("AccountConfigurationOption").performClick()
 
     // Wait until the first name input is visible
     composeTestRule.waitUntil("find the firstNameInput $log", timeoutMillis = 20000) {
@@ -451,9 +552,9 @@ class MainActivityTest : TestCase() {
     // Click on save button
     composeTestRule.onNodeWithTag("SaveButton").performClick()
 
-    composeTestRule.waitUntil("find the AccountconfigurationOption $log", timeoutMillis = 20000) {
+    composeTestRule.waitUntil("find the AccountConfigurationOption $log", timeoutMillis = 20000) {
       composeTestRule
-          .onAllNodesWithTag("AccountconfigurationOption")
+          .onAllNodesWithTag("AccountConfigurationOption")
           .fetchSemanticsNodes()
           .isNotEmpty()
     }

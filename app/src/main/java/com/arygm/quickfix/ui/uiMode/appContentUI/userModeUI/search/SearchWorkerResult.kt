@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.search
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -75,6 +75,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.Account
@@ -83,6 +85,7 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
@@ -93,6 +96,7 @@ import com.arygm.quickfix.ui.elements.QuickFixSlidingWindow
 import com.arygm.quickfix.ui.elements.RatingBar
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.utils.GeocoderWrapper
 import com.arygm.quickfix.utils.LocationHelper
 import com.arygm.quickfix.utils.loadUserId
@@ -116,6 +120,7 @@ fun SearchWorkerResult(
     accountViewModel: AccountViewModel,
     userProfileViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
+    quickFixViewModel: QuickFixViewModel,
     geocoderWrapper: GeocoderWrapper = GeocoderWrapper(LocalContext.current)
 ) {
   fun getCityNameFromCoordinates(latitude: Double, longitude: Double): String? {
@@ -433,8 +438,8 @@ fun SearchWorkerResult(
                               searchViewModel.calculateDistance(
                                   workerLocation.latitude,
                                   workerLocation.longitude,
-                                  baseLocation!!.latitude,
-                                  baseLocation!!.longitude)
+                                  baseLocation.latitude,
+                                  baseLocation.longitude)
                             }
                             ?.toInt()
 
@@ -597,311 +602,361 @@ fun SearchWorkerResult(
     }
 
     if (isWindowVisible) {
-      QuickFixSlidingWindow(isVisible = isWindowVisible, onDismiss = { isWindowVisible = false }) {
-        // Content of the sliding window
-        Column(
-            modifier =
-                Modifier.clip(RoundedCornerShape(topStart = 25f, bottomStart = 25f))
-                    .fillMaxWidth()
-                    .background(colorScheme.background)
-                    .testTag("sliding_window_content")) {
+      Popup(
+          onDismissRequest = { isWindowVisible = false },
+          properties = PopupProperties(focusable = true)) {
+            QuickFixSlidingWindow(
+                isVisible = isWindowVisible, onDismiss = { isWindowVisible = false }) {
+                  // Content of the sliding window
+                  Column(
+                      modifier =
+                          Modifier.clip(RoundedCornerShape(topStart = 25f, bottomStart = 25f))
+                              .fillMaxWidth()
+                              .background(colorScheme.background)
+                              .testTag("sliding_window_content")) {
 
-              // Top Bar
-              Box(
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .height(
-                              screenHeight *
-                                  0.23f) // Adjusted height to accommodate profile picture overlap
-                          .testTag("sliding_window_top_bar")) {
-                    // Banner Image
-                    Image(
-                        painter = painterResource(id = bannerImage),
-                        contentDescription = "Banner",
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .height(screenHeight * 0.2f)
-                                .testTag("sliding_window_banner_image"),
-                        contentScale = ContentScale.Crop)
-
-                    QuickFixButton(
-                        buttonText = if (saved) "saved" else "save",
-                        onClickAction = { saved = !saved },
-                        buttonColor = colorScheme.surface,
-                        textColor = colorScheme.onBackground,
-                        textStyle = MaterialTheme.typography.labelMedium,
-                        contentPadding = PaddingValues(horizontal = screenWidth * 0.01f),
-                        modifier =
-                            Modifier.align(Alignment.BottomEnd)
-                                .width(screenWidth * 0.25f)
-                                .offset(x = -(screenWidth * 0.04f))
-                                .testTag(
-                                    "sliding_window_save_button"), // Negative offset to position
-                        // correctly,
-                        leadingIcon =
-                            if (saved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder)
-
-                    // Profile picture overlapping the banner image
-                    Image(
-                        painter = painterResource(id = profilePicture),
-                        contentDescription = "Profile Picture",
-                        modifier =
-                            Modifier.size(screenHeight * 0.1f)
-                                .align(Alignment.BottomStart)
-                                .offset(x = screenWidth * 0.04f)
-                                .clip(CircleShape)
-                                .testTag("sliding_window_profile_picture"),
-                        // Negative offset to position correctly
-                        contentScale = ContentScale.Crop)
-                  }
-
-              // Worker Field and Address under the profile picture.
-              Column(
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(horizontal = screenWidth * 0.04f)
-                          .testTag("sliding_window_worker_additional_info")) {
-                    Text(
-                        text = selectedWorker.fieldOfWork,
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = colorScheme.onBackground,
-                        modifier = Modifier.testTag("sliding_window_worker_category"))
-                    selectedCityName?.let {
-                      Text(
-                          text = it,
-                          style = MaterialTheme.typography.headlineSmall,
-                          color = colorScheme.onBackground,
-                          modifier = Modifier.testTag("sliding_window_worker_address"))
-                    }
-                  }
-
-              // Main content should be scrollable
-              Column(
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .verticalScroll(rememberScrollState())
-                          .background(colorScheme.surface)
-                          .testTag("sliding_window_scrollable_content")) {
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-
-                    // Description with "Show more" functionality
-                    var showFullDescription by remember { mutableStateOf(false) }
-                    val descriptionText =
-                        if (showFullDescription || selectedWorker.description.length <= 100) {
-                          selectedWorker.description
-                        } else {
-                          selectedWorker.description.take(100) + "..."
-                        }
-
-                    Text(
-                        text = descriptionText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colorScheme.onSurface,
-                        modifier =
-                            Modifier.padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_description"))
-
-                    if (selectedWorker.description.length > 100) {
-                      Text(
-                          text = if (showFullDescription) "Show less" else "Show more",
-                          style =
-                              MaterialTheme.typography.bodySmall.copy(color = colorScheme.primary),
-                          modifier =
-                              Modifier.padding(horizontal = screenWidth * 0.04f)
-                                  .clickable { showFullDescription = !showFullDescription }
-                                  .testTag("sliding_window_description_show_more_button"))
-                    }
-
-                    // Delimiter between description and services
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-
-                    HorizontalDivider(
-                        modifier =
-                            Modifier.padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_horizontal_divider_1"),
-                        thickness = 1.dp,
-                        color = colorScheme.onSurface.copy(alpha = 0.2f))
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-
-                    // Services Section
-                    Row(
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_services_row")) {
-                          // Included Services
-                          Column(
-                              modifier =
-                                  Modifier.weight(1f)
-                                      .testTag("sliding_window_included_services_column")) {
-                                Text(
-                                    text = "Included Services",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    color = colorScheme.onBackground)
-                                Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-                                selectedWorker.includedServices.forEach { service ->
-                                  val name = service.name
-                                  Text(
-                                      text = "• $name",
-                                      style = MaterialTheme.typography.bodySmall,
-                                      color = colorScheme.onSurface,
-                                      modifier = Modifier.padding(bottom = screenHeight * 0.005f))
-                                }
-                              }
-
-                          Spacer(modifier = Modifier.width(screenWidth * 0.02f))
-
-                          // Add-On Services
-                          Column(
-                              modifier =
-                                  Modifier.weight(1f)
-                                      .testTag("sliding_window_addon_services_column")) {
-                                Text(
-                                    text = "Add-On Services",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    color = colorScheme.primary)
-                                Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-                                selectedWorker.addOnServices.forEach { service ->
-                                  val name = service.name
-                                  Text(
-                                      text = "• $name",
-                                      style = MaterialTheme.typography.bodySmall,
-                                      color = colorScheme.primary,
-                                      modifier = Modifier.padding(bottom = screenHeight * 0.005f))
-                                }
-                              }
-                        }
-
-                    Spacer(modifier = Modifier.height(screenHeight * 0.03f))
-
-                    // Continue Button with Rate/HR
-                    QuickFixButton(
-                        buttonText = "Continue",
-                        onClickAction = { /* Handle continue */},
-                        buttonColor = colorScheme.primary,
-                        textColor = colorScheme.onPrimary,
-                        textStyle = MaterialTheme.typography.labelMedium,
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_continue_button"))
-
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-
-                    HorizontalDivider(
-                        modifier =
-                            Modifier.padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_horizontal_divider_2"),
-                        thickness = 1.dp,
-                        color = colorScheme.onSurface.copy(alpha = 0.2f),
-                    )
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-
-                    // Tags Section
-                    Text(
-                        text = "Tags",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = colorScheme.onBackground,
-                        modifier = Modifier.padding(horizontal = screenWidth * 0.04f))
-                    Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-
-                    // Display tags using FlowRow for wrapping
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(screenWidth * 0.02f),
-                        verticalArrangement = Arrangement.spacedBy(screenHeight * 0.01f),
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_tags_flow_row"),
-                    ) {
-                      selectedWorker.tags.forEach { tag ->
-                        Text(
-                            text = tag,
-                            color = colorScheme.primary,
-                            style = MaterialTheme.typography.bodySmall,
+                        // Top Bar
+                        Box(
                             modifier =
-                                Modifier.border(
-                                        width = 1.dp,
-                                        color = colorScheme.primary,
-                                        shape = MaterialTheme.shapes.small)
-                                    .padding(
-                                        horizontal = screenWidth * 0.02f,
-                                        vertical = screenHeight * 0.005f))
-                      }
-                    }
+                                Modifier.fillMaxWidth()
+                                    .height(
+                                        screenHeight *
+                                            0.23f) // Adjusted height to accommodate profile picture
+                                    // overlap
+                                    .testTag("sliding_window_top_bar")) {
+                              // Banner Image
+                              Image(
+                                  painter = painterResource(id = bannerImage),
+                                  contentDescription = "Banner",
+                                  modifier =
+                                      Modifier.fillMaxWidth()
+                                          .height(screenHeight * 0.2f)
+                                          .testTag("sliding_window_banner_image"),
+                                  contentScale = ContentScale.Crop)
 
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+                              QuickFixButton(
+                                  buttonText = if (saved) "saved" else "save",
+                                  onClickAction = { saved = !saved },
+                                  buttonColor = colorScheme.surface,
+                                  textColor = colorScheme.onBackground,
+                                  textStyle = MaterialTheme.typography.labelMedium,
+                                  contentPadding = PaddingValues(horizontal = screenWidth * 0.01f),
+                                  modifier =
+                                      Modifier.align(Alignment.BottomEnd)
+                                          .width(screenWidth * 0.25f)
+                                          .offset(x = -(screenWidth * 0.04f))
+                                          .testTag(
+                                              "sliding_window_save_button"), // Negative offset to
+                                  // position
+                                  // correctly,
+                                  leadingIcon =
+                                      if (saved) Icons.Filled.Bookmark
+                                      else Icons.Outlined.BookmarkBorder)
 
-                    HorizontalDivider(
-                        modifier =
-                            Modifier.padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_horizontal_divider_3"),
-                        thickness = 1.dp,
-                        color = colorScheme.onSurface.copy(alpha = 0.2f))
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+                              // Profile picture overlapping the banner image
+                              Image(
+                                  painter = painterResource(id = profilePicture),
+                                  contentDescription = "Profile Picture",
+                                  modifier =
+                                      Modifier.size(screenHeight * 0.1f)
+                                          .align(Alignment.BottomStart)
+                                          .offset(x = screenWidth * 0.04f)
+                                          .clip(CircleShape)
+                                          .testTag("sliding_window_profile_picture"),
+                                  // Negative offset to position correctly
+                                  contentScale = ContentScale.Crop)
+                            }
 
-                    Text(
-                        text = "Reviews",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = colorScheme.onBackground,
-                        modifier = Modifier.padding(horizontal = screenWidth * 0.04f))
-                    Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+                        // Worker Field and Address under the profile picture
+                        Column(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .padding(horizontal = screenWidth * 0.04f)
+                                    .testTag("sliding_window_worker_additional_info")) {
+                              Text(
+                                  text = selectedWorker.fieldOfWork,
+                                  style = MaterialTheme.typography.headlineLarge,
+                                  color = colorScheme.onBackground,
+                                  modifier = Modifier.testTag("sliding_window_worker_category"))
+                              selectedCityName?.let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    color = colorScheme.onBackground,
+                                    modifier = Modifier.testTag("sliding_window_worker_address"))
+                              }
+                            }
 
-                    // Star Rating Row
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier =
-                            Modifier.padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_star_rating_row")) {
-                          RatingBar(
-                              selectedWorker.rating.toFloat(),
-                              modifier = Modifier.height(screenHeight * 0.03f).testTag("starsRow"))
-                        }
-                    Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-                    LazyRow(
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_reviews_row")) {
-                          itemsIndexed(selectedWorker.reviews) { index, review ->
-                            var isExpanded by remember { mutableStateOf(false) }
-                            val displayText =
-                                if (isExpanded || review.review.length <= 100) {
-                                  review.review
-                                } else {
-                                  review.review.take(100) + "..."
+                        // Main content should be scrollable
+                        Column(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .verticalScroll(rememberScrollState())
+                                    .background(colorScheme.surface)
+                                    .testTag("sliding_window_scrollable_content")) {
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                              // Description with "Show more" functionality
+                              var showFullDescription by remember { mutableStateOf(false) }
+                              val descriptionText =
+                                  if (showFullDescription ||
+                                      selectedWorker.description.length <= 100) {
+                                    selectedWorker.description
+                                  } else {
+                                    selectedWorker.description.take(100) + "..."
+                                  }
+
+                              Text(
+                                  text = descriptionText,
+                                  style = MaterialTheme.typography.bodySmall,
+                                  color = colorScheme.onSurface,
+                                  modifier =
+                                      Modifier.padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_description"))
+
+                              if (selectedWorker.description.length > 100) {
+                                Text(
+                                    text = if (showFullDescription) "Show less" else "Show more",
+                                    style =
+                                        MaterialTheme.typography.bodySmall.copy(
+                                            color = colorScheme.primary),
+                                    modifier =
+                                        Modifier.padding(horizontal = screenWidth * 0.04f)
+                                            .clickable {
+                                              showFullDescription = !showFullDescription
+                                            }
+                                            .testTag("sliding_window_description_show_more_button"))
+                              }
+
+                              // Delimiter between description and services
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                              HorizontalDivider(
+                                  modifier =
+                                      Modifier.padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_horizontal_divider_1"),
+                                  thickness = 1.dp,
+                                  color = colorScheme.onSurface.copy(alpha = 0.2f))
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                              // Services Section
+                              Row(
+                                  modifier =
+                                      Modifier.fillMaxWidth()
+                                          .padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_services_row")) {
+                                    // Included Services
+                                    Column(
+                                        modifier =
+                                            Modifier.weight(1f)
+                                                .testTag(
+                                                    "sliding_window_included_services_column")) {
+                                          Text(
+                                              text = "Included Services",
+                                              style = MaterialTheme.typography.headlineMedium,
+                                              color = colorScheme.onBackground)
+                                          Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+                                          selectedWorker.includedServices.forEach { service ->
+                                            val name = service.name
+                                            Text(
+                                                text = "• $name",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = colorScheme.onSurface,
+                                                modifier =
+                                                    Modifier.padding(
+                                                        bottom = screenHeight * 0.005f))
+                                          }
+                                        }
+
+                                    Spacer(modifier = Modifier.width(screenWidth * 0.02f))
+
+                                    // Add-On Services
+                                    Column(
+                                        modifier =
+                                            Modifier.weight(1f)
+                                                .testTag("sliding_window_addon_services_column")) {
+                                          Text(
+                                              text = "Add-On Services",
+                                              style = MaterialTheme.typography.headlineMedium,
+                                              color = colorScheme.primary)
+                                          Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+                                          selectedWorker.addOnServices.forEach { service ->
+                                            val name = service.name
+                                            Text(
+                                                text = "• $name",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = colorScheme.primary,
+                                                modifier =
+                                                    Modifier.padding(
+                                                        bottom = screenHeight * 0.005f))
+                                          }
+                                        }
+                                  }
+
+                              Spacer(modifier = Modifier.height(screenHeight * 0.03f))
+
+                              // Continue Button with Rate/HR
+                              QuickFixButton(
+                                  buttonText = "Continue",
+                                  onClickAction = {
+                                    quickFixViewModel.setSelectedWorkerProfile(selectedWorker)
+                                    navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
+                                  },
+                                  buttonColor = colorScheme.primary,
+                                  textColor = colorScheme.onPrimary,
+                                  textStyle = MaterialTheme.typography.labelMedium,
+                                  modifier =
+                                      Modifier.fillMaxWidth()
+                                          .padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_continue_button"))
+
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                              HorizontalDivider(
+                                  modifier =
+                                      Modifier.padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_horizontal_divider_2"),
+                                  thickness = 1.dp,
+                                  color = colorScheme.onSurface.copy(alpha = 0.2f),
+                              )
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                              // Tags Section
+                              Text(
+                                  text = "Tags",
+                                  style = MaterialTheme.typography.headlineMedium,
+                                  color = colorScheme.onBackground,
+                                  modifier = Modifier.padding(horizontal = screenWidth * 0.04f))
+                              Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+
+                              // Display tags using FlowRow for wrapping
+                              FlowRow(
+                                  horizontalArrangement = Arrangement.spacedBy(screenWidth * 0.02f),
+                                  verticalArrangement = Arrangement.spacedBy(screenHeight * 0.01f),
+                                  modifier =
+                                      Modifier.fillMaxWidth()
+                                          .padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_tags_flow_row"),
+                              ) {
+                                selectedWorker.tags.forEach { tag ->
+                                  Text(
+                                      text = tag,
+                                      color = colorScheme.primary,
+                                      style = MaterialTheme.typography.bodySmall,
+                                      modifier =
+                                          Modifier.border(
+                                                  width = 1.dp,
+                                                  color = colorScheme.primary,
+                                                  shape = MaterialTheme.shapes.small)
+                                              .padding(
+                                                  horizontal = screenWidth * 0.02f,
+                                                  vertical = screenHeight * 0.005f))
                                 }
+                              }
 
-                            Box(
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                              HorizontalDivider(
+                                  modifier =
+                                      Modifier.padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_horizontal_divider_3"),
+                                  thickness = 1.dp,
+                                  color = colorScheme.onSurface.copy(alpha = 0.2f))
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                              Text(
+                                  text = "Reviews",
+                                  style = MaterialTheme.typography.headlineMedium,
+                                  color = colorScheme.onBackground,
+                                  modifier = Modifier.padding(horizontal = screenWidth * 0.04f))
+                              Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+
+                            // Star Rating Row
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
                                 modifier =
-                                    Modifier.padding(end = screenWidth * 0.02f)
-                                        .width(screenWidth * 0.6f)
-                                        .clip(RoundedCornerShape(25f))
-                                        .background(colorScheme.background)) {
-                                  Column(modifier = Modifier.padding(screenWidth * 0.02f)) {
-                                    Text(
-                                        text = displayText,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = colorScheme.onSurface)
-                                    if (review.review.length > 100) {
-                                      Text(
-                                          text = if (isExpanded) "See less" else "See more",
-                                          style =
-                                              MaterialTheme.typography.bodySmall.copy(
-                                                  color = colorScheme.primary),
+                                    Modifier.padding(horizontal = screenWidth * 0.04f)
+                                        .testTag("sliding_window_star_rating_row")) {
+                                  RatingBar(
+                                      selectedWorker.rating.toFloat(),
+                                      modifier = Modifier.height(screenHeight * 0.03f).testTag("starsRow"))
+                                }
+                            Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+                            LazyRow(
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .padding(horizontal = screenWidth * 0.04f)
+                                        .testTag("sliding_window_reviews_row")) {
+                                  itemsIndexed(selectedWorker.reviews) { index, review ->
+                                    var isExpanded by remember { mutableStateOf(false) }
+                                    val displayText =
+                                        if (isExpanded || review.review.length <= 100) {
+                                          review.review
+                                        } else {
+                                          review.review.take(100) + "..."
+                                        }
+                              // Star Rating Row
+                              Row(
+                                  verticalAlignment = Alignment.CenterVertically,
+                                  modifier =
+                                      Modifier.padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_star_rating_row")) {
+                                    RatingBar(
+                                        selectedWorker.rating.toFloat(),
+                                        modifier = Modifier.height(20.dp).testTag("starsRow"))
+                                  }
+                              Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+                              LazyRow(
+                                  modifier =
+                                      Modifier.fillMaxWidth()
+                                          .padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_reviews_row")) {
+                                    itemsIndexed(selectedWorker.reviews) { index, review ->
+                                      var isExpanded by remember { mutableStateOf(false) }
+                                      val displayText =
+                                          if (isExpanded || review.review.length <= 100) {
+                                            review.review
+                                          } else {
+                                            review.review.take(100) + "..."
+                                          }
+
+                                      Box(
                                           modifier =
-                                              Modifier.clickable { isExpanded = !isExpanded }
-                                                  .padding(top = screenHeight * 0.01f))
+                                              Modifier.padding(end = screenWidth * 0.02f)
+                                                  .width(screenWidth * 0.6f)
+                                                  .clip(RoundedCornerShape(25f))
+                                                  .background(colorScheme.background)) {
+                                            Column(
+                                                modifier = Modifier.padding(screenWidth * 0.02f)) {
+                                                  Text(
+                                                      text = displayText,
+                                                      style = MaterialTheme.typography.bodySmall,
+                                                      color = colorScheme.onSurface)
+                                                  if (review.review.length > 100) {
+                                                    Text(
+                                                        text =
+                                                            if (isExpanded) "See less"
+                                                            else "See more",
+                                                        style =
+                                                            MaterialTheme.typography.bodySmall.copy(
+                                                                color = colorScheme.primary),
+                                                        modifier =
+                                                            Modifier.clickable {
+                                                                  isExpanded = !isExpanded
+                                                                }
+                                                                .padding(
+                                                                    top = screenHeight * 0.01f))
+                                                  }
+                                                }
+                                          }
                                     }
                                   }
-                                }
-                          }
-                        }
 
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-                  }
-            }
-      }
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+                            }
+                      }
+                }
+          }
     }
   }
-}
+}}}

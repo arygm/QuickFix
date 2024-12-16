@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.profile
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile
 
 import android.annotation.SuppressLint
 import android.widget.Toast
@@ -51,15 +51,16 @@ import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
-import com.arygm.quickfix.ui.authentication.CustomTextField
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.noModeUI.authentication.CustomTextField
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.isValidEmail
 import com.arygm.quickfix.utils.loadBirthDate
 import com.arygm.quickfix.utils.loadEmail
 import com.arygm.quickfix.utils.loadFirstName
+import com.arygm.quickfix.utils.loadIsWorker
 import com.arygm.quickfix.utils.loadLastName
 import com.arygm.quickfix.utils.setAccountPreferences
 import com.google.firebase.Timestamp
@@ -73,7 +74,7 @@ fun AccountConfigurationScreen(
     accountViewModel: AccountViewModel,
     preferencesViewModel: PreferencesViewModel
 ) {
-
+  var isWorker = false
   val uid by remember { mutableStateOf("Loading...") }
   var firstName by remember { mutableStateOf("Loading...") }
   var lastName by remember { mutableStateOf("Loading...") }
@@ -85,6 +86,7 @@ fun AccountConfigurationScreen(
     lastName = loadLastName(preferencesViewModel)
     email = loadEmail(preferencesViewModel)
     birthDate = loadBirthDate(preferencesViewModel)
+    isWorker = loadIsWorker(preferencesViewModel)
   }
 
   var emailError by remember { mutableStateOf(false) }
@@ -295,7 +297,8 @@ fun AccountConfigurationScreen(
                                 firstName = firstName,
                                 lastName = lastName,
                                 email = email,
-                                birthDate = Timestamp(calendar.time))
+                                birthDate = Timestamp(calendar.time),
+                                isWorker = isWorker)
                         accountViewModel.updateAccount(
                             newAccount,
                             onSuccess = { setAccountPreferences(preferencesViewModel, newAccount) },

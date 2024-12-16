@@ -18,7 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
@@ -263,7 +263,7 @@ fun QuickFixSlidingWindowContent(
                       verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector =
-                                Icons.Default
+                                Icons.AutoMirrored.Filled
                                     .ArrowForward, // Replace with an appropriate swipe icon
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurface)

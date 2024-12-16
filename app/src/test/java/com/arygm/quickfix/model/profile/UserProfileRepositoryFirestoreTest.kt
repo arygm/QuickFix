@@ -92,7 +92,7 @@ class UserProfileRepositoryFirestoreTest {
     }
 
     firebaseAuthMockedStatic = Mockito.mockStatic(FirebaseAuth::class.java)
-    mockFirebaseAuth = Mockito.mock(FirebaseAuth::class.java)
+    mockFirebaseAuth = mock(FirebaseAuth::class.java)
 
     // Mock FirebaseAuth.getInstance() to return the mockFirebaseAuth
     firebaseAuthMockedStatic
@@ -373,8 +373,8 @@ class UserProfileRepositoryFirestoreTest {
     val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
     whenever(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
 
-    val document1 = Mockito.mock(DocumentSnapshot::class.java)
-    val document2 = Mockito.mock(DocumentSnapshot::class.java)
+    val document1 = mock(DocumentSnapshot::class.java)
+    val document2 = mock(DocumentSnapshot::class.java)
 
     val userProfile2 =
         UserProfile(
@@ -445,7 +445,7 @@ class UserProfileRepositoryFirestoreTest {
   @Test
   fun init_whenCurrentUserNotNull_callsOnSuccess() {
     val authStateListenerCaptor = argumentCaptor<FirebaseAuth.AuthStateListener>()
-    val mockFirebaseUser = Mockito.mock(FirebaseUser::class.java)
+    val mockFirebaseUser = mock(FirebaseUser::class.java)
 
     doNothing().whenever(mockFirebaseAuth).addAuthStateListener(authStateListenerCaptor.capture())
     whenever(mockFirebaseAuth.currentUser).thenReturn(mockFirebaseUser)
@@ -482,7 +482,7 @@ class UserProfileRepositoryFirestoreTest {
   @Test
   fun documentToUser_whenAllFieldsArePresent_returnsUserProfile() {
     // Arrange
-    val document = Mockito.mock(DocumentSnapshot::class.java)
+    val document = mock(DocumentSnapshot::class.java)
     `when`(document.id).thenReturn(userProfile.uid)
     `when`(document.get("locations"))
         .thenReturn(
@@ -501,7 +501,7 @@ class UserProfileRepositoryFirestoreTest {
   @Test
   fun documentToUser_whenLocationsAreMissing_returnsNull() {
     // Arrange
-    val document = Mockito.mock(DocumentSnapshot::class.java)
+    val document = mock(DocumentSnapshot::class.java)
     `when`(document.id).thenReturn(userProfile.uid)
     // "locations" field is missing
     `when`(document.get("locations")).thenReturn(null)
@@ -516,7 +516,7 @@ class UserProfileRepositoryFirestoreTest {
   @Test
   fun documentToUser_whenLocationsHaveInvalidDataType_returnsNull() {
     // Arrange
-    val document = Mockito.mock(DocumentSnapshot::class.java)
+    val document = mock(DocumentSnapshot::class.java)
     `when`(document.id).thenReturn(userProfile.uid)
     // "locations" field has invalid data type (not a list of maps)
     `when`(document.get("locations")).thenReturn("Invalid data type")
@@ -531,7 +531,7 @@ class UserProfileRepositoryFirestoreTest {
   @Test
   fun documentToUser_whenExceptionOccurs_returnsNull() {
     // Arrange
-    val document = Mockito.mock(DocumentSnapshot::class.java)
+    val document = mock(DocumentSnapshot::class.java)
     `when`(document.id).thenReturn(userProfile.uid)
     // Simulate an exception when accessing the "locations" field
     `when`(document.get("locations")).thenThrow(RuntimeException("Test exception"))
@@ -687,7 +687,7 @@ class UserProfileRepositoryFirestoreTest {
     val imageData = baos.toByteArray()
 
     // Mock storageRef.child("workerProfiles/$workerProfileId")
-    Mockito.`when`(storageRef.child("profiles").child(accountId).child("user"))
+    `when`(storageRef.child("profiles").child(accountId).child("user"))
         .thenReturn(workerProfileFolderRef)
 
     // For each image, when workerProfileFolderRef.child(anyString()) is called, return a new
@@ -696,9 +696,7 @@ class UserProfileRepositoryFirestoreTest {
     val fileRef2 = mock(StorageReference::class.java)
     val fileRefs = listOf(fileRef1, fileRef2)
     var fileRefIndex = 0
-    Mockito.`when`(workerProfileFolderRef.child(anyString())).thenAnswer {
-      fileRefs[fileRefIndex++]
-    }
+    `when`(workerProfileFolderRef.child(anyString())).thenAnswer { fileRefs[fileRefIndex++] }
 
     // Mock putBytes
     val mockUploadTask1 = mock(UploadTask::class.java)
@@ -707,13 +705,12 @@ class UserProfileRepositoryFirestoreTest {
     val imageDatas = listOf(imageData, imageData) // Assuming same data for simplicity
 
     // Mock fileRef.putBytes(imageData)
-    Mockito.`when`(fileRef1.putBytes(imageDatas[0])).thenReturn(mockUploadTask1)
-    Mockito.`when`(fileRef2.putBytes(imageDatas[1])).thenReturn(mockUploadTask2)
+    `when`(fileRef1.putBytes(imageDatas[0])).thenReturn(mockUploadTask1)
+    `when`(fileRef2.putBytes(imageDatas[1])).thenReturn(mockUploadTask2)
 
     // Mock mockUploadTask.addOnSuccessListener(...)
     mockUploadTasks.forEachIndexed { index, mockUploadTask ->
-      Mockito.`when`(mockUploadTask.addOnSuccessListener(org.mockito.kotlin.any())).thenAnswer {
-          invocation ->
+      `when`(mockUploadTask.addOnSuccessListener(any())).thenAnswer { invocation ->
         val listener = invocation.getArgument<OnSuccessListener<UploadTask.TaskSnapshot>>(0)
         val taskSnapshot = mock(UploadTask.TaskSnapshot::class.java) // Mock the snapshot
         listener.onSuccess(taskSnapshot)
@@ -722,8 +719,8 @@ class UserProfileRepositoryFirestoreTest {
     }
 
     // Mock fileRef.downloadUrl
-    Mockito.`when`(fileRef1.downloadUrl).thenReturn(Tasks.forResult(Uri.parse(expectedUrls[0])))
-    Mockito.`when`(fileRef2.downloadUrl).thenReturn(Tasks.forResult(Uri.parse(expectedUrls[1])))
+    `when`(fileRef1.downloadUrl).thenReturn(Tasks.forResult(Uri.parse(expectedUrls[0])))
+    `when`(fileRef2.downloadUrl).thenReturn(Tasks.forResult(Uri.parse(expectedUrls[1])))
 
     // Act
     var resultUrls = listOf<String>()
@@ -748,7 +745,7 @@ class UserProfileRepositoryFirestoreTest {
     val exception = Exception("Upload failed")
 
     // Mock storageRef.child("workerProfiles/$workerProfileId")
-    Mockito.`when`(storageRef.child("profiles").child(accountId).child("user"))
+    `when`(storageRef.child("profiles").child(accountId).child("user"))
         .thenReturn(workerProfileFolderRef)
     // Mock fileRef
     val fileRef = mock(StorageReference::class.java)
@@ -756,11 +753,11 @@ class UserProfileRepositoryFirestoreTest {
 
     // Mock putBytes
     val uploadTask = mock(UploadTask::class.java)
-    whenever(fileRef.putBytes(org.mockito.kotlin.any())).thenReturn(uploadTask)
+    whenever(fileRef.putBytes(any())).thenReturn(uploadTask)
 
     // Mock uploadTask.addOnSuccessListener and addOnFailureListener
-    whenever(uploadTask.addOnSuccessListener(org.mockito.kotlin.any())).thenReturn(uploadTask)
-    whenever(uploadTask.addOnFailureListener(org.mockito.kotlin.any())).thenAnswer { invocation ->
+    whenever(uploadTask.addOnSuccessListener(any())).thenReturn(uploadTask)
+    whenever(uploadTask.addOnFailureListener(any())).thenAnswer { invocation ->
       val listener = invocation.arguments[0] as OnFailureListener
       listener.onFailure(exception)
       uploadTask
