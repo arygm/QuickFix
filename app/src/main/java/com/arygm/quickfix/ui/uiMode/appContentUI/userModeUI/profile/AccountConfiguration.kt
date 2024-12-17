@@ -382,6 +382,7 @@ fun AccountConfigurationScreen(
                         Toast.makeText(context, "Update failed!", Toast.LENGTH_SHORT).show()
                       })
                 }
+                  navigationActions.goBack()
               },
               enabled = isModified && !emailError && !birthDateError,
               colors =
