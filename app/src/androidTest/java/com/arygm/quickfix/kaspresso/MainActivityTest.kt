@@ -244,7 +244,10 @@ class MainActivityTest : TestCase() {
               "Dedicated and skilled painter with over 5 years of experience in residential and commercial projects. Specializes in surface preparation, interior and exterior painting, and detailed decorative finishes. Known for delivering high-quality results, adhering to client specifications, and ensuring timely project completion. Passionate about transforming spaces and creating visually appealing environments with precision and creativity.")
 
       composeTestRule.onNodeWithTag(C.Tag.personalInfoScreencontinueButton).performClick()
-
+      composeTestRule.onNodeWithTag("TimeDropdownMenuFieldStartTime").performClick()
+      composeTestRule.onNodeWithTag("TimeDropdownMenuItem_00:15").performClick()
+      composeTestRule.onNodeWithTag("TimeDropdownMenuFieldEndTime").performClick()
+      composeTestRule.onNodeWithTag("TimeDropdownMenuItem_00:45").performClick()
       composeTestRule.onNodeWithTag(professionalInfoScreenCategoryField).performClick()
 
       // Select the first category
