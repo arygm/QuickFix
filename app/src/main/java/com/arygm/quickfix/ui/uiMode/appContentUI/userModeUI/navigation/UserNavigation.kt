@@ -27,6 +27,7 @@ object UserScreen {
   const val DISPLAY_UPLOADED_IMAGES = "Displayed images Screen"
   const val SEARCH_LOCATION = "SEARCH_Location Screen"
   const val QUICKFIX_ONBOARDING = "QuickFix OnBoarding Screen"
+  const val QUICKFIX_DISPLAY_IMAGES = "QuickFix Display Images Screen"
 }
 
 object UserTopLevelDestinations {

@@ -1,12 +1,14 @@
 package com.arygm.quickfix.ui.elements
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,8 +26,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
@@ -66,21 +74,21 @@ fun QuickFixDetailsScreen(
 
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
           // Images Section
-          ImageSelector(screenWidth, screenHeight * 1.2f, quickFix)
+          ImageSelector(screenWidth, screenWidth * 2f, quickFix, {})
 
           // Selected Services
-          Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+          Spacer(modifier = Modifier.height(8.dp))
 
           Text(
               text = "Selected Services",
               style = poppinsTypography.headlineMedium,
               color = MaterialTheme.colorScheme.onBackground,
-              modifier = Modifier.padding(bottom = screenHeight * 0.01f))
+              modifier = Modifier.padding(bottom = 8.dp))
 
           allServicesToShow.forEach { service ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = screenHeight * 0.01f)) {
+                modifier = Modifier.padding(bottom = 4.dp)) {
                   Icon(
                       imageVector =
                           if (quickFix.includedServices.contains(service)) Icons.Default.Check
@@ -100,57 +108,108 @@ fun QuickFixDetailsScreen(
           }
 
           // Description Section with "Show More"
-          Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+          Spacer(modifier = Modifier.height(8.dp))
           Text(
               text = "Description",
               style = poppinsTypography.headlineMedium,
               color = MaterialTheme.colorScheme.onBackground,
-              modifier = Modifier.padding(bottom = screenHeight * 0.01f))
-          Column {
-            Text(
-                text = if (isExpanded) quickFix.title else quickFix.title.take(250) + "...",
-                style = poppinsTypography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            TextButton(
-                onClick = { onShowMoreToggle(!isExpanded) },
-                modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                  Text(
-                      text = if (isExpanded) "Show less" else "Show more",
-                      style = poppinsTypography.labelMedium,
-                      color = MaterialTheme.colorScheme.primary)
-                }
-          }
+              modifier = Modifier.padding(bottom = 8.dp))
+          Text(
+              text =
+                  if (isExpanded) quickFix.title
+                  else quickFix.title.take(250) + if (quickFix.title.length > 250) ("...") else "",
+              style = poppinsTypography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurface,
+          )
+          Column(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                TextButton(
+                    onClick = { onShowMoreToggle(!isExpanded) },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                      Text(
+                          text = if (isExpanded) "Show less" else "Show more",
+                          style = poppinsTypography.labelMedium,
+                          color = MaterialTheme.colorScheme.primary)
+                    }
+              }
         }
       }
 }
 
 @Composable
-fun ImageSelector(screenWidth: Dp, screenHeight: Dp, quickFix: QuickFix) {
+fun ImageSelector(
+    screenWidth: Dp,
+    screenHeight: Dp,
+    quickFix: QuickFix,
+    onViewAllImages: () -> Unit = {} // Callback pour afficher l'écran complet
+) {
   Row(
       modifier =
           Modifier.fillMaxWidth()
-              .height(screenHeight * 0.23f) // Adjust height as needed
+              .height(screenHeight * 0.23f)
               .clip(RoundedCornerShape(8.dp))
               .background(MaterialTheme.colorScheme.background)
-              .padding(8.dp), // General padding for uniformity
+              .padding(8.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically) {
-        quickFix.imageUrl.take(2).forEach { imageUrl ->
+        val visibleImages = quickFix.imageUrl.take(2) // Prendre les 2 premières images
+        val remainingImagesCount = quickFix.imageUrl.size - 2 // Nombre d'images restantes
+
+        visibleImages.forEachIndexed { index, imageUrl ->
           Box(
               modifier =
-                  Modifier.weight(1f) // Ensure equal spacing for each image
-                      .height(screenHeight * 0.20f) // Maintain a square aspect ratio
-                      .clip(RoundedCornerShape(8.dp)) // Clip corners
+                  Modifier.testTag("imageCard")
+                      .weight(1f)
+                      .height(screenHeight * 0.20f)
+                      .clip(RoundedCornerShape(8.dp))
                       .background(MaterialTheme.colorScheme.secondary)
-                      .padding(8.dp), // Specific padding for each image
-              contentAlignment = Alignment.Center) {
-                // Placeholder for an image. Replace with actual image loading logic using Coil or
-                // Glide
-                Text(
-                    text = "Image",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSecondary)
+                      .clickable {
+                        if (index == 1 && remainingImagesCount > 0) {
+                          // Naviguer vers l'écran complet des images
+                          onViewAllImages()
+                        }
+                      }) {
+                SubcomposeAsyncImage(
+                    model = imageUrl,
+                    contentDescription = "QuickFix Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                    loading = {
+                      Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Loading...",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center)
+                      }
+                    },
+                    error = {
+                      Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Error",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Red,
+                            textAlign = TextAlign.Center)
+                      }
+                    },
+                    success = { SubcomposeAsyncImageContent() })
+
+                // Overlay +X si plus de 2 images et c'est la 2ᵉ image
+                if (index == 1 && remainingImagesCount > 0) {
+                  Box(
+                      modifier =
+                          Modifier.fillMaxSize()
+                              .background(Color.Black.copy(alpha = 0.6f))
+                              .align(Alignment.Center),
+                      contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "+$remainingImagesCount",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White,
+                            textAlign = TextAlign.Center)
+                      }
+                }
               }
         }
       }
