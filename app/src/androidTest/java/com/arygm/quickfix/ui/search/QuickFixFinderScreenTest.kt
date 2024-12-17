@@ -69,7 +69,7 @@ class QuickFixFinderScreenTest {
     searchViewModel = SearchViewModel(workerProfileRepo)
     categoryViewModel = CategoryViewModel(categoryRepo)
     accountViewModel = mockk(relaxed = true)
-      quickFixViewModel = QuickFixViewModel(mock())
+    quickFixViewModel = QuickFixViewModel(mock())
   }
 
   @Test
