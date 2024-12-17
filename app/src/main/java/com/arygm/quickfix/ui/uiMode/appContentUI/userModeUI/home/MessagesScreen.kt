@@ -172,7 +172,6 @@ fun MessageScreen(
                             Box(
                                 modifier =
                                     Modifier.fillMaxWidth()
-                                        .height(maxHeight * 0.52f)
                                         .padding(
                                             horizontal = maxWidth * 0.02f,
                                             vertical = maxHeight * 0.02f)
@@ -182,7 +181,6 @@ fun MessageScreen(
                                       horizontalAlignment = Alignment.CenterHorizontally,
                                       modifier =
                                           Modifier.fillMaxWidth(0.9f)
-                                              .height(maxHeight * 0.52f)
                                               .background(
                                                   colorScheme.surface, RoundedCornerShape(16.dp))
                                               .testTag("quickFixDetails")) {
@@ -388,7 +386,8 @@ fun MessageScreen(
           QuickFixSlidingWindowContent(
               quickFix = quickFix!!,
               isVisible = isSlidingWindowVisible,
-              onDismiss = { isSlidingWindowVisible = false })
+              onDismiss = { isSlidingWindowVisible = false },
+              navigationActions = navigationActions)
         }
       }
 }

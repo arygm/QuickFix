@@ -41,6 +41,7 @@ import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.elements.LocationSearchCustomScreen
+import com.arygm.quickfix.ui.elements.QuickFixDisplayImagesScreen
 import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -116,8 +117,11 @@ fun UserModeNavHost(
           currentScreen?.let {
             it != UserScreen.ACCOUNT_CONFIGURATION && it != UserScreen.TO_WORKER
           } ?: true &&
-          currentScreen?.let { it != UserScreen.QUICKFIX_ONBOARDING && it != UserScreen.MESSAGES }
-              ?: true &&
+          currentScreen?.let {
+            it != UserScreen.QUICKFIX_ONBOARDING &&
+                it != UserScreen.MESSAGES &&
+                it != UserScreen.QUICKFIX_DISPLAY_IMAGES
+          } ?: true &&
           currentScreen?.let { it != UserScreen.ANNOUNCEMENT_DETAIL } ?: true
     }
   }
@@ -439,6 +443,12 @@ fun SearchNavHost(
           modeViewModel = modeViewModel,
           preferencesViewModel = preferencesViewModel,
       )
+    }
+    composable(UserScreen.QUICKFIX_DISPLAY_IMAGES) {
+      QuickFixDisplayImagesScreen(
+          navigationActions = navigationActions,
+          chatViewModel = chatViewModel,
+          quickFixViewModel = quickFixViewModel)
     }
   }
 }

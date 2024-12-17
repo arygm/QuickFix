@@ -80,7 +80,7 @@ class QuickFixDetailsUserNoModeScreenTest {
     }
 
     // Check that the description is truncated
-    composeTestRule.onNodeWithText(quickFixMock.title.take(250) + "...").assertIsDisplayed()
+    composeTestRule.onNodeWithText(quickFixMock.title.take(250)).assertIsDisplayed()
 
     // Check that "Show more" button is displayed
     composeTestRule.onNodeWithText("Show more").assertIsDisplayed()
@@ -127,7 +127,7 @@ class QuickFixDetailsUserNoModeScreenTest {
 
     // Check placeholders for images
     composeTestRule
-        .onAllNodesWithText("Image")
+        .onAllNodesWithTag("imageCard")
         .assertCountEquals(2) // 2 placeholders should be displayed
   }
 }
