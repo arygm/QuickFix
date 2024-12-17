@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,9 +45,13 @@ import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.category.getCategoryIcon
 import com.arygm.quickfix.model.messaging.Chat
+import com.arygm.quickfix.model.messaging.ChatStatus
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.utils.loadAppMode
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -65,9 +70,12 @@ fun ChatWidget(
     uid: String,
     accountViewModel: AccountViewModel,
     categoryViewModel: CategoryViewModel,
-    workerViewModel: ProfileViewModel
+    workerViewModel: ProfileViewModel,
+    preferencesViewModel: PreferencesViewModel
 ) {
   var showAll by remember { mutableStateOf(false) } // Toggle for showing all items
+  var mode by remember { mutableStateOf("") }
+  LaunchedEffect(Unit) { mode = loadAppMode(preferencesViewModel) }
   BoxWithConstraints {
     val cardWidth = maxWidth * 0.4f // 40% of the available width for each card
     val horizontalSpacing = maxWidth * 0.025f // 2.5% of the available width for spacing
@@ -119,7 +127,8 @@ fun ChatWidget(
                 uid = uid,
                 accountViewModel = accountViewModel,
                 categoryViewModel = categoryViewModel,
-                workerViewModel = workerViewModel)
+                workerViewModel = workerViewModel,
+                mode = AppMode.valueOf(mode))
 
             // Divider between items
             if (index < itemsToShow.size - 1) {
@@ -141,7 +150,8 @@ fun ChatItem(
     uid: String,
     accountViewModel: AccountViewModel,
     categoryViewModel: CategoryViewModel,
-    workerViewModel: ProfileViewModel
+    workerViewModel: ProfileViewModel,
+    mode: AppMode
 ) {
   var workerProfile by remember { mutableStateOf(WorkerProfile()) }
   workerViewModel.fetchUserProfile(
@@ -177,22 +187,35 @@ fun ChatItem(
         Column(modifier = Modifier.weight(0.7f)) {
           // Row for name and task description on the same line
           Row(verticalAlignment = Alignment.Bottom) {
+            var name by remember { mutableStateOf("") }
             Text(
                 text =
-                    if (uid == chat.messages.last().senderId) {
-                      "You"
-                    } else {
-                      var name by remember { mutableStateOf("") }
+                    if (chat.messages.isEmpty() && mode == AppMode.USER) {
+                      workerProfile.displayName
+                    } else if (chat.messages.isEmpty() && mode == AppMode.WORKER) {
                       accountViewModel.fetchUserAccount(
-                          chat.messages.last().senderId,
+                          chat.useruid,
                           onResult = {
                             if (it != null) {
-                              name = it.firstName + it.lastName
+                              name = it.firstName.plus(" ").plus(it.lastName)
                             }
                           })
                       name
+                    } else {
+                      if (uid == chat.messages.last().senderId) {
+                        "You"
+                      } else {
+                        accountViewModel.fetchUserAccount(
+                            chat.messages.last().senderId,
+                            onResult = {
+                              if (it != null) {
+                                name = it.firstName.plus(" ").plus(it.lastName)
+                              }
+                            })
+                        name
+                      }
                     },
-                modifier = Modifier.testTag(chat.messages.last().senderId), // Added testTag
+                modifier = Modifier.testTag(name), // Added testTag
                 style = poppinsTypography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold,
@@ -208,12 +231,21 @@ fun ChatItem(
             }
           }
           Text(
-              text = chat.messages.last().content, // Removed leading comma for clarity
-              modifier = Modifier.testTag(chat.messages.last().content), // Added testTag
+              text =
+                  if (chat.messages.isEmpty() &&
+                      (chat.chatStatus == ChatStatus.WAITING_FOR_RESPONSE ||
+                          chat.chatStatus == ChatStatus.GETTING_SUGGESTIONS)) {
+                    "Await confirmation from ${workerProfile.displayName}"
+                  } else chat.messages.last().content, // Removed leading comma for clarity
+              modifier =
+                  Modifier.testTag(
+                      if (chat.messages.isEmpty()) "No messages"
+                      else chat.messages.last().content), // Added testTag
               style = poppinsTypography.bodyMedium.copy(fontSize = 12.sp),
               fontWeight = FontWeight.Normal,
               color =
-                  if (chat.messages.last().isRead) MaterialTheme.colorScheme.onSurface
+                  if (chat.messages.isEmpty() || chat.messages.last().isRead)
+                      MaterialTheme.colorScheme.onSurface
                   else MaterialTheme.colorScheme.onBackground,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis)
@@ -224,9 +256,14 @@ fun ChatItem(
             modifier = Modifier.weight(0.15f).align(Alignment.Top),
             verticalArrangement = Arrangement.SpaceBetween) {
               Text(
-                  text = formatCustomDate(chat.messages.last().timestamp),
+                  text =
+                      if (chat.messages.isEmpty()) {
+                        "--:--"
+                      } else formatCustomDate(chat.messages.last().timestamp),
                   modifier =
-                      Modifier.testTag(formatCustomDate(chat.messages.last().timestamp))
+                      Modifier.testTag(
+                              if (chat.messages.isEmpty()) "--:--"
+                              else formatCustomDate(chat.messages.last().timestamp))
                           .align(Alignment.End), // Added testTag
                   style = MaterialTheme.typography.labelSmall,
                   color = MaterialTheme.colorScheme.onSurface)

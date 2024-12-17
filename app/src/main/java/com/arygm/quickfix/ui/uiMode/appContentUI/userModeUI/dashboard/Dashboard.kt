@@ -30,7 +30,6 @@ import androidx.lifecycle.viewModelScope
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.messaging.Chat
-import com.arygm.quickfix.model.messaging.ChatStatus
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
@@ -43,6 +42,8 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixesWidget
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerScreen
 import com.arygm.quickfix.utils.loadAppMode
 import com.arygm.quickfix.utils.loadUserId
 import kotlinx.coroutines.launch
@@ -265,18 +266,19 @@ fun DashboardScreen(
 
               item {
                 ChatWidget(
-                    chatList =
-                        chats.filter {
-                          it.chatStatus == ChatStatus.ACCEPTED ||
-                              it.chatStatus == ChatStatus.GETTING_SUGGESTIONS
-                        },
-                    onItemClick = { /*Handle Message Item Click*/},
+                    chatList = chats,
+                    onItemClick = {
+                      chatViewModel.selectChat(it)
+                      if (mode == "USER") navigationActions.navigateTo(UserScreen.MESSAGES)
+                      else navigationActions.navigateTo(WorkerScreen.MESSAGES)
+                    },
                     onShowAllClick = { /*Handle Show All Click*/},
                     itemsToShowDefault = 3,
                     uid = uid,
                     accountViewModel = accountViewModel,
                     categoryViewModel = categoryViewModel,
                     workerViewModel = workerViewModel,
+                    preferencesViewModel = preferencesViewModel,
                 )
               }
 

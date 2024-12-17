@@ -33,6 +33,7 @@ import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepositoryDataStore
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelWorkerProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
@@ -78,6 +79,7 @@ fun UserModeNavHost(
     preferencesViewModel: PreferencesViewModel,
     rootMainNavigationActions: NavigationActions,
     userPreferencesViewModel: PreferencesViewModelUserProfile,
+    workerPreferencesViewModel: PreferencesViewModelWorkerProfile,
     appContentNavigationActions: NavigationActions,
     chatViewModel: ChatViewModel,
     quickFixViewModel: QuickFixViewModel,
@@ -100,7 +102,7 @@ fun UserModeNavHost(
   val announcementViewModel: AnnouncementViewModel =
       viewModel(
           factory =
-              AnnouncementViewModel.Factory(
+              AnnouncementViewModel.userFactory(
                   announcementRepository = announcementRepository,
                   preferencesRepository = preferencesRepository,
                   userProfileRepository = userProfileRepository))
@@ -172,7 +174,6 @@ fun UserModeNavHost(
                 HomeNavHost(
                     onScreenChange = { currentScreen = it },
                     chatViewModel,
-                    modeViewModel,
                     preferencesViewModel,
                     userViewModel,
                     workerViewModel,
@@ -213,7 +214,6 @@ fun UserModeNavHost(
               composable(UserRoute.PROFILE) {
                 ProfileNavHost(
                     accountViewModel,
-                    loggedInAccountViewModel,
                     workerViewModel,
                     userNavigationActions,
                     onScreenChange = { currentScreen = it },
@@ -225,7 +225,8 @@ fun UserModeNavHost(
                     rootMainNavigationActions,
                     userPreferencesViewModel,
                     appContentNavigationActions,
-                    modeViewModel)
+                    modeViewModel,
+                    workerPreferencesViewModel)
               }
             }
       }
@@ -235,7 +236,6 @@ fun UserModeNavHost(
 fun HomeNavHost(
     onScreenChange: (String) -> Unit = {},
     chatViewModel: ChatViewModel,
-    modeViewModel: ModeViewModel,
     preferencesViewModel: PreferencesViewModel,
     userViewModel: ProfileViewModel,
     workerViewModel: ProfileViewModel,
@@ -266,7 +266,6 @@ fun HomeNavHost(
           chatViewModel = chatViewModel,
           navigationActions = navigationActions,
           quickFixViewModel = quickFixViewModel,
-          modeViewModel = modeViewModel,
           preferencesViewModel = preferencesViewModel,
       )
     }
@@ -276,7 +275,6 @@ fun HomeNavHost(
 @Composable
 fun ProfileNavHost(
     accountViewModel: AccountViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
     workerViewModel: ProfileViewModel,
     userNavigationActions: NavigationActions,
     onScreenChange: (String) -> Unit,
@@ -288,7 +286,8 @@ fun ProfileNavHost(
     rootMainNavigationActions: NavigationActions,
     userPreferencesViewModel: PreferencesViewModelUserProfile,
     appContentNavigationActions: NavigationActions,
-    modeViewModel: ModeViewModel
+    modeViewModel: ModeViewModel,
+    workerPreferencesViewModel: PreferencesViewModelWorkerProfile
 ) {
 
   val profileNavController = rememberNavController()
@@ -316,12 +315,12 @@ fun ProfileNavHost(
           profileNavigationActions,
           accountViewModel,
           workerViewModel,
-          loggedInAccountViewModel,
           preferencesViewModel,
           categoryViewModel,
           locationViewModel,
           testBitmapPP,
-          testLocation)
+          testLocation,
+          workerPreferencesViewModel)
     }
   }
 }
@@ -355,6 +354,14 @@ fun DashBoardNavHost(
           preferencesViewModel,
           announcementViewModel,
           categoryViewModel)
+    }
+    composable(UserScreen.MESSAGES) {
+      MessageScreen(
+          chatViewModel,
+          navigationActions,
+          quickFixViewModel,
+          preferencesViewModel,
+      )
     }
     composable(UserScreen.ANNOUNCEMENT_DETAIL) {
       AnnouncementDetailScreen(
@@ -441,7 +448,6 @@ fun SearchNavHost(
           chatViewModel = chatViewModel,
           navigationActions = navigationActions,
           quickFixViewModel = quickFixViewModel,
-          modeViewModel = modeViewModel,
           preferencesViewModel = preferencesViewModel,
       )
     }

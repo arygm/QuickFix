@@ -8,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.utils.UID_KEY
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,10 +45,10 @@ open class AnnouncementViewModel(
 
   // create factory
   companion object {
-    fun Factory(
+    fun userFactory(
         announcementRepository: AnnouncementRepository,
         preferencesRepository: PreferencesRepository,
-        userProfileRepository: ProfileRepository
+        userProfileRepository: UserProfileRepositoryFirestore
     ): ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
@@ -54,6 +56,21 @@ open class AnnouncementViewModel(
 
             return AnnouncementViewModel(
                 announcementRepository, preferencesRepository, userProfileRepository)
+                as T
+          }
+        }
+
+    fun workerFactory(
+        announcementRepository: AnnouncementRepository,
+        preferencesRepository: PreferencesRepository,
+        workerProfileRepository: WorkerProfileRepositoryFirestore
+    ): ViewModelProvider.Factory =
+        object : ViewModelProvider.Factory {
+          @Suppress("UNCHECKED_CAST")
+          override fun <T : ViewModel> create(modelClass: Class<T>): T {
+
+            return AnnouncementViewModel(
+                announcementRepository, preferencesRepository, workerProfileRepository)
                 as T
           }
         }

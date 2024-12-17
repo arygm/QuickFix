@@ -83,8 +83,8 @@ fun UserProfileScreen(
       userPreferencesViewModel = userPreferencesViewModel,
       appContentNavigationActions = appContentNavigationActions,
       modeViewModel = modeViewModel,
-      false,
-      AppMode.WORKER,
+      initialState = false,
+      switchMode = AppMode.WORKER,
       sections =
           listOf(
               { modifier ->

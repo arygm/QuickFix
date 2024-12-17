@@ -34,7 +34,6 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.switchModes.AppMode
-import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.elements.QuickFixDetailsScreen
 import com.arygm.quickfix.ui.elements.QuickFixSlidingWindowContent
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -50,7 +49,6 @@ fun MessageScreen(
     chatViewModel: ChatViewModel,
     navigationActions: NavigationActions,
     quickFixViewModel: QuickFixViewModel,
-    modeViewModel: ModeViewModel,
     preferencesViewModel: PreferencesViewModel,
 ) {
   var userId by remember { mutableStateOf("") }
@@ -197,14 +195,22 @@ fun MessageScreen(
                               ChatStatus.WAITING_FOR_RESPONSE -> {
                                 // UI for waiting for response
                                 if (mode == AppMode.USER.name) {
-                                  Text(
-                                      text = "Awaiting confirmation from ${quickFix!!.workerId}...",
-                                      style = MaterialTheme.typography.bodyMedium,
-                                      color = colorScheme.onBackground,
-                                      textAlign = TextAlign.Center,
+                                  Column(
+                                      horizontalAlignment = Alignment.CenterHorizontally,
                                       modifier =
-                                          Modifier.padding(vertical = maxHeight * 0.02f)
-                                              .testTag("awaitingConfirmationText"))
+                                          Modifier.fillMaxWidth()
+                                              .padding(horizontal = maxWidth * 0.04f)
+                                              .testTag("userResponseContainer")) {
+                                        Text(
+                                            text =
+                                                "Awaiting confirmation from ${quickFix!!.workerId}...",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = colorScheme.onBackground,
+                                            textAlign = TextAlign.Center,
+                                            modifier =
+                                                Modifier.padding(vertical = maxHeight * 0.02f)
+                                                    .testTag("awaitingConfirmationText"))
+                                      }
                                 } else {
                                   // Worker response options
                                   Column(

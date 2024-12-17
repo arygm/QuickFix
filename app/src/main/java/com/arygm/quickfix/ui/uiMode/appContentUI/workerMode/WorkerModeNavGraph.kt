@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.uiMode.workerMode
+package com.arygm.quickfix.ui.uiMode.appContentUI.workerMode
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
@@ -14,26 +14,41 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.arygm.quickfix.dataStore
 import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.messaging.ChatViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesRepositoryDataStore
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
-import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelWorkerProfile
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
+import com.arygm.quickfix.model.search.AnnouncementRepositoryFirestore
+import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.DashboardScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.MessageScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.WorkerProfileScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.announcements.AnnouncementsScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.messages.MessagesScreen
-import com.arygm.quickfix.ui.uiMode.workerMode.home.HomeScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.profile.WorkerProfileScreen
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerRoute
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerScreen
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.getBottomBarIdWorker
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.delay
 
 @Composable
@@ -44,13 +59,37 @@ fun WorkerModeNavGraph(
     preferencesViewModel: PreferencesViewModel,
     accountViewModel: AccountViewModel,
     rootMainNavigationActions: NavigationActions,
-    userPreferencesViewModel: PreferencesViewModelUserProfile
+    workerPreferenceViewModel: PreferencesViewModelWorkerProfile,
+    userViewModel: ProfileViewModel,
+    workerViewModel: ProfileViewModel,
+    quickFixViewModel: QuickFixViewModel,
+    chatViewModel: ChatViewModel,
+    categoryViewModel: CategoryViewModel
 ) {
+  val context = LocalContext.current
   val workerNavController = rememberNavController()
   val workerNavigationActions = remember { NavigationActions(workerNavController) }
+
+  // Create required repositories
+  val announcementRepository =
+      AnnouncementRepositoryFirestore(db = Firebase.firestore, storage = Firebase.storage)
+  val preferencesRepository = PreferencesRepositoryDataStore(context.dataStore)
+  val workerProfileRepository =
+      WorkerProfileRepositoryFirestore(db = Firebase.firestore, storage = Firebase.storage)
+  val announcementViewModel: AnnouncementViewModel =
+      viewModel(
+          factory =
+              AnnouncementViewModel.workerFactory(
+                  announcementRepository = announcementRepository,
+                  preferencesRepository = preferencesRepository,
+                  workerProfileRepository = workerProfileRepository))
+
   var currentScreen by remember { mutableStateOf<String?>(null) }
   val shouldShowBottomBar by remember {
-    derivedStateOf { currentScreen?.let { it != WorkerScreen.ACCOUNT_CONFIGURATION } ?: true }
+    derivedStateOf {
+      currentScreen?.let { it != WorkerScreen.ACCOUNT_CONFIGURATION } ?: true &&
+          currentScreen?.let { it != WorkerScreen.MESSAGES } ?: true
+    }
   }
   val startDestination by modeViewModel.onSwitchStartDestWorker.collectAsState()
   var showBottomBar by remember { mutableStateOf(false) }
@@ -87,7 +126,18 @@ fun WorkerModeNavGraph(
             navController = workerNavigationActions.navController,
             startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)) {
-              composable(WorkerRoute.HOME) { HomeNavHost(onScreenChange = { currentScreen = it }) }
+              composable(WorkerRoute.HOME) {
+                HomeNavHost(
+                    onScreenChange = { currentScreen = it },
+                    userViewModel = userViewModel,
+                    workerViewModel = workerViewModel,
+                    accountViewModel = accountViewModel,
+                    quickFixViewModel = quickFixViewModel,
+                    chatViewModel = chatViewModel,
+                    preferencesViewModel = preferencesViewModel,
+                    announcementViewModel = announcementViewModel,
+                    categoryViewModel = categoryViewModel)
+              }
               composable(WorkerRoute.MESSAGES) {
                 MessagesNavHost(onScreenChange = { currentScreen = it })
               }
@@ -103,7 +153,7 @@ fun WorkerModeNavGraph(
                     accountViewModel,
                     workerNavigationActions,
                     rootMainNavigationActions,
-                    userPreferencesViewModel)
+                    workerPreferenceViewModel)
               }
             }
       }
@@ -141,6 +191,14 @@ fun AnnouncementsNavHost(
 @Composable
 fun HomeNavHost(
     onScreenChange: (String) -> Unit = {},
+    userViewModel: ProfileViewModel,
+    workerViewModel: ProfileViewModel,
+    accountViewModel: AccountViewModel,
+    quickFixViewModel: QuickFixViewModel,
+    chatViewModel: ChatViewModel,
+    preferencesViewModel: PreferencesViewModel,
+    announcementViewModel: AnnouncementViewModel,
+    categoryViewModel: CategoryViewModel
 ) {
   val homeNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(homeNavController) }
@@ -149,7 +207,22 @@ fun HomeNavHost(
     onScreenChange(navigationActions.currentScreen)
   }
   NavHost(navController = homeNavController, startDestination = WorkerScreen.HOME) {
-    composable(WorkerScreen.HOME) { HomeScreen() }
+    composable(WorkerScreen.HOME) {
+      DashboardScreen(
+          navigationActions,
+          userViewModel,
+          workerViewModel,
+          accountViewModel,
+          quickFixViewModel,
+          chatViewModel,
+          preferencesViewModel,
+          announcementViewModel,
+          categoryViewModel)
+    }
+
+    composable(WorkerScreen.MESSAGES) {
+      MessageScreen(chatViewModel, navigationActions, quickFixViewModel, preferencesViewModel)
+    }
   }
 }
 
@@ -162,7 +235,7 @@ fun ProfileNavHost(
     accountViewModel: AccountViewModel,
     workerNavigationActions: NavigationActions,
     rootMainNavigationActions: NavigationActions,
-    userPreferencesViewModel: PreferencesViewModelUserProfile
+    workerPreferenceViewModel: PreferencesViewModelWorkerProfile
 ) {
   val profileNavController = rememberNavController()
   val profileNavigationActions = remember { NavigationActions(profileNavController) }
@@ -177,7 +250,7 @@ fun ProfileNavHost(
           profileNavigationActions,
           rootMainNavigationActions,
           preferencesViewModel,
-          userPreferencesViewModel,
+          workerPreferenceViewModel,
           appContentNavigationActions,
           modeViewModel)
     }

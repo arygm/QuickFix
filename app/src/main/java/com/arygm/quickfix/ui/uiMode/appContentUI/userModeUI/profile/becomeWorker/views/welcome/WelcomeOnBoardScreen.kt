@@ -37,6 +37,7 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerScreen
 
 @Composable
 fun WelcomeOnBoardScreen(
@@ -56,7 +57,7 @@ fun WelcomeOnBoardScreen(
     // When isWorker changes, if we're waiting for worker mode and it's now true, navigate
     LaunchedEffect(isWorker) {
       if (isWaitingForWorkerMode && isWorker) {
-        navigationActions.navigateTo(UserScreen.PROFILE)
+        navigationActions.navigateTo(WorkerScreen.PROFILE)
       }
     }
     if (isWaitingForWorkerMode) {

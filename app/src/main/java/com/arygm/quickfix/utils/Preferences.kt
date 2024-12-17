@@ -6,7 +6,9 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelWorkerProfile
 import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.profile.WorkerProfile
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineDispatcher
@@ -54,6 +56,16 @@ fun setUserProfilePreferences(
   }
 }
 
+fun setWorkerProfilePreferences(
+    preferencesViewModel: PreferencesViewModelWorkerProfile,
+    workerProfile: WorkerProfile,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
+) {
+  CoroutineScope(dispatcher).launch {
+    preferencesViewModel.savePreference(WALLET_KEY, workerProfile.wallet)
+  }
+}
+
 fun clearPreferences(
     preferencesViewModel: PreferencesViewModel,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -63,6 +75,13 @@ fun clearPreferences(
 
 fun clearUserProfilePreferences(
     preferencesViewModel: PreferencesViewModelUserProfile,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
+) {
+  CoroutineScope(dispatcher).launch { preferencesViewModel.clearAllPreferences() }
+}
+
+fun clearWorkerProfilePreferences(
+    preferencesViewModel: PreferencesViewModelWorkerProfile,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
   CoroutineScope(dispatcher).launch { preferencesViewModel.clearAllPreferences() }
