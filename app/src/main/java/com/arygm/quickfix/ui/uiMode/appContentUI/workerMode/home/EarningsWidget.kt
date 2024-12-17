@@ -37,15 +37,17 @@ fun EarningsWidget(
     activeOrderValue: Double,
 ) {
   BoxWithConstraints {
-    val horizontalSpacing = maxWidth * 0.025f // 2.5% of the available width for spacing
+    val maxWidth = maxWidth
+    val maxHeight = maxHeight
     val currencyFormat = DecimalFormat("######.##CHF")
 
     Column(
         modifier =
             Modifier.fillMaxWidth()
-                .padding(horizontalSpacing)
-                .shadow(5.dp, RoundedCornerShape(20.dp))
-                .background(colorScheme.surface, RoundedCornerShape(12.dp))
+                .padding(maxWidth * 0.025f)
+                .shadow(
+                    maxWidth * 0.01f, RoundedCornerShape(maxWidth * 0.05f)) // Shadow size dynamic
+                .background(colorScheme.surface, RoundedCornerShape(maxWidth * 0.03f))
                 .testTag("EarningsWidget"),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start) {
@@ -53,8 +55,8 @@ fun EarningsWidget(
           Row(
               modifier =
                   Modifier.fillMaxWidth()
-                      .padding(horizontal = 12.dp)
-                      .padding(top = 12.dp)
+                      .padding(horizontal = maxWidth * 0.03f)
+                      .padding(top = maxHeight * 0.01f)
                       .testTag("EarningsHeader"),
               horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically) {
@@ -70,14 +72,14 @@ fun EarningsWidget(
           HorizontalDivider(
               thickness = 1.dp,
               color = colorScheme.onSurface.copy(alpha = 0.2f),
-              modifier = Modifier.padding(vertical = 8.dp).testTag("EarningsDivider"))
+              modifier = Modifier.padding(vertical = maxHeight * 0.01f).testTag("EarningsDivider"))
 
           // Content Rows
           Row(
               modifier =
                   Modifier.fillMaxWidth()
-                      .padding(horizontal = 12.dp)
-                      .padding(bottom = 12.dp)
+                      .padding(horizontal = maxWidth * 0.03f)
+                      .padding(bottom = maxHeight * 0.01f)
                       .testTag("EarningsContent"),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.SpaceBetween) {
@@ -94,7 +96,7 @@ fun EarningsWidget(
                       color = colorScheme.primary,
                       modifier = Modifier.testTag("PersonalBalanceValue"))
 
-                  Spacer(modifier = Modifier.height(8.dp))
+                  Spacer(modifier = Modifier.height(maxHeight * 0.01f))
 
                   Text(
                       text = "Avg. selling price",
@@ -115,15 +117,14 @@ fun EarningsWidget(
                       style = poppinsTypography.labelSmall,
                       fontSize = 10.sp,
                       modifier = Modifier.testTag("EarningsThisMonthLabel"))
-
                   Text(
                       text = currencyFormat.format(earningsThisMonth),
                       style = poppinsTypography.headlineMedium,
-                      fontSize = 16.sp,
                       color = colorScheme.onBackground,
+                      fontSize = 16.sp,
                       modifier = Modifier.testTag("EarningsThisMonthValue"))
 
-                  Spacer(modifier = Modifier.height(8.dp))
+                  Spacer(modifier = Modifier.height(maxHeight * 0.01f))
 
                   Text(
                       text = "Active orders",
@@ -156,7 +157,7 @@ fun StyledActiveOrders(count: Int, amount: String, modifier: Modifier = Modifier
   Text(
       text = styledText,
       style = poppinsTypography.headlineMedium,
-      fontSize = 16.sp,
+      fontSize = 16.sp, // Keep the font size static here unless needed dynamic
       letterSpacing = (-0.5).sp,
       modifier = modifier)
 }
