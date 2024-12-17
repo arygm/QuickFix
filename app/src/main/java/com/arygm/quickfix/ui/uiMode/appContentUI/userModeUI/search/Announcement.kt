@@ -20,9 +20,16 @@ import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.*
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -41,10 +48,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.search.Announcement
@@ -59,6 +66,8 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.professional.calculateMaxTextWidth
+import com.arygm.quickfix.utils.loadUserId
+import com.arygm.quickfix.utils.setAccountPreferences
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.firebase.Timestamp
 import java.time.Instant
@@ -69,12 +78,10 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun AnnouncementScreen(
-    announcementViewModel: AnnouncementViewModel =
-        viewModel(factory = AnnouncementViewModel.Factory),
-    loggedInAccountViewModel: LoggedInAccountViewModel =
-        viewModel(factory = LoggedInAccountViewModel.Factory),
+    announcementViewModel: AnnouncementViewModel,
     profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
     accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
+    preferencesViewModel: PreferencesViewModel,
     categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     navigationActions: NavigationActions,
@@ -86,6 +93,9 @@ fun AnnouncementScreen(
     initialAvailability: List<Pair<Long, Long>> = emptyList(),
     initialUploadedImages: List<Bitmap> = emptyList()
 ) {
+  var userId by remember { mutableStateOf("") }
+
+  LaunchedEffect(Unit) { userId = loadUserId(preferencesViewModel) }
   var title by rememberSaveable { mutableStateOf(initialTitle) }
   var subcategoryTitle by rememberSaveable { mutableStateOf(initialSubcategoryTitle) }
   var description by rememberSaveable { mutableStateOf(initialDescription) }
@@ -95,9 +105,6 @@ fun AnnouncementScreen(
   var locationName by rememberSaveable { mutableStateOf(initialLocation?.name) }
   var locationTitle by rememberSaveable { mutableStateOf(initialLocation?.name ?: "") }
   var locationIsSelected by rememberSaveable { mutableStateOf(initialLocation != null) }
-
-  val loggedInAccount by loggedInAccountViewModel.loggedInAccount.collectAsState()
-  val userId = loggedInAccount?.uid ?: "Should not happen"
 
   var selectedSubcategoryName by rememberSaveable { mutableStateOf("") }
 
@@ -167,15 +174,19 @@ fun AnnouncementScreen(
     announcementViewModel.clearUploadedImages()
   }
 
+  // Function to update user profile
   val updateUserProfileWithAnnouncement: (Announcement) -> Unit = { announcement ->
     profileViewModel.fetchUserProfile(userId) { profile ->
       if (profile is UserProfile) {
         val announcementList = profile.announcements + announcement.announcementId
+
         profileViewModel.updateProfile(
             UserProfile(profile.locations, announcementList, profile.wallet, profile.uid),
             onSuccess = {
               accountViewModel.fetchUserAccount(profile.uid) { account ->
-                loggedInAccountViewModel.setLoggedInAccount(account!!)
+                if (account != null) {
+                  setAccountPreferences(preferencesViewModel, account)
+                }
               }
             },
             onFailure = { e ->
@@ -187,6 +198,7 @@ fun AnnouncementScreen(
     }
   }
 
+  // Function to handle successful image upload
   val handleSuccessfulImageUpload: (String, List<String>) -> Unit =
       { announcementId, uploadedImageUrls ->
         val availabilitySlots =
@@ -207,7 +219,14 @@ fun AnnouncementScreen(
                 availability = availabilitySlots,
                 quickFixImages = uploadedImageUrls)
         announcementViewModel.announce(announcement)
+
+        // Clear the added pictures
+        announcementViewModel.clearUploadedImages()
+
+        // Update the user profile with the new announcement
         updateUserProfileWithAnnouncement(announcement)
+
+        // Reset all parameters after making an announcement
         resetAnnouncementParameters()
       }
 

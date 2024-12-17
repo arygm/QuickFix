@@ -33,4 +33,10 @@ interface ChatRepository {
   )
 
   suspend fun updateChat(chat: Chat, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+
+  suspend fun getChatByChatUid(
+      chatUid: String,
+      onSuccess: (Chat?) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 }

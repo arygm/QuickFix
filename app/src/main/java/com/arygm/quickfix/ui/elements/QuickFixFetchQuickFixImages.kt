@@ -23,76 +23,88 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuickFixDisplayImagesScreen(
-    navigationActions: NavigationActions,
-    chatViewModel: ChatViewModel,
-    quickFixViewModel: QuickFixViewModel
+    navigationActions: NavigationActions, // Handles navigation actions like "goBack"
+    chatViewModel: ChatViewModel, // ViewModel to retrieve the active chat
+    quickFixViewModel: QuickFixViewModel // ViewModel to fetch QuickFix details
 ) {
-  // Récupérer la conversation active depuis ChatViewModel
+  // Retrieve the active chat from the ChatViewModel
   val activeChat = chatViewModel.selectedChat.collectAsState().value
 
+  // If no active chat is available, display a placeholder message
   if (activeChat == null) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-      Text("No active chat selected.")
+      Text("No active chat selected.") // Display message
     }
     return
   }
 
-  // Récupérer les images associées au QuickFix
+  // Variable to hold QuickFix data fetched based on the chat's quickFixUid
   var quickFix by remember { mutableStateOf<QuickFix?>(null) }
 
+  // Fetch QuickFix details when the screen is launched
   LaunchedEffect(activeChat.quickFixUid) {
     quickFixViewModel.fetchQuickFix(activeChat.quickFixUid) { result -> quickFix = result }
   }
 
+  // If QuickFix data is available, display the images
   quickFix?.let { fix ->
-    val imageUrls = fix.imageUrl
+    val imageUrls = fix.imageUrl // List of image URLs from QuickFix
 
+    // Scaffold provides the structure for the screen (Top AppBar + Content)
     Scaffold(
         topBar = {
           TopAppBar(
               title = {
+                // Row layout for TopAppBar title with spacing
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
-                      // Bouton "Select All" en mode sélection
-
-                      // Titre central
+                      // Title showing the number of images
                       Text(
                           text = "${imageUrls.size} images",
                           style = MaterialTheme.typography.titleMedium,
                           color = MaterialTheme.colorScheme.primary)
-                      // Bouton "Done" en mode sélection
                     }
               },
               navigationIcon = {
+                // Navigation button to go back
                 IconButton(onClick = { navigationActions.goBack() }) {
                   Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
                 }
-              },
-          )
-        },
-    ) { paddingValues ->
-      LazyVerticalGrid(
-          columns = GridCells.Fixed(2),
-          modifier = Modifier.fillMaxSize().padding(paddingValues),
-          contentPadding = PaddingValues(8.dp),
-          verticalArrangement = Arrangement.spacedBy(8.dp),
-          horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(imageUrls.size) { index ->
-              val imageUrl = imageUrls[index]
-              Box(modifier = Modifier.fillMaxWidth().aspectRatio(1f).testTag("imageCard")) {
-                Image(
-                    painter = rememberAsyncImagePainter(imageUrl),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)))
+              })
+        }) { paddingValues ->
+          // LazyVerticalGrid for displaying images in a grid layout
+          LazyVerticalGrid(
+              columns = GridCells.Fixed(2), // Two columns
+              modifier = Modifier.fillMaxSize().padding(paddingValues),
+              contentPadding = PaddingValues(8.dp),
+              verticalArrangement = Arrangement.spacedBy(8.dp),
+              horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Display each image in the grid
+                items(imageUrls.size) { index ->
+                  val imageUrl = imageUrls[index]
+                  Box(
+                      modifier =
+                          Modifier.fillMaxWidth()
+                              .aspectRatio(1f)
+                              .testTag("imageCard") // Test tag for UI testing
+                      ) {
+                        Image(
+                            painter = rememberAsyncImagePainter(imageUrl), // Load image from URL
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop, // Crop image to fit the box
+                            modifier =
+                                Modifier.fillMaxSize()
+                                    .clip(RoundedCornerShape(8.dp)) // Rounded corners
+                            )
+                      }
+                }
               }
-            }
-          }
-    }
+        }
   }
+      // If QuickFix data is null, display a placeholder message
       ?: Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("No images found.")
+        Text("No images found.") // Display message if no images are available
       }
 }

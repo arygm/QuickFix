@@ -56,7 +56,7 @@ open class NavigationActions(
   /** Navigate back to the previous screen. */
   open fun goBack() {
     navController.popBackStack()
-    currentScreen = routeToScreen(currentRoute())
+    currentScreen = currentRoute()
     currentRoute_.value = currentRoute()
     Log.d("NavigationActions", "Navigating back to ${currentRoute()}")
   }

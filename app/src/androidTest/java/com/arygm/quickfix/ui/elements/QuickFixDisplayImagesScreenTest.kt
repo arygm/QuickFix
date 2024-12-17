@@ -22,7 +22,7 @@ class QuickFixDisplayImagesScreenTest {
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var quickFixViewModel: QuickFixViewModel
 
-  // Données de test
+  // Test data
   private val fakeQuickFixUid = "fake_quick_fix_id"
   private val fakeChat =
       Chat(
@@ -42,24 +42,24 @@ class QuickFixDisplayImagesScreenTest {
 
   @Before
   fun setup() = runBlocking {
-    // Mock des dépendances
+    // Mock dependencies
     navigationActions = mock()
     chatRepository = mock()
     quickFixRepository = mock()
 
-    // Mock ChatRepository: Retourner un chat
+    // Mock ChatRepository: Return a chat
     whenever(chatRepository.getChats(any(), any())).thenAnswer {
       val onSuccess = it.getArgument<(List<Chat>) -> Unit>(0)
       onSuccess(listOf(fakeChat))
     }
 
-    // Mock QuickFixRepository: Retourner un QuickFix
+    // Mock QuickFixRepository: Return a QuickFix
     whenever(quickFixRepository.getQuickFixById(eq(fakeQuickFixUid), any(), any())).thenAnswer {
       val onResult = it.getArgument<(QuickFix?) -> Unit>(1)
       onResult(fakeQuickFix)
     }
 
-    // Initialisation des ViewModels
+    // Initialize ViewModels
     chatViewModel = ChatViewModel(chatRepository)
     quickFixViewModel = QuickFixViewModel(quickFixRepository)
 
@@ -76,7 +76,7 @@ class QuickFixDisplayImagesScreenTest {
           quickFixViewModel = quickFixViewModel)
     }
 
-    // Vérification du titre avec le bon nombre d'images
+    // Verify the title displays the correct number of images
     composeTestRule.onNodeWithText("2 images").assertIsDisplayed()
   }
 
@@ -89,10 +89,10 @@ class QuickFixDisplayImagesScreenTest {
           quickFixViewModel = quickFixViewModel)
     }
 
-    // Action : clic sur le bouton "Back"
+    // Action: click on the "Back" button
     composeTestRule.onNodeWithContentDescription("Back").performClick()
 
-    // Vérification : navigation appelée
+    // Verify: navigation is called
     verify(navigationActions).goBack()
   }
 
@@ -105,14 +105,14 @@ class QuickFixDisplayImagesScreenTest {
           quickFixViewModel = quickFixViewModel)
     }
 
-    // Vérification : 2 images sont affichées dans la grille
+    // Verify: 2 images are displayed in the grid
     composeTestRule.onAllNodesWithTag("imageCard").assertCountEquals(2)
   }
 
   @Test
   fun displaysNoActiveChatMessageWhenNoChatSelected() {
     runBlocking {
-      // Supprimer le chat sélectionné
+      // Remove the selected chat
       chatViewModel.clearSelectedChat()
 
       composeTestRule.setContent {
@@ -122,7 +122,7 @@ class QuickFixDisplayImagesScreenTest {
             quickFixViewModel = quickFixViewModel)
       }
 
-      // Vérification : le message d'absence de chat actif est affiché
+      // Verify: the message for no active chat is displayed
       composeTestRule.onNodeWithText("No active chat selected.").assertIsDisplayed()
     }
   }
