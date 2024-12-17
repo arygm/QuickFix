@@ -101,6 +101,7 @@ open class AccountRepositoryFirestore(
       val birthDate = document.getTimestamp("birthDate") ?: return null
       Log.d("AccountRepositoryFirestore", "birthDate: $birthDate")
       val isWorker = document.getBoolean("worker") ?: return null
+      val activeChats = document.get("activeChats") as? List<String> ?: emptyList()
       Log.d("AccountRepositoryFirestore", "isWorker: $isWorker")
       val profilePicture = document.getString("profilePicture") ?: ""
       Log.d("AccountRepositoryFirestore", "profilePicture: $profilePicture")
@@ -113,7 +114,9 @@ open class AccountRepositoryFirestore(
               email = email,
               birthDate = birthDate,
               isWorker = isWorker,
+              activeChats = activeChats,
               profilePicture = profilePicture)
+
       Log.d("AccountRepositoryFirestore", "account: $account")
       account
     } catch (e: Exception) {

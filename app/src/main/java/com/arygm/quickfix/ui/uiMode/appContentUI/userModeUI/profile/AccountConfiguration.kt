@@ -82,7 +82,7 @@ fun AccountConfigurationScreen(
     preferencesViewModel: PreferencesViewModel
 ) {
   var uid by remember { mutableStateOf("Loading...") }
-  var isWorker = false
+  var isWorker by remember { mutableStateOf(false) }
   // State to store saved data
   var savedFirstName by remember { mutableStateOf("Loading...") }
   var savedLastName by remember { mutableStateOf("Loading...") }
@@ -382,7 +382,7 @@ fun AccountConfigurationScreen(
                         Toast.makeText(context, "Update failed!", Toast.LENGTH_SHORT).show()
                       })
                 }
-                  navigationActions.goBack()
+                navigationActions.goBack()
               },
               enabled = isModified && !emailError && !birthDateError,
               colors =

@@ -117,6 +117,20 @@ class ChatViewModel(
         })
   }
 
+  suspend fun getChatByChatUid(
+      chatUid: String,
+      onSuccess: (Chat?) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    repository.getChatByChatUid(
+        chatUid = chatUid,
+        onSuccess = { chat -> onSuccess(chat) },
+        onFailure = { e ->
+          Log.e("ChatViewModel", "Failed to fetch chat by UID: ${e.message}")
+          onFailure(e)
+        })
+  }
+
   fun selectChat(chat: Chat) {
     _selectedChat.value = chat
   }

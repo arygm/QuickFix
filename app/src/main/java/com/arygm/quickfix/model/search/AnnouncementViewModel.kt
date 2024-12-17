@@ -4,14 +4,21 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.firestore
-import com.google.firebase.storage.storage
+import androidx.lifecycle.viewModelScope
+import com.arygm.quickfix.model.offline.small.PreferencesRepository
+import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.utils.UID_KEY
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-open class AnnouncementViewModel(private val repository: AnnouncementRepository) : ViewModel() {
+open class AnnouncementViewModel(
+    private val announcementRepository: AnnouncementRepository,
+    private val preferencesRepository: PreferencesRepository,
+    private val userProfileRepository: ProfileRepository
+) : ViewModel() {
 
   private val announcementsForUser_ = MutableStateFlow<List<Announcement>>(emptyList())
   val announcementsForUser: StateFlow<List<Announcement>> = announcementsForUser_.asStateFlow()
@@ -22,14 +29,31 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   private val uploadedImages_ = MutableStateFlow<List<Bitmap>>(emptyList())
   val uploadedImages: StateFlow<List<Bitmap>> = uploadedImages_.asStateFlow()
 
+  private val announcementImagesMap_ =
+      MutableStateFlow<Map<String, List<Pair<String, Bitmap>>>>(emptyMap())
+  val announcementImagesMap: StateFlow<Map<String, List<Pair<String, Bitmap>>>> =
+      announcementImagesMap_.asStateFlow()
+
+  private val selectedAnnouncement_ = MutableStateFlow<Announcement?>(null)
+  val selectedAnnouncement: StateFlow<Announcement?> = selectedAnnouncement_.asStateFlow()
+
+  init {
+    announcementRepository.init { getAnnouncementsForCurrentUser() }
+  }
+
   // create factory
   companion object {
-    val Factory: ViewModelProvider.Factory =
+    fun Factory(
+        announcementRepository: AnnouncementRepository,
+        preferencesRepository: PreferencesRepository,
+        userProfileRepository: ProfileRepository
+    ): ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
+
             return AnnouncementViewModel(
-                AnnouncementRepositoryFirestore(Firebase.firestore, Firebase.storage))
+                announcementRepository, preferencesRepository, userProfileRepository)
                 as T
           }
         }
@@ -41,12 +65,12 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
    * @return A new unique ID.
    */
   fun getNewUid(): String {
-    return repository.getNewUid()
+    return announcementRepository.getNewUid()
   }
 
   /** Gets all announcements documents. */
   fun getAnnouncements() {
-    repository.getAnnouncements(
+    announcementRepository.getAnnouncements(
         onSuccess = { allAnnouncements ->
           announcements_.value = allAnnouncements // Update all announcements
         },
@@ -54,13 +78,54 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   }
 
   /** Gets all announcements documents for a certain user. */
-  fun getAnnouncementsForUser(announcements: List<String>) {
-    repository.getAnnouncementsForUser(
-        announcements = announcements,
-        onSuccess = { announcementsForUser_.value = it },
+  fun getAnnouncementsForUser(announcementIds: List<String>) {
+    announcementRepository.getAnnouncementsForUser(
+        announcements = announcementIds,
+        onSuccess = { announcements ->
+          announcementsForUser_.value = announcements
+
+          // Fetch images for each announcement
+          announcements.forEach { announcement ->
+            fetchAnnouncementImagesAsBitmaps(announcement.announcementId)
+          }
+        },
         onFailure = { e ->
           Log.e("AnnouncementViewModel", "Failed to fetch announcements for user: ${e.message}")
         })
+  }
+
+  fun getAnnouncementsForCurrentUser() {
+    viewModelScope.launch {
+      try {
+        // Step 1: Load the user ID from preferences
+        preferencesRepository.getPreferenceByKey(UID_KEY).collect { userId ->
+          if (userId.isNullOrEmpty()) {
+            Log.e("AnnouncementViewModel", "Failed to load user ID")
+            return@collect
+          }
+
+          // Step 2: Fetch the user profile using the user ID
+          userProfileRepository.getProfileById(
+              uid = userId,
+              onSuccess = { profile ->
+                if (profile is UserProfile) {
+                  // Step 3: Use the profile's announcements field to fetch announcements
+                  val announcementIds = profile.announcements
+                  if (announcementIds.isNotEmpty()) {
+                    getAnnouncementsForUser(announcementIds)
+                  }
+                } else {
+                  Log.e("AnnouncementViewModel", "No profile found for user ID: $userId")
+                }
+              },
+              onFailure = { e ->
+                Log.e("AnnouncementViewModel", "Error fetching profile for user ID: $userId", e)
+              })
+        }
+      } catch (e: Exception) {
+        Log.e("AnnouncementViewModel", "Error getting announcements for current user", e)
+      }
+    }
   }
 
   /**
@@ -69,9 +134,13 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
    * @param announcement The announcement document to be added.
    */
   fun announce(announcement: Announcement) {
-    repository.announce(
+    announcementRepository.announce(
         announcement = announcement,
-        onSuccess = { announcementsForUser_.value += announcement },
+        onSuccess = {
+          announcementsForUser_.value += announcement
+          // Fetch and add images for the new announcement
+          fetchAnnouncementImagesAsBitmaps(announcement.announcementId)
+        },
         onFailure = { e ->
           Log.e(
               "AnnouncementViewModel",
@@ -85,12 +154,31 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
       onSuccess: (List<String>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    Log.d("UploadingImages", "$images.size")
-    repository.uploadAnnouncementImages(
+    announcementRepository.uploadAnnouncementImages(
         announcementId = announcementId,
         images = images,
         onSuccess = { onSuccess(it) },
         onFailure = { e -> onFailure(e) })
+  }
+
+  /**
+   * Fetches the images for an announcement as bitmaps and updates the state flow.
+   *
+   * @param announcementId The ID of the announcement whose images are to be fetched.
+   */
+  fun fetchAnnouncementImagesAsBitmaps(announcementId: String) {
+    announcementRepository.fetchAnnouncementsImagesAsBitmaps(
+        announcementId = announcementId,
+        onSuccess = { bitmaps ->
+          // Update the map with the new images
+          announcementImagesMap_.value =
+              announcementImagesMap_.value.toMutableMap().apply { this[announcementId] = bitmaps }
+        },
+        onFailure = { e ->
+          Log.e(
+              "AnnouncementViewModel",
+              "Failed to fetch images for announcement $announcementId: ${e.message}")
+        })
   }
 
   /**
@@ -99,13 +187,15 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
    * @param announcement The announcement document to be updated.
    */
   fun updateAnnouncement(announcement: Announcement) {
-    repository.updateAnnouncement(
+    announcementRepository.updateAnnouncement(
         announcement = announcement,
         onSuccess = {
           announcementsForUser_.value =
               announcementsForUser_.value
                   .filter { it.announcementId != announcement.announcementId }
                   .plus(announcement)
+          // Fetch and update the images for the updated announcement
+          fetchAnnouncementImagesAsBitmaps(announcement.announcementId)
         },
         onFailure = { e ->
           Log.e(
@@ -117,18 +207,84 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   /**
    * Deletes an announcement by its id.
    *
-   * @param userId The ID of the user that deletes the announcement.
    * @param announcementId The ID of the announcement document to be deleted.
    */
-  fun deleteAnnouncementById(userId: String, announcementId: String) {
-    repository.deleteAnnouncementById(
+  fun deleteAnnouncementById(announcementId: String) {
+    announcementRepository.deleteAnnouncementById(
         announcementId = announcementId,
-        onSuccess = { // Remove the announcement with the matching ID from the list
-          announcementsForUser_.value =
-              announcementsForUser_.value.filter { it.announcementId != announcementId }
+        onSuccess = {
+          // After deleting the announcement document itself, we must also remove it
+          // from the user's profile announcements list.
+          viewModelScope.launch {
+            try {
+              // Load the user ID from preferences
+              preferencesRepository.getPreferenceByKey(UID_KEY).collect { userId ->
+                if (userId.isNullOrEmpty()) {
+                  Log.e("AnnouncementViewModel", "No user ID found in preferences.")
+                  return@collect
+                }
+
+                // Fetch the user profile
+                userProfileRepository.getProfileById(
+                    uid = userId,
+                    onSuccess = { profile ->
+                      if (profile is UserProfile) {
+                        // Remove the announcementId from the user's announcements list
+                        val updatedAnnouncements =
+                            profile.announcements.filterNot { it == announcementId }
+
+                        if (updatedAnnouncements.size != profile.announcements.size) {
+                          val updatedProfile =
+                              UserProfile(
+                                  profile.locations,
+                                  updatedAnnouncements,
+                                  profile.wallet,
+                                  profile.uid,
+                                  profile.quickFixes)
+
+                          // Update the profile
+                          userProfileRepository.updateProfile(
+                              profile = updatedProfile,
+                              onSuccess = {
+                                // Remove the announcement from the local cached lists
+                                announcementsForUser_.value =
+                                    announcementsForUser_.value.filter {
+                                      it.announcementId != announcementId
+                                    }
+                                announcementImagesMap_.value =
+                                    announcementImagesMap_.value.toMutableMap().apply {
+                                      remove(announcementId)
+                                    }
+                              },
+                              onFailure = { e ->
+                                Log.e(
+                                    "AnnouncementViewModel",
+                                    "Failed to update user profile after deleting announcement $announcementId: ${e.message}")
+                              })
+                        }
+                      } else {
+                        Log.e(
+                            "AnnouncementViewModel",
+                            "No valid user profile found for userId: $userId")
+                      }
+                    },
+                    onFailure = { e ->
+                      Log.e(
+                          "AnnouncementViewModel",
+                          "Failed to fetch user profile while deleting announcement $announcementId: ${e.message}")
+                    })
+              }
+            } catch (e: Exception) {
+              Log.e(
+                  "AnnouncementViewModel",
+                  "Exception while deleting announcement $announcementId: ${e.message}")
+            }
+          }
         },
         onFailure = { e ->
-          Log.e("AnnouncementViewModel", "User $userId failed to delete announcement: ${e.message}")
+          Log.e(
+              "AnnouncementViewModel",
+              "Failed to delete announcement $announcementId: ${e.message}")
         })
   }
 
@@ -153,5 +309,28 @@ open class AnnouncementViewModel(private val repository: AnnouncementRepository)
   /** Clears the entire list of uploaded images. */
   fun clearUploadedImages() {
     uploadedImages_.value = emptyList()
+  }
+
+  /**
+   * Selects an Announcement document.
+   *
+   * @param announcement The Announcement document to be selected.
+   */
+  fun selectAnnouncement(announcement: Announcement) {
+    selectedAnnouncement_.value = announcement
+  }
+
+  /** Unselects the selected announcement. */
+  fun unselectAnnouncement() {
+    selectedAnnouncement_.value = null
+  }
+
+  /**
+   * updates the map between announcements and images.
+   *
+   * @param updatedMap The new value of the map.
+   */
+  fun setAnnouncementImagesMap(updatedMap: MutableMap<String, List<Pair<String, Bitmap>>>) {
+    announcementImagesMap_.value = updatedMap
   }
 }
