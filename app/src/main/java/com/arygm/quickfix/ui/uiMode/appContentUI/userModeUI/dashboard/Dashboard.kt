@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,9 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ElectricalServices
-import androidx.compose.material.icons.outlined.ImagesearchRoller
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +16,7 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,25 +26,82 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arygm.quickfix.R
+import androidx.lifecycle.viewModelScope
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.messaging.Chat
+import com.arygm.quickfix.model.messaging.ChatStatus
+import com.arygm.quickfix.model.messaging.ChatViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.quickfix.QuickFix
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
+import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.dashboard.AnnouncementsWidget
-import com.arygm.quickfix.ui.elements.QuickFix
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixesWidget
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import kotlin.random.Random
+import com.arygm.quickfix.utils.loadAppMode
+import com.arygm.quickfix.utils.loadUserId
+import kotlinx.coroutines.launch
 
 @Composable
 fun DashboardScreen(
-    announcementViewModel: AnnouncementViewModel,
-    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
     navigationActions: NavigationActions,
-    isUser: Boolean = true
+    userViewModel: ProfileViewModel,
+    workerViewModel: ProfileViewModel,
+    accountViewModel: AccountViewModel,
+    quickFixViewModel: QuickFixViewModel,
+    chatViewModel: ChatViewModel,
+    preferencesViewModel: PreferencesViewModel,
+    announcementViewModel: AnnouncementViewModel,
+    categoryViewModel: CategoryViewModel
 ) {
+
+  var mode by remember { mutableStateOf("") }
+  var uid by remember { mutableStateOf("") }
+  var quickFixes by remember { mutableStateOf(emptyList<QuickFix>()) }
+  var chats by remember { mutableStateOf(emptyList<Chat>()) }
+  LaunchedEffect(Unit) {
+    mode = loadAppMode(preferencesViewModel)
+    uid = loadUserId(preferencesViewModel)
+    userViewModel.fetchUserProfile(uid) { profile ->
+      if (profile != null) {
+        Log.d("DashboardScreen", "profile quickfixes: ${profile.quickFixes}")
+      }
+      profile?.quickFixes?.forEach { quickFix ->
+        quickFixViewModel.fetchQuickFix(quickFix) {
+          if (it != null) {
+            quickFixes = quickFixes + it
+          }
+        }
+      }
+    }
+    accountViewModel.fetchUserAccount(
+        uid,
+        onResult = { account ->
+          account?.activeChats?.forEach { chatUid ->
+            Log.d("DashboardScreen", "chatUid: $chatUid")
+            chatViewModel.viewModelScope.launch {
+              chatViewModel.getChatByChatUid(
+                  chatUid,
+                  onSuccess = { chat ->
+                    Log.d("DashboardScreen", "chat: $chat")
+                    if (chat != null) {
+                      chats = chats + chat
+                    }
+                  },
+                  onFailure = { e ->
+                    Log.e("DashboardScreen", "Failed to fetch chat: ${e.message}")
+                  })
+            }
+          }
+        })
+    Log.d("DashboardScreen", "quickFixes: $quickFixes")
+    Log.d("DashboardScreen", "chats: $chats")
+  }
 
   data class QuickFixFilterButtons(
       val title: String,
@@ -55,49 +111,14 @@ fun DashboardScreen(
 
   var quickFixFilterButtons by remember {
     mutableStateOf(
-        listOf(
-            QuickFixFilterButtons("All", false, {}),
-            QuickFixFilterButtons("Upcoming", true, {}),
-            QuickFixFilterButtons("Canceled", false, {}),
-            QuickFixFilterButtons("Unpaid", false, {}),
-            QuickFixFilterButtons("Finished", false, {}),
-        ))
+        listOf(QuickFixFilterButtons("All", true, {})) +
+            Status.entries
+                .filter { it != Status.FINISHED }
+                .map { status ->
+                  QuickFixFilterButtons(
+                      status.name.lowercase().replaceFirstChar { it.uppercase() }, false, {})
+                })
   }
-
-  // Sample data for fetched filtered quick fixes
-  val quickFixes =
-      listOf(
-          QuickFix("Adam", "Bathroom renovation", "Sat, 12 Oct 2024"),
-          QuickFix("Mehdi", "Laying kitchen tiles", "Sun, 13 Oct 2024"),
-          QuickFix("Ramy", "Bathroom painting", "Sat, 12 Oct 2024"),
-          QuickFix("Ramy", "Bathroom painting", "Sat, 12 Oct 2024"),
-          QuickFix("Mehdi", "Laying kitchen tiles", "Sun, 13 Oct 2024"),
-          QuickFix("Ramy", "Bathroom painting", "Sat, 12 Oct 2024"))
-
-  val messageList =
-      listOf(
-          MessageSneakPeak(
-              "Ramy Hatimy",
-              "Hello, I’m available everyday from 7pm to 8pm bla bla bla bla bla bla bla",
-              "8:30",
-              R.drawable.placeholder_worker,
-              false,
-              2,
-              Icons.Outlined.ImagesearchRoller),
-          MessageSneakPeak(
-              "Adam Ait Bousselham",
-              "Yes of course I’ll be there by 9pm. Can you tell me ouais c'est comment la vie d'artiste hehehe",
-              "11:00",
-              R.drawable.placeholder_worker,
-              true,
-              0,
-              Icons.Outlined.ElectricalServices),
-      )
-
-  val billList =
-      quickFixes.map {
-        BillSneakPeak(it.name, it.taskDescription, it.date, Random.nextDouble(10.00, 10000.00))
-      }
 
   Scaffold(
       containerColor = colorScheme.background,
@@ -125,6 +146,7 @@ fun DashboardScreen(
 
                   LazyRow(
                       horizontalArrangement = Arrangement.spacedBy(4.dp),
+                      modifier = Modifier.testTag("QuickFixFilterButtons"),
                   ) {
                     items(quickFixFilterButtons.size) { index ->
                       QuickFixButton(
@@ -154,43 +176,69 @@ fun DashboardScreen(
                   }
                   val buttonTitle = quickFixFilterButtons.firstOrNull { it.isSelected }?.title
                   when (buttonTitle) {
-                    "Upcoming" ->
+                    "Pending" ->
                         QuickFixesWidget(
-                            status = "Upcoming",
-                            quickFixList = quickFixes,
+                            status = "Pending",
+                            quickFixList = quickFixes.filter { it.status == Status.PENDING },
                             onShowAllClick = { /* Handle Show All Click */},
                             onItemClick = { /* Handle QuickFix Item Click */},
                             modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                             itemsToShowDefault = 3,
+                            workerViewModel = workerViewModel,
                         )
-                    "Canceled" -> {
-                      QuickFixesWidget(
-                          status = "Canceled",
-                          quickFixList = quickFixes,
-                          onShowAllClick = { /* Handle Show All Click */},
-                          onItemClick = { /* Handle QuickFix Item Click */},
-                          modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
-                          itemsToShowDefault = 3,
-                      )
-                    }
                     "Unpaid" -> {
                       QuickFixesWidget(
                           status = "Unpaid",
-                          quickFixList = quickFixes,
+                          quickFixList = quickFixes.filter { it.status == Status.UNPAID },
                           onShowAllClick = { /* Handle Show All Click */},
                           onItemClick = { /* Handle QuickFix Item Click */},
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
+                          workerViewModel = workerViewModel,
                       )
                     }
-                    "Finished" -> {
+                    "Paid" -> {
                       QuickFixesWidget(
-                          status = "Finished",
-                          quickFixList = quickFixes,
+                          status = "Paid",
+                          quickFixList = quickFixes.filter { it.status == Status.PAID },
                           onShowAllClick = { /* Handle Show All Click */},
                           onItemClick = { /* Handle QuickFix Item Click */},
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
+                          workerViewModel = workerViewModel,
+                      )
+                    }
+                    "Upcoming" -> {
+                      QuickFixesWidget(
+                          status = "Upcoming",
+                          quickFixList = quickFixes.filter { it.status == Status.UPCOMING },
+                          onShowAllClick = { /* Handle Show All Click */},
+                          onItemClick = { /* Handle QuickFix Item Click */},
+                          modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
+                          itemsToShowDefault = 3,
+                          workerViewModel = workerViewModel,
+                      )
+                    }
+                    "Completed" -> {
+                      QuickFixesWidget(
+                          status = "Completed",
+                          quickFixList = quickFixes.filter { it.status == Status.COMPLETED },
+                          onShowAllClick = { /* Handle Show All Click */},
+                          onItemClick = { /* Handle QuickFix Item Click */},
+                          modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
+                          itemsToShowDefault = 3,
+                          workerViewModel = workerViewModel,
+                      )
+                    }
+                    "Canceled" -> {
+                      QuickFixesWidget(
+                          status = "Canceled",
+                          quickFixList = quickFixes.filter { it.status == Status.CANCELED },
+                          onShowAllClick = { /* Handle Show All Click */},
+                          onItemClick = { /* Handle QuickFix Item Click */},
+                          modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
+                          itemsToShowDefault = 3,
+                          workerViewModel = workerViewModel,
                       )
                     }
                     "All" -> {
@@ -200,6 +248,7 @@ fun DashboardScreen(
                           onItemClick = { /* Handle QuickFix Item Click */},
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
+                          workerViewModel = workerViewModel,
                       )
                     }
                   }
@@ -215,17 +264,25 @@ fun DashboardScreen(
               }
 
               item {
-                MessagesWidget(
-                    messageList = messageList,
+                ChatWidget(
+                    chatList =
+                        chats.filter {
+                          it.chatStatus == ChatStatus.ACCEPTED ||
+                              it.chatStatus == ChatStatus.GETTING_SUGGESTIONS
+                        },
                     onItemClick = { /*Handle Message Item Click*/},
                     onShowAllClick = { /*Handle Show All Click*/},
                     itemsToShowDefault = 3,
+                    uid = uid,
+                    accountViewModel = accountViewModel,
+                    categoryViewModel = categoryViewModel,
+                    workerViewModel = workerViewModel,
                 )
               }
 
               item {
                 BillsWidget(
-                    billList = billList,
+                    quickFixes = quickFixes,
                     onItemClick = { /*Handle Bill Item Click*/},
                     onShowAllClick = { /*Handle Show All Click*/},
                     itemsToShowDefault = 2,

@@ -25,7 +25,6 @@ import com.arygm.quickfix.ui.theme.poppinsTypography
 fun AnnouncementDetailScreen(
     announcementViewModel: AnnouncementViewModel,
     navigationActions: NavigationActions,
-    isUser: Boolean
 ) {
   Box(
       modifier = Modifier.fillMaxSize().testTag("AnnouncementDetailScreen"),

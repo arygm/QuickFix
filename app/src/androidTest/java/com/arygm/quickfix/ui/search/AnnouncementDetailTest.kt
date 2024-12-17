@@ -32,9 +32,7 @@ class AnnouncementDetailTest {
   fun announcementDetailScreen_displaysTopAppBarWithTitle() {
     composeTestRule.setContent {
       AnnouncementDetailScreen(
-          announcementViewModel = announcementViewModel,
-          navigationActions = navigationActions,
-          isUser = true)
+          announcementViewModel = announcementViewModel, navigationActions = navigationActions)
     }
 
     // Verify that the Top App Bar is displayed
@@ -51,9 +49,7 @@ class AnnouncementDetailTest {
   fun announcementDetailScreen_displaysCenteredText() {
     composeTestRule.setContent {
       AnnouncementDetailScreen(
-          announcementViewModel = announcementViewModel,
-          navigationActions = navigationActions,
-          isUser = true)
+          announcementViewModel = announcementViewModel, navigationActions = navigationActions)
     }
 
     // Verify that the centered text is displayed
@@ -70,9 +66,7 @@ class AnnouncementDetailTest {
   fun announcementDetailScreen_goBackButtonWorks() {
     composeTestRule.setContent {
       AnnouncementDetailScreen(
-          announcementViewModel = announcementViewModel,
-          navigationActions = navigationActions,
-          isUser = true)
+          announcementViewModel = announcementViewModel, navigationActions = navigationActions)
     }
 
     // Verify that the Go Back button exists
@@ -89,9 +83,7 @@ class AnnouncementDetailTest {
   fun announcementDetailScreen_fullLayoutRendersCorrectly() {
     composeTestRule.setContent {
       AnnouncementDetailScreen(
-          announcementViewModel = announcementViewModel,
-          navigationActions = navigationActions,
-          isUser = true)
+          announcementViewModel = announcementViewModel, navigationActions = navigationActions)
     }
 
     // Verify all key components exist and are displayed

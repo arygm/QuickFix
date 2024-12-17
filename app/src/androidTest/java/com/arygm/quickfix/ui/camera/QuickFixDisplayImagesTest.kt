@@ -7,7 +7,9 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.search.Announcement
@@ -15,8 +17,7 @@ import com.arygm.quickfix.model.search.AnnouncementRepository
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixDisplayImages
-import com.arygm.quickfix.utils.UID_KEY
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -29,6 +30,10 @@ class QuickFixDisplayImagesTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
+  // Class-level MutableStateFlows for userId and appMode
+  private val userIdFlow = MutableStateFlow("testUserId")
+  private val appModeFlow = MutableStateFlow("USER")
+
   private lateinit var navigationActions: NavigationActions
   private lateinit var images: List<Bitmap>
   private lateinit var announcementViewModel: AnnouncementViewModel
@@ -36,6 +41,8 @@ class QuickFixDisplayImagesTest {
   private lateinit var mockAnnouncementRepository: AnnouncementRepository
   private lateinit var mockPreferencesRepository: PreferencesRepository
   private lateinit var mockProfileRepository: ProfileRepository
+
+  private lateinit var preferencesViewModel: PreferencesViewModel
 
   @Before
   fun setup() {
@@ -47,8 +54,15 @@ class QuickFixDisplayImagesTest {
     mockPreferencesRepository = Mockito.mock(PreferencesRepository::class.java)
     mockProfileRepository = Mockito.mock(ProfileRepository::class.java)
 
-    // Return a valid userId from preferences
-    whenever(mockPreferencesRepository.getPreferenceByKey(UID_KEY)).thenReturn(flowOf("testUserId"))
+    preferencesViewModel = PreferencesViewModel(mockPreferencesRepository)
+
+    // Mock getPreferenceByKey for user_id
+    val userIdKey = stringPreferencesKey("user_id")
+    whenever(mockPreferencesRepository.getPreferenceByKey(userIdKey)).thenReturn(userIdFlow)
+
+    // Mock getPreferenceByKey for app_mode
+    val appModeKey = stringPreferencesKey("app_mode")
+    whenever(mockPreferencesRepository.getPreferenceByKey(appModeKey)).thenReturn(appModeFlow)
 
     // Mock profile fetch to return a UserProfile (not strictly needed here but let's keep it
     // consistent)
@@ -68,15 +82,13 @@ class QuickFixDisplayImagesTest {
 
   @Test
   fun displaysTitleWithCorrectNumberOfImages_whenImagesProvidedDirectly() {
-    // Pass images directly
     composeTestRule.setContent {
       QuickFixDisplayImages(
-          canDelete = true,
           navigationActions = navigationActions,
           announcementViewModel = announcementViewModel,
+          preferencesViewModel = preferencesViewModel,
           images = images)
     }
-
     // Verify the title displays the correct number of images
     composeTestRule.onNodeWithTag("DisplayedImagesTitle").assertTextEquals("4 elements")
   }
@@ -85,12 +97,11 @@ class QuickFixDisplayImagesTest {
   fun goBackButtonNavigatesCorrectly_whenSelectingIsOff() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-          canDelete = true,
           navigationActions = navigationActions,
           announcementViewModel = announcementViewModel,
+          preferencesViewModel = preferencesViewModel,
           images = images)
     }
-
     // Click the "Go Back" button
     composeTestRule.onNodeWithTag("goBackButton").performClick()
 
@@ -102,12 +113,11 @@ class QuickFixDisplayImagesTest {
   fun selectImagesButtonTogglesSelectionMode() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-          canDelete = true,
           navigationActions = navigationActions,
           announcementViewModel = announcementViewModel,
+          preferencesViewModel = preferencesViewModel,
           images = images)
     }
-
     // Click the "Select Images" button
     composeTestRule.onNodeWithTag("SelectImagesButton").performClick()
 
@@ -120,9 +130,9 @@ class QuickFixDisplayImagesTest {
   fun selectAllButtonSelectsAllImages() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-          canDelete = true,
           navigationActions = navigationActions,
           announcementViewModel = announcementViewModel,
+          preferencesViewModel = preferencesViewModel,
           images = images)
     }
 
@@ -140,9 +150,9 @@ class QuickFixDisplayImagesTest {
   fun endSelectionButtonExitsSelectionMode() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-          canDelete = true,
           navigationActions = navigationActions,
           announcementViewModel = announcementViewModel,
+          preferencesViewModel = preferencesViewModel,
           images = images)
     }
 
@@ -164,9 +174,9 @@ class QuickFixDisplayImagesTest {
 
     composeTestRule.setContent {
       QuickFixDisplayImages(
-          canDelete = true,
           navigationActions = navigationActions,
           announcementViewModel = announcementViewModel,
+          preferencesViewModel = preferencesViewModel,
           images = emptyList())
     }
 
@@ -187,15 +197,13 @@ class QuickFixDisplayImagesTest {
 
   @Test
   fun clickingOnImageSelectsAndDeselectsIt() {
-    // Pass images directly
     composeTestRule.setContent {
       QuickFixDisplayImages(
-          canDelete = true,
           navigationActions = navigationActions,
           announcementViewModel = announcementViewModel,
+          preferencesViewModel = preferencesViewModel,
           images = images)
     }
-
     // Enter selection mode
     composeTestRule.onNodeWithTag("SelectImagesButton").performClick()
 
@@ -212,12 +220,11 @@ class QuickFixDisplayImagesTest {
   fun displaysCorrectIconForSelectedImages() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-          canDelete = true,
           navigationActions = navigationActions,
           announcementViewModel = announcementViewModel,
+          preferencesViewModel = preferencesViewModel,
           images = images)
     }
-
     // Enter selection mode
     composeTestRule.onNodeWithTag("SelectImagesButton").performClick()
 
@@ -232,12 +239,11 @@ class QuickFixDisplayImagesTest {
   fun displaysRadioButtonForUnselectedImages() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-          canDelete = true,
           navigationActions = navigationActions,
           announcementViewModel = announcementViewModel,
+          preferencesViewModel = preferencesViewModel,
           images = images)
     }
-
     // Enter selection mode
     composeTestRule.onNodeWithTag("SelectImagesButton").performClick()
 
@@ -268,9 +274,9 @@ class QuickFixDisplayImagesTest {
 
     composeTestRule.setContent {
       QuickFixDisplayImages(
-          canDelete = true,
           navigationActions = navigationActions,
           announcementViewModel = announcementViewModel,
+          preferencesViewModel = preferencesViewModel,
           images = emptyList())
     }
 
@@ -280,11 +286,12 @@ class QuickFixDisplayImagesTest {
 
   @Test
   fun canDeleteFalseHidesSelectionFeatures() {
+    appModeFlow.value = "WORKER"
     composeTestRule.setContent {
       QuickFixDisplayImages(
-          canDelete = false,
           navigationActions = navigationActions,
           announcementViewModel = announcementViewModel,
+          preferencesViewModel = preferencesViewModel,
           images = images)
     }
 
@@ -296,9 +303,9 @@ class QuickFixDisplayImagesTest {
   fun noImagesShowsZeroElements() {
     composeTestRule.setContent {
       QuickFixDisplayImages(
-          canDelete = true,
           navigationActions = navigationActions,
           announcementViewModel = announcementViewModel,
+          preferencesViewModel = preferencesViewModel,
           images = emptyList())
     }
 

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class QuickFixViewModel(private val repository: QuickFixRepository) : ViewModel() {
+open class QuickFixViewModel(private val repository: QuickFixRepository) : ViewModel() {
 
   private val quickFixes_ = MutableStateFlow<List<QuickFix>>(emptyList())
   val quickFixes: StateFlow<List<QuickFix>> = quickFixes_.asStateFlow()

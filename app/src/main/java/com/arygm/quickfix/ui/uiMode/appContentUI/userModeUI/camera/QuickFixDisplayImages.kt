@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,18 +51,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
+import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.utils.loadAppMode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuickFixDisplayImages(
-    canDelete: Boolean = true,
     navigationActions: NavigationActions,
+    preferencesViewModel: PreferencesViewModel,
     announcementViewModel: AnnouncementViewModel,
     images: List<Bitmap> = emptyList() // For testing
 ) {
+  var canDelete by remember { mutableStateOf(true) }
+  LaunchedEffect(Unit) { canDelete = loadAppMode(preferencesViewModel) == AppMode.USER.name }
   val selectedAnnouncement by announcementViewModel.selectedAnnouncement.collectAsState()
 
   val defaultUploadedImages by announcementViewModel.uploadedImages.collectAsState()
