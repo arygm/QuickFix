@@ -55,7 +55,8 @@ private const val PADDING_BETWEEN_ELEM = 8
 @Composable
 fun AnnouncementDetailScreen(
     announcementViewModel: AnnouncementViewModel,
-    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory(LocalContext.current)),
+    categoryViewModel: CategoryViewModel =
+        viewModel(factory = CategoryViewModel.Factory(LocalContext.current)),
     preferencesViewModel: PreferencesViewModel,
     navigationActions: NavigationActions,
 ) {

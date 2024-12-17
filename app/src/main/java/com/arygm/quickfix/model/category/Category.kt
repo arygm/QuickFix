@@ -29,14 +29,13 @@ data class Category(
     val description: String = "",
     val subcategories: List<Subcategory> = emptyList()
 ) {
-    fun toCategoryEntity(): CategoryEntity {
-        return CategoryEntity(
-            id = id,
-            name = name,
-            description = description,
-            subcategories = Converters().fromSubcategoryList(subcategories)
-        )
-    }
+  fun toCategoryEntity(): CategoryEntity {
+    return CategoryEntity(
+        id = id,
+        name = name,
+        description = description,
+        subcategories = Converters().fromSubcategoryList(subcategories))
+  }
 }
 
 data class Scale(val longScale: String, val shortScale: String)

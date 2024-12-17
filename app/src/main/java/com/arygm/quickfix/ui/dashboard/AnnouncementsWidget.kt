@@ -57,7 +57,8 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScree
 @Composable
 fun AnnouncementsWidget(
     announcementViewModel: AnnouncementViewModel,
-    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory(LocalContext.current)),
+    categoryViewModel: CategoryViewModel =
+        viewModel(factory = CategoryViewModel.Factory(LocalContext.current)),
     navigationActions: NavigationActions,
     modifier: Modifier = Modifier,
     itemsToShowDefault: Int = 2

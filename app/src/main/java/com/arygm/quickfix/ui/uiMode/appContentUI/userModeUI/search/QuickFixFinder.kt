@@ -49,7 +49,8 @@ fun QuickFixFinderScreen(
     accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
     searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory),
     announcementViewModel: AnnouncementViewModel,
-    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory(LocalContext.current)),
+    categoryViewModel: CategoryViewModel =
+        viewModel(factory = CategoryViewModel.Factory(LocalContext.current)),
     preferencesViewModel: PreferencesViewModel
 ) {
   val pagerState = rememberPagerState(pageCount = { 2 })

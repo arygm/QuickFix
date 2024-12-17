@@ -48,12 +48,12 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.google.firebase.Timestamp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatWidget(
@@ -147,11 +147,11 @@ fun ChatItem(
   workerViewModel.fetchUserProfile(
       chat.workeruid, onResult = { workerProfile = it as WorkerProfile })
   var image by remember { mutableStateOf<ImageVector?>(null) }
-    CoroutineScope(Dispatchers.IO).launch {
-        categoryViewModel.getCategoryBySubcategoryId(workerProfile.fieldOfWork) {
-            image = it?.let { it1 -> getCategoryIcon(it1) }
-        }
+  CoroutineScope(Dispatchers.IO).launch {
+    categoryViewModel.getCategoryBySubcategoryId(workerProfile.fieldOfWork) {
+      image = it?.let { it1 -> getCategoryIcon(it1) }
     }
+  }
   Row(
       modifier =
           Modifier.fillMaxWidth()

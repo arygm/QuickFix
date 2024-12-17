@@ -14,8 +14,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-open class CategoryViewModel(private val categoryRepositoryFirestore: CategoryRepositoryFirestore, dispatcher: CoroutineDispatcher = Dispatchers.IO) :
-    ViewModel() {
+open class CategoryViewModel(
+    private val categoryRepositoryFirestore: CategoryRepositoryFirestore,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
+) : ViewModel() {
 
   private val _categories = MutableStateFlow<List<Category>>(emptyList())
   val categories: StateFlow<List<Category>> = _categories
@@ -28,7 +30,10 @@ open class CategoryViewModel(private val categoryRepositoryFirestore: CategoryRe
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return CategoryViewModel(CategoryRepositoryFirestore(QuickFixRoomDatabase.getInstance(context).categoryDao(), Firebase.firestore)) as T
+            return CategoryViewModel(
+                CategoryRepositoryFirestore(
+                    QuickFixRoomDatabase.getInstance(context).categoryDao(), Firebase.firestore))
+                as T
           }
         }
   }
@@ -36,9 +41,7 @@ open class CategoryViewModel(private val categoryRepositoryFirestore: CategoryRe
   init {
     categoryRepositoryFirestore.init {
       Log.d("CategoryViewModel", "CategoryRepositoryFirestore initialized")
-        CoroutineScope(dispatcher).launch {
-            getCategories()
-        }
+      CoroutineScope(dispatcher).launch { getCategories() }
     }
   }
 

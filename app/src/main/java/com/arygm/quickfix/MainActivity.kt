@@ -49,153 +49,144 @@ val Context.dataStore by preferencesDataStore(name = "quickfix_preferences")
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var locationHelper: LocationHelper
-    private var testBitmapPP = mutableStateOf<Bitmap?>(null)
-    private var testLocation = mutableStateOf<Location>(Location())
+  private lateinit var locationHelper: LocationHelper
+  private var testBitmapPP = mutableStateOf<Bitmap?>(null)
+  private var testLocation = mutableStateOf<Location>(Location())
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
 
-        locationHelper = LocationHelper(this, this)
+    locationHelper = LocationHelper(this, this)
 
-        setContent {
-            QuickFixTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    QuickFixApp(testBitmapPP.value, testLocation.value)
-                }
-            }
+    setContent {
+      QuickFixTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+          QuickFixApp(testBitmapPP.value, testLocation.value)
         }
+      }
+    }
 
-        // Check permissions and get location
-        if (locationHelper.checkPermissions()) {
-            locationHelper.getCurrentLocation { location ->
-                location?.let {
-                    // Handle location (e.g., update UI, save location data)
-                    Log.d("MainActivity", "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
-                }
-            }
-        } else {
-            locationHelper.requestPermissions()
+    // Check permissions and get location
+    if (locationHelper.checkPermissions()) {
+      locationHelper.getCurrentLocation { location ->
+        location?.let {
+          // Handle location (e.g., update UI, save location data)
+          Log.d("MainActivity", "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
         }
+      }
+    } else {
+      locationHelper.requestPermissions()
     }
+  }
 
-    fun setTestBitmap(bitmap: Bitmap) {
-        testBitmapPP.value = bitmap
-    }
+  fun setTestBitmap(bitmap: Bitmap) {
+    testBitmapPP.value = bitmap
+  }
 
-    fun setTestLocation(location: Location) {
-        testLocation.value = location
-    }
+  fun setTestLocation(location: Location) {
+    testLocation.value = location
+  }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LocationHelper.PERMISSION_REQUEST_ACCESS_LOCATION &&
-            grantResults.isNotEmpty() &&
-            grantResults[0] == PackageManager.PERMISSION_GRANTED
-        ) {
-            locationHelper.getCurrentLocation { location ->
-                location?.let {
-                    Log.d("MainActivity", "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
-                }
-            }
+  override fun onRequestPermissionsResult(
+      requestCode: Int,
+      permissions: Array<String>,
+      grantResults: IntArray
+  ) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    if (requestCode == LocationHelper.PERMISSION_REQUEST_ACCESS_LOCATION &&
+        grantResults.isNotEmpty() &&
+        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+      locationHelper.getCurrentLocation { location ->
+        location?.let {
+          Log.d("MainActivity", "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
         }
+      }
     }
+  }
 }
 
 @Composable
 fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
 
-    val context = LocalContext.current
-    val rootNavController = rememberNavController()
-    val navigationActionsRoot = remember { NavigationActions(rootNavController) }
+  val context = LocalContext.current
+  val rootNavController = rememberNavController()
+  val navigationActionsRoot = remember { NavigationActions(rootNavController) }
 
-    val modeViewModel: ModeViewModel = viewModel(factory = ModeViewModel.Factory)
+  val modeViewModel: ModeViewModel = viewModel(factory = ModeViewModel.Factory)
 
-    val userViewModel: ProfileViewModel =
-        viewModel(key = "userViewModel", factory = ProfileViewModel.UserFactory)
+  val userViewModel: ProfileViewModel =
+      viewModel(key = "userViewModel", factory = ProfileViewModel.UserFactory)
 
-    val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
+  val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
 
-    val preferencesViewModel: PreferencesViewModel =
-        viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
-    val userPreferencesViewModel: PreferencesViewModelUserProfile =
-        viewModel(factory = PreferencesViewModelUserProfile.Factory(LocalContext.current.dataStore))
+  val preferencesViewModel: PreferencesViewModel =
+      viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
+  val userPreferencesViewModel: PreferencesViewModelUserProfile =
+      viewModel(factory = PreferencesViewModelUserProfile.Factory(LocalContext.current.dataStore))
 
-    val workerViewModel: ProfileViewModel =
-        viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
-    val categoryViewModel: CategoryViewModel = viewModel(
-        factory = CategoryViewModel.Factory(
-            LocalContext.current
-        )
-    )
-    val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
-    val chatViewModel: ChatViewModel =
-        viewModel(factory = ChatViewModel.Factory(LocalContext.current))
-    val quickFixViewModel: QuickFixViewModel = viewModel(factory = QuickFixViewModel.Factory)
+  val workerViewModel: ProfileViewModel =
+      viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
+  val categoryViewModel: CategoryViewModel =
+      viewModel(factory = CategoryViewModel.Factory(LocalContext.current))
+  val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
+  val chatViewModel: ChatViewModel =
+      viewModel(factory = ChatViewModel.Factory(LocalContext.current))
+  val quickFixViewModel: QuickFixViewModel = viewModel(factory = QuickFixViewModel.Factory)
 
-    var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
+  var isOffline by remember { mutableStateOf(!isConnectedToInternet(context)) }
 
-    // Simulate monitoring connectivity (replace this with actual monitoring in production)
-    LaunchedEffect(Unit) {
-        while (true) {
-            isOffline = !isConnectedToInternet(context)
-            delay(3000) // Poll every 3 seconds
-        }
+  // Simulate monitoring connectivity (replace this with actual monitoring in production)
+  LaunchedEffect(Unit) {
+    while (true) {
+      isOffline = !isConnectedToInternet(context)
+      delay(3000) // Poll every 3 seconds
     }
-    NavHost(
-        navController = rootNavController,
-        startDestination = RootRoute.NO_MODE,
-        enterTransition = {
-            // You can change whatever you want for transitions
-            EnterTransition.None
-        },
-        exitTransition = {
-            // You can change whatever you want for transitions
-            ExitTransition.None
-        }) {
+  }
+  NavHost(
+      navController = rootNavController,
+      startDestination = RootRoute.NO_MODE,
+      enterTransition = {
+        // You can change whatever you want for transitions
+        EnterTransition.None
+      },
+      exitTransition = {
+        // You can change whatever you want for transitions
+        ExitTransition.None
+      }) {
         composable(RootRoute.NO_MODE) {
-            NoModeNavHost(
-                navigationActionsRoot,
-                accountViewModel,
-                preferencesViewModel,
-                userViewModel,
-                isOffline = isOffline,
-                userPreferencesViewModel
-            )
+          NoModeNavHost(
+              navigationActionsRoot,
+              accountViewModel,
+              preferencesViewModel,
+              userViewModel,
+              isOffline = isOffline,
+              userPreferencesViewModel)
         }
 
         composable(RootRoute.APP_CONTENT) {
-            AppContentNavGraph(
-                testBitmapPP,
-                testLocation,
-                preferencesViewModel,
-                userViewModel,
-                accountViewModel,
-                isOffline,
-                navigationActionsRoot,
-                modeViewModel,
-                userPreferencesViewModel,
-                workerViewModel,
-                categoryViewModel,
-                locationViewModel,
-                chatViewModel,
-                quickFixViewModel
-            )
+          AppContentNavGraph(
+              testBitmapPP,
+              testLocation,
+              preferencesViewModel,
+              userViewModel,
+              accountViewModel,
+              isOffline,
+              navigationActionsRoot,
+              modeViewModel,
+              userPreferencesViewModel,
+              workerViewModel,
+              categoryViewModel,
+              locationViewModel,
+              chatViewModel,
+              quickFixViewModel)
         }
-    }
+      }
 }
 
 fun isConnectedToInternet(context: Context): Boolean {
-    val connectivityManager =
-        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val network = connectivityManager.activeNetwork ?: return false
-    val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
-    return activeNetwork.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+  val connectivityManager =
+      context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+  val network = connectivityManager.activeNetwork ?: return false
+  val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+  return activeNetwork.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }

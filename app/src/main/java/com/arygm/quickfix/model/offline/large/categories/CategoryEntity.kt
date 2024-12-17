@@ -12,12 +12,11 @@ data class CategoryEntity(
     val description: String,
     val subcategories: String, // Serialized List<Subcategory>
 ) {
-    fun toCategory(): Category {
-        return Category(
-            id = id,
-            name = name,
-            description = description,
-            subcategories = Converters().toSubcategoryList(subcategories)
-        )
-    }
+  fun toCategory(): Category {
+    return Category(
+        id = id,
+        name = name,
+        description = description,
+        subcategories = Converters().toSubcategoryList(subcategories))
+  }
 }
