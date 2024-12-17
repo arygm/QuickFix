@@ -33,6 +33,7 @@ import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -45,12 +46,13 @@ fun QuickFixFinderScreen(
     navigationActions: NavigationActions,
     navigationActionsRoot: NavigationActions,
     isUser: Boolean = true,
-    profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
-    accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
-    searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory),
+    profileViewModel: ProfileViewModel,
+    accountViewModel: AccountViewModel,
+    searchViewModel: SearchViewModel,
     announcementViewModel: AnnouncementViewModel,
     categoryViewModel: CategoryViewModel =
         viewModel(factory = CategoryViewModel.Factory(LocalContext.current)),
+    quickFixViewModel: QuickFixViewModel,
     preferencesViewModel: PreferencesViewModel
 ) {
   val pagerState = rememberPagerState(pageCount = { 2 })
@@ -108,7 +110,8 @@ fun QuickFixFinderScreen(
                               navigationActionsRoot,
                               searchViewModel,
                               accountViewModel,
-                              categoryViewModel)
+                              categoryViewModel,
+                              quickFixViewModel)
                       1 ->
                           AnnouncementScreen(
                               announcementViewModel,

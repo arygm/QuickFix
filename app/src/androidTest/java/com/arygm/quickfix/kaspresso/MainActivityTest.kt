@@ -21,6 +21,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.printToLog
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
@@ -189,7 +190,7 @@ class MainActivityTest : TestCase() {
   }
 
   @Test
-  fun DbecomeAWorker() = run {
+  fun EbecomeAWorker() = run {
     step("Set up the WelcomeScreen and transit to the register") {
       val indicesIncludedServices =
           (0 until item.subcategories[0].setServices.size / 2 step 2).toList()
@@ -445,7 +446,51 @@ class MainActivityTest : TestCase() {
   }
 
   @Test
-  fun CshouldBeAbleToLogin() = run {
+  fun CsearchForWorker() = run {
+    step("Set up the WelcomeScreen and transit to the register") {
+      val testLocation =
+          com.arygm.quickfix.model.locations.Location(
+              latitude = 0.0, longitude = 0.0, name = "Test Location")
+      val testBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+      composeTestRule.activityRule.scenario.onActivity { activity ->
+        (activity as MainActivity).setTestBitmap(testBitmap)
+        activity.setTestLocation(testLocation)
+      }
+
+      // Wait for the UI to settle
+      composeTestRule.waitForIdle()
+
+      // Attempt to grant permissions
+      allowPermissionsIfNeeded()
+      composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()
+      }
+
+      composeTestRule.waitForIdle()
+      // Navigate to search
+      onView(withText("Search")).perform(click())
+      onView(withText("Search")).perform(click())
+      composeTestRule.waitUntil("find the categories", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithText("Carpentry").fetchSemanticsNodes().isNotEmpty()
+      }
+      composeTestRule.onNodeWithTag("searchContent").performTextInput("Framing")
+      composeTestRule.waitForIdle()
+      composeTestRule.waitUntil("find the worker", timeoutMillis = 20000) {
+        composeTestRule
+            .onAllNodesWithTag("worker_profile_result_0")
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      }
+      // composeTestRule.onNodeWithTag("worker_profile_result_0").assertIsDisplayed()
+      composeTestRule.onAllNodesWithTag("book_button")[0].assertExists().performClick()
+      composeTestRule.waitForIdle()
+      composeTestRule.onNodeWithTag("sliding_window_content").assertExists().assertIsDisplayed()
+      composeTestRule.onNodeWithText("Construction Carpentry").assertIsDisplayed()
+    }
+  }
+
+  @Test
+  fun DshouldBeAbleToLogin() = run {
     step("Set up the WelcomeScreen and transit to the register") {
       composeTestRule.activity
 
@@ -568,5 +613,13 @@ class MainActivityTest : TestCase() {
     }
     // Verify that the profile name has been updated correctly
     composeTestRule.onNodeWithTag("ProfileDisplayName").assertTextEquals(expectedProfileName)
+  }
+
+  private fun searchEngine() {
+    composeTestRule.onNodeWithTag("searchContent").performTextReplacement("Jane")
+    composeTestRule.waitForIdle()
+    // Assert: "Jane Smith" is displayed
+    composeTestRule.onNodeWithText("Jane Smith").assertIsDisplayed()
+    composeTestRule.onNodeWithText("book_button").performClick()
   }
 }

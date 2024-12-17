@@ -16,6 +16,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -47,6 +48,7 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchWorkerResult
 import java.time.LocalDate
 import java.time.LocalTime
+import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
@@ -188,16 +190,10 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel)
     }
     // Set the search query and verify that the title and description match the query
-    searchViewModel.setSearchQuery("Construction Carpentry")
-
-    // Check if the title with search query text is displayed
-    composeTestRule.onNodeWithText("Construction Carpentry").assertExists().assertIsDisplayed()
+    searchViewModel.setSearchQuery("Unknown")
 
     // Check if the description with the query text is displayed
-    composeTestRule
-        .onNodeWithText("This is a sample description for the Construction Carpentry result")
-        .assertExists()
-        .assertIsDisplayed()
+    composeTestRule.onAllNodesWithText("Unknown").assertCountEquals(2)
   }
 
   @Test
@@ -1013,7 +1009,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 
@@ -1088,7 +1085,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(filteredWorkers.size)
 
     filteredWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 
@@ -1228,7 +1226,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 
@@ -1288,7 +1287,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 
@@ -1727,7 +1727,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 

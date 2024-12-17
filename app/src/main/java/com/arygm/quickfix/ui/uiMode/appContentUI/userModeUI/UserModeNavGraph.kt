@@ -402,6 +402,7 @@ fun SearchNavHost(
           searchViewModel,
           announcementViewModel,
           categoryViewModel,
+          quickFixViewModel,
           preferencesViewModel)
     }
     composable(UserScreen.DISPLAY_UPLOADED_IMAGES) {
