@@ -11,10 +11,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.outlined.ElectricalServices
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,11 +23,10 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.category.Category
@@ -38,12 +37,16 @@ import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.AvailabilitySlot
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.ui.elements.QuickFixButton
+import com.arygm.quickfix.ui.elements.QuickFixDateTimePicker
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.utils.loadAppMode
+import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.Locale
 
 private const val PADDING_BETWEEN_ELEM = 8
@@ -57,44 +60,92 @@ fun AnnouncementDetailScreen(
 ) {
   var isUser by remember { mutableStateOf(true) }
   LaunchedEffect(Unit) { isUser = loadAppMode(preferencesViewModel) == AppMode.USER.name }
-  BoxWithConstraints {
-    val widthRatio = maxWidth / 411
-    val heightRatio = maxHeight / 860
-    val sizeRatio = minOf(widthRatio, heightRatio)
+  fun LocalDateTime.toMillis(): Long =
+      this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
-    val selectedAnnouncement by announcementViewModel.selectedAnnouncement.collectAsState()
-    val imagesMap by announcementViewModel.announcementImagesMap.collectAsState()
+  val selectedAnnouncement by announcementViewModel.selectedAnnouncement.collectAsState()
+  val imagesMap by announcementViewModel.announcementImagesMap.collectAsState()
 
-    if (selectedAnnouncement != null) {
-      val announcement = selectedAnnouncement!!
-      var category by remember { mutableStateOf(Category()) }
-      LaunchedEffect(Unit) {
-        categoryViewModel.getCategoryBySubcategoryId(
-            announcement.category,
-            onSuccess = {
-              if (it != null) {
-                category = it
+  if (selectedAnnouncement != null) {
+    val announcement = selectedAnnouncement!!
+    var category by remember { mutableStateOf(Category()) }
+    LaunchedEffect(Unit) {
+      categoryViewModel.getCategoryBySubcategoryId(
+          announcement.category,
+          onSuccess = {
+            if (it != null) {
+              category = it
+            }
+          })
+    }
+
+    val description = remember { mutableStateOf(announcement.description) }
+    var descriptionError by remember { mutableStateOf(false) }
+    val images = imagesMap[announcement.announcementId] ?: emptyList()
+    val bannerText = if (images.isNotEmpty()) "1 of ${images.size}" else null
+
+    var isEditing by remember { mutableStateOf(false) }
+    val dates = remember {
+      mutableStateListOf<AvailabilitySlot>().apply { addAll(announcement.availability) }
+    }
+    var isEditingIndex by rememberSaveable { mutableStateOf<Int?>(null) }
+    var showStartAvailabilityPopup by remember { mutableStateOf(false) }
+    var showEndAvailabilityPopup by remember { mutableStateOf(false) }
+    var tempStart by remember { mutableStateOf<Timestamp?>(null) }
+
+    if (showStartAvailabilityPopup) {
+      Dialog(onDismissRequest = { showStartAvailabilityPopup = false }) {
+        println("showStartAvailabilityPopup")
+        QuickFixDateTimePicker(
+            onDateTimeSelected = { date, time ->
+              val start = LocalDateTime.of(date, time)
+              val startMillis = start.toMillis()
+              tempStart = millisToTimestamp(startMillis)
+              showStartAvailabilityPopup = false
+              showEndAvailabilityPopup = true
+            },
+            onDismissRequest = { showStartAvailabilityPopup = false },
+            modifier = Modifier.testTag("startAvailabilityPicker"))
+      }
+    }
+
+    if (showEndAvailabilityPopup) {
+      Dialog(onDismissRequest = { showEndAvailabilityPopup = false }) {
+        QuickFixDateTimePicker(
+            onDateTimeSelected = { date, time ->
+              val end = LocalDateTime.of(date, time)
+
+              tempStart?.let { start ->
+                if (isEditingIndex == null) {
+                  val endMillis = end.toMillis()
+                  val tempEnd = millisToTimestamp(endMillis)
+                  dates.add(AvailabilitySlot(start = start, end = tempEnd))
+                } else {
+                  isEditingIndex = null
+                }
               }
-            })
+              tempStart = null
+              showEndAvailabilityPopup = false
+            },
+            onDismissRequest = { showEndAvailabilityPopup = false },
+            modifier = Modifier.testTag("endAvailabilityPicker"))
       }
+    }
 
-      val description = remember { mutableStateOf(announcement.description) }
-      var descriptionError by remember { mutableStateOf(false) }
-      val images = imagesMap[announcement.announcementId] ?: emptyList()
-      val bannerText = if (images.isNotEmpty()) "1 of ${images.size}" else null
-
-      var isEditing by remember { mutableStateOf(false) }
-      val dates = remember {
-        mutableStateListOf<AvailabilitySlot>().apply { addAll(announcement.availability) }
-      }
+    BoxWithConstraints {
+      val widthRatio = maxWidth / 411
+      val heightRatio = maxHeight / 860
+      val sizeRatio = minOf(widthRatio, heightRatio)
 
       Box(
           modifier =
               Modifier.fillMaxSize()
                   .background(color = colorScheme.surface)
-                  .align(Alignment.Center)) {
+                  .align(Alignment.Center)
+                  .testTag("AnnouncementDetailScreenRoot") // Tag the entire screen root
+          ) {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().testTag("AnnouncementDetailLazyColumn"),
                 verticalArrangement = Arrangement.spacedBy(PADDING_BETWEEN_ELEM.dp)) {
                   item {
                     // Top Image Section
@@ -110,14 +161,15 @@ fun AnnouncementDetailScreen(
                                 .background(Color.Gray)
                                 .clickable {
                                   navigationActions.navigateTo(UserScreen.DISPLAY_UPLOADED_IMAGES)
-                                }) {
+                                }
+                                .testTag("TopImageBox")) {
                           // Display the first image or a placeholder
                           if (images.isNotEmpty()) {
                             Image(
                                 bitmap = images.first().second.asImageBitmap(),
                                 contentDescription = "Announcement Image",
                                 contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize())
+                                modifier = Modifier.fillMaxSize().testTag("AnnouncementMainImage"))
                           }
 
                           // Back button
@@ -131,7 +183,8 @@ fun AnnouncementDetailScreen(
                                       .background(colorScheme.surface, shape = CircleShape)
                                       .padding(
                                           horizontal = PADDING_BETWEEN_ELEM.dp * sizeRatio.value,
-                                          vertical = 4.dp * sizeRatio.value)) {
+                                          vertical = 4.dp * sizeRatio.value)
+                                      .testTag("GoBackIconBtn")) {
                                 Icon(
                                     imageVector = Icons.Default.ArrowBack,
                                     contentDescription = "Go Back",
@@ -159,7 +212,8 @@ fun AnnouncementDetailScreen(
                                         .background(colorScheme.surface, shape = CircleShape)
                                         .padding(
                                             horizontal = PADDING_BETWEEN_ELEM.dp * sizeRatio.value,
-                                            vertical = 4.dp * sizeRatio.value)) {
+                                            vertical = 4.dp * sizeRatio.value)
+                                        .testTag("EditDeleteIconBtn")) {
                                   Icon(
                                       painter =
                                           if (isEditing) painterResource(id = R.drawable.delete)
@@ -184,7 +238,8 @@ fun AnnouncementDetailScreen(
                                             RoundedCornerShape(4.dp * sizeRatio.value))
                                         .padding(
                                             horizontal = PADDING_BETWEEN_ELEM.dp * sizeRatio.value,
-                                            vertical = 4.dp * sizeRatio.value))
+                                            vertical = 4.dp * sizeRatio.value)
+                                        .testTag("BannerText"))
                           }
                         }
                   }
@@ -193,12 +248,11 @@ fun AnnouncementDetailScreen(
                     Column(
                         modifier =
                             Modifier.fillMaxWidth()
-                                .padding(
-                                    horizontal = 16.dp * sizeRatio.value) // Add padding for content
-                        ) {
+                                .padding(horizontal = 16.dp * sizeRatio.value)
+                                .testTag("AnnouncementContentColumn")) {
                           // Announcement Title
                           Row(
-                              modifier = Modifier.fillMaxWidth(),
+                              modifier = Modifier.fillMaxWidth().testTag("AnnouncementTitleRow"),
                               verticalAlignment = Alignment.CenterVertically) {
                                 // Title Text
                                 Text(
@@ -206,7 +260,7 @@ fun AnnouncementDetailScreen(
                                     style = poppinsTypography.titleMedium.copy(fontSize = 22.sp),
                                     color = colorScheme.onBackground,
                                     fontWeight = FontWeight.Bold,
-                                )
+                                    modifier = Modifier.testTag("AnnouncementTitle"))
 
                                 Spacer(modifier = Modifier.width(30.dp * widthRatio.value))
 
@@ -224,7 +278,7 @@ fun AnnouncementDetailScreen(
 
                           // Description
                           QuickFixTextFieldCustom(
-                              modifier = Modifier.semantics { testTag = "descriptionHolder" },
+                              modifier = Modifier.testTag("DescriptionTextField"),
                               widthField = 380.dp * widthRatio.value,
                               value = description.value,
                               onValueChange = { description.value = it },
@@ -267,7 +321,8 @@ fun AnnouncementDetailScreen(
                           Row(
                               modifier =
                                   Modifier.fillMaxWidth()
-                                      .padding(vertical = PADDING_BETWEEN_ELEM.dp),
+                                      .padding(vertical = PADDING_BETWEEN_ELEM.dp)
+                                      .testTag("LocationRow"),
                               verticalAlignment = Alignment.CenterVertically) {
                                 // Location Icon
                                 Icon(
@@ -276,7 +331,8 @@ fun AnnouncementDetailScreen(
                                     tint = colorScheme.onSurface,
                                     modifier =
                                         Modifier.size(35.dp * sizeRatio.value)
-                                            .padding(end = PADDING_BETWEEN_ELEM.dp))
+                                            .padding(end = PADDING_BETWEEN_ELEM.dp)
+                                            .testTag("LocationIcon"))
 
                                 Column {
                                   // Location Title
@@ -289,8 +345,9 @@ fun AnnouncementDetailScreen(
                                   // Location Value
                                   Text(
                                       text = announcement.location?.name ?: "No location available",
-                                      style = MaterialTheme.typography.labelSmall,
-                                      color = colorScheme.onSurface)
+                                      style = poppinsTypography.labelSmall,
+                                      color = colorScheme.onSurface,
+                                      modifier = Modifier.testTag("LocationValue"))
                                 }
                               }
 
@@ -314,11 +371,8 @@ fun AnnouncementDetailScreen(
                                     tint = colorScheme.onSurface,
                                     modifier =
                                         Modifier.size(35.dp * sizeRatio.value)
-                                            .padding(
-                                                end =
-                                                    PADDING_BETWEEN_ELEM
-                                                        .dp) // Space between icon and text
-                                    )
+                                            .padding(end = PADDING_BETWEEN_ELEM.dp)
+                                            .testTag("CalendarIcon"))
 
                                 // Section Title
                                 Text(
@@ -326,7 +380,8 @@ fun AnnouncementDetailScreen(
                                     style =
                                         poppinsTypography.headlineMedium.copy(
                                             fontSize = 12.sp, fontWeight = FontWeight.Medium),
-                                    color = colorScheme.onBackground)
+                                    color = colorScheme.onBackground,
+                                    modifier = Modifier.testTag("DateAndTimeTitle"))
                               }
 
                           Spacer(
@@ -337,78 +392,90 @@ fun AnnouncementDetailScreen(
                           val dateFormatter = SimpleDateFormat("EEE, dd MMM", Locale.getDefault())
                           val timeFormatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
 
+                          // Availability
+                          val startAvailability = {
+                            isEditingIndex = null
+                            showStartAvailabilityPopup = true
+                          }
                           // Availability List or Fallback Message
-                          if (dates.isNotEmpty()) {
-                            // Availability Slots Header
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween) {
-                                  Text(
-                                      text = "Day",
-                                      style =
-                                          MaterialTheme.typography.bodyMedium.copy(
-                                              fontWeight = FontWeight.Medium),
-                                      color = colorScheme.onSurface)
-                                  Text(
-                                      text = "Time",
-                                      style =
-                                          MaterialTheme.typography.bodyMedium.copy(
-                                              fontWeight = FontWeight.Medium),
-                                      color = colorScheme.onSurface)
-                                }
-
-                            Spacer(
-                                modifier =
-                                    Modifier.height(PADDING_BETWEEN_ELEM.dp * heightRatio.value))
-
-                            // Display Each Availability Slot
-                            dates.forEach { slot ->
-                              val day =
-                                  dateFormatter.format(
-                                      slot.start.toDate()) // Format date as "EEE, dd MMM"
-                              val timeRange =
-                                  "${timeFormatter.format(slot.start.toDate())} - ${
-                                            timeFormatter.format(slot.end.toDate())
-                                        }" // Format time as "hh:mm a"
+                          Column(modifier = Modifier.testTag("AvailabilitySection")) {
+                            if (dates.isNotEmpty()) {
+                              // Availability Slots Header
                               Row(
-                                  modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                                  modifier =
+                                      Modifier.fillMaxWidth()
+                                          .padding(horizontal = 8.dp)
+                                          .testTag("AvailabilityHeader"),
                                   horizontalArrangement = Arrangement.SpaceBetween) {
                                     Text(
-                                        text = day, // Displays the day
-                                        style = MaterialTheme.typography.bodyMedium,
+                                        text = "Day",
+                                        style =
+                                            poppinsTypography.bodyMedium.copy(
+                                                fontWeight = FontWeight.Medium),
                                         color = colorScheme.onSurface)
                                     Text(
-                                        text = timeRange, // Displays the time range
-                                        style = MaterialTheme.typography.bodyMedium,
+                                        text = "Time",
+                                        style =
+                                            poppinsTypography.bodyMedium.copy(
+                                                fontWeight = FontWeight.Medium),
+                                        color = colorScheme.onSurface)
+                                  }
+
+                              Spacer(
+                                  modifier =
+                                      Modifier.height(PADDING_BETWEEN_ELEM.dp * heightRatio.value))
+
+                              // Display Each Availability Slot
+                              dates.forEachIndexed { index, slot ->
+                                val day = dateFormatter.format(slot.start.toDate())
+                                val timeRange =
+                                    "${timeFormatter.format(slot.start.toDate())} - ${
+                                                timeFormatter.format(slot.end.toDate())
+                                            }"
+                                Row(
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                            .padding(horizontal = 8.dp)
+                                            .testTag("AvailabilitySlot_$index"),
+                                    horizontalArrangement = Arrangement.SpaceBetween) {
+                                      Text(
+                                          text = day,
+                                          style = poppinsTypography.bodyMedium,
+                                          color = colorScheme.onSurface)
+                                      Text(
+                                          text = timeRange,
+                                          style = poppinsTypography.bodyMedium,
+                                          color = colorScheme.onSurface)
+                                    }
+                              }
+                            } else {
+                              // Fallback Message for Empty Availability
+                              Box(
+                                  modifier =
+                                      Modifier.fillMaxWidth().testTag("EmptyAvailabilityBox"),
+                                  contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = "Availability has not been specified",
+                                        style = poppinsTypography.labelSmall,
                                         color = colorScheme.onSurface)
                                   }
                             }
-                          } else {
-                            // Fallback Message for Empty Availability
-                            Box(
-                                modifier = Modifier.fillMaxWidth(),
-                                contentAlignment = Alignment.Center) {
-                                  Text(
-                                      text = "Availability has not been specified",
-                                      style = MaterialTheme.typography.labelSmall,
-                                      color = colorScheme.onSurface)
-                                }
-                          }
 
-                          if (isEditing) {
-                            Text(
-                                text = "+ Add new",
-                                style =
-                                    MaterialTheme.typography.bodyMedium.copy(
-                                        color = MaterialTheme.colorScheme.primary),
-                                modifier =
-                                    Modifier.padding(top = 8.dp, start = 8.dp).clickable {
-                                      // Add a new AvailabilitySlot with default start and end times
-                                      dates.add(
-                                          AvailabilitySlot(
-                                              start = com.google.firebase.Timestamp.now(),
-                                              end = com.google.firebase.Timestamp.now()))
-                                    })
+                            if (isEditing) {
+                              Text(
+                                  text = "+ Add new",
+                                  style =
+                                      poppinsTypography.bodyMedium.copy(
+                                          color = colorScheme.primary),
+                                  modifier =
+                                      Modifier.padding(top = 8.dp, start = 8.dp)
+                                          .clickable {
+                                            // Add a new AvailabilitySlot with default start/end
+                                            // times
+                                            showStartAvailabilityPopup = true
+                                          }
+                                          .testTag("AddNewAvailabilityBtn"))
+                            }
                           }
                         }
                   }
@@ -417,7 +484,10 @@ fun AnnouncementDetailScreen(
             // Buttons logic
             Box(
                 modifier =
-                    Modifier.fillMaxWidth().align(Alignment.BottomCenter).padding(bottom = 16.dp)) {
+                    Modifier.fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 16.dp)
+                        .testTag("BottomButtonBox")) {
                   Row(
                       modifier = Modifier.fillMaxWidth(),
                       horizontalArrangement = Arrangement.Center) {
@@ -446,7 +516,8 @@ fun AnnouncementDetailScreen(
                                 buttonColor = colorScheme.primary,
                                 textColor = colorScheme.onPrimary,
                                 leadingIcon = Icons.Default.Edit,
-                                leadingIconTint = colorScheme.onPrimary)
+                                leadingIconTint = colorScheme.onPrimary,
+                                modifier = Modifier.testTag("UpdateAnnouncementBtn"))
                           }
                         } else {
                           QuickFixButton(
@@ -456,8 +527,9 @@ fun AnnouncementDetailScreen(
                               },
                               buttonColor = colorScheme.primary,
                               textColor = colorScheme.onPrimary,
-                              leadingIcon = Icons.Outlined.ElectricalServices,
-                              leadingIconTint = colorScheme.onPrimary)
+                              leadingIcon = getCategoryIcon(category),
+                              leadingIconTint = colorScheme.onPrimary,
+                              modifier = Modifier.testTag("ProposeQuickFixBtn"))
                         }
                       }
                 }
