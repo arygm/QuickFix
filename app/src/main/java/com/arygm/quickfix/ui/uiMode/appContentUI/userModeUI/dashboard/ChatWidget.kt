@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -50,6 +51,9 @@ import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatWidget(
@@ -129,6 +133,7 @@ fun ChatWidget(
   }
 }
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun ChatItem(
     chat: Chat,
@@ -142,8 +147,10 @@ fun ChatItem(
   workerViewModel.fetchUserProfile(
       chat.workeruid, onResult = { workerProfile = it as WorkerProfile })
   var image by remember { mutableStateOf<ImageVector?>(null) }
-  categoryViewModel.getCategoryBySubcategoryId(workerProfile.fieldOfWork) {
-    image = it?.let { it1 -> getCategoryIcon(it1) }
+  CoroutineScope(Dispatchers.IO).launch {
+    categoryViewModel.getCategoryBySubcategoryId(workerProfile.fieldOfWork) {
+      image = it?.let { it1 -> getCategoryIcon(it1) }
+    }
   }
   Row(
       modifier =

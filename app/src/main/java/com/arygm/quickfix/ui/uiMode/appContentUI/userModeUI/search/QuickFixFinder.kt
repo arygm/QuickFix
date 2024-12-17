@@ -25,8 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
@@ -48,7 +50,8 @@ fun QuickFixFinderScreen(
     accountViewModel: AccountViewModel,
     searchViewModel: SearchViewModel,
     announcementViewModel: AnnouncementViewModel,
-    categoryViewModel: CategoryViewModel,
+    categoryViewModel: CategoryViewModel =
+        viewModel(factory = CategoryViewModel.Factory(LocalContext.current)),
     quickFixViewModel: QuickFixViewModel,
     preferencesViewModel: PreferencesViewModel
 ) {
