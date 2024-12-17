@@ -353,7 +353,8 @@ fun DashBoardNavHost(
           categoryViewModel)
     }
     composable(UserScreen.ANNOUNCEMENT_DETAIL) {
-      AnnouncementDetailScreen(announcementViewModel, navigationActions)
+      AnnouncementDetailScreen(
+          announcementViewModel, categoryViewModel, preferencesViewModel, navigationActions)
     }
     composable(UserScreen.DISPLAY_UPLOADED_IMAGES) {
       QuickFixDisplayImages(navigationActions, preferencesViewModel, announcementViewModel)
