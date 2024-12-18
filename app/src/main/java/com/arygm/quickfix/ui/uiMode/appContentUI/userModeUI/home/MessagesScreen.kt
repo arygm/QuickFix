@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.home
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -11,10 +11,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
@@ -30,10 +30,16 @@ import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.model.messaging.ChatStatus
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.messaging.Message
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
+import com.arygm.quickfix.model.switchModes.AppMode
+import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.elements.QuickFixDetailsScreen
 import com.arygm.quickfix.ui.elements.QuickFixSlidingWindowContent
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.utils.loadAppMode
+import com.arygm.quickfix.utils.loadUserId
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
@@ -44,13 +50,17 @@ fun MessageScreen(
     chatViewModel: ChatViewModel,
     navigationActions: NavigationActions,
     quickFixViewModel: QuickFixViewModel,
-    userId: String,
-    isUser: Boolean,
+    modeViewModel: ModeViewModel,
+    preferencesViewModel: PreferencesViewModel,
 ) {
+  var userId by remember { mutableStateOf("") }
+  var mode by remember { mutableStateOf("") }
+  LaunchedEffect(Unit) {
+    userId = loadUserId(preferencesViewModel)
+    mode = loadAppMode(preferencesViewModel)
+  }
   // Collecting the selected chat from the ViewModel as state
-  val activeChat by chatViewModel.selectedChat.collectAsState()
-  // Collecting the list of QuickFixes from the ViewModel as state
-  val quickFixList by quickFixViewModel.quickFixes.collectAsState()
+  val activeChat = chatViewModel.selectedChat.collectAsState().value
 
   // If no active chat is selected, show a placeholder message and return
   if (activeChat == null) {
@@ -58,16 +68,16 @@ fun MessageScreen(
     return
   }
   // Assigning the non-null value of activeChat
-  val chat = activeChat!!
+  val chat = activeChat
 
+  var quickFix by remember { mutableStateOf<QuickFix?>(null) }
   // Finding the associated QuickFix for the selected chat
-  val chatQuickFix = quickFixList.firstOrNull { it.uid == activeChat?.quickFixUid }
-  if (chatQuickFix == null) {
+  quickFixViewModel.fetchQuickFix(chat.quickFixUid, onResult = { quickFix = it })
+  if (quickFix == null) {
     // If no QuickFix is found, show a placeholder message and return
     Text("QuickFix not found.", modifier = Modifier.testTag("quickFixNotFoundPlaceholder"))
     return
   }
-  val quickFix = chatQuickFix!!
   val chatId = chat.chatId
 
   // Mutable states to manage input text and sliding window visibility
@@ -78,7 +88,7 @@ fun MessageScreen(
   // Retrieve chat status and prepare suggestions based on user role (User or Worker)
   val chatStatus = chat.chatStatus
   val suggestions =
-      if (isUser) {
+      if (mode == AppMode.USER.name) {
         listOf(
             "How is it going?",
             "Is the time and day okay for you?",
@@ -104,9 +114,7 @@ fun MessageScreen(
 
   BoxWithConstraints(
       modifier =
-          Modifier.fillMaxSize()
-              .background(MaterialTheme.colorScheme.background)
-              .testTag("messageScreen")) {
+          Modifier.fillMaxSize().background(colorScheme.background).testTag("messageScreen")) {
         val maxWidth = maxWidth
         val maxHeight = maxHeight
 
@@ -122,7 +130,7 @@ fun MessageScreen(
                       Modifier.fillMaxWidth()
                           .height(maxHeight * 0.1f)
                           .testTag("messageInputBar")
-                          .background(MaterialTheme.colorScheme.background)) {
+                          .background(colorScheme.background)) {
                     // Message input field and send button
                     MessageInput(
                         messageText = messageText,
@@ -155,7 +163,7 @@ fun MessageScreen(
                       Modifier.fillMaxSize()
                           .padding(paddingValues)
                           .testTag("messageListBox")
-                          .background(MaterialTheme.colorScheme.background)) {
+                          .background(colorScheme.background)) {
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize().testTag("messageList")) {
@@ -164,7 +172,6 @@ fun MessageScreen(
                             Box(
                                 modifier =
                                     Modifier.fillMaxWidth()
-                                        .height(maxHeight * 0.52f)
                                         .padding(
                                             horizontal = maxWidth * 0.02f,
                                             vertical = maxHeight * 0.02f)
@@ -174,13 +181,11 @@ fun MessageScreen(
                                       horizontalAlignment = Alignment.CenterHorizontally,
                                       modifier =
                                           Modifier.fillMaxWidth(0.9f)
-                                              .height(maxHeight * 0.52f)
                                               .background(
-                                                  MaterialTheme.colorScheme.surface,
-                                                  RoundedCornerShape(16.dp))
+                                                  colorScheme.surface, RoundedCornerShape(16.dp))
                                               .testTag("quickFixDetails")) {
                                         QuickFixDetailsScreen(
-                                            quickFix = quickFix,
+                                            quickFix = quickFix!!,
                                             isExpanded = false,
                                             onShowMoreToggle = { isSlidingWindowVisible = it })
                                       }
@@ -191,11 +196,11 @@ fun MessageScreen(
                             when (chatStatus) {
                               ChatStatus.WAITING_FOR_RESPONSE -> {
                                 // UI for waiting for response
-                                if (isUser) {
+                                if (mode == AppMode.USER.name) {
                                   Text(
-                                      text = "Awaiting confirmation from ${quickFix.workerId}...",
+                                      text = "Awaiting confirmation from ${quickFix!!.workerId}...",
                                       style = MaterialTheme.typography.bodyMedium,
-                                      color = MaterialTheme.colorScheme.onBackground,
+                                      color = colorScheme.onBackground,
                                       textAlign = TextAlign.Center,
                                       modifier =
                                           Modifier.padding(vertical = maxHeight * 0.02f)
@@ -212,7 +217,7 @@ fun MessageScreen(
                                             text =
                                                 "Would you like to accept this QuickFix request?",
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onBackground,
+                                            color = colorScheme.onBackground,
                                             textAlign = TextAlign.Center,
                                             modifier = Modifier.padding(bottom = maxHeight * 0.02f))
                                         Row(
@@ -238,8 +243,7 @@ fun MessageScreen(
                                                       Modifier.weight(0.1f)
                                                           .aspectRatio(1f)
                                                           .background(
-                                                              MaterialTheme.colorScheme.surface,
-                                                              CircleShape)
+                                                              colorScheme.surface, CircleShape)
                                                           .testTag("acceptButton")) {
                                                     Icon(
                                                         imageVector = Icons.Default.Check,
@@ -265,8 +269,7 @@ fun MessageScreen(
                                                       Modifier.weight(0.1f)
                                                           .aspectRatio(1f)
                                                           .background(
-                                                              MaterialTheme.colorScheme.surface,
-                                                              CircleShape)
+                                                              colorScheme.surface, CircleShape)
                                                           .testTag("refuseButton")) {
                                                     Icon(
                                                         imageVector = Icons.Default.Close,
@@ -288,13 +291,13 @@ fun MessageScreen(
                                             .testTag("gettingSuggestionsContainer")) {
                                       Text(
                                           text =
-                                              if (isUser) {
-                                                "${quickFix.workerId} has accepted the QuickFix! 🎉"
+                                              if (mode == AppMode.USER.name) {
+                                                "${quickFix!!.workerId} has accepted the QuickFix! 🎉"
                                               } else {
                                                 "You have accepted this request! 🎉"
                                               },
                                           style = MaterialTheme.typography.bodyMedium,
-                                          color = MaterialTheme.colorScheme.onBackground,
+                                          color = colorScheme.onBackground,
                                           textAlign = TextAlign.Center,
                                           modifier = Modifier.padding(bottom = maxHeight * 0.01f))
                                       SuggestionsRow(
@@ -322,7 +325,7 @@ fun MessageScreen(
                                 Text(
                                     text = "Conversation is active. Start messaging!",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onBackground,
+                                    color = colorScheme.onBackground,
                                     textAlign = TextAlign.Center,
                                     modifier =
                                         Modifier.fillMaxWidth()
@@ -333,13 +336,13 @@ fun MessageScreen(
                                 // UI for rejection state
                                 Text(
                                     text =
-                                        if (isUser) {
-                                          "${quickFix.workerId} has rejected the QuickFix. No big deal! Contact another worker from the search screen! 😊"
+                                        if (mode == AppMode.USER.name) {
+                                          "${quickFix!!.workerId} has rejected the QuickFix. No big deal! Contact another worker from the search screen! 😊"
                                         } else {
                                           "You have rejected this request. Find your next client on the announcement screen! 😊"
                                         },
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onBackground,
+                                    color = colorScheme.onBackground,
                                     textAlign = TextAlign.Center,
                                     modifier =
                                         Modifier.padding(
@@ -381,47 +384,44 @@ fun MessageScreen(
         // Sliding window overlay for additional details
         if (isSlidingWindowVisible) {
           QuickFixSlidingWindowContent(
-              quickFix = quickFix,
+              quickFix = quickFix!!,
               isVisible = isSlidingWindowVisible,
-              onDismiss = { isSlidingWindowVisible = false })
+              onDismiss = { isSlidingWindowVisible = false },
+              navigationActions = navigationActions)
         }
       }
 }
 
 @Composable
 fun Header(navigationActions: NavigationActions, modifier: Modifier = Modifier) {
-  Box(
-      modifier =
-          Modifier.fillMaxWidth()
-              .background(MaterialTheme.colorScheme.surface)
-              .padding(vertical = 8.dp)) {
-        // Back button aligned to the start (left)
-        IconButton(
-            onClick = { navigationActions.goBack() },
-            modifier = modifier.align(Alignment.CenterStart)) {
-              Icon(
-                  imageVector = Icons.Default.ArrowBack,
-                  contentDescription = "Back",
-                  tint = MaterialTheme.colorScheme.primary)
-            }
+  Box(modifier = Modifier.fillMaxWidth().background(colorScheme.surface).padding(vertical = 8.dp)) {
+    // Back button aligned to the start (left)
+    IconButton(
+        onClick = { navigationActions.goBack() },
+        modifier = modifier.align(Alignment.CenterStart)) {
+          Icon(
+              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = "Back",
+              tint = colorScheme.primary)
+        }
 
-        // Centered Column containing profile picture and name
-        Column(
-            modifier = Modifier.align(Alignment.Center),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              Box(
-                  modifier =
-                      Modifier.size(40.dp)
-                          .background(Color.Black, CircleShape)
-                          .testTag("profilePicture"))
-              Text(
-                  text = "Moha",
-                  fontWeight = FontWeight.Bold,
-                  fontSize = 20.sp,
-                  color = MaterialTheme.colorScheme.onBackground,
-                  modifier = Modifier.testTag("chatPartnerName").padding(vertical = 4.dp))
-            }
-      }
+    // Centered Column containing profile picture and name
+    Column(
+        modifier = Modifier.align(Alignment.Center),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+          Box(
+              modifier =
+                  Modifier.size(40.dp)
+                      .background(Color.Black, CircleShape)
+                      .testTag("profilePicture"))
+          Text(
+              text = "Moha",
+              fontWeight = FontWeight.Bold,
+              fontSize = 20.sp,
+              color = colorScheme.onBackground,
+              modifier = Modifier.testTag("chatPartnerName").padding(vertical = 4.dp))
+        }
+  }
 }
 
 @Composable
@@ -455,7 +455,7 @@ fun DateDivider(timestamp: Timestamp, modifier: Modifier = Modifier) {
       fontSize = 12.sp,
       fontWeight = FontWeight.Bold,
       modifier = modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("dateDivider"),
-      textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+      textAlign = TextAlign.Center)
 }
 
 @Composable
@@ -468,7 +468,7 @@ fun MessageInput(
       modifier =
           Modifier.padding(8.dp)
               .fillMaxWidth()
-              .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
+              .background(colorScheme.surface, RoundedCornerShape(24.dp))
               .padding(
                   horizontal = 12.dp, vertical = 8.dp) // Inner padding for the rounded input box
               .testTag("messageInputArea"),
@@ -482,10 +482,10 @@ fun MessageInput(
                 OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = colorScheme.surface,
                     focusedContainerColor = colorScheme.surface,
-                    errorContainerColor = MaterialTheme.colorScheme.errorContainer,
+                    errorContainerColor = colorScheme.errorContainer,
                     unfocusedPlaceholderColor = colorScheme.onSecondary,
                     focusedPlaceholderColor = colorScheme.onSecondary,
-                    errorTextColor = MaterialTheme.colorScheme.error,
+                    errorTextColor = colorScheme.error,
                     unfocusedBorderColor = Color.Transparent,
                     focusedBorderColor = Color.Transparent),
             shape = RoundedCornerShape(10.dp),
@@ -497,10 +497,11 @@ fun MessageInput(
             modifier =
                 Modifier.weight(0.1f)
                     .aspectRatio(1f)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    .background(colorScheme.primary, CircleShape)
                     .testTag("sendButton")) {
               Icon(
-                  imageVector = Icons.Default.Send, // Replace with your custom icon if available
+                  imageVector =
+                      Icons.AutoMirrored.Filled.Send, // Replace with your custom icon if available
                   contentDescription = "Send",
                   tint = Color.White)
             }

@@ -16,10 +16,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,10 +39,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.ui.theme.poppinsTypography
-
-// Data class for QuickFix item
-data class QuickFix(val name: String, val taskDescription: String, val date: String)
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun QuickFixesWidget(
@@ -49,6 +52,7 @@ fun QuickFixesWidget(
     quickFixList: List<QuickFix>,
     onShowAllClick: () -> Unit,
     onItemClick: (QuickFix) -> Unit,
+    workerViewModel: ProfileViewModel,
     modifier: Modifier = Modifier,
     itemsToShowDefault: Int = 3
 ) {
@@ -75,7 +79,7 @@ fun QuickFixesWidget(
               verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "$status QuickFixes",
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = colorScheme.onBackground,
                     style = poppinsTypography.headlineMedium,
                     fontSize = 19.sp,
                     modifier =
@@ -88,25 +92,25 @@ fun QuickFixesWidget(
                     ) {
                       Text(
                           text = if (showAll) "Show Less" else "Show All",
-                          color = MaterialTheme.colorScheme.onSurface,
-                          style = MaterialTheme.typography.bodyMedium,
+                          color = colorScheme.onSurface,
+                          style = poppinsTypography.bodyMedium,
                           fontWeight = FontWeight.SemiBold)
                     }
               }
           HorizontalDivider(
               modifier = Modifier.padding(horizontal = 0.dp),
               thickness = 1.dp,
-              color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+              color = colorScheme.onSurface.copy(alpha = 0.2f))
 
           val itemsToShow = if (showAll) quickFixList else quickFixList.take(itemsToShowDefault)
           quickFixList.take(itemsToShow.size).forEachIndexed { index, quickFix ->
-            QuickFixItem(quickFix = quickFix, onClick = { onItemClick(quickFix) })
+            QuickFixItem(quickFix = quickFix, onClick = { onItemClick(quickFix) }, workerViewModel)
             // Divider between items
             if (index < itemsToShow.size - 1) {
               HorizontalDivider(
                   modifier = Modifier.fillMaxWidth(),
                   thickness = 1.dp,
-                  color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+                  color = colorScheme.onSurface.copy(alpha = 0.2f))
             }
           }
         }
@@ -114,13 +118,18 @@ fun QuickFixesWidget(
 }
 
 @Composable
-fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
+fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit, workerViewModel: ProfileViewModel) {
+  val formatter = SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault())
+  var workerName by remember { mutableStateOf("") }
+  workerViewModel.fetchUserProfile(quickFix.workerId) { profile ->
+    workerName = (profile as WorkerProfile).displayName
+  }
   Row(
       modifier =
           Modifier.fillMaxWidth()
               .padding(horizontal = 12.dp, vertical = 8.dp)
               .clickable { onClick() }
-              .testTag("QuickFixItem_${quickFix.name}"), // Added testTag
+              .testTag("QuickFixItem_${quickFix.title}"), // Added testTag
       verticalAlignment = Alignment.CenterVertically) {
         Column(modifier = Modifier.weight(0.15f)) {
           // Profile image placeholder
@@ -130,7 +139,7 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
               modifier =
                   Modifier.size(40.dp)
                       .clip(CircleShape)
-                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+                      .background(colorScheme.onSurface.copy(alpha = 0.1f)))
         }
 
         // Text information
@@ -138,33 +147,36 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
           // Row for name and task description on the same line
           Row(verticalAlignment = Alignment.Bottom) {
             Text(
-                text = quickFix.name,
-                modifier = Modifier.testTag(quickFix.name), // Added testTag
+                text = workerName,
+                modifier = Modifier.testTag(quickFix.title), // Added testTag
                 style = poppinsTypography.bodyMedium,
                 fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = colorScheme.onBackground,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis)
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = quickFix.taskDescription, // Removed leading comma for clarity
-                modifier = Modifier.testTag(quickFix.taskDescription), // Added testTag
+                text = quickFix.title, // Removed leading comma for clarity
+                modifier = Modifier.testTag(quickFix.title), // Added testTag
                 style = poppinsTypography.bodyMedium,
                 fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                color = colorScheme.onBackground.copy(alpha = 0.7f),
                 fontWeight = FontWeight.Normal,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis)
           }
           // Date text on a separate line
           Text(
-              text = quickFix.date,
-              modifier = Modifier.testTag(quickFix.date), // Added testTag
+              text =
+                  quickFix.date.joinToString(" - ") { timestamp ->
+                    formatter.format(timestamp.toDate())
+                  },
+              modifier = Modifier.testTag(quickFix.date.toString()), // Added testTag
               style = poppinsTypography.bodyMedium,
               fontSize = 15.sp,
               fontWeight = FontWeight.Normal,
-              color = MaterialTheme.colorScheme.onSurface)
+              color = colorScheme.onSurface)
         }
 
         Column(
@@ -173,15 +185,12 @@ fun QuickFixItem(quickFix: QuickFix, onClick: () -> Unit) {
         ) {
           // Arrow icon with a circular background
           Box(
-              modifier =
-                  Modifier.size(32.dp)
-                      .clip(CircleShape)
-                      .background(MaterialTheme.colorScheme.secondary),
+              modifier = Modifier.size(32.dp).clip(CircleShape).background(colorScheme.secondary),
               contentAlignment = Alignment.Center) {
                 Icon(
-                    imageVector = Icons.Default.ArrowForward,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = "Go to details",
-                    tint = MaterialTheme.colorScheme.onBackground)
+                    tint = colorScheme.onBackground)
               }
         }
       }

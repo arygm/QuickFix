@@ -15,11 +15,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -65,7 +65,7 @@ fun LocationSearchCustomScreen(
                     onValueChange = { locationViewModel.setQuery(it) },
                     placeHolderText = "Enter a location",
                     showLeadingIcon = { true },
-                    leadingIcon = Icons.Default.ArrowBack,
+                    leadingIcon = Icons.AutoMirrored.Filled.ArrowBack,
                     descriptionLeadIcon = "Retour",
                     onTextFieldClick = { navigationActions.goBack() },
                     shape = RoundedCornerShape(20.dp),
@@ -90,7 +90,7 @@ fun LocationSearchCustomScreen(
                 Modifier.fillMaxSize()
                     .padding(padding)
                     .background(MaterialTheme.colorScheme.background)) {
-              Divider(thickness = 1.dp)
+              HorizontalDivider(thickness = 1.dp)
 
               LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
                 if (locationSuggestions.isNotEmpty()) {
@@ -115,12 +115,12 @@ fun LocationSearchCustomScreen(
                           }
 
                           Icon(
-                              imageVector = Icons.Default.ArrowForward,
+                              imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                               contentDescription = "Naviguer",
                               tint = MaterialTheme.colorScheme.onBackground,
                               modifier = Modifier.size(screenWidth * 0.06f))
                         }
-                    Divider(color = MaterialTheme.colorScheme.secondary)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.secondary)
                   }
                 } else if (locationQuery.isEmpty()) {
                   item {
@@ -128,8 +128,6 @@ fun LocationSearchCustomScreen(
                         modifier =
                             Modifier.fillMaxWidth()
                                 .clickable {
-                                  Log.e("LocationSearch", "Position actuelle: haaaaaaaamid")
-
                                   locationHelper.getCurrentLocation { currentLocation ->
                                     Log.e(
                                         "LocationSearch",

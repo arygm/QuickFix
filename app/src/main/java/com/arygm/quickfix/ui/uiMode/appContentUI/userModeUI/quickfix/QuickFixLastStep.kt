@@ -1,7 +1,6 @@
-package com.arygm.quickfix.ui.quickfix
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix
 
 import android.util.Log
-import android.widget.RatingBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -20,8 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -54,6 +51,7 @@ import com.arygm.quickfix.model.profile.dataFields.Review
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
+import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.QuickFixWorkerOverview
@@ -71,6 +69,8 @@ fun QuickFixLastStep(
     categoryViewModel: CategoryViewModel,
     quickFixViewModel: QuickFixViewModel,
     workerViewModel: ProfileViewModel,
+    onQuickFixChange: (QuickFix) -> Unit,
+    mode: AppMode
 ) {
 
   val focusManager = LocalFocusManager.current
@@ -347,7 +347,8 @@ fun QuickFixLastStep(
                       modifier = Modifier.fillMaxWidth().testTag("CancelButton"))
                 }
 
-                if (quickFix.status == Status.COMPLETED || quickFix.status == Status.CANCELED) {
+                if ((quickFix.status == Status.COMPLETED || quickFix.status == Status.CANCELED) &&
+                    mode == AppMode.USER) {
                   Column(
                       modifier =
                           Modifier.fillMaxWidth()
@@ -427,7 +428,7 @@ fun QuickFixLastStep(
                             modifier = Modifier.testTag("FeedbackTextField"))
 
                         QuickFixButton(
-                            buttonText = "Finish",
+                            buttonText = "Add a review",
                             enabled = rating > 0f,
                             buttonColor = colorScheme.primary,
                             textColor = colorScheme.onPrimary,

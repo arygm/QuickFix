@@ -5,10 +5,10 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
-import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
-import com.arygm.quickfix.ui.userModeUI.navigation.UserTopLevelDestinations
-import com.arygm.quickfix.ui.userModeUI.navigation.getBottomBarIdUser
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserTopLevelDestinations
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.getBottomBarIdUser
 import junit.framework.TestCase.assertEquals
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat

@@ -1,9 +1,18 @@
 package com.arygm.quickfix.ui.dashboard
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.arygm.quickfix.model.bill.BillField
+import com.arygm.quickfix.model.bill.Units
+import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.quickfix.QuickFix
+import com.arygm.quickfix.model.quickfix.Status
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.BillsWidget
+import com.google.firebase.Timestamp
 import org.junit.Rule
 import org.junit.Test
 
@@ -11,24 +20,41 @@ class BillsWidgetTests {
 
   @get:Rule val composeTestRule = createComposeRule()
 
+  private val testBills =
+      listOf(
+          BillField("Bill 1", Units.M2, 100.0, 25.0),
+          BillField("Bill 2", Units.H, 100.0, 25.0),
+          BillField("Bill 3", Units.M, 100.0, 25.0),
+          BillField("Bill 4", Units.U, 100.0, 25.0))
+
+  private val fakeQuickFix =
+      QuickFix(
+          uid = "1",
+          title = "Fake QuickFix",
+          description = "This is a fake QuickFix for testing",
+          imageUrl = listOf("https://example.com/image.jpg"),
+          date = listOf(Timestamp.now()), // Example timestamp
+          time = Timestamp.now(),
+          includedServices = emptyList(),
+          addOnServices = emptyList(),
+          workerId = "1",
+          userId = "1",
+          chatUid = "1",
+          status = Status.UPCOMING,
+          bill = testBills,
+          location = Location(0.0, 0.0, "Fake Location"))
+
   @Test
   fun billSample_displaysDefaultNumberOfItems() {
-    val testBills =
-        listOf(
-            BillSneakPeak("Bill 1", "Task 1", "2023-11-26", 100.0),
-            BillSneakPeak("Bill 2", "Task 2", "2023-11-27", 200.0),
-            BillSneakPeak("Bill 3", "Task 3", "2023-11-28", 300.0),
-            BillSneakPeak("Bill 4", "Task 4", "2023-11-29", 400.0))
-
     composeTestRule.setContent {
       BillsWidget(
-          billList = testBills, onShowAllClick = {}, onItemClick = {}, itemsToShowDefault = 3)
+          quickFixes = listOf(fakeQuickFix),
+          onShowAllClick = {},
+          onItemClick = {},
+          itemsToShowDefault = 3)
     }
 
-    // Verify that only the default number of items (3) are displayed initially
-    composeTestRule.onNodeWithTag("BillItem_Bill 1").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("BillItem_Bill 2").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("BillItem_Bill 3").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("BillItem_${fakeQuickFix.title}").assertIsDisplayed()
 
     // Verify that the fourth item is not displayed
     composeTestRule.onNodeWithTag("BillItem_Bill 4").assertDoesNotExist()
@@ -36,25 +62,18 @@ class BillsWidgetTests {
 
   @Test
   fun billSample_displaysAllItems_whenShowAllClicked() {
-    val testBills =
-        listOf(
-            BillSneakPeak("Bill 1", "Task 1", "2023-11-26", 100.0),
-            BillSneakPeak("Bill 2", "Task 2", "2023-11-27", 200.0),
-            BillSneakPeak("Bill 3", "Task 3", "2023-11-28", 300.0),
-            BillSneakPeak("Bill 4", "Task 4", "2023-11-29", 400.0))
-
     composeTestRule.setContent {
       BillsWidget(
-          billList = testBills, onShowAllClick = {}, onItemClick = {}, itemsToShowDefault = 3)
+          quickFixes = List(4) { fakeQuickFix },
+          onShowAllClick = {},
+          onItemClick = {},
+          itemsToShowDefault = 3)
     }
 
     // Click the "Show All" button
     composeTestRule.onNodeWithTag("ShowAllButton").performClick()
 
     // Verify that all items are displayed
-    composeTestRule.onNodeWithTag("BillItem_Bill 1").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("BillItem_Bill 2").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("BillItem_Bill 3").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("BillItem_Bill 4").assertIsDisplayed()
+    composeTestRule.onAllNodesWithTag("BillItem_${fakeQuickFix.title}").assertCountEquals(4)
   }
 }

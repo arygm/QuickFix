@@ -1,7 +1,17 @@
 package com.arygm.quickfix.ui.quickfix
 
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.model.bill.BillField
 import com.arygm.quickfix.model.category.Category
@@ -15,11 +25,18 @@ import com.arygm.quickfix.model.profile.dataFields.Review
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
+import com.arygm.quickfix.model.switchModes.AppMode
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixLastStep
 import com.google.firebase.Timestamp
-import io.mockk.*
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.verify
 import java.time.LocalDate
 import java.time.LocalTime
 import java.util.Date
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -86,7 +103,7 @@ class QuickFixLastStepTest {
   @Test
   fun testQuickFixLastStepDisplaysWorkerOverview() {
     // Arrange
-    every { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } answers
+    every { runBlocking { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } } answers
         {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
@@ -98,7 +115,9 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Assert
@@ -108,7 +127,7 @@ class QuickFixLastStepTest {
   @Test
   fun testQuickFixLastStepDisplaysButtonsWhenUpcoming() {
     // Arrange
-    every { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } answers
+    every { runBlocking { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } } answers
         {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
@@ -120,7 +139,9 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Assert
@@ -134,7 +155,7 @@ class QuickFixLastStepTest {
   @Test
   fun testCancelButtonUpdatesQuickFixStatus() {
     // Arrange
-    every { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } answers
+    every { runBlocking { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } } answers
         {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
@@ -147,7 +168,9 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Find and click the Cancel button
@@ -167,7 +190,7 @@ class QuickFixLastStepTest {
   fun testReviewSectionDisplayedWhenQuickFixCompleted() {
     // Arrange
     val completedQuickFix = sampleQuickFix.copy(status = Status.COMPLETED)
-    every { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } answers
+    every { runBlocking { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } } answers
         {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
@@ -179,7 +202,9 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Assert
@@ -191,7 +216,7 @@ class QuickFixLastStepTest {
   fun testUserCanEnterFeedbackAndRating() {
     // Arrange
     val completedQuickFix = sampleQuickFix.copy(status = Status.COMPLETED)
-    every { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } answers
+    every { runBlocking { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } } answers
         {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
@@ -204,7 +229,9 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Enter Feedback
@@ -235,7 +262,7 @@ class QuickFixLastStepTest {
   fun testFeedbackFieldMaxCharacters() {
     // Arrange
     val completedQuickFix = sampleQuickFix.copy(status = Status.COMPLETED)
-    every { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } answers
+    every { runBlocking { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } } answers
         {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
@@ -247,7 +274,9 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     composeTestRule.onNodeWithTag("FeedbackTextField").performTextInput("a".repeat(1500))
@@ -263,7 +292,7 @@ class QuickFixLastStepTest {
   @Test
   fun testConsultDiscussionButtonNavigatesToChat() {
     // Arrange
-    every { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } answers
+    every { runBlocking { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } } answers
         {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
@@ -276,6 +305,8 @@ class QuickFixLastStepTest {
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER,
       )
     }
 
@@ -288,7 +319,7 @@ class QuickFixLastStepTest {
   @Test
   fun testQuickFixDetailsDisplayedCorrectly() {
     // Arrange
-    every { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } answers
+    every { runBlocking { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } } answers
         {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
@@ -300,7 +331,9 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Assert Title
@@ -319,7 +352,7 @@ class QuickFixLastStepTest {
   @Test
   fun testQuickFixDateAndTimeDisplayedCorrectly() {
     // Arrange
-    every { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } answers
+    every { runBlocking { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } } answers
         {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
@@ -331,7 +364,9 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Format dates and times as in the composable
@@ -350,7 +385,7 @@ class QuickFixLastStepTest {
   fun testFinishButtonNotEnabledWhenRatingIsZero() {
     // Arrange
     val completedQuickFix = sampleQuickFix.copy(status = Status.COMPLETED)
-    every { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } answers
+    every { runBlocking { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } } answers
         {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
@@ -362,7 +397,9 @@ class QuickFixLastStepTest {
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-          workerViewModel = profileViewModel)
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER)
     }
 
     // Set rating to 0

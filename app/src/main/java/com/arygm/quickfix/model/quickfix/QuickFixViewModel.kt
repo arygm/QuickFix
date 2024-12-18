@@ -3,16 +3,25 @@ package com.arygm.quickfix.model.quickfix
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-class QuickFixViewModel(private val repository: QuickFixRepository) : ViewModel() {
+open class QuickFixViewModel(private val repository: QuickFixRepository) : ViewModel() {
 
   private val quickFixes_ = MutableStateFlow<List<QuickFix>>(emptyList())
   val quickFixes: StateFlow<List<QuickFix>> = quickFixes_.asStateFlow()
+
+  private val currentQuickFix_ = MutableStateFlow(QuickFix())
+  val currentQuickFix: StateFlow<QuickFix> = currentQuickFix_.asStateFlow()
+
+  private val selectedWorkerProfile_ = MutableStateFlow(WorkerProfile())
+  val selectedWorkerProfile: StateFlow<WorkerProfile> = selectedWorkerProfile_.asStateFlow()
 
   init {
     repository.init { getQuickFixes() }
@@ -90,5 +99,13 @@ class QuickFixViewModel(private val repository: QuickFixRepository) : ViewModel(
 
   fun setQuickFixes(quickFixes: List<QuickFix>) { // For testing purposes
     quickFixes_.value = quickFixes
+  }
+
+  fun setSelectedWorkerProfile(workerProfile: WorkerProfile) {
+    selectedWorkerProfile_.value = workerProfile
+  }
+
+  fun setUpdateQuickFix(updatedQuickFix: QuickFix) {
+    viewModelScope.launch { currentQuickFix_.value = updatedQuickFix }
   }
 }

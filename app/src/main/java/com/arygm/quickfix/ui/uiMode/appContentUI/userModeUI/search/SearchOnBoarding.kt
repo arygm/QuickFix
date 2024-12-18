@@ -34,10 +34,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
+import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
@@ -47,7 +50,8 @@ import com.arygm.quickfix.ui.elements.QuickFixPriceRangeBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import com.arygm.quickfix.ui.userModeUI.navigation.UserTopLevelDestinations
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserTopLevelDestinations
 
 @Composable
 fun SearchOnBoarding(
@@ -58,8 +62,10 @@ fun SearchOnBoarding(
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
     categoryViewModel: CategoryViewModel,
-    onProfileClick: (WorkerProfile) -> Unit
+    onProfileClick: (WorkerProfile) -> Unit,
+    quickFixViewModel: QuickFixViewModel
 ) {
+  val profiles = searchViewModel.workerProfilesSuggestions.collectAsState()
   val context = LocalContext.current
   val workerProfiles by searchViewModel.subCategoryWorkerProfiles.collectAsState()
   var userProfile = UserProfile(locations = emptyList(), announcements = emptyList(), uid = "0")
@@ -78,6 +84,7 @@ fun SearchOnBoarding(
   // Filtering logic
   val filterState = rememberSearchFiltersState()
   var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
+  var selectedWorker by remember { mutableStateOf<WorkerProfile?>(null) }
 
   fun updateFilteredProfiles() {
     filteredWorkerProfiles = filterState.reapplyFilters(workerProfiles, searchViewModel)
@@ -100,6 +107,12 @@ fun SearchOnBoarding(
           onShowPriceRangeBottomSheet = { showPriceRangeBottomSheet = true },
           onShowLocationBottomSheet = { showLocationBottomSheet = true },
       )
+  // Variables for WorkerSlidingWindowContent
+  // These will be set when a worker profile is selected
+  var bannerImage by remember { mutableStateOf(R.drawable.moroccan_flag) }
+  var profilePicture by remember { mutableStateOf(R.drawable.placeholder_worker) }
+  var initialSaved by remember { mutableStateOf(false) }
+  var workerAddress by remember { mutableStateOf("") }
 
   BoxWithConstraints {
     val widthRatio = maxWidth.value / 411f
@@ -113,10 +126,7 @@ fun SearchOnBoarding(
         content = { padding ->
           Column(
               modifier =
-                  Modifier.fillMaxWidth()
-                      .padding(padding)
-                      .padding(top = 40.dp * heightRatio)
-                      .padding(horizontal = 10.dp * widthRatio),
+                  Modifier.fillMaxWidth().padding(padding).padding(top = 40.dp * heightRatio),
               horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 0.dp * heightRatio),
@@ -138,7 +148,7 @@ fun SearchOnBoarding(
                           value = searchQuery,
                           onValueChange = {
                             searchQuery = it
-                            searchViewModel.updateSearchQuery(it)
+                            searchViewModel.searchEngine(it)
                             if (it.isEmpty()) {
                               onSearchEmpty()
                               // When search is empty, we can reset filteredWorkerProfiles to
@@ -208,16 +218,24 @@ fun SearchOnBoarding(
                           screenHeight = screenHeight)
                     }
 
-                    ProfileResults(
-                        profiles = filteredWorkerProfiles,
-                        searchViewModel = searchViewModel,
-                        accountViewModel = accountViewModel,
-                        listState = listState,
-                        onBookClick = { selectedProfile -> onProfileClick(selectedProfile) })
-                  }
+                      ProfileResults(
+                          profiles = profiles.value,
+                          searchViewModel = searchViewModel,
+                          accountViewModel = accountViewModel,
+                          listState = listState,
+                          heightRatio = heightRatio,
+                          onBookClick = { selectedProfile, locName ->
+                              selectedWorker = selectedProfile as WorkerProfile
+                              // Set up variables for WorkerSlidingWindowContent
+                              bannerImage = R.drawable.moroccan_flag
+                              profilePicture = R.drawable.placeholder_worker
+                              initialSaved = false
+                              workerAddress = locName
+                              isWindowVisible = true
+                          })
                 }
               }
-        },
+        }},
         modifier =
             Modifier.pointerInput(Unit) {
               detectTapGestures(onTap = { focusManager.clearFocus() })
@@ -298,6 +316,4 @@ fun SearchOnBoarding(
           filterState.locationFilterApplied = false
           updateFilteredProfiles()
         },
-        clearEnabled = filterState.locationFilterApplied)
-  }
-}
+        clearEnabled = filterState.locationFilterApplied)}}

@@ -1,11 +1,7 @@
-package com.arygm.quickfix.model.categories
+package com.arygm.quickfix.model.category
 
-import com.arygm.quickfix.model.category.Category
-import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
-import com.arygm.quickfix.model.category.CategoryViewModel
-import com.arygm.quickfix.model.category.Scale
-import com.arygm.quickfix.model.category.Subcategory
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
@@ -15,7 +11,6 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.verify
 
 class CategoryViewModelTest {
@@ -132,17 +127,18 @@ class CategoryViewModelTest {
 
   @Before
   fun setUp() {
-    categoryRepository = mock(CategoryRepositoryFirestore::class.java)
-    categoryViewModel = CategoryViewModel(categoryRepository)
+    runBlocking {
+      categoryRepository = mock(CategoryRepositoryFirestore::class.java)
+      categoryViewModel = CategoryViewModel(categoryRepository)
 
-    val initCaptor = argumentCaptor<() -> Unit>()
-    verify(categoryRepository).init(initCaptor.capture())
+      val initCaptor = argumentCaptor<() -> Unit>()
+      verify(categoryRepository).init(initCaptor.capture())
 
-    // Mock getProfiles
-    doNothing().`when`(categoryRepository).fetchCategories(any(), any())
+      // Mock getProfiles
 
-    // Simulate repository calling the init callback
-    initCaptor.firstValue.invoke()
+      // Simulate repository calling the init callback
+      initCaptor.firstValue.invoke()
+    }
   }
 
   @Test
@@ -152,7 +148,7 @@ class CategoryViewModelTest {
 
   @Test
   fun init_invokesFetchCategoriesWhenRepositoryInitCallsCallback() {
-    verify(categoryRepository).fetchCategories(any(), any())
+    runBlocking { verify(categoryRepository).fetchCategories(any(), any()) }
   }
 
   @Test
@@ -174,20 +170,22 @@ class CategoryViewModelTest {
 
   @Test
   fun fetchCategories_whenFailure_logsError() {
-    val exception = Exception("Test exception")
-    doAnswer { invocation ->
-          val onFailure = invocation.getArgument<(Exception) -> Unit>(1)
-          onFailure(exception)
-          null
-        }
-        .`when`(categoryRepository)
-        .fetchCategories(any(), any())
+    runBlocking {
+      val exception = Exception("Test exception")
+      doAnswer { invocation ->
+            val onFailure = invocation.getArgument<(Exception) -> Unit>(1)
+            onFailure(exception)
+            null
+          }
+          .`when`(categoryRepository)
+          .fetchCategories(any(), any())
 
-    categoryViewModel.getCategories()
+      categoryViewModel.getCategories()
 
-    // We can check that profiles remains empty
-    val result = categoryViewModel.categories.value
-    assertThat(result, `is`(emptyList()))
+      // We can check that profiles remains empty
+      val result = categoryViewModel.categories.value
+      assertThat(result, `is`(emptyList()))
+    }
   }
 
   @Test
@@ -209,19 +207,21 @@ class CategoryViewModelTest {
 
   @Test
   fun fetchSubCategories_whenFailure_logsError() {
-    val exception = Exception("Test exception")
-    doAnswer { invocation ->
-          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
-          onFailure(exception)
-          null
-        }
-        .`when`(categoryRepository)
-        .fetchSubcategories(any(), any(), any())
+    runBlocking {
+      val exception = Exception("Test exception")
+      doAnswer { invocation ->
+            val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
+            onFailure(exception)
+            null
+          }
+          .`when`(categoryRepository)
+          .fetchSubcategories(any(), any(), any())
 
-    categoryViewModel.getSubcategories("painting")
+      categoryViewModel.getSubcategories("painting")
 
-    // We can check that profiles remains empty
-    val result = categoryViewModel.subcategories.value
-    assertThat(result, `is`(emptyList()))
+      // We can check that profiles remains empty
+      val result = categoryViewModel.subcategories.value
+      assertThat(result, `is`(emptyList()))
+    }
   }
 }

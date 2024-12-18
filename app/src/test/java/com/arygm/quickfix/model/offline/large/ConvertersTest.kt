@@ -1,5 +1,7 @@
 package com.arygm.quickfix.model.offline.large
 
+import com.arygm.quickfix.model.category.Scale
+import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.messaging.Message
 import com.google.firebase.Timestamp
 import org.junit.Assert.assertEquals
@@ -29,7 +31,6 @@ class ConvertersTest {
                 timestamp = timestamp))
 
     val json = converters.fromMessagesList(messages)
-    // Just check that it's not empty and contains known fields
     assertTrue(json.isNotEmpty())
     assertTrue(json.contains("user1"))
     assertTrue(json.contains("worker1"))
@@ -53,27 +54,88 @@ class ConvertersTest {
     val deserialized = converters.toMessagesList(json)
 
     assertEquals(messages.size, deserialized.size)
-    // Verify fields of the first message
     assertEquals("1", deserialized[0].messageId)
     assertEquals("user1", deserialized[0].senderId)
     assertEquals("Hello!", deserialized[0].content)
-    // Timestamp comparison: we can check that the type matches or that the difference in time is
-    // minimal
-    // but for simplicity, we'll just assume if it deserialized without error it's correct.
-
-    // Verify fields of the second message
     assertEquals("2", deserialized[1].messageId)
     assertEquals("worker1", deserialized[1].senderId)
     assertEquals("Hi there!", deserialized[1].content)
   }
 
   @Test
-  fun emptyList_serializesAndDeserializesCorrectly() {
-    val messages = emptyList<Message>()
-    val json = converters.fromMessagesList(messages)
-    assertTrue(json.isNotEmpty()) // Should be "[]"
+  fun fromSubcategoryList_serializesCorrectly() {
+    val subcategories =
+        listOf(
+            Subcategory(id = "1", name = "Sub1", category = "Cat1", tags = listOf("Tag1", "Tag2")),
+            Subcategory(id = "2", name = "Sub2", category = "Cat2", tags = listOf("Tag3")))
 
-    val deserialized = converters.toMessagesList(json)
+    val json = converters.fromSubcategoryList(subcategories)
+    assertTrue(json.isNotEmpty())
+    assertTrue(json.contains("Sub1"))
+    assertTrue(json.contains("Sub2"))
+    assertTrue(json.contains("Tag1"))
+    assertTrue(json.contains("Tag3"))
+  }
+
+  @Test
+  fun toSubcategoryList_deserializesCorrectly() {
+    val subcategories =
+        listOf(
+            Subcategory(id = "1", name = "Sub1", category = "Cat1", tags = listOf("Tag1", "Tag2")),
+            Subcategory(id = "2", name = "Sub2", category = "Cat2", tags = listOf("Tag3")))
+
+    val json = converters.fromSubcategoryList(subcategories)
+    val deserialized = converters.toSubcategoryList(json)
+
+    assertEquals(subcategories.size, deserialized.size)
+    assertEquals("1", deserialized[0].id)
+    assertEquals("Sub1", deserialized[0].name)
+    assertEquals("Cat1", deserialized[0].category)
+    assertEquals(listOf("Tag1", "Tag2"), deserialized[0].tags)
+    assertEquals("2", deserialized[1].id)
+    assertEquals("Sub2", deserialized[1].name)
+    assertEquals("Cat2", deserialized[1].category)
+    assertEquals(listOf("Tag3"), deserialized[1].tags)
+  }
+
+  @Test
+  fun fromScale_serializesCorrectly() {
+    val scale = Scale(longScale = "Large", shortScale = "L")
+
+    val json = converters.fromScale(scale)
+    assertTrue(json.isNotEmpty())
+    assertTrue(json.contains("Large"))
+    assertTrue(json.contains("L"))
+  }
+
+  @Test
+  fun toScale_deserializesCorrectly() {
+    val scale = Scale(longScale = "Large", shortScale = "L")
+
+    val json = converters.fromScale(scale)
+    val deserialized = converters.toScale(json)
+
+    assertEquals(scale.longScale, deserialized?.longScale)
+    assertEquals(scale.shortScale, deserialized?.shortScale)
+  }
+
+  @Test
+  fun emptyScale_serializesAndDeserializesCorrectly() {
+    val scale: Scale? = null
+    val json = converters.fromScale(scale)
+    assertTrue(json.isNotEmpty()) // Should serialize to "null" for a nullable field
+
+    val deserialized = converters.toScale(json)
+    assertEquals(null, deserialized) // Should return null
+  }
+
+  @Test
+  fun emptySubcategoryList_serializesAndDeserializesCorrectly() {
+    val subcategories = emptyList<Subcategory>()
+    val json = converters.fromSubcategoryList(subcategories)
+    assertTrue(json.isNotEmpty()) // Should serialize to "[]"
+
+    val deserialized = converters.toSubcategoryList(json)
     assertTrue(deserialized.isEmpty())
   }
 }

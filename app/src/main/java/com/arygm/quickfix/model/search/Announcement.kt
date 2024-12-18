@@ -9,7 +9,7 @@ data class Announcement(
     val announcementId: String,
     val userId: String,
     val title: String,
-    val category: String, // replace by the category type
+    val category: String,
     val description: String,
     val location: Location?,
     val availability: List<AvailabilitySlot>,

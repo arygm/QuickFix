@@ -13,13 +13,17 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -48,6 +52,7 @@ data class SearchFiltersState(
     var priceFilterApplied: Boolean = false,
     var locationFilterApplied: Boolean = false,
     var ratingFilterApplied: Boolean = false,
+    var emergencyFilterApplied: Boolean = false,
     var selectedDays: List<LocalDate> = emptyList(),
     var selectedHour: Int = 0,
     var selectedMinute: Int = 0,
@@ -58,6 +63,10 @@ data class SearchFiltersState(
     var maxDistance: Int = 0,
     var baseLocation: Location = Location(),
     var phoneLocation: Location = Location(0.0, 0.0, "Default"),
+    var lastAppliedPriceStart: Int = 500,
+var lastAppliedPriceEnd: Int = 2500,
+var lastAppliedMaxDist: Int = 200,
+var selectedLocationIndex: Int? = null,
 )
 
 @Composable
@@ -96,6 +105,9 @@ fun SearchFiltersState.reapplyFilters(
   if (ratingFilterApplied) {
     updatedProfiles = searchViewModel.sortWorkersByRating(updatedProfiles)
   }
+    if (emergencyFilterApplied) {
+    updatedProfiles = searchViewModel.emergencyFilter(updatedProfiles, baseLocation)
+    }
 
   return updatedProfiles
 }
@@ -175,7 +187,35 @@ fun SearchFiltersState.getFilterButtons(
           text = "Price Range",
           leadingIcon = Icons.Default.MonetizationOn,
           trailingIcon = Icons.Default.KeyboardArrowDown,
-          applied = priceFilterApplied))
+          applied = priceFilterApplied),
+
+    SearchFilterButtons(
+        onClick = {
+            if (emergencyFilterApplied) {
+                emergencyFilterApplied = false
+                reapplyFilters()
+            } else {
+                lastAppliedMaxDist = 200
+                lastAppliedPriceStart = 500
+                lastAppliedPriceEnd = 2500
+                selectedLocationIndex = null
+                selectedServices = emptyList()
+                availabilityFilterApplied = false
+                priceFilterApplied = false
+                locationFilterApplied = false
+                ratingFilterApplied = false
+                servicesFilterApplied = false
+                baseLocation = phoneLocation
+                filteredWorkerProfiles = workerProfiles
+                filteredWorkerProfiles =
+                    searchViewModel.emergencyFilter(filteredWorkerProfiles, baseLocation)
+                emergencyFilterApplied = true
+            }
+        },
+        text = "Emergency",
+        leadingIcon = Icons.Default.Warning,
+        trailingIcon = if (emergencyFilterApplied) Icons.Default.Clear else null,
+        applied = emergencyFilterApplied))
 }
 
 @Composable

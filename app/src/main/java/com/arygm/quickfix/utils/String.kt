@@ -1,10 +1,10 @@
 package com.arygm.quickfix.utils
 
 import android.util.Log
-import com.arygm.quickfix.ui.noModeUI.navigation.NoModeRoute
-import com.arygm.quickfix.ui.noModeUI.navigation.NoModeScreen
-import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.noModeUI.navigation.NoModeRoute
+import com.arygm.quickfix.ui.uiMode.noModeUI.navigation.NoModeScreen
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -82,14 +82,12 @@ fun splitDate(date: String): Triple<Int, Int, Int> {
 fun routeToScreen(route: String): String {
   return when (route) {
     UserRoute.HOME -> UserScreen.HOME
-    UserRoute.CALENDAR -> UserScreen.CALENDAR
     NoModeRoute.WELCOME -> NoModeScreen.WELCOME
     NoModeRoute.LOGIN -> NoModeScreen.LOGIN
     NoModeRoute.PASSWORD -> NoModeScreen.PASSWORD
     UserRoute.SEARCH -> UserScreen.SEARCH
     UserRoute.DASHBOARD -> UserScreen.DASHBOARD
     UserRoute.PROFILE -> UserScreen.PROFILE
-    UserRoute.ACCOUNT_CONFIGURATION -> UserScreen.ACCOUNT_CONFIGURATION
     else -> {
       NoModeScreen.WELCOME
     }

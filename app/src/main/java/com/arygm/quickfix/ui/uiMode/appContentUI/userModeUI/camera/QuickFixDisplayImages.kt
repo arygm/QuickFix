@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.camera
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera
 
 import android.graphics.Bitmap
 import android.util.Log
@@ -18,9 +18,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,32 +44,56 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.rememberAsyncImagePainter
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
+import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.utils.loadAppMode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuickFixDisplayImages(
-    canDelete: Boolean = true,
-    navigationActions: NavigationActions, // Navigation actions parameter
-    announcementViewModel: AnnouncementViewModel =
-        viewModel(factory = AnnouncementViewModel.Factory),
-    images: List<Bitmap> = emptyList() // added these for testing
+    navigationActions: NavigationActions,
+    preferencesViewModel: PreferencesViewModel,
+    announcementViewModel: AnnouncementViewModel,
+    images: List<Bitmap> = emptyList() // For testing
 ) {
-  val uploadedImages by announcementViewModel.uploadedImages.collectAsState()
-  val imagesToDisplay = images.ifEmpty { uploadedImages }
+  var canDelete by remember { mutableStateOf(true) }
+  LaunchedEffect(Unit) { canDelete = loadAppMode(preferencesViewModel) == AppMode.USER.name }
+  val selectedAnnouncement by announcementViewModel.selectedAnnouncement.collectAsState()
+
+  val defaultUploadedImages by announcementViewModel.uploadedImages.collectAsState()
+  val announcementImagesMap by announcementViewModel.announcementImagesMap.collectAsState()
+
+  // If we have a selected announcement, get its (URL, Bitmap) pairs, otherwise convert default
+  // uploaded images
+  val uploadedImages: List<Pair<String, Bitmap>> =
+      if (selectedAnnouncement != null) {
+        // Announcement images map is Map<String, List<Pair<String, Bitmap>>>
+        announcementImagesMap[selectedAnnouncement!!.announcementId] ?: emptyList()
+      } else {
+        // Convert the default uploaded images (List<Bitmap>) into pairs with a placeholder URL
+        defaultUploadedImages.mapIndexed { index, bitmap -> "local_$index" to bitmap }
+      }
+
+  // If the `images` parameter is not empty, use it by converting to pairs as well
+  val imagesToDisplay: List<Pair<String, Bitmap>> =
+      if (images.isNotEmpty()) {
+        images.mapIndexed { index, bitmap -> "localparam_$index" to bitmap }
+      } else {
+        uploadedImages
+      }
+
   var isSelecting by remember { mutableStateOf(false) }
-  var selectedImages by remember { mutableStateOf(setOf<Bitmap>()) }
+  var selectedImages by remember { mutableStateOf(setOf<Pair<String, Bitmap>>()) }
 
   Scaffold(
       topBar = {
@@ -124,7 +149,7 @@ fun QuickFixDisplayImages(
                     onClick = { navigationActions.goBack() },
                     modifier = Modifier.testTag("goBackButton")) {
                       Icon(
-                          Icons.Outlined.ArrowBack,
+                          Icons.AutoMirrored.Outlined.ArrowBack,
                           contentDescription = "Back",
                           tint = colorScheme.primary)
                     }
@@ -154,7 +179,35 @@ fun QuickFixDisplayImages(
               contentAlignment = Alignment.Center) {
                 Button(
                     onClick = {
-                      announcementViewModel.deleteUploadedImages(selectedImages.toList())
+                      if (selectedAnnouncement != null) {
+                        val announcementId = selectedAnnouncement!!.announcementId
+                        val currentImages =
+                            announcementViewModel.announcementImagesMap.value[announcementId]
+                                ?: emptyList()
+
+                        // Filter out the selected images (pairs)
+                        val updatedImages = currentImages.filterNot { it in selectedImages }
+
+                        // Update the announcement images map
+                        val updatedMap =
+                            announcementViewModel.announcementImagesMap.value.toMutableMap().apply {
+                              put(announcementId, updatedImages)
+                            }
+                        announcementViewModel.setAnnouncementImagesMap(updatedMap)
+
+                        // Since quickFixImages is a list of URLs, we can now derive it from
+                        // updatedImages
+                        val updatedQuickFixImages = updatedImages.map { it.first }
+
+                        val updatedAnnouncement =
+                            selectedAnnouncement!!.copy(quickFixImages = updatedQuickFixImages)
+                        announcementViewModel.updateAnnouncement(updatedAnnouncement)
+                      } else {
+                        // If no selected announcement, delete uploaded images by extracting their
+                        // bitmaps
+                        val bitmapsToDelete = selectedImages.map { it.second }
+                        announcementViewModel.deleteUploadedImages(bitmapsToDelete)
+                      }
                       isSelecting = false
                       selectedImages = emptySet()
                     },
@@ -180,7 +233,7 @@ fun QuickFixDisplayImages(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
               items(imagesToDisplay.size) { index ->
-                val image = imagesToDisplay[index]
+                val imagePair = imagesToDisplay[index] // This is (URL, Bitmap)
                 Box(modifier = Modifier.fillMaxSize()) {
                   Card(
                       modifier =
@@ -189,18 +242,19 @@ fun QuickFixDisplayImages(
                               .clickable {
                                 if (isSelecting) {
                                   selectedImages =
-                                      if (selectedImages.contains(image)) {
-                                        selectedImages - image
+                                      if (selectedImages.contains(imagePair)) {
+                                        selectedImages - imagePair
                                       } else {
-                                        selectedImages + image
+                                        selectedImages + imagePair
                                       }
                                 }
                               }
-                              .testTag("imageCard_$index"), // Added test tag here
+                              .testTag("imageCard_$index"),
                       shape = MaterialTheme.shapes.medium,
                       elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+                        // Use the bitmap from the pair
                         Image(
-                            painter = rememberAsyncImagePainter(image),
+                            bitmap = imagePair.second.asImageBitmap(),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize())
@@ -208,28 +262,28 @@ fun QuickFixDisplayImages(
                   if (isSelecting) {
                     Icon(
                         imageVector =
-                            if (selectedImages.contains(image)) {
+                            if (selectedImages.contains(imagePair)) {
                               Icons.Default.CheckCircle
                             } else {
                               Icons.Default.RadioButtonUnchecked
                             },
                         contentDescription = null,
                         tint =
-                            if (selectedImages.contains(image)) colorScheme.primary else Color.Gray,
+                            if (selectedImages.contains(imagePair)) colorScheme.primary
+                            else colorScheme.onSurface,
                         modifier =
                             Modifier.size(24.dp)
                                 .align(Alignment.TopStart)
                                 .padding(4.dp)
                                 .clickable {
                                   selectedImages =
-                                      if (selectedImages.contains(image)) {
-                                        selectedImages - image
+                                      if (selectedImages.contains(imagePair)) {
+                                        selectedImages - imagePair
                                       } else {
-                                        selectedImages + image
+                                        selectedImages + imagePair
                                       }
                                 }
-                                .testTag("selectionIcon_$index") // Added test tag here
-                        )
+                                .testTag("selectionIcon_$index"))
                   }
                 }
               }

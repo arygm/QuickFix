@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
+import android.widget.RatingBar
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -317,23 +318,22 @@ fun QuickFixSlidingWindowWorker(
                             .testTag("sliding_window_star_rating_row")) {
                       RatingBar(
                           workerRating.toFloat(),
-                          modifier = Modifier.height(20.dp).testTag("starsRow"))
+                          modifier = Modifier.height(screenHeight * 0.03f).testTag("starsRow"))
                     }
-              }
-          Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-          LazyRow(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .padding(horizontal = screenWidth * 0.04f)
-                      .testTag("sliding_window_reviews_row")) {
-                itemsIndexed(reviews) { index, review ->
-                  var isExpanded by remember { mutableStateOf(false) }
-                  val displayText =
-                      if (isExpanded || review.length <= 100) {
-                        review
-                      } else {
-                        review.take(100) + "..."
-                      }
+                Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+                LazyRow(
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .padding(horizontal = screenWidth * 0.04f)
+                            .testTag("sliding_window_reviews_row")) {
+                      itemsIndexed(reviews) { index, review ->
+                        var isExpanded by remember { mutableStateOf(false) }
+                        val displayText =
+                            if (isExpanded || review.length <= 100) {
+                              review
+                            } else {
+                              review.take(100) + "..."
+                            }
 
                   Box(
                       modifier =
@@ -362,6 +362,4 @@ fun QuickFixSlidingWindowWorker(
               }
 
           Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-        }
-  }
-}
+        }}}}

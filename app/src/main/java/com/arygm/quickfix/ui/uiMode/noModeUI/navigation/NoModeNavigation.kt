@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.noModeUI.navigation
+package com.arygm.quickfix.ui.uiMode.noModeUI.navigation
 
 import com.arygm.quickfix.ui.navigation.TopLevelDestination
 

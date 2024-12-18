@@ -1,22 +1,58 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Handyman
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.LocationSearching
+import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.WorkspacePremium
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
@@ -33,13 +69,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
@@ -49,15 +93,23 @@ import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.model.profile.dataFields.Review
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
+import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixLocationFilterBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixPriceRangeBottomSheet
+import com.arygm.quickfix.ui.elements.QuickFixSlidingWindow
+import com.arygm.quickfix.ui.elements.RatingBar
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.utils.GeocoderWrapper
 import com.arygm.quickfix.utils.LocationHelper
 import com.arygm.quickfix.utils.loadUserId
+import java.time.LocalDate
+import kotlin.math.roundToInt
 import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,8 +119,21 @@ fun SearchWorkerResult(
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
     userProfileViewModel: ProfileViewModel,
-    preferencesViewModel: PreferencesViewModel
+    preferencesViewModel: PreferencesViewModel,
+    quickFixViewModel: QuickFixViewModel,
+    geocoderWrapper: GeocoderWrapper = GeocoderWrapper(LocalContext.current),
+    locationHelper: LocationHelper = LocationHelper(LocalContext.current, MainActivity())
 ) {
+  fun getCityNameFromCoordinates(latitude: Double, longitude: Double): String? {
+    val addresses = geocoderWrapper.getFromLocation(latitude, longitude, 1)
+    return addresses?.firstOrNull()?.locality
+        ?: addresses?.firstOrNull()?.subAdminArea
+        ?: addresses?.firstOrNull()?.adminArea
+  }
+  var phoneLocation by remember {
+    mutableStateOf(com.arygm.quickfix.model.locations.Location(0.0, 0.0, "Default"))
+  }
+  var baseLocation by remember { mutableStateOf(phoneLocation) }
   val context = LocalContext.current
   val locationHelper = LocationHelper(context, MainActivity())
 
@@ -133,15 +198,82 @@ fun SearchWorkerResult(
     }
   }
 
-  val listState = rememberLazyListState()
+  var selectedWorker by remember { mutableStateOf(WorkerProfile()) }
+  var selectedCityName by remember { mutableStateOf<String?>(null) }
+  var showFilterButtons by remember { mutableStateOf(false) }
+  var showAvailabilityBottomSheet by remember { mutableStateOf(false) }
+  var showServicesBottomSheet by remember { mutableStateOf(false) }
+  var showPriceRangeBottomSheet by remember { mutableStateOf(false) }
+  var showLocationBottomSheet by remember { mutableStateOf(false) }
+  val workerProfiles by searchViewModel.subCategoryWorkerProfiles.collectAsState()
+  Log.d("Chill guy", workerProfiles.size.toString())
+  var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
+  val searchSubcategory by searchViewModel.searchSubcategory.collectAsState()
+  val searchCategory by searchViewModel.searchCategory.collectAsState()
 
-  // Update the displayed profiles after filters have changed
-  fun updateFilteredProfiles() {
-    filteredWorkerProfiles = filterState.reapplyFilters(workerProfiles, searchViewModel)
+  var availabilityFilterApplied by remember { mutableStateOf(false) }
+  var servicesFilterApplied by remember { mutableStateOf(false) }
+  var priceFilterApplied by remember { mutableStateOf(false) }
+  var locationFilterApplied by remember { mutableStateOf(false) }
+  var ratingFilterApplied by remember { mutableStateOf(false) }
+  var emergencyFilterApplied by remember { mutableStateOf(false) }
+
+  var selectedDays by remember { mutableStateOf(emptyList<LocalDate>()) }
+  var selectedHour by remember { mutableStateOf(0) }
+  var selectedMinute by remember { mutableStateOf(0) }
+  var selectedServices by remember { mutableStateOf(emptyList<String>()) }
+  var selectedPriceStart by remember { mutableStateOf(0) }
+  var selectedPriceEnd by remember { mutableStateOf(0) }
+  var selectedLocation by remember { mutableStateOf(com.arygm.quickfix.model.locations.Location()) }
+  var maxDistance by remember { mutableStateOf(0) }
+  var selectedLocationIndex by remember { mutableStateOf<Int?>(null) }
+
+  var lastAppliedPriceStart by remember { mutableStateOf(500) }
+  var lastAppliedPriceEnd by remember { mutableStateOf(2500) }
+  var lastAppliedMaxDist by remember { mutableStateOf(200) }
+
+  fun reapplyFilters() {
+    Log.d("Chill guy", "entered")
+    var updatedProfiles = workerProfiles
+
+    if (availabilityFilterApplied) {
+      updatedProfiles =
+          searchViewModel.filterWorkersByAvailability(
+              updatedProfiles, selectedDays, selectedHour, selectedMinute)
+    }
+
+    if (servicesFilterApplied) {
+      updatedProfiles = searchViewModel.filterWorkersByServices(updatedProfiles, selectedServices)
+    }
+
+    if (priceFilterApplied) {
+      updatedProfiles =
+          searchViewModel.filterWorkersByPriceRange(
+              updatedProfiles, selectedPriceStart, selectedPriceEnd)
+    }
+
+    if (locationFilterApplied) {
+      updatedProfiles =
+          searchViewModel.filterWorkersByDistance(updatedProfiles, selectedLocation, maxDistance)
+    }
+
+    if (ratingFilterApplied) {
+      updatedProfiles = searchViewModel.sortWorkersByRating(updatedProfiles)
+    }
+
+    if (emergencyFilterApplied) {
+      updatedProfiles = searchViewModel.emergencyFilter(updatedProfiles, baseLocation)
+    }
+
+    Log.d("Chill guy", updatedProfiles.size.toString())
+    filteredWorkerProfiles = updatedProfiles
   }
+    val listState = rememberLazyListState()
+    fun updateFilteredProfiles() {
+        filteredWorkerProfiles = filterState.reapplyFilters(workerProfiles, searchViewModel)
+    }
 
-  // Build the list of filter buttons through the filter state
-  val listOfButtons =
+    val listOfButtons =
       filterState.getFilterButtons(
           workerProfiles = workerProfiles,
           filteredProfiles = filteredWorkerProfiles,
@@ -153,6 +285,21 @@ fun SearchWorkerResult(
           onShowLocationBottomSheet = { showLocationBottomSheet = true },
       )
 
+  // ==========================================================================//
+  // ============ TODO: REMOVE NO-DATA WHEN BACKEND IS IMPLEMENTED ============//
+  // ==========================================================================//
+
+  val bannerImage = R.drawable.moroccan_flag
+  val profilePicture = R.drawable.placeholder_worker
+
+  // ==========================================================================//
+  // ==========================================================================//
+  // ==========================================================================//
+
+  var isWindowVisible by remember { mutableStateOf(false) }
+  var saved by remember { mutableStateOf(false) }
+
+  // Wrap everything in a Box to allow overlay
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     val screenHeight = maxHeight
     val screenWidth = maxWidth
@@ -191,14 +338,14 @@ fun SearchWorkerResult(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top) {
                       Text(
-                          text = searchQuery,
+                          text = searchSubcategory?.name ?: "Unknown",
                           style = poppinsTypography.labelMedium,
                           fontSize = 24.sp,
                           fontWeight = FontWeight.SemiBold,
                           textAlign = TextAlign.Center,
                       )
                       Text(
-                          text = "This is a sample description for the $searchQuery result",
+                          text = searchCategory?.description ?: "Unknown",
                           style = poppinsTypography.labelSmall,
                           fontWeight = FontWeight.Medium,
                           fontSize = 12.sp,
@@ -211,7 +358,9 @@ fun SearchWorkerResult(
                     modifier =
                         Modifier.fillMaxWidth()
                             .padding(top = screenHeight * 0.02f, bottom = screenHeight * 0.01f)
-                            .padding(horizontal = screenWidth * 0.02f),
+                            .padding(horizontal = screenWidth * 0.02f)
+                            .wrapContentHeight()
+                            .testTag("filter_buttons_row"),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                   FilterRow(
@@ -336,30 +485,43 @@ fun SearchWorkerResult(
         },
         clearEnabled = filterState.priceFilterApplied)
 
-    QuickFixLocationFilterBottomSheet(
-        showLocationBottomSheet,
-        userProfile = userProfile,
-        phoneLocation = filterState.phoneLocation,
-        selectedLocationIndex = selectedLocationIndex,
-        onApplyClick = { location, max ->
-          selectedLocationIndex = userProfile.locations.indexOf(location) + 1
-          filterState.selectedLocation = location
-          filterState.baseLocation = location
-          filterState.maxDistance = max
-          filterState.locationFilterApplied = true
-          updateFilteredProfiles()
-        },
-        onDismissRequest = { showLocationBottomSheet = false },
-        onClearClick = {
-          filterState.baseLocation = filterState.phoneLocation
-          filterState.selectedLocation = Location()
-          filterState.maxDistance = 0
-          filterState.locationFilterApplied = false
-          updateFilteredProfiles()
-          selectedLocationIndex = null
-        },
-        clearEnabled = filterState.locationFilterApplied)
+    userProfile?.let {
+      QuickFixLocationFilterBottomSheet(
+          showLocationBottomSheet,
+          userProfile = it,
+          phoneLocation = phoneLocation,
+          selectedLocationIndex = selectedLocationIndex,
+          onApplyClick = { location, max ->
+            selectedLocation = location
+            lastAppliedMaxDist = max
+            baseLocation = location
+            maxDistance = max
+            selectedLocationIndex = userProfile!!.locations.indexOf(location) + 1
 
+            if (location == com.arygm.quickfix.model.locations.Location(0.0, 0.0, "Default")) {
+              Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
+            }
+            if (locationFilterApplied) {
+              reapplyFilters()
+            } else {
+              filteredWorkerProfiles =
+                  searchViewModel.filterWorkersByDistance(filteredWorkerProfiles, location, max)
+            }
+            locationFilterApplied = true
+          },
+          onDismissRequest = { showLocationBottomSheet = false },
+          onClearClick = {
+            baseLocation = phoneLocation
+            lastAppliedMaxDist = 200
+            selectedLocation = com.arygm.quickfix.model.locations.Location()
+            maxDistance = 0
+            selectedLocationIndex = null
+            locationFilterApplied = false
+            reapplyFilters()
+          },
+          clearEnabled = locationFilterApplied,
+          end = lastAppliedMaxDist)
+    }
     QuickFixSlidingWindowWorker(
         isVisible = isWindowVisible,
         onDismiss = { isWindowVisible = false },
@@ -376,6 +538,8 @@ fun SearchWorkerResult(
         reviews = reviews,
         screenHeight = maxHeight,
         screenWidth = maxWidth,
-        onContinueClick = {})
+        onContinueClick = {
+                  quickFixViewModel.setSelectedWorkerProfile(selectedWorker)
+                  navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)})
   }
 }
