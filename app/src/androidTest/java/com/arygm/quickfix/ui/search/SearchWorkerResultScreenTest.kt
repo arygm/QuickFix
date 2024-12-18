@@ -1959,7 +1959,7 @@ class SearchWorkerResultScreenTest {
                 location = Location(40.7128, -74.0060)),
             WorkerProfile(
                 uid = "worker3",
-                price = 3010.0,
+                price = 600.0,
                 fieldOfWork = "Plumber",
                 rating = 3.9,
                 workingHours = Pair(LocalTime.of(0, 0), LocalTime.of(23, 59)),
