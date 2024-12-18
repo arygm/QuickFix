@@ -231,15 +231,15 @@ fun UserModeNavHost(
                               slideOutVertically { fullHeight ->
                                 fullHeight
                               }, // Slide out to bottom
-                          ) {
-                            BottomNavigationMenu(
-                                onTabSelect = { selectedDestination ->
-                                  userNavigationActions.navigateTo(selectedDestination)
-                                },
-                                navigationActions = userNavigationActions,
-                                tabList = USER_TOP_LEVEL_DESTINATIONS,
-                                getBottomBarId = getBottomBarIdUser)
-                          }
+                      ) {
+                        BottomNavigationMenu(
+                            onTabSelect = { selectedDestination ->
+                              userNavigationActions.navigateTo(selectedDestination)
+                            },
+                            navigationActions = userNavigationActions,
+                            tabList = USER_TOP_LEVEL_DESTINATIONS,
+                            getBottomBarId = getBottomBarIdUser)
+                      }
                     }
               }
         }

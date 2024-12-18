@@ -111,7 +111,7 @@ fun WorkerModeNavGraph(
                     modifier =
                         Modifier.align(Alignment.BottomCenter) // Align it to the bottom center
                             .zIndex(1f)
-                            .testTag("BNM")// Ensure it's on top
+                            .testTag("BNM") // Ensure it's on top
                     ) {
                       BottomNavigationMenu(
                           onTabSelect = { selectedDestination ->
