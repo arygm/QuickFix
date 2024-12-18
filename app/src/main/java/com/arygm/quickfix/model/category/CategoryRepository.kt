@@ -4,15 +4,15 @@ interface CategoryRepository {
 
   fun init(onSuccess: () -> Unit)
 
-  fun fetchCategories(onSuccess: (List<Category?>) -> Unit, onFailure: (Exception) -> Unit)
+  suspend fun fetchCategories(onSuccess: (List<Category?>) -> Unit, onFailure: (Exception) -> Unit)
 
-  fun fetchSubcategories(
+  suspend fun fetchSubcategories(
       categoryId: String,
       onSuccess: (List<Subcategory?>) -> Unit,
       onFailure: (Exception) -> Unit
   )
 
-  fun fetchCategoryBySubcategoryId(
+  suspend fun fetchCategoryBySubcategoryId(
       subcategoryId: String,
       onSuccess: (Category?) -> Unit,
       onFailure: (Exception) -> Unit

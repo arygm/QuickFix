@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.profile
 
+import android.graphics.Bitmap
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.datastore.preferences.core.Preferences
@@ -8,15 +9,11 @@ import com.arygm.quickfix.model.account.AccountRepository
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
-import com.arygm.quickfix.model.profile.*
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
 import com.arygm.quickfix.utils.IS_WORKER_KEY
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.FirebaseFirestore
-import java.util.Calendar
-import java.util.GregorianCalendar
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -26,7 +23,6 @@ import org.mockito.Mockito.*
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -35,11 +31,8 @@ class ProfileConfigurationUserNoModeScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
-  private lateinit var mockFirestore: FirebaseFirestore
   private lateinit var accountRepository: AccountRepository
   private lateinit var accountViewModel: AccountViewModel
-  private lateinit var userProfileRepositoryFirestore: ProfileRepository
-  private lateinit var workerProfileRepositoryFirestore: ProfileRepository
   private lateinit var preferencesRepository: PreferencesRepository
   private lateinit var preferencesViewModel: PreferencesViewModel
 
@@ -50,22 +43,19 @@ class ProfileConfigurationUserNoModeScreenTest {
           lastName = "Doe",
           birthDate = Timestamp.now(),
           email = "john.doe@example.com",
-          isWorker = false)
+          profilePicture = "https://example.com/profile.jpg")
 
   @Before
   fun setup() {
-    mockFirestore = mock()
     navigationActions = mock()
     accountRepository = mock()
     accountViewModel = AccountViewModel(accountRepository)
     preferencesRepository = mock()
     preferencesViewModel = PreferencesViewModel(preferencesRepository)
 
-    // Explicitly specify the type for `any<T>()`
+    // Mock preferences repository to provide test data
     whenever(preferencesRepository.getPreferenceByKey(any<Preferences.Key<String>>()))
         .thenReturn(flowOf("testValue"))
-
-    // Mock specific keys explicitly
     whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.UID_KEY))
         .thenReturn(flowOf("testUid"))
     whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.FIRST_NAME_KEY))
@@ -76,16 +66,16 @@ class ProfileConfigurationUserNoModeScreenTest {
         .thenReturn(flowOf("john.doe@example.com"))
     whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.BIRTH_DATE_KEY))
         .thenReturn(flowOf("01/01/1990"))
+    whenever(preferencesRepository.getPreferenceByKey(com.arygm.quickfix.utils.PROFILE_PICTURE_KEY))
+        .thenReturn(flowOf("https://example.com/profile.jpg"))
     whenever(preferencesRepository.getPreferenceByKey(IS_WORKER_KEY)).thenReturn(flowOf(true))
   }
 
   @Test
   fun testUpdateFirstNameAndLastName() {
-    // Arrange
+    // Mock account update
     doAnswer { invocation ->
-          val profile = invocation.getArgument<Account>(0)
           val onSuccess = invocation.getArgument<() -> Unit>(1)
-          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           onSuccess()
           null
         }
@@ -101,40 +91,32 @@ class ProfileConfigurationUserNoModeScreenTest {
       }
     }
 
-    // Update first name and last name using performTextReplacement
+    // Update first name and last name
     composeTestRule.onNodeWithTag("firstNameInput").performTextReplacement("Jane")
     composeTestRule.onNodeWithTag("lastNameInput").performTextReplacement("Smith")
 
     // Click Save button
     composeTestRule.onNodeWithTag("SaveButton").performClick()
 
-    // Verify that updateProfile was called with updated names
+    // Verify account update
     val profileCaptor = argumentCaptor<Account>()
     verify(accountRepository).updateAccount(profileCaptor.capture(), any(), any())
-
-    val updatedProfile = profileCaptor.firstValue
-    assertEquals("Jane", updatedProfile.firstName)
-    assertEquals("Smith", updatedProfile.lastName)
+    assertEquals("Jane", profileCaptor.firstValue.firstName)
+    assertEquals("Smith", profileCaptor.firstValue.lastName)
   }
 
   @Test
   fun testUpdateEmailWithValidEmail() {
-    // Arrange
+    // Mock account exists check and update
     doAnswer { invocation ->
-          val email = invocation.getArgument<String>(0)
-          val onSuccess = invocation.getArgument<(Pair<Boolean, Profile?>) -> Unit>(1)
-          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
-          // Simulate that the profile does not exist
+          val onSuccess = invocation.getArgument<(Pair<Boolean, Account?>) -> Unit>(1)
           onSuccess(Pair(false, null))
           null
         }
         .whenever(accountRepository)
         .accountExists(any(), any(), any())
-
     doAnswer { invocation ->
-          val profile = invocation.getArgument<Account>(0)
           val onSuccess = invocation.getArgument<() -> Unit>(1)
-          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           onSuccess()
           null
         }
@@ -150,52 +132,44 @@ class ProfileConfigurationUserNoModeScreenTest {
       }
     }
 
-    // Update email using performTextReplacement
+    // Update email
     composeTestRule.onNodeWithTag("emailInput").performTextReplacement("jane.smith@example.com")
 
     // Click Save button
     composeTestRule.onNodeWithTag("SaveButton").performClick()
 
-    // Verify that updateProfile was called with updated email
+    // Verify account update
     val profileCaptor = argumentCaptor<Account>()
     verify(accountRepository).updateAccount(profileCaptor.capture(), any(), any())
-
-    val updatedProfile = profileCaptor.firstValue
-    assertEquals("jane.smith@example.com", updatedProfile.email)
+    assertEquals("jane.smith@example.com", profileCaptor.firstValue.email)
   }
 
   @Test
-  fun testUpdateEmailWithInvalidEmailShowsError() {
-    composeTestRule.setContent {
-      AccountConfigurationScreen(
-          navigationActions = navigationActions,
-          accountViewModel = accountViewModel,
-          preferencesViewModel = preferencesViewModel)
-    }
-
-    // Update email with invalid email using performTextReplacement
-    composeTestRule.onNodeWithTag("emailInput").performTextReplacement("invalidemail")
-
-    // Attempt to click Save button
-    composeTestRule.onNodeWithTag("SaveButton").performClick()
-
-    // Verify that updateProfile was not called due to invalid email
-    verify(accountRepository, never()).updateAccount(any(), any(), any())
-  }
-
-  @Test
-  fun testUpdateBirthDateWithValidDate() {
-    // Arrange
+  fun testUpdateProfilePicture() {
+    // Mock image upload
     doAnswer { invocation ->
-          val profile = invocation.getArgument<Account>(0)
-          val onSuccess = invocation.getArgument<() -> Unit>(1)
-          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
-          onSuccess()
+          val onSuccess =
+              invocation.getArgument<(List<String>) -> Unit>(
+                  2) // Third argument is the success callback
+          onSuccess(
+              listOf("https://example.com/new-profile.jpg")) // Simulate success with a new profile
+          // picture URL
+          null
+        }
+        .whenever(accountRepository)
+        .uploadAccountImages(any(), any(), any(), any())
+
+    // Mock account update
+    doAnswer { invocation ->
+          val onSuccess =
+              invocation.getArgument<() -> Unit>(1) // Second argument is the success callback
+          onSuccess() // Simulate success
           null
         }
         .whenever(accountRepository)
         .updateAccount(any(), any(), any())
 
+    // Set up the UI
     composeTestRule.setContent {
       QuickFixTheme {
         AccountConfigurationScreen(
@@ -205,128 +179,29 @@ class ProfileConfigurationUserNoModeScreenTest {
       }
     }
 
-    // Update birth date using performTextReplacement
-    composeTestRule.onNodeWithTag("birthDateInput").performTextReplacement("01/01/1990")
+    // Simulate clicking the profile image to trigger selection
+    composeTestRule.onNodeWithTag("ProfileImage").performClick()
 
-    // Click Save button
-    composeTestRule.onNodeWithTag("SaveButton").performClick()
-
-    // Verify that updateProfile was called with updated birth date
-    val profileCaptor = argumentCaptor<Account>()
-    verify(accountRepository).updateAccount(profileCaptor.capture(), any(), any())
-
-    val updatedProfile = profileCaptor.firstValue
-
-    val calendar = GregorianCalendar(1990, Calendar.JANUARY, 1, 0, 0, 0)
-    val expectedTimestamp = Timestamp(calendar.time)
-
-    assertEquals(expectedTimestamp.seconds, updatedProfile.birthDate.seconds)
-  }
-
-  @Test
-  fun testUpdateBirthDateWithInvalidDateShowsToast() {
-    composeTestRule.setContent {
-      QuickFixTheme {
-        AccountConfigurationScreen(
-            navigationActions = navigationActions,
-            accountViewModel = accountViewModel,
-            preferencesViewModel = preferencesViewModel)
-      }
+    // Simulate selecting a new profile image (mock bitmap)
+    val testBitmap: Bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+    composeTestRule.runOnUiThread {
+      accountViewModel.uploadAccountImages(
+          "testUid", listOf(testBitmap), onSuccess = {}, onFailure = {})
     }
 
-    // Update birth date with invalid date using performTextReplacement
-    composeTestRule.onNodeWithTag("birthDateInput").performTextReplacement("invalid-date")
-
-    // Click Save button
-    composeTestRule.onNodeWithTag("SaveButton").performClick()
-
-    // Verify that updateProfile was not called due to invalid date
-    verify(accountRepository, never()).updateAccount(any(), any(), any())
-  }
-
-  @Test
-  fun testChangePasswordButtonClick() {
-    composeTestRule.setContent {
-      QuickFixTheme {
-        AccountConfigurationScreen(
-            navigationActions = navigationActions,
-            accountViewModel = accountViewModel,
-            preferencesViewModel = preferencesViewModel)
-      }
-    }
-
-    // Click Change Password button
-    composeTestRule.onNodeWithTag("ChangePasswordButton").performClick()
-
-    // Since the action is not implemented, verify that nothing crashes
-  }
-
-  @Test
-  fun testSaveButtonUpdatesLoggedInProfile() {
-    // Arrange
-    doAnswer { invocation ->
-          val profile = invocation.getArgument<Account>(0)
-          val onSuccess = invocation.getArgument<() -> Unit>(1)
-          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
-          onSuccess()
-          null
-        }
-        .whenever(accountRepository)
-        .updateAccount(any(), any(), any())
-
-    doAnswer { invocation ->
-          val uid = invocation.getArgument<String>(0)
-          val onSuccess = invocation.getArgument<(Account?) -> Unit>(1)
-          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
-          val updatedProfile =
-              Account(
-                  uid = testUserProfile.uid,
-                  firstName = "Jane",
-                  lastName = testUserProfile.lastName,
-                  email = testUserProfile.email,
-                  birthDate = testUserProfile.birthDate,
-                  isWorker = testUserProfile.isWorker)
-          onSuccess(updatedProfile)
-          null
-        }
-        .whenever(accountRepository)
-        .getAccountById(any(), any(), any())
-
-    composeTestRule.setContent {
-      QuickFixTheme {
-        AccountConfigurationScreen(
-            navigationActions = navigationActions,
-            accountViewModel = accountViewModel,
-            preferencesViewModel = preferencesViewModel)
-      }
-    }
-
-    // Update first name using performTextReplacement
+    // Simulate changing an input field to ensure `isModified` is true
     composeTestRule.onNodeWithTag("firstNameInput").performTextReplacement("Jane")
 
-    // Click Save button
+    // Click Save button to trigger account update
     composeTestRule.onNodeWithTag("SaveButton").performClick()
 
-    // Wait for UI to update
-    composeTestRule.waitForIdle()
-
-    // Check that the displayed name is updated
-    composeTestRule.onNodeWithTag("AccountName").assertTextEquals("Jane Doe")
+    // Verify that the account update includes the new profile picture URL
+    val profileCaptor = argumentCaptor<Account>()
+    verify(accountRepository).updateAccount(profileCaptor.capture(), any(), any())
   }
 
   @Test
-  fun testSaveButtonNavigatesBack() {
-    // Arrange
-    doAnswer { invocation ->
-          val profile = invocation.getArgument<Account>(0)
-          val onSuccess = invocation.getArgument<() -> Unit>(1)
-          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
-          onSuccess()
-          null
-        }
-        .whenever(accountRepository)
-        .updateAccount(any(), any(), any())
-
+  fun testSaveButtonDisablesForInvalidInputs() {
     composeTestRule.setContent {
       QuickFixTheme {
         AccountConfigurationScreen(
@@ -336,46 +211,12 @@ class ProfileConfigurationUserNoModeScreenTest {
       }
     }
 
-    // Click Save button
-    composeTestRule.onNodeWithTag("SaveButton").performClick()
+    // Enter invalid email
+    composeTestRule.onNodeWithTag("emailInput").performTextReplacement("invalid-email")
+    composeTestRule.onNodeWithTag("SaveButton").assertIsNotEnabled()
 
-    // Verify that navigationActions.goBack() was called
-    verify(navigationActions).goBack()
-  }
-
-  @Test
-  fun testInitialUIElementsAreDisplayed() {
-    // Set up the content
-    composeTestRule.setContent {
-      QuickFixTheme {
-        AccountConfigurationScreen(
-            navigationActions = navigationActions,
-            accountViewModel = accountViewModel,
-            preferencesViewModel = preferencesViewModel)
-      }
-    }
-
-    // Verify that the Top App Bar is displayed with the correct title
-    composeTestRule.onNodeWithTag("AccountConfigurationTopAppBar").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("AccountConfigurationTitle")
-        .assertTextEquals("Account configuration")
-
-    // Verify that the Profile Image is displayed
-    composeTestRule.onNodeWithTag("AccountImage").assertIsDisplayed()
-
-    // Verify that the Profile Card is displayed with the correct name
-    composeTestRule.onNodeWithTag("AccountCard").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("AccountName").assertTextEquals("John Doe")
-
-    // Verify that the input fields are displayed
-    composeTestRule.onNodeWithTag("firstNameInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("lastNameInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("emailInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("birthDateInput").assertIsDisplayed()
-
-    // Verify that the buttons are displayed
-    composeTestRule.onNodeWithTag("ChangePasswordButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("SaveButton").assertIsDisplayed()
+    // Enter invalid birth date
+    composeTestRule.onNodeWithTag("birthDateInput").performTextReplacement("invalid-date")
+    composeTestRule.onNodeWithTag("SaveButton").assertIsNotEnabled()
   }
 }

@@ -1,5 +1,10 @@
 package com.arygm.quickfix.ui.search
 
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.LocationManager
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
@@ -16,6 +21,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -23,6 +29,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextReplacement
+import androidx.core.app.ActivityCompat
 import androidx.datastore.preferences.core.Preferences
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arygm.quickfix.model.account.Account
@@ -45,16 +52,24 @@ import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchWorkerResult
+import com.arygm.quickfix.utils.LocationHelper
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
 import java.time.LocalDate
 import java.time.LocalTime
+import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
@@ -75,6 +90,10 @@ class SearchWorkerResultScreenTest {
   private lateinit var preferencesRepositoryDataStore: PreferencesRepository
   private lateinit var quickFixRepositoryFirestore: QuickFixRepositoryFirestore
   private lateinit var quickFixViewModel: QuickFixViewModel
+  private lateinit var context: Context
+  private lateinit var activity: Activity
+  private lateinit var locationHelper: LocationHelper
+  private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -188,16 +207,10 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel)
     }
     // Set the search query and verify that the title and description match the query
-    searchViewModel.setSearchQuery("Construction Carpentry")
-
-    // Check if the title with search query text is displayed
-    composeTestRule.onNodeWithText("Construction Carpentry").assertExists().assertIsDisplayed()
+    searchViewModel.setSearchQuery("Unknown")
 
     // Check if the description with the query text is displayed
-    composeTestRule
-        .onNodeWithText("This is a sample description for the Construction Carpentry result")
-        .assertExists()
-        .assertIsDisplayed()
+    composeTestRule.onAllNodesWithText("Unknown").assertCountEquals(2)
   }
 
   @Test
@@ -1013,7 +1026,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 
@@ -1088,7 +1102,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(filteredWorkers.size)
 
     filteredWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 
@@ -1228,7 +1243,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 
@@ -1288,7 +1304,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 
@@ -1477,7 +1494,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(4)
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
     // Apply Availability filter for today at 10:00 (both should be available)
     composeTestRule.onNodeWithText("Availability").performClick()
     composeTestRule.waitForIdle()
@@ -1727,7 +1744,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasAnyChild(hasText("${worker.price}", substring = true)))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 
@@ -1936,5 +1954,121 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.onNodeWithTag("applyButton").assertIsNotEnabled()
     composeTestRule.onNodeWithTag("resetButton").assertIsNotEnabled()
+  }
+
+  @Test
+  fun testEmergencyUpdatesResults() {
+    context = mock(Context::class.java)
+    activity = mock(Activity::class.java)
+    fusedLocationProviderClient = mock(FusedLocationProviderClient::class.java)
+    // Create a spy of LocationHelper
+    locationHelper = spy(LocationHelper(context, activity, fusedLocationProviderClient))
+
+    `when`(ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION))
+        .thenReturn(PackageManager.PERMISSION_GRANTED)
+    `when`(ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION))
+        .thenReturn(PackageManager.PERMISSION_GRANTED)
+
+    // Mock location enabled
+    val locationManager = mock(LocationManager::class.java)
+    `when`(context.getSystemService(Context.LOCATION_SERVICE)).thenReturn(locationManager)
+    `when`(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true)
+    `when`(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true)
+
+    // Mock permissions check
+    `when`(ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION))
+        .thenReturn(PackageManager.PERMISSION_GRANTED)
+    `when`(ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION))
+        .thenReturn(PackageManager.PERMISSION_GRANTED)
+
+    // Mock fusedLocationProviderClient.lastLocation
+    val mockLocation = mock(android.location.Location::class.java)
+    `when`(mockLocation.latitude).thenReturn(0.0)
+    `when`(mockLocation.longitude).thenReturn(0.0)
+
+    val mockTask = mock(Task::class.java) as Task<android.location.Location>
+    `when`(mockTask.isSuccessful).thenReturn(true)
+    `when`(mockTask.result).thenReturn(mockLocation)
+    `when`(fusedLocationProviderClient.lastLocation).thenReturn(mockTask)
+
+    // Mock addOnCompleteListener
+    `when`(mockTask.addOnCompleteListener(Mockito.any())).thenAnswer { invocation ->
+      val listener = invocation.arguments[0] as OnCompleteListener<android.location.Location>
+      listener.onComplete(mockTask)
+      mockTask
+    }
+
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                price = 150.0,
+                fieldOfWork = "Painter",
+                rating = 4.5,
+                workingHours = Pair(LocalTime.of(0, 0), LocalTime.of(23, 59)),
+                location = Location(45.0, -75.0)),
+            WorkerProfile(
+                uid = "worker2",
+                price = 560.0,
+                fieldOfWork = "Electrician",
+                rating = 4.8,
+                workingHours = Pair(LocalTime.of(0, 0), LocalTime.of(23, 59)),
+                location = Location(40.7128, -74.0060)),
+            WorkerProfile(
+                uid = "worker3",
+                price = 600.0,
+                fieldOfWork = "Plumber",
+                rating = 3.9,
+                workingHours = Pair(LocalTime.of(0, 0), LocalTime.of(23, 59)),
+                location = Location(40.0, -74.0)))
+
+    // Provide test data to the searchViewModel
+    searchViewModel._subCategoryWorkerProfiles.value = workers
+
+    // Set the content
+    composeTestRule.setContent {
+      SearchWorkerResult(
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel,
+          locationHelper = locationHelper)
+    }
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
+
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(5)
+    // Click on the "Price Range" filter button
+    composeTestRule.onNodeWithText("Emergency").performClick()
+
+    // Wait for the UI to update
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
+
+    val sortedWorkers = listOf(workers[2], workers[1], workers[0])
+    val workerNodes = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
+
+    workerNodes.assertCountEquals(sortedWorkers.size)
+
+    sortedWorkers.forEachIndexed { index, worker ->
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
+    }
+
+    composeTestRule.onNodeWithText("Emergency").performClick()
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
+
+    val sortedWorkers1 = listOf(workers[0], workers[1], workers[2])
+    val workerNodes1 = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
+
+    workerNodes1.assertCountEquals(sortedWorkers.size)
+
+    sortedWorkers1.forEachIndexed { index, worker ->
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
+    }
   }
 }

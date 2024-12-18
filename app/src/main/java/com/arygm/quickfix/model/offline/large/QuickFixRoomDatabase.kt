@@ -5,13 +5,17 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.arygm.quickfix.model.offline.large.categories.CategoryDao
+import com.arygm.quickfix.model.offline.large.categories.CategoryEntity
 import com.arygm.quickfix.model.offline.large.messaging.ChatDao
 import com.arygm.quickfix.model.offline.large.messaging.ChatEntity
 
-@Database(entities = [ChatEntity::class], version = 1)
+@Database(entities = [ChatEntity::class, CategoryEntity::class], version = 2)
 @TypeConverters(Converters::class)
 abstract class QuickFixRoomDatabase : RoomDatabase() {
   abstract fun chatDao(): ChatDao
+
+  abstract fun categoryDao(): CategoryDao
 
   companion object {
     @Volatile private var INSTANCE: QuickFixRoomDatabase? = null

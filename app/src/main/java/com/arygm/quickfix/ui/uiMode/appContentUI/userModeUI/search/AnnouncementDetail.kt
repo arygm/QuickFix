@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -54,7 +55,8 @@ private const val PADDING_BETWEEN_ELEM = 8
 @Composable
 fun AnnouncementDetailScreen(
     announcementViewModel: AnnouncementViewModel,
-    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
+    categoryViewModel: CategoryViewModel =
+        viewModel(factory = CategoryViewModel.Factory(LocalContext.current)),
     preferencesViewModel: PreferencesViewModel,
     navigationActions: NavigationActions,
 ) {

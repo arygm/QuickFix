@@ -11,6 +11,7 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.AnnouncementRepository
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -41,6 +42,7 @@ class QuickFixFinderScreenTest {
   private lateinit var searchViewModel: SearchViewModel
   private lateinit var accountViewModel: AccountViewModel
   private lateinit var categoryViewModel: CategoryViewModel
+  private lateinit var quickFixViewModel: QuickFixViewModel
 
   @Before
   fun setup() {
@@ -67,6 +69,7 @@ class QuickFixFinderScreenTest {
     searchViewModel = SearchViewModel(workerProfileRepo)
     categoryViewModel = CategoryViewModel(categoryRepo)
     accountViewModel = mockk(relaxed = true)
+    quickFixViewModel = QuickFixViewModel(mock())
   }
 
   @Test
@@ -81,7 +84,8 @@ class QuickFixFinderScreenTest {
           searchViewModel = searchViewModel,
           announcementViewModel = announcementViewModel,
           categoryViewModel = categoryViewModel,
-          preferencesViewModel = preferencesViewModel)
+          preferencesViewModel = preferencesViewModel,
+          quickFixViewModel = quickFixViewModel)
     }
 
     // Assert top bar is displayed
@@ -119,7 +123,8 @@ class QuickFixFinderScreenTest {
           searchViewModel = searchViewModel,
           announcementViewModel = announcementViewModel,
           categoryViewModel = categoryViewModel,
-          preferencesViewModel = preferencesViewModel)
+          preferencesViewModel = preferencesViewModel,
+          quickFixViewModel = quickFixViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -143,7 +148,8 @@ class QuickFixFinderScreenTest {
           searchViewModel = searchViewModel,
           announcementViewModel = announcementViewModel,
           categoryViewModel = categoryViewModel,
-          preferencesViewModel = preferencesViewModel)
+          preferencesViewModel = preferencesViewModel,
+          quickFixViewModel = quickFixViewModel)
     }
 
     // Click on the "Announce" tab
@@ -165,7 +171,8 @@ class QuickFixFinderScreenTest {
           searchViewModel = searchViewModel,
           announcementViewModel = announcementViewModel,
           categoryViewModel = categoryViewModel,
-          preferencesViewModel = preferencesViewModel)
+          preferencesViewModel = preferencesViewModel,
+          quickFixViewModel = quickFixViewModel)
     }
 
     // Click on the "Search" tab

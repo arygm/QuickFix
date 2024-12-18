@@ -162,7 +162,7 @@ class ChatViewModelTest {
 
   @Test
   fun deleteChat_whenSuccess_updatesChats() = runTest {
-      println("9bl")
+    println("9bl")
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()

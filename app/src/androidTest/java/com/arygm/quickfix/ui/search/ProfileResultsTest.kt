@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import com.arygm.quickfix.model.account.Account
+import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.category.CategoryViewModel
@@ -27,6 +28,7 @@ class ProfileResultsTest {
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
+  private lateinit var accountRepositoryFirestore: AccountRepositoryFirestore
   private lateinit var categoryRepo: CategoryRepositoryFirestore
   private lateinit var searchViewModel: SearchViewModel
   private lateinit var accountViewModel: AccountViewModel
@@ -41,6 +43,7 @@ class ProfileResultsTest {
     navigationActionsRoot = mock(NavigationActions::class.java)
     workerProfileRepo = mockk(relaxed = true)
     categoryRepo = mockk(relaxed = true)
+    accountRepositoryFirestore = mock(AccountRepositoryFirestore::class.java)
     searchViewModel = SearchViewModel(workerProfileRepo)
     categoryViewModel = CategoryViewModel(categoryRepo)
     accountViewModel = mockk(relaxed = true)
@@ -101,7 +104,7 @@ class ProfileResultsTest {
           searchViewModel = searchViewModel,
           accountViewModel = accountViewModel,
           heightRatio = 1.0f,
-          onBookClick = { _ -> })
+          onBookClick = { _, _ -> })
     }
 
     // Allow coroutines to complete

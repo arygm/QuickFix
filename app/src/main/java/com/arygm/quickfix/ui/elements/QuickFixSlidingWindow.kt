@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -108,12 +109,21 @@ fun QuickFixSlidingWindow(
                         elevation = 16.dp,
                         shape =
                             RoundedCornerShape(
-                                topStart = 0.dp,
-                                topEnd = 16.dp,
-                                bottomEnd = 16.dp,
-                                bottomStart = 0.dp),
+                                topStart = 16.dp,
+                                topEnd = 0.dp,
+                                bottomEnd = 0.dp,
+                                bottomStart = 16.dp),
                         clip = false)
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))) {
+                    .background(
+                        MaterialTheme.colorScheme.surface,
+                        RoundedCornerShape(
+                            topStart = 16.dp, topEnd = 0.dp, bottomEnd = 0.dp, bottomStart = 16.dp))
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 16.dp,
+                            topEnd = 0.dp,
+                            bottomEnd = 0.dp,
+                            bottomStart = 16.dp))) {
               content()
             }
       }

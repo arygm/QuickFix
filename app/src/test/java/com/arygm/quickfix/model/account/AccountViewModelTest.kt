@@ -14,6 +14,8 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import junit.framework.TestCase.fail
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -53,6 +55,11 @@ class AccountViewModelTest {
   @Mock private lateinit var mockAccountQuerySnapshot: QuerySnapshot
 
   @Mock private lateinit var mockQuery: Query
+  @Mock private lateinit var mockStorage: FirebaseStorage
+  @Mock private lateinit var storageRef: StorageReference
+  @Mock private lateinit var storageRef1: StorageReference
+  @Mock private lateinit var storageRef2: StorageReference
+  @Mock private lateinit var accountFolderRef: StorageReference
 
   private lateinit var mockFirebaseAuth: FirebaseAuth
   private lateinit var firebaseAuthMockedStatic: MockedStatic<FirebaseAuth>
@@ -66,7 +73,8 @@ class AccountViewModelTest {
           lastName = "Doe",
           email = "john.doe@example.com",
           birthDate = Timestamp.now(),
-          isWorker = false)
+          isWorker = false,
+          profilePicture = "https://example.com/profile.jpg")
 
   private val account2 =
       Account(
@@ -75,7 +83,8 @@ class AccountViewModelTest {
           lastName = "Smith",
           email = "jane.smith@example.com",
           birthDate = Timestamp.now(),
-          isWorker = true)
+          isWorker = true,
+          profilePicture = "https://example.com/profile2.jpg")
 
   @Before
   fun setUp() {
@@ -92,8 +101,9 @@ class AccountViewModelTest {
     firebaseAuthMockedStatic
         .`when`<FirebaseAuth> { FirebaseAuth.getInstance() }
         .thenReturn(mockFirebaseAuth)
+    `when`(mockStorage.reference).thenReturn(storageRef)
 
-    accountRepositoryFirestore = AccountRepositoryFirestore(mockFirestore)
+    accountRepositoryFirestore = AccountRepositoryFirestore(mockFirestore, mockStorage)
 
     // Mocking the collection reference
     `when`(mockFirestore.collection(eq("accounts"))).thenReturn(mockCollectionReference)
@@ -307,6 +317,8 @@ class AccountViewModelTest {
     `when`(mockDocumentSnapshot.getString("lastName")).thenReturn(account.lastName)
     `when`(mockDocumentSnapshot.getString("email")).thenReturn(account.email)
     `when`(mockDocumentSnapshot.getTimestamp("birthDate")).thenReturn(account.birthDate)
+    `when`(mockDocumentSnapshot.getBoolean("worker")).thenReturn(account.isWorker)
+    `when`(mockDocumentSnapshot.getString("profilePicture")).thenReturn(account.profilePicture)
 
     var callbackCalled = false
 
@@ -385,6 +397,8 @@ class AccountViewModelTest {
     `when`(mockDocumentSnapshot.getString("lastName")).thenReturn(account.lastName)
     `when`(mockDocumentSnapshot.getString("email")).thenReturn(account.email)
     `when`(mockDocumentSnapshot.getTimestamp("birthDate")).thenReturn(account.birthDate)
+    `when`(mockDocumentSnapshot.getBoolean("worker")).thenReturn(account.isWorker)
+    `when`(mockDocumentSnapshot.getString("profilePicture")).thenReturn(account.profilePicture)
 
     var callbackCalled = false
 
@@ -472,6 +486,7 @@ class AccountViewModelTest {
     `when`(document1.getString("email")).thenReturn(account.email)
     `when`(document1.getTimestamp("birthDate")).thenReturn(account.birthDate)
     `when`(document1.getBoolean("worker")).thenReturn(account.isWorker)
+    `when`(document1.getString("profilePicture")).thenReturn(account.profilePicture)
 
     // Mock data for second document
     `when`(document2.id).thenReturn(account2.uid)
@@ -480,6 +495,7 @@ class AccountViewModelTest {
     `when`(document2.getString("email")).thenReturn(account2.email)
     `when`(document2.getTimestamp("birthDate")).thenReturn(account2.birthDate)
     `when`(document2.getBoolean("worker")).thenReturn(account2.isWorker)
+    `when`(document2.getString("profilePicture")).thenReturn(account2.profilePicture)
 
     var callbackCalled = false
     var returnedAccounts: List<Account>? = null
@@ -538,6 +554,8 @@ class AccountViewModelTest {
     `when`(document.getString("lastName")).thenReturn(account.lastName)
     `when`(document.getString("email")).thenReturn(account.email)
     `when`(document.getTimestamp("birthDate")).thenReturn(account.birthDate)
+    `when`(document.getBoolean("worker")).thenReturn(account.isWorker)
+    `when`(document.getString("profilePicture")).thenReturn(account.profilePicture)
 
     // Act
     val result = invokeDocumentToAccount(document)
@@ -609,6 +627,7 @@ class AccountViewModelTest {
     `when`(document.getTimestamp("birthDate")).thenReturn(account.birthDate)
     // Extra field that is not used by the repository
     `when`(document.getString("isWorker")).thenReturn("false")
+    `when`(document.getString("profilePicture")).thenReturn(account.profilePicture)
 
     // Act
     val result = invokeDocumentToAccount(document)

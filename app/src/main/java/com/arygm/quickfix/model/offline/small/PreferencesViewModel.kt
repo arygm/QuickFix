@@ -11,6 +11,7 @@ import com.arygm.quickfix.utils.FIRST_NAME_KEY
 import com.arygm.quickfix.utils.IS_SIGN_IN_KEY
 import com.arygm.quickfix.utils.IS_WORKER_KEY
 import com.arygm.quickfix.utils.LAST_NAME_KEY
+import com.arygm.quickfix.utils.PROFILE_PICTURE_KEY
 import com.arygm.quickfix.utils.UID_KEY
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +39,8 @@ open class PreferencesViewModel(
 
   val birthDate: Flow<String> =
       repositoryAccount.getPreferenceByKey(BIRTH_DATE_KEY).map { it ?: "" }
+  val profilePicture: Flow<String> =
+      repositoryAccount.getPreferenceByKey(PROFILE_PICTURE_KEY).map { it ?: "" }
 
   val isSignInKey: Flow<Boolean> =
       repositoryAccount.getPreferenceByKey(IS_SIGN_IN_KEY).map { it ?: false }

@@ -56,6 +56,7 @@ import com.arygm.quickfix.utils.loadEmail
 import com.arygm.quickfix.utils.loadFirstName
 import com.arygm.quickfix.utils.loadIsWorker
 import com.arygm.quickfix.utils.loadLastName
+import com.arygm.quickfix.utils.loadProfilePicture
 import com.arygm.quickfix.utils.loadUserId
 import com.arygm.quickfix.utils.setAccountPreferences
 import com.arygm.quickfix.utils.stringToTimestamp
@@ -95,6 +96,9 @@ fun BusinessScreen(
   var email by remember { mutableStateOf("") }
   var birthDate by remember { mutableStateOf("") }
   var isWorker by remember { mutableStateOf(false) }
+  var savedProfilePicture by remember {
+    mutableStateOf("https://example.com/default-profile-pic.jpg")
+  }
 
   LaunchedEffect(Unit) {
     workerId = loadUserId(preferencesViewModel)
@@ -103,6 +107,7 @@ fun BusinessScreen(
     email = loadEmail(preferencesViewModel)
     birthDate = loadBirthDate(preferencesViewModel)
     isWorker = loadIsWorker(preferencesViewModel)
+    savedProfilePicture = loadProfilePicture(preferencesViewModel)
   }
 
   val handleSuccessfulImageUpload: (String, List<String>) -> Unit =
@@ -134,7 +139,8 @@ fun BusinessScreen(
                       lastName = lastName,
                       email = email,
                       birthDate = stringToTimestamp(birthDate) ?: Timestamp.now(),
-                      isWorker = true)
+                      isWorker = true,
+                      profilePicture = savedProfilePicture)
               accountViewModel.updateAccount(
                   newAccount,
                   onSuccess = { setAccountPreferences(preferencesViewModel, newAccount) },
