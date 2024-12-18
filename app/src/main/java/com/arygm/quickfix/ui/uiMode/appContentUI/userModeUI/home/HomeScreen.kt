@@ -75,177 +75,154 @@ fun HomeScreen(
     workerViewModel: ProfileViewModel,
     quickFixViewModel: QuickFixViewModel
 ) {
-    val focusManager = LocalFocusManager.current
-    // Sample data for services and quick fixes
-    val services =
-        listOf(
-            Service("Painter", R.drawable.painter),
-            Service("Gardener", R.drawable.gardener),
-            Service("Electrician", R.drawable.electrician)
-        )
+  val focusManager = LocalFocusManager.current
+  // Sample data for services and quick fixes
+  val services =
+      listOf(
+          Service("Painter", R.drawable.painter),
+          Service("Gardener", R.drawable.gardener),
+          Service("Electrician", R.drawable.electrician))
 
-    var quickFixes by remember { mutableStateOf(emptyList<QuickFix>()) }
-    var mode by remember { mutableStateOf("") }
-    var uid by remember { mutableStateOf("") }
-    LaunchedEffect(Unit) {
-        mode = loadAppMode(preferencesViewModel)
-        uid = loadUserId(preferencesViewModel)
-        userViewModel.fetchUserProfile(uid) { profile ->
-            profile?.quickFixes?.forEach { quickFix ->
-                quickFixViewModel.fetchQuickFix(quickFix) {
-                    if (it != null) {
-                        quickFixes = quickFixes + it
-                    }
-                }
-            }
+  var quickFixes by remember { mutableStateOf(emptyList<QuickFix>()) }
+  var mode by remember { mutableStateOf("") }
+  var uid by remember { mutableStateOf("") }
+  LaunchedEffect(Unit) {
+    mode = loadAppMode(preferencesViewModel)
+    uid = loadUserId(preferencesViewModel)
+    userViewModel.fetchUserProfile(uid) { profile ->
+      profile?.quickFixes?.forEach { quickFix ->
+        quickFixViewModel.fetchQuickFix(quickFix) {
+          if (it != null) {
+            quickFixes = quickFixes + it
+          }
         }
+      }
     }
-    BoxWithConstraints {
-
-        val screenHeight = maxHeight.value
-        val screenWidth = maxWidth.value
-        Scaffold(
-            modifier =
-            Modifier
-                .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
+  }
+  BoxWithConstraints {
+    val screenHeight = maxHeight.value
+    val screenWidth = maxWidth.value
+    Scaffold(
+        modifier =
+            Modifier.pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
                 .testTag("HomeScreen"),
-            containerColor = colorScheme.background,
-            floatingActionButton = {
-                QuickFixToolboxFloatingButton(
-                    iconList = listOf(
-                        Icons.Default.Map,
-                        Icons.Default.AutoAwesome,
-                        Icons.Default.Create
-                    ),
-                    onIconClick = {},
-                    modifier = Modifier
-                        .padding(bottom = (screenHeight * 0.07).dp)
-                        .testTag("ToolboxFloatingButton")
-                )
-            },
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Column {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(0.dp),
-                                horizontalArrangement = Arrangement.Start,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.home_screen_headline),
-                                    contentDescription = "home_title",
-                                    modifier = Modifier.size((screenHeight * 0.25).dp)
-                                )
-                            }
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
-                    navigationIcon = {},
-                    actions = {
-                        IconButton(
-                            onClick = { navigationActions.navigateTo(UserScreen.MESSAGES) },
-                            Modifier.testTag("MessagesButton")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Email,
-                                contentDescription = "Messages",
-                                tint = colorScheme.background
-                            )
-                        }
-                    })
-            },
-            content = { padding ->
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(vertical = (screenHeight * 0.02).dp)
-                            .testTag("homeContent"),
-                        verticalArrangement = Arrangement.Top,
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Spacer(modifier = Modifier.width((screenWidth * 0.03).dp))
-                            Log.d("QuickFixTextFieldCustomHomeScreen", "DISPLAYED")
-                            QuickFixTextFieldCustom(
-                                modifier = Modifier.semantics { testTag = "searchBar" },
-                                showLeadingIcon = { true },
-                                showTrailingIcon = { true },
-                                leadingIcon = Icons.Outlined.Search,
-                                trailingIcon = { Icons.Default.Clear },
-                                descriptionLeadIcon = "Search",
-                                descriptionTrailIcon = "Clear",
-                                placeHolderText = "Find your perfect fix with QuickFix",
-                                shape = CircleShape,
-                                textStyle = poppinsTypography.bodyMedium,
-                                textColor = colorScheme.onBackground,
-                                placeHolderColor = colorScheme.onBackground,
-                                leadIconColor = colorScheme.onBackground,
-                                trailIconColor = colorScheme.onBackground,
-                                widthField = (screenWidth * 0.8).dp,
-                                heightField = (screenHeight * 0.045).dp,
-                                onValueChange = {},
-                                value = "",
-                                debug = "homescreen"
-                            )
-
-                            Spacer(modifier = Modifier.width((screenWidth * 0.04).dp))
-
-                            IconButton(
-                                onClick = { navigationActions.navigateTo(UserScreen.MESSAGES) },
-                                modifier =
-                                Modifier
-                                    .size((screenHeight * 0.045).dp)
-                                    .clip(CircleShape)
-                                    .background(colorScheme.surface)
-                                    .padding(8.dp)
-                                    .testTag(C.Tag.notification)
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.bell),
-                                    contentDescription = "notifications",
-                                    tint = colorScheme.primary
-                                )
-                            }
-                        }
-
-                        Text(
-                            text = "Popular services",
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = (screenWidth * 0.04).dp, vertical = (screenHeight * 0.02).dp)
-                        )
-
-                        PopularServicesRow(
-                            services = services,
-                            modifier = Modifier.testTag("PopularServicesRow"),
-                            onServiceClick = { /* Handle Service Click */ })
-
-                        Spacer(modifier = Modifier.weight(0.09f))
-
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .zIndex(2f)
-                            .weight(1.5f)) {
-                            QuickFixesWidget(
-                                status = "Upcoming",
-                                quickFixList = quickFixes,
-                                onShowAllClick = { /* Handle Show All Click */ },
-                                onItemClick = { /* Handle QuickFix Item Click */ },
-                                modifier = Modifier.testTag("UpcomingQuickFixes"),
-                                workerViewModel = workerViewModel,
-                            )
-                        }
-                    }
+        containerColor = colorScheme.background,
+        floatingActionButton = {
+          QuickFixToolboxFloatingButton(
+              iconList = listOf(Icons.Default.Map, Icons.Default.AutoAwesome, Icons.Default.Create),
+              onIconClick = {},
+              modifier =
+                  Modifier.padding(bottom = (screenHeight * 0.07).dp)
+                      .testTag("ToolboxFloatingButton"))
+        },
+        topBar = {
+          TopAppBar(
+              title = {
+                Column {
+                  Row(
+                      modifier = Modifier.fillMaxSize().padding(0.dp),
+                      horizontalArrangement = Arrangement.Start,
+                      verticalAlignment = Alignment.CenterVertically) {
+                        Image(
+                            painter = painterResource(id = R.drawable.home_screen_headline),
+                            contentDescription = "home_title",
+                            modifier = Modifier.size((screenHeight * 0.25).dp))
+                      }
                 }
-            })
-    }
+              },
+              colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
+              navigationIcon = {},
+              actions = {
+                IconButton(
+                    onClick = { navigationActions.navigateTo(UserScreen.MESSAGES) },
+                    Modifier.testTag("MessagesButton")) {
+                      Icon(
+                          imageVector = Icons.Outlined.Email,
+                          contentDescription = "Messages",
+                          tint = colorScheme.background)
+                    }
+              })
+        },
+        content = { padding ->
+          Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Column(
+                modifier =
+                    Modifier.fillMaxSize()
+                        .padding(vertical = (screenHeight * 0.02).dp)
+                        .testTag("homeContent"),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start) {
+                  Row(
+                      modifier = Modifier.fillMaxWidth(),
+                  ) {
+                    Spacer(modifier = Modifier.width((screenWidth * 0.03).dp))
+                    Log.d("QuickFixTextFieldCustomHomeScreen", "DISPLAYED")
+                    QuickFixTextFieldCustom(
+                        modifier = Modifier.semantics { testTag = "searchBar" },
+                        showLeadingIcon = { true },
+                        showTrailingIcon = { true },
+                        leadingIcon = Icons.Outlined.Search,
+                        trailingIcon = { Icons.Default.Clear },
+                        descriptionLeadIcon = "Search",
+                        descriptionTrailIcon = "Clear",
+                        placeHolderText = "Find your perfect fix with QuickFix",
+                        shape = CircleShape,
+                        textStyle = poppinsTypography.bodyMedium,
+                        textColor = colorScheme.onBackground,
+                        placeHolderColor = colorScheme.onBackground,
+                        leadIconColor = colorScheme.onBackground,
+                        trailIconColor = colorScheme.onBackground,
+                        widthField = (screenWidth * 0.8).dp,
+                        heightField = (screenHeight * 0.045).dp,
+                        onValueChange = {},
+                        value = "",
+                        debug = "homescreen")
+
+                    Spacer(modifier = Modifier.width((screenWidth * 0.04).dp))
+
+                    IconButton(
+                        onClick = { navigationActions.navigateTo(UserScreen.MESSAGES) },
+                        modifier =
+                            Modifier.size((screenHeight * 0.045).dp)
+                                .clip(CircleShape)
+                                .background(colorScheme.surface)
+                                .padding(8.dp)
+                                .testTag(C.Tag.notification)) {
+                          Icon(
+                              painter = painterResource(id = R.drawable.bell),
+                              contentDescription = "notifications",
+                              tint = colorScheme.primary)
+                        }
+                  }
+
+                  Text(
+                      text = "Popular services",
+                      style = MaterialTheme.typography.titleMedium,
+                      modifier =
+                          Modifier.fillMaxWidth()
+                              .padding(
+                                  horizontal = (screenWidth * 0.04).dp,
+                                  vertical = (screenHeight * 0.02).dp))
+
+                  PopularServicesRow(
+                      services = services,
+                      modifier = Modifier.testTag("PopularServicesRow"),
+                      onServiceClick = { /* Handle Service Click */})
+
+                  Spacer(modifier = Modifier.weight(0.09f))
+
+                  Box(modifier = Modifier.fillMaxWidth().zIndex(2f).weight(1.5f)) {
+                    QuickFixesWidget(
+                        status = "Upcoming",
+                        quickFixList = quickFixes,
+                        onShowAllClick = { /* Handle Show All Click */},
+                        onItemClick = { /* Handle QuickFix Item Click */},
+                        modifier = Modifier.testTag("UpcomingQuickFixes"),
+                        workerViewModel = workerViewModel,
+                    )
+                  }
+                }
+          }
+        })
+  }
 }
