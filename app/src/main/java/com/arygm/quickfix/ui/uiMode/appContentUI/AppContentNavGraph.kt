@@ -108,7 +108,9 @@ fun AppContentNavGraph(
               preferencesViewModel,
               accountViewModel,
               rootNavigationActions,
-              userPreferencesViewModel)
+              chatViewModel,
+              userPreferencesViewModel,
+              quickFixViewModel)
         }
       }
 }

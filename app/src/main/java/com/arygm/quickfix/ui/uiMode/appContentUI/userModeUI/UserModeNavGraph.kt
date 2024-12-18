@@ -266,7 +266,6 @@ fun HomeNavHost(
           chatViewModel = chatViewModel,
           navigationActions = navigationActions,
           quickFixViewModel = quickFixViewModel,
-          modeViewModel = modeViewModel,
           preferencesViewModel = preferencesViewModel,
       )
     }
@@ -440,7 +439,6 @@ fun SearchNavHost(
           chatViewModel = chatViewModel,
           navigationActions = navigationActions,
           quickFixViewModel = quickFixViewModel,
-          modeViewModel = modeViewModel,
           preferencesViewModel = preferencesViewModel,
       )
     }

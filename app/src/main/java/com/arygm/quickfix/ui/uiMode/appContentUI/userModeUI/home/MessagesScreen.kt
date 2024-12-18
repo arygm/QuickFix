@@ -50,7 +50,6 @@ fun MessageScreen(
     chatViewModel: ChatViewModel,
     navigationActions: NavigationActions,
     quickFixViewModel: QuickFixViewModel,
-    modeViewModel: ModeViewModel,
     preferencesViewModel: PreferencesViewModel,
 ) {
   var userId by remember { mutableStateOf("") }

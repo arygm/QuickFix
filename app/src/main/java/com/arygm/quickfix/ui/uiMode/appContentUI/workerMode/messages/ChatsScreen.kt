@@ -1,5 +1,8 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.messages
 
+import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,122 +14,244 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arygm.quickfix.R
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.messaging.Chat
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerScreen
+import com.arygm.quickfix.utils.loadAppMode
 import com.arygm.quickfix.utils.loadUserId
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatsScreen(
+    navigationActions: NavigationActions,
+    accountViewModel: AccountViewModel,
     chatViewModel: ChatViewModel,
-    preferencesViewModel: PreferencesViewModel,
-    navigationActions: NavigationActions
+    preferencesViewModel: PreferencesViewModel
 ) {
-    var userId by remember { mutableStateOf("") }
-    val chats = chatViewModel.chats.collectAsState().value
+    var mode by remember { mutableStateOf("") }
+    var uid by remember { mutableStateOf("") }
+    var chats by remember { mutableStateOf(emptyList<Chat>()) }
+    var searchQuery by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
-    // Charge l'utilisateur ID en utilisant PreferencesViewModel
-    LaunchedEffect(Unit) {
-        userId = loadUserId(preferencesViewModel)
-    }
+    // Map pour stocker useruid -> firstName
+    val userFirstNameMap = remember { mutableStateMapOf<String, String>() }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Chats",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.surface)
-            )
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            if (chats.isEmpty()) {
-                // Placeholder si aucun chat n'est disponible
-                Text(
-                    text = "No chats available.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.align(Alignment.Center),
-                    textAlign = TextAlign.Center
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(chats) { chat ->
-                        ChatItem(
-                            chat = chat,
-                            onClick = {
-                                coroutineScope.launch {
-                                    chatViewModel.selectChat(chat) // Met à jour le chat sélectionné
-                                    navigationActions.navigateTo("messageScreen") // Navigue vers l'écran des messages
+    LaunchedEffect(Unit) {
+        mode = loadAppMode(preferencesViewModel)
+        uid = loadUserId(preferencesViewModel)
+
+        accountViewModel.fetchUserAccount(uid) { account ->
+            account?.activeChats?.forEach { chatUid ->
+                coroutineScope.launch {
+                    chatViewModel.getChatByChatUid(
+                        chatUid,
+                        onSuccess = { chat ->
+                            if (chat != null) {
+                                chats = chats + chat
+                                // Récupérer le firstName de useruid pour chaque chat
+                                accountViewModel.fetchUserAccount(chat.useruid) { userAccount ->
+                                    userFirstNameMap[chat.useruid] =
+                                        userAccount?.firstName ?: "Unknown"
                                 }
                             }
-                        )
-                    }
+                        },
+                        onFailure = { e -> Log.e("ChatScreen", "Failed: ${e.message}") }
+                    )
                 }
             }
         }
     }
+
+    BoxWithConstraints {
+        val widthRatio = maxWidth.value / 411f
+        val heightRatio = maxHeight.value / 860f
+
+        Scaffold(
+            containerColor = colorScheme.background,
+            topBar = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp * widthRatio, vertical = 8.dp * heightRatio)
+                ) {
+                    Text(
+                        text = "Messages",
+                        style = poppinsTypography.headlineLarge.copy(fontWeight = FontWeight.Bold),
+                        color = colorScheme.onBackground,
+                        modifier = Modifier.padding(bottom = 8.dp * heightRatio)
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                    QuickFixTextFieldCustom(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        showLeadingIcon = { true },
+                        leadingIcon = Icons.Outlined.Search,
+                        placeHolderText = "Search",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp * heightRatio).testTag("customSearchField"),
+                        widthField = 380.dp * widthRatio
+                    )}
+                }
+            },
+            content = { padding ->
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                ) {
+                    // Filtrer les chats en comparant avec userFirstName
+                    val filteredChats = chats.filter { chat ->
+                        val userFirstName = userFirstNameMap[chat.useruid] ?: ""
+                        chat.workeruid == uid &&userFirstName.contains(searchQuery, ignoreCase = true)
+                    }
+
+                    itemsIndexed(filteredChats) { index, chat ->
+                        // Chat Item
+
+                        ChatItem(
+                            chat = chat,
+                            userFirstName = userFirstNameMap[chat.useruid] ?: "Loading...",
+                            onClick = {
+                                chatViewModel.selectChat(chat)
+                                if (mode == "USER") navigationActions.navigateTo(UserScreen.MESSAGES)
+                                else navigationActions.navigateTo(WorkerScreen.MESSAGES)
+                            },
+                            widthRatio = widthRatio,
+                            heightRatio = heightRatio
+                        )
+
+                        // Ajouter un Divider sauf pour le dernier élément
+                        if (index < filteredChats.size - 1) {
+                            Column (modifier = Modifier.padding(start = 32 .dp * widthRatio )){
+                            Divider(
+                                color = colorScheme.onSurface.copy(alpha = 0.2f), // Couleur de la ligne
+                                thickness = 1.dp, // Épaisseur de la ligne
+                                modifier = Modifier.padding(vertical = 4.dp * heightRatio) // Espacement autour du Divider
+                                                    .testTag("Divider") // Ajout du testTag ici
+
+                            )}
+                        }
+                    }
+                }
+
+            }
+        )
+    }
 }
 
 @Composable
-fun ChatItem(chat: Chat, onClick: () -> Unit) {
-    Surface(
+fun ChatItem(
+    chat: Chat,
+    userFirstName: String,
+    onClick: () -> Unit,
+    widthRatio: Float,
+    heightRatio: Float
+) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 4.dp
+            .testTag("ChatItem")
+            .clickable { onClick() }
+            .padding(vertical = 8.dp * heightRatio, horizontal = 12.dp * widthRatio),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
+        // Profile Picture Placeholder
+        Image(
+            painter = painterResource(id = R.drawable.placeholder_worker),
+            contentDescription = "Profile Picture",
+            contentScale = ContentScale.Crop,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+                .size(48.dp * widthRatio)
+                .clip(CircleShape)
+                .background(Color.Gray)
+        )
+
+        Spacer(modifier = Modifier.width(8.dp * widthRatio))
+
+        // Chat Info
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Chat with ${chat.workeruid}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                text = userFirstName,
+                style = poppinsTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                color = colorScheme.onBackground
             )
             Text(
-                text = "Last message: ${
-                    if (chat.messages.isNotEmpty()) chat.messages.last().content else "No messages yet"
-                }",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = chat.messages.lastOrNull()?.content ?: "No messages yet",
+                style = poppinsTypography.bodySmall,
+                color = colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
+
+        Spacer(modifier = Modifier.width(8.dp * widthRatio))
+
+        // Timestamp
+        val formattedDate = formatMessageTimestamp(chat.messages.lastOrNull()?.timestamp)
+        Text(
+            text = formattedDate,
+            style = MaterialTheme.typography.labelSmall,
+            color = colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+
+// Helper function to format timestamp
+fun formatMessageTimestamp(timestamp: com.google.firebase.Timestamp?): String {
+    if (timestamp == null) return "--:--"
+
+    val now = Calendar.getInstance()
+    val messageTime = Calendar.getInstance().apply { time = timestamp.toDate() }
+
+    return if (now.get(Calendar.YEAR) == messageTime.get(Calendar.YEAR) &&
+        now.get(Calendar.DAY_OF_YEAR) == messageTime.get(Calendar.DAY_OF_YEAR)
+    ) {
+        // If the message is from today, show hours and minutes
+        SimpleDateFormat("HH:mm", Locale.getDefault()).format(messageTime.time)
+    } else {
+        // If the message is from a different day, show day and month
+        SimpleDateFormat("dd MMM", Locale.getDefault()).format(messageTime.time)
     }
 }

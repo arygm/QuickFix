@@ -22,10 +22,12 @@ import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.MessageScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.WorkerProfileScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.announcements.AnnouncementsScreen
@@ -46,13 +48,16 @@ fun WorkerModeNavGraph(
     accountViewModel: AccountViewModel,
     rootMainNavigationActions: NavigationActions,
     chatViewModel: ChatViewModel,
-    userPreferencesViewModel: PreferencesViewModelUserProfile
-) {
+    userPreferencesViewModel: PreferencesViewModelUserProfile,
+    quickFixViewModel: QuickFixViewModel,
+
+    ) {
   val workerNavController = rememberNavController()
   val workerNavigationActions = remember { NavigationActions(workerNavController) }
   var currentScreen by remember { mutableStateOf<String?>(null) }
   val shouldShowBottomBar by remember {
-    derivedStateOf { currentScreen?.let { it != WorkerScreen.ACCOUNT_CONFIGURATION } ?: true }
+    derivedStateOf { currentScreen?.let { it != WorkerScreen.ACCOUNT_CONFIGURATION && it != WorkerScreen.MESSAGES} ?: true }
+
   }
   val startDestination by modeViewModel.onSwitchStartDestWorker.collectAsState()
   var showBottomBar by remember { mutableStateOf(false) }
@@ -91,7 +96,7 @@ fun WorkerModeNavGraph(
             modifier = Modifier.padding(innerPadding)) {
               composable(WorkerRoute.HOME) { HomeNavHost(onScreenChange = { currentScreen = it }) }
               composable(WorkerRoute.CHATS) {
-                MessagesNavHost(onScreenChange = { currentScreen = it }, preferencesViewModel,workerNavigationActions, chatViewModel)
+                MessagesNavHost(onScreenChange = { currentScreen = it }, preferencesViewModel,workerNavigationActions, chatViewModel,quickFixViewModel,accountViewModel)
               }
               composable(WorkerRoute.ANNOUNCEMENT) {
                 AnnouncementsNavHost(onScreenChange = { currentScreen = it })
@@ -112,15 +117,19 @@ fun WorkerModeNavGraph(
 }
 
 @Composable
-fun MessagesNavHost(onScreenChange: (String) -> Unit, pre: PreferencesViewModel, workerNavigationActions: NavigationActions, chatViewModel: ChatViewModel) {
+fun MessagesNavHost(onScreenChange: (String) -> Unit, pre: PreferencesViewModel, workerNavigationActions: NavigationActions, chatViewModel: ChatViewModel,quickFixViewModel: QuickFixViewModel,accountViewModel: AccountViewModel) {
   val dashboardNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(dashboardNavController) }
   LaunchedEffect(navigationActions.currentScreen) {
     onScreenChange(navigationActions.currentScreen)
   }
   NavHost(navController = dashboardNavController, startDestination = WorkerScreen.CHATS) {
-    composable(WorkerScreen.CHATS) { ChatsScreen (chatViewModel,pre,navigationActions) }
+    composable(WorkerScreen.CHATS) { ChatsScreen (navigationActions,accountViewModel,chatViewModel,pre ) }
+      composable(WorkerScreen.MESSAGES) {
+          MessageScreen(chatViewModel, navigationActions, quickFixViewModel, pre)
+      }
   }
+
 }
 
 @Composable
