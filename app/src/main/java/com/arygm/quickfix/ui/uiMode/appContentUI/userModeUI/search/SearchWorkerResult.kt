@@ -43,6 +43,7 @@ import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -121,7 +122,8 @@ fun SearchWorkerResult(
     userProfileViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
     quickFixViewModel: QuickFixViewModel,
-    geocoderWrapper: GeocoderWrapper = GeocoderWrapper(LocalContext.current)
+    geocoderWrapper: GeocoderWrapper = GeocoderWrapper(LocalContext.current),
+    locationHelper: LocationHelper = LocationHelper(LocalContext.current, MainActivity())
 ) {
   fun getCityNameFromCoordinates(latitude: Double, longitude: Double): String? {
     val addresses = geocoderWrapper.getFromLocation(latitude, longitude, 1)
@@ -129,7 +131,6 @@ fun SearchWorkerResult(
         ?: addresses?.firstOrNull()?.subAdminArea
         ?: addresses?.firstOrNull()?.adminArea
   }
-  val locationHelper = LocationHelper(LocalContext.current, MainActivity())
   var phoneLocation by remember {
     mutableStateOf(com.arygm.quickfix.model.locations.Location(0.0, 0.0, "Default"))
   }
@@ -176,6 +177,7 @@ fun SearchWorkerResult(
   var priceFilterApplied by remember { mutableStateOf(false) }
   var locationFilterApplied by remember { mutableStateOf(false) }
   var ratingFilterApplied by remember { mutableStateOf(false) }
+  var emergencyFilterApplied by remember { mutableStateOf(false) }
 
   var selectedDays by remember { mutableStateOf(emptyList<LocalDate>()) }
   var selectedHour by remember { mutableStateOf(0) }
@@ -220,6 +222,10 @@ fun SearchWorkerResult(
       updatedProfiles = searchViewModel.sortWorkersByRating(updatedProfiles)
     }
 
+    if (emergencyFilterApplied) {
+      updatedProfiles = searchViewModel.emergencyFilter(updatedProfiles, baseLocation)
+    }
+
     Log.d("Chill guy", updatedProfiles.size.toString())
     filteredWorkerProfiles = updatedProfiles
   }
@@ -234,6 +240,7 @@ fun SearchWorkerResult(
                 locationFilterApplied = false
                 ratingFilterApplied = false
                 servicesFilterApplied = false
+                emergencyFilterApplied = false
                 lastAppliedMaxDist = 200
                 lastAppliedPriceStart = 500
                 lastAppliedPriceEnd = 2500
@@ -283,7 +290,33 @@ fun SearchWorkerResult(
               leadingIcon = Icons.Default.MonetizationOn,
               trailingIcon = Icons.Default.KeyboardArrowDown,
               applied = priceFilterApplied),
-      )
+          SearchFilterButtons(
+              onClick = {
+                if (emergencyFilterApplied) {
+                  emergencyFilterApplied = false
+                  reapplyFilters()
+                } else {
+                  lastAppliedMaxDist = 200
+                  lastAppliedPriceStart = 500
+                  lastAppliedPriceEnd = 2500
+                  selectedLocationIndex = null
+                  selectedServices = emptyList()
+                  availabilityFilterApplied = false
+                  priceFilterApplied = false
+                  locationFilterApplied = false
+                  ratingFilterApplied = false
+                  servicesFilterApplied = false
+                  baseLocation = phoneLocation
+                  filteredWorkerProfiles = workerProfiles
+                  filteredWorkerProfiles =
+                      searchViewModel.emergencyFilter(filteredWorkerProfiles, baseLocation)
+                  emergencyFilterApplied = true
+                }
+              },
+              text = "Emergency",
+              leadingIcon = Icons.Default.Warning,
+              trailingIcon = if (emergencyFilterApplied) Icons.Default.Clear else null,
+              applied = emergencyFilterApplied))
 
   // ==========================================================================//
   // ============ TODO: REMOVE NO-DATA WHEN BACKEND IS IMPLEMENTED ============//

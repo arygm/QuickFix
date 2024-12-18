@@ -38,20 +38,26 @@ fun CategoryContent(
             color = MaterialTheme.colorScheme.onBackground,
         )
         Spacer(modifier = Modifier.height(4.dp * heightRatio))
-        LazyColumn(modifier = Modifier.fillMaxWidth(), state = listState) {
-          itemsIndexed(itemCategories, key = { index, _ -> index }) { index, item ->
-            ExpandableCategoryItem(
-                item = item,
-                isExpanded = expandedStates[index],
-                onExpandedChange = {
-                  expandedStates[index] = it
-                  searchViewModel.setSearchCategory(itemCategories[index])
-                },
-                searchViewModel = searchViewModel,
-                navigationActions = navigationActions,
-            )
-            Spacer(modifier = Modifier.height(10.dp * heightRatio))
-          }
-        }
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            state = listState,
+            contentPadding =
+                androidx.compose.foundation.layout.PaddingValues(
+                    bottom = 80.dp * heightRatio // Adjust this value as needed
+                    )) {
+              itemsIndexed(itemCategories, key = { index, _ -> index }) { index, item ->
+                ExpandableCategoryItem(
+                    item = item,
+                    isExpanded = expandedStates[index],
+                    onExpandedChange = {
+                      expandedStates[index] = it
+                      searchViewModel.setSearchCategory(itemCategories[index])
+                    },
+                    searchViewModel = searchViewModel,
+                    navigationActions = navigationActions,
+                )
+                Spacer(modifier = Modifier.height(10.dp * heightRatio))
+              }
+            }
       }
 }
