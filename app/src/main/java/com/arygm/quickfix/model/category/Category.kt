@@ -11,6 +11,8 @@ import androidx.compose.material.icons.outlined.NaturePeople
 import androidx.compose.material.icons.outlined.Plumbing
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.arygm.quickfix.model.offline.large.Converters
+import com.arygm.quickfix.model.offline.large.categories.CategoryEntity
 
 data class Subcategory(
     val id: String = "",
@@ -26,7 +28,15 @@ data class Category(
     val name: String = "",
     val description: String = "",
     val subcategories: List<Subcategory> = emptyList()
-)
+) {
+  fun toCategoryEntity(): CategoryEntity {
+    return CategoryEntity(
+        id = id,
+        name = name,
+        description = description,
+        subcategories = Converters().fromSubcategoryList(subcategories))
+  }
+}
 
 data class Scale(val longScale: String, val shortScale: String)
 

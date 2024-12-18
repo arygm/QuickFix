@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -82,7 +83,8 @@ fun AnnouncementScreen(
     profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
     accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
     preferencesViewModel: PreferencesViewModel,
-    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
+    categoryViewModel: CategoryViewModel =
+        viewModel(factory = CategoryViewModel.Factory(LocalContext.current)),
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     navigationActions: NavigationActions,
     isUser: Boolean = true,

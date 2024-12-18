@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.WorkerProfile
@@ -20,14 +21,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositoryFirestore) :
-    ViewModel() {
+open class SearchViewModel(
+    private val workerProfileRepo: WorkerProfileRepositoryFirestore,
+) : ViewModel() {
 
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery
 
   val _searchSubcategory = MutableStateFlow<Subcategory?>(null)
   val searchSubcategory: StateFlow<Subcategory?> = _searchSubcategory
+
+  val _searchCategory = MutableStateFlow<Category?>(null)
+  val searchCategory: StateFlow<Category?> = _searchCategory
 
   val _workerProfiles = MutableStateFlow<List<WorkerProfile>>(emptyList())
   val workerProfiles: StateFlow<List<WorkerProfile>> = _workerProfiles
@@ -61,6 +66,10 @@ open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositor
 
   fun setSearchSubcategory(subcategory: Subcategory) { // Used for test purposes
     _searchSubcategory.value = subcategory
+  }
+
+  fun setSearchCategory(category: Category) { // Used for test purposes
+    _searchCategory.value = category
   }
 
   fun setWorkerProfiles(workerProfiles: List<WorkerProfile>) { // Used for test purposes
@@ -211,7 +220,7 @@ open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositor
                 }
               }
 
-          _workerProfilesSuggestions.value = filteredProfiles
+          _workerProfilesSuggestions.value = filteredProfiles.sortedByDescending { it.rating }
         },
         onFailure = { Log.e("SearchViewModel", "Failed to fetch worker profiles.") })
   }
