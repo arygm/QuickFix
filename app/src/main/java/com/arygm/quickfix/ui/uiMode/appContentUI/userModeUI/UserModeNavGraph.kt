@@ -7,6 +7,8 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -17,9 +19,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -136,105 +140,108 @@ fun UserModeNavHost(
       showBottomBar = false
     }
   }
-  Scaffold(
-      topBar = { QuickFixOfflineBar(isVisible = isOffline) },
-      bottomBar = {
-        // Show BottomNavigationMenu only if the route is not part of the login/registration flow
-        AnimatedVisibility(
-            visible = showBottomBar,
-            enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from the bottom
-            exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to the bottom
-            modifier = Modifier.testTag("BNM")) {
-              BottomNavigationMenu(
-                  onTabSelect = { selectedDestination ->
-                    // Use this block to navigate based on the selected tab
-                    userNavigationActions.navigateTo(selectedDestination)
-                  },
-                  navigationActions = userNavigationActions,
-                  tabList = USER_TOP_LEVEL_DESTINATIONS,
-                  getBottomBarId = getBottomBarIdUser)
-            }
-      }) { innerPadding ->
-        NavHost(
-            navController = userNavigationActions.navController,
-            startDestination = startDestination,
-            modifier = Modifier.padding(innerPadding),
-            enterTransition = {
-              // You can change whatever you want for transitions
-              EnterTransition.None
-            },
-            exitTransition = {
-              // You can change whatever you want for transitions
-              ExitTransition.None
-            }) {
-              composable(UserRoute.HOME) {
-                HomeNavHost(
-                    onScreenChange = { currentScreen = it },
-                    chatViewModel,
-                    modeViewModel,
-                    locationViewModel,
-                    accountViewModel,
-                    categoryViewModel,
-                    preferencesViewModel,
-                    userViewModel,
-                    workerViewModel,
-                    quickFixViewModel,
-                    userNavigationActions) // , loggedInAccountViewModel, chatViewModel)
-              }
 
-              composable(UserRoute.SEARCH) {
-                SearchNavHost(
-                    isUser,
-                    userNavigationActions,
-                    searchViewModel,
-                    userViewModel,
-                    workerViewModel,
-                    accountViewModel,
-                    announcementViewModel,
-                    onScreenChange = { currentScreen = it },
-                    categoryViewModel,
-                    preferencesViewModel,
-                    locationViewModel,
-                    quickFixViewModel,
-                    chatViewModel,
-                    modeViewModel)
-              }
+  Box(modifier = Modifier.fillMaxSize()) {
+    Scaffold(
+        topBar = { QuickFixOfflineBar(isVisible = isOffline) },
+        modifier = Modifier.fillMaxSize() // Ensure Scaffold fills the parent
+        ) { innerPadding ->
+          Box(
+              modifier =
+                  Modifier.fillMaxSize().padding(innerPadding) // Apply the scaffold's padding
+              ) {
+                // Main app navigation content
+                NavHost(
+                    navController = userNavigationActions.navController,
+                    startDestination = startDestination,
+                    enterTransition = { EnterTransition.None },
+                    exitTransition = { ExitTransition.None }) {
+                      composable(UserRoute.HOME) {
+                        HomeNavHost(
+                            onScreenChange = { currentScreen = it },
+                            chatViewModel,
+                            modeViewModel,
+                            locationViewModel,
+                            accountViewModel,
+                            categoryViewModel,
+                            preferencesViewModel,
+                            userViewModel,
+                            workerViewModel,
+                            quickFixViewModel,
+                            userNavigationActions)
+                      }
+                      composable(UserRoute.SEARCH) {
+                        SearchNavHost(
+                            isUser,
+                            userNavigationActions,
+                            searchViewModel,
+                            userViewModel,
+                            workerViewModel,
+                            accountViewModel,
+                            announcementViewModel,
+                            onScreenChange = { currentScreen = it },
+                            categoryViewModel,
+                            preferencesViewModel,
+                            locationViewModel,
+                            quickFixViewModel,
+                            chatViewModel,
+                            modeViewModel)
+                      }
+                      composable(UserRoute.DASHBOARD) {
+                        DashBoardNavHost(
+                            onScreenChange = { currentScreen = it },
+                            userViewModel,
+                            workerViewModel,
+                            accountViewModel,
+                            modeViewModel,
+                            locationViewModel,
+                            quickFixViewModel,
+                            chatViewModel,
+                            preferencesViewModel,
+                            announcementViewModel,
+                            categoryViewModel,
+                            userNavigationActions)
+                      }
+                      composable(UserRoute.PROFILE) {
+                        ProfileNavHost(
+                            accountViewModel,
+                            workerViewModel,
+                            userNavigationActions,
+                            onScreenChange = { currentScreen = it },
+                            categoryViewModel,
+                            preferencesViewModel,
+                            locationViewModel,
+                            testBitmapPP,
+                            testLocation,
+                            rootMainNavigationActions,
+                            userPreferencesViewModel,
+                            appContentNavigationActions,
+                            modeViewModel,
+                            workerPreferencesViewModel)
+                      }
+                    }
 
-              composable(UserRoute.DASHBOARD) {
-                DashBoardNavHost(
-                    onScreenChange = { currentScreen = it },
-                    userViewModel,
-                    workerViewModel,
-                    accountViewModel,
-                    modeViewModel,
-                    locationViewModel,
-                    quickFixViewModel,
-                    chatViewModel,
-                    preferencesViewModel,
-                    announcementViewModel,
-                    categoryViewModel,
-                    userNavigationActions)
-              }
+                // Bottom bar aligned at the bottom of the same parent Box
 
-              composable(UserRoute.PROFILE) {
-                ProfileNavHost(
-                    accountViewModel,
-                    workerViewModel,
-                    userNavigationActions,
-                    onScreenChange = { currentScreen = it },
-                    categoryViewModel,
-                    preferencesViewModel,
-                    locationViewModel,
-                    testBitmapPP,
-                    testLocation,
-                    rootMainNavigationActions,
-                    userPreferencesViewModel,
-                    appContentNavigationActions,
-                    modeViewModel,
-                    workerPreferencesViewModel)
+                AnimatedVisibility(
+                    visible = showBottomBar,
+                    enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from bottom
+                    exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to bottom
+                    modifier =
+                        Modifier.align(Alignment.BottomCenter) // Align at bottom of this parent Box
+                            .zIndex(1f)
+                            .testTag("BNM")) {
+                      BottomNavigationMenu(
+                          onTabSelect = { selectedDestination ->
+                            userNavigationActions.navigateTo(selectedDestination)
+                          },
+                          navigationActions = userNavigationActions,
+                          tabList = USER_TOP_LEVEL_DESTINATIONS,
+                          getBottomBarId = getBottomBarIdUser)
+                    }
               }
-            }
-      }
+        }
+  }
 }
 
 @Composable

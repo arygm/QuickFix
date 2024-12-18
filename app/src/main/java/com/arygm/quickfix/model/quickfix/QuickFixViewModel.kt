@@ -108,4 +108,8 @@ open class QuickFixViewModel(private val repository: QuickFixRepository) : ViewM
   fun setUpdateQuickFix(updatedQuickFix: QuickFix) {
     viewModelScope.launch { currentQuickFix_.value = updatedQuickFix }
   }
+
+  fun resetCurrentQuickFix() {
+    viewModelScope.launch { currentQuickFix_.value = QuickFix() }
+  }
 }

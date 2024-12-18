@@ -21,6 +21,7 @@ val IS_SIGN_IN_KEY = booleanPreferencesKey("is_sign_in")
 val UID_KEY = stringPreferencesKey("user_id")
 val FIRST_NAME_KEY = stringPreferencesKey("first_name")
 val LAST_NAME_KEY = stringPreferencesKey("last_name")
+val PROFILE_PICTURE_KEY = stringPreferencesKey("profile_picture")
 val EMAIL_KEY = stringPreferencesKey("email")
 val BIRTH_DATE_KEY = stringPreferencesKey("date_of_birth")
 val IS_WORKER_KEY = booleanPreferencesKey("is_worker")
@@ -43,6 +44,7 @@ fun setAccountPreferences(
     preferencesViewModel.savePreference(EMAIL_KEY, account.email)
     preferencesViewModel.savePreference(BIRTH_DATE_KEY, timestampToString(account.birthDate))
     preferencesViewModel.savePreference(IS_WORKER_KEY, account.isWorker)
+    preferencesViewModel.savePreference(PROFILE_PICTURE_KEY, account.profilePicture)
   }
 }
 
@@ -156,6 +158,16 @@ fun setIsWorker(
   CoroutineScope(dispatcher).launch { preferencesViewModel.savePreference(IS_WORKER_KEY, isWorker) }
 }
 
+fun setProfilePicture(
+    preferencesViewModel: PreferencesViewModel,
+    profilePicture: String,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
+) {
+  CoroutineScope(dispatcher).launch {
+    preferencesViewModel.savePreference(PROFILE_PICTURE_KEY, profilePicture)
+  }
+}
+
 suspend fun loadWallet(preferencesViewModel: PreferencesViewModel): Double {
   return suspendCoroutine { cont ->
     var resumed = false
@@ -201,6 +213,18 @@ suspend fun loadFirstName(preferencesViewModel: PreferencesViewModel): String {
       if (!resumed) {
         resumed = true
         cont.resume(value ?: "no_first_name")
+      }
+    }
+  }
+}
+
+suspend fun loadProfilePicture(preferencesViewModel: PreferencesViewModel): String {
+  return suspendCoroutine { cont ->
+    var resumed = false
+    preferencesViewModel.loadPreference(PROFILE_PICTURE_KEY) { value ->
+      if (!resumed) {
+        resumed = true
+        cont.resume(value ?: "no_profile_picture")
       }
     }
   }
