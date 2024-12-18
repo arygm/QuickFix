@@ -87,81 +87,77 @@ fun UserModeNavHost(
     quickFixViewModel: QuickFixViewModel,
     isOffline: Boolean
 ) {
-    val context = LocalContext.current
-    val userNavController = rememberNavController()
-    val userNavigationActions = remember { NavigationActions(userNavController) }
+  val context = LocalContext.current
+  val userNavController = rememberNavController()
+  val userNavigationActions = remember { NavigationActions(userNavController) }
 
-    val loggedInAccountViewModel: LoggedInAccountViewModel =
-        viewModel(factory = LoggedInAccountViewModel.Factory)
-    val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
+  val loggedInAccountViewModel: LoggedInAccountViewModel =
+      viewModel(factory = LoggedInAccountViewModel.Factory)
+  val searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
 
-    // Create required repositories
-    val announcementRepository =
-        AnnouncementRepositoryFirestore(db = Firebase.firestore, storage = Firebase.storage)
-    val preferencesRepository = PreferencesRepositoryDataStore(context.dataStore)
-    val userProfileRepository =
-        UserProfileRepositoryFirestore(db = Firebase.firestore, storage = Firebase.storage)
-    val announcementViewModel: AnnouncementViewModel =
-        viewModel(
-            factory =
-            AnnouncementViewModel.Factory(
-                announcementRepository = announcementRepository,
-                preferencesRepository = preferencesRepository,
-                userProfileRepository = userProfileRepository
-            )
-        )
+  // Create required repositories
+  val announcementRepository =
+      AnnouncementRepositoryFirestore(db = Firebase.firestore, storage = Firebase.storage)
+  val preferencesRepository = PreferencesRepositoryDataStore(context.dataStore)
+  val userProfileRepository =
+      UserProfileRepositoryFirestore(db = Firebase.firestore, storage = Firebase.storage)
+  val announcementViewModel: AnnouncementViewModel =
+      viewModel(
+          factory =
+              AnnouncementViewModel.Factory(
+                  announcementRepository = announcementRepository,
+                  preferencesRepository = preferencesRepository,
+                  userProfileRepository = userProfileRepository))
 
-    // Initialized here because needed for the bottom bar
-    val startDestination by modeViewModel.onSwitchStartDestUser.collectAsState()
-    val isUser = true // TODO: This variable needs to get its value after the authentication
-    var currentScreen by remember { mutableStateOf<String?>(null) }
-    val shouldShowBottomBar by remember {
-        derivedStateOf {
-            currentScreen?.let {
-                it != UserScreen.DISPLAY_UPLOADED_IMAGES && it != UserScreen.SEARCH_LOCATION
-            } ?: true &&
-                    currentScreen?.let {
-                        it != UserScreen.ACCOUNT_CONFIGURATION && it != UserScreen.TO_WORKER
-                    } ?: true &&
-                    currentScreen?.let {
-                        it != UserScreen.QUICKFIX_ONBOARDING &&
-                                it != UserScreen.MESSAGES &&
-                                it != UserScreen.QUICKFIX_DISPLAY_IMAGES
-                    } ?: true &&
-                    currentScreen?.let { it != UserScreen.ANNOUNCEMENT_DETAIL } ?: true
-        }
+  // Initialized here because needed for the bottom bar
+  val startDestination by modeViewModel.onSwitchStartDestUser.collectAsState()
+  val isUser = true // TODO: This variable needs to get its value after the authentication
+  var currentScreen by remember { mutableStateOf<String?>(null) }
+  val shouldShowBottomBar by remember {
+    derivedStateOf {
+      currentScreen?.let {
+        it != UserScreen.DISPLAY_UPLOADED_IMAGES && it != UserScreen.SEARCH_LOCATION
+      } ?: true &&
+          currentScreen?.let {
+            it != UserScreen.ACCOUNT_CONFIGURATION && it != UserScreen.TO_WORKER
+          } ?: true &&
+          currentScreen?.let {
+            it != UserScreen.QUICKFIX_ONBOARDING &&
+                it != UserScreen.MESSAGES &&
+                it != UserScreen.QUICKFIX_DISPLAY_IMAGES
+          } ?: true &&
+          currentScreen?.let { it != UserScreen.ANNOUNCEMENT_DETAIL } ?: true
     }
+  }
 
-    var showBottomBar by remember { mutableStateOf(false) }
+  var showBottomBar by remember { mutableStateOf(false) }
 
-    // Delay the appearance of the bottom bar
-    LaunchedEffect(shouldShowBottomBar) {
-        if (shouldShowBottomBar) {
-            delay(200) // Adjust the delay duration (in milliseconds) as needed
-            showBottomBar = true
-        } else {
-            showBottomBar = false
-        }
+  // Delay the appearance of the bottom bar
+  LaunchedEffect(shouldShowBottomBar) {
+    if (shouldShowBottomBar) {
+      delay(200) // Adjust the delay duration (in milliseconds) as needed
+      showBottomBar = true
+    } else {
+      showBottomBar = false
     }
+  }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            topBar = { QuickFixOfflineBar(isVisible = isOffline) },
-            modifier = Modifier.fillMaxSize() // Ensure Scaffold fills the parent
+  Box(modifier = Modifier.fillMaxSize()) {
+    Scaffold(
+        topBar = { QuickFixOfflineBar(isVisible = isOffline) },
+        modifier = Modifier.fillMaxSize() // Ensure Scaffold fills the parent
         ) { innerPadding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding) // Apply the scaffold's padding
-            ) {
+          Box(
+              modifier =
+                  Modifier.fillMaxSize().padding(innerPadding) // Apply the scaffold's padding
+              ) {
                 // Main app navigation content
                 NavHost(
                     navController = userNavigationActions.navController,
                     startDestination = startDestination,
                     enterTransition = { EnterTransition.None },
-                    exitTransition = { ExitTransition.None }
-                ) {
-                    composable(UserRoute.HOME) {
+                    exitTransition = { ExitTransition.None }) {
+                      composable(UserRoute.HOME) {
                         HomeNavHost(
                             onScreenChange = { currentScreen = it },
                             chatViewModel,
@@ -169,10 +165,9 @@ fun UserModeNavHost(
                             preferencesViewModel,
                             userViewModel,
                             workerViewModel,
-                            quickFixViewModel
-                        )
-                    }
-                    composable(UserRoute.SEARCH) {
+                            quickFixViewModel)
+                      }
+                      composable(UserRoute.SEARCH) {
                         SearchNavHost(
                             isUser,
                             userNavigationActions,
@@ -187,10 +182,9 @@ fun UserModeNavHost(
                             locationViewModel,
                             quickFixViewModel,
                             chatViewModel,
-                            modeViewModel
-                        )
-                    }
-                    composable(UserRoute.DASHBOARD) {
+                            modeViewModel)
+                      }
+                      composable(UserRoute.DASHBOARD) {
                         DashBoardNavHost(
                             onScreenChange = { currentScreen = it },
                             userViewModel,
@@ -200,10 +194,9 @@ fun UserModeNavHost(
                             chatViewModel,
                             preferencesViewModel,
                             announcementViewModel,
-                            categoryViewModel
-                        )
-                    }
-                    composable(UserRoute.PROFILE) {
+                            categoryViewModel)
+                      }
+                      composable(UserRoute.PROFILE) {
                         ProfileNavHost(
                             accountViewModel,
                             loggedInAccountViewModel,
@@ -218,36 +211,38 @@ fun UserModeNavHost(
                             rootMainNavigationActions,
                             userPreferencesViewModel,
                             appContentNavigationActions,
-                            modeViewModel
-                        )
+                            modeViewModel)
+                      }
                     }
-                }
 
                 // Bottom bar aligned at the bottom of the same parent Box
                 Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter) // Align at bottom of this parent Box
-                        .zIndex(1f)
-                ) {
-                    AnimatedVisibility(
-                        visible = showBottomBar,
-                        enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from bottom
-                        exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to bottom
-                        modifier = Modifier.testTag("BNM")
-                    ) {
-                        BottomNavigationMenu(
-                            onTabSelect = { selectedDestination ->
-                                userNavigationActions.navigateTo(selectedDestination)
-                            },
-                            navigationActions = userNavigationActions,
-                            tabList = USER_TOP_LEVEL_DESTINATIONS,
-                            getBottomBarId = getBottomBarIdUser
-                        )
+                    modifier =
+                        Modifier.align(Alignment.BottomCenter) // Align at bottom of this parent Box
+                            .zIndex(1f)) {
+                      AnimatedVisibility(
+                          visible = showBottomBar,
+                          enter =
+                              slideInVertically { fullHeight ->
+                                fullHeight
+                              }, // Slide in from bottom
+                          exit =
+                              slideOutVertically { fullHeight ->
+                                fullHeight
+                              }, // Slide out to bottom
+                          modifier = Modifier.testTag("BNM")) {
+                            BottomNavigationMenu(
+                                onTabSelect = { selectedDestination ->
+                                  userNavigationActions.navigateTo(selectedDestination)
+                                },
+                                navigationActions = userNavigationActions,
+                                tabList = USER_TOP_LEVEL_DESTINATIONS,
+                                getBottomBarId = getBottomBarIdUser)
+                          }
                     }
-                }
-            }
+              }
         }
-    }
+  }
 }
 
 @Composable
@@ -260,37 +255,36 @@ fun HomeNavHost(
     workerViewModel: ProfileViewModel,
     quickFixViewModel: QuickFixViewModel
 ) {
-    val homeNavController = rememberNavController()
-    val navigationActions = remember { NavigationActions(homeNavController) }
+  val homeNavController = rememberNavController()
+  val navigationActions = remember { NavigationActions(homeNavController) }
 
-    LaunchedEffect(navigationActions.currentScreen) {
-        onScreenChange(navigationActions.currentScreen)
+  LaunchedEffect(navigationActions.currentScreen) {
+    onScreenChange(navigationActions.currentScreen)
+  }
+  NavHost(
+      navController = homeNavController,
+      startDestination = UserScreen.HOME,
+      route = UserRoute.HOME,
+  ) {
+    composable(UserScreen.HOME) {
+      HomeScreen(
+          navigationActions,
+          preferencesViewModel,
+          userViewModel,
+          workerViewModel,
+          quickFixViewModel)
     }
-    NavHost(
-        navController = homeNavController,
-        startDestination = UserScreen.HOME,
-        route = UserRoute.HOME,
-    ) {
-        composable(UserScreen.HOME) {
-            HomeScreen(
-                navigationActions,
-                preferencesViewModel,
-                userViewModel,
-                workerViewModel,
-                quickFixViewModel
-            )
-        }
-        // Add MessageScreen as a nested composable within Home
-        composable(UserScreen.MESSAGES) {
-            MessageScreen(
-                chatViewModel = chatViewModel,
-                navigationActions = navigationActions,
-                quickFixViewModel = quickFixViewModel,
-                modeViewModel = modeViewModel,
-                preferencesViewModel = preferencesViewModel,
-            )
-        }
+    // Add MessageScreen as a nested composable within Home
+    composable(UserScreen.MESSAGES) {
+      MessageScreen(
+          chatViewModel = chatViewModel,
+          navigationActions = navigationActions,
+          quickFixViewModel = quickFixViewModel,
+          modeViewModel = modeViewModel,
+          preferencesViewModel = preferencesViewModel,
+      )
     }
+  }
 }
 
 @Composable
@@ -311,45 +305,39 @@ fun ProfileNavHost(
     modeViewModel: ModeViewModel
 ) {
 
-    val profileNavController = rememberNavController()
-    val profileNavigationActions = remember { NavigationActions(profileNavController) }
+  val profileNavController = rememberNavController()
+  val profileNavigationActions = remember { NavigationActions(profileNavController) }
 
-    LaunchedEffect(profileNavigationActions.currentScreen) {
-        onScreenChange(profileNavigationActions.currentScreen)
+  LaunchedEffect(profileNavigationActions.currentScreen) {
+    onScreenChange(profileNavigationActions.currentScreen)
+  }
+  NavHost(navController = profileNavController, startDestination = UserScreen.PROFILE) {
+    composable(UserScreen.PROFILE) {
+      UserProfileScreen(
+          userNavigationActions,
+          profileNavigationActions,
+          rootMainNavigationActions,
+          preferencesViewModel,
+          userPreferencesViewModel,
+          appContentNavigationActions,
+          modeViewModel)
     }
-    NavHost(navController = profileNavController, startDestination = UserScreen.PROFILE) {
-        composable(UserScreen.PROFILE) {
-            UserProfileScreen(
-                userNavigationActions,
-                profileNavigationActions,
-                rootMainNavigationActions,
-                preferencesViewModel,
-                userPreferencesViewModel,
-                appContentNavigationActions,
-                modeViewModel
-            )
-        }
-        composable(UserScreen.ACCOUNT_CONFIGURATION) {
-            AccountConfigurationScreen(
-                profileNavigationActions,
-                accountViewModel,
-                preferencesViewModel
-            )
-        }
-        composable(UserScreen.TO_WORKER) {
-            BusinessScreen(
-                profileNavigationActions,
-                accountViewModel,
-                workerViewModel,
-                loggedInAccountViewModel,
-                preferencesViewModel,
-                categoryViewModel,
-                locationViewModel,
-                testBitmapPP,
-                testLocation
-            )
-        }
+    composable(UserScreen.ACCOUNT_CONFIGURATION) {
+      AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)
     }
+    composable(UserScreen.TO_WORKER) {
+      BusinessScreen(
+          profileNavigationActions,
+          accountViewModel,
+          workerViewModel,
+          loggedInAccountViewModel,
+          preferencesViewModel,
+          categoryViewModel,
+          locationViewModel,
+          testBitmapPP,
+          testLocation)
+    }
+  }
 }
 
 @Composable
@@ -364,34 +352,32 @@ fun DashBoardNavHost(
     announcementViewModel: AnnouncementViewModel,
     categoryViewModel: CategoryViewModel
 ) {
-    val dashboardNavController = rememberNavController()
-    val navigationActions = remember { NavigationActions(dashboardNavController) }
-    LaunchedEffect(navigationActions.currentScreen) {
-        onScreenChange(navigationActions.currentScreen)
+  val dashboardNavController = rememberNavController()
+  val navigationActions = remember { NavigationActions(dashboardNavController) }
+  LaunchedEffect(navigationActions.currentScreen) {
+    onScreenChange(navigationActions.currentScreen)
+  }
+  NavHost(navController = dashboardNavController, startDestination = UserScreen.DASHBOARD) {
+    composable(UserScreen.DASHBOARD) {
+      DashboardScreen(
+          navigationActions,
+          userViewModel,
+          workerViewModel,
+          accountViewModel,
+          quickFixViewModel,
+          chatViewModel,
+          preferencesViewModel,
+          announcementViewModel,
+          categoryViewModel)
     }
-    NavHost(navController = dashboardNavController, startDestination = UserScreen.DASHBOARD) {
-        composable(UserScreen.DASHBOARD) {
-            DashboardScreen(
-                navigationActions,
-                userViewModel,
-                workerViewModel,
-                accountViewModel,
-                quickFixViewModel,
-                chatViewModel,
-                preferencesViewModel,
-                announcementViewModel,
-                categoryViewModel
-            )
-        }
-        composable(UserScreen.ANNOUNCEMENT_DETAIL) {
-            AnnouncementDetailScreen(
-                announcementViewModel, categoryViewModel, preferencesViewModel, navigationActions
-            )
-        }
-        composable(UserScreen.DISPLAY_UPLOADED_IMAGES) {
-            QuickFixDisplayImages(navigationActions, preferencesViewModel, announcementViewModel)
-        }
+    composable(UserScreen.ANNOUNCEMENT_DETAIL) {
+      AnnouncementDetailScreen(
+          announcementViewModel, categoryViewModel, preferencesViewModel, navigationActions)
     }
+    composable(UserScreen.DISPLAY_UPLOADED_IMAGES) {
+      QuickFixDisplayImages(navigationActions, preferencesViewModel, announcementViewModel)
+    }
+  }
 }
 
 @Composable
@@ -411,78 +397,73 @@ fun SearchNavHost(
     chatViewModel: ChatViewModel,
     modeViewModel: ModeViewModel
 ) {
-    val searchNavController = rememberNavController()
-    val navigationActions = remember { NavigationActions(searchNavController) }
-    LaunchedEffect(navigationActions.currentScreen) {
-        onScreenChange(navigationActions.currentScreen)
+  val searchNavController = rememberNavController()
+  val navigationActions = remember { NavigationActions(searchNavController) }
+  LaunchedEffect(navigationActions.currentScreen) {
+    onScreenChange(navigationActions.currentScreen)
+  }
+  NavHost(
+      navController = searchNavController,
+      startDestination = UserScreen.SEARCH,
+  ) {
+    composable(UserScreen.SEARCH) {
+      QuickFixFinderScreen(
+          navigationActions,
+          navigationActionsRoot,
+          isUser,
+          userViewModel,
+          accountViewModel,
+          searchViewModel,
+          announcementViewModel,
+          categoryViewModel,
+          quickFixViewModel,
+          preferencesViewModel)
     }
-    NavHost(
-        navController = searchNavController,
-        startDestination = UserScreen.SEARCH,
-    ) {
-        composable(UserScreen.SEARCH) {
-            QuickFixFinderScreen(
-                navigationActions,
-                navigationActionsRoot,
-                isUser,
-                userViewModel,
-                accountViewModel,
-                searchViewModel,
-                announcementViewModel,
-                categoryViewModel,
-                quickFixViewModel,
-                preferencesViewModel
-            )
-        }
-        composable(UserScreen.DISPLAY_UPLOADED_IMAGES) {
-            QuickFixDisplayImages(navigationActions, preferencesViewModel, announcementViewModel)
-        }
-        composable(UserScreen.SEARCH_WORKER_RESULT) {
-            SearchWorkerResult(
-                navigationActions,
-                searchViewModel,
-                accountViewModel,
-                userViewModel,
-                preferencesViewModel,
-                quickFixViewModel
-            )
-        }
-        composable(UserScreen.SEARCH_LOCATION) {
-            LocationSearchCustomScreen(
-                navigationActions = navigationActions, locationViewModel = locationViewModel
-            )
-        }
-
-        composable(UserScreen.QUICKFIX_ONBOARDING) {
-            QuickFixOnBoarding(
-                navigationActions = navigationActions,
-                modeViewModel = modeViewModel,
-                quickFixViewModel = quickFixViewModel,
-                preferencesViewModel = preferencesViewModel,
-                chatViewModel = chatViewModel,
-                userViewModel = userViewModel,
-                workerViewModel = workerViewModel,
-                locationViewModel = locationViewModel,
-                accountViewModel = accountViewModel,
-                categoryViewModel = categoryViewModel
-            )
-        }
-
-        composable(UserScreen.MESSAGES) {
-            MessageScreen(
-                chatViewModel = chatViewModel,
-                navigationActions = navigationActions,
-                quickFixViewModel = quickFixViewModel,
-                modeViewModel = modeViewModel,
-                preferencesViewModel = preferencesViewModel,
-            )
-        }
-        composable(UserScreen.QUICKFIX_DISPLAY_IMAGES) {
-            QuickFixDisplayImagesScreen(
-                navigationActions = navigationActions,
-                chatViewModel = chatViewModel,
-                quickFixViewModel = quickFixViewModel
-            )
-        }
+    composable(UserScreen.DISPLAY_UPLOADED_IMAGES) {
+      QuickFixDisplayImages(navigationActions, preferencesViewModel, announcementViewModel)
     }
+    composable(UserScreen.SEARCH_WORKER_RESULT) {
+      SearchWorkerResult(
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
+    }
+    composable(UserScreen.SEARCH_LOCATION) {
+      LocationSearchCustomScreen(
+          navigationActions = navigationActions, locationViewModel = locationViewModel)
+    }
+
+    composable(UserScreen.QUICKFIX_ONBOARDING) {
+      QuickFixOnBoarding(
+          navigationActions = navigationActions,
+          modeViewModel = modeViewModel,
+          quickFixViewModel = quickFixViewModel,
+          preferencesViewModel = preferencesViewModel,
+          chatViewModel = chatViewModel,
+          userViewModel = userViewModel,
+          workerViewModel = workerViewModel,
+          locationViewModel = locationViewModel,
+          accountViewModel = accountViewModel,
+          categoryViewModel = categoryViewModel)
+    }
+
+    composable(UserScreen.MESSAGES) {
+      MessageScreen(
+          chatViewModel = chatViewModel,
+          navigationActions = navigationActions,
+          quickFixViewModel = quickFixViewModel,
+          modeViewModel = modeViewModel,
+          preferencesViewModel = preferencesViewModel,
+      )
+    }
+    composable(UserScreen.QUICKFIX_DISPLAY_IMAGES) {
+      QuickFixDisplayImagesScreen(
+          navigationActions = navigationActions,
+          chatViewModel = chatViewModel,
+          quickFixViewModel = quickFixViewModel)
+    }
+  }
 }

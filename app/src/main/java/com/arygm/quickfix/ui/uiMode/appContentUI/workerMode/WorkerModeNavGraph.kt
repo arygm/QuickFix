@@ -17,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.zIndex
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -68,33 +67,29 @@ fun WorkerModeNavGraph(
       showBottomBar = false
     }
   }
-    Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            topBar = { QuickFixOfflineBar(isVisible = isOffline) },
-            modifier = Modifier.fillMaxSize()
-        ) { innerPadding ->
-            // Main content area
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding) // Scaffold padding
-            ) {
+  Box(modifier = Modifier.fillMaxSize()) {
+    Scaffold(
+        topBar = { QuickFixOfflineBar(isVisible = isOffline) },
+        modifier = Modifier.fillMaxSize()) { innerPadding ->
+          // Main content area
+          Box(
+              modifier = Modifier.fillMaxSize().padding(innerPadding) // Scaffold padding
+              ) {
                 // NavHost for worker routes
                 NavHost(
                     navController = workerNavigationActions.navController,
                     startDestination = startDestination,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    composable(WorkerRoute.HOME) {
+                    modifier = Modifier.fillMaxSize()) {
+                      composable(WorkerRoute.HOME) {
                         HomeNavHost(onScreenChange = { currentScreen = it })
-                    }
-                    composable(WorkerRoute.MESSAGES) {
+                      }
+                      composable(WorkerRoute.MESSAGES) {
                         MessagesNavHost(onScreenChange = { currentScreen = it })
-                    }
-                    composable(WorkerRoute.ANNOUNCEMENT) {
+                      }
+                      composable(WorkerRoute.ANNOUNCEMENT) {
                         AnnouncementsNavHost(onScreenChange = { currentScreen = it })
-                    }
-                    composable(WorkerRoute.PROFILE) {
+                      }
+                      composable(WorkerRoute.PROFILE) {
                         ProfileNavHost(
                             onScreenChange = { currentScreen = it },
                             appContentNavigationActions,
@@ -103,33 +98,30 @@ fun WorkerModeNavGraph(
                             accountViewModel,
                             workerNavigationActions,
                             rootMainNavigationActions,
-                            userPreferencesViewModel
-                        )
+                            userPreferencesViewModel)
+                      }
                     }
-                }
 
                 // Bottom navigation bar at the bottom
                 AnimatedVisibility(
                     visible = showBottomBar,
                     enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from bottom
                     exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to bottom
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter) // Align it to the bottom center
-                        .zIndex(1f) // Ensure it's on top
-                ) {
-                    BottomNavigationMenu(
-                        onTabSelect = { selectedDestination ->
+                    modifier =
+                        Modifier.align(Alignment.BottomCenter) // Align it to the bottom center
+                            .zIndex(1f) // Ensure it's on top
+                    ) {
+                      BottomNavigationMenu(
+                          onTabSelect = { selectedDestination ->
                             workerNavigationActions.navigateTo(selectedDestination)
-                        },
-                        navigationActions = workerNavigationActions,
-                        tabList = WORKER_TOP_LEVEL_DESTINATIONS,
-                        getBottomBarId = getBottomBarIdWorker
-                    )
-                }
-            }
+                          },
+                          navigationActions = workerNavigationActions,
+                          tabList = WORKER_TOP_LEVEL_DESTINATIONS,
+                          getBottomBarId = getBottomBarIdWorker)
+                    }
+              }
         }
-    }
-
+  }
 }
 
 @Composable
