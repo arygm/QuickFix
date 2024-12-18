@@ -35,63 +35,55 @@ fun QuickFixToolboxFloatingButton(
     onIconClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var expanded by remember { mutableStateOf(false) }
+  var expanded by remember { mutableStateOf(false) }
 
-    BoxWithConstraints {
-        val screenHeight = maxHeight.value
+  BoxWithConstraints {
+    val screenHeight = maxHeight.value
 
-        Column(
-            modifier = modifier,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AnimatedVisibility(
-                visible = expanded,
-                enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
-                exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
-            ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy((screenHeight * 0.01).dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    iconList.forEachIndexed { index, icon ->
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            modifier = Modifier
-                                .size((screenHeight * 0.06).dp)
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+      AnimatedVisibility(
+          visible = expanded,
+          enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+          exit = fadeOut() + slideOutVertically(targetOffsetY = { it })) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy((screenHeight * 0.01).dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                  iconList.forEachIndexed { index, icon ->
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        modifier =
+                            Modifier.size((screenHeight * 0.06).dp)
                                 .clickable { onIconClick(index) }
                                 .testTag("subIcon$index"),
-                            color = colorScheme.surface,
-                            shadowElevation = 5.dp
-                        ) {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = "Sub Icon $index",
-                                modifier = Modifier.padding((screenHeight * 0.012).dp),
-                                tint = colorScheme.primary
-                            )
+                        color = colorScheme.surface,
+                        shadowElevation = 5.dp) {
+                          Icon(
+                              imageVector = icon,
+                              contentDescription = "Sub Icon $index",
+                              modifier = Modifier.padding((screenHeight * 0.012).dp),
+                              tint = colorScheme.primary)
                         }
-                    }
+                  }
                 }
-            }
+          }
 
-            Spacer(modifier = Modifier.height((screenHeight * 0.01).dp))
+      Spacer(modifier = Modifier.height((screenHeight * 0.01).dp))
 
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier
-                    .size((screenHeight * 0.07).dp)
-                    .clickable { expanded = !expanded }
-                    .testTag("mainIcon"),
-                color = if (!expanded) colorScheme.surface else colorScheme.primary,
-                shadowElevation = 5.dp
-            ) {
-                Icon(
-                    imageVector = mainIcon,
-                    contentDescription = "Main Icon",
-                    modifier = Modifier.padding((screenHeight * 0.01).dp),
-                    tint = if (!expanded) colorScheme.primary else colorScheme.surface,
-                )
-            }
-        }
+      Surface(
+          shape = RoundedCornerShape(20.dp),
+          modifier =
+              Modifier.size((screenHeight * 0.07).dp)
+                  .clickable { expanded = !expanded }
+                  .testTag("mainIcon"),
+          color = if (!expanded) colorScheme.surface else colorScheme.primary,
+          shadowElevation = 5.dp) {
+            Icon(
+                imageVector = mainIcon,
+                contentDescription = "Main Icon",
+                modifier = Modifier.padding((screenHeight * 0.01).dp),
+                tint = if (!expanded) colorScheme.primary else colorScheme.surface,
+            )
+          }
     }
+  }
 }

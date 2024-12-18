@@ -19,107 +19,86 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class QuickFixToolboxFloatingButtonTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    @Test
-    fun mainIconIsDisplayedInitially() {
-        composeTestRule.setContent {
-            QuickFixToolboxFloatingButton(
-                iconList = listOf(Icons.Default.Work, Icons.Default.Work),
-                onIconClick = {}
-            )
-        }
-
-        // Check if the main icon is displayed
-        composeTestRule.onNodeWithTag("mainIcon")
-            .assertIsDisplayed()
-
-        // Sub icons should not be visible initially
-        composeTestRule.onAllNodes(hasTestTagPrefix("subIcon"))
-            .assertCountEquals(0)
+  @Test
+  fun mainIconIsDisplayedInitially() {
+    composeTestRule.setContent {
+      QuickFixToolboxFloatingButton(
+          iconList = listOf(Icons.Default.Work, Icons.Default.Work), onIconClick = {})
     }
 
-    @Test
-    fun clickingMainIconShowsSubIcons() {
-        val subIcons = listOf(Icons.Default.Work, Icons.Default.Work, Icons.Default.Work)
-        composeTestRule.setContent {
-            QuickFixToolboxFloatingButton(
-                iconList = subIcons,
-                onIconClick = {}
-            )
-        }
+    // Check if the main icon is displayed
+    composeTestRule.onNodeWithTag("mainIcon").assertIsDisplayed()
 
-        // Click the main icon to expand
-        composeTestRule.onNodeWithTag("mainIcon")
-            .performClick()
+    // Sub icons should not be visible initially
+    composeTestRule.onAllNodes(hasTestTagPrefix("subIcon")).assertCountEquals(0)
+  }
 
-        // Now all sub-icons should be visible
-        subIcons.indices.forEach { index ->
-            composeTestRule.onNodeWithTag("subIcon$index")
-                .assertIsDisplayed()
-        }
+  @Test
+  fun clickingMainIconShowsSubIcons() {
+    val subIcons = listOf(Icons.Default.Work, Icons.Default.Work, Icons.Default.Work)
+    composeTestRule.setContent {
+      QuickFixToolboxFloatingButton(iconList = subIcons, onIconClick = {})
     }
 
-    @Test
-    fun clickingSubIconTriggersCallback() {
-        val subIcons = listOf(Icons.Default.Work, Icons.Default.Work)
-        var clickedIndex: Int? = null
+    // Click the main icon to expand
+    composeTestRule.onNodeWithTag("mainIcon").performClick()
 
-        composeTestRule.setContent {
-            QuickFixToolboxFloatingButton(
-                iconList = subIcons,
-                onIconClick = { index ->
-                    clickedIndex = index
-                }
-            )
-        }
+    // Now all sub-icons should be visible
+    subIcons.indices.forEach { index ->
+      composeTestRule.onNodeWithTag("subIcon$index").assertIsDisplayed()
+    }
+  }
 
-        // Expand first
-        composeTestRule.onNodeWithTag("mainIcon")
-            .performClick()
+  @Test
+  fun clickingSubIconTriggersCallback() {
+    val subIcons = listOf(Icons.Default.Work, Icons.Default.Work)
+    var clickedIndex: Int? = null
 
-        // Click the first sub icon
-        composeTestRule.onNodeWithTag("subIcon0")
-            .performClick()
-
-        // Verify callback was triggered with correct index
-        assertEquals(0, clickedIndex)
+    composeTestRule.setContent {
+      QuickFixToolboxFloatingButton(
+          iconList = subIcons, onIconClick = { index -> clickedIndex = index })
     }
 
-    @Test
-    fun clickingMainIconAgainHidesSubIcons() {
-        val subIcons = listOf(Icons.Default.Work, Icons.Default.Work, Icons.Default.Work)
-        composeTestRule.setContent {
-            QuickFixToolboxFloatingButton(
-                iconList = subIcons,
-                onIconClick = {}
-            )
-        }
+    // Expand first
+    composeTestRule.onNodeWithTag("mainIcon").performClick()
 
-        // Expand the button
-        composeTestRule.onNodeWithTag("mainIcon").performClick()
+    // Click the first sub icon
+    composeTestRule.onNodeWithTag("subIcon0").performClick()
 
-        // Verify sub icons are shown
-        subIcons.indices.forEach { index ->
-            composeTestRule.onNodeWithTag("subIcon$index")
-                .assertIsDisplayed()
-        }
+    // Verify callback was triggered with correct index
+    assertEquals(0, clickedIndex)
+  }
 
-        // Collapse the button
-        composeTestRule.onNodeWithTag("mainIcon").performClick()
-
-        // Verify sub icons are no longer visible
-        composeTestRule.onAllNodes(hasTestTagPrefix("subIcon"))
-            .assertCountEquals(0)
+  @Test
+  fun clickingMainIconAgainHidesSubIcons() {
+    val subIcons = listOf(Icons.Default.Work, Icons.Default.Work, Icons.Default.Work)
+    composeTestRule.setContent {
+      QuickFixToolboxFloatingButton(iconList = subIcons, onIconClick = {})
     }
 
-    // Helper matcher for subIcon test tags
-    private fun hasTestTagPrefix(prefix: String): SemanticsMatcher {
-        return hasTestTag(ComplicationTagMatcher(prefix).toString())
+    // Expand the button
+    composeTestRule.onNodeWithTag("mainIcon").performClick()
+
+    // Verify sub icons are shown
+    subIcons.indices.forEach { index ->
+      composeTestRule.onNodeWithTag("subIcon$index").assertIsDisplayed()
     }
 
-    private fun ComplicationTagMatcher(prefix: String): (String) -> Boolean = {
-        it.startsWith(prefix)
-    }
+    // Collapse the button
+    composeTestRule.onNodeWithTag("mainIcon").performClick()
+
+    // Verify sub icons are no longer visible
+    composeTestRule.onAllNodes(hasTestTagPrefix("subIcon")).assertCountEquals(0)
+  }
+
+  // Helper matcher for subIcon test tags
+  private fun hasTestTagPrefix(prefix: String): SemanticsMatcher {
+    return hasTestTag(complicationTagMatcher(prefix).toString())
+  }
+
+  private fun complicationTagMatcher(prefix: String): (String) -> Boolean = {
+    it.startsWith(prefix)
+  }
 }
