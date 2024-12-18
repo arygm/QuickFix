@@ -93,6 +93,7 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker
 import com.arygm.quickfix.utils.loadUserId
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.firebase.Timestamp
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -141,6 +142,20 @@ fun QuickFixFirstStep(
   val locationSuggestions by locationViewModel.locationSuggestions.collectAsState()
 
   var listDates by remember { mutableStateOf(emptyList<LocalDateTime>()) }
+  var disableDates by remember { mutableStateOf(emptyList<LocalDate>()) }
+  workerProfile.quickFixes.forEach { it ->
+    quickFixViewModel.fetchQuickFix(
+        it,
+        onResult = { quickFix ->
+          if (quickFix != null) {
+            disableDates =
+                disableDates +
+                    quickFix.date.map {
+                      it.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                    }
+          }
+        })
+  }
   var showDateTimePopup by remember { mutableStateOf(false) }
   val dateFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM")
   val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
@@ -155,6 +170,8 @@ fun QuickFixFirstStep(
           locationTitle.isNotEmpty()
     }
   }
+  var editingDateIndex by remember { mutableStateOf<Int?>(null) }
+
   BoxWithConstraints(
       modifier =
           Modifier.background(colorScheme.surface).pointerInput(Unit) {
@@ -169,7 +186,23 @@ fun QuickFixFirstStep(
                   listDates = listDates + LocalDateTime.of(date, time)
                   showDateTimePopup = false
                 },
-                onDismissRequest = { showDateTimePopup = false })
+                onDismissRequest = { showDateTimePopup = false },
+                disableDates = disableDates)
+          }
+        }
+
+        if (editingDateIndex != null) {
+          Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+            QuickFixDateTimePicker(
+                onDateTimeSelected = { date, time ->
+                  listDates =
+                      listDates.toMutableList().apply {
+                        set(editingDateIndex!!, LocalDateTime.of(date, time))
+                      }
+                  editingDateIndex = null
+                },
+                onDismissRequest = { editingDateIndex = null },
+                disableDates = disableDates)
           }
         }
 
@@ -408,7 +441,7 @@ fun QuickFixFirstStep(
                           fontWeight = FontWeight.Medium,
                           modifier = Modifier.weight(0.35f))
                       TextButton(
-                          onClick = { listDates = listDates.toMutableList().apply { /* Edit */} },
+                          onClick = { editingDateIndex = index },
                           modifier = Modifier.wrapContentWidth().weight(0.15f),
                           shape = RoundedCornerShape(10.dp),
                           colors =

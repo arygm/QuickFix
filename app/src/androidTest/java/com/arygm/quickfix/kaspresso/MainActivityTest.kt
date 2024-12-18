@@ -213,6 +213,7 @@ class MainActivityTest : TestCase() {
 
       // Attempt to grant permissions
       allowPermissionsIfNeeded()
+      loginToTestAccount()
       // Retry the action until it works with a timeout of 10 seconds
       composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()
@@ -350,7 +351,7 @@ class MainActivityTest : TestCase() {
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
       composeTestRule.onNodeWithText("- Withdraw funds").assertIsDisplayed()
-      composeTestRule.onNodeWithText("User Mode").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Worker Mode").assertIsDisplayed()
       composeTestRule.onNodeWithText("Personal Settings").assertIsDisplayed()
       composeTestRule.onNodeWithText("My Account").assertIsDisplayed()
       composeTestRule.onNodeWithText("Preferences").assertIsDisplayed()

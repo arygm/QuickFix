@@ -267,6 +267,7 @@ fun HomeNavHost(
     composable(UserScreen.HOME) {
       HomeScreen(
           navigationActions,
+          navigationActionsRoot,
           preferencesViewModel,
           userViewModel,
           workerViewModel,
@@ -294,7 +295,8 @@ fun HomeNavHost(
           navigationActions = navigationActions,
           quickFixViewModel = quickFixViewModel,
           preferencesViewModel = preferencesViewModel,
-      )
+          accountViewModel = accountViewModel,
+          workerViewModel = workerViewModel)
     }
   }
 }
@@ -396,7 +398,8 @@ fun DashBoardNavHost(
           navigationActions,
           quickFixViewModel,
           preferencesViewModel,
-      )
+          workerViewModel,
+          accountViewModel)
     }
 
     composable(UserScreen.QUICKFIX_ONBOARDING) {
@@ -503,7 +506,8 @@ fun SearchNavHost(
           navigationActions = navigationActions,
           quickFixViewModel = quickFixViewModel,
           preferencesViewModel = preferencesViewModel,
-      )
+          accountViewModel = accountViewModel,
+          workerViewModel = workerViewModel)
     }
     composable(UserScreen.QUICKFIX_DISPLAY_IMAGES) {
       QuickFixDisplayImagesScreen(

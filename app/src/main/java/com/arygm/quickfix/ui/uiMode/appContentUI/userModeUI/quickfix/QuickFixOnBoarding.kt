@@ -105,7 +105,7 @@ fun QuickFixOnBoarding(
                 )
               }
               1 -> {
-                BackHandler(enabled = true) {}
+                BackHandler(enabled = true) { navigationActionsRoot.goBack() }
                 QuickFixSecondStep(
                     quickFix = quickFix,
                     mode = mode,
@@ -113,7 +113,8 @@ fun QuickFixOnBoarding(
                     navigationActions = navigationActions,
                     chatViewModel = chatViewModel,
                     quickFixViewModel = quickFixViewModel,
-                    accountViewModel = accountViewModel)
+                    accountViewModel = accountViewModel,
+                    navigationActionsRoot = navigationActionsRoot)
               }
               2 -> {
                 QuickFixThirdStep(

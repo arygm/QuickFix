@@ -26,6 +26,7 @@ import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.model.switchModes.AppMode
+import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixLastStep
 import com.google.firebase.Timestamp
 import io.mockk.Runs
@@ -50,6 +51,7 @@ class QuickFixLastStepTest {
   private val categoryViewModel: CategoryViewModel = mockk(relaxed = true)
   private val quickFixViewModel: QuickFixViewModel = mockk(relaxed = true)
   private val profileViewModel: ProfileViewModel = mockk(relaxed = true)
+  private val navigationActions: NavigationActions = mockk(relaxed = true)
 
   // Sample Data
   private val sampleCategory = Category(id = "cat1", name = "Plumbing")
@@ -117,7 +119,8 @@ class QuickFixLastStepTest {
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Assert
@@ -141,7 +144,8 @@ class QuickFixLastStepTest {
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Assert
@@ -170,7 +174,8 @@ class QuickFixLastStepTest {
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Find and click the Cancel button
@@ -204,7 +209,8 @@ class QuickFixLastStepTest {
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Assert
@@ -231,7 +237,8 @@ class QuickFixLastStepTest {
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Enter Feedback
@@ -276,7 +283,8 @@ class QuickFixLastStepTest {
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("FeedbackTextField").performTextInput("a".repeat(1500))
@@ -307,7 +315,7 @@ class QuickFixLastStepTest {
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
           mode = AppMode.USER,
-      )
+          navigationActionsRoot = navigationActions)
     }
 
     // Click the Consult Discussion button
@@ -333,7 +341,8 @@ class QuickFixLastStepTest {
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Assert Title
@@ -366,7 +375,8 @@ class QuickFixLastStepTest {
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Format dates and times as in the composable
@@ -399,7 +409,8 @@ class QuickFixLastStepTest {
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Set rating to 0

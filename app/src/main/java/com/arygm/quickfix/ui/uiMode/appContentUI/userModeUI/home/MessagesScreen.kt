@@ -27,16 +27,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.messaging.ChatStatus
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.messaging.Message
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.ui.elements.QuickFixDetailsScreen
 import com.arygm.quickfix.ui.elements.QuickFixSlidingWindowContent
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.theme.poppinsFontFamily
 import com.arygm.quickfix.utils.loadAppMode
 import com.arygm.quickfix.utils.loadUserId
 import com.google.firebase.Timestamp
@@ -51,12 +55,11 @@ fun MessageScreen(
     navigationActions: NavigationActions,
     quickFixViewModel: QuickFixViewModel,
     preferencesViewModel: PreferencesViewModel,
+    workerViewModel: ProfileViewModel,
+    accountViewModel: AccountViewModel
 ) {
   var userId by remember { mutableStateOf("") }
   var mode by remember { mutableStateOf("") }
-  var chatStatus by remember { mutableStateOf<ChatStatus>(ChatStatus.WAITING_FOR_RESPONSE) }
-  var messages by remember { mutableStateOf<List<Message>>(emptyList()) } // État local des messages
-
   LaunchedEffect(Unit) {
     userId = loadUserId(preferencesViewModel)
     mode = loadAppMode(preferencesViewModel)
@@ -71,6 +74,8 @@ fun MessageScreen(
   }
   // Assigning the non-null value of activeChat
   val chat = activeChat
+  var chatStatus by remember { mutableStateOf(chat.chatStatus) }
+  var messages by remember { mutableStateOf(chat.messages) } // État local des messages
 
   var quickFix by remember { mutableStateOf<QuickFix?>(null) }
   // Finding the associated QuickFix for the selected chat
@@ -155,6 +160,9 @@ fun MessageScreen(
     }
   }
 
+  var displayNameHeader by remember { mutableStateOf("") }
+  var workerProfileDisplayName by remember { mutableStateOf("") }
+
   BoxWithConstraints(
       modifier =
           Modifier.fillMaxSize().background(colorScheme.background).testTag("messageScreen")) {
@@ -163,8 +171,29 @@ fun MessageScreen(
 
         Scaffold(
             topBar = {
+              if (mode == AppMode.USER.name) {
+                workerViewModel.fetchUserProfile(
+                    chat.workeruid,
+                    onResult = {
+                      if (it != null) {
+                        displayNameHeader = (it as WorkerProfile).displayName
+                        workerProfileDisplayName = it.displayName
+                      }
+                    })
+              } else {
+                accountViewModel.fetchUserAccount(
+                    chat.useruid,
+                    onResult = {
+                      if (it != null) {
+                        displayNameHeader = it.firstName.plus(" ").plus(it.lastName)
+                      }
+                    })
+              }
               // Header section with a back button
-              Header(navigationActions, modifier = Modifier.testTag("backButton"))
+              Header(
+                  navigationActions,
+                  modifier = Modifier.testTag("backButton"),
+                  displayName = displayNameHeader)
             },
             bottomBar = {
               // Bottom input bar for entering and sending messages
@@ -176,6 +205,7 @@ fun MessageScreen(
                           .background(colorScheme.background)) {
                     // Message input field and send button
                     MessageInput(
+                        chatStatus = chatStatus,
                         messageText = messageText,
                         onMessageChange = { messageText = it },
                         onSendMessage = {
@@ -247,7 +277,8 @@ fun MessageScreen(
                                               .padding(horizontal = maxWidth * 0.04f)
                                               .testTag("userResponseContainer")) {
                                         Text(
-                                            text = "Awaiting confirmation from the worker...",
+                                            text =
+                                                "Awaiting confirmation from $workerProfileDisplayName...",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = colorScheme.onBackground,
                                             textAlign = TextAlign.Center,
@@ -342,7 +373,7 @@ fun MessageScreen(
                                       Text(
                                           text =
                                               if (mode == AppMode.USER.name) {
-                                                "the worker has accepted the QuickFix! 🎉"
+                                                "$workerProfileDisplayName has accepted the QuickFix! 🎉"
                                               } else {
                                                 "You have accepted this request! 🎉"
                                               },
@@ -387,7 +418,7 @@ fun MessageScreen(
                                 Text(
                                     text =
                                         if (mode == AppMode.USER.name) {
-                                          "the worker has rejected the QuickFix. No big deal! Contact another worker from the search screen! 😊"
+                                          "$workerProfileDisplayName has rejected the QuickFix. No big deal! Contact another worker from the search screen! 😊"
                                         } else {
                                           "You have rejected this request. Find your next client on the announcement screen! 😊"
                                         },
@@ -437,13 +468,18 @@ fun MessageScreen(
               quickFix = quickFix!!,
               isVisible = isSlidingWindowVisible,
               onDismiss = { isSlidingWindowVisible = false },
-              navigationActions = navigationActions)
+              navigationActions = navigationActions,
+              accountViewModel = accountViewModel)
         }
       }
 }
 
 @Composable
-fun Header(navigationActions: NavigationActions, modifier: Modifier = Modifier) {
+fun Header(
+    navigationActions: NavigationActions,
+    modifier: Modifier = Modifier,
+    displayName: String
+) {
   Box(modifier = Modifier.fillMaxWidth().background(colorScheme.surface).padding(vertical = 8.dp)) {
     // Back button aligned to the start (left)
     IconButton(
@@ -465,9 +501,10 @@ fun Header(navigationActions: NavigationActions, modifier: Modifier = Modifier) 
                       .background(Color.Black, CircleShape)
                       .testTag("profilePicture"))
           Text(
-              text = "Moha",
+              text = displayName,
               fontWeight = FontWeight.Bold,
               fontSize = 20.sp,
+              fontFamily = poppinsFontFamily,
               color = colorScheme.onBackground,
               modifier = Modifier.testTag("chatPartnerName").padding(vertical = 4.dp))
         }
@@ -490,8 +527,11 @@ fun MessageBubble(message: Message, isSent: Boolean, modifier: Modifier = Modifi
                     .testTag(if (isSent) "sentMessage" else "receivedMessage")) {
               Text(
                   text = message.content,
+                  fontFamily = poppinsFontFamily,
                   color = if (isSent) Color.White else Color.Black,
-                  fontSize = 16.sp)
+                  fontSize = 16.sp,
+                  fontWeight = FontWeight.Medium,
+              )
             }
       }
 }
@@ -501,6 +541,7 @@ fun MessageBubble(message: Message, isSent: Boolean, modifier: Modifier = Modifi
 fun DateDivider(timestamp: Timestamp, modifier: Modifier = Modifier) {
   Text(
       text = formatDate(timestamp),
+      fontFamily = poppinsFontFamily,
       color = Color.Gray,
       fontSize = 12.sp,
       fontWeight = FontWeight.Bold,
@@ -512,7 +553,8 @@ fun DateDivider(timestamp: Timestamp, modifier: Modifier = Modifier) {
 fun MessageInput(
     messageText: String,
     onMessageChange: (String) -> Unit,
-    onSendMessage: () -> Unit
+    onSendMessage: () -> Unit,
+    chatStatus: ChatStatus
 ) {
   Row(
       modifier =
@@ -525,6 +567,8 @@ fun MessageInput(
       verticalAlignment = Alignment.CenterVertically) {
         // Message input text field
         TextField(
+            enabled =
+                (chatStatus == ChatStatus.ACCEPTED || chatStatus == ChatStatus.GETTING_SUGGESTIONS),
             value = messageText,
             onValueChange = onMessageChange,
             placeholder = { Text("Message") },
@@ -544,6 +588,8 @@ fun MessageInput(
         // Send button
         IconButton(
             onClick = { onSendMessage() },
+            enabled =
+                (chatStatus == ChatStatus.ACCEPTED || chatStatus == ChatStatus.GETTING_SUGGESTIONS),
             modifier =
                 Modifier.weight(0.1f)
                     .aspectRatio(1f)

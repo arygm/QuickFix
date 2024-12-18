@@ -26,16 +26,21 @@ import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 
 @Composable
@@ -43,8 +48,17 @@ fun QuickFixSlidingWindowContent(
     quickFix: QuickFix,
     onDismiss: () -> Unit,
     isVisible: Boolean = true,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    accountViewModel: AccountViewModel
 ) {
+  var userName by remember { mutableStateOf("") }
+  accountViewModel.fetchUserAccount(
+      quickFix.userId,
+      onResult = {
+        if (it != null) {
+          userName = it.firstName.plus(" ").plus(it.lastName)
+        }
+      })
   QuickFixSlidingWindow(isVisible = isVisible, onDismiss = onDismiss) {
     BoxWithConstraints(
         modifier = Modifier.fillMaxHeight().background(MaterialTheme.colorScheme.surface)) {
@@ -65,9 +79,9 @@ fun QuickFixSlidingWindowContent(
                                   vertical = screenHeight * 0.02f), // Relative vertical padding
                       contentAlignment = Alignment.Center) {
                         Text(
-                            text = "${quickFix.userId}'s QuickFix request",
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            text = "$userName's QuickFix request",
+                            style = poppinsTypography.headlineSmall,
+                            color = colorScheme.onBackground,
                             textAlign = TextAlign.Center)
                       }
                 }
@@ -79,8 +93,8 @@ fun QuickFixSlidingWindowContent(
                 item {
                   Text(
                       text = "Photo description",
-                      style = MaterialTheme.typography.bodyMedium,
-                      color = MaterialTheme.colorScheme.onBackground)
+                      style = poppinsTypography.bodyMedium,
+                      color = colorScheme.onBackground)
                   Spacer(modifier = Modifier.height(screenHeight * 0.01f))
                   ImageSelector(
                       screenWidth,
@@ -96,8 +110,8 @@ fun QuickFixSlidingWindowContent(
                 item {
                   Text(
                       text = "Selected services",
-                      style = MaterialTheme.typography.headlineSmall,
-                      color = MaterialTheme.colorScheme.onBackground)
+                      style = poppinsTypography.headlineSmall,
+                      color = colorScheme.onBackground)
                 }
                 item { Spacer(modifier = Modifier.height(screenHeight * 0.01f)) }
 
@@ -105,8 +119,8 @@ fun QuickFixSlidingWindowContent(
                 item {
                   Text(
                       text = "Included Services",
-                      style = MaterialTheme.typography.bodyMedium,
-                      color = MaterialTheme.colorScheme.onSurface)
+                      style = poppinsTypography.bodyMedium,
+                      color = colorScheme.onSurface)
                 }
                 items(quickFix.includedServices) { service ->
                   Row(
@@ -118,14 +132,14 @@ fun QuickFixSlidingWindowContent(
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface,
+                            tint = colorScheme.onSurface,
                             modifier = Modifier.size(screenWidth * 0.04f) // Relative size
                             )
                         Spacer(modifier = Modifier.width(screenWidth * 0.02f)) // Relative spacing
                         Text(
                             text = service.name,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface)
+                            style = poppinsTypography.bodySmall,
+                            color = colorScheme.onSurface)
                       }
                 }
 
@@ -136,8 +150,8 @@ fun QuickFixSlidingWindowContent(
                 item {
                   Text(
                       text = "Add-on Services",
-                      style = MaterialTheme.typography.bodyMedium,
-                      color = MaterialTheme.colorScheme.primary)
+                      style = poppinsTypography.bodyMedium,
+                      color = colorScheme.primary)
                 }
                 items(quickFix.addOnServices) { service ->
                   Row(
@@ -146,13 +160,13 @@ fun QuickFixSlidingWindowContent(
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = colorScheme.primary,
                             modifier = Modifier.size(screenWidth * 0.04f))
                         Spacer(modifier = Modifier.width(screenWidth * 0.02f))
                         Text(
                             text = service.name,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary)
+                            style = poppinsTypography.bodySmall,
+                            color = colorScheme.primary)
                       }
                 }
 
@@ -163,18 +177,18 @@ fun QuickFixSlidingWindowContent(
                 item {
                   Text(
                       text = "Description",
-                      style = MaterialTheme.typography.headlineSmall,
-                      color = MaterialTheme.colorScheme.onBackground)
+                      style = poppinsTypography.headlineSmall,
+                      color = colorScheme.onBackground)
                   Box(
                       modifier =
                           Modifier.fillMaxWidth()
                               .clip(RoundedCornerShape(screenWidth * 0.02f))
-                              .background(MaterialTheme.colorScheme.background)
+                              .background(colorScheme.background)
                               .padding(screenWidth * 0.03f)) {
                         Text(
                             text = quickFix.title,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            style = poppinsTypography.bodySmall,
+                            color = colorScheme.onSurface,
                         )
                       }
                 }
@@ -186,8 +200,8 @@ fun QuickFixSlidingWindowContent(
                 item {
                   Text(
                       text = "Suggested appointment",
-                      style = MaterialTheme.typography.headlineSmall,
-                      color = MaterialTheme.colorScheme.onBackground)
+                      style = poppinsTypography.headlineSmall,
+                      color = colorScheme.onBackground)
                   Spacer(modifier = Modifier.height(screenHeight * 0.01f))
 
                   val appointmentTime =
@@ -204,7 +218,7 @@ fun QuickFixSlidingWindowContent(
                       modifier =
                           Modifier.fillMaxWidth()
                               .clip(RoundedCornerShape(screenWidth * 0.02f))
-                              .background(MaterialTheme.colorScheme.background)
+                              .background(colorScheme.background)
                               .padding(screenWidth * 0.03f)) {
                         Column {
                           Row(
@@ -213,13 +227,13 @@ fun QuickFixSlidingWindowContent(
                                 Icon(
                                     imageVector = Icons.Default.Schedule,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    tint = colorScheme.onSurface,
                                     modifier = Modifier.size(screenWidth * 0.04f))
                                 Spacer(modifier = Modifier.width(screenWidth * 0.02f))
                                 Text(
                                     text = appointmentTime,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface)
+                                    style = poppinsTypography.bodySmall,
+                                    color = colorScheme.onSurface)
                               }
 
                           Spacer(modifier = Modifier.height(screenHeight * 0.01f))
@@ -230,13 +244,13 @@ fun QuickFixSlidingWindowContent(
                                 Icon(
                                     imageVector = Icons.Default.CalendarMonth,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    tint = colorScheme.onSurface,
                                     modifier = Modifier.size(screenWidth * 0.04f))
                                 Spacer(modifier = Modifier.width(screenWidth * 0.02f))
                                 Text(
                                     text = appointmentDate,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface)
+                                    style = poppinsTypography.bodySmall,
+                                    color = colorScheme.onSurface)
                               }
 
                           Spacer(modifier = Modifier.height(screenHeight * 0.01f))
@@ -247,13 +261,13 @@ fun QuickFixSlidingWindowContent(
                                 Icon(
                                     imageVector = Icons.Default.LocationOn,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    tint = colorScheme.onSurface,
                                     modifier = Modifier.size(screenWidth * 0.04f))
                                 Spacer(modifier = Modifier.width(screenWidth * 0.02f))
                                 Text(
                                     text = quickFix.location.name,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface)
+                                    style = poppinsTypography.bodySmall,
+                                    color = colorScheme.onSurface)
                               }
                         }
                       }
@@ -273,12 +287,12 @@ fun QuickFixSlidingWindowContent(
                                 Icons.AutoMirrored.Filled
                                     .ArrowForward, // Replace with an appropriate swipe icon
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface)
+                            tint = colorScheme.onSurface)
                         Spacer(modifier = Modifier.width(screenWidth * 0.02f))
                         Text(
                             text = "Swipe right to hide QuickFix details",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface)
+                            style = poppinsTypography.bodySmall,
+                            color = colorScheme.onSurface)
                       }
                 }
               }

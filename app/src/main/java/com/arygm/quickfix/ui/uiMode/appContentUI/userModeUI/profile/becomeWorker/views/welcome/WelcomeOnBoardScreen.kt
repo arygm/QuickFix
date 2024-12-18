@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -78,7 +77,7 @@ fun WelcomeOnBoardScreen(
             "Welcome on board !!",
             style =
                 poppinsTypography.headlineLarge.copy(
-                    color = MaterialTheme.colorScheme.onBackground, fontSize = 26.sp))
+                    color = colorScheme.onBackground, fontSize = 26.sp))
         Spacer(modifier = Modifier.weight(0.2f))
         Row(modifier = Modifier.weight(0.9f)) {
           Image(

@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -53,7 +54,9 @@ import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerScreen
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -63,6 +66,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun QuickFixSecondStep(
     quickFixViewModel: QuickFixViewModel,
+    navigationActionsRoot: NavigationActions,
     accountViewModel: AccountViewModel,
     chatViewModel: ChatViewModel,
     navigationActions: NavigationActions,
@@ -334,6 +338,7 @@ fun QuickFixSecondStep(
                                               activeChats =
                                                   workerAccount!!.activeChats + chat!!.chatId),
                                           onSuccess = {
+                                            navigationActions.navigateTo(UserScreen.MESSAGES)
                                             Log.d("QuickFixSecondStep", "Chat added to user")
                                           },
                                           onFailure = {
@@ -343,7 +348,6 @@ fun QuickFixSecondStep(
                                     onFailure = {
                                       Log.d("QuickFixSecondStep", "Chat not added to user")
                                     })
-                                navigationActions.navigateTo(UserScreen.MESSAGES)
                               },
                               onFailure = { Log.d("QuickFixSecondStep", "Chat not added") })
                         }
@@ -382,6 +386,26 @@ fun QuickFixSecondStep(
                   leadingIconTint = colorScheme.onPrimary,
               )
             }
+      }
+
+      item {
+        QuickFixButton(
+            buttonText = "Go back home",
+            buttonColor = colorScheme.surface,
+            textStyle = poppinsTypography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            textColor = colorScheme.onSurface,
+            height = 75.dp * heightRatio.value,
+            onClickAction = {
+              navigationActionsRoot.navigateTo(
+                  if (mode == AppMode.USER) USER_TOP_LEVEL_DESTINATIONS[0].route
+                  else WORKER_TOP_LEVEL_DESTINATIONS[0].route)
+            },
+            leadingIcon = Icons.Outlined.Home,
+            leadingIconTint = colorScheme.onSurface,
+            modifier =
+                Modifier.padding(top = 16.dp * heightRatio.value)
+                    .fillMaxWidth()
+                    .testTag("GoBackHomeButton"))
       }
     }
   }

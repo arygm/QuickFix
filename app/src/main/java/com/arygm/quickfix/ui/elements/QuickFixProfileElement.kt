@@ -301,7 +301,7 @@ fun QuickFixProfileScreenElement(
                               modifier = Modifier.size(screenWidth * 0.06f))
                           Spacer(modifier = Modifier.width(screenWidth * 0.04f))
                           Text(
-                              text = "Woker Mode",
+                              text = "Worker Mode",
                               style =
                                   poppinsTypography.bodyMedium.copy(
                                       fontWeight = FontWeight.Medium, fontSize = 16.sp),

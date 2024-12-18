@@ -258,7 +258,13 @@ fun HomeNavHost(
     }
 
     composable(WorkerScreen.MESSAGES) {
-      MessageScreen(chatViewModel, navigationActions, quickFixViewModel, preferencesViewModel)
+      MessageScreen(
+          chatViewModel,
+          navigationActions,
+          quickFixViewModel,
+          preferencesViewModel,
+          workerViewModel,
+          accountViewModel)
     }
   }
 }

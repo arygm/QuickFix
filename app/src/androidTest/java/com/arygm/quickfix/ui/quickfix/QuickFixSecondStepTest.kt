@@ -50,6 +50,7 @@ class QuickFixSecondStepTest {
 
   // Mocked dependencies
   private lateinit var navigationActions: NavigationActions
+  private lateinit var navigationActionsRoot: NavigationActions
   private lateinit var locationRepository: LocationRepository
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var chatRepository: ChatRepository
@@ -123,6 +124,7 @@ class QuickFixSecondStepTest {
   fun setUp() {
     // Initialize mocks
     navigationActions = mock(NavigationActions::class.java)
+    navigationActionsRoot = mock(NavigationActions::class.java)
     locationRepository = mock(LocationRepository::class.java)
     locationViewModel = LocationViewModel(locationRepository)
     chatRepository = mock(ChatRepository::class.java)
@@ -236,7 +238,8 @@ class QuickFixSecondStepTest {
           navigationActions = navigationActions,
           onQuickFixMakeBill = {},
           quickFix = fakeQuickFix,
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActionsRoot)
     }
 
     // Assert: Check if the header text is displayed
@@ -251,6 +254,7 @@ class QuickFixSecondStepTest {
     // Act: Set the composable content
     composeTestRule.setContent {
       QuickFixSecondStep(
+          navigationActionsRoot = navigationActionsRoot,
           quickFixViewModel = quickFixViewModel,
           accountViewModel = accountViewModel,
           chatViewModel = chatViewModel,
@@ -259,6 +263,7 @@ class QuickFixSecondStepTest {
           quickFix = fakeQuickFix,
           mode = AppMode.USER)
     }
+    composeTestRule.onNodeWithTag("MainColumn").performScrollToIndex(6)
 
     // Assert: Check if the "Consult the discussion" button is displayed
     composeTestRule.onNodeWithTag("ConsultDiscussionButton").assertIsDisplayed()
@@ -272,6 +277,7 @@ class QuickFixSecondStepTest {
     // Act: Set the composable content
     composeTestRule.setContent {
       QuickFixSecondStep(
+          navigationActionsRoot = navigationActionsRoot,
           quickFixViewModel = quickFixViewModel,
           accountViewModel = accountViewModel,
           chatViewModel = chatViewModel,
@@ -314,6 +320,7 @@ class QuickFixSecondStepTest {
     // Act: Set the composable content with mode = WORKER
     composeTestRule.setContent {
       QuickFixSecondStep(
+          navigationActionsRoot = navigationActionsRoot,
           quickFixViewModel = quickFixViewModel,
           accountViewModel = accountViewModel,
           chatViewModel = chatViewModel,
@@ -323,6 +330,8 @@ class QuickFixSecondStepTest {
           mode = AppMode.WORKER)
     }
 
+    composeTestRule.onNodeWithTag("MainColumn").performScrollToIndex(6)
+
     // Assert: Check if the "Make the bill" button is displayed
     composeTestRule.onNodeWithTag("MakethebillButton").assertIsDisplayed()
 
@@ -331,5 +340,23 @@ class QuickFixSecondStepTest {
 
     // Assert: Verify that the onQuickFixMakeBill lambda was invoked
     assert(isMakeBillClicked) { "onQuickFixMakeBill was not called upon button click." }
+  }
+
+  @Test
+  fun testGoBackHomeButtonIsDisplayed() = runTest {
+    composeTestRule.setContent {
+      QuickFixSecondStep(
+          quickFixViewModel = quickFixViewModel,
+          accountViewModel = accountViewModel,
+          chatViewModel = chatViewModel,
+          navigationActions = navigationActions,
+          onQuickFixMakeBill = {},
+          quickFix = fakeQuickFix,
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActionsRoot)
+    }
+
+    composeTestRule.onNodeWithTag("MainColumn").performScrollToIndex(6)
+    composeTestRule.onNodeWithTag("GoBackHomeButton").assertIsDisplayed()
   }
 }

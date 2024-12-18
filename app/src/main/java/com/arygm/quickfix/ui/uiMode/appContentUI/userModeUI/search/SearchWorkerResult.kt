@@ -674,7 +674,7 @@ fun SearchWorkerResult(
                                     .padding(horizontal = screenWidth * 0.04f)
                                     .testTag("sliding_window_worker_additional_info")) {
                               Text(
-                                  text = selectedWorker.fieldOfWork,
+                                  text = selectedWorker.displayName,
                                   style = MaterialTheme.typography.headlineLarge,
                                   color = colorScheme.onBackground,
                                   modifier = Modifier.testTag("sliding_window_worker_category"))
@@ -696,6 +696,14 @@ fun SearchWorkerResult(
                                     .testTag("sliding_window_scrollable_content")) {
                               Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
+                              Text(
+                                  text = selectedWorker.fieldOfWork,
+                                  style =
+                                      MaterialTheme.typography.headlineLarge.copy(fontSize = 28.sp),
+                                  color = colorScheme.onBackground,
+                                  modifier = Modifier.padding(horizontal = screenWidth * 0.04f))
+
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
                               // Description with "Show more" functionality
                               var showFullDescription by remember { mutableStateOf(false) }
                               val descriptionText =
@@ -897,76 +905,40 @@ fun SearchWorkerResult(
                                           } else {
                                             review.review.take(100) + "..."
                                           }
-                                      // Star Rating Row
-                                      Row(
-                                          verticalAlignment = Alignment.CenterVertically,
-                                          modifier =
-                                              Modifier.padding(horizontal = screenWidth * 0.04f)
-                                                  .testTag("sliding_window_star_rating_row")) {
-                                            RatingBar(
-                                                selectedWorker.rating.toFloat(),
-                                                modifier =
-                                                    Modifier.height(20.dp).testTag("starsRow"))
-                                          }
-                                      Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-                                      LazyRow(
-                                          modifier =
-                                              Modifier.fillMaxWidth()
-                                                  .padding(horizontal = screenWidth * 0.04f)
-                                                  .testTag("sliding_window_reviews_row")) {
-                                            itemsIndexed(selectedWorker.reviews) { index, review ->
-                                              var isExpanded by remember { mutableStateOf(false) }
-                                              val displayText =
-                                                  if (isExpanded || review.review.length <= 100) {
-                                                    review.review
-                                                  } else {
-                                                    review.review.take(100) + "..."
-                                                  }
 
-                                              Box(
-                                                  modifier =
-                                                      Modifier.padding(end = screenWidth * 0.02f)
-                                                          .width(screenWidth * 0.6f)
-                                                          .clip(RoundedCornerShape(25f))
-                                                          .background(colorScheme.background)) {
-                                                    Column(
+                                      Box(
+                                          modifier =
+                                              Modifier.padding(end = screenWidth * 0.02f)
+                                                  .width(screenWidth * 0.6f)
+                                                  .clip(RoundedCornerShape(25f))
+                                                  .background(colorScheme.background)) {
+                                            Column(
+                                                modifier = Modifier.padding(screenWidth * 0.02f)) {
+                                                  Text(
+                                                      text = displayText,
+                                                      style = MaterialTheme.typography.bodySmall,
+                                                      color = colorScheme.onSurface)
+                                                  if (review.review.length > 100) {
+                                                    Text(
+                                                        text =
+                                                            if (isExpanded) "See less"
+                                                            else "See more",
+                                                        style =
+                                                            MaterialTheme.typography.bodySmall.copy(
+                                                                color = colorScheme.primary),
                                                         modifier =
-                                                            Modifier.padding(screenWidth * 0.02f)) {
-                                                          Text(
-                                                              text = displayText,
-                                                              style =
-                                                                  MaterialTheme.typography
-                                                                      .bodySmall,
-                                                              color = colorScheme.onSurface)
-                                                          if (review.review.length > 100) {
-                                                            Text(
-                                                                text =
-                                                                    if (isExpanded) "See less"
-                                                                    else "See more",
-                                                                style =
-                                                                    MaterialTheme.typography
-                                                                        .bodySmall
-                                                                        .copy(
-                                                                            color =
-                                                                                colorScheme
-                                                                                    .primary),
-                                                                modifier =
-                                                                    Modifier.clickable {
-                                                                          isExpanded = !isExpanded
-                                                                        }
-                                                                        .padding(
-                                                                            top =
-                                                                                screenHeight *
-                                                                                    0.01f))
-                                                          }
-                                                        }
+                                                            Modifier.clickable {
+                                                                  isExpanded = !isExpanded
+                                                                }
+                                                                .padding(
+                                                                    top = screenHeight * 0.01f))
                                                   }
-                                            }
+                                                }
                                           }
-
-                                      Spacer(modifier = Modifier.height(screenHeight * 0.02f))
                                     }
                                   }
+
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
                             }
                       }
                 }

@@ -4,6 +4,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.arygm.quickfix.model.account.Account
+import com.arygm.quickfix.model.account.AccountRepository
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.dataFields.Service
 import com.arygm.quickfix.model.quickfix.QuickFix
@@ -16,11 +19,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class QuickFixSlidingWindowContentTest {
 
   @get:Rule val composeTestRule = createComposeRule()
+  private lateinit var accountRepository: AccountRepository
+  private lateinit var accountViewModel: AccountViewModel
 
   private val quickFixMock =
       QuickFix(
@@ -57,23 +65,45 @@ class QuickFixSlidingWindowContentTest {
   @Before
   fun setup() {
     navigationActions = mock(NavigationActions::class.java)
+    accountRepository = mock(AccountRepository::class.java)
+    accountViewModel = AccountViewModel(accountRepository)
+    doAnswer { invocation ->
+          val onSuccess = invocation.arguments[1] as (Account?) -> Unit
+          onSuccess(
+              Account(
+                  uid = "User Id",
+                  firstName = "Name",
+                  lastName = "Last Name",
+                  email = "email",
+                  birthDate = Timestamp.now()))
+        }
+        .whenever(accountRepository)
+        .getAccountById(any(), any(), any())
   }
 
   @Test
   fun quickFixSlidingWindowContent_displaysTitle() {
     composeTestRule.setContent {
       QuickFixSlidingWindowContent(
-          quickFix = quickFixMock, onDismiss = {}, isVisible = true, navigationActions)
+          quickFix = quickFixMock,
+          onDismiss = {},
+          isVisible = true,
+          navigationActions,
+          accountViewModel)
     }
 
-    composeTestRule.onNodeWithText("${quickFixMock.userId}'s QuickFix request").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Name Last Name's QuickFix request").assertIsDisplayed()
   }
 
   @Test
   fun quickFixSlidingWindowContent_displaysServices() {
     composeTestRule.setContent {
       QuickFixSlidingWindowContent(
-          quickFix = quickFixMock, onDismiss = {}, isVisible = true, navigationActions)
+          quickFix = quickFixMock,
+          onDismiss = {},
+          isVisible = true,
+          navigationActions,
+          accountViewModel)
     }
 
     quickFixMock.includedServices.forEach { service ->
@@ -88,7 +118,11 @@ class QuickFixSlidingWindowContentTest {
   fun quickFixSlidingWindowContent_displaysAppointmentDetails() {
     composeTestRule.setContent {
       QuickFixSlidingWindowContent(
-          quickFix = quickFixMock, onDismiss = {}, isVisible = true, navigationActions)
+          quickFix = quickFixMock,
+          onDismiss = {},
+          isVisible = true,
+          navigationActions,
+          accountViewModel)
     }
 
     val appointmentTime = quickFixMock.time.toDate().toString().split(" ")[3]
