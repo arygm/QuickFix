@@ -210,6 +210,7 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
+    testImplementation(libs.androidx.core.testing) // or latest version
     globalTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)

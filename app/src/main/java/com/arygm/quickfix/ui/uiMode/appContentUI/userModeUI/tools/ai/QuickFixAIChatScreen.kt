@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -134,7 +135,7 @@ fun MessageInput(onMessageSend: (String) -> Unit) {
           Surface(
               color = MaterialTheme.colorScheme.primary,
               shape = RoundedCornerShape(18.dp),
-              modifier = Modifier.size(40.dp).offset(x = -4.dp)) {
+              modifier = Modifier.size(40.dp).offset(x = (-4).dp)) {
                 IconButton(
                     onClick = {
                       if (message.isNotEmpty()) {
@@ -142,7 +143,7 @@ fun MessageInput(onMessageSend: (String) -> Unit) {
                         message = ""
                       }
                     },
-                    Modifier.size(20.dp)) {
+                    Modifier.size(20.dp).testTag("sendIcon")) {
                       Icon(
                           imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
                     }

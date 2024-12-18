@@ -8,7 +8,10 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.launch
 
-class GeminiViewModel : ViewModel() {
+class GeminiViewModel(
+    private val generativeModel: GenerativeModel =
+        GenerativeModel(modelName = "gemini-pro", apiKey = GEMINI_API_KEY)
+) : ViewModel() {
 
   val contextMessage =
       """
@@ -71,8 +74,6 @@ By following these guidelines, you will assist users in quickly finding the most
 """
 
   val messageList by lazy { mutableStateListOf(GeminiMessageModel(contextMessage, "user")) }
-  private val generativeModel: GenerativeModel =
-      GenerativeModel(modelName = "gemini-pro", apiKey = GEMINI_API_KEY)
 
   fun sendMessage(question: String) {
     viewModelScope.launch {
