@@ -24,12 +24,14 @@ open class Profile(
 }
 
 class UserProfile(
+     // String of uid that will represents the uid of the saved lists
     val locations: List<Location>,
     val announcements: List<String>, // Each string correspond to an announcement id.
     val wallet: Double = 0.0,
     uid: String,
     quickFixes: List<String> =
         emptyList(), // String of uid that will represents the uid of the QuickFixes
+    val savedList: List<String> = emptyList(),
 ) : Profile(uid, quickFixes) {
   // quickFixes: List<String>, // String of uid that will represents the uid of the QuickFixes
   override fun equals(other: Any?): Boolean {

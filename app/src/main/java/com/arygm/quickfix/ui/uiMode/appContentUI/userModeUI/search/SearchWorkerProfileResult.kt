@@ -125,12 +125,6 @@ fun SearchWorkerProfileResult(
                       lineHeight = 20.sp,
                       color = colorScheme.onBackground,
                       modifier = Modifier.testTag("price"))
-                  Text(
-                      text = "/Hour",
-                      fontSize = 13.sp,
-                      fontWeight = FontWeight.SemiBold,
-                      lineHeight = 20.sp,
-                      color = colorScheme.onSurface)
                 }
               }
 

@@ -47,6 +47,7 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -96,8 +97,16 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.utils.GeocoderWrapper
 import com.arygm.quickfix.utils.LocationHelper
+import com.arygm.quickfix.utils.loadBirthDate
+import com.arygm.quickfix.utils.loadEmail
+import com.arygm.quickfix.utils.loadFirstName
+import com.arygm.quickfix.utils.loadIsWorker
+import com.arygm.quickfix.utils.loadLastName
 import com.arygm.quickfix.utils.loadUserId
+import com.google.firebase.Timestamp
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 data class SearchFilterButtons(
     val onClick: () -> Unit,
@@ -134,6 +143,24 @@ fun SearchWorkerResult(
 
   var userProfile by remember { mutableStateOf<UserProfile?>(null) }
   var uid by remember { mutableStateOf("Loading...") }
+
+    var loading by remember { mutableStateOf(true) } // Tracks if data is loading
+
+    val currentAccount = remember { mutableStateOf<Account?>(null) }
+    LaunchedEffect(Unit) {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd") // Adjust format as needed
+        val localDate = LocalDate.parse(loadBirthDate(preferencesViewModel), formatter)
+        val epochSeconds = localDate.atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
+        Timestamp(epochSeconds, 0) // 0 for nanoseconds
+        Account(
+            uid = loadUserId(preferencesViewModel),
+            firstName = loadFirstName(preferencesViewModel),
+            lastName = loadLastName(preferencesViewModel),
+            email = loadEmail(preferencesViewModel),
+            birthDate = Timestamp(epochSeconds, 0),
+            isWorker = loadIsWorker(preferencesViewModel)
+        )
+    }
 
   LaunchedEffect(Unit) {
     if (locationHelper.checkPermissions()) {
@@ -295,6 +322,42 @@ fun SearchWorkerResult(
   var saved by remember { mutableStateOf(false) }
   val searchQuery by searchViewModel.searchQuery.collectAsState()
 
+    val profileImagesMap by remember { mutableStateOf(mutableMapOf<String, Bitmap?>()) }
+    val bannerImagesMap by remember { mutableStateOf(mutableMapOf<String, Bitmap?>()) }
+
+// Check if all required data is fetched
+    LaunchedEffect(workerProfiles) {
+        if (workerProfiles.isNotEmpty()) {
+            workerProfiles.forEach { profile ->
+                // Fetch profile images
+                workerViewModel.fetchProfileImageAsBitmap(
+                    profile.uid,
+                    onSuccess = { bitmap ->
+                        profileImagesMap[profile.uid] = bitmap
+                        checkIfLoadingComplete(workerProfiles, profileImagesMap, bannerImagesMap) {
+                            loading = false
+                        }
+                    },
+                    onFailure = { Log.e("ProfileResults", "Failed to fetch profile image") }
+                )
+
+                // Fetch banner images
+                workerViewModel.fetchBannerImageAsBitmap(
+                    profile.uid,
+                    onSuccess = { bitmap ->
+                        bannerImagesMap[profile.uid] = bitmap
+                        checkIfLoadingComplete(workerProfiles, profileImagesMap, bannerImagesMap) {
+                            loading = false
+                        }
+                    },
+                    onFailure = { Log.e("ProfileResults", "Failed to fetch banner image") }
+                )
+            }
+        } else {
+            loading = false // No profiles to load
+        }
+    }
+
   // Wrap everything in a Box to allow overlay
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     val screenHeight = maxHeight
@@ -420,26 +483,26 @@ fun SearchWorkerResult(
                         }
                   }
                 }
-
+              if (loading) {
+                  // Display a loader
+                  Box(
+                      modifier = Modifier.fillMaxSize(),
+                      contentAlignment = Alignment.Center
+                  ) {
+                      CircularProgressIndicator(
+                          color = colorScheme.primary,
+                          modifier = Modifier.size(64.dp)
+                      )
+                  }
+              } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth().testTag("worker_profiles_list")) {
                   items(filteredWorkerProfiles.size) { index ->
                     val profile = filteredWorkerProfiles[index]
                     var account by remember { mutableStateOf<Account?>(null) }
                     var distance by remember { mutableStateOf<Int?>(null) }
                     var cityName by remember { mutableStateOf<String?>(null) }
-                    var profileImage by remember { mutableStateOf<Bitmap?>(null) }
-                    var bannerImage by remember { mutableStateOf<Bitmap?>(null) }
-                    workerViewModel.fetchProfileImageAsBitmap(
-                        profile.uid,
-                        {
-                          Log.d("ProfileResults", "Fetched profile image: $it")
-                          profileImage = it
-                        },
-                        { Log.e("ProfileResults", "Failed to fetch profile image: $it") })
-                    workerViewModel.fetchBannerImageAsBitmap(
-                        profile.uid,
-                        { bannerImage = it },
-                        { Log.e("ProfileResults", "Failed to fetch banner image: $it") })
+                      val profileImage = profileImagesMap[profile.uid]
+                      val bannerImage = bannerImagesMap[profile.uid]
                     distance =
                         profile.location
                             ?.let { workerLocation ->
@@ -473,7 +536,7 @@ fun SearchWorkerResult(
                             SearchWorkerProfileResult(
                                 modifier = Modifier.testTag("worker_profile_result$index"),
                                 profileImage = it2,
-                                name = "${acc.firstName} ${acc.lastName}",
+                                name = profile.displayName,
                                 category = profile.fieldOfWork,
                                 rating = profile.reviews.map { review -> review.rating }.average(),
                                 reviewCount = profile.reviews.size,
@@ -495,6 +558,7 @@ fun SearchWorkerResult(
                     Spacer(modifier = Modifier.height(screenHeight * 0.004f))
                   }
                 }
+                  }
               }
         }
 
@@ -643,7 +707,9 @@ fun SearchWorkerResult(
 
                     QuickFixButton(
                         buttonText = if (saved) "saved" else "save",
-                        onClickAction = { saved = !saved },
+                        onClickAction = {
+                            saved = !saved
+                                        },
                         buttonColor = colorScheme.surface,
                         textColor = colorScheme.onBackground,
                         textStyle = MaterialTheme.typography.labelMedium,
@@ -679,7 +745,7 @@ fun SearchWorkerResult(
                           .padding(horizontal = screenWidth * 0.04f)
                           .testTag("sliding_window_worker_additional_info")) {
                     Text(
-                        text = selectedWorker.fieldOfWork,
+                        text = selectedWorker.displayName,
                         style = MaterialTheme.typography.headlineLarge,
                         color = colorScheme.onBackground,
                         modifier = Modifier.testTag("sliding_window_worker_category"))
@@ -921,4 +987,16 @@ fun SearchWorkerResult(
       }
     }
   }
+}
+
+fun checkIfLoadingComplete(
+    profiles: List<WorkerProfile>,
+    profileImages: Map<String, Bitmap?>,
+    bannerImages: Map<String, Bitmap?>,
+    onComplete: () -> Unit
+) {
+    val allProfilesLoaded = profiles.all { profile ->
+        profileImages[profile.uid] != null && bannerImages[profile.uid] != null
+    }
+    if (allProfilesLoaded) onComplete()
 }
