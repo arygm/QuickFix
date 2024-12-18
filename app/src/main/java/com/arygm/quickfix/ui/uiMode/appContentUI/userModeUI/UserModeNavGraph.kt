@@ -219,7 +219,8 @@ fun UserModeNavHost(
                 Box(
                     modifier =
                         Modifier.align(Alignment.BottomCenter) // Align at bottom of this parent Box
-                            .zIndex(1f)) {
+                            .zIndex(1f)
+                            .testTag("BNM")) {
                       AnimatedVisibility(
                           visible = showBottomBar,
                           enter =
@@ -230,7 +231,7 @@ fun UserModeNavHost(
                               slideOutVertically { fullHeight ->
                                 fullHeight
                               }, // Slide out to bottom
-                          modifier = Modifier.testTag("BNM")) {
+                          ) {
                             BottomNavigationMenu(
                                 onTabSelect = { selectedDestination ->
                                   userNavigationActions.navigateTo(selectedDestination)

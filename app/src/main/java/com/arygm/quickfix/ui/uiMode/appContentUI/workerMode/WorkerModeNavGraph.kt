@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.zIndex
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -109,7 +110,8 @@ fun WorkerModeNavGraph(
                     exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to bottom
                     modifier =
                         Modifier.align(Alignment.BottomCenter) // Align it to the bottom center
-                            .zIndex(1f) // Ensure it's on top
+                            .zIndex(1f)
+                            .testTag("BNM")// Ensure it's on top
                     ) {
                       BottomNavigationMenu(
                           onTabSelect = { selectedDestination ->
