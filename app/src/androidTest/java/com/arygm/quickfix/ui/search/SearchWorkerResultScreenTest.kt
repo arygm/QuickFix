@@ -1938,4 +1938,77 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("applyButton").assertIsNotEnabled()
     composeTestRule.onNodeWithTag("resetButton").assertIsNotEnabled()
   }
+
+  @Test
+  fun testEmergencyUpdatesResults() {
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                price = 150.0,
+                fieldOfWork = "Painter",
+                rating = 4.5,
+                workingHours = Pair(LocalTime.of(0, 0), LocalTime.of(23, 59)),
+                location = Location(45.0, -75.0)),
+            WorkerProfile(
+                uid = "worker2",
+                price = 560.0,
+                fieldOfWork = "Electrician",
+                rating = 4.8,
+                workingHours = Pair(LocalTime.of(0, 0), LocalTime.of(23, 59)),
+                location = Location(40.7128, -74.0060)),
+            WorkerProfile(
+                uid = "worker3",
+                price = 3010.0,
+                fieldOfWork = "Plumber",
+                rating = 3.9,
+                workingHours = Pair(LocalTime.of(0, 0), LocalTime.of(23, 59)),
+                location = Location(40.0, -74.0)))
+
+    // Provide test data to the searchViewModel
+    searchViewModel._subCategoryWorkerProfiles.value = workers
+
+    // Set the content
+    composeTestRule.setContent {
+      SearchWorkerResult(
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          preferencesViewModel,
+          quickFixViewModel)
+    }
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
+
+    composeTestRule.onNodeWithTag("tuneButton").performClick()
+    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(5)
+    // Click on the "Price Range" filter button
+    composeTestRule.onNodeWithText("Emergency").performClick()
+
+    // Wait for the UI to update
+    composeTestRule.waitForIdle()
+
+    val sortedWorkers = listOf(workers[2], workers[1], workers[0])
+    val workerNodes = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
+
+    workerNodes.assertCountEquals(sortedWorkers.size)
+
+    sortedWorkers.forEachIndexed { index, worker ->
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
+    }
+
+    composeTestRule.onNodeWithText("Emergency").performClick()
+
+    val sortedWorkers1 = listOf(workers[0], workers[1], workers[2])
+    val workerNodes1 = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
+
+    workerNodes1.assertCountEquals(sortedWorkers.size)
+
+    sortedWorkers1.forEachIndexed { index, worker ->
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
+    }
+  }
 }

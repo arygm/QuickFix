@@ -43,6 +43,7 @@ import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -176,6 +177,7 @@ fun SearchWorkerResult(
   var priceFilterApplied by remember { mutableStateOf(false) }
   var locationFilterApplied by remember { mutableStateOf(false) }
   var ratingFilterApplied by remember { mutableStateOf(false) }
+  var emergencyFilterApplied by remember { mutableStateOf(false) }
 
   var selectedDays by remember { mutableStateOf(emptyList<LocalDate>()) }
   var selectedHour by remember { mutableStateOf(0) }
@@ -218,6 +220,10 @@ fun SearchWorkerResult(
 
     if (ratingFilterApplied) {
       updatedProfiles = searchViewModel.sortWorkersByRating(updatedProfiles)
+    }
+
+    if (emergencyFilterApplied) {
+      updatedProfiles = searchViewModel.emergencyFilter(updatedProfiles, baseLocation)
     }
 
     Log.d("Chill guy", updatedProfiles.size.toString())
@@ -283,7 +289,33 @@ fun SearchWorkerResult(
               leadingIcon = Icons.Default.MonetizationOn,
               trailingIcon = Icons.Default.KeyboardArrowDown,
               applied = priceFilterApplied),
-      )
+          SearchFilterButtons(
+              onClick = {
+                if (emergencyFilterApplied) {
+                  emergencyFilterApplied = false
+                  reapplyFilters()
+                } else {
+                  lastAppliedMaxDist = 200
+                  lastAppliedPriceStart = 500
+                  lastAppliedPriceEnd = 2500
+                  selectedLocationIndex = null
+                  selectedServices = emptyList()
+                  availabilityFilterApplied = false
+                  priceFilterApplied = false
+                  locationFilterApplied = false
+                  ratingFilterApplied = false
+                  servicesFilterApplied = false
+                  baseLocation = phoneLocation
+                  filteredWorkerProfiles = workerProfiles
+                  filteredWorkerProfiles =
+                      searchViewModel.emergencyFilter(filteredWorkerProfiles, baseLocation)
+                  emergencyFilterApplied = true
+                }
+              },
+              text = "Emergency",
+              leadingIcon = Icons.Default.Warning,
+              trailingIcon = if (emergencyFilterApplied) Icons.Default.Clear else null,
+              applied = emergencyFilterApplied))
 
   // ==========================================================================//
   // ============ TODO: REMOVE NO-DATA WHEN BACKEND IS IMPLEMENTED ============//

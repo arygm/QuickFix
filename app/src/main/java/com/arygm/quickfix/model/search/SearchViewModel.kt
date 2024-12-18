@@ -13,6 +13,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
 import java.time.LocalDate
+import java.time.LocalTime
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -161,7 +162,9 @@ open class SearchViewModel(
   }
 
   fun sortWorkersByRating(workers: List<WorkerProfile>): List<WorkerProfile> {
-    return workers.sortedByDescending { it.rating }
+    return workers.sortedWith(
+        compareByDescending<WorkerProfile> { it.rating.takeIf { !it.isNaN() } }
+            .thenBy { it.rating.isNaN() })
   }
 
   fun filterWorkersByPriceRange(
@@ -199,6 +202,30 @@ open class SearchViewModel(
           onComplete?.invoke()
         },
         onFailure = { Log.e("SearchViewModel", "Failed to fetch worker profiles.") })
+  }
+
+  fun emergencyFilter(
+      workers: List<WorkerProfile>,
+      location: Location,
+      hour: Int = LocalTime.now().hour,
+      minute: Int = LocalTime.now().minute
+  ): List<WorkerProfile> {
+    val availableWorkers =
+        filterWorkersByAvailability(workers, listOf(LocalDate.now()), hour, minute)
+    val sortedWorkers =
+        availableWorkers.sortedBy { worker ->
+          val workerLocation = worker.location
+          if (workerLocation != null) {
+            calculateDistance(
+                location.latitude,
+                location.longitude,
+                workerLocation.latitude,
+                workerLocation.longitude)
+          } else {
+            Double.MAX_VALUE // Place workers without a location at the end
+          }
+        }
+    return sortedWorkers.take(3)
   }
 
   fun searchEngine(query: String) {
