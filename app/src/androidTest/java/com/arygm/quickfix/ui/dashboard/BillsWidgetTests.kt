@@ -11,7 +11,6 @@ import com.arygm.quickfix.model.bill.Units
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.Status
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.BillsWidget
 import com.google.firebase.Timestamp
 import org.junit.Rule
 import org.junit.Test

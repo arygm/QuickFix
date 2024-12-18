@@ -40,6 +40,7 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.utils.loadAppMode
 import com.arygm.quickfix.utils.loadUserId
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlinx.coroutines.launch
@@ -53,6 +54,9 @@ fun MessageScreen(
 ) {
   var userId by remember { mutableStateOf("") }
   var mode by remember { mutableStateOf("") }
+  var chatStatus by remember { mutableStateOf<ChatStatus>(ChatStatus.WAITING_FOR_RESPONSE) }
+  var messages by remember { mutableStateOf<List<Message>>(emptyList()) } // État local des messages
+
   LaunchedEffect(Unit) {
     userId = loadUserId(preferencesViewModel)
     mode = loadAppMode(preferencesViewModel)
@@ -84,7 +88,6 @@ fun MessageScreen(
   val coroutineScope = rememberCoroutineScope()
 
   // Retrieve chat status and prepare suggestions based on user role (User or Worker)
-  val chatStatus = chat.chatStatus
   val suggestions =
       if (mode == AppMode.USER.name) {
         listOf(
@@ -94,6 +97,48 @@ fun MessageScreen(
       } else {
         listOf("How is it going?", "This time doesn’t work for me 🤔", "Yo wassup G")
       }
+  DisposableEffect(chatId) {
+    val db = FirebaseFirestore.getInstance()
+    val chatRef = db.collection("chats").document(chatId)
+
+    val listener =
+        chatRef.addSnapshotListener { snapshot, e ->
+          if (e != null) {
+            Log.e("MessageScreen", "Listen failed: ${e.message}")
+            return@addSnapshotListener
+          }
+          if (snapshot != null && snapshot.exists()) {
+            // Mise à jour des messages
+            val messagesList = snapshot.get("messages") as? List<Map<String, Any>> ?: emptyList()
+            val newMessages =
+                messagesList.mapNotNull { messageData ->
+                  try {
+                    Message(
+                        messageId = messageData["messageId"] as? String ?: "",
+                        senderId = messageData["senderId"] as? String ?: "",
+                        content = messageData["content"] as? String ?: "",
+                        timestamp =
+                            messageData["timestamp"] as? com.google.firebase.Timestamp
+                                ?: com.google.firebase.Timestamp.now())
+                  } catch (ex: Exception) {
+                    Log.e("MessageScreen", "Error parsing message: ${ex.message}")
+                    null
+                  }
+                }
+
+            // Fusionne les nouveaux messages avec l'existant en évitant les doublons
+            messages = (messages + newMessages).distinctBy { it.messageId }
+
+            // Mise à jour du chatStatus
+            val statusString =
+                snapshot.getString("chatStatus") ?: ChatStatus.WAITING_FOR_RESPONSE.name
+            chatStatus = ChatStatus.valueOf(statusString)
+          }
+        }
+
+    // Nettoyer le listener lorsque le composant est détruit
+    onDispose { listener.remove() }
+  }
   val listState = rememberLazyListState()
 
   // Fetch chats and QuickFixes when relevant keys change
@@ -102,8 +147,8 @@ fun MessageScreen(
     quickFixViewModel.getQuickFixes()
   }
   // Automatically scroll to the last message when new messages are added
-  LaunchedEffect(chat.messages) {
-    chat.messages.let {
+  LaunchedEffect(messages) {
+    messages.let {
       if (it.isNotEmpty()) {
         listState.animateScrollToItem(it.size - 1)
       }
@@ -202,8 +247,7 @@ fun MessageScreen(
                                               .padding(horizontal = maxWidth * 0.04f)
                                               .testTag("userResponseContainer")) {
                                         Text(
-                                            text =
-                                                "Awaiting confirmation from ${quickFix!!.workerId}...",
+                                            text = "Awaiting confirmation from the worker...",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = colorScheme.onBackground,
                                             textAlign = TextAlign.Center,
@@ -298,7 +342,7 @@ fun MessageScreen(
                                       Text(
                                           text =
                                               if (mode == AppMode.USER.name) {
-                                                "${quickFix!!.workerId} has accepted the QuickFix! 🎉"
+                                                "the worker has accepted the QuickFix! 🎉"
                                               } else {
                                                 "You have accepted this request! 🎉"
                                               },
@@ -343,7 +387,7 @@ fun MessageScreen(
                                 Text(
                                     text =
                                         if (mode == AppMode.USER.name) {
-                                          "${quickFix!!.workerId} has rejected the QuickFix. No big deal! Contact another worker from the search screen! 😊"
+                                          "the worker has rejected the QuickFix. No big deal! Contact another worker from the search screen! 😊"
                                         } else {
                                           "You have rejected this request. Find your next client on the announcement screen! 😊"
                                         },
@@ -359,7 +403,7 @@ fun MessageScreen(
                             }
                           }
                           // Display chat messages with date dividers
-                          chat.messages.let { messages ->
+                          messages.let { messages ->
                             itemsIndexed(messages) { index, message ->
                               val previousMessage = if (index > 0) messages[index - 1] else null
 

@@ -15,7 +15,6 @@ import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfile
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.ChatWidget
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

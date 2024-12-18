@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard
+package com.arygm.quickfix.ui.dashboard
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image

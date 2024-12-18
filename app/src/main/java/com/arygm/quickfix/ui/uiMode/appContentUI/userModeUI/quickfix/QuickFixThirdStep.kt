@@ -75,7 +75,7 @@ fun QuickFixThirdStep(
     quickFix: QuickFix,
     workerProfile: WorkerProfile,
     onQuickFixChange: (QuickFix) -> Unit,
-    onQuickFixPay: () -> Unit,
+    onQuickFixPay: (QuickFix) -> Unit,
     mode: AppMode
 ) {
   val focusManager = LocalFocusManager.current
@@ -165,7 +165,8 @@ fun QuickFixThirdStep(
               }
         }
       }
-      items(if (mode == AppMode.WORKER) listDates.size else quickFix.date.size) { index ->
+      items(if (quickFix.status == Status.PENDING) listDates.size else quickFix.date.size) { index
+        ->
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -177,7 +178,7 @@ fun QuickFixThirdStep(
               Text(
                   text =
                       dateFormatter.format(
-                          if (mode == AppMode.WORKER) listDates[index].toDate()
+                          if (quickFix.status == Status.PENDING) listDates[index].toDate()
                           else quickFix.date[index].toDate()),
                   style = poppinsTypography.labelSmall,
                   color = colorScheme.onBackground,
@@ -186,7 +187,7 @@ fun QuickFixThirdStep(
               Text(
                   text =
                       timeFormatter.format(
-                          if (mode == AppMode.WORKER) listDates[index].toDate()
+                          if (quickFix.status == Status.PENDING) listDates[index].toDate()
                           else quickFix.date[index].toDate()),
                   style = poppinsTypography.labelSmall,
                   color = colorScheme.onBackground,
@@ -194,7 +195,7 @@ fun QuickFixThirdStep(
                   modifier = Modifier.weight(0.5f).testTag("TimeText_$index"))
             }
       }
-      if (mode == AppMode.WORKER) {
+      if (quickFix.status == Status.PENDING) {
         item {
           Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
             Button(
@@ -354,9 +355,11 @@ fun QuickFixThirdStep(
       }
 
       items(
-          if (mode == AppMode.WORKER) listBillFields.size else quickFix.bill.size,
+          if (quickFix.status == Status.PENDING) listBillFields.size else quickFix.bill.size,
           key = { it.hashCode() }) { index ->
-            val billField = listBillFields[index]
+            val billField =
+                if (quickFix.status == Status.PENDING) listBillFields[index]
+                else quickFix.bill[index]
             var dropDownUnitExpanded by remember { mutableStateOf(false) }
             var billDescription by remember { mutableStateOf(billField.description) }
             var billAmount by remember { mutableDoubleStateOf(billField.amount) }
@@ -370,7 +373,7 @@ fun QuickFixThirdStep(
                   Box(
                       contentAlignment = Alignment.TopStart,
                       modifier = Modifier.width(150.dp * widthRatio.value)) {
-                        if (mode == AppMode.WORKER) {
+                        if (quickFix.status == Status.PENDING) {
                           IconButton(
                               onClick = { listBillFields = listBillFields - billField },
                               modifier =
@@ -390,10 +393,10 @@ fun QuickFixThirdStep(
                         }
                         QuickFixTextFieldCustom(
                             value =
-                                if (mode == AppMode.WORKER) billDescription
+                                if (quickFix.status == Status.PENDING) billDescription
                                 else quickFix.bill[index].description,
                             onValueChange = { it ->
-                              if (mode == AppMode.WORKER) {
+                              if (quickFix.status == Status.PENDING) {
                                 billDescription = it
                                 updateBillField(index, listBillFields) {
                                   it.copy(description = billDescription)
@@ -404,14 +407,15 @@ fun QuickFixThirdStep(
                             alwaysShowTrailingIcon = false,
                             singleLine = false,
                             placeHolderText = "Add a description",
-                            enabled = mode == AppMode.WORKER,
+                            enabled = quickFix.status == Status.PENDING,
                             shape = RoundedCornerShape(10.dp),
                             showTrailingIcon = { false },
                             hasShadow = false,
                             borderColor =
-                                if (mode == AppMode.WORKER) colorScheme.onSecondaryContainer
+                                if (quickFix.status == Status.PENDING)
+                                    colorScheme.onSecondaryContainer
                                 else colorScheme.surface,
-                            borderThickness = if (mode == AppMode.WORKER) 1.dp else 0.dp,
+                            borderThickness = if (quickFix.status == Status.PENDING) 1.dp else 0.dp,
                             heightInEnabled = true,
                             modifier = Modifier.testTag("DescriptionTextField_$index"))
                       }
@@ -419,7 +423,7 @@ fun QuickFixThirdStep(
                   Box {
                     QuickFixTextFieldCustom(
                         value =
-                            if (mode == AppMode.WORKER) billUnit.name
+                            if (quickFix.status == Status.PENDING) billUnit.name
                             else quickFix.bill[index].unit.name,
                         onValueChange = {},
                         widthField = 40.dp * widthRatio.value,
@@ -434,22 +438,22 @@ fun QuickFixThirdStep(
                                       .size(16.dp * widthRatio.value))
                         },
                         modifier = Modifier.testTag("UnitDropdown_$index"),
-                        showTrailingIcon = { mode == AppMode.WORKER },
+                        showTrailingIcon = { quickFix.status == Status.PENDING },
                         showLeadingIcon = { false },
                         hasShadow = false,
-                        enabled = mode == AppMode.WORKER,
+                        enabled = quickFix.status == Status.PENDING,
                         borderColor =
-                            if (mode == AppMode.WORKER) colorScheme.onSecondaryContainer
+                            if (quickFix.status == Status.PENDING) colorScheme.onSecondaryContainer
                             else colorScheme.surface,
-                        borderThickness = if (mode == AppMode.WORKER) 1.dp else 0.dp,
+                        borderThickness = if (quickFix.status == Status.PENDING) 1.dp else 0.dp,
                         scrollable = false,
-                        alwaysShowTrailingIcon = mode == AppMode.WORKER,
+                        alwaysShowTrailingIcon = quickFix.status == Status.PENDING,
                         isTextField = false,
                         onTextFieldClick = { dropDownUnitExpanded = true },
                         moveTrailingIconLeft = 4.dp * widthRatio.value,
                         sizeIconGroup = 16.dp * widthRatio.value,
                     )
-                    if (mode == AppMode.WORKER) {
+                    if (quickFix.status == Status.PENDING) {
                       DropdownMenu(
                           expanded = dropDownUnitExpanded,
                           onDismissRequest = { dropDownUnitExpanded = false },
@@ -491,11 +495,11 @@ fun QuickFixThirdStep(
                   Spacer(modifier = Modifier.width(6.dp * widthRatio.value))
                   QuickFixTextFieldCustom(
                       value =
-                          if (mode == AppMode.WORKER)
+                          if (quickFix.status == Status.PENDING)
                               billAmount.let { if (it == 0.0) "" else it.toString() }
                           else quickFix.bill[index].amount.toString(), // Use the raw input
                       onValueChange = { input ->
-                        if (mode == AppMode.WORKER) {
+                        if (quickFix.status == Status.PENDING) {
                           val trimmedInput = input.trimStart('0').ifEmpty { "0" }
                           if (trimmedInput.matches(numberPattern)) {
                             billAmount = trimmedInput.toDoubleOrNull() ?: 0.0
@@ -509,23 +513,23 @@ fun QuickFixThirdStep(
                       widthField = 50.dp * widthRatio.value,
                       showTrailingIcon = { false },
                       hasShadow = false,
-                      enabled = mode == AppMode.WORKER,
+                      enabled = quickFix.status == Status.PENDING,
                       borderColor =
-                          if (mode == AppMode.WORKER) colorScheme.onSecondaryContainer
+                          if (quickFix.status == Status.PENDING) colorScheme.onSecondaryContainer
                           else colorScheme.surface,
                       shape = RoundedCornerShape(10.dp),
-                      borderThickness = if (mode == AppMode.WORKER) 1.dp else 0.dp,
+                      borderThickness = if (quickFix.status == Status.PENDING) 1.dp else 0.dp,
                       scrollable = false,
                   )
 
                   Spacer(modifier = Modifier.width(6.dp * widthRatio.value))
                   QuickFixTextFieldCustom(
                       value =
-                          if (mode == AppMode.WORKER)
+                          if (quickFix.status == Status.PENDING)
                               billUnitPrice.let { if (it == 0.0) "" else it.toString() }
                           else quickFix.bill[index].unitPrice.toString(), // Use the raw input
                       onValueChange = { input ->
-                        if (mode == AppMode.WORKER) {
+                        if (quickFix.status == Status.PENDING) {
                           val trimmedInput = input.trimStart('0').ifEmpty { "0" }
                           if (trimmedInput.matches(numberPattern)) {
                             billUnitPrice = trimmedInput.toDoubleOrNull() ?: 0.0
@@ -541,17 +545,17 @@ fun QuickFixThirdStep(
                       showTrailingIcon = { false },
                       hasShadow = false,
                       borderColor =
-                          if (mode == AppMode.WORKER) colorScheme.onSecondaryContainer
+                          if (quickFix.status == Status.PENDING) colorScheme.onSecondaryContainer
                           else colorScheme.surface,
                       shape = RoundedCornerShape(10.dp),
-                      borderThickness = if (mode == AppMode.WORKER) 1.dp else 0.dp,
+                      borderThickness = if (quickFix.status == Status.PENDING) 1.dp else 0.dp,
                       scrollable = false,
-                      enabled = mode == AppMode.WORKER,
+                      enabled = quickFix.status == Status.PENDING,
                   )
                   Spacer(modifier = Modifier.width(2.dp * widthRatio.value))
                   Text(
                       text =
-                          if (mode == AppMode.WORKER) {
+                          if (quickFix.status == Status.PENDING) {
                             if (total == 0.0 || total.isNaN()) "Total CHF"
                             else "%.2f".format(total).plus(" CHF")
                           } else {
@@ -565,7 +569,7 @@ fun QuickFixThirdStep(
                 }
           }
 
-      if (mode == AppMode.WORKER) {
+      if (quickFix.status == Status.PENDING) {
         item {
           Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
             Button(
@@ -611,7 +615,7 @@ fun QuickFixThirdStep(
                   modifier = Modifier.weight(1f).testTag("OverallTotalLabel"))
               Text(
                   text =
-                      if (mode == AppMode.WORKER) {
+                      if (quickFix.status == Status.PENDING) {
                         listBillFields
                             .map { it.amount.times(it.unitPrice) }
                             .sum()
@@ -632,26 +636,27 @@ fun QuickFixThirdStep(
 
       item {
         QuickFixButton(
-            buttonText = if (mode == AppMode.WORKER) "Submit the QuickFix" else "Pay",
+            buttonText = if (quickFix.status == Status.PENDING) "Submit the QuickFix" else "Pay",
             buttonColor = colorScheme.primary,
             textColor = colorScheme.onPrimary,
             onClickAction = {
-              if (mode == AppMode.WORKER) {
+              if (quickFix.status == Status.PENDING) {
                 val updatedQuickFix =
                     quickFix.copy(date = listDates, bill = listBillFields, status = Status.UNPAID)
                 quickFixViewModel.updateQuickFix(
                     updatedQuickFix,
                     onSuccess = {
                       onQuickFixChange(updatedQuickFix)
-                      /* Make so that the worker cannot edit the quickfix anymore */
+                      // TODO /* Make so that the worker cannot edit the quickfix anymore */
                     },
                     onFailure = {
                       Log.e("QuickFixThirdStep", "Failed to update QuickFix: ${it.message}")
                     })
               } else {
+                val quickfix = quickFix.copy(status = Status.UPCOMING)
                 quickFixViewModel.updateQuickFix(
-                    quickFix.copy(status = Status.UPCOMING),
-                    onSuccess = { onQuickFixPay() },
+                    quickfix,
+                    onSuccess = { onQuickFixPay(quickfix) },
                     onFailure = {
                       Log.e("QuickFixThirdStep", "Failed to update QuickFix: ${it.message}")
                     })
@@ -662,12 +667,14 @@ fun QuickFixThirdStep(
                     .padding(top = 16.dp * heightRatio.value)
                     .testTag("SubmitQuickFixButton"),
             enabled =
-                if (mode == AppMode.WORKER) {
+                if (quickFix.status == Status.PENDING) {
                   listDates.isNotEmpty() &&
                       listBillFields.isNotEmpty() &&
                       listBillFields.all {
                         it.amount != 0.0 && it.unitPrice != 0.0 && it.description.isNotBlank()
                       }
+                } else if (mode == AppMode.WORKER) {
+                  false
                 } else true)
       }
     }

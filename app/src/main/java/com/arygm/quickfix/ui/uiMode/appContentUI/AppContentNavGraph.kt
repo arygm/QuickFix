@@ -49,6 +49,7 @@ fun AppContentNavGraph(
     chatViewModel: ChatViewModel,
     quickFixViewModel: QuickFixViewModel,
 ) {
+
   val appContentNavController = rememberNavController()
   val appContentNavigationActions = remember { NavigationActions(appContentNavController) }
   var currentAppMode by remember { mutableStateOf(AppMode.USER) }
@@ -112,6 +113,7 @@ fun AppContentNavGraph(
               accountViewModel,
               rootNavigationActions,
               workerPreferencesViewModel,
+              locationViewModel,
               userViewModel,
               workerViewModel,
               quickFixViewModel,

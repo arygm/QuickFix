@@ -49,6 +49,7 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
+import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.elements.PopularServicesRow
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
@@ -204,9 +205,12 @@ fun HomeScreen(
                   ) {
                     QuickFixesWidget(
                         status = "Upcoming",
-                        quickFixList = quickFixes,
+                        quickFixList = quickFixes.filter { it.status == Status.UPCOMING },
                         onShowAllClick = { /* Handle Show All Click */},
-                        onItemClick = { /* Handle QuickFix Item Click */},
+                        onItemClick = {
+                          quickFixViewModel.setUpdateQuickFix(it)
+                          navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
+                        },
                         modifier = Modifier.testTag("UpcomingQuickFixes"),
                         workerViewModel = workerViewModel,
                     )

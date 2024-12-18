@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -55,7 +56,10 @@ import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.QuickFixWorkerOverview
+import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
+import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTINATIONS
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarStyle
 import com.gowtham.ratingbar.StepSize
@@ -69,6 +73,7 @@ fun QuickFixLastStep(
     categoryViewModel: CategoryViewModel,
     quickFixViewModel: QuickFixViewModel,
     workerViewModel: ProfileViewModel,
+    navigationActionsRoot: NavigationActions,
     onQuickFixChange: (QuickFix) -> Unit,
     mode: AppMode
 ) {
@@ -345,10 +350,34 @@ fun QuickFixLastStep(
                         /* cancelQuickFix()*/
                       },
                       modifier = Modifier.fillMaxWidth().testTag("CancelButton"))
+                  var showButtonWorker by remember { mutableStateOf(mode == AppMode.WORKER) }
+                  if (showButtonWorker) {
+                    QuickFixButton(
+                        buttonText = "Mark as completed",
+                        buttonColor = colorScheme.primary,
+                        textColor = colorScheme.onPrimary,
+                        onClickAction = {
+                          quickFixViewModel.updateQuickFix(
+                              quickFix.copy(status = Status.COMPLETED),
+                              onSuccess = {
+                                showButtonWorker = false
+                                onQuickFixChange(quickFix.copy(status = Status.COMPLETED))
+                                Log.d("QuickFixLastStep", "QuickFix completed")
+                              },
+                              onFailure = {
+                                Log.e("QuickFixLastStep", "Error completing QuickFix", it)
+                              })
+                        },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp * heightRatio.value))
+                  }
                 }
-
-                if ((quickFix.status == Status.COMPLETED || quickFix.status == Status.CANCELED) &&
-                    mode == AppMode.USER) {
+                var showReview by remember {
+                  mutableStateOf(
+                      mode == AppMode.USER &&
+                          (quickFix.status == Status.COMPLETED ||
+                              quickFix.status == Status.CANCELED))
+                }
+                if (showReview) {
                   Column(
                       modifier =
                           Modifier.fillMaxWidth()
@@ -442,6 +471,19 @@ fun QuickFixLastStep(
                                             username = "Placeholder, get real username"))
                                   },
                                   onSuccess = {
+                                    quickFixViewModel.updateQuickFix(
+                                        quickFix.copy(status = Status.FINISHED),
+                                        onSuccess = {
+                                          showReview = false
+                                          Log.d("QuickFixLastStep", "Worker profile updated")
+                                          onQuickFixChange(quickFix.copy(status = Status.FINISHED))
+                                        },
+                                        onFailure = {
+                                          Log.e(
+                                              "QuickFixLastStep",
+                                              "Error updating worker profile",
+                                              it)
+                                        })
                                     Log.d("QuickFixLastStep", "Worker profile updated")
                                   },
                                   onFailure = {
@@ -453,6 +495,26 @@ fun QuickFixLastStep(
                                     .padding(top = 8.dp * heightRatio.value)
                                     .testTag("FinishButton"))
                       }
+                }
+
+                if (!showReview && quickFix.status == Status.FINISHED) {
+                  QuickFixButton(
+                      buttonText = "Go back home",
+                      buttonColor = colorScheme.surface,
+                      textStyle =
+                          poppinsTypography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                      textColor = colorScheme.primary,
+                      onClickAction = {
+                        navigationActionsRoot.navigateTo(
+                            if (mode == AppMode.USER) USER_TOP_LEVEL_DESTINATIONS[0].route
+                            else WORKER_TOP_LEVEL_DESTINATIONS[0].route)
+                      },
+                      leadingIcon = Icons.Outlined.Home,
+                      leadingIconTint = colorScheme.primary,
+                      modifier =
+                          Modifier.padding(top = 16.dp * heightRatio.value)
+                              .fillMaxWidth()
+                              .testTag("ConsultDiscussionButton"))
                 }
               }
             }
