@@ -110,12 +110,12 @@ fun AccountConfigurationScreen(
   LaunchedEffect(Unit) {
     // Load saved data
     uid = loadUserId(preferencesViewModel)
-    isWorker = loadIsWorker(preferencesViewModel)
     savedFirstName = loadFirstName(preferencesViewModel)
     savedLastName = loadLastName(preferencesViewModel)
     savedEmail = loadEmail(preferencesViewModel)
     savedBirthDate = loadBirthDate(preferencesViewModel)
     savedProfilePicture = loadProfilePicture(preferencesViewModel)
+    isWorker = loadIsWorker(preferencesViewModel)
 
     // Initialize input fields with saved data
     inputFirstName = savedFirstName
@@ -366,6 +366,7 @@ fun AccountConfigurationScreen(
                                           inputBirthDate.split("/")[1].toInt() - 1,
                                           inputBirthDate.split("/")[0].toInt())
                                       .time),
+                          isWorker = isWorker,
                           profilePicture = savedProfilePicture)
                   accountViewModel.updateAccount(
                       updatedAccount,
