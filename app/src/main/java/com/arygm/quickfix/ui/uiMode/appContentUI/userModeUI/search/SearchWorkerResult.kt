@@ -122,7 +122,8 @@ fun SearchWorkerResult(
     userProfileViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
     quickFixViewModel: QuickFixViewModel,
-    geocoderWrapper: GeocoderWrapper = GeocoderWrapper(LocalContext.current)
+    geocoderWrapper: GeocoderWrapper = GeocoderWrapper(LocalContext.current),
+    locationHelper: LocationHelper = LocationHelper(LocalContext.current, MainActivity())
 ) {
   fun getCityNameFromCoordinates(latitude: Double, longitude: Double): String? {
     val addresses = geocoderWrapper.getFromLocation(latitude, longitude, 1)
@@ -130,7 +131,6 @@ fun SearchWorkerResult(
         ?: addresses?.firstOrNull()?.subAdminArea
         ?: addresses?.firstOrNull()?.adminArea
   }
-  val locationHelper = LocationHelper(LocalContext.current, MainActivity())
   var phoneLocation by remember {
     mutableStateOf(com.arygm.quickfix.model.locations.Location(0.0, 0.0, "Default"))
   }
@@ -240,6 +240,7 @@ fun SearchWorkerResult(
                 locationFilterApplied = false
                 ratingFilterApplied = false
                 servicesFilterApplied = false
+                emergencyFilterApplied = false
                 lastAppliedMaxDist = 200
                 lastAppliedPriceStart = 500
                 lastAppliedPriceEnd = 2500
