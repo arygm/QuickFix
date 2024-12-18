@@ -16,6 +16,8 @@ import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -39,11 +41,15 @@ class SearchOnBoardingTest {
   private lateinit var categoryViewModel: CategoryViewModel
   private lateinit var navigationActionsRoot: NavigationActions
   private lateinit var quickFixViewModel: QuickFixViewModel
+  private lateinit var workerViewModel: ProfileViewModel
+  private lateinit var workerProfileRepository: ProfileRepository
 
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setup() {
+      workerProfileRepository = mock(ProfileRepository::class.java)
+      workerViewModel = ProfileViewModel(workerProfileRepository)
     navigationActions = mock(NavigationActions::class.java)
     navigationActionsRoot = mock(NavigationActions::class.java)
     workerProfileRepo = mockk(relaxed = true)
@@ -64,7 +70,8 @@ class SearchOnBoardingTest {
           searchViewModel,
           accountViewModel,
           categoryViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          workerViewModel)
     }
 
     // Check that the search input field is displayed
@@ -84,7 +91,8 @@ class SearchOnBoardingTest {
           searchViewModel,
           accountViewModel,
           categoryViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          workerViewModel)
     }
 
     // Input text into the search field
@@ -113,7 +121,8 @@ class SearchOnBoardingTest {
           searchViewModel = searchViewModel,
           accountViewModel = accountViewModel,
           categoryViewModel = categoryViewModel,
-          quickFixViewModel = quickFixViewModel)
+          quickFixViewModel = quickFixViewModel,
+            workerViewModel = workerViewModel)
     }
 
     // Verify initial state (Categories are displayed)

@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.theme.poppinsFontFamily
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import java.util.Locale
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -95,7 +96,7 @@ fun SearchWorkerProfileResult(
                     verticalArrangement = Arrangement.Top,
                 ) {
                   Row(verticalAlignment = Alignment.CenterVertically) {
-                    val roundedRating = String.format("%.2f", rating).toDouble()
+                      val roundedRating = String.format(Locale.US, "%.2f", rating).toDouble()
                     Text(
                         text = "$roundedRating ★",
                         fontFamily = poppinsFontFamily,
