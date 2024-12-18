@@ -146,22 +146,6 @@ fun SearchWorkerResult(
 
     var loading by remember { mutableStateOf(true) } // Tracks if data is loading
 
-    val currentAccount = remember { mutableStateOf<Account?>(null) }
-    LaunchedEffect(Unit) {
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd") // Adjust format as needed
-        val localDate = LocalDate.parse(loadBirthDate(preferencesViewModel), formatter)
-        val epochSeconds = localDate.atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
-        Timestamp(epochSeconds, 0) // 0 for nanoseconds
-        Account(
-            uid = loadUserId(preferencesViewModel),
-            firstName = loadFirstName(preferencesViewModel),
-            lastName = loadLastName(preferencesViewModel),
-            email = loadEmail(preferencesViewModel),
-            birthDate = Timestamp(epochSeconds, 0),
-            isWorker = loadIsWorker(preferencesViewModel)
-        )
-    }
-
   LaunchedEffect(Unit) {
     if (locationHelper.checkPermissions()) {
       locationHelper.getCurrentLocation { location ->
@@ -709,6 +693,22 @@ fun SearchWorkerResult(
                         buttonText = if (saved) "saved" else "save",
                         onClickAction = {
                             saved = !saved
+                            val newProfile =
+                                userProfile?.let {
+                                    UserProfile(
+                                        locations = it.locations,
+                                        announcements = it.announcements,
+                                        wallet = it.wallet,
+                                        uid = it.uid,
+                                        quickFixes = it.quickFixes,
+                                        savedList = it.savedList + selectedWorker.uid
+                                    )
+                                }
+                            userProfileViewModel.updateProfile(newProfile!!, onSuccess = {
+                                Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
+                            }, onFailure = {
+                                Log.e("SlidingWindow", "Failed to save profile")
+                            })
                                         },
                         buttonColor = colorScheme.surface,
                         textColor = colorScheme.onBackground,
