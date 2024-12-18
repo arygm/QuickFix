@@ -64,7 +64,6 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixOnB
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.AnnouncementDetailScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchWorkerResult
-import com.arygm.quickfix.ui.uiMode.workerMode.navigation.getBottomBarIdWorker
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
