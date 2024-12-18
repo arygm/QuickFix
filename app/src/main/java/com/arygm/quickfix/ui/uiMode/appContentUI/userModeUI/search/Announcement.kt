@@ -879,7 +879,9 @@ fun AnnouncementScreen(
                         !titleIsEmpty &&
                             categoryIsSelected &&
                             locationIsSelected &&
-                            !descriptionIsEmpty)
+                            !descriptionIsEmpty
+                )
+              Spacer(modifier = Modifier.height(80.dp * heightRatio.value))
               }
         }
 
@@ -889,6 +891,8 @@ fun AnnouncementScreen(
         onDismissRequest = { showUploadImageSheet = false },
         onShowBottomSheetChange = { showUploadImageSheet = it },
         onActionRequest = { value -> announcementViewModel.addUploadedImage(value) })
+
+
   }
 }
 

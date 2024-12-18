@@ -56,6 +56,7 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.MessageScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.getBottomBarIdUser
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.UserProfileScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.BusinessScreen
@@ -216,23 +217,30 @@ fun UserModeNavHost(
                     }
 
                 // Bottom bar aligned at the bottom of the same parent Box
-
-                AnimatedVisibility(
-                    visible = showBottomBar,
-                    enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from bottom
-                    exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to bottom
+                Box(
                     modifier =
-                        Modifier.align(Alignment.BottomCenter) // Align it to the bottom center
+                        Modifier.align(Alignment.BottomCenter) // Align at bottom of this parent Box
                             .zIndex(1f)
-                            .testTag("BNM") // Ensure it's on top
-                    ) {
-                      BottomNavigationMenu(
-                          onTabSelect = { selectedDestination ->
-                            userNavigationActions.navigateTo(selectedDestination)
-                          },
-                          navigationActions = userNavigationActions,
-                          tabList = USER_TOP_LEVEL_DESTINATIONS,
-                          getBottomBarId = getBottomBarIdWorker)
+                            .testTag("BNM")) {
+                      AnimatedVisibility(
+                          visible = showBottomBar,
+                          enter =
+                              slideInVertically { fullHeight ->
+                                fullHeight
+                              }, // Slide in from bottom
+                          exit =
+                              slideOutVertically { fullHeight ->
+                                fullHeight
+                              }, // Slide out to bottom
+                      ) {
+                        BottomNavigationMenu(
+                            onTabSelect = { selectedDestination ->
+                              userNavigationActions.navigateTo(selectedDestination)
+                            },
+                            navigationActions = userNavigationActions,
+                            tabList = USER_TOP_LEVEL_DESTINATIONS,
+                            getBottomBarId = getBottomBarIdUser)
+                      }
                     }
               }
         }
