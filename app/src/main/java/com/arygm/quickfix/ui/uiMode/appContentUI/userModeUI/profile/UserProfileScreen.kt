@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.switchModes.AppMode
@@ -29,7 +30,8 @@ fun UserProfileScreen(
     preferencesViewModel: PreferencesViewModel,
     userPreferencesViewModel: PreferencesViewModelUserProfile,
     appContentNavigationActions: NavigationActions,
-    modeViewModel: ModeViewModel
+    modeViewModel: ModeViewModel,
+    accountViewModel: AccountViewModel
 ) {
   val isWorker by preferencesViewModel.isWorkerFlow.collectAsState(initial = false)
 
@@ -102,5 +104,6 @@ fun UserProfileScreen(
                     cardCornerRadius = 16.dp,
                     showConditionalItem = !isWorker,
                     conditionalItem = conditionalWorkerSection)
-              }))
+              }),
+      accountViewModel = accountViewModel)
 }

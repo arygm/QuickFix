@@ -1,7 +1,11 @@
 package com.arygm.quickfix.model.account
 
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
@@ -14,6 +18,10 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
+import java.io.ByteArrayOutputStream
 import junit.framework.TestCase.fail
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -24,10 +32,12 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.MockedStatic
 import org.mockito.Mockito
 import org.mockito.Mockito.doNothing
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
@@ -53,6 +63,12 @@ class AccountRepositoryFirestoreTest {
   @Mock private lateinit var mockAccountQuerySnapshot: QuerySnapshot
 
   @Mock private lateinit var mockQuery: Query
+  // Firebase Storage Mocks
+  @Mock private lateinit var mockStorage: FirebaseStorage
+  @Mock private lateinit var storageRef: StorageReference
+  @Mock private lateinit var storageRef1: StorageReference
+  @Mock private lateinit var storageRef2: StorageReference
+  @Mock private lateinit var accountFolderRef: StorageReference
 
   private lateinit var mockFirebaseAuth: FirebaseAuth
   private lateinit var firebaseAuthMockedStatic: MockedStatic<FirebaseAuth>
@@ -66,7 +82,8 @@ class AccountRepositoryFirestoreTest {
           lastName = "Doe",
           email = "john.doe@example.com",
           birthDate = Timestamp.now(),
-          isWorker = false)
+          isWorker = false,
+          profilePicture = "https://example.com/profile.jpg")
 
   private val account2 =
       Account(
@@ -75,7 +92,8 @@ class AccountRepositoryFirestoreTest {
           lastName = "Smith",
           email = "jane.smith@example.com",
           birthDate = Timestamp.now(),
-          isWorker = true)
+          isWorker = true,
+          profilePicture = "https://example.com/profile2.jpg")
 
   @Before
   fun setUp() {
@@ -92,8 +110,11 @@ class AccountRepositoryFirestoreTest {
     firebaseAuthMockedStatic
         .`when`<FirebaseAuth> { FirebaseAuth.getInstance() }
         .thenReturn(mockFirebaseAuth)
-
-    accountRepositoryFirestore = AccountRepositoryFirestore(mockFirestore)
+    `when`(mockStorage.reference).thenReturn(storageRef)
+    `when`(storageRef.child(anyString())).thenReturn(storageRef1)
+    `when`(storageRef1.child(anyString())).thenReturn(storageRef2)
+    `when`(storageRef2.child(anyString())).thenReturn(accountFolderRef)
+    accountRepositoryFirestore = AccountRepositoryFirestore(mockFirestore, mockStorage)
 
     `when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
@@ -111,6 +132,96 @@ class AccountRepositoryFirestoreTest {
   fun tearDown() {
     // Close the static mock
     firebaseAuthMockedStatic.close()
+  }
+
+  @Test
+  fun uploadAccountImages_whenSuccess_callsOnSuccess() {
+    val accountId = "1"
+    val bitmaps = listOf(mock(Bitmap::class.java))
+    val expectedUrl = listOf("https://example.com/uploaded_image.jpg")
+    val baos = ByteArrayOutputStream()
+
+    // Simuler la compression d'image
+    bitmaps.forEach { bitmap -> bitmap.compress(Bitmap.CompressFormat.JPEG, 90, baos) }
+    val imageData = baos.toByteArray()
+
+    // Mock StorageReference
+    `when`(storageRef.child("accounts").child(accountId)).thenReturn(accountFolderRef)
+    val fileRef = mock(StorageReference::class.java)
+
+    `when`(accountFolderRef.child(anyString())).thenReturn(fileRef)
+
+    // Mock putBytes
+    val mockUploadTask = mock(UploadTask::class.java)
+    `when`(fileRef.putBytes(eq(imageData))).thenReturn(mockUploadTask)
+
+    // Mock addOnSuccessListener
+    `when`(mockUploadTask.addOnSuccessListener(org.mockito.kotlin.any())).thenAnswer { invocation ->
+      val listener = invocation.getArgument<OnSuccessListener<UploadTask.TaskSnapshot>>(0)
+      val taskSnapshot = mock(UploadTask.TaskSnapshot::class.java) // Mock the snapshot
+      listener.onSuccess(taskSnapshot)
+      mockUploadTask
+    }
+
+    // Mock fileRef.downloadUrl
+    `when`(fileRef.downloadUrl).thenReturn(Tasks.forResult(Uri.parse(expectedUrl[0])))
+
+    var resultUrl = listOf<String>()
+    accountRepositoryFirestore.uploadAccountImages(
+        accountId = accountId,
+        images = bitmaps,
+        onSuccess = { urls ->
+          resultUrl = urls
+          assertEquals(expectedUrl, resultUrl)
+        },
+        onFailure = { fail("Failure callback should not be called") })
+    shadowOf(Looper.getMainLooper()).idle()
+  }
+
+  @Test
+  fun uploadAccountImages_whenFailure_callsOnFailure() {
+    val accountId = "1"
+    val bitmaps = listOf(mock(Bitmap::class.java))
+    val exception = Exception("Upload failed")
+
+    // Mock StorageReference
+    `when`(storageRef.child("accounts").child(accountId)).thenReturn(accountFolderRef)
+    val fileRef = mock(StorageReference::class.java)
+    `when`(accountFolderRef.child(anyString())).thenReturn(fileRef)
+
+    // Mock putBytes
+    val mockUploadTask = mock(UploadTask::class.java)
+    `when`(fileRef.putBytes(any())).thenReturn(mockUploadTask)
+
+    // Mock addOnFailureListener
+    `when`(mockUploadTask.addOnFailureListener(org.mockito.kotlin.any())).thenAnswer { invocation ->
+      val listener = invocation.arguments[0] as OnFailureListener
+      listener.onFailure(exception) // Simule une erreur d'upload
+      mockUploadTask
+    }
+
+    // Mock addOnSuccessListener pour éviter des comportements inattendus
+    `when`(mockUploadTask.addOnSuccessListener(org.mockito.kotlin.any())).thenReturn(mockUploadTask)
+
+    // Act
+    var onFailureCalled = false
+    var exceptionReceived: Exception? = null
+    accountRepositoryFirestore.uploadAccountImages(
+        accountId = accountId,
+        images = bitmaps,
+        onSuccess = { fail("onSuccess should not be called when upload fails") },
+        onFailure = { e ->
+          onFailureCalled = true
+          exceptionReceived = e
+        })
+
+    // Attendre que les tâches se terminent
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assertions
+    assertTrue(onFailureCalled)
+    assertNotNull(exceptionReceived)
+    assertEquals(exception, exceptionReceived)
   }
 
   // ----- CRUD Operation Tests -----
@@ -306,6 +417,8 @@ class AccountRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.getString("lastName")).thenReturn(account.lastName)
     `when`(mockDocumentSnapshot.getString("email")).thenReturn(account.email)
     `when`(mockDocumentSnapshot.getTimestamp("birthDate")).thenReturn(account.birthDate)
+    `when`(mockDocumentSnapshot.getBoolean("worker")).thenReturn(account.isWorker)
+    `when`(mockDocumentSnapshot.getString("profilePicture")).thenReturn(account.profilePicture)
 
     var callbackCalled = false
 
@@ -381,6 +494,8 @@ class AccountRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.getString("lastName")).thenReturn(account.lastName)
     `when`(mockDocumentSnapshot.getString("email")).thenReturn(account.email)
     `when`(mockDocumentSnapshot.getTimestamp("birthDate")).thenReturn(account.birthDate)
+    `when`(mockDocumentSnapshot.getBoolean("worker")).thenReturn(account.isWorker)
+    `when`(mockDocumentSnapshot.getString("profilePicture")).thenReturn(account.profilePicture)
 
     var callbackCalled = false
 
@@ -462,6 +577,7 @@ class AccountRepositoryFirestoreTest {
     `when`(document1.getString("email")).thenReturn(account.email)
     `when`(document1.getTimestamp("birthDate")).thenReturn(account.birthDate)
     `when`(document1.getBoolean("worker")).thenReturn(account.isWorker)
+    `when`(document1.getString("profilePicture")).thenReturn(account.profilePicture)
 
     // Mock data for second document
     `when`(document2.id).thenReturn(account2.uid)
@@ -470,6 +586,7 @@ class AccountRepositoryFirestoreTest {
     `when`(document2.getString("email")).thenReturn(account2.email)
     `when`(document2.getTimestamp("birthDate")).thenReturn(account2.birthDate)
     `when`(document2.getBoolean("worker")).thenReturn(account2.isWorker)
+    `when`(document2.getString("profilePicture")).thenReturn(account2.profilePicture)
 
     var callbackCalled = false
     var returnedAccounts: List<Account>? = null
@@ -528,6 +645,8 @@ class AccountRepositoryFirestoreTest {
     `when`(document.getString("lastName")).thenReturn(account.lastName)
     `when`(document.getString("email")).thenReturn(account.email)
     `when`(document.getTimestamp("birthDate")).thenReturn(account.birthDate)
+    `when`(document.getBoolean("worker")).thenReturn(account.isWorker)
+    `when`(document.getString("profilePicture")).thenReturn(account.profilePicture)
 
     // Act
     val result = invokeDocumentToAccount(document)
@@ -599,6 +718,7 @@ class AccountRepositoryFirestoreTest {
     `when`(document.getTimestamp("birthDate")).thenReturn(account.birthDate)
     // Extra field that is not used by the repository
     `when`(document.getString("isWorker")).thenReturn("false")
+    `when`(document.getString("profilePicture")).thenReturn(account.profilePicture)
 
     // Act
     val result = invokeDocumentToAccount(document)
@@ -659,5 +779,64 @@ class AccountRepositoryFirestoreTest {
     shadowOf(Looper.getMainLooper()).idle()
 
     assertFalse(callbackCalled)
+  }
+
+  @Test
+  fun fetchAccountProfileImageAsBitmap_emptyUrl_returnsDefaultBitmap() {
+    val accountId = "someAccountId"
+    val documentId = "profilePicture"
+
+    // Mock Firestore document get
+    val tcs = TaskCompletionSource<DocumentSnapshot>()
+    `when`(mockCollectionReference.document(accountId)).thenReturn(mockDocumentReference)
+    `when`(mockDocumentReference.get()).thenReturn(tcs.task)
+    `when`(mockDocumentSnapshot.exists()).thenReturn(true)
+    `when`(mockDocumentSnapshot.get(documentId)).thenReturn("")
+    tcs.setResult(mockDocumentSnapshot)
+
+    var onSuccessCalled = false
+    var returnedBitmap: Bitmap? = null
+
+    accountRepositoryFirestore.fetchAccountProfileImageAsBitmap(
+        profilePictureUrl = accountId,
+        onSuccess = {
+          onSuccessCalled = true
+          returnedBitmap = it
+        },
+        onFailure = { fail("Should not fail with empty URL") })
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assertTrue(onSuccessCalled)
+    assertNotNull(returnedBitmap)
+    // On ne vérifie pas exactement le bitmap, mais on s'assure qu'il n'est pas null
+  }
+
+  @Test
+  fun fetchAccountProfileImageAsBitmap_firestoreFails_callsOnFailure() {
+    val accountId = "someAccountId"
+    val documentId = "profilePicture"
+    val firestoreException = Exception("Firestore error")
+
+    val tcsDoc = TaskCompletionSource<DocumentSnapshot>()
+    `when`(mockCollectionReference.document(accountId)).thenReturn(mockDocumentReference)
+    `when`(mockDocumentReference.get()).thenReturn(tcsDoc.task)
+
+    var onFailureCalled = false
+
+    accountRepositoryFirestore.fetchAccountProfileImageAsBitmap(
+        profilePictureUrl = accountId,
+        onSuccess = { fail("Should not succeed") },
+        onFailure = {
+          onFailureCalled = true
+          assertEquals(firestoreException.message, it.message)
+        })
+
+    // Simuler une erreur Firestore
+    tcsDoc.setException(firestoreException)
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assertTrue(onFailureCalled)
   }
 }

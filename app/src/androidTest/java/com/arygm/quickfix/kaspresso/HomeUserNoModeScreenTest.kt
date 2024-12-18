@@ -78,6 +78,7 @@ class HomeUserNoModeScreenTest : TestCase() {
       }
     }
 
+    // Step 1: Check UI elements on HomeScreen
     step("Check UI elements on HomeScreen") {
       // You can add assertions and interactions here
       ComposeScreen.onComposeScreen<HomeScreenObject>(composeTestRule) {
@@ -86,6 +87,8 @@ class HomeUserNoModeScreenTest : TestCase() {
         searchBar { assertIsDisplayed() }
       }
     }
+
+    // Step 2: Click inside the search bar to gain focus
     step("Click inside the search bar to gain focus") {
       composeTestRule.onNodeWithTag("searchBar").performClick()
     }
@@ -95,7 +98,17 @@ class HomeUserNoModeScreenTest : TestCase() {
       composeTestRule.onNodeWithTag("homeContent").performClick()
     }
 
-    // Step 4: Assert that the search bar has lost focus
+    // Step 4: Click on the floating action button to open the QuickFixToolbox
+    step("Click on the floating action button to open the QuickFixToolbox") {
+      composeTestRule.onNodeWithTag("ToolboxFloatingButton").performClick()
+    }
+
+    // Step 5: Click on the floating action button again to close the QuickFixToolbox
+    step("Click on the floating action button to open the QuickFixToolbox") {
+      composeTestRule.onNodeWithTag("ToolboxFloatingButton").performClick()
+    }
+
+    // Step 6: Assert that the search bar has lost focus
     step("Assert the search bar has lost focus") {
       composeTestRule.onNodeWithTag("searchBar").assertIsNotFocused()
     }

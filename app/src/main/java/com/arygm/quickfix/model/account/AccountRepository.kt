@@ -1,5 +1,7 @@
 package com.arygm.quickfix.model.account
 
+import android.graphics.Bitmap
+
 interface AccountRepository {
 
   fun init(onSuccess: () -> Unit)
@@ -19,4 +21,17 @@ interface AccountRepository {
   )
 
   fun getAccountById(uid: String, onSuccess: (Account?) -> Unit, onFailure: (Exception) -> Unit)
+
+  fun uploadAccountImages(
+      accountId: String,
+      images: List<Bitmap>,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun fetchAccountProfileImageAsBitmap(
+      profilePictureUrl: String,
+      onSuccess: (Bitmap) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 }

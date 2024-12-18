@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.WorkerProfile
@@ -12,6 +13,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
 import java.time.LocalDate
+import java.time.LocalTime
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -20,14 +22,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositoryFirestore) :
-    ViewModel() {
+open class SearchViewModel(
+    private val workerProfileRepo: WorkerProfileRepositoryFirestore,
+) : ViewModel() {
 
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery
 
   val _searchSubcategory = MutableStateFlow<Subcategory?>(null)
   val searchSubcategory: StateFlow<Subcategory?> = _searchSubcategory
+
+  val _searchCategory = MutableStateFlow<Category?>(null)
+  val searchCategory: StateFlow<Category?> = _searchCategory
 
   val _workerProfiles = MutableStateFlow<List<WorkerProfile>>(emptyList())
   val workerProfiles: StateFlow<List<WorkerProfile>> = _workerProfiles
@@ -61,6 +67,10 @@ open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositor
 
   fun setSearchSubcategory(subcategory: Subcategory) { // Used for test purposes
     _searchSubcategory.value = subcategory
+  }
+
+  fun setSearchCategory(category: Category) { // Used for test purposes
+    _searchCategory.value = category
   }
 
   fun setWorkerProfiles(workerProfiles: List<WorkerProfile>) { // Used for test purposes
@@ -152,7 +162,9 @@ open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositor
   }
 
   fun sortWorkersByRating(workers: List<WorkerProfile>): List<WorkerProfile> {
-    return workers.sortedByDescending { it.rating }
+    return workers.sortedWith(
+        compareByDescending<WorkerProfile> { it.rating.takeIf { !it.isNaN() } }
+            .thenBy { it.rating.isNaN() })
   }
 
   fun filterWorkersByPriceRange(
@@ -192,6 +204,30 @@ open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositor
         onFailure = { Log.e("SearchViewModel", "Failed to fetch worker profiles.") })
   }
 
+  fun emergencyFilter(
+      workers: List<WorkerProfile>,
+      location: Location,
+      hour: Int = LocalTime.now().hour,
+      minute: Int = LocalTime.now().minute
+  ): List<WorkerProfile> {
+    val availableWorkers =
+        filterWorkersByAvailability(workers, listOf(LocalDate.now()), hour, minute)
+    val sortedWorkers =
+        availableWorkers.sortedBy { worker ->
+          val workerLocation = worker.location
+          if (workerLocation != null) {
+            calculateDistance(
+                location.latitude,
+                location.longitude,
+                workerLocation.latitude,
+                workerLocation.longitude)
+          } else {
+            Double.MAX_VALUE // Place workers without a location at the end
+          }
+        }
+    return sortedWorkers.take(3)
+  }
+
   fun searchEngine(query: String) {
     val queryWords = query.split(" ").map { it.lowercase().trim() }
 
@@ -211,7 +247,7 @@ open class SearchViewModel(private val workerProfileRepo: WorkerProfileRepositor
                 }
               }
 
-          _workerProfilesSuggestions.value = filteredProfiles
+          _workerProfilesSuggestions.value = filteredProfiles.sortedByDescending { it.rating }
         },
         onFailure = { Log.e("SearchViewModel", "Failed to fetch worker profiles.") })
   }

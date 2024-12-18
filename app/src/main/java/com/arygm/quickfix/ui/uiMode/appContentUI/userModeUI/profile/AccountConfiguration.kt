@@ -1,10 +1,14 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import android.widget.Toast
-import androidx.compose.foundation.border
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,25 +18,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,19 +43,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
-import com.arygm.quickfix.R
+import androidx.compose.ui.unit.sp
+import coil.compose.SubcomposeAsyncImage
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import com.arygm.quickfix.ui.uiMode.noModeUI.authentication.CustomTextField
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.utils.isValidDate
 import com.arygm.quickfix.utils.isValidEmail
 import com.arygm.quickfix.utils.loadBirthDate
@@ -62,270 +67,368 @@ import com.arygm.quickfix.utils.loadEmail
 import com.arygm.quickfix.utils.loadFirstName
 import com.arygm.quickfix.utils.loadIsWorker
 import com.arygm.quickfix.utils.loadLastName
+import com.arygm.quickfix.utils.loadProfilePicture
+import com.arygm.quickfix.utils.loadUserId
 import com.arygm.quickfix.utils.setAccountPreferences
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.firebase.Timestamp
 import java.util.GregorianCalendar
 
-@SuppressLint("StateFlowValueCalledInComposition")
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("StateFlowValueCalledInComposition", "UnusedBoxWithConstraintsScope")
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun AccountConfigurationScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
     preferencesViewModel: PreferencesViewModel
 ) {
-  var isWorker = false
-  val uid by remember { mutableStateOf("Loading...") }
-  var firstName by remember { mutableStateOf("Loading...") }
-  var lastName by remember { mutableStateOf("Loading...") }
-  var email by remember { mutableStateOf("Loading...") }
-  var birthDate by remember { mutableStateOf("Loading...") }
-
-  LaunchedEffect(Unit) {
-    firstName = loadFirstName(preferencesViewModel)
-    lastName = loadLastName(preferencesViewModel)
-    email = loadEmail(preferencesViewModel)
-    birthDate = loadBirthDate(preferencesViewModel)
-    isWorker = loadIsWorker(preferencesViewModel)
+  var uid by remember { mutableStateOf("Loading...") }
+  var isWorker by remember { mutableStateOf(false) }
+  // State to store saved data
+  var savedFirstName by remember { mutableStateOf("Loading...") }
+  var savedLastName by remember { mutableStateOf("Loading...") }
+  var savedEmail by remember { mutableStateOf("Loading...") }
+  var savedBirthDate by remember { mutableStateOf("Loading...") }
+  var savedProfilePicture by remember {
+    mutableStateOf("https://example.com/default-profile-pic.jpg")
   }
+  var imageChanged by remember { mutableStateOf(false) }
+  var userAccount by remember { mutableStateOf<Account?>(null) }
 
+  // State for input fields
+  var inputFirstName by remember { mutableStateOf("Loading...") }
+  var inputLastName by remember { mutableStateOf("Loading...") }
+  var inputEmail by remember { mutableStateOf("Loading...") }
+  var inputBirthDate by remember { mutableStateOf("Loading...") }
+  var inputProfilePicture by remember { mutableStateOf(savedProfilePicture) }
+
+  // State for selected profile image
+  var profileBitmap by remember { mutableStateOf<Bitmap?>(null) }
+  var showBottomSheetPP by remember { mutableStateOf(false) }
+  val sheetState = rememberModalBottomSheetState()
+
+  var isUploading by remember { mutableStateOf(false) }
+
+  val context = LocalContext.current
   var emailError by remember { mutableStateOf(false) }
   var birthDateError by remember { mutableStateOf(false) }
 
-  val context = LocalContext.current
+  LaunchedEffect(Unit) {
+    // Load saved data
+    uid = loadUserId(preferencesViewModel)
+    savedFirstName = loadFirstName(preferencesViewModel)
+    savedLastName = loadLastName(preferencesViewModel)
+    savedEmail = loadEmail(preferencesViewModel)
+    savedBirthDate = loadBirthDate(preferencesViewModel)
+    savedProfilePicture = loadProfilePicture(preferencesViewModel)
+    isWorker = loadIsWorker(preferencesViewModel)
+    accountViewModel.fetchUserAccount(uid) { userAccount = it }
 
-  Scaffold(
-      containerColor = colorScheme.background,
-      topBar = {
-        TopAppBar(
-            title = {
-              Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(
-                    "Account configuration",
-                    modifier = Modifier.testTag("AccountConfigurationTitle").padding(end = 29.dp),
-                    style = poppinsTypography.headlineMedium,
-                    color = colorScheme.primary)
+    // Initialize input fields with saved data
+    inputFirstName = savedFirstName
+    inputLastName = savedLastName
+    inputEmail = savedEmail
+    inputBirthDate = savedBirthDate
+    inputProfilePicture = savedProfilePicture
+
+    // Fetch le bitmap depuis le backend en utilisant accountViewModel
+    accountViewModel.fetchAccountProfileImageAsBitmap(
+        accountId = uid,
+        onSuccess = { bitmap -> profileBitmap = bitmap },
+        onFailure = {
+          // En cas d'erreur, laissez profileBitmap à null - le placeholder sera affiché
+        })
+  }
+
+  val screenWidth = with(LocalContext.current.resources.displayMetrics) { widthPixels.dp / density }
+  val screenHeight =
+      with(LocalContext.current.resources.displayMetrics) { heightPixels.dp / density }
+
+  BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier =
+            Modifier.fillMaxSize()
+                .padding(horizontal = screenWidth * 0.05f)
+                .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top) {
+          // Top bar with back button and profile information
+          Box(modifier = Modifier.fillMaxWidth().padding(vertical = screenHeight * 0.02f)) {
+            // Back button at the top left
+            IconButton(
+                onClick = { navigationActions.goBack() },
+                modifier = Modifier.align(Alignment.TopStart).testTag("goBackButton")) {
+                  Icon(
+                      imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                      contentDescription = "Back",
+                      tint = MaterialTheme.colorScheme.onBackground)
+                }
+
+            // Centered profile column with image, name, and email
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.align(Alignment.TopCenter).testTag("CenteredProfileColumn")) {
+                  // Profile image
+                  Box(
+                      modifier =
+                          Modifier.size(screenWidth * 0.28f)
+                              .clip(CircleShape)
+                              .background(Color.Gray)
+                              .testTag("ProfileImage")
+                              .clickable { showBottomSheetPP = true },
+                      contentAlignment = Alignment.Center) {
+                        profileBitmap?.let {
+                          Image(
+                              bitmap = it.asImageBitmap(),
+                              contentDescription = "Profile Image",
+                              modifier = Modifier.fillMaxSize().clip(CircleShape),
+                              contentScale = ContentScale.Crop)
+                        }
+                            ?: SubcomposeAsyncImage(
+                                model = savedProfilePicture,
+                                contentDescription = "Profile Image",
+                                modifier = Modifier.fillMaxSize().clip(CircleShape),
+                                contentScale = ContentScale.Crop,
+                                error = {
+                                  Icon(
+                                      Icons.Outlined.CameraAlt,
+                                      contentDescription = "Placeholder",
+                                      tint = Color.Gray)
+                                },
+                            )
+                      }
+
+                  Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+
+                  // Full name
+                  Text(
+                      text = capitalizeName(savedFirstName, savedLastName),
+                      style =
+                          poppinsTypography.headlineSmall.copy(
+                              fontWeight = FontWeight.Bold, fontSize = 15.sp),
+                      color = MaterialTheme.colorScheme.onBackground,
+                      modifier = Modifier.testTag("ProfileDisplayName"),
+                      textAlign = TextAlign.Center)
+
+                  Spacer(modifier = Modifier.height(screenHeight * 0.005f))
+
+                  // Email
+                  Text(
+                      text = savedEmail,
+                      style =
+                          poppinsTypography.bodySmall.copy(
+                              fontSize = 14.sp, fontWeight = FontWeight.Medium),
+                      color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                      modifier = Modifier.testTag("ProfileEmail"))
+                }
+          }
+
+          Spacer(modifier = Modifier.height(screenHeight * 0.03f))
+
+          // Input fields for First Name and Last Name
+          Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.spacedBy(screenWidth * 0.02f),
+              verticalAlignment = Alignment.CenterVertically) {
+                QuickFixTextFieldCustom(
+                    value = inputFirstName,
+                    onValueChange = { inputFirstName = it },
+                    placeHolderText = "First Name",
+                    placeHolderColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    showLabel = true,
+                    label = { Text("First Name") },
+                    shape = RoundedCornerShape(screenWidth * 0.02f),
+                    hasShadow = false,
+                    borderColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    widthField = screenWidth * 0.44f,
+                    heightField = screenHeight * 0.035f,
+                    modifier = Modifier.testTag("firstNameInput"))
+
+                QuickFixTextFieldCustom(
+                    value = inputLastName,
+                    onValueChange = { inputLastName = it },
+                    placeHolderText = "Last Name",
+                    placeHolderColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    showLabel = true,
+                    label = { Text("Last Name") },
+                    shape = RoundedCornerShape(screenWidth * 0.02f),
+                    hasShadow = false,
+                    borderColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    widthField = screenWidth * 0.44f,
+                    heightField = screenHeight * 0.035f,
+                    modifier = Modifier.testTag("lastNameInput"))
               }
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("goBackButton")) {
-                    Icon(
-                        Icons.AutoMirrored.Outlined.ArrowBack,
-                        contentDescription = "Back",
-                        tint = colorScheme.primary)
-                  }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
-            modifier = Modifier.testTag("AccountConfigurationTopAppBar"))
-      },
-      content = { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().fillMaxWidth().padding(padding),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              // Account Image Placeholder
-              Icon(
-                  imageVector = Icons.Default.AccountCircle,
-                  contentDescription = "Account Circle Icon",
-                  tint = colorScheme.surface,
-                  modifier =
-                      Modifier.size(100.dp)
-                          .clip(CircleShape)
-                          .border(2.dp, colorScheme.background, CircleShape)
-                          .testTag("AccountImage"))
 
-              Spacer(modifier = Modifier.height(16.dp))
+          Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
-              // Account Card
-              Card(
-                  modifier =
-                      Modifier.fillMaxWidth(0.85f)
-                          .align(Alignment.CenterHorizontally)
-                          .testTag("AccountCard"),
-                  shape = RoundedCornerShape(16.dp),
-                  colors =
-                      CardDefaults.cardColors(
-                          containerColor = colorScheme.surface,
-                          contentColor = colorScheme.onSurface),
-                  elevation = CardDefaults.cardElevation(4.dp)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(7.dp)) {
-                          Icon(
-                              painter = painterResource(R.drawable.profilevector),
-                              contentDescription = "Account Icon",
-                              tint = colorScheme.primary,
-                              modifier = Modifier.size(24.dp))
-                          Spacer(modifier = Modifier.width(65.dp))
+          // Email Input
+          QuickFixTextFieldCustom(
+              value = inputEmail,
+              onValueChange = {
+                inputEmail = it
+                emailError = !isValidEmail(it)
+              },
+              placeHolderText = "E-mail address",
+              placeHolderColor = MaterialTheme.colorScheme.onSecondaryContainer,
+              isError = emailError,
+              errorText = "Invalid Email",
+              showLabel = true,
+              label = { Text("E-mail address") },
+              shape = RoundedCornerShape(screenWidth * 0.02f),
+              hasShadow = false,
+              borderColor = MaterialTheme.colorScheme.tertiaryContainer,
+              widthField = screenWidth * 0.9f,
+              heightField = screenHeight * 0.035f,
+              modifier = Modifier.testTag("emailInput"))
 
-                          val displayName = capitalizeName(firstName, lastName)
+          Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
-                          Text(
-                              text = displayName,
-                              style = MaterialTheme.typography.bodyLarge,
-                              color = colorScheme.onBackground,
-                              modifier = Modifier.testTag("AccountName"))
-                        }
-                  }
+          // Birthdate Input
+          QuickFixTextFieldCustom(
+              value = inputBirthDate,
+              onValueChange = {
+                inputBirthDate = it
+                birthDateError = !isValidDate(it)
+              },
+              placeHolderText = "Enter your birthdate (DD/MM/YYYY)",
+              placeHolderColor = MaterialTheme.colorScheme.onSecondaryContainer,
+              isError = birthDateError,
+              errorText = "Invalid Date",
+              showLabel = true,
+              label = { Text("Birthdate") },
+              shape = RoundedCornerShape(screenWidth * 0.02f),
+              hasShadow = false,
+              borderColor = MaterialTheme.colorScheme.tertiaryContainer,
+              widthField = screenWidth * 0.9f,
+              heightField = screenHeight * 0.035f,
+              modifier = Modifier.testTag("birthDateInput"))
 
-              Spacer(modifier = Modifier.height(60.dp))
+          Spacer(modifier = Modifier.height(screenHeight * 0.25f))
 
-              Column(
-                  modifier =
-                      Modifier.align(Alignment.CenterHorizontally)
-                          .padding(16.dp)
-                          .zIndex(100f), // Ensure it's on top
-                  horizontalAlignment = Alignment.CenterHorizontally,
-                  verticalArrangement = Arrangement.Center) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().height(55.dp).padding(start = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically) {
-                          CustomTextField(
-                              value = firstName,
-                              onValueChange = { firstName = it },
-                              placeHolderText = "First Name",
-                              placeHolderColor = colorScheme.onSecondaryContainer,
-                              label = "First Name",
-                              columnModifier = Modifier.weight(1f),
-                              modifier = Modifier.testTag("firstNameInput"))
+          // Save Button
+          val isModified =
+              inputFirstName != savedFirstName ||
+                  inputLastName != savedLastName ||
+                  inputEmail != savedEmail ||
+                  inputBirthDate != savedBirthDate ||
+                  imageChanged
 
-                          CustomTextField(
-                              value = lastName,
-                              onValueChange = { lastName = it },
-                              placeHolderText = "Last Name",
-                              placeHolderColor = colorScheme.onSecondaryContainer,
-                              label = "Last Name",
-                              columnModifier = Modifier.weight(1f),
-                              modifier = Modifier.testTag("lastNameInput"))
-                        }
-
-                    Spacer(modifier = Modifier.padding(6.dp))
-
-                    Column(modifier = Modifier.fillMaxWidth().padding(start = 8.dp)) {
-                      QuickFixTextFieldCustom(
-                          value = email,
-                          onValueChange = {
-                            email = it
-                            emailError = !isValidEmail(it)
-                            accountViewModel.accountExists(email) { exists, account ->
-                              emailError = exists && account != null && email != account.email
-                            }
-                          },
-                          placeHolderText = "Enter your email address",
-                          placeHolderColor = colorScheme.onSecondaryContainer,
-                          isError = emailError,
-                          showError = emailError,
-                          errorText = "INVALID EMAIL",
-                          modifier = Modifier.testTag("emailInput"),
-                          showLabel = true,
-                          label = {
-                            Text(
-                                "Email",
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = colorScheme.onBackground,
-                                modifier = Modifier.padding(start = 3.dp).testTag("emailLabel"))
-                          })
-                    }
-
-                    Spacer(modifier = Modifier.padding(6.dp))
-
-                    Column(modifier = Modifier.fillMaxWidth().padding(start = 8.dp)) {
-                      QuickFixTextFieldCustom(
-                          modifier = Modifier.testTag("birthDateInput"),
-                          value = birthDate,
-                          onValueChange = {
-                            birthDate = it
-                            birthDateError = !isValidDate(it)
-                          },
-                          placeHolderText = "Enter your birthdate (DD/MM/YYYY)",
-                          placeHolderColor = colorScheme.onSecondaryContainer,
-                          isError = birthDateError,
-                          errorText = "INVALID DATE",
-                          showError = birthDateError,
-                          showLabel = true,
-                          label = {
-                            Text(
-                                "Birthdate",
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = colorScheme.onBackground,
-                                modifier = Modifier.padding(start = 3.dp).testTag("birthDateLabel"))
-                          })
-                    }
-                  }
-
-              Spacer(modifier = Modifier.height(16.dp))
-
-              // Change password button
-              Button(
-                  onClick = { /* Handle change password */},
-                  modifier =
-                      Modifier.fillMaxWidth(0.8f)
-                          .padding(horizontal = 16.dp)
-                          .testTag("ChangePasswordButton"),
-                  colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
-                    Icon(Icons.Outlined.Lock, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Change password",
-                        color = colorScheme.onPrimary,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.testTag("ChangePasswordText"))
-                  }
-
-              Spacer(modifier = Modifier.height(8.dp))
-
-              // Save button
-              Button(
-                  onClick = {
-                    val calendar = GregorianCalendar()
-                    val parts = birthDate.split("/")
-                    if (parts.size == 3) {
-                      try {
-                        calendar.set(
-                            parts[2].toInt(),
-                            parts[1].toInt() - 1, // Months are 0-based indexed
-                            parts[0].toInt(),
-                            0,
-                            0,
-                            0)
+          Button(
+              onClick = {
+                if (profileBitmap != null) {
+                  // Handle image upload logic
+                  isUploading = true
+                  accountViewModel.uploadAccountImages(
+                      accountId = uid,
+                      images = listOf(profileBitmap!!),
+                      onSuccess = { imageUrls ->
+                        val newProfilePicture = imageUrls.first()
                         val newAccount =
-                            Account(
-                                uid = uid,
-                                firstName = firstName,
-                                lastName = lastName,
-                                email = email,
-                                birthDate = Timestamp(calendar.time),
+                            userAccount?.copy(
+                                profilePicture = newProfilePicture,
+                                firstName = inputFirstName,
+                                lastName = inputLastName,
+                                email = inputEmail,
+                                birthDate =
+                                    Timestamp(
+                                        GregorianCalendar(
+                                                inputBirthDate.split("/")[2].toInt(),
+                                                inputBirthDate.split("/")[1].toInt() - 1,
+                                                inputBirthDate.split("/")[0].toInt())
+                                            .time),
                                 isWorker = isWorker)
-                        accountViewModel.updateAccount(
-                            newAccount,
-                            onSuccess = { setAccountPreferences(preferencesViewModel, newAccount) },
-                            onFailure = {})
-                        navigationActions.goBack()
-                        return@Button
-                      } catch (_: NumberFormatException) {}
-                    }
 
-                    Toast.makeText(
-                            context, "Invalid format, date must be DD/MM/YYYY.", Toast.LENGTH_SHORT)
-                        .show()
-                  },
-                  enabled = !emailError && !birthDateError,
-                  modifier =
-                      Modifier.fillMaxWidth(0.8f).padding(horizontal = 16.dp).testTag("SaveButton"),
-                  colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
-                    Text(
-                        text = "Save",
-                        color = colorScheme.onPrimary,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.testTag("SaveButtonText"))
+                        if (newAccount != null) {
+                          accountViewModel.updateAccount(
+                              newAccount,
+                              onSuccess = {
+                                setAccountPreferences(preferencesViewModel, newAccount)
+                                isUploading = false
+                                Toast.makeText(context, "Profile updated!", Toast.LENGTH_SHORT)
+                                    .show()
+                                savedFirstName = inputFirstName
+                                savedLastName = inputLastName
+                                savedEmail = inputEmail
+                                savedBirthDate = inputBirthDate
+                                savedProfilePicture = newProfilePicture
+                                imageChanged = false
+                                navigationActions.goBack()
+                              },
+                              onFailure = {
+                                isUploading = false
+                                Toast.makeText(context, "Update failed!", Toast.LENGTH_SHORT).show()
+                              })
+                        }
+                      },
+                      onFailure = {
+                        isUploading = false
+                        Toast.makeText(context, "Image upload failed!", Toast.LENGTH_SHORT).show()
+                      })
+                } else {
+                  // Update without changing the image
+                  val newAccount =
+                      userAccount?.copy(
+                          firstName = inputFirstName,
+                          lastName = inputLastName,
+                          email = inputEmail,
+                          birthDate =
+                              Timestamp(
+                                  GregorianCalendar(
+                                          inputBirthDate.split("/")[2].toInt(),
+                                          inputBirthDate.split("/")[1].toInt() - 1,
+                                          inputBirthDate.split("/")[0].toInt())
+                                      .time),
+                          isWorker = isWorker)
+                  if (newAccount != null) {
+                    accountViewModel.updateAccount(
+                        newAccount,
+                        onSuccess = {
+                          setAccountPreferences(preferencesViewModel, newAccount)
+                          Toast.makeText(context, "Profile updated!", Toast.LENGTH_SHORT).show()
+                          savedFirstName = inputFirstName
+                          savedLastName = inputLastName
+                          savedEmail = inputEmail
+                          savedBirthDate = inputBirthDate
+                          imageChanged = false
+                          navigationActions.goBack()
+                        },
+                        onFailure = {
+                          Toast.makeText(context, "Update failed!", Toast.LENGTH_SHORT).show()
+                        })
                   }
-            }
+                }
+              },
+              enabled = isModified && !emailError && !birthDateError,
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor =
+                          if (isModified) MaterialTheme.colorScheme.primary
+                          else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)),
+              shape = RoundedCornerShape(50),
+              modifier =
+                  Modifier.width(screenWidth * 0.85f)
+                      .height(screenHeight * 0.05f)
+                      .testTag("SaveButton")) {
+                Text("Save")
+              }
+        }
+  }
+
+  // Image selection interface
+  QuickFixUploadImageSheet(
+      sheetState = sheetState,
+      showModalBottomSheet = showBottomSheetPP,
+      onDismissRequest = { showBottomSheetPP = false },
+      onShowBottomSheetChange = { showBottomSheetPP = it },
+      onActionRequest = { bitmap ->
+        inputProfilePicture = "example.com"
+        imageChanged = true
+        profileBitmap = bitmap
+        showBottomSheetPP = false
       })
 }
 
+// Helper function to capitalize names
 private fun capitalizeName(firstName: String?, lastName: String?): String {
   val capitalizedFirstName = firstName?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""
   val capitalizedLastName = lastName?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""

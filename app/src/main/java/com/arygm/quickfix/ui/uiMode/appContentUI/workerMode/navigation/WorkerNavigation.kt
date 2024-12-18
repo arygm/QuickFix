@@ -11,16 +11,16 @@ import com.arygm.quickfix.ui.navigation.TopLevelDestination
 object WorkerRoute {
   const val HOME = "Home"
   const val ANNOUNCEMENT = "Announcement"
-    const val MESSAGES = "Messages"
-    const val CHATS = "Chats"
+  const val MESSAGES = "Messages"
+  const val CHATS = "Chats"
   const val PROFILE = "Profile"
 }
 
 object WorkerScreen {
   const val HOME = "Home Screen"
   const val ANNOUNCEMENT = "Announcement Screen"
-    const val MESSAGES = "Messages Screen"
-    const val CHATS = "Chats Screen"
+  const val MESSAGES = "Messages Screen"
+  const val CHATS = "Chats Screen"
   const val PROFILE = "Profile Screen"
   const val ACCOUNT_CONFIGURATION = "Account configuration Screen"
 }
