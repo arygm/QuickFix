@@ -19,6 +19,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.model.account.AccountViewModel
+import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.switchModes.ModeViewModel
@@ -28,7 +29,7 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.WorkerProfileScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.announcements.AnnouncementsScreen
-import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.messages.MessagesScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.messages.ChatsScreen
 import com.arygm.quickfix.ui.uiMode.workerMode.home.HomeScreen
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerRoute
@@ -44,6 +45,7 @@ fun WorkerModeNavGraph(
     preferencesViewModel: PreferencesViewModel,
     accountViewModel: AccountViewModel,
     rootMainNavigationActions: NavigationActions,
+    chatViewModel: ChatViewModel,
     userPreferencesViewModel: PreferencesViewModelUserProfile
 ) {
   val workerNavController = rememberNavController()
@@ -88,8 +90,8 @@ fun WorkerModeNavGraph(
             startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)) {
               composable(WorkerRoute.HOME) { HomeNavHost(onScreenChange = { currentScreen = it }) }
-              composable(WorkerRoute.MESSAGES) {
-                MessagesNavHost(onScreenChange = { currentScreen = it })
+              composable(WorkerRoute.CHATS) {
+                MessagesNavHost(onScreenChange = { currentScreen = it }, preferencesViewModel,workerNavigationActions, chatViewModel)
               }
               composable(WorkerRoute.ANNOUNCEMENT) {
                 AnnouncementsNavHost(onScreenChange = { currentScreen = it })
@@ -110,14 +112,14 @@ fun WorkerModeNavGraph(
 }
 
 @Composable
-fun MessagesNavHost(onScreenChange: (String) -> Unit) {
+fun MessagesNavHost(onScreenChange: (String) -> Unit, pre: PreferencesViewModel, workerNavigationActions: NavigationActions, chatViewModel: ChatViewModel) {
   val dashboardNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(dashboardNavController) }
   LaunchedEffect(navigationActions.currentScreen) {
     onScreenChange(navigationActions.currentScreen)
   }
-  NavHost(navController = dashboardNavController, startDestination = WorkerScreen.MESSAGES) {
-    composable(WorkerScreen.MESSAGES) { MessagesScreen() }
+  NavHost(navController = dashboardNavController, startDestination = WorkerScreen.CHATS) {
+    composable(WorkerScreen.CHATS) { ChatsScreen (chatViewModel,pre,navigationActions) }
   }
 }
 

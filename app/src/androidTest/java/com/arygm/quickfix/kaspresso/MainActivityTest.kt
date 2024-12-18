@@ -246,8 +246,9 @@ class MainActivityTest : TestCase() {
       composeTestRule.onNodeWithTag(C.Tag.personalInfoScreencontinueButton).performClick()
 
       composeTestRule.onNodeWithTag(professionalInfoScreenCategoryField).performClick()
+        Log.e("TestLog", "debut test")
 
-      // Select the first category
+        // Select the first category
       composeTestRule
           .onNodeWithTag(C.Tag.professionalInfoScreenCategoryDropdownMenuItem + 0)
           .performClick()
@@ -358,19 +359,26 @@ class MainActivityTest : TestCase() {
       composeTestRule.onNodeWithText("Support").assertIsDisplayed()
       composeTestRule.onNodeWithText("Legal").assertIsDisplayed()
       composeTestRule.onNodeWithText("Log out").assertIsDisplayed()
-      composeTestRule.waitUntil("find the AccountConfigurationOption", timeoutMillis = 20000) {
+        Log.e("TestLog", "avant probbleme")
+
+        composeTestRule.waitUntil("find the AccountConfigurationOption", timeoutMillis = 20000) {
         composeTestRule
             .onAllNodesWithTag("AccountConfigurationOption")
             .fetchSemanticsNodes()
             .isNotEmpty()
       }
-      updateAccountConfigurationAndVerify(
+        Log.e("TestLog", "mid probbleme")
+
+        updateAccountConfigurationAndVerify(
           composeTestRule, "Ramo", "Hatimo", "28/10/2004", "Ramo Hatimo", 2)
       composeTestRule.waitUntil("find the switch", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag(C.Tag.buttonSwitch).fetchSemanticsNodes().isNotEmpty()
       }
-      composeTestRule.onNodeWithTag(C.Tag.buttonSwitch, useUnmergedTree = true).performClick()
+        Log.e("TestLog", "apres probbleme")
+
+        composeTestRule.onNodeWithTag(C.Tag.buttonSwitch, useUnmergedTree = true).performClick()
     }
+      Log.e("TestLog", "fin test")
   }
 
   @Test
