@@ -729,4 +729,206 @@ class WorkerFilterTest {
     // Validate the result
     assertEquals(0, result.size)
   }
+
+  @Test
+  fun `sortWorkersByRating handles NaN and sorts them at the end`() {
+    val workers =
+        listOf(
+            WorkerProfile(uid = "worker1", rating = 4.5, displayName = "Alice"),
+            WorkerProfile(uid = "worker2", rating = Double.NaN, displayName = "Bob"),
+            WorkerProfile(uid = "worker3", rating = 5.0, displayName = "Charlie"),
+            WorkerProfile(uid = "worker4", rating = 3.8, displayName = "Diana"))
+
+    val sortedWorkers = searchViewModel.sortWorkersByRating(workers)
+
+    // Assert valid ratings are sorted in descending order
+    assertEquals("worker3", sortedWorkers[0].uid)
+    assertEquals("worker1", sortedWorkers[1].uid)
+    assertEquals("worker4", sortedWorkers[2].uid)
+    // Assert NaN appears last
+    assertEquals("worker2", sortedWorkers[3].uid)
+  }
+
+  @Test
+  fun `sortWorkersByRating handles multiple NaN ratings correctly`() {
+    val workers =
+        listOf(
+            WorkerProfile(uid = "worker1", rating = Double.NaN, displayName = "Alice"),
+            WorkerProfile(uid = "worker2", rating = 4.0, displayName = "Bob"),
+            WorkerProfile(uid = "worker3", rating = Double.NaN, displayName = "Charlie"),
+            WorkerProfile(uid = "worker4", rating = 5.0, displayName = "Diana"))
+
+    val sortedWorkers = searchViewModel.sortWorkersByRating(workers)
+
+    // Assert valid ratings are sorted in descending order
+    assertEquals("worker4", sortedWorkers[0].uid)
+    assertEquals("worker2", sortedWorkers[1].uid)
+    // Assert all NaN ratings appear at the end
+    assertEquals("worker1", sortedWorkers[2].uid)
+    assertEquals("worker3", sortedWorkers[3].uid)
+  }
+
+  @Test
+  fun `sortWorkersByRating works with only NaN ratings`() {
+    val workers =
+        listOf(
+            WorkerProfile(uid = "worker1", rating = Double.NaN, displayName = "Alice"),
+            WorkerProfile(uid = "worker2", rating = Double.NaN, displayName = "Bob"),
+            WorkerProfile(uid = "worker3", rating = Double.NaN, displayName = "Charlie"))
+
+    val sortedWorkers = searchViewModel.sortWorkersByRating(workers)
+
+    // Assert all workers remain in their original order since all ratings are NaN
+    assertEquals("worker1", sortedWorkers[0].uid)
+    assertEquals("worker2", sortedWorkers[1].uid)
+    assertEquals("worker3", sortedWorkers[2].uid)
+  }
+
+  @Test
+  fun `sortWorkersByRating handles mixed valid and NaN ratings`() {
+    val workers =
+        listOf(
+            WorkerProfile(uid = "worker1", rating = 4.5, displayName = "Alice"),
+            WorkerProfile(uid = "worker2", rating = 3.8, displayName = "Bob"),
+            WorkerProfile(uid = "worker3", rating = Double.NaN, displayName = "Charlie"),
+            WorkerProfile(uid = "worker4", rating = Double.NaN, displayName = "Diana"),
+            WorkerProfile(uid = "worker5", rating = 5.0, displayName = "Eve"))
+
+    val sortedWorkers = searchViewModel.sortWorkersByRating(workers)
+
+    // Assert valid ratings are sorted in descending order
+    assertEquals("worker5", sortedWorkers[0].uid)
+    assertEquals("worker1", sortedWorkers[1].uid)
+    assertEquals("worker2", sortedWorkers[2].uid)
+    // Assert NaN ratings are at the end in the original order
+    assertEquals("worker3", sortedWorkers[3].uid)
+    assertEquals("worker4", sortedWorkers[4].uid)
+  }
+
+  @Test
+  fun `emergencyFilter returns up to 3 closest available workers`() {
+    val userLocation = Location(40.0, -74.0, "User Location")
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                location = Location(40.1, -74.1, "Nearby Worker 1"),
+                workingHours = Pair(LocalTime.of(8, 0), LocalTime.of(18, 0)),
+                unavailability_list = emptyList()),
+            WorkerProfile(
+                uid = "worker2",
+                location = Location(40.2, -74.2, "Nearby Worker 2"),
+                workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
+                unavailability_list = emptyList()),
+            WorkerProfile(
+                uid = "worker3",
+                location = Location(41.0, -75.0, "Far Worker"),
+                workingHours = Pair(LocalTime.of(7, 0), LocalTime.of(15, 0)),
+                unavailability_list = emptyList()),
+            WorkerProfile(
+                uid = "worker4",
+                location = Location(42.0, -76.0, "Very Far Worker"),
+                workingHours = Pair(LocalTime.of(8, 0), LocalTime.of(16, 0)),
+                unavailability_list = emptyList()))
+
+    val result = searchViewModel.emergencyFilter(workers, userLocation, 10, 0)
+
+    // Validate the result
+    assertEquals(3, result.size)
+    assertEquals("worker1", result[0].uid) // Closest worker
+    assertEquals("worker2", result[1].uid)
+    assertEquals("worker3", result[2].uid) // Third closest worker
+  }
+
+  @Test
+  fun `emergencyFilter excludes workers unavailable at current time`() {
+    val userLocation = Location(40.0, -74.0, "User Location")
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                location = Location(40.1, -74.1, "Nearby Worker"),
+                workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
+                unavailability_list = listOf(LocalDate.now()) // Unavailable today
+                ),
+            WorkerProfile(
+                uid = "worker2",
+                location = Location(40.2, -74.2, "Nearby Worker 2"),
+                workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(18, 0)),
+                unavailability_list = emptyList()))
+
+    val result = searchViewModel.emergencyFilter(workers, userLocation, 17, 30)
+
+    // Validate the result
+    assertEquals(1, result.size)
+    assertEquals("worker2", result[0].uid) // Only available worker
+  }
+
+  @Test
+  fun `emergencyFilter returns empty list if no workers are available`() {
+    val userLocation = Location(40.0, -74.0, "User Location")
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                location = Location(40.1, -74.1, "Nearby Worker"),
+                workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
+                unavailability_list = listOf(LocalDate.now()) // Unavailable today
+                ),
+            WorkerProfile(
+                uid = "worker2",
+                location = Location(40.2, -74.2, "Nearby Worker 2"),
+                workingHours = Pair(LocalTime.of(10, 0), LocalTime.of(16, 0)),
+                unavailability_list = emptyList()))
+
+    // Simulate a time when no workers are available
+    val fakeCurrentTime = LocalTime.of(18, 0)
+    val result =
+        searchViewModel.filterWorkersByAvailability(
+            workers, listOf(LocalDate.now()), fakeCurrentTime.hour, fakeCurrentTime.minute)
+
+    assertEquals(0, result.size) // No workers available
+  }
+
+  @Test
+  fun `emergencyFilter includes workers without location at the end`() {
+    val userLocation = Location(40.0, -74.0, "User Location")
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                location = Location(40.1, -74.1, "Nearby Worker"),
+                workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
+                unavailability_list = emptyList()),
+            WorkerProfile(
+                uid = "worker2",
+                location = null, // Worker without location
+                workingHours = Pair(LocalTime.of(8, 0), LocalTime.of(16, 0)),
+                unavailability_list = emptyList()))
+
+    val result = searchViewModel.emergencyFilter(workers, userLocation, 15, 30)
+
+    // Validate the result
+    assertEquals(2, result.size)
+    assertEquals("worker1", result[0].uid) // Closest worker
+    assertEquals("worker2", result[1].uid) // Worker without location
+  }
+
+  @Test
+  fun `emergencyFilter returns fewer than 3 workers if less are available`() {
+    val userLocation = Location(40.0, -74.0, "User Location")
+    val workers =
+        listOf(
+            WorkerProfile(
+                uid = "worker1",
+                location = Location(40.1, -74.1, "Nearby Worker"),
+                workingHours = Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)),
+                unavailability_list = emptyList()))
+
+    val result = searchViewModel.emergencyFilter(workers, userLocation, 15, 30)
+
+    // Validate the result
+    assertEquals(1, result.size)
+    assertEquals("worker1", result[0].uid)
+  }
 }
