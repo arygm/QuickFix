@@ -29,6 +29,7 @@ import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.getBottomBarIdUser
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.WorkerProfileScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.announcements.AnnouncementsScreen
@@ -37,7 +38,6 @@ import com.arygm.quickfix.ui.uiMode.workerMode.home.HomeScreen
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerRoute
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerScreen
-import com.arygm.quickfix.ui.uiMode.workerMode.navigation.getBottomBarIdWorker
 import kotlinx.coroutines.delay
 
 @Composable
@@ -109,17 +109,16 @@ fun WorkerModeNavGraph(
                     enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from bottom
                     exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to bottom
                     modifier =
-                        Modifier.align(Alignment.BottomCenter) // Align it to the bottom center
+                        Modifier.align(Alignment.BottomCenter) // Align at bottom of this parent Box
                             .zIndex(1f)
-                            .testTag("BNM") // Ensure it's on top
-                    ) {
+                            .testTag("BNM")) {
                       BottomNavigationMenu(
                           onTabSelect = { selectedDestination ->
                             workerNavigationActions.navigateTo(selectedDestination)
                           },
                           navigationActions = workerNavigationActions,
                           tabList = WORKER_TOP_LEVEL_DESTINATIONS,
-                          getBottomBarId = getBottomBarIdWorker)
+                          getBottomBarId = getBottomBarIdUser)
                     }
               }
         }

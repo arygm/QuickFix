@@ -216,30 +216,22 @@ fun UserModeNavHost(
                     }
 
                 // Bottom bar aligned at the bottom of the same parent Box
-                Box(
+
+                AnimatedVisibility(
+                    visible = showBottomBar,
+                    enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from bottom
+                    exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to bottom
                     modifier =
                         Modifier.align(Alignment.BottomCenter) // Align at bottom of this parent Box
                             .zIndex(1f)
                             .testTag("BNM")) {
-                      AnimatedVisibility(
-                          visible = showBottomBar,
-                          enter =
-                              slideInVertically { fullHeight ->
-                                fullHeight
-                              }, // Slide in from bottom
-                          exit =
-                              slideOutVertically { fullHeight ->
-                                fullHeight
-                              }, // Slide out to bottom
-                      ) {
-                        BottomNavigationMenu(
-                            onTabSelect = { selectedDestination ->
-                              userNavigationActions.navigateTo(selectedDestination)
-                            },
-                            navigationActions = userNavigationActions,
-                            tabList = USER_TOP_LEVEL_DESTINATIONS,
-                            getBottomBarId = getBottomBarIdUser)
-                      }
+                      BottomNavigationMenu(
+                          onTabSelect = { selectedDestination ->
+                            userNavigationActions.navigateTo(selectedDestination)
+                          },
+                          navigationActions = userNavigationActions,
+                          tabList = USER_TOP_LEVEL_DESTINATIONS,
+                          getBottomBarId = getBottomBarIdUser)
                     }
               }
         }
