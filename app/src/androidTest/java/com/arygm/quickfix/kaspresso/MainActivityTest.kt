@@ -213,7 +213,6 @@ class MainActivityTest : TestCase() {
 
       // Attempt to grant permissions
       allowPermissionsIfNeeded()
-      loginToTestAccount()
       // Retry the action until it works with a timeout of 10 seconds
       composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()
@@ -367,7 +366,7 @@ class MainActivityTest : TestCase() {
             .isNotEmpty()
       }
       updateAccountConfigurationAndVerify(
-          composeTestRule, "Ramo", "Hatimo", "28/10/2004", "Ramo Hatimo", 2)
+          composeTestRule, "Rame", "Hatime", "28/10/2004", "Rame Hatime", 2)
       composeTestRule.waitUntil("find the switch", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag(C.Tag.buttonSwitch).fetchSemanticsNodes().isNotEmpty()
       }

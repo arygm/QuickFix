@@ -1,26 +1,30 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home
 
+import QuickFixToolboxFloatingButton
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -66,7 +70,6 @@ import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.QuickFixesWidget
 import com.arygm.quickfix.ui.elements.Service
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.theme.poppinsFontFamily
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
@@ -111,190 +114,200 @@ fun HomeScreen(
       }
     }
   }
-
-  Scaffold(
-      modifier =
-          Modifier.pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
-              .testTag("HomeScreen"),
-      containerColor = colorScheme.background,
-      topBar = {
-        TopAppBar(
-            title = {
-              Column {
-                Row(
-                    modifier = Modifier.fillMaxSize().padding(0.dp),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically) {
-                      Image(
-                          painter = painterResource(id = R.drawable.home_screen_headline),
-                          contentDescription = "home_title",
-                          modifier = Modifier.size(200.dp))
+  BoxWithConstraints {
+    val screenHeight = maxHeight.value
+    val screenWidth = maxWidth.value
+    Scaffold(
+        modifier =
+            Modifier.pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
+                .testTag("HomeScreen"),
+        containerColor = colorScheme.background,
+        floatingActionButton = {
+          QuickFixToolboxFloatingButton(
+              iconList = listOf(Icons.Default.Map, Icons.Default.AutoAwesome, Icons.Default.Create),
+              onIconClick = {},
+              modifier =
+                  Modifier.padding(bottom = (screenHeight * 0.07).dp)
+                      .testTag("ToolboxFloatingButton"))
+        },
+        topBar = {
+          TopAppBar(
+              title = {
+                Column {
+                  Row(
+                      modifier = Modifier.fillMaxSize().padding(0.dp),
+                      horizontalArrangement = Arrangement.Start,
+                      verticalAlignment = Alignment.CenterVertically) {
+                        Image(
+                            painter = painterResource(id = R.drawable.home_screen_headline),
+                            contentDescription = "home_title",
+                            modifier = Modifier.size((screenHeight * 0.25).dp))
+                      }
+                }
+              },
+              colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
+              navigationIcon = {},
+              actions = {
+                IconButton(
+                    onClick = { navigationActions.navigateTo(UserScreen.MESSAGES) },
+                    Modifier.testTag("MessagesButton")) {
+                      Icon(
+                          imageVector = Icons.Outlined.Email,
+                          contentDescription = "Messages",
+                          tint = colorScheme.background)
                     }
-              }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
-            navigationIcon = {},
-            actions = {
-              IconButton(
-                  onClick = { navigationActions.navigateTo(UserScreen.MESSAGES) },
-                  Modifier.testTag("MessagesButton")) {
-                    Icon(
-                        imageVector = Icons.Outlined.Email,
-                        contentDescription = "Messages",
-                        tint = colorScheme.background)
+              })
+        },
+        content = { padding ->
+          Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Column(
+                modifier =
+                    Modifier.fillMaxSize()
+                        .padding(vertical = (screenHeight * 0.02).dp)
+                        .testTag("homeContent"),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start) {
+                  Row(
+                      modifier = Modifier.fillMaxWidth(),
+                  ) {
+                    Spacer(modifier = Modifier.width((screenWidth * 0.03).dp))
+                    Log.d("QuickFixTextFieldCustomHomeScreen", "DISPLAYED")
+                    QuickFixTextFieldCustom(
+                        modifier = Modifier.semantics { testTag = "searchBar" },
+                        showLeadingIcon = { true },
+                        showTrailingIcon = { true },
+                        leadingIcon = Icons.Outlined.Search,
+                        trailingIcon = { Icons.Default.Clear },
+                        descriptionLeadIcon = "Search",
+                        descriptionTrailIcon = "Clear",
+                        placeHolderText = "Find your perfect fix with QuickFix",
+                        shape = CircleShape,
+                        textStyle = poppinsTypography.bodyMedium,
+                        textColor = colorScheme.onBackground,
+                        placeHolderColor = colorScheme.onBackground,
+                        leadIconColor = colorScheme.onBackground,
+                        trailIconColor = colorScheme.onBackground,
+                        widthField = (screenWidth * 0.8).dp,
+                        heightField = (screenHeight * 0.045).dp,
+                        onValueChange = {},
+                        value = "",
+                        debug = "homescreen")
+
+                    Spacer(modifier = Modifier.width((screenWidth * 0.04).dp))
+
+                    IconButton(
+                        onClick = { navigationActions.navigateTo(UserScreen.MESSAGES) },
+                        modifier =
+                            Modifier.size((screenHeight * 0.045).dp)
+                                .clip(CircleShape)
+                                .background(colorScheme.surface)
+                                .padding(8.dp)
+                                .testTag(C.Tag.notification)) {
+                          Icon(
+                              painter = painterResource(id = R.drawable.bell),
+                              contentDescription = "notifications",
+                              tint = colorScheme.primary)
+                        }
                   }
-            })
-      },
-      content = { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.Start) {
-              Column(
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(padding)
-                          .padding(vertical = 8.dp)
-                          .testTag("homeContent"),
-                  verticalArrangement = Arrangement.Top,
-                  horizontalAlignment = Alignment.Start) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically) {
-                          Spacer(modifier = Modifier.width(10.dp))
-                          Log.d("QuickFixTextFieldCustomHomeScreen", "DISPLAYED")
-                          QuickFixTextFieldCustom(
-                              modifier = Modifier.semantics { testTag = "searchBar" },
-                              showLeadingIcon = { true },
-                              showTrailingIcon = { true },
-                              leadingIcon = Icons.Outlined.Search,
-                              trailingIcon = { Icons.Default.Clear },
-                              descriptionLeadIcon = "Search",
-                              descriptionTrailIcon = "Clear",
-                              placeHolderText = "Find your perfect fix with QuickFix",
-                              shape = CircleShape,
-                              textStyle = poppinsTypography.bodyMedium,
-                              textColor = colorScheme.onBackground,
-                              placeHolderColor = colorScheme.onBackground,
-                              leadIconColor = colorScheme.onBackground,
-                              trailIconColor = colorScheme.onBackground,
-                              widthField = 330.dp,
-                              heightField = 40.dp,
-                              onValueChange = {},
-                              value = "",
-                              debug = "homescreen")
 
-                          Spacer(modifier = Modifier.width(20.dp))
+                  Text(
+                      text = "Popular services",
+                      style = MaterialTheme.typography.titleMedium,
+                      modifier =
+                          Modifier.fillMaxWidth()
+                              .padding(
+                                  horizontal = (screenWidth * 0.04).dp,
+                                  vertical = (screenHeight * 0.02).dp))
 
-                          IconButton(
-                              onClick = { navigationActions.navigateTo(UserScreen.MESSAGES) },
+                  PopularServicesRow(
+                      services = services,
+                      modifier = Modifier.testTag("PopularServicesRow"),
+                      onServiceClick = { /* Handle Service Click */})
+                  Spacer(modifier = Modifier.weight(0.09f))
+
+                  // Section QuickFixes
+                  if (quickFixes.any { it.status == Status.UPCOMING }) {
+                    Box(modifier = Modifier.fillMaxWidth().weight(1.5f)) {
+                      QuickFixesWidget(
+                          status = "Upcoming",
+                          quickFixList = quickFixes.filter { it.status == Status.UPCOMING },
+                          onShowAllClick = { /* Handle Show All Click */},
+                          onItemClick = {
+                            quickFixViewModel.setUpdateQuickFix(it)
+                            navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
+                          },
+                          modifier =
+                              Modifier.fillMaxWidth()
+                                  .padding(horizontal = 4.dp, vertical = 8.dp)
+                                  .testTag("UpcomingQuickFixes"),
+                          workerViewModel = workerViewModel,
+                      )
+                    }
+                  } else {
+                    Box(
+                        modifier =
+                            Modifier.fillMaxWidth().weight(1.5f).testTag("NoQuickFixesBox")) {
+                          Column(
                               modifier =
-                                  Modifier.size(40.dp)
-                                      .clip(CircleShape)
-                                      .background(colorScheme.surface)
-                                      .padding(8.dp)
-                                      .testTag(C.Tag.notification)) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.bell),
-                                    contentDescription = "notifications",
-                                    tint = colorScheme.primary)
+                                  Modifier.fillMaxWidth()
+                                      .padding(horizontal = 16.dp)
+                                      .wrapContentHeight()
+                                      .clip(RoundedCornerShape(10.dp))
+                                      .background(colorScheme.surface),
+                              verticalArrangement = Arrangement.spacedBy((-64).dp),
+                              horizontalAlignment = Alignment.CenterHorizontally) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.noquickfix),
+                                    contentDescription = "No QuickFixes Background",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.size(180.dp).alpha(1f))
+
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Bottom,
+                                    modifier = Modifier.fillMaxWidth()) {
+                                      Text(
+                                          text = "No QuickFixes found",
+                                          style =
+                                              poppinsTypography.bodyMedium.copy(
+                                                  fontWeight = FontWeight.Bold,
+                                                  color = colorScheme.onBackground,
+                                                  fontSize = 14.sp),
+                                          textAlign = TextAlign.Center,
+                                          modifier = Modifier.padding(vertical = 8.dp))
+
+                                      Text(
+                                          text =
+                                              "You have not yet created any QuickFixes. Create one now!",
+                                          style =
+                                              poppinsTypography.bodyMedium.copy(
+                                                  fontWeight = FontWeight.Medium,
+                                                  color = colorScheme.onSurface,
+                                                  fontSize = 10.sp),
+                                          textAlign = TextAlign.Center,
+                                      )
+
+                                      QuickFixButton(
+                                          buttonText = "Book a QuickFix",
+                                          buttonColor = colorScheme.primary,
+                                          textColor = colorScheme.onPrimary,
+                                          onClickAction = {
+                                            navigationActionsRoot.navigateTo(
+                                                USER_TOP_LEVEL_DESTINATIONS[1])
+                                          },
+                                          textStyle =
+                                              MaterialTheme.typography.labelMedium.copy(
+                                                  fontWeight = FontWeight.SemiBold,
+                                                  fontSize = 14.sp),
+                                          modifier = Modifier.padding(vertical = 8.dp),
+                                          leadingIcon = Icons.Outlined.Search,
+                                          leadingIconTint = colorScheme.onPrimary)
+                                    }
                               }
                         }
-
-                    Text(
-                        text = "Popular services",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontFamily = poppinsFontFamily,
-                        modifier =
-                            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
-
-                    PopularServicesRow(
-                        services = services,
-                        modifier = Modifier.testTag("PopularServicesRow"),
-                        onServiceClick = { /* Handle Service Click */})
-
-                    Spacer(
-                        modifier = Modifier.height(16.dp)) // Ajusté pour mieux séparer les sections
-              }
-
-              // Section QuickFixes
-              if (quickFixes.isNotEmpty()) {
-                QuickFixesWidget(
-                    status = "Upcoming",
-                    quickFixList = quickFixes.filter { it.status == Status.UPCOMING },
-                    onShowAllClick = { /* Handle Show All Click */},
-                    onItemClick = {
-                      quickFixViewModel.setUpdateQuickFix(it)
-                      navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
-                    },
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(horizontal = 4.dp, vertical = 8.dp)
-                            .testTag("UpcomingQuickFixes"),
-                    workerViewModel = workerViewModel,
-                )
-              } else {
-                Box(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(colorScheme.surface)
-                            .testTag("NoQuickFixesBox") // Tag de test
-                    ) {
-                      Column(
-                          modifier = Modifier.fillMaxSize(),
-                          verticalArrangement = Arrangement.spacedBy((-64).dp),
-                          horizontalAlignment = Alignment.CenterHorizontally) {
-                            Image(
-                                painter = painterResource(id = R.drawable.noquickfix),
-                                contentDescription = "No QuickFixes Background",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.size(180.dp).alpha(1f))
-
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Bottom,
-                                modifier = Modifier.fillMaxWidth()) {
-                                  Text(
-                                      text = "No QuickFixes found",
-                                      style =
-                                          poppinsTypography.bodyMedium.copy(
-                                              fontWeight = FontWeight.Bold,
-                                              color = colorScheme.onBackground,
-                                              fontSize = 14.sp),
-                                      textAlign = TextAlign.Center,
-                                      modifier = Modifier.padding(vertical = 8.dp))
-
-                                  Text(
-                                      text =
-                                          "You have not yet created any QuickFixes. Create one now!",
-                                      style =
-                                          poppinsTypography.bodyMedium.copy(
-                                              fontWeight = FontWeight.Medium,
-                                              color = colorScheme.onSurface,
-                                              fontSize = 10.sp),
-                                      textAlign = TextAlign.Center,
-                                  )
-
-                                  QuickFixButton(
-                                      buttonText = "Book a QuickFix",
-                                      buttonColor = colorScheme.primary,
-                                      textColor = colorScheme.onPrimary,
-                                      onClickAction = {
-                                        navigationActionsRoot.navigateTo(
-                                            USER_TOP_LEVEL_DESTINATIONS[1])
-                                      },
-                                      textStyle =
-                                          MaterialTheme.typography.labelMedium.copy(
-                                              fontWeight = FontWeight.SemiBold, fontSize = 14.sp),
-                                      modifier = Modifier.padding(vertical = 8.dp),
-                                      leadingIcon = Icons.Outlined.Search,
-                                      leadingIconTint = colorScheme.onPrimary)
-                                }
-                          }
-                    }
-              }
-            }
-      })
+                  }
+                }
+          }
+        })
+  }
 }
