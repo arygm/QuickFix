@@ -880,6 +880,7 @@ fun AnnouncementScreen(
                             categoryIsSelected &&
                             locationIsSelected &&
                             !descriptionIsEmpty)
+                Spacer(modifier = Modifier.height(80.dp * heightRatio.value))
               }
         }
 
