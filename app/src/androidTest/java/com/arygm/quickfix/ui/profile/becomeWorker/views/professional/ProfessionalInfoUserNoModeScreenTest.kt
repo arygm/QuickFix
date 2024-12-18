@@ -30,6 +30,7 @@ import com.arygm.quickfix.ressources.C.Tag.professionalInfoScreenCategoryField
 import com.arygm.quickfix.ressources.C.Tag.professionalInfoScreenSubcategoryDropdownMenu
 import com.arygm.quickfix.ressources.C.Tag.professionalInfoScreenSubcategoryField
 import com.arygm.quickfix.ui.theme.QuickFixTheme
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.professional.ProfessionalInfoScreen
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

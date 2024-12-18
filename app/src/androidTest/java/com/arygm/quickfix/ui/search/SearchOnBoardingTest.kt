@@ -12,13 +12,16 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.text.AnnotatedString
+import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchOnBoarding
 import io.mockk.mockk
 import org.junit.Before
 import org.junit.Rule
@@ -29,11 +32,13 @@ class SearchOnBoardingTest {
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
+  private lateinit var accountRepositoryFirestore: AccountRepositoryFirestore
   private lateinit var categoryRepo: CategoryRepositoryFirestore
   private lateinit var searchViewModel: SearchViewModel
   private lateinit var accountViewModel: AccountViewModel
   private lateinit var categoryViewModel: CategoryViewModel
   private lateinit var navigationActionsRoot: NavigationActions
+  private lateinit var quickFixViewModel: QuickFixViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -43,9 +48,11 @@ class SearchOnBoardingTest {
     navigationActionsRoot = mock(NavigationActions::class.java)
     workerProfileRepo = mockk(relaxed = true)
     categoryRepo = mockk(relaxed = true)
+    accountRepositoryFirestore = mock(AccountRepositoryFirestore::class.java)
     searchViewModel = SearchViewModel(workerProfileRepo)
     categoryViewModel = CategoryViewModel(categoryRepo)
     accountViewModel = mockk(relaxed = true)
+    quickFixViewModel = QuickFixViewModel(mock())
   }
 
   @Test
@@ -56,7 +63,8 @@ class SearchOnBoardingTest {
           navigationActionsRoot,
           searchViewModel,
           accountViewModel,
-          categoryViewModel)
+          categoryViewModel,
+          quickFixViewModel)
     }
 
     // Check that the search input field is displayed
@@ -75,7 +83,8 @@ class SearchOnBoardingTest {
           navigationActionsRoot,
           searchViewModel,
           accountViewModel,
-          categoryViewModel)
+          categoryViewModel,
+          quickFixViewModel)
     }
 
     // Input text into the search field
@@ -103,7 +112,8 @@ class SearchOnBoardingTest {
           navigationActionsRoot = navigationActionsRoot,
           searchViewModel = searchViewModel,
           accountViewModel = accountViewModel,
-          categoryViewModel = categoryViewModel)
+          categoryViewModel = categoryViewModel,
+          quickFixViewModel = quickFixViewModel)
     }
 
     // Verify initial state (Categories are displayed)

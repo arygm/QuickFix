@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.search
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Arrangement.Start
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -78,6 +79,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
@@ -85,6 +88,7 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
@@ -95,18 +99,11 @@ import com.arygm.quickfix.ui.elements.QuickFixSlidingWindow
 import com.arygm.quickfix.ui.elements.RatingBar
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.utils.GeocoderWrapper
 import com.arygm.quickfix.utils.LocationHelper
-import com.arygm.quickfix.utils.loadBirthDate
-import com.arygm.quickfix.utils.loadEmail
-import com.arygm.quickfix.utils.loadFirstName
-import com.arygm.quickfix.utils.loadIsWorker
-import com.arygm.quickfix.utils.loadLastName
 import com.arygm.quickfix.utils.loadUserId
-import com.google.firebase.Timestamp
 import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 data class SearchFilterButtons(
     val onClick: () -> Unit,
@@ -125,6 +122,7 @@ fun SearchWorkerResult(
     accountViewModel: AccountViewModel,
     userProfileViewModel: ProfileViewModel,
     preferencesViewModel: PreferencesViewModel,
+    quickFixViewModel: QuickFixViewModel,
     geocoderWrapper: GeocoderWrapper = GeocoderWrapper(LocalContext.current),
     workerViewModel: ProfileViewModel
 ) {
@@ -140,11 +138,10 @@ fun SearchWorkerResult(
   }
   var baseLocation by remember { mutableStateOf(phoneLocation) }
   val context = LocalContext.current
-
   var userProfile by remember { mutableStateOf<UserProfile?>(null) }
   var uid by remember { mutableStateOf("Loading...") }
 
-    var loading by remember { mutableStateOf(true) } // Tracks if data is loading
+  var loading by remember { mutableStateOf(true) } // Tracks if data is loading
 
   LaunchedEffect(Unit) {
     if (locationHelper.checkPermissions()) {
@@ -167,7 +164,7 @@ fun SearchWorkerResult(
 
   var selectedWorker by remember { mutableStateOf(WorkerProfile()) }
   var selectedCityName by remember { mutableStateOf<String?>(null) }
-  var showFilterButtons by remember { mutableStateOf(false) }
+  var showFilterButtons by remember { mutableStateOf(true) }
   var showAvailabilityBottomSheet by remember { mutableStateOf(false) }
   var showServicesBottomSheet by remember { mutableStateOf(false) }
   var showPriceRangeBottomSheet by remember { mutableStateOf(false) }
@@ -176,6 +173,7 @@ fun SearchWorkerResult(
   Log.d("Chill guy", workerProfiles.size.toString())
   var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
   val searchSubcategory by searchViewModel.searchSubcategory.collectAsState()
+  val searchCategory by searchViewModel.searchCategory.collectAsState()
 
   var availabilityFilterApplied by remember { mutableStateOf(false) }
   var servicesFilterApplied by remember { mutableStateOf(false) }
@@ -304,43 +302,40 @@ fun SearchWorkerResult(
 
   var isWindowVisible by remember { mutableStateOf(false) }
   var saved by remember { mutableStateOf(false) }
-  val searchQuery by searchViewModel.searchQuery.collectAsState()
 
-    val profileImagesMap by remember { mutableStateOf(mutableMapOf<String, Bitmap?>()) }
-    val bannerImagesMap by remember { mutableStateOf(mutableMapOf<String, Bitmap?>()) }
+  val profileImagesMap by remember { mutableStateOf(mutableMapOf<String, Bitmap?>()) }
+  val bannerImagesMap by remember { mutableStateOf(mutableMapOf<String, Bitmap?>()) }
 
-// Check if all required data is fetched
-    LaunchedEffect(workerProfiles) {
-        if (workerProfiles.isNotEmpty()) {
-            workerProfiles.forEach { profile ->
-                // Fetch profile images
-                workerViewModel.fetchProfileImageAsBitmap(
-                    profile.uid,
-                    onSuccess = { bitmap ->
-                        profileImagesMap[profile.uid] = bitmap
-                        checkIfLoadingComplete(workerProfiles, profileImagesMap, bannerImagesMap) {
-                            loading = false
-                        }
-                    },
-                    onFailure = { Log.e("ProfileResults", "Failed to fetch profile image") }
-                )
+  // Check if all required data is fetched
+  LaunchedEffect(workerProfiles) {
+    if (workerProfiles.isNotEmpty()) {
+      workerProfiles.forEach { profile ->
+        // Fetch profile images
+        workerViewModel.fetchProfileImageAsBitmap(
+            profile.uid,
+            onSuccess = { bitmap ->
+              profileImagesMap[profile.uid] = bitmap
+              checkIfLoadingComplete(workerProfiles, profileImagesMap, bannerImagesMap) {
+                loading = false
+              }
+            },
+            onFailure = { Log.e("ProfileResults", "Failed to fetch profile image") })
 
-                // Fetch banner images
-                workerViewModel.fetchBannerImageAsBitmap(
-                    profile.uid,
-                    onSuccess = { bitmap ->
-                        bannerImagesMap[profile.uid] = bitmap
-                        checkIfLoadingComplete(workerProfiles, profileImagesMap, bannerImagesMap) {
-                            loading = false
-                        }
-                    },
-                    onFailure = { Log.e("ProfileResults", "Failed to fetch banner image") }
-                )
-            }
-        } else {
-            loading = false // No profiles to load
-        }
+        // Fetch banner images
+        workerViewModel.fetchBannerImageAsBitmap(
+            profile.uid,
+            onSuccess = { bitmap ->
+              bannerImagesMap[profile.uid] = bitmap
+              checkIfLoadingComplete(workerProfiles, profileImagesMap, bannerImagesMap) {
+                loading = false
+              }
+            },
+            onFailure = { Log.e("ProfileResults", "Failed to fetch banner image") })
+      }
+    } else {
+      loading = false // No profiles to load
     }
+  }
 
   // Wrap everything in a Box to allow overlay
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -371,179 +366,188 @@ fun SearchWorkerResult(
               },
               colors =
                   TopAppBarDefaults.centerAlignedTopAppBarColors(
-                      containerColor = colorScheme.background),
+                      containerColor = colorScheme.surface),
           )
         }) { paddingValues ->
           // Main content inside the Scaffold
-          Column(
-              modifier = Modifier.fillMaxWidth().padding(paddingValues),
-              horizontalAlignment = Alignment.CenterHorizontally) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Top) {
-                      Text(
-                          text = searchQuery,
-                          style = poppinsTypography.labelMedium,
-                          fontSize = 24.sp,
-                          fontWeight = FontWeight.SemiBold,
-                          textAlign = TextAlign.Center,
-                      )
-                      Text(
-                          text = "This is a sample description for the $searchQuery result",
-                          style = poppinsTypography.labelSmall,
-                          fontWeight = FontWeight.Medium,
-                          fontSize = 12.sp,
-                          color = colorScheme.onSurface,
-                          textAlign = TextAlign.Center,
-                      )
-                    }
-
-                Row(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(top = screenHeight * 0.02f, bottom = screenHeight * 0.01f)
-                            .padding(horizontal = screenWidth * 0.02f)
-                            .wrapContentHeight()
-                            .testTag("filter_buttons_row"),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                  // Tune Icon - fixed, non-scrollable
-                  IconButton(
-                      onClick = { showFilterButtons = !showFilterButtons },
-                      modifier =
-                          Modifier.padding(bottom = screenHeight * 0.01f).testTag("tuneButton"),
-                      content = {
-                        Icon(
-                            imageVector = Icons.Default.Tune,
-                            contentDescription = "Filter",
-                            tint =
-                                if (showFilterButtons) colorScheme.onPrimary
-                                else colorScheme.onBackground,
+          if (loading) {
+            // Display a loader
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+              CircularProgressIndicator(
+                  color = colorScheme.primary, modifier = Modifier.size(64.dp))
+            }
+          } else {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(paddingValues),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                  Column(
+                      modifier = Modifier.fillMaxWidth().background(colorScheme.surface),
+                      horizontalAlignment = Alignment.CenterHorizontally,
+                      verticalArrangement = Arrangement.Top) {
+                        Text(
+                            text = searchSubcategory?.name ?: "Unknown",
+                            style = poppinsTypography.labelMedium,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center,
                         )
-                      },
-                      colors =
-                          IconButtonDefaults.iconButtonColors(
-                              containerColor =
-                                  if (showFilterButtons) colorScheme.primary
-                                  else colorScheme.surface),
-                  )
+                        Text(
+                            text = searchCategory?.description ?: "Unknown",
+                            style = poppinsTypography.labelSmall,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 12.sp,
+                            color = colorScheme.onSurface,
+                            textAlign = TextAlign.Center,
+                        )
+                        Row(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .padding(
+                                        top = screenHeight * 0.02f, bottom = screenHeight * 0.01f)
+                                    .padding(horizontal = screenWidth * 0.02f)
+                                    .wrapContentHeight()
+                                    .testTag("filter_buttons_row")
+                                    .background(colorScheme.surface),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                          // Tune Icon - fixed, non-scrollable
+                          IconButton(
+                              onClick = { showFilterButtons = !showFilterButtons },
+                              modifier =
+                                  Modifier.padding(bottom = screenHeight * 0.01f)
+                                      .testTag("tuneButton"),
+                              content = {
+                                Icon(
+                                    imageVector = Icons.Default.Tune,
+                                    contentDescription = "Filter",
+                                    tint =
+                                        if (showFilterButtons) colorScheme.onPrimary
+                                        else colorScheme.onBackground,
+                                )
+                              },
+                              colors =
+                                  IconButtonDefaults.iconButtonColors(
+                                      containerColor =
+                                          if (showFilterButtons) colorScheme.primary
+                                          else colorScheme.surface),
+                          )
 
-                  Spacer(modifier = Modifier.width(10.dp))
+                          Spacer(modifier = Modifier.width(10.dp))
 
-                  AnimatedVisibility(visible = showFilterButtons) {
-                    LazyRow(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.testTag("lazy_filter_row")) {
-                          items(listOfButtons.size) { index ->
-                            QuickFixButton(
-                                buttonText = listOfButtons[index].text,
-                                onClickAction = listOfButtons[index].onClick,
-                                buttonColor =
-                                    if (listOfButtons[index].applied) colorScheme.primary
-                                    else colorScheme.surface,
-                                textColor =
-                                    if (listOfButtons[index].applied) colorScheme.onPrimary
-                                    else colorScheme.onBackground,
-                                textStyle =
-                                    poppinsTypography.labelSmall.copy(
-                                        fontWeight = FontWeight.Medium),
-                                height = screenHeight * 0.05f,
-                                leadingIcon = listOfButtons[index].leadingIcon,
-                                trailingIcon = listOfButtons[index].trailingIcon,
-                                leadingIconTint =
-                                    if (listOfButtons[index].applied) colorScheme.onPrimary
-                                    else colorScheme.onBackground,
-                                trailingIconTint =
-                                    if (listOfButtons[index].applied) colorScheme.onPrimary
-                                    else colorScheme.onBackground,
-                                contentPadding =
-                                    PaddingValues(
-                                        vertical = 0.dp, horizontal = screenWidth * 0.02f),
-                                modifier =
-                                    Modifier.testTag("filter_button_${listOfButtons[index].text}"))
-                            Spacer(modifier = Modifier.width(screenHeight * 0.01f))
+                          AnimatedVisibility(visible = showFilterButtons) {
+                            LazyRow(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.testTag("lazy_filter_row")) {
+                                  items(listOfButtons.size) { index ->
+                                    QuickFixButton(
+                                        buttonText = listOfButtons[index].text,
+                                        onClickAction = listOfButtons[index].onClick,
+                                        buttonColor =
+                                            if (listOfButtons[index].applied) colorScheme.primary
+                                            else colorScheme.surface,
+                                        textColor =
+                                            if (listOfButtons[index].applied) colorScheme.onPrimary
+                                            else colorScheme.onBackground,
+                                        textStyle =
+                                            poppinsTypography.labelSmall.copy(
+                                                fontWeight = FontWeight.Medium),
+                                        height = screenHeight * 0.05f,
+                                        leadingIcon = listOfButtons[index].leadingIcon,
+                                        trailingIcon = listOfButtons[index].trailingIcon,
+                                        leadingIconTint =
+                                            if (listOfButtons[index].applied) colorScheme.onPrimary
+                                            else colorScheme.onBackground,
+                                        trailingIconTint =
+                                            if (listOfButtons[index].applied) colorScheme.onPrimary
+                                            else colorScheme.onBackground,
+                                        contentPadding =
+                                            PaddingValues(
+                                                vertical = 0.dp, horizontal = screenWidth * 0.02f),
+                                        modifier =
+                                            Modifier.testTag(
+                                                "filter_button_${listOfButtons[index].text}"))
+                                    Spacer(modifier = Modifier.width(screenHeight * 0.01f))
+                                  }
+                                }
                           }
                         }
-                  }
-                }
-              if (loading) {
-                  // Display a loader
-                  Box(
-                      modifier = Modifier.fillMaxSize(),
-                      contentAlignment = Alignment.Center
-                  ) {
-                      CircularProgressIndicator(
-                          color = colorScheme.primary,
-                          modifier = Modifier.size(64.dp)
-                      )
-                  }
-              } else {
-                LazyColumn(modifier = Modifier.fillMaxWidth().testTag("worker_profiles_list")) {
-                  items(filteredWorkerProfiles.size) { index ->
-                    val profile = filteredWorkerProfiles[index]
-                    var account by remember { mutableStateOf<Account?>(null) }
-                    var distance by remember { mutableStateOf<Int?>(null) }
-                    var cityName by remember { mutableStateOf<String?>(null) }
+                        Text(
+                            modifier =
+                                Modifier.align(Alignment.Start)
+                                    .padding(start = screenWidth * 0.03f),
+                            text = searchSubcategory?.scale?.longScale ?: "Unknown",
+                            color = colorScheme.error,
+                            style = poppinsTypography.labelSmall,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 10.sp)
+                      }
+
+                  LazyColumn(modifier = Modifier.fillMaxWidth().testTag("worker_profiles_list")) {
+                    items(filteredWorkerProfiles.size) { index ->
+                      val profile = filteredWorkerProfiles[index]
+                      var account by remember { mutableStateOf<Account?>(null) }
+                      var distance by remember { mutableStateOf<Int?>(null) }
+                      var cityName by remember { mutableStateOf<String?>(null) }
                       val profileImage = profileImagesMap[profile.uid]
                       val bannerImage = bannerImagesMap[profile.uid]
-                    distance =
-                        profile.location
-                            ?.let { workerLocation ->
-                              searchViewModel.calculateDistance(
-                                  workerLocation.latitude,
-                                  workerLocation.longitude,
-                                  baseLocation!!.latitude,
-                                  baseLocation!!.longitude)
-                            }
-                            ?.toInt()
+                      distance =
+                          profile.location
+                              ?.let { workerLocation ->
+                                searchViewModel.calculateDistance(
+                                    workerLocation.latitude,
+                                    workerLocation.longitude,
+                                    baseLocation.latitude,
+                                    baseLocation.longitude)
+                              }
+                              ?.toInt()
 
-                    LaunchedEffect(profile.uid) {
-                      accountViewModel.fetchUserAccount(profile.uid) { fetchedAccount: Account? ->
-                        account = fetchedAccount
+                      LaunchedEffect(profile.uid) {
+                        accountViewModel.fetchUserAccount(profile.uid) { fetchedAccount: Account? ->
+                          account = fetchedAccount
+                        }
                       }
-                    }
 
-                    account?.let { acc ->
-                      val locationName =
-                          if (profile.location?.name.isNullOrEmpty()) "Unknown"
-                          else profile.location?.name
+                      account?.let { acc ->
+                        val locationName =
+                            if (profile.location?.name.isNullOrEmpty()) "Unknown"
+                            else profile.location?.name
 
-                      locationName?.let {
-                        cityName =
-                            profile.location?.let { it1 ->
-                              getCityNameFromCoordinates(it1.latitude, profile.location.longitude)
+                        locationName?.let {
+                          cityName =
+                              profile.location?.let { it1 ->
+                                getCityNameFromCoordinates(it1.latitude, profile.location.longitude)
+                              }
+                          Log.d("Chill guy", cityName.toString())
+                          cityName?.let { it1 ->
+                            profileImage?.let { it2 ->
+                              SearchWorkerProfileResult(
+                                  modifier = Modifier.testTag("worker_profile_result$index"),
+                                  profileImage = it2,
+                                  name = profile.displayName,
+                                  category = profile.fieldOfWork,
+                                  rating =
+                                      profile.reviews.map { review -> review.rating }.average(),
+                                  reviewCount = profile.reviews.size,
+                                  location = it1,
+                                  price = profile.price.toString(),
+                                  onBookClick = {
+                                    selectedWorker = profile
+                                    selectedCityName = cityName
+                                    isWindowVisible = true
+                                    profilePicture = it2
+                                    bannerPicture = bannerImage!!
+                                  },
+                                  distance = distance,
+                              )
                             }
-                        Log.d("Chill guy", cityName.toString())
-                        cityName?.let { it1 ->
-                          profileImage?.let { it2 ->
-                            SearchWorkerProfileResult(
-                                modifier = Modifier.testTag("worker_profile_result$index"),
-                                profileImage = it2,
-                                name = profile.displayName,
-                                category = profile.fieldOfWork,
-                                rating = profile.reviews.map { review -> review.rating }.average(),
-                                reviewCount = profile.reviews.size,
-                                location = it1,
-                                price = profile.price.toString(),
-                                onBookClick = {
-                                  selectedWorker = profile
-                                  selectedCityName = cityName
-                                  isWindowVisible = true
-                                  profilePicture = profileImage!!
-                                  bannerPicture = bannerImage!!
-                                },
-                                distance = distance,
-                            )
                           }
                         }
                       }
+                      Spacer(modifier = Modifier.height(screenHeight * 0.004f))
                     }
-                    Spacer(modifier = Modifier.height(screenHeight * 0.004f))
                   }
                 }
-                  }
-              }
+          }
         }
 
     QuickFixAvailabilityBottomSheet(
@@ -662,329 +666,371 @@ fun SearchWorkerResult(
     }
 
     if (isWindowVisible) {
-      QuickFixSlidingWindow(isVisible = isWindowVisible, onDismiss = { isWindowVisible = false }) {
-        // Content of the sliding window
-        Column(
-            modifier =
-                Modifier.clip(RoundedCornerShape(topStart = 25f, bottomStart = 25f))
-                    .fillMaxWidth()
-                    .background(colorScheme.background)
-                    .testTag("sliding_window_content")) {
+      Log.d("saved lists", userProfile?.savedList.toString() + selectedWorker.uid)
+      Popup(
+          onDismissRequest = { isWindowVisible = false },
+          properties = PopupProperties(focusable = true)) {
+            QuickFixSlidingWindow(
+                isVisible = isWindowVisible, onDismiss = { isWindowVisible = false }) {
+                  // Content of the sliding window
+                  Column(
+                      modifier =
+                          Modifier.clip(RoundedCornerShape(topStart = 25f, bottomStart = 25f))
+                              .fillMaxWidth()
+                              .background(colorScheme.background)
+                              .testTag("sliding_window_content")) {
 
-              // Top Bar
-              Box(
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .height(
-                              screenHeight *
-                                  0.23f) // Adjusted height to accommodate profile picture overlap
-                          .testTag("sliding_window_top_bar")) {
-                    // Banner Image
-                    Image(
-                        painter = BitmapPainter(bannerPicture!!.asImageBitmap()),
-                        contentDescription = "Banner",
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .height(screenHeight * 0.2f)
-                                .testTag("sliding_window_banner_image"),
-                        contentScale = ContentScale.Crop)
-
-                    QuickFixButton(
-                        buttonText = if (saved) "saved" else "save",
-                        onClickAction = {
-                            saved = !saved
-                            val newProfile =
-                                userProfile?.let {
-                                    UserProfile(
-                                        locations = it.locations,
-                                        announcements = it.announcements,
-                                        wallet = it.wallet,
-                                        uid = it.uid,
-                                        quickFixes = it.quickFixes,
-                                        savedList = it.savedList + selectedWorker.uid
-                                    )
-                                }
-                            userProfileViewModel.updateProfile(newProfile!!, onSuccess = {
-                                Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
-                            }, onFailure = {
-                                Log.e("SlidingWindow", "Failed to save profile")
-                            })
-                                        },
-                        buttonColor = colorScheme.surface,
-                        textColor = colorScheme.onBackground,
-                        textStyle = MaterialTheme.typography.labelMedium,
-                        contentPadding = PaddingValues(horizontal = screenWidth * 0.01f),
-                        modifier =
-                            Modifier.align(Alignment.BottomEnd)
-                                .width(screenWidth * 0.25f)
-                                .offset(x = -(screenWidth * 0.04f))
-                                .testTag(
-                                    "sliding_window_save_button"), // Negative offset to position
-                        // correctly,
-                        leadingIcon =
-                            if (saved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder)
-
-                    // Profile picture overlapping the banner image
-                    Image(
-                        painter = BitmapPainter(profilePicture!!.asImageBitmap()),
-                        contentDescription = "Profile Picture",
-                        modifier =
-                            Modifier.size(screenHeight * 0.1f)
-                                .align(Alignment.BottomStart)
-                                .offset(x = screenWidth * 0.04f)
-                                .clip(CircleShape)
-                                .testTag("sliding_window_profile_picture"),
-                        // Negative offset to position correctly
-                        contentScale = ContentScale.Crop)
-                  }
-
-              // Worker Field and Address under the profile picture.
-              Column(
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(horizontal = screenWidth * 0.04f)
-                          .testTag("sliding_window_worker_additional_info")) {
-                    Text(
-                        text = selectedWorker.displayName,
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = colorScheme.onBackground,
-                        modifier = Modifier.testTag("sliding_window_worker_category"))
-                    selectedCityName?.let {
-                      Text(
-                          text = it,
-                          style = MaterialTheme.typography.headlineSmall,
-                          color = colorScheme.onBackground,
-                          modifier = Modifier.testTag("sliding_window_worker_address"))
-                    }
-                  }
-
-              // Main content should be scrollable
-              Column(
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .verticalScroll(rememberScrollState())
-                          .background(colorScheme.surface)
-                          .testTag("sliding_window_scrollable_content")) {
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-
-                    // Description with "Show more" functionality
-                    var showFullDescription by remember { mutableStateOf(false) }
-                    val descriptionText =
-                        if (showFullDescription || selectedWorker.description.length <= 100) {
-                          selectedWorker.description
-                        } else {
-                          selectedWorker.description.take(100) + "..."
-                        }
-
-                    Text(
-                        text = descriptionText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colorScheme.onSurface,
-                        modifier =
-                            Modifier.padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_description"))
-
-                    if (selectedWorker.description.length > 100) {
-                      Text(
-                          text = if (showFullDescription) "Show less" else "Show more",
-                          style =
-                              MaterialTheme.typography.bodySmall.copy(color = colorScheme.primary),
-                          modifier =
-                              Modifier.padding(horizontal = screenWidth * 0.04f)
-                                  .clickable { showFullDescription = !showFullDescription }
-                                  .testTag("sliding_window_description_show_more_button"))
-                    }
-
-                    // Delimiter between description and services
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-
-                    HorizontalDivider(
-                        modifier =
-                            Modifier.padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_horizontal_divider_1"),
-                        thickness = 1.dp,
-                        color = colorScheme.onSurface.copy(alpha = 0.2f))
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-
-                    // Services Section
-                    Row(
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_services_row")) {
-                          // Included Services
-                          Column(
-                              modifier =
-                                  Modifier.weight(1f)
-                                      .testTag("sliding_window_included_services_column")) {
-                                Text(
-                                    text = "Included Services",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    color = colorScheme.onBackground)
-                                Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-                                selectedWorker.includedServices.forEach { service ->
-                                  val name = service.name
-                                  Text(
-                                      text = "• $name",
-                                      style = MaterialTheme.typography.bodySmall,
-                                      color = colorScheme.onSurface,
-                                      modifier = Modifier.padding(bottom = screenHeight * 0.005f))
-                                }
-                              }
-
-                          Spacer(modifier = Modifier.width(screenWidth * 0.02f))
-
-                          // Add-On Services
-                          Column(
-                              modifier =
-                                  Modifier.weight(1f)
-                                      .testTag("sliding_window_addon_services_column")) {
-                                Text(
-                                    text = "Add-On Services",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    color = colorScheme.primary)
-                                Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-                                selectedWorker.addOnServices.forEach { service ->
-                                  val name = service.name
-                                  Text(
-                                      text = "• $name",
-                                      style = MaterialTheme.typography.bodySmall,
-                                      color = colorScheme.primary,
-                                      modifier = Modifier.padding(bottom = screenHeight * 0.005f))
-                                }
-                              }
-                        }
-
-                    Spacer(modifier = Modifier.height(screenHeight * 0.03f))
-
-                    // Continue Button with Rate/HR
-                    QuickFixButton(
-                        buttonText = "Continue",
-                        onClickAction = { /* Handle continue */},
-                        buttonColor = colorScheme.primary,
-                        textColor = colorScheme.onPrimary,
-                        textStyle = MaterialTheme.typography.labelMedium,
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_continue_button"))
-
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-
-                    HorizontalDivider(
-                        modifier =
-                            Modifier.padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_horizontal_divider_2"),
-                        thickness = 1.dp,
-                        color = colorScheme.onSurface.copy(alpha = 0.2f),
-                    )
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-
-                    // Tags Section
-                    Text(
-                        text = "Tags",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = colorScheme.onBackground,
-                        modifier = Modifier.padding(horizontal = screenWidth * 0.04f))
-                    Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-
-                    // Display tags using FlowRow for wrapping
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(screenWidth * 0.02f),
-                        verticalArrangement = Arrangement.spacedBy(screenHeight * 0.01f),
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_tags_flow_row"),
-                    ) {
-                      selectedWorker.tags.forEach { tag ->
-                        Text(
-                            text = tag,
-                            color = colorScheme.primary,
-                            style = MaterialTheme.typography.bodySmall,
+                        // Top Bar
+                        Box(
                             modifier =
-                                Modifier.border(
-                                        width = 1.dp,
-                                        color = colorScheme.primary,
-                                        shape = MaterialTheme.shapes.small)
-                                    .padding(
-                                        horizontal = screenWidth * 0.02f,
-                                        vertical = screenHeight * 0.005f))
-                      }
-                    }
+                                Modifier.fillMaxWidth()
+                                    .height(
+                                        screenHeight *
+                                            0.23f) // Adjusted height to accommodate profile picture
+                                    // overlap
+                                    .testTag("sliding_window_top_bar")) {
+                              // Banner Image
+                              Image(
+                                  painter = BitmapPainter(bannerPicture!!.asImageBitmap()),
+                                  contentDescription = "Banner",
+                                  modifier =
+                                      Modifier.fillMaxWidth()
+                                          .height(screenHeight * 0.2f)
+                                          .testTag("sliding_window_banner_image"),
+                                  contentScale = ContentScale.Crop)
 
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+                              QuickFixButton(
+                                  buttonText =
+                                      if (userProfile?.savedList?.contains(selectedWorker.uid) ==
+                                          true)
+                                          "saved"
+                                      else "save",
+                                  onClickAction = {
+                                    val profile = userProfile
+                                    if (profile == null) {
+                                      Log.e(
+                                          "SlidingWindow",
+                                          "Cannot update saved list: userProfile is null")
+                                      return@QuickFixButton
+                                    }
 
-                    HorizontalDivider(
-                        modifier =
-                            Modifier.padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_horizontal_divider_3"),
-                        thickness = 1.dp,
-                        color = colorScheme.onSurface.copy(alpha = 0.2f))
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+                                    val isSaved = profile.savedList.contains(selectedWorker.uid)
+                                    val updatedList =
+                                        if (isSaved) profile.savedList - selectedWorker.uid
+                                        else profile.savedList + selectedWorker.uid
+                                    val newProfile = profile.copy(savedList = updatedList)
 
-                    Text(
-                        text = "Reviews",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = colorScheme.onBackground,
-                        modifier = Modifier.padding(horizontal = screenWidth * 0.04f))
-                    Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+                                    userProfileViewModel.updateProfile(
+                                        newProfile,
+                                        onSuccess = {
+                                          userProfile = newProfile
+                                          val message =
+                                              if (isSaved) "Removed from saved list" else "Saved"
+                                          Toast.makeText(context, message, Toast.LENGTH_SHORT)
+                                              .show()
+                                        },
+                                        onFailure = {
+                                          Log.e("SlidingWindow", "Failed to update profile")
+                                        })
+                                  },
+                                  buttonColor = colorScheme.surface,
+                                  textColor = colorScheme.onBackground,
+                                  textStyle = MaterialTheme.typography.labelMedium,
+                                  contentPadding = PaddingValues(horizontal = screenWidth * 0.01f),
+                                  modifier =
+                                      Modifier.align(Alignment.BottomEnd)
+                                          .width(screenWidth * 0.25f)
+                                          .offset(x = -(screenWidth * 0.04f))
+                                          .testTag("sliding_window_save_button"),
+                                  leadingIcon =
+                                      if (userProfile?.savedList?.contains(selectedWorker.uid) ==
+                                          true)
+                                          Icons.Filled.Bookmark
+                                      else Icons.Outlined.BookmarkBorder)
 
-                    // Star Rating Row
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier =
-                            Modifier.padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_star_rating_row")) {
-                          RatingBar(
-                              selectedWorker.rating.toFloat(),
-                              modifier = Modifier.height(20.dp).testTag("starsRow"))
-                        }
-                    Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-                    LazyRow(
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .padding(horizontal = screenWidth * 0.04f)
-                                .testTag("sliding_window_reviews_row")) {
-                          itemsIndexed(selectedWorker.reviews) { index, review ->
-                            var isExpanded by remember { mutableStateOf(false) }
-                            val displayText =
-                                if (isExpanded || review.review.length <= 100) {
-                                  review.review
-                                } else {
-                                  review.review.take(100) + "..."
+                              // Profile picture overlapping the banner image
+                              Image(
+                                  painter = BitmapPainter(profilePicture!!.asImageBitmap()),
+                                  contentDescription = "Profile Picture",
+                                  modifier =
+                                      Modifier.size(screenHeight * 0.1f)
+                                          .align(Alignment.BottomStart)
+                                          .offset(x = screenWidth * 0.04f)
+                                          .clip(CircleShape)
+                                          .testTag("sliding_window_profile_picture"),
+                                  // Negative offset to position correctly
+                                  contentScale = ContentScale.Crop)
+                            }
+
+                        // Worker Field and Address under the profile picture
+                        Column(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .padding(horizontal = screenWidth * 0.04f)
+                                    .testTag("sliding_window_worker_additional_info")) {
+                              Text(
+                                  text = selectedWorker.displayName,
+                                  style = MaterialTheme.typography.headlineLarge,
+                                  color = colorScheme.onBackground,
+                                  modifier = Modifier.testTag("sliding_window_worker_category"))
+                              selectedCityName?.let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    color = colorScheme.onBackground,
+                                    modifier = Modifier.testTag("sliding_window_worker_address"))
+                              }
+                            }
+
+                        // Main content should be scrollable
+                        Column(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .verticalScroll(rememberScrollState())
+                                    .background(colorScheme.surface)
+                                    .testTag("sliding_window_scrollable_content")) {
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                              // Description with "Show more" functionality
+                              var showFullDescription by remember { mutableStateOf(false) }
+                              val descriptionText =
+                                  if (showFullDescription ||
+                                      selectedWorker.description.length <= 100) {
+                                    selectedWorker.description
+                                  } else {
+                                    selectedWorker.description.take(100) + "..."
+                                  }
+
+                              Text(
+                                  text = descriptionText,
+                                  style = MaterialTheme.typography.bodySmall,
+                                  color = colorScheme.onSurface,
+                                  modifier =
+                                      Modifier.padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_description"))
+
+                              if (selectedWorker.description.length > 100) {
+                                Text(
+                                    text = if (showFullDescription) "Show less" else "Show more",
+                                    style =
+                                        MaterialTheme.typography.bodySmall.copy(
+                                            color = colorScheme.primary),
+                                    modifier =
+                                        Modifier.padding(horizontal = screenWidth * 0.04f)
+                                            .clickable {
+                                              showFullDescription = !showFullDescription
+                                            }
+                                            .testTag("sliding_window_description_show_more_button"))
+                              }
+
+                              // Delimiter between description and services
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                              HorizontalDivider(
+                                  modifier =
+                                      Modifier.padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_horizontal_divider_1"),
+                                  thickness = 1.dp,
+                                  color = colorScheme.onSurface.copy(alpha = 0.2f))
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                              // Services Section
+                              Row(
+                                  modifier =
+                                      Modifier.fillMaxWidth()
+                                          .padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_services_row")) {
+                                    // Included Services
+                                    Column(
+                                        modifier =
+                                            Modifier.weight(1f)
+                                                .testTag(
+                                                    "sliding_window_included_services_column")) {
+                                          Text(
+                                              text = "Included Services",
+                                              style = MaterialTheme.typography.headlineMedium,
+                                              color = colorScheme.onBackground)
+                                          Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+                                          selectedWorker.includedServices.forEach { service ->
+                                            val name = service.name
+                                            Text(
+                                                text = "• $name",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = colorScheme.onSurface,
+                                                modifier =
+                                                    Modifier.padding(
+                                                        bottom = screenHeight * 0.005f))
+                                          }
+                                        }
+
+                                    Spacer(modifier = Modifier.width(screenWidth * 0.02f))
+
+                                    // Add-On Services
+                                    Column(
+                                        modifier =
+                                            Modifier.weight(1f)
+                                                .testTag("sliding_window_addon_services_column")) {
+                                          Text(
+                                              text = "Add-On Services",
+                                              style = MaterialTheme.typography.headlineMedium,
+                                              color = colorScheme.primary)
+                                          Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+                                          selectedWorker.addOnServices.forEach { service ->
+                                            val name = service.name
+                                            Text(
+                                                text = "• $name",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = colorScheme.primary,
+                                                modifier =
+                                                    Modifier.padding(
+                                                        bottom = screenHeight * 0.005f))
+                                          }
+                                        }
+                                  }
+
+                              Spacer(modifier = Modifier.height(screenHeight * 0.03f))
+
+                              // Continue Button with Rate/HR
+                              QuickFixButton(
+                                  buttonText = "Continue",
+                                  onClickAction = {
+                                    quickFixViewModel.setSelectedWorkerProfile(selectedWorker)
+                                    navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
+                                  },
+                                  buttonColor = colorScheme.primary,
+                                  textColor = colorScheme.onPrimary,
+                                  textStyle = MaterialTheme.typography.labelMedium,
+                                  modifier =
+                                      Modifier.fillMaxWidth()
+                                          .padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_continue_button"))
+
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                              HorizontalDivider(
+                                  modifier =
+                                      Modifier.padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_horizontal_divider_2"),
+                                  thickness = 1.dp,
+                                  color = colorScheme.onSurface.copy(alpha = 0.2f),
+                              )
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                              // Tags Section
+                              Text(
+                                  text = "Tags",
+                                  style = MaterialTheme.typography.headlineMedium,
+                                  color = colorScheme.onBackground,
+                                  modifier = Modifier.padding(horizontal = screenWidth * 0.04f))
+                              Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+
+                              // Display tags using FlowRow for wrapping
+                              FlowRow(
+                                  horizontalArrangement = Arrangement.spacedBy(screenWidth * 0.02f),
+                                  verticalArrangement = Arrangement.spacedBy(screenHeight * 0.01f),
+                                  modifier =
+                                      Modifier.fillMaxWidth()
+                                          .padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_tags_flow_row"),
+                              ) {
+                                selectedWorker.tags.forEach { tag ->
+                                  Text(
+                                      text = tag,
+                                      color = colorScheme.primary,
+                                      style = MaterialTheme.typography.bodySmall,
+                                      modifier =
+                                          Modifier.border(
+                                                  width = 1.dp,
+                                                  color = colorScheme.primary,
+                                                  shape = MaterialTheme.shapes.small)
+                                              .padding(
+                                                  horizontal = screenWidth * 0.02f,
+                                                  vertical = screenHeight * 0.005f))
                                 }
+                              }
 
-                            Box(
-                                modifier =
-                                    Modifier.padding(end = screenWidth * 0.02f)
-                                        .width(screenWidth * 0.6f)
-                                        .clip(RoundedCornerShape(25f))
-                                        .background(colorScheme.background)) {
-                                  Column(modifier = Modifier.padding(screenWidth * 0.02f)) {
-                                    Text(
-                                        text = displayText,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = colorScheme.onSurface)
-                                    if (review.review.length > 100) {
-                                      Text(
-                                          text = if (isExpanded) "See less" else "See more",
-                                          style =
-                                              MaterialTheme.typography.bodySmall.copy(
-                                                  color = colorScheme.primary),
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                              HorizontalDivider(
+                                  modifier =
+                                      Modifier.padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_horizontal_divider_3"),
+                                  thickness = 1.dp,
+                                  color = colorScheme.onSurface.copy(alpha = 0.2f))
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+
+                              Text(
+                                  text = "Reviews",
+                                  style = MaterialTheme.typography.headlineMedium,
+                                  color = colorScheme.onBackground,
+                                  modifier = Modifier.padding(horizontal = screenWidth * 0.04f))
+                              Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+
+                              // Star Rating Row
+                              Row(
+                                  verticalAlignment = Alignment.CenterVertically,
+                                  modifier =
+                                      Modifier.padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_star_rating_row")) {
+                                    RatingBar(
+                                        selectedWorker.rating.toFloat(),
+                                        modifier =
+                                            Modifier.height(screenHeight * 0.03f)
+                                                .testTag("starsRow"))
+                                  }
+                              Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+                              Spacer(modifier = Modifier.height(screenHeight * 0.01f))
+                              LazyRow(
+                                  modifier =
+                                      Modifier.fillMaxWidth()
+                                          .padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_reviews_row")) {
+                                    itemsIndexed(selectedWorker.reviews) { index, review ->
+                                      var isExpanded by remember { mutableStateOf(false) }
+                                      val displayText =
+                                          if (isExpanded || review.review.length <= 100) {
+                                            review.review
+                                          } else {
+                                            review.review.take(100) + "..."
+                                          }
+
+                                      Box(
                                           modifier =
-                                              Modifier.clickable { isExpanded = !isExpanded }
-                                                  .padding(top = screenHeight * 0.01f))
+                                              Modifier.padding(end = screenWidth * 0.02f)
+                                                  .width(screenWidth * 0.6f)
+                                                  .clip(RoundedCornerShape(25f))
+                                                  .background(colorScheme.background)) {
+                                            Column(
+                                                modifier = Modifier.padding(screenWidth * 0.02f)) {
+                                                  Text(
+                                                      text = displayText,
+                                                      style = MaterialTheme.typography.bodySmall,
+                                                      color = colorScheme.onSurface)
+                                                  if (review.review.length > 100) {
+                                                    Text(
+                                                        text =
+                                                            if (isExpanded) "See less"
+                                                            else "See more",
+                                                        style =
+                                                            MaterialTheme.typography.bodySmall.copy(
+                                                                color = colorScheme.primary),
+                                                        modifier =
+                                                            Modifier.clickable {
+                                                                  isExpanded = !isExpanded
+                                                                }
+                                                                .padding(
+                                                                    top = screenHeight * 0.01f))
+                                                  }
+                                                }
+                                          }
                                     }
                                   }
-                                }
-                          }
-                        }
 
-                    Spacer(modifier = Modifier.height(screenHeight * 0.02f))
-                  }
-            }
-      }
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+                            }
+                      }
+                }
+          }
     }
   }
 }
@@ -995,8 +1041,9 @@ fun checkIfLoadingComplete(
     bannerImages: Map<String, Bitmap?>,
     onComplete: () -> Unit
 ) {
-    val allProfilesLoaded = profiles.all { profile ->
+  val allProfilesLoaded =
+      profiles.all { profile ->
         profileImages[profile.uid] != null && bannerImages[profile.uid] != null
-    }
-    if (allProfilesLoaded) onComplete()
+      }
+  if (allProfilesLoaded) onComplete()
 }

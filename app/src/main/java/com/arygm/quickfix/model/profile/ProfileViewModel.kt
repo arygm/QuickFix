@@ -66,7 +66,6 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
         profile = profile,
         onSuccess = {
           getProfiles()
-
           onSuccess()
           // fetchUserProfile(profile.uid) { loggedInProfileViewModel.setLoggedInProfile(profile) }
         },

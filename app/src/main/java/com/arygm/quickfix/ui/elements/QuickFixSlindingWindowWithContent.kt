@@ -18,7 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
@@ -35,12 +35,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import com.arygm.quickfix.model.quickfix.QuickFix
+import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 
 @Composable
 fun QuickFixSlidingWindowContent(
     quickFix: QuickFix,
     onDismiss: () -> Unit,
-    isVisible: Boolean = true
+    isVisible: Boolean = true,
+    navigationActions: NavigationActions
 ) {
   QuickFixSlidingWindow(isVisible = isVisible, onDismiss = onDismiss) {
     BoxWithConstraints(
@@ -79,7 +82,11 @@ fun QuickFixSlidingWindowContent(
                       style = MaterialTheme.typography.bodyMedium,
                       color = MaterialTheme.colorScheme.onBackground)
                   Spacer(modifier = Modifier.height(screenHeight * 0.01f))
-                  ImageSelector(screenWidth, screenHeight * 0.9f, quickFix)
+                  ImageSelector(
+                      screenWidth,
+                      screenHeight * 0.9f,
+                      quickFix,
+                      { navigationActions.navigateTo(UserScreen.QUICKFIX_DISPLAY_IMAGES) })
                 }
 
                 // Spacer
@@ -263,7 +270,7 @@ fun QuickFixSlidingWindowContent(
                       verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector =
-                                Icons.Default
+                                Icons.AutoMirrored.Filled
                                     .ArrowForward, // Replace with an appropriate swipe icon
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurface)

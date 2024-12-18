@@ -9,7 +9,7 @@ import java.time.LocalTime
 
 open class Profile(
     val uid: String,
-    val quickFixes: List<String> = emptyList(), // common field
+    var quickFixes: List<String> = emptyList(), // common field
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -24,7 +24,7 @@ open class Profile(
 }
 
 class UserProfile(
-     // String of uid that will represents the uid of the saved lists
+    // String of uid that will represents the uid of the saved lists
     val locations: List<Location>,
     val announcements: List<String>, // Each string correspond to an announcement id.
     val wallet: Double = 0.0,
@@ -39,11 +39,36 @@ class UserProfile(
     if (other !is UserProfile) return false
     if (!super.equals(other)) return false
 
-    return locations == other.locations
+    return locations == other.locations &&
+        announcements == other.announcements &&
+        wallet == other.wallet &&
+        savedList == other.savedList
   }
 
   override fun hashCode(): Int {
-    return listOf(super.hashCode(), locations).hashCode()
+    var result = super.hashCode()
+    result = 31 * result + locations.hashCode()
+    result = 31 * result + announcements.hashCode()
+    result = 31 * result + wallet.hashCode()
+    result = 31 * result + savedList.hashCode()
+    return result
+  }
+
+  fun copy(
+      locations: List<Location> = this.locations,
+      announcements: List<String> = this.announcements,
+      wallet: Double = this.wallet,
+      uid: String = this.uid,
+      quickFixes: List<String> = this.quickFixes,
+      savedList: List<String> = this.savedList
+  ): UserProfile {
+    return UserProfile(
+        locations = locations,
+        announcements = announcements,
+        wallet = wallet,
+        uid = uid,
+        quickFixes = quickFixes,
+        savedList = savedList)
   }
 }
 
@@ -52,10 +77,7 @@ class WorkerProfile(
     val description: String = "No description available", // Default description
     val location: Location? =
         Location(0.0, 0.0, "Unknown Location"), // Default to an empty Location
-    quickFixes: List<String> =
-        listOf(
-            "Fix a leaking faucet",
-            "Assemble a furniture piece"), // Default list with realistic examples
+    quickFixes: List<String> = emptyList(),
     val includedServices: List<IncludedService> =
         listOf(
             IncludedService(name = "Basic Consultation"),
@@ -64,27 +86,19 @@ class WorkerProfile(
         listOf(
             AddOnService(name = "Express Delivery"),
             AddOnService(name = "Premium Materials")), // Default add-on services
-    val reviews: ArrayDeque<Review> =
-        ArrayDeque(
-            listOf(
-                Review(username = "User1", review = "Great service!", rating = 5.0),
-                Review(
-                    username = "User2",
-                    review = "Very satisfied",
-                    rating = 4.5))), // Default reviews
-    val profilePicture: String =
-        "https://example.com/default-profile-pic.jpg", // Default profile picture URL
+    val reviews: ArrayDeque<Review> = ArrayDeque(emptyList()), // Default reviews
+    val profilePicture: String = "", // Default profile picture URL
     val bannerPicture: String =
         "https://example.com/default-banner-pic.jpg", // Default banner picture URL
-    val price: Double = 50.0, // Default price
-    val displayName: String = "Anonymous Worker", // Default display name
+    val price: Double = 0.0, // Default price
+    val displayName: String = "", // Default display name
     val unavailability_list: List<LocalDate> =
         listOf(
             LocalDate.now().plusDays(1),
             LocalDate.now().plusDays(3)), // Default unavailability dates
     val workingHours: Pair<LocalTime, LocalTime> =
         Pair(LocalTime.of(9, 0), LocalTime.of(17, 0)), // Default working hours (9 AM to 5 PM)
-    uid: String = "default-uid", // Default UID
+    uid: String = "", // Default UID
     val tags: List<String> = listOf("Reliable", "Experienced", "Professional"), // Default tags
     val rating: Double = reviews.map { it.rating }.average(),
 ) : Profile(uid, quickFixes) {
@@ -96,11 +110,36 @@ class WorkerProfile(
     return fieldOfWork == other.fieldOfWork &&
         description == other.description &&
         location == other.location &&
-        reviews == other.reviews
+        includedServices == other.includedServices &&
+        addOnServices == other.addOnServices &&
+        reviews == other.reviews &&
+        profilePicture == other.profilePicture &&
+        bannerPicture == other.bannerPicture &&
+        price == other.price &&
+        displayName == other.displayName &&
+        unavailability_list == other.unavailability_list &&
+        workingHours == other.workingHours &&
+        tags == other.tags &&
+        rating == other.rating
   }
 
   override fun hashCode(): Int {
-    return listOf(super.hashCode(), fieldOfWork, description, location, reviews).hashCode()
+    var result = super.hashCode()
+    result = 31 * result + fieldOfWork.hashCode()
+    result = 31 * result + description.hashCode()
+    result = 31 * result + (location?.hashCode() ?: 0)
+    result = 31 * result + includedServices.hashCode()
+    result = 31 * result + addOnServices.hashCode()
+    result = 31 * result + reviews.hashCode()
+    result = 31 * result + profilePicture.hashCode()
+    result = 31 * result + bannerPicture.hashCode()
+    result = 31 * result + price.hashCode()
+    result = 31 * result + displayName.hashCode()
+    result = 31 * result + unavailability_list.hashCode()
+    result = 31 * result + workingHours.hashCode()
+    result = 31 * result + tags.hashCode()
+    result = 31 * result + rating.hashCode()
+    return result
   }
 
   fun toFirestoreMap(): Map<String, Any?> {

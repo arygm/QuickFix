@@ -17,15 +17,17 @@ import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
+import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.UserModeNavHost
 import com.arygm.quickfix.ui.uiMode.workerMode.WorkerModeNavGraph
-import com.arygm.quickfix.ui.userModeUI.UserModeNavHost
 import com.arygm.quickfix.utils.loadAppMode
 
 @Composable
@@ -41,7 +43,9 @@ fun AppContentNavGraph(
     userPreferencesViewModel: PreferencesViewModelUserProfile,
     workerViewModel: ProfileViewModel,
     categoryViewModel: CategoryViewModel,
-    locationViewModel: LocationViewModel
+    locationViewModel: LocationViewModel,
+    chatViewModel: ChatViewModel,
+    quickFixViewModel: QuickFixViewModel
 ) {
   val appContentNavController = rememberNavController()
   val appContentNavigationActions = remember { NavigationActions(appContentNavController) }
@@ -91,6 +95,8 @@ fun AppContentNavGraph(
               rootNavigationActions,
               userPreferencesViewModel,
               appContentNavigationActions,
+              chatViewModel,
+              quickFixViewModel,
               isOffline)
         }
 

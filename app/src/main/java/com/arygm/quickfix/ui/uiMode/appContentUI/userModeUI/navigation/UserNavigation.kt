@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.userModeUI.navigation
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -8,12 +8,10 @@ import androidx.compose.material.icons.filled.Search
 import com.arygm.quickfix.ui.navigation.TopLevelDestination
 
 object UserRoute {
-  const val CALENDAR = "Calendar"
   const val HOME = "Home"
   const val SEARCH = "Search"
   const val DASHBOARD = "Dashboard"
   const val PROFILE = "Profile"
-  const val ACCOUNT_CONFIGURATION = "Account configuration"
 }
 
 object UserScreen {
@@ -28,6 +26,10 @@ object UserScreen {
   const val SEARCH_WORKER_RESULT = "Search Worker Result Screen"
   const val DISPLAY_UPLOADED_IMAGES = "Displayed images Screen"
   const val SEARCH_LOCATION = "SEARCH_Location Screen"
+  const val ANNOUNCEMENT_DETAIL = "Announcement detail screen"
+  const val QUICKFIX_ONBOARDING = "QuickFix OnBoarding Screen"
+  const val QUICKFIX_DISPLAY_IMAGES = "QuickFix Display Images Screen"
+  const val SAVED_LIST = "Saved List Screen"
 }
 
 object UserTopLevelDestinations {

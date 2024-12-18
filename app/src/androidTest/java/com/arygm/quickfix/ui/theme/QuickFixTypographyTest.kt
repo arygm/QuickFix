@@ -17,7 +17,7 @@ class QuickFixTypographyTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   @Composable
-  fun TypographyTextSample(text: String, style: androidx.compose.ui.text.TextStyle) {
+  fun TypographyTextSample(text: String, style: TextStyle) {
     Text(text = text, style = style)
   }
 

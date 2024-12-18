@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerRoute
-import com.arygm.quickfix.ui.userModeUI.navigation.UserRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

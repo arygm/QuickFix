@@ -19,7 +19,7 @@ import com.arygm.quickfix.ui.elements.QuickFixProfileScreenElement
 import com.arygm.quickfix.ui.elements.SettingItemData
 import com.arygm.quickfix.ui.elements.SettingsSection
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 
 @Composable
 fun UserProfileScreen(
@@ -50,7 +50,7 @@ fun UserProfileScreen(
               icon = Icons.Outlined.FavoriteBorder,
               label = "Saved Lists",
               testTag = "SavedLists",
-              action = { /* Action */}))
+              action = {}))
 
   // Define Resources Section
   val resources =

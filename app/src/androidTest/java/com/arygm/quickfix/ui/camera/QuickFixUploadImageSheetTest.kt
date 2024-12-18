@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.arygm.quickfix.ui.profile.becomeWorker.views.personal.FakePermissionState
 import com.arygm.quickfix.ui.profile.becomeWorker.views.personal.TestActivityResultLauncher
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixUploadImageSheet
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import org.junit.Assert.assertEquals

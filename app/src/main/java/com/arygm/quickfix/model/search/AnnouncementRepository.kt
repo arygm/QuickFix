@@ -24,6 +24,18 @@ interface AnnouncementRepository {
       onFailure: (Exception) -> Unit
   )
 
+  fun fetchAnnouncementsImageUrls(
+      announcementId: String,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun fetchAnnouncementsImagesAsBitmaps(
+      announcementId: String,
+      onSuccess: (List<Pair<String, Bitmap>>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   fun updateAnnouncement(
       announcement: Announcement,
       onSuccess: () -> Unit,

@@ -26,16 +26,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.AnnouncementScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchOnBoarding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -45,14 +49,14 @@ fun QuickFixFinderScreen(
     navigationActions: NavigationActions,
     navigationActionsRoot: NavigationActions,
     isUser: Boolean = true,
-    profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.UserFactory),
-    loggedInAccountViewModel: LoggedInAccountViewModel =
-        viewModel(factory = LoggedInAccountViewModel.Factory),
-    searchViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory),
-    accountViewModel: AccountViewModel = viewModel(factory = AccountViewModel.Factory),
-    announcementViewModel: AnnouncementViewModel =
-        viewModel(factory = AnnouncementViewModel.Factory),
-    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
+    profileViewModel: ProfileViewModel,
+    accountViewModel: AccountViewModel,
+    searchViewModel: SearchViewModel,
+    announcementViewModel: AnnouncementViewModel,
+    categoryViewModel: CategoryViewModel =
+        viewModel(factory = CategoryViewModel.Factory(LocalContext.current)),
+    quickFixViewModel: QuickFixViewModel,
+    preferencesViewModel: PreferencesViewModel,
     workerViewModel: ProfileViewModel
 ) {
   val pagerState = rememberPagerState(pageCount = { 2 })
@@ -65,31 +69,29 @@ fun QuickFixFinderScreen(
       topBar = {
         TopAppBar(
             title = {
-                val coroutineScope = rememberCoroutineScope()
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxSize().padding(end = 20.dp)){
+              val coroutineScope = rememberCoroutineScope()
+              Row(
+                  horizontalArrangement = Arrangement.Center,
+                  verticalAlignment = Alignment.CenterVertically,
+                  modifier = Modifier.fillMaxSize().padding(end = 20.dp)) {
                     Surface(
                         color = colorButton,
                         shape = RoundedCornerShape(20.dp),
-                        modifier = Modifier.padding(horizontal = 40.dp)
-                            .clip(RoundedCornerShape(20.dp))
-                    ) {
-                        TabRow(
-                            selectedTabIndex = pagerState.currentPage,
-                            containerColor = Color.Transparent,
-                            divider = {},
-                            indicator = {},
-                            modifier =
-                            Modifier.padding(horizontal = 1.dp, vertical = 1.dp)
-                                .testTag("quickFixSearchTabRow")
-                        ) {
-                            QuickFixScreenTab(pagerState, coroutineScope, 0, "Search")
-                            QuickFixScreenTab(pagerState, coroutineScope, 1, "Announce")
+                        modifier =
+                            Modifier.padding(horizontal = 40.dp).clip(RoundedCornerShape(20.dp))) {
+                          TabRow(
+                              selectedTabIndex = pagerState.currentPage,
+                              containerColor = Color.Transparent,
+                              divider = {},
+                              indicator = {},
+                              modifier =
+                                  Modifier.padding(horizontal = 1.dp, vertical = 1.dp)
+                                      .testTag("quickFixSearchTabRow")) {
+                                QuickFixScreenTab(pagerState, coroutineScope, 0, "Search")
+                                QuickFixScreenTab(pagerState, coroutineScope, 1, "Announce")
+                              }
                         }
-                    }
-                }
+                  }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorBackground),
             modifier = Modifier.testTag("QuickFixFinderTopBar"))
@@ -99,8 +101,6 @@ fun QuickFixFinderScreen(
             modifier = Modifier.fillMaxSize().testTag("QuickFixFinderContent").padding(padding),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
-
-
               HorizontalPager(
                   state = pagerState,
                   userScrollEnabled = false,
@@ -113,13 +113,14 @@ fun QuickFixFinderScreen(
                               searchViewModel,
                               accountViewModel,
                               categoryViewModel,
+                              quickFixViewModel,
                               workerViewModel)
                       1 ->
                           AnnouncementScreen(
                               announcementViewModel,
-                              loggedInAccountViewModel,
                               profileViewModel,
                               accountViewModel,
+                              preferencesViewModel,
                               categoryViewModel,
                               navigationActions = navigationActions,
                               isUser = isUser)

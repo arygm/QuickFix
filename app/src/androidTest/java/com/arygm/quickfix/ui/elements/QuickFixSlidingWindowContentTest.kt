@@ -8,7 +8,9 @@ import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.dataFields.Service
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.Status
+import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,11 +52,18 @@ class QuickFixSlidingWindowContentTest {
           description = "QuickFix Description",
           bill = emptyList(),
           location = Location(48.8566, 2.3522, "Paris, France"))
+  private lateinit var navigationActions: NavigationActions
+
+  @Before
+  fun setup() {
+    navigationActions = mock(NavigationActions::class.java)
+  }
 
   @Test
   fun quickFixSlidingWindowContent_displaysTitle() {
     composeTestRule.setContent {
-      QuickFixSlidingWindowContent(quickFix = quickFixMock, onDismiss = {}, isVisible = true)
+      QuickFixSlidingWindowContent(
+          quickFix = quickFixMock, onDismiss = {}, isVisible = true, navigationActions)
     }
 
     composeTestRule.onNodeWithText("${quickFixMock.userId}'s QuickFix request").assertIsDisplayed()
@@ -63,7 +72,8 @@ class QuickFixSlidingWindowContentTest {
   @Test
   fun quickFixSlidingWindowContent_displaysServices() {
     composeTestRule.setContent {
-      QuickFixSlidingWindowContent(quickFix = quickFixMock, onDismiss = {}, isVisible = true)
+      QuickFixSlidingWindowContent(
+          quickFix = quickFixMock, onDismiss = {}, isVisible = true, navigationActions)
     }
 
     quickFixMock.includedServices.forEach { service ->
@@ -77,7 +87,8 @@ class QuickFixSlidingWindowContentTest {
   @Test
   fun quickFixSlidingWindowContent_displaysAppointmentDetails() {
     composeTestRule.setContent {
-      QuickFixSlidingWindowContent(quickFix = quickFixMock, onDismiss = {}, isVisible = true)
+      QuickFixSlidingWindowContent(
+          quickFix = quickFixMock, onDismiss = {}, isVisible = true, navigationActions)
     }
 
     val appointmentTime = quickFixMock.time.toDate().toString().split(" ")[3]

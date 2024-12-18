@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.dashboard
+package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,24 +29,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arygm.quickfix.model.bill.BillField
+import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.ui.theme.poppinsFontFamily
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
 import java.util.Locale
-
-// Data class for QuickFix item
-data class BillSneakPeak(
-    val name: String,
-    val taskDescription: String,
-    val date: String,
-    val price: Double
-)
 
 @Composable
 fun BillsWidget(
-    billList: List<BillSneakPeak>,
+    quickFixes: List<QuickFix>,
     onShowAllClick: () -> Unit,
-    onItemClick: (BillSneakPeak) -> Unit,
+    onItemClick: (BillField) -> Unit,
     modifier: Modifier = Modifier,
     itemsToShowDefault: Int = 3
 ) {
@@ -96,39 +91,49 @@ fun BillsWidget(
               thickness = 1.dp,
               color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
 
-          val itemsToShow = if (showAll) billList else billList.take(itemsToShowDefault)
+          val itemsToShow =
+              if (showAll) quickFixes.map { it.bill }
+              else quickFixes.map { it.bill }.take(itemsToShowDefault)
 
-          billList.take(itemsToShow.size).forEachIndexed { index, bill ->
-            BillItem(billSneakPeak = bill, onClick = { onItemClick(bill) })
-
-            // Divider between items
-            if (index < itemsToShow.size - 1) {
-              HorizontalDivider(
-                  modifier = Modifier.fillMaxWidth(),
-                  thickness = 1.dp,
-                  color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
-            }
-          }
+          quickFixes
+              .map { it to it.bill }
+              .take(itemsToShow.size)
+              .forEachIndexed { index, (quickFix, bill) ->
+                if (bill.isNotEmpty()) {
+                  BillItem(
+                      billField = bill[index],
+                      onClick = { onItemClick(bill[index]) },
+                      quickFix = quickFix)
+                }
+                // Divider between items
+                if (index < itemsToShow.size - 1) {
+                  HorizontalDivider(
+                      modifier = Modifier.fillMaxWidth(),
+                      thickness = 1.dp,
+                      color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+                }
+              }
         }
   }
 }
 
 @Composable
-fun BillItem(billSneakPeak: BillSneakPeak, onClick: () -> Unit) {
+fun BillItem(billField: BillField, onClick: () -> Unit, quickFix: QuickFix) {
+  val formatter = SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault())
   Row(
       modifier =
           Modifier.fillMaxWidth()
               .padding(horizontal = 12.dp, vertical = 8.dp)
               .clickable { onClick() }
-              .testTag("BillItem_${billSneakPeak.name}"), // Added testTag
+              .testTag("BillItem_${quickFix.title}"), // Added testTag
       verticalAlignment = Alignment.CenterVertically) {
         // Text information
         Column(modifier = Modifier.weight(0.7f).padding(start = 8.dp)) {
           // Row for name and task description on the same line
           Row(verticalAlignment = Alignment.Bottom) {
             Text(
-                text = billSneakPeak.name,
-                modifier = Modifier.testTag(billSneakPeak.name), // Added testTag
+                text = quickFix.title,
+                modifier = Modifier.testTag(billField.description), // Added testTag
                 style = poppinsTypography.bodyMedium,
                 fontSize = 15.sp,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -137,8 +142,8 @@ fun BillItem(billSneakPeak: BillSneakPeak, onClick: () -> Unit) {
                 overflow = TextOverflow.Ellipsis)
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = billSneakPeak.taskDescription, // Removed leading comma for clarity
-                modifier = Modifier.testTag(billSneakPeak.taskDescription), // Added testTag
+                text = quickFix.description, // Removed leading comma for clarity
+                modifier = Modifier.testTag(quickFix.description), // Added testTag
                 style = poppinsTypography.bodyMedium,
                 fontSize = 15.sp,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
@@ -148,8 +153,11 @@ fun BillItem(billSneakPeak: BillSneakPeak, onClick: () -> Unit) {
           }
           // Date text on a separate line
           Text(
-              text = billSneakPeak.date,
-              modifier = Modifier.testTag(billSneakPeak.date), // Added testTag
+              text =
+                  quickFix.date.joinToString(" - ") { timestamp ->
+                    formatter.format(timestamp.toDate())
+                  },
+              modifier = Modifier.testTag(quickFix.date.toString()), // Added testTag
               style = poppinsTypography.bodyMedium,
               fontSize = 15.sp,
               fontWeight = FontWeight.Normal,
@@ -167,8 +175,8 @@ fun BillItem(billSneakPeak: BillSneakPeak, onClick: () -> Unit) {
                             maximumFractionDigits = 2
                             minimumIntegerDigits = 2
                           }
-                          .format(billSneakPeak.price),
-                  modifier = Modifier.testTag("BillPrice_${billSneakPeak.price}"),
+                          .format(billField.total),
+                  modifier = Modifier.testTag("BillPrice_${billField.total}"),
                   color = MaterialTheme.colorScheme.primary,
                   fontFamily = poppinsFontFamily,
                   fontWeight = FontWeight.Bold,
