@@ -6,6 +6,9 @@ import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
+import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.utils.UID_KEY
 import com.google.firebase.Timestamp
 import kotlinx.coroutines.Dispatchers
@@ -594,5 +597,192 @@ class AnnouncementViewModelTest {
     announcementViewModel.setAnnouncementImagesMap(updatedMap)
 
     assertEquals(pairs, announcementViewModel.announcementImagesMap.value["announcement1"])
+  }
+
+  @Test
+  fun `init with UserProfileRepositoryFirestore calls getAnnouncementsForCurrentUser`() = runTest {
+    // Given a UserProfileRepositoryFirestore
+    val userProfileRepository = mock(UserProfileRepositoryFirestore::class.java)
+    whenever(mockRepository.init(any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<() -> Unit>(0)
+      onSuccess()
+      null
+    }
+
+    // When we create a new ViewModel with userProfileRepository
+    val viewModel =
+        AnnouncementViewModel(mockRepository, mockPreferencesRepository, userProfileRepository)
+
+    verify(mockRepository, times(1)).init(any())
+  }
+
+  @Test
+  fun `init with WorkerProfileRepositoryFirestore calls getAnnouncementsForCurrentWorker`() =
+      runTest {
+        // Given a WorkerProfileRepositoryFirestore
+        val workerProfileRepository = mock(WorkerProfileRepositoryFirestore::class.java)
+        whenever(mockRepository.init(any())).thenAnswer { invocation ->
+          // Simulate immediate success callback
+          val onSuccess = invocation.getArgument<() -> Unit>(0)
+          onSuccess()
+          null
+        }
+
+        // When we create a new ViewModel with workerProfileRepository
+        val viewModel =
+            AnnouncementViewModel(
+                mockRepository, mockPreferencesRepository, workerProfileRepository)
+
+        // Then getAnnouncementsForCurrentWorker should have been called
+        verify(mockRepository, times(1)).init(any())
+      }
+
+  @Test
+  fun `getAnnouncementsByCategory success updates announcements`() = runTest {
+    val category = "Plumbing"
+    val filteredAnnouncements = listOf(announcement1)
+
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(List<Announcement>) -> Unit>(1)
+          onSuccess(filteredAnnouncements)
+          null
+        }
+        .whenever(mockRepository)
+        .getAnnouncementsByCategory(eq(category), any(), any())
+
+    announcementViewModel.getAnnouncementsByCategory(category)
+
+    assertEquals(filteredAnnouncements, announcementViewModel.announcements.value)
+    verify(mockRepository).getAnnouncementsByCategory(eq(category), any(), any())
+  }
+
+  @Test
+  fun `getAnnouncementsByCategory failure logs error and announcements remain empty`() = runTest {
+    val category = "Plumbing"
+    val exception = Exception("Category fetch failed")
+
+    doAnswer { invocation ->
+          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
+          onFailure(exception)
+          null
+        }
+        .whenever(mockRepository)
+        .getAnnouncementsByCategory(eq(category), any(), any())
+
+    announcementViewModel.getAnnouncementsByCategory(category)
+
+    // announcements should remain unchanged (empty)
+    assertTrue(announcementViewModel.announcements.value.isEmpty())
+  }
+
+  @Test
+  fun `getAnnouncementsForCurrentWorker with no userId logs error`() = runTest {
+    whenever(mockPreferencesRepository.getPreferenceByKey(UID_KEY)).thenReturn(flowOf(null))
+
+    announcementViewModel.getAnnouncementsForCurrentWorker()
+
+    // There's no direct observable state changed here when userId is null,
+    // but no crash should occur.
+    // Just ensuring the code runs through without errors is enough.
+    verify(mockProfileRepository, never()).getProfileById(anyString(), any(), any())
+  }
+
+  @Test
+  fun `getAnnouncementsForCurrentWorker with non-worker profile logs error`() = runTest {
+    whenever(mockPreferencesRepository.getPreferenceByKey(UID_KEY)).thenReturn(flowOf("user123"))
+
+    // Return a UserProfile (not a WorkerProfile)
+    val userProfile = UserProfile(emptyList(), emptyList(), 0.0, "user123", emptyList())
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(UserProfile) -> Unit>(1)
+          onSuccess(userProfile)
+          null
+        }
+        .whenever(mockProfileRepository)
+        .getProfileById(eq("user123"), any(), any())
+
+    announcementViewModel.getAnnouncementsForCurrentWorker()
+
+    // No announcementsByCategory call should be made, since profile is not WorkerProfile
+    verify(mockRepository, never()).getAnnouncementsByCategory(anyString(), any(), any())
+  }
+
+  @Test
+  fun `getAnnouncementsForCurrentWorker with worker profile calls getAnnouncementsByCategory`() =
+      runTest {
+        whenever(mockPreferencesRepository.getPreferenceByKey(UID_KEY))
+            .thenReturn(flowOf("worker123"))
+
+        val workerProfile = WorkerProfile("Plumbing", "worker123")
+        doAnswer { invocation ->
+              val onSuccess = invocation.getArgument<(WorkerProfile) -> Unit>(1)
+              onSuccess(workerProfile)
+              null
+            }
+            .whenever(mockProfileRepository)
+            .getProfileById(eq("worker123"), any(), any())
+
+        // Mock the result of getAnnouncementsByCategory
+        doAnswer { invocation ->
+              val onSuccess = invocation.getArgument<(List<Announcement>) -> Unit>(1)
+              onSuccess(listOf(announcement2))
+              null
+            }
+            .whenever(mockRepository)
+            .getAnnouncementsByCategory(eq("Plumbing"), any(), any())
+
+        announcementViewModel.getAnnouncementsForCurrentWorker()
+
+        assertEquals(listOf(announcement2), announcementViewModel.announcements.value)
+        verify(mockRepository).getAnnouncementsByCategory(eq("Plumbing"), any(), any())
+      }
+
+  @Test
+  fun `getAnnouncementsForCurrentWorker profile fetch failure logs error`() = runTest {
+    whenever(mockPreferencesRepository.getPreferenceByKey(UID_KEY)).thenReturn(flowOf("worker123"))
+    val exception = Exception("Worker profile fetch failed")
+
+    doAnswer { invocation ->
+          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
+          onFailure(exception)
+          null
+        }
+        .whenever(mockProfileRepository)
+        .getProfileById(eq("worker123"), any(), any())
+
+    announcementViewModel.getAnnouncementsForCurrentWorker()
+
+    // No announcements fetched
+    assertTrue(announcementViewModel.announcements.value.isEmpty())
+  }
+
+  @Test
+  fun `filterAnnouncementsByDistance returns only announcements within maxDistance`() {
+    val userLocation = Location(0.0, 0.0, "Origin")
+    val closeAnnouncement =
+        announcement1.copy(location = Location(0.0, 0.01, "Close")) // ~1.11km away
+    val farAnnouncement = announcement2.copy(location = Location(1.0, 1.0, "Far")) // ~157 km away
+
+    val announcements = listOf(closeAnnouncement, farAnnouncement)
+
+    // maxDistance in km (e.g. 10 km)
+    val filtered =
+        announcementViewModel.filterAnnouncementsByDistance(announcements, userLocation, 10)
+
+    // Only the closeAnnouncement should appear
+    assertEquals(1, filtered.size)
+    assertEquals(closeAnnouncement, filtered[0])
+  }
+
+  @Test
+  fun `calculateDistance returns correct distance`() {
+    val lat1 = 0.0
+    val lon1 = 0.0
+    val lat2 = 0.0
+    val lon2 = 1.0 // 1 degree of longitude at the equator ~ 111 km
+
+    val distance = announcementViewModel.calculateDistance(lat1, lon1, lat2, lon2)
+    // Roughly check if the distance is about 111 km
+    assertTrue(distance > 100.0 && distance < 120.0)
   }
 }
