@@ -58,7 +58,7 @@ fun SearchWorkerProfileResult(
       if (location.length <= 9) {
         location
       } else {
-        location.take(9) + "..."
+        location.take(7) + "..."
       }
   val displayName =
       if (name.length <= 25) {

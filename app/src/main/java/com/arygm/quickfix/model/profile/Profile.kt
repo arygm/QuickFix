@@ -101,6 +101,7 @@ class WorkerProfile(
     uid: String = "", // Default UID
     val tags: List<String> = listOf("Reliable", "Experienced", "Professional"), // Default tags
     val rating: Double = reviews.map { it.rating }.average(),
+    val wallet: Double = 0.0,
 ) : Profile(uid, quickFixes) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

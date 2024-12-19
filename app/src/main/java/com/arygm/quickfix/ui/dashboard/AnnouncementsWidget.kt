@@ -81,7 +81,7 @@ fun AnnouncementsWidget(
                 .testTag("AnnouncementsWidget")) {
           // Header with Show All button
           Row(
-              modifier = Modifier.fillMaxWidth().padding(8.dp),
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
               horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -89,7 +89,7 @@ fun AnnouncementsWidget(
                     color = colorScheme.onBackground,
                     style = poppinsTypography.headlineMedium,
                     fontSize = 19.sp,
-                    modifier = Modifier.testTag("AnnouncementsTitle"))
+                    modifier = Modifier.testTag("AnnouncementsTitle").padding(horizontal = 8.dp))
                 TextButton(
                     onClick = { showAll = !showAll },
                     modifier = Modifier.testTag("ShowAllButton")) {

@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile
+package com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.profile
 
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.material.icons.Icons
@@ -12,7 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
-import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelWorkerProfile
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.elements.QuickFixProfileScreenElement
@@ -27,7 +27,7 @@ fun WorkerProfileScreen(
     navigationActions: NavigationActions,
     rootMainNavigationActions: NavigationActions,
     preferencesViewModel: PreferencesViewModel,
-    userPreferencesViewModel: PreferencesViewModelUserProfile,
+    workerPreferencesViewModel: PreferencesViewModelWorkerProfile,
     appContentNavigationActions: NavigationActions,
     modeViewModel: ModeViewModel
 ) {
@@ -75,11 +75,11 @@ fun WorkerProfileScreen(
         navigationActions = navigationActions,
         rootMainNavigationActions = rootMainNavigationActions,
         preferencesViewModel = preferencesViewModel,
-        userPreferencesViewModel = userPreferencesViewModel,
+        workerPreferencesViewModel = workerPreferencesViewModel,
         appContentNavigationActions = appContentNavigationActions,
         modeViewModel = modeViewModel,
-        true,
-        AppMode.USER,
+        initialState = true,
+        switchMode = AppMode.USER,
         sections =
             listOf(
                 { modifier ->

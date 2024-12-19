@@ -147,7 +147,6 @@ class QuickFixThirdStepTest {
     // Arrange: Set the composable content
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
@@ -166,7 +165,6 @@ class QuickFixThirdStepTest {
   fun deleteBillField_removesFromList() = runTest {
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix,
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
@@ -194,7 +192,6 @@ class QuickFixThirdStepTest {
     // Arrange: Add a bill field
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
@@ -220,7 +217,6 @@ class QuickFixThirdStepTest {
     // Arrange: Add a bill field
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
@@ -246,7 +242,6 @@ class QuickFixThirdStepTest {
     // Arrange: Add a bill field
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
@@ -272,7 +267,6 @@ class QuickFixThirdStepTest {
     // Arrange: Add a bill field
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
@@ -294,9 +288,9 @@ class QuickFixThirdStepTest {
 
   @Test
   fun addAndSubmitQuickFix_success() = runTest {
+    quickFixViewModel.setUpdateQuickFix(fakeQuickFix)
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix,
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* Verify changes if needed */},
@@ -362,7 +356,6 @@ class QuickFixThirdStepTest {
     // Arrange: Initialize QuickFix with no bill fields
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
@@ -388,9 +381,9 @@ class QuickFixThirdStepTest {
     val date2 = Timestamp(1234567890, 0)
     val testQuickFix = fakeQuickFix.copy(date = listOf(date1, date2))
 
+    quickFixViewModel.setUpdateQuickFix(testQuickFix)
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = testQuickFix,
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
@@ -413,7 +406,6 @@ class QuickFixThirdStepTest {
   fun overallTotal_calculatesCorrectly() = runTest {
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix,
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},

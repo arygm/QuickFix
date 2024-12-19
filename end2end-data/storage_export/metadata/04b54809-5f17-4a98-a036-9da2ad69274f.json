@@ -1,0 +1,19 @@
+{
+  "name": "profiles/RXtch0tIoFXQ2yyVkD2NrcrENi4Z/worker/image_1734539663154.jpg",
+  "bucket": "quickfix-1fd34.firebasestorage.app",
+  "metageneration": 1,
+  "generation": 1734539664177,
+  "contentType": "application/octet-stream",
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "downloadTokens": [
+    "c73901f8-eddb-4633-bebb-a7ec5552c873"
+  ],
+  "etag": "OGg3lBeUzo3G+e3sjZTO8DUSSZY",
+  "customMetadata": {},
+  "timeCreated": "2024-12-18T16:34:24.177Z",
+  "updated": "2024-12-18T16:34:24.177Z",
+  "size": 831,
+  "md5Hash": "fvAlG4m+oruX+hkIaOUmTA==",
+  "crc32c": "4140551666"
+}

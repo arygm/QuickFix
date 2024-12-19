@@ -82,8 +82,8 @@ fun SearchOnBoarding(
     val widthRatio = maxWidth.value / 411f
     val heightRatio = maxHeight.value / 860f
     val sizeRatio = minOf(widthRatio, heightRatio)
-    val screenHeight = maxHeight
-    val screenWidth = maxWidth
+    val screenHeight = maxHeight.value
+    val screenWidth = maxWidth.value
 
     // Use Scaffold for the layout structure
     Scaffold(
@@ -119,8 +119,8 @@ fun SearchOnBoarding(
                           textColor = colorScheme.onBackground,
                           placeHolderColor = colorScheme.onBackground,
                           leadIconColor = colorScheme.onBackground,
-                          widthField = 300.dp * widthRatio,
-                          heightField = 40.dp * heightRatio,
+                          widthField = (screenWidth * 0.8).dp,
+                          heightField = (screenHeight * 0.045).dp,
                           moveContentHorizontal = 10.dp * widthRatio,
                           moveContentBottom = 0.dp,
                           moveContentTop = 0.dp,
@@ -190,8 +190,8 @@ fun SearchOnBoarding(
                                 workerRating = it.reviews.map { it1 -> it1.rating }.average(),
                                 tags = it.tags,
                                 reviews = it.reviews.map { it.review },
-                                screenHeight = screenHeight,
-                                screenWidth = screenWidth,
+                                screenHeight = screenHeight.dp,
+                                screenWidth = screenWidth.dp,
                                 onContinueClick = {
                                   quickFixViewModel.setSelectedWorkerProfile(it)
                                   navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)

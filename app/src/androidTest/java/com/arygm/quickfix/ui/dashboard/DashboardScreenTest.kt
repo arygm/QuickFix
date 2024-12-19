@@ -25,7 +25,6 @@ import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.AnnouncementRepository
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.DashboardScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before

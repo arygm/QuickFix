@@ -38,6 +38,7 @@ class HomeUserNoModeScreenTest : TestCase() {
   private val appModeFlow = MutableStateFlow("USER")
 
   private lateinit var navigationActions: NavigationActions
+  private lateinit var navigationActionsRoot: NavigationActions
   private lateinit var preferencesRepositoryDataStore: PreferencesRepositoryDataStore
   private lateinit var preferencesViewModel: PreferencesViewModel
   private lateinit var profileRepository: ProfileRepository
@@ -49,6 +50,7 @@ class HomeUserNoModeScreenTest : TestCase() {
   @Before
   fun setUp() {
     navigationActions = mock(NavigationActions::class.java)
+    navigationActionsRoot = mock(NavigationActions::class.java)
     preferencesRepositoryDataStore = mock(PreferencesRepositoryDataStore::class.java)
     preferencesViewModel = PreferencesViewModel(preferencesRepositoryDataStore)
     profileRepository = mock(ProfileRepository::class.java)
@@ -71,6 +73,7 @@ class HomeUserNoModeScreenTest : TestCase() {
       composeTestRule.setContent {
         HomeScreen(
             navigationActions,
+            navigationActionsRoot,
             preferencesViewModel,
             userViewModel,
             workerViewModel,
@@ -117,7 +120,7 @@ class HomeUserNoModeScreenTest : TestCase() {
       composeTestRule.onNodeWithTag("PopularServicesRow").assertIsDisplayed()
 
       // Verify Upcoming QuickFixes title is displayed
-      composeTestRule.onNodeWithTag("UpcomingQuickFixes").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("NoQuickFixesBox").assertIsDisplayed()
     }
   }
 }

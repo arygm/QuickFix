@@ -22,7 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.WorkOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -41,8 +40,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,6 +62,7 @@ import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelWorkerProfile
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ressources.C
@@ -71,6 +73,9 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerRoute
 import com.arygm.quickfix.utils.clearPreferences
 import com.arygm.quickfix.utils.clearUserProfilePreferences
+import com.arygm.quickfix.utils.clearWorkerProfilePreferences
+import com.arygm.quickfix.utils.loadAppMode
+import com.arygm.quickfix.utils.loadWallet
 import com.arygm.quickfix.utils.setAppMode
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -82,7 +87,8 @@ fun QuickFixProfileScreenElement(
     navigationActions: NavigationActions,
     rootMainNavigationActions: NavigationActions,
     preferencesViewModel: PreferencesViewModel,
-    userPreferencesViewModel: PreferencesViewModelUserProfile,
+    userPreferencesViewModel: PreferencesViewModelUserProfile? = null,
+    workerPreferencesViewModel: PreferencesViewModelWorkerProfile? = null,
     appContentNavigationActions: NavigationActions,
     modeViewModel: ModeViewModel,
     initialState: Boolean,
@@ -92,8 +98,13 @@ fun QuickFixProfileScreenElement(
   val firstName by preferencesViewModel.firstName.collectAsState(initial = "")
   val lastName by preferencesViewModel.lastName.collectAsState(initial = "")
   val email by preferencesViewModel.email.collectAsState(initial = "")
-  val wallet by userPreferencesViewModel.wallet.collectAsState(initial = "")
   val isWorker by preferencesViewModel.isWorkerFlow.collectAsState(initial = false)
+  var mode by remember { mutableStateOf("") }
+  var wallet by remember { mutableDoubleStateOf(0.0) }
+  LaunchedEffect(Unit) {
+    mode = loadAppMode(preferencesViewModel)
+    wallet = loadWallet(preferencesViewModel)
+  }
 
   // Compute display name using the collected first and last names
   val displayName = capitalizeName(firstName, lastName)
@@ -284,21 +295,13 @@ fun QuickFixProfileScreenElement(
                                 .align(Alignment.CenterStart),
                         verticalAlignment = Alignment.CenterVertically) {
                           Icon(
-                              imageVector =
-                                  when (switchMode) {
-                                    AppMode.USER -> Icons.Outlined.Person
-                                    AppMode.WORKER -> Icons.Outlined.WorkOutline
-                                  },
+                              imageVector = Icons.Outlined.WorkOutline,
                               contentDescription = "worker Icon",
                               tint = colorScheme.tertiaryContainer,
                               modifier = Modifier.size(screenWidth * 0.06f))
                           Spacer(modifier = Modifier.width(screenWidth * 0.04f))
                           Text(
-                              text =
-                                  when (switchMode) {
-                                    AppMode.USER -> "User Mode"
-                                    AppMode.WORKER -> "Worker Mode"
-                                  },
+                              text = "Worker Mode",
                               style =
                                   poppinsTypography.bodyMedium.copy(
                                       fontWeight = FontWeight.Medium, fontSize = 16.sp),
@@ -353,7 +356,9 @@ fun QuickFixProfileScreenElement(
                       Log.d("QuickFixProfileElement", modeViewModel.onSwitchStartDestUser.value)
                       setAppMode(preferencesViewModel, AppMode.USER.name)
                       clearPreferences(preferencesViewModel)
-                      clearUserProfilePreferences(userPreferencesViewModel)
+                      if (mode == AppMode.USER.name)
+                          clearUserProfilePreferences(userPreferencesViewModel!!)
+                      else clearWorkerProfilePreferences(workerPreferencesViewModel!!)
                       rootMainNavigationActions.navigateTo(RootRoute.NO_MODE)
                       Log.d("user", Firebase.auth.currentUser.toString())
                     },

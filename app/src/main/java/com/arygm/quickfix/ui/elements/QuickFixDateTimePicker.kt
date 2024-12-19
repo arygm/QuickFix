@@ -96,7 +96,6 @@ fun DatePickerDialog(
                   onDateSelected(localDate.year, localDate.monthValue, localDate.dayOfMonth)
                   onFinishedRequest()
                 },
-                selectedDate = LocalDate.now(),
                 onNegativeClick = { onDismissRequest() }),
         config =
             CalendarConfig(

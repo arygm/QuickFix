@@ -1,10 +1,13 @@
 package com.arygm.quickfix.ui.elements
 
+import android.graphics.Bitmap
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.dataFields.Service
 import com.arygm.quickfix.model.quickfix.QuickFix
+import com.arygm.quickfix.model.quickfix.QuickFixRepository
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
 import com.google.firebase.Timestamp
 import org.junit.Before
@@ -13,15 +16,23 @@ import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.whenever
 
 class QuickFixDetailsUserNoModeScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
+  private lateinit var quickFixRepository: QuickFixRepository
+  private lateinit var quickFixViewModel: QuickFixViewModel
+
   private lateinit var quickFixMock: QuickFix
 
   @Before
   fun setup() {
+    quickFixRepository = mock(QuickFixRepository::class.java)
+    quickFixViewModel = QuickFixViewModel(quickFixRepository)
     val includedServices =
         listOf(
             mock(Service::class.java).apply { `when`(name).thenReturn("Initial Consultation") },
@@ -58,7 +69,8 @@ class QuickFixDetailsUserNoModeScreenTest {
   @Test
   fun quickFixDetailsScreen_displaysTitleAndServices() {
     composeTestRule.setContent {
-      QuickFixDetailsScreen(quickFix = quickFixMock, onShowMoreToggle = {}, isExpanded = false)
+      QuickFixDetailsScreen(
+          quickFix = quickFixMock, onShowMoreToggle = {}, isExpanded = false, quickFixViewModel)
     }
 
     // Check the title
@@ -76,7 +88,8 @@ class QuickFixDetailsUserNoModeScreenTest {
   @Test
   fun quickFixDetailsScreen_displaysDescriptionCollapsed() {
     composeTestRule.setContent {
-      QuickFixDetailsScreen(quickFix = quickFixMock, onShowMoreToggle = {}, isExpanded = false)
+      QuickFixDetailsScreen(
+          quickFix = quickFixMock, onShowMoreToggle = {}, isExpanded = false, quickFixViewModel)
     }
 
     // Check that the description is truncated
@@ -89,7 +102,8 @@ class QuickFixDetailsUserNoModeScreenTest {
   @Test
   fun quickFixDetailsScreen_displaysDescriptionExpanded() {
     composeTestRule.setContent {
-      QuickFixDetailsScreen(quickFix = quickFixMock, onShowMoreToggle = {}, isExpanded = true)
+      QuickFixDetailsScreen(
+          quickFix = quickFixMock, onShowMoreToggle = {}, isExpanded = true, quickFixViewModel)
     }
 
     // Check that the full description is displayed
@@ -106,7 +120,10 @@ class QuickFixDetailsUserNoModeScreenTest {
 
     composeTestRule.setContent {
       QuickFixDetailsScreen(
-          quickFix = quickFixMock, onShowMoreToggle = onShowMoreToggleMock, isExpanded = false)
+          quickFix = quickFixMock,
+          onShowMoreToggle = onShowMoreToggleMock,
+          isExpanded = false,
+          quickFixViewModel)
     }
 
     // Vérifiez que "Show more" est initialement affiché
@@ -121,8 +138,23 @@ class QuickFixDetailsUserNoModeScreenTest {
 
   @Test
   fun quickFixDetailsScreen_displaysImages() {
+    quickFixViewModel.setUpdateQuickFix(quickFixMock)
+    doAnswer { invocation ->
+          val onSuccess = invocation.arguments[1] as (List<Pair<String, Bitmap>>) -> Unit
+          onSuccess(
+              listOf(
+                  Pair(
+                      "https://via.placeholder.com/120",
+                      Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)),
+                  Pair(
+                      "https://via.placeholder.com/120",
+                      Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888))))
+        }
+        .whenever(quickFixRepository)
+        .fetchQuickFixAsBitmaps(any(), any(), any())
     composeTestRule.setContent {
-      QuickFixDetailsScreen(quickFix = quickFixMock, onShowMoreToggle = {}, isExpanded = false)
+      QuickFixDetailsScreen(
+          quickFix = quickFixMock, onShowMoreToggle = {}, isExpanded = false, quickFixViewModel)
     }
 
     // Check placeholders for images

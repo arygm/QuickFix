@@ -803,8 +803,7 @@ fun SearchWorkerResult(
                               Text(
                                   text = selectedWorker.displayName,
                                   style = MaterialTheme.typography.headlineLarge,
-                                  color = colorScheme.onBackground,
-                                  modifier = Modifier.testTag("sliding_window_worker_category"))
+                                  color = colorScheme.onBackground)
                               selectedCityName?.let {
                                 Text(
                                     text = it,
@@ -823,6 +822,16 @@ fun SearchWorkerResult(
                                     .testTag("sliding_window_scrollable_content")) {
                               Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
+                              Text(
+                                  text = selectedWorker.fieldOfWork,
+                                  style =
+                                      MaterialTheme.typography.headlineLarge.copy(fontSize = 28.sp),
+                                  color = colorScheme.onBackground,
+                                  modifier =
+                                      Modifier.padding(horizontal = screenWidth * 0.04f)
+                                          .testTag("sliding_window_worker_category"))
+
+                              Spacer(modifier = Modifier.height(screenHeight * 0.02f))
                               // Description with "Show more" functionality
                               var showFullDescription by remember { mutableStateOf(false) }
                               val descriptionText =
@@ -927,6 +936,7 @@ fun SearchWorkerResult(
                                   buttonText = "Continue",
                                   onClickAction = {
                                     quickFixViewModel.setSelectedWorkerProfile(selectedWorker)
+                                    quickFixViewModel.resetCurrentQuickFix()
                                     navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
                                   },
                                   buttonColor = colorScheme.primary,

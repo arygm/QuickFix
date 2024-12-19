@@ -1,5 +1,7 @@
 package com.arygm.quickfix.model.quickfix
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import com.arygm.quickfix.model.bill.BillField
 import com.arygm.quickfix.model.bill.Units
@@ -12,10 +14,17 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import java.io.ByteArrayOutputStream
 
-open class QuickFixRepositoryFirestore(private val db: FirebaseFirestore) : QuickFixRepository {
+open class QuickFixRepositoryFirestore(
+    private val db: FirebaseFirestore,
+    private val storage: FirebaseStorage
+) : QuickFixRepository {
 
   val collectionPath = "quickFix"
+  val storageRef = storage.reference
+  private val compressionQuality = 50
 
   override fun getRandomUid(): String {
     return db.collection(collectionPath).document().id
@@ -92,6 +101,92 @@ open class QuickFixRepositoryFirestore(private val db: FirebaseFirestore) : Quic
           Log.e("QuickFixRepositoryFirestore", "Error fetching QuickFix", exception)
           onFailure(exception)
         }
+  }
+
+  override fun uploadQuickFixImages(
+      quickFixId: String,
+      images: List<Bitmap>,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val announcementFolderRef = storageRef.child("quickfix/$quickFixId")
+    val uploadedImageUrls = mutableListOf<String>()
+    var uploadCount = 0
+
+    images.forEach { bitmap ->
+      val fileRef = announcementFolderRef.child("image_${System.currentTimeMillis()}.jpg")
+
+      val baos = ByteArrayOutputStream()
+      bitmap.compress(Bitmap.CompressFormat.JPEG, compressionQuality, baos)
+      val byteArray = baos.toByteArray()
+
+      fileRef
+          .putBytes(byteArray)
+          .addOnSuccessListener {
+            fileRef.downloadUrl
+                .addOnSuccessListener { uri ->
+                  uploadedImageUrls.add(uri.toString())
+                  uploadCount++
+                  if (uploadCount == images.size) {
+                    onSuccess(uploadedImageUrls)
+                  }
+                }
+                .addOnFailureListener { exception -> onFailure(exception) }
+          }
+          .addOnFailureListener { exception -> onFailure(exception) }
+    }
+  }
+
+  override fun fetchQuickFixImageUrls(
+      quickFixId: String,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val firestore = db
+    val collection = firestore.collection(collectionPath)
+
+    collection
+        .document(quickFixId)
+        .get()
+        .addOnSuccessListener { document ->
+          val imageUrls = document["imageUrl"] as? List<String> ?: emptyList()
+          onSuccess(imageUrls)
+        }
+        .addOnFailureListener { onFailure(it) }
+  }
+
+  override fun fetchQuickFixAsBitmaps(
+      quickFixId: String,
+      onSuccess: (List<Pair<String, Bitmap>>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    fetchQuickFixImageUrls(
+        quickFixId,
+        { urls ->
+          if (urls.isEmpty()) {
+            onSuccess(emptyList())
+            return@fetchQuickFixImageUrls
+          }
+
+          val urlBitmapPairs = mutableListOf<Pair<String, Bitmap>>()
+          var successCount = 0
+
+          urls.forEach { url ->
+            val imageRef = storage.getReferenceFromUrl(url)
+            imageRef
+                .getBytes(Long.MAX_VALUE)
+                .addOnSuccessListener { bytes ->
+                  val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                  urlBitmapPairs.add(url to bitmap)
+                  successCount++
+                  if (successCount == urls.size) {
+                    onSuccess(urlBitmapPairs)
+                  }
+                }
+                .addOnFailureListener { onFailure(it) }
+          }
+        },
+        onFailure)
   }
 
   private fun documentToQuickFix(document: DocumentSnapshot): QuickFix? {

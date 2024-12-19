@@ -1,5 +1,6 @@
-package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard
+package com.arygm.quickfix.ui.dashboard
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.model.bill.BillField
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.ui.theme.poppinsFontFamily
 import com.arygm.quickfix.ui.theme.poppinsTypography
@@ -41,7 +44,8 @@ import java.util.Locale
 fun BillsWidget(
     quickFixes: List<QuickFix>,
     onShowAllClick: () -> Unit,
-    onItemClick: (BillField) -> Unit,
+    workerViewModel: ProfileViewModel,
+    onItemClick: (QuickFix) -> Unit,
     modifier: Modifier = Modifier,
     itemsToShowDefault: Int = 3
 ) {
@@ -99,11 +103,23 @@ fun BillsWidget(
               .map { it to it.bill }
               .take(itemsToShow.size)
               .forEachIndexed { index, (quickFix, bill) ->
+                Log.d("BillsWidget", "quickFix: $quickFix, bill: $bill")
                 if (bill.isNotEmpty()) {
-                  BillItem(
-                      billField = bill[index],
-                      onClick = { onItemClick(bill[index]) },
-                      quickFix = quickFix)
+                  var workerProfile by remember { mutableStateOf<WorkerProfile?>(null) }
+                  workerViewModel.fetchUserProfile(
+                      quickFix.workerId,
+                      onResult = { profile ->
+                        if (profile is WorkerProfile) {
+                          workerProfile = profile
+                        }
+                      })
+                  workerProfile?.let {
+                    BillItem(
+                        billFields = bill,
+                        onClick = { onItemClick(quickFix) },
+                        quickFix = quickFix,
+                        workerProfile = it)
+                  }
                 }
                 // Divider between items
                 if (index < itemsToShow.size - 1) {
@@ -118,7 +134,12 @@ fun BillsWidget(
 }
 
 @Composable
-fun BillItem(billField: BillField, onClick: () -> Unit, quickFix: QuickFix) {
+fun BillItem(
+    billFields: List<BillField>,
+    onClick: () -> Unit,
+    quickFix: QuickFix,
+    workerProfile: WorkerProfile
+) {
   val formatter = SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault())
   Row(
       modifier =
@@ -132,8 +153,8 @@ fun BillItem(billField: BillField, onClick: () -> Unit, quickFix: QuickFix) {
           // Row for name and task description on the same line
           Row(verticalAlignment = Alignment.Bottom) {
             Text(
-                text = quickFix.title,
-                modifier = Modifier.testTag(billField.description), // Added testTag
+                text = workerProfile.displayName,
+                modifier = Modifier.testTag(workerProfile.displayName), // Added testTag
                 style = poppinsTypography.bodyMedium,
                 fontSize = 15.sp,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -142,8 +163,8 @@ fun BillItem(billField: BillField, onClick: () -> Unit, quickFix: QuickFix) {
                 overflow = TextOverflow.Ellipsis)
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = quickFix.description, // Removed leading comma for clarity
-                modifier = Modifier.testTag(quickFix.description), // Added testTag
+                text = quickFix.title, // Removed leading comma for clarity
+                modifier = Modifier.testTag(quickFix.title), // Added testTag
                 style = poppinsTypography.bodyMedium,
                 fontSize = 15.sp,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
@@ -175,8 +196,8 @@ fun BillItem(billField: BillField, onClick: () -> Unit, quickFix: QuickFix) {
                             maximumFractionDigits = 2
                             minimumIntegerDigits = 2
                           }
-                          .format(billField.total),
-                  modifier = Modifier.testTag("BillPrice_${billField.total}"),
+                          .format(billFields.sumOf { it.total }),
+                  modifier = Modifier.testTag("BillPrice_${billFields.sumOf { it.total }}"),
                   color = MaterialTheme.colorScheme.primary,
                   fontFamily = poppinsFontFamily,
                   fontWeight = FontWeight.Bold,

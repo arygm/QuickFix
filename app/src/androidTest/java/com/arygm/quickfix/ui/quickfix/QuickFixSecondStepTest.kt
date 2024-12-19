@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.quickfix
 
+import android.graphics.Bitmap
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -50,6 +51,7 @@ class QuickFixSecondStepTest {
 
   // Mocked dependencies
   private lateinit var navigationActions: NavigationActions
+  private lateinit var navigationActionsRoot: NavigationActions
   private lateinit var locationRepository: LocationRepository
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var chatRepository: ChatRepository
@@ -69,7 +71,7 @@ class QuickFixSecondStepTest {
       QuickFix(
           uid = fakeQuickFixUid,
           status = Status.PENDING,
-          imageUrl = listOf("https://example.com/image1.jpg", "https://example.com/image2.jpg"),
+          imageUrl = listOf("https://example.com/image1.jpg"),
           date =
               listOf(
                   Timestamp(Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000)), // Yesterday
@@ -123,6 +125,7 @@ class QuickFixSecondStepTest {
   fun setUp() {
     // Initialize mocks
     navigationActions = mock(NavigationActions::class.java)
+    navigationActionsRoot = mock(NavigationActions::class.java)
     locationRepository = mock(LocationRepository::class.java)
     locationViewModel = LocationViewModel(locationRepository)
     chatRepository = mock(ChatRepository::class.java)
@@ -217,7 +220,19 @@ class QuickFixSecondStepTest {
     runBlocking {
       chatViewModel.getChats() // Load chats
       quickFixViewModel.getQuickFixes() // Load QuickFixes if necessary
+      quickFixViewModel.setUpdateQuickFix(fakeQuickFix) // Update the QuickFix
     }
+
+    doAnswer { invocation ->
+          val onSuccess = invocation.arguments[1] as (List<Pair<String, Bitmap>>) -> Unit
+          onSuccess(
+              listOf(
+                  Pair(
+                      "https://example.com/image1.jpg",
+                      Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888))))
+        }
+        .whenever(quickFixRepository)
+        .fetchQuickFixAsBitmaps(any(), any(), any())
 
     chatViewModel.selectChat(fakeChat)
   }
@@ -235,8 +250,8 @@ class QuickFixSecondStepTest {
           chatViewModel = chatViewModel,
           navigationActions = navigationActions,
           onQuickFixMakeBill = {},
-          quickFix = fakeQuickFix,
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActionsRoot)
     }
 
     // Assert: Check if the header text is displayed
@@ -251,14 +266,15 @@ class QuickFixSecondStepTest {
     // Act: Set the composable content
     composeTestRule.setContent {
       QuickFixSecondStep(
+          navigationActionsRoot = navigationActionsRoot,
           quickFixViewModel = quickFixViewModel,
           accountViewModel = accountViewModel,
           chatViewModel = chatViewModel,
           navigationActions = navigationActions,
           onQuickFixMakeBill = {},
-          quickFix = fakeQuickFix,
           mode = AppMode.USER)
     }
+    composeTestRule.onNodeWithTag("MainColumn").performScrollToIndex(6)
 
     // Assert: Check if the "Consult the discussion" button is displayed
     composeTestRule.onNodeWithTag("ConsultDiscussionButton").assertIsDisplayed()
@@ -272,12 +288,12 @@ class QuickFixSecondStepTest {
     // Act: Set the composable content
     composeTestRule.setContent {
       QuickFixSecondStep(
+          navigationActionsRoot = navigationActionsRoot,
           quickFixViewModel = quickFixViewModel,
           accountViewModel = accountViewModel,
           chatViewModel = chatViewModel,
           navigationActions = navigationActions,
           onQuickFixMakeBill = {},
-          quickFix = fakeQuickFix,
           mode = AppMode.USER)
     }
 
@@ -297,6 +313,9 @@ class QuickFixSecondStepTest {
       composeTestRule.onNodeWithTag("TimeText_$index").assertIsDisplayed()
     }
 
+    composeTestRule.waitUntil(20000) {
+      composeTestRule.onNodeWithTag("ImageContent_0").isDisplayed()
+    }
     // Assert: Check if each image is displayed
     fakeQuickFix.imageUrl.forEachIndexed { index, _ ->
       composeTestRule.onNodeWithTag("Image_$index").assertIsDisplayed()
@@ -314,14 +333,16 @@ class QuickFixSecondStepTest {
     // Act: Set the composable content with mode = WORKER
     composeTestRule.setContent {
       QuickFixSecondStep(
+          navigationActionsRoot = navigationActionsRoot,
           quickFixViewModel = quickFixViewModel,
           accountViewModel = accountViewModel,
           chatViewModel = chatViewModel,
           navigationActions = navigationActions,
           onQuickFixMakeBill = { isMakeBillClicked = true },
-          quickFix = fakeQuickFix,
           mode = AppMode.WORKER)
     }
+
+    composeTestRule.onNodeWithTag("MainColumn").performScrollToIndex(6)
 
     // Assert: Check if the "Make the bill" button is displayed
     composeTestRule.onNodeWithTag("MakethebillButton").assertIsDisplayed()
@@ -331,5 +352,22 @@ class QuickFixSecondStepTest {
 
     // Assert: Verify that the onQuickFixMakeBill lambda was invoked
     assert(isMakeBillClicked) { "onQuickFixMakeBill was not called upon button click." }
+  }
+
+  @Test
+  fun testGoBackHomeButtonIsDisplayed() = runTest {
+    composeTestRule.setContent {
+      QuickFixSecondStep(
+          quickFixViewModel = quickFixViewModel,
+          accountViewModel = accountViewModel,
+          chatViewModel = chatViewModel,
+          navigationActions = navigationActions,
+          onQuickFixMakeBill = {},
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActionsRoot)
+    }
+
+    composeTestRule.onNodeWithTag("MainColumn").performScrollToIndex(6)
+    composeTestRule.onNodeWithTag("GoBackHomeButton").assertIsDisplayed()
   }
 }

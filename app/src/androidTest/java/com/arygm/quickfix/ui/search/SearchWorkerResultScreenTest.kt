@@ -460,7 +460,7 @@ class SearchWorkerResultScreenTest {
         .onNodeWithTag("sliding_window_worker_category")
         .assertExists()
         .assertIsDisplayed()
-        .assertTextContains("Ramo") // Replace with expected category
+        .assertTextContains("Carpentry") // Replace with expected category
 
     // Verify the worker address is displayed
     composeTestRule

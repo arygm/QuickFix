@@ -11,7 +11,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @Composable
 fun QuickFixStepper(
@@ -36,11 +34,6 @@ fun QuickFixStepper(
     widthRatio: Dp, // Width ratio of the stepper
     coroutineScope: CoroutineScope
 ) {
-  LaunchedEffect(Unit) {
-    coroutineScope.launch {
-      // Do something
-    }
-  }
   Row(
       modifier =
           Modifier.fillMaxWidth()
