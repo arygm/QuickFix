@@ -48,8 +48,8 @@ class SearchOnBoardingTest {
 
   @Before
   fun setup() {
-      workerProfileRepository = mock(ProfileRepository::class.java)
-      workerViewModel = ProfileViewModel(workerProfileRepository)
+    workerProfileRepository = mock(ProfileRepository::class.java)
+    workerViewModel = ProfileViewModel(workerProfileRepository)
     navigationActions = mock(NavigationActions::class.java)
     navigationActionsRoot = mock(NavigationActions::class.java)
     workerProfileRepo = mockk(relaxed = true)
@@ -122,7 +122,7 @@ class SearchOnBoardingTest {
           accountViewModel = accountViewModel,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
-            workerViewModel = workerViewModel)
+          workerViewModel = workerViewModel)
     }
 
     // Verify initial state (Categories are displayed)

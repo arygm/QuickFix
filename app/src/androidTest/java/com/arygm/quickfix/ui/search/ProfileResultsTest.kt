@@ -53,27 +53,25 @@ class ProfileResultsTest {
     categoryViewModel = CategoryViewModel(categoryRepo)
     accountViewModel = mockk(relaxed = true)
 
-      workerViewModel = mockk(relaxed = true)
+    workerViewModel = mockk(relaxed = true)
 
-      // Mock fetchProfileImageAsBitmap
-      every {
-          workerViewModel.fetchProfileImageAsBitmap(any(), any(), any())
-      } answers {
+    // Mock fetchProfileImageAsBitmap
+    every { workerViewModel.fetchProfileImageAsBitmap(any(), any(), any()) } answers
+        {
           val onSuccess = arg<(Bitmap) -> Unit>(1)
           // Provide a dummy bitmap here (e.g. a solid color bitmap or decode from resources)
           val dummyBitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
           onSuccess(dummyBitmap) // Simulate success callback
-      }
+        }
 
-      // Mock fetchBannerImageAsBitmap
-      every {
-          workerViewModel.fetchBannerImageAsBitmap(any(), any(), any())
-      } answers {
+    // Mock fetchBannerImageAsBitmap
+    every { workerViewModel.fetchBannerImageAsBitmap(any(), any(), any()) } answers
+        {
           val onSuccess = arg<(Bitmap) -> Unit>(1)
           // Provide another dummy bitmap
           val dummyBitmap = Bitmap.createBitmap(20, 20, Bitmap.Config.ARGB_8888)
           onSuccess(dummyBitmap) // Simulate success callback
-      }
+        }
   }
 
   @Test

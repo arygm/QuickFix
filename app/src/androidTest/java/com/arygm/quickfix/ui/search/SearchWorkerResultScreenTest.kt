@@ -97,7 +97,7 @@ class SearchWorkerResultScreenTest {
     quickFixRepositoryFirestore = mock(QuickFixRepositoryFirestore::class.java)
     userProfileRepositoryFirestore = mock(ProfileRepository::class.java)
     preferencesRepositoryDataStore = mock(PreferencesRepository::class.java)
-      workerViewModel = ProfileViewModel(workerRepository)
+    workerViewModel = ProfileViewModel(workerRepository)
 
     // Mock the flow returned by the repository
     val mockedPreferenceFlow = MutableStateFlow<Any?>(null)
@@ -165,27 +165,25 @@ class SearchWorkerResultScreenTest {
         .`when`(userProfileRepositoryFirestore)
         .getProfileById(anyString(), any(), any())
 
-      workerViewModel = mockk(relaxed = true)
+    workerViewModel = mockk(relaxed = true)
 
-      // Mock fetchProfileImageAsBitmap
-      every {
-          workerViewModel.fetchProfileImageAsBitmap(any(), any(), any())
-      } answers {
+    // Mock fetchProfileImageAsBitmap
+    every { workerViewModel.fetchProfileImageAsBitmap(any(), any(), any()) } answers
+        {
           val onSuccess = arg<(Bitmap) -> Unit>(1)
           // Provide a dummy bitmap here (e.g. a solid color bitmap or decode from resources)
           val dummyBitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
           onSuccess(dummyBitmap) // Simulate success callback
-      }
+        }
 
-      // Mock fetchBannerImageAsBitmap
-      every {
-          workerViewModel.fetchBannerImageAsBitmap(any(), any(), any())
-      } answers {
+    // Mock fetchBannerImageAsBitmap
+    every { workerViewModel.fetchBannerImageAsBitmap(any(), any(), any()) } answers
+        {
           val onSuccess = arg<(Bitmap) -> Unit>(1)
           // Provide another dummy bitmap
           val dummyBitmap = Bitmap.createBitmap(20, 20, Bitmap.Config.ARGB_8888)
           onSuccess(dummyBitmap) // Simulate success callback
-      }
+        }
   }
 
   @Test
@@ -198,7 +196,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
     // Verify that Back and Search icons are present in the top bar
     composeTestRule.onNodeWithContentDescription("Back").assertExists().assertIsDisplayed()
@@ -215,7 +214,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
     // Set the search query and verify that the title and description match the query
     searchViewModel.setSearchQuery("Unknown")
@@ -234,7 +234,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Wait for the UI to settle
@@ -273,7 +274,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
     // Verify that the filter icon button is displayed and has a click action
     composeTestRule
@@ -293,7 +295,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
     // Scroll through the LazyColumn and verify each profile result is displayed
     val workerProfilesList = composeTestRule.onNodeWithTag("worker_profiles_list")
@@ -317,7 +320,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
     // Perform click on the back button and verify goBack() is called
     composeTestRule.onNodeWithContentDescription("Back").performClick()
@@ -334,7 +338,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Wait for the UI to settle
@@ -363,7 +368,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -389,7 +395,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -418,7 +425,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -455,7 +463,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -491,7 +500,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -527,7 +537,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -565,7 +576,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -627,7 +639,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Initially, all workers should be displayed
@@ -719,7 +732,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Initially, all workers should be displayed
@@ -811,7 +825,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Initially, all workers should be displayed
@@ -895,7 +910,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -962,7 +978,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1030,7 +1047,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1100,7 +1118,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1127,7 +1146,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1176,7 +1196,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1237,7 +1258,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1291,7 +1313,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Initially, both workers should be displayed
@@ -1369,7 +1392,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -1441,7 +1465,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -1524,7 +1549,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -1572,7 +1598,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -1604,7 +1631,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -1655,7 +1683,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1745,7 +1774,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Initially, all workers should be displayed
@@ -1852,7 +1882,8 @@ class SearchWorkerResultScreenTest {
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Initially, both workers should be displayed

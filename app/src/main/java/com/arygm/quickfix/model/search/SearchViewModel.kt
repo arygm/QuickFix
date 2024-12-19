@@ -3,7 +3,6 @@ package com.arygm.quickfix.model.search
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.locations.Location
@@ -19,7 +18,6 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 open class SearchViewModel(
     private val workerProfileRepo: WorkerProfileRepositoryFirestore,
@@ -74,50 +72,6 @@ open class SearchViewModel(
 
   fun setWorkerProfiles(workerProfiles: List<WorkerProfile>) { // Used for test purposes
     _workerProfiles.value = workerProfiles
-  }
-
-  fun updateSearchQuery(query: String) {
-    viewModelScope.launch {
-      _searchQuery.value = query
-      filterWorkerProfiles(fieldOfWork = query)
-    }
-  }
-
-  fun filterWorkerProfiles(
-      rating: Double? = null,
-      reviews: List<String>? = emptyList(),
-      price: Double? = null,
-      fieldOfWork: String? = null,
-      location: Location? = null,
-      maxDistanceInKm: Double? = null
-  ) {
-    val userLat = location?.latitude
-    val userLon = location?.longitude
-
-    workerProfileRepo.filterWorkers(
-        rating,
-        reviews,
-        price,
-        fieldOfWork,
-        location,
-        maxDistanceInKm,
-        { profiles ->
-          if (userLat != null && userLon != null && maxDistanceInKm != null) {
-            val filteredProfiles =
-                profiles.filter { profile ->
-                  val location =
-                      profile.location ?: return@filter false // Ensure location is non-null
-                  val workerLat = location.latitude
-                  val workerLon = location.longitude
-                  val distance = calculateDistance(userLat, userLon, workerLat, workerLon)
-                  distance <= maxDistanceInKm
-                }
-            _workerProfiles.value = filteredProfiles
-          } else {
-            _workerProfiles.value = profiles
-          }
-        },
-        { error -> _errorMessage.value = error.message })
   }
 
   fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {

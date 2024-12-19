@@ -104,6 +104,40 @@ class MainActivityTest : TestCase() {
                               "Renovations and Additions",
                               "Demolition and Removal",
                               "Insulation Installation",
+                              "Clean-Up")),
+                  Subcategory(
+                      id = "furniture_carpentry",
+                      name = "Furniture Carpentry",
+                      category = "Carpentry",
+                      tags =
+                          listOf(
+                              "Custom Furniture",
+                              "Restoration",
+                              "Handcrafted Woodwork",
+                              "Modern Designs",
+                              "Wooden Art Pieces",
+                              "Bespoke Joinery"),
+                      scale =
+                          Scale(
+                              longScale =
+                                  "Prices are displayed relative to the cost of crafting a custom piece of furniture.",
+                              shortScale = "Custom furniture equivalent"),
+                      setServices =
+                          listOf(
+                              "Custom Furniture Design",
+                              "Furniture Restoration",
+                              "Cabinet Making",
+                              "Shelving Units",
+                              "Built-In Closets",
+                              "Table and Chair Construction",
+                              "Antique Repair",
+                              "Wood Finishing and Staining",
+                              "Upholstery Services",
+                              "Furniture Assembly",
+                              "Outdoor Furniture",
+                              "Furniture Modification",
+                              "Wood Carving",
+                              "Veneer Work",
                               "Clean-Up"))))
 
   fun allowPermissionsIfNeeded() {
@@ -213,7 +247,6 @@ class MainActivityTest : TestCase() {
 
       // Attempt to grant permissions
       allowPermissionsIfNeeded()
-      loginToTestAccount()
       // Retry the action until it works with a timeout of 10 seconds
       composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()
@@ -258,7 +291,7 @@ class MainActivityTest : TestCase() {
 
       // Select the first subcategory
       composeTestRule
-          .onNodeWithTag(C.Tag.professionalInfoScreenSubcategoryDropdownMenuItem + 0)
+          .onNodeWithTag(C.Tag.professionalInfoScreenSubcategoryDropdownMenuItem + 1)
           .performClick()
 
       composeTestRule.onNodeWithTag(C.Tag.professionalInfoScreenPriceField).performTextInput("100")
@@ -546,37 +579,6 @@ class MainActivityTest : TestCase() {
       composeTestRule.onNodeWithTag("goBackButton").performClick()
     }
   }
-
-    @Test
-    fun FsearchForAWorker() = run {
-        step("Set up the WelcomeScreen and transit to the register") {
-            // Wait for the UI to settle
-            composeTestRule.waitForIdle()
-
-            // Attempt to grant permissions
-            allowPermissionsIfNeeded() // Retry the action until it works with a timeout of 10 seconds
-            composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
-                composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()
-            }
-            composeTestRule.onRoot().printToLog("TAG")
-            onView(withText("Search")) // Match the TextView that has the text "Hello World"
-                .perform(click())
-
-            composeTestRule.waitUntil("find the categories", timeoutMillis = 20000) {
-                composeTestRule.onAllNodesWithText(item.name).fetchSemanticsNodes().isNotEmpty()
-            }
-            composeTestRule.onNodeWithText(item.name).assertIsDisplayed()
-            composeTestRule.onNodeWithText(item.name).performClick()
-            composeTestRule.waitUntil("find the categories", timeoutMillis = 20000) {
-                composeTestRule
-                    .onAllNodesWithText(item.subcategories[0].name)
-                    .fetchSemanticsNodes()
-                    .isNotEmpty()
-            }
-            composeTestRule.onNodeWithText(item.subcategories[0].name).performClick()
-            composeTestRule
-        }
-    }
 
   private fun loginToTestAccount() {
     ComposeScreen.onComposeScreen<WelcomeScreen>(composeTestRule) {

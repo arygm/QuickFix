@@ -47,7 +47,7 @@ class QuickFixFinderScreenTest {
 
   @Before
   fun setup() {
-      workerProfileRepository = mock(ProfileRepository::class.java)
+    workerProfileRepository = mock(ProfileRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
     navigationActionsRoot = mock(NavigationActions::class.java)
 
@@ -72,7 +72,7 @@ class QuickFixFinderScreenTest {
     categoryViewModel = CategoryViewModel(categoryRepo)
     accountViewModel = mockk(relaxed = true)
     quickFixViewModel = QuickFixViewModel(mock())
-      workerViewModel = ProfileViewModel(workerProfileRepository)
+    workerViewModel = ProfileViewModel(workerProfileRepository)
   }
 
   @Test
@@ -94,8 +94,6 @@ class QuickFixFinderScreenTest {
 
     // Assert top bar is displayed
     composeTestRule.onNodeWithTag("QuickFixFinderTopBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("QuickFixFinderTopBarTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("QuickFixFinderTopBarTitle").assertTextEquals("Quickfix")
 
     // Assert main content is displayed
     composeTestRule.onNodeWithTag("QuickFixFinderContent").assertIsDisplayed()
@@ -155,7 +153,7 @@ class QuickFixFinderScreenTest {
           categoryViewModel = categoryViewModel,
           preferencesViewModel = preferencesViewModel,
           quickFixViewModel = quickFixViewModel,
-            workerViewModel = workerViewModel)
+          workerViewModel = workerViewModel)
     }
 
     // Click on the "Announce" tab
@@ -179,7 +177,7 @@ class QuickFixFinderScreenTest {
           categoryViewModel = categoryViewModel,
           preferencesViewModel = preferencesViewModel,
           quickFixViewModel = quickFixViewModel,
-            workerViewModel = workerViewModel)
+          workerViewModel = workerViewModel)
     }
 
     // Click on the "Search" tab

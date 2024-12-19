@@ -14,12 +14,10 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
 import java.time.LocalDate
 import java.time.LocalTime
-import kotlin.math.cos
 
 open class WorkerProfileRepositoryFirestore(
     private val db: FirebaseFirestore,
@@ -237,23 +235,25 @@ open class WorkerProfileRepositoryFirestore(
       val profilePicture = document.getString("profileImageUrl") ?: ""
       val bannerPicture = document.getString("bannerImageUrl") ?: ""
       val quickFixes = document.get("quickFixes") as? List<String> ?: emptyList()
-
-      WorkerProfile(
-          uid = uid,
-          price = price,
-          description = description,
-          fieldOfWork = fieldOfWork,
-          location = location,
-          unavailability_list = unavailabilityList,
-          workingHours = workingHours,
-          reviews = reviews.toCollection(ArrayDeque()),
-          includedServices = includedServices,
-          addOnServices = addOnServices,
-          profilePicture = profilePicture,
-          bannerPicture = bannerPicture,
-          displayName = displayName,
-          tags = tags,
-          quickFixes = quickFixes)
+      val workerProfile =
+          WorkerProfile(
+              uid = uid,
+              price = price,
+              description = description,
+              fieldOfWork = fieldOfWork,
+              location = location,
+              unavailability_list = unavailabilityList,
+              workingHours = workingHours,
+              reviews = reviews.toCollection(ArrayDeque()),
+              includedServices = includedServices,
+              addOnServices = addOnServices,
+              profilePicture = profilePicture,
+              bannerPicture = bannerPicture,
+              displayName = displayName,
+              tags = tags,
+              quickFixes = quickFixes)
+      Log.d("WorkerProfileRepositoryFirestore", workerProfile.toString())
+      workerProfile
     } catch (e: Exception) {
       Log.e("WorkerProfileRepositoryFirestore", "Error converting document to WorkerProfile", e)
       null
@@ -280,57 +280,6 @@ open class WorkerProfileRepositoryFirestore(
           Log.e("WorkerProfileRepositoryFirestore", "Error fetching profile", exception)
           onFailure(exception)
         }
-  }
-
-  fun filterWorkers(
-      rating: Double?,
-      reviews: List<String>?,
-      price: Double?,
-      fieldOfWork: String?,
-      location: Location?,
-      radiusInKm: Double?,
-      onSuccess: (List<WorkerProfile>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    var query: Query = db.collection(collectionPath)
-
-    rating?.let { query = query.whereEqualTo("rating", it) }
-    reviews?.takeIf { it.isNotEmpty() }?.let { query = query.whereArrayContainsAny("reviews", it) }
-
-    fieldOfWork?.let { query = query.whereEqualTo("fieldOfWork", it) }
-
-    price?.let { query = query.whereLessThan("price", it) }
-
-    if (location != null && radiusInKm != null) {
-      val earthRadius = 6371.0
-      val lat = location.latitude
-      val lon = location.longitude
-      val latDelta = radiusInKm / earthRadius
-      val lonDelta = radiusInKm / (earthRadius * cos(Math.toRadians(lat)))
-
-      val minLat = lat - Math.toDegrees(latDelta)
-      val maxLat = lat + Math.toDegrees(latDelta)
-      val minLon = lon - Math.toDegrees(lonDelta)
-      val maxLon = lon + Math.toDegrees(lonDelta)
-
-      // Add range filters for latitude and longitude
-      query =
-          query
-              .whereGreaterThanOrEqualTo("location.latitude", minLat)
-              .whereLessThanOrEqualTo("location.latitude", maxLat)
-              .whereGreaterThanOrEqualTo("location.longitude", minLon)
-              .whereLessThanOrEqualTo("location.longitude", maxLon)
-    }
-    query
-        .get()
-        .addOnSuccessListener { querySnapshot ->
-          Log.d(
-              "WorkerProfileRepositoryFirestore",
-              "Successfully fetched worker profiles : ${querySnapshot.documents.size}")
-          val workerProfiles = querySnapshot.documents.mapNotNull { documentToWorker(it) }
-          onSuccess(workerProfiles)
-        }
-        .addOnFailureListener { exception -> onFailure(exception) }
   }
 
   private fun fetchProfileImageUrl(
@@ -360,28 +309,37 @@ open class WorkerProfileRepositoryFirestore(
         accountId,
         { url ->
           if (url.isEmpty()) {
-            Log.d(
-                "WorkerProfileRepositoryFirestore",
-                "No profile image found for account ID: $accountId")
-            val defaultProfileBitmap =
+            val defaultBannerBitmap =
                 createSolidColorBitmap(
-                    width = 200, // Adjust the width in pixels
-                    height = 200, // Adjust the height in pixels
+                    width = 800, // Adjust the width in pixels
+                    height = 400, // Adjust the height in pixels
                     color = 0xFF66001A.toInt())
-            onSuccess(defaultProfileBitmap)
+            onSuccess(defaultBannerBitmap)
           } else {
-            val imageRef = storage.getReferenceFromUrl(url)
-            Log.d("WorkerProfileRepositoryFirestore", "Fetching profile image from URL: $url")
-            imageRef
-                .getBytes(Long.MAX_VALUE)
-                .addOnSuccessListener { bytes ->
-                  val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                  onSuccess(bitmap)
-                }
-                .addOnFailureListener {
-                  Log.e("WorkerProfileRepositoryFirestore", "Failed to fetch profile image", it)
-                  onFailure(it)
-                }
+            if (url.isEmpty() || url.contains("10.0.2.2:9199")) {
+              Log.d(
+                  "WorkerProfileRepositoryFirestore",
+                  "No profile image found for account ID: $accountId")
+              val defaultProfileBitmap =
+                  createSolidColorBitmap(
+                      width = 200, // Adjust the width in pixels
+                      height = 200, // Adjust the height in pixels
+                      color = 0xFF66001A.toInt())
+              onSuccess(defaultProfileBitmap)
+            } else {
+              Log.d("WorkerProfileRepositoryFirestore", "Fetching profile image from URL: $url")
+              val imageRef = storage.getReferenceFromUrl(url)
+              imageRef
+                  .getBytes(Long.MAX_VALUE)
+                  .addOnSuccessListener { bytes ->
+                    val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    onSuccess(bitmap)
+                  }
+                  .addOnFailureListener {
+                    Log.e("WorkerProfileRepositoryFirestore", "Failed to fetch profile image", it)
+                    onFailure(it)
+                  }
+            }
           }
         },
         onFailure,
@@ -404,14 +362,30 @@ open class WorkerProfileRepositoryFirestore(
                     color = 0xFF66001A.toInt())
             onSuccess(defaultBannerBitmap)
           } else {
-            val imageRef = storage.getReferenceFromUrl(url)
-            imageRef
-                .getBytes(Long.MAX_VALUE)
-                .addOnSuccessListener { bytes ->
-                  val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                  onSuccess(bitmap)
-                }
-                .addOnFailureListener { onFailure(it) }
+            if (url.isEmpty() || url.contains("10.0.2.2:9199")) {
+              Log.d(
+                  "WorkerProfileRepositoryFirestore",
+                  "No profile image found for account ID: $accountId")
+              val defaultProfileBitmap =
+                  createSolidColorBitmap(
+                      width = 200, // Adjust the width in pixels
+                      height = 200, // Adjust the height in pixels
+                      color = 0xFF66001A.toInt())
+              onSuccess(defaultProfileBitmap)
+            } else {
+              Log.d("WorkerProfileRepositoryFirestore", "Fetching profile image from URL: $url")
+              val imageRef = storage.getReferenceFromUrl(url)
+              imageRef
+                  .getBytes(Long.MAX_VALUE)
+                  .addOnSuccessListener { bytes ->
+                    val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    onSuccess(bitmap)
+                  }
+                  .addOnFailureListener {
+                    Log.e("WorkerProfileRepositoryFirestore", "Failed to fetch profile image", it)
+                    onFailure(it)
+                  }
+            }
           }
         },
         onFailure,
