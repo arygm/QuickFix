@@ -345,12 +345,14 @@ fun DashboardScreen(
                 }
               }
               item {
-                AnnouncementsWidget(
-                    announcementViewModel = announcementViewModel,
-                    navigationActions = navigationActions,
-                    categoryViewModel = categoryViewModel,
-                    itemsToShowDefault = 3,
-                )
+                if (mode == "USER") {
+                  AnnouncementsWidget(
+                      announcementViewModel = announcementViewModel,
+                      navigationActions = navigationActions,
+                      categoryViewModel = categoryViewModel,
+                      itemsToShowDefault = 3,
+                  )
+                }
               }
 
               item {

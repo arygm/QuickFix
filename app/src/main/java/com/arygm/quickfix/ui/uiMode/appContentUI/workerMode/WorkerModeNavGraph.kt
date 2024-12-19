@@ -45,7 +45,6 @@ import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixDisplayImages
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.MessageScreen
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.getBottomBarIdUser
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixOnBoarding
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.AnnouncementDetailScreen
@@ -56,6 +55,7 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.quickfix.QuickFixBil
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerRoute
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerScreen
+import com.arygm.quickfix.ui.uiMode.workerMode.navigation.getBottomBarIdWorker
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
@@ -186,7 +186,7 @@ fun WorkerModeNavGraph(
                           },
                           navigationActions = workerNavigationActions,
                           tabList = WORKER_TOP_LEVEL_DESTINATIONS,
-                          getBottomBarId = getBottomBarIdUser)
+                          getBottomBarId = getBottomBarIdWorker)
                     }
               }
         }

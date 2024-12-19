@@ -20,6 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
@@ -60,6 +61,7 @@ class QuickFixRepositoryFirestoreTest {
   @Mock private lateinit var mockQuickFixQuerySnapshot: QuerySnapshot
 
   @Mock private lateinit var mockQuery: Query
+  @Mock private lateinit var mockReference: StorageReference
 
   private lateinit var mockFirebaseAuth: FirebaseAuth
   private lateinit var firebaseAuthMockedStatic: MockedStatic<FirebaseAuth>
@@ -99,7 +101,7 @@ class QuickFixRepositoryFirestoreTest {
     if (FirebaseApp.getApps(ApplicationProvider.getApplicationContext()).isEmpty()) {
       FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
     }
-
+    mockReference = Mockito.mock(StorageReference::class.java)
     firebaseAuthMockedStatic = Mockito.mockStatic(FirebaseAuth::class.java)
     mockFirebaseAuth = Mockito.mock(FirebaseAuth::class.java)
 
@@ -107,12 +109,12 @@ class QuickFixRepositoryFirestoreTest {
         .`when`<FirebaseAuth> { FirebaseAuth.getInstance() }
         .thenReturn(mockFirebaseAuth)
 
-    quickFixRepositoryFirestore = QuickFixRepositoryFirestore(mockFirestore, mockFirebaseStorage)
-
+    whenever(mockFirebaseStorage.reference).thenReturn(mockReference)
     whenever(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     whenever(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
     whenever(mockCollectionReference.document()).thenReturn(mockDocumentReference)
     whenever(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockQuickFixQuerySnapshot))
+    quickFixRepositoryFirestore = QuickFixRepositoryFirestore(mockFirestore, mockFirebaseStorage)
   }
 
   @After
