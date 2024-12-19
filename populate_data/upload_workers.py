@@ -278,7 +278,7 @@ def generate_random_worker_profile(uid, categories):
         ]),
         profile_picture=random_picture(),
         banner_picture=random_picture(),
-        price=random.uniform(50, 200),
+        price=round(random.uniform(50, 200), 1),
         display_name=f"Worker {uid}",
         unavailability_list=unavailability_list,
         working_hours=working_hours,

@@ -30,6 +30,7 @@ object UserScreen {
   const val QUICKFIX_ONBOARDING = "QuickFix OnBoarding Screen"
   const val QUICKFIX_DISPLAY_IMAGES = "QuickFix Display Images Screen"
   const val MAP = "QuickFix Display Images Screen"
+  const val SAVED_LIST = "Saved List Screen"
 }
 
 object UserTopLevelDestinations {

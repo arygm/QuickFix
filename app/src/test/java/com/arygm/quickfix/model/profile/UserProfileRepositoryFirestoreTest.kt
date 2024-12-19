@@ -5,6 +5,9 @@ import android.net.Uri
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.profile.dataFields.AddOnService
+import com.arygm.quickfix.model.profile.dataFields.IncludedService
+import com.arygm.quickfix.model.profile.dataFields.Review
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.TaskCompletionSource
@@ -22,12 +25,16 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
 import java.io.ByteArrayOutputStream
+import java.time.LocalDate
+import java.time.LocalTime
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.fail
 import org.junit.After
 import org.junit.Assert
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -781,5 +788,176 @@ class UserProfileRepositoryFirestoreTest {
     // Assert
     assertTrue(onFailureCalled)
     Assert.assertEquals(exception, exceptionReceived)
+  }
+
+  @Test
+  fun testEqualsAndHashCode() {
+    val location1 = Location(latitude = 10.0, longitude = 20.0, name = "Home")
+    val location2 = Location(latitude = 30.0, longitude = 40.0, name = "Work")
+
+    val userProfile1 =
+        UserProfile(
+            locations = listOf(location1, location2),
+            announcements = listOf("announcement1", "announcement2"),
+            wallet = 50.0,
+            uid = "user123",
+            quickFixes = listOf("fix1", "fix2"),
+            savedList = listOf("saved1", "saved2"))
+
+    val userProfile2 =
+        UserProfile(
+            locations = listOf(location1, location2),
+            announcements = listOf("announcement1", "announcement2"),
+            wallet = 50.0,
+            uid = "user123",
+            quickFixes = listOf("fix1", "fix2"),
+            savedList = listOf("saved1", "saved2"))
+
+    // Another profile with different properties
+    val userProfile3 =
+        UserProfile(
+            locations = listOf(location1),
+            announcements = listOf("announcement3"),
+            wallet = 100.0,
+            uid = "user456",
+            quickFixes = listOf("fix3"),
+            savedList = listOf("saved3"))
+
+    // Test equals
+    assertTrue(userProfile1 == userProfile2)
+    assertFalse(userProfile1 == userProfile3)
+
+    // Test hashCode
+    assertEquals(userProfile1.hashCode(), userProfile2.hashCode())
+    assertNotEquals(userProfile1.hashCode(), userProfile3.hashCode())
+  }
+
+  @Test
+  fun testCopy() {
+    val location1 = Location(latitude = 10.0, longitude = 20.0, name = "Home")
+    val location2 = Location(latitude = 30.0, longitude = 40.0, name = "Work")
+
+    val original =
+        UserProfile(
+            locations = listOf(location1, location2),
+            announcements = listOf("announcement1", "announcement2"),
+            wallet = 50.0,
+            uid = "user123",
+            quickFixes = listOf("fix1", "fix2"),
+            savedList = listOf("saved1", "saved2"))
+
+    // Copy without changing anything
+    val copySame = original.copy()
+    assertEquals(original, copySame)
+
+    // Copy with some modifications
+    val modified =
+        original.copy(locations = listOf(location1), wallet = 100.0, savedList = listOf("newSaved"))
+
+    assertNotEquals(original, modified)
+    assertEquals(listOf(location1), modified.locations)
+    assertEquals(100.0, modified.wallet, 0.0001)
+    assertEquals(listOf("newSaved"), modified.savedList)
+    // Check that unchanged fields remain the same
+    assertEquals(original.uid, modified.uid)
+    assertEquals(original.announcements, modified.announcements)
+    assertEquals(original.quickFixes, modified.quickFixes)
+  }
+
+  @Test
+  fun testEquals() {
+    // Set up test data for components
+    val location1 = Location(latitude = 10.0, longitude = 20.0, name = "Home")
+    val location2 = Location(latitude = 30.0, longitude = 40.0, name = "Work")
+
+    val includedServices = listOf(IncludedService("Service A"), IncludedService("Service B"))
+
+    val addOnServices = listOf(AddOnService("AddOn A"), AddOnService("AddOn B"))
+
+    val reviews =
+        ArrayDeque(
+            listOf(
+                Review(username = "user1", review = "Great work", rating = 4.5),
+                Review(username = "user2", review = "Good job", rating = 4.0)))
+
+    val unavailabilityList = listOf(LocalDate.now().plusDays(2), LocalDate.now().plusDays(4))
+    val workingHours = Pair(LocalTime.of(8, 0), LocalTime.of(16, 0))
+
+    // Create a base WorkerProfile
+    val worker1 =
+        WorkerProfile(
+            fieldOfWork = "Carpentry",
+            description = "Skilled carpenter",
+            location = location1,
+            quickFixes = listOf("fix1", "fix2"),
+            includedServices = includedServices,
+            addOnServices = addOnServices,
+            reviews = reviews,
+            profilePicture = "http://example.com/profile.jpg",
+            bannerPicture = "http://example.com/banner.jpg",
+            price = 100.0,
+            displayName = "John Doe",
+            unavailability_list = unavailabilityList,
+            workingHours = workingHours,
+            uid = "worker123",
+            tags = listOf("Professional", "Reliable"),
+            rating = reviews.map { it.rating }.average())
+
+    // Create an identical WorkerProfile
+    val worker2 =
+        WorkerProfile(
+            fieldOfWork = "Carpentry",
+            description = "Skilled carpenter",
+            location = location1,
+            quickFixes = listOf("fix1", "fix2"),
+            includedServices = includedServices,
+            addOnServices = addOnServices,
+            reviews = reviews,
+            profilePicture = "http://example.com/profile.jpg",
+            bannerPicture = "http://example.com/banner.jpg",
+            price = 100.0,
+            displayName = "John Doe",
+            unavailability_list = unavailabilityList,
+            workingHours = workingHours,
+            uid = "worker123",
+            tags = listOf("Professional", "Reliable"),
+            rating = reviews.map { it.rating }.average())
+
+    // A WorkerProfile with a different field to ensure not equal
+    val worker3 =
+        WorkerProfile(
+            fieldOfWork = "Plumbing", // changed fieldOfWork
+            description = "Skilled carpenter",
+            location = location1,
+            quickFixes = listOf("fix1", "fix2"),
+            includedServices = includedServices,
+            addOnServices = addOnServices,
+            reviews = reviews,
+            profilePicture = "http://example.com/profile.jpg",
+            bannerPicture = "http://example.com/banner.jpg",
+            price = 100.0,
+            displayName = "John Doe",
+            unavailability_list = unavailabilityList,
+            workingHours = workingHours,
+            uid = "worker123",
+            tags = listOf("Professional", "Reliable"),
+            rating = reviews.map { it.rating }.average())
+
+    // Tests
+    assertTrue("worker1 should be equal to worker2", worker1 == worker2)
+    assertEquals(
+        "worker1 and worker2 should have the same hashCode", worker1.hashCode(), worker2.hashCode())
+
+    assertFalse(
+        "worker1 should not be equal to worker3 because fieldOfWork differs", worker1 == worker3)
+
+    // Check self equality
+    assertTrue("worker1 should be equal to itself", worker1 == worker1)
+
+    // Check null
+    assertFalse("worker1 should not be equal to null", worker1 == null)
+
+    // Check different type
+    assertFalse("worker1 should not be equal to a different type", worker1.equals("Some String"))
   }
 }
