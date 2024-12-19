@@ -265,6 +265,7 @@ fun MapScreen(
         contentAlignment = Alignment.BottomStart,
     ) {
       QuickFixToolboxFloatingButton(
+          modifier = Modifier.testTag("FilterButton"),
           mainIcon = Icons.Default.FilterAlt,
           iconList =
               listOf(
