@@ -38,6 +38,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,7 +57,8 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScree
 @Composable
 fun AnnouncementsWidget(
     announcementViewModel: AnnouncementViewModel,
-    categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory),
+    categoryViewModel: CategoryViewModel =
+        viewModel(factory = CategoryViewModel.Factory(LocalContext.current)),
     navigationActions: NavigationActions,
     modifier: Modifier = Modifier,
     itemsToShowDefault: Int = 2

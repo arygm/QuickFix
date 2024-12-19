@@ -126,7 +126,8 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
 
   val workerViewModel: ProfileViewModel =
       viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
-  val categoryViewModel: CategoryViewModel = viewModel(factory = CategoryViewModel.Factory)
+  val categoryViewModel: CategoryViewModel =
+      viewModel(factory = CategoryViewModel.Factory(LocalContext.current))
   val locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
   val chatViewModel: ChatViewModel =
       viewModel(factory = ChatViewModel.Factory(LocalContext.current))
