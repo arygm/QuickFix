@@ -236,7 +236,10 @@ fun HomeScreen(
 
                   Text(
                       text = "Popular services",
-                      style = MaterialTheme.typography.titleMedium,
+                      color = colorScheme.onBackground,
+                      style =
+                          poppinsTypography.headlineMedium.copy(
+                              fontSize = 20.sp, fontWeight = FontWeight.SemiBold),
                       modifier =
                           Modifier.fillMaxWidth()
                               .padding(
