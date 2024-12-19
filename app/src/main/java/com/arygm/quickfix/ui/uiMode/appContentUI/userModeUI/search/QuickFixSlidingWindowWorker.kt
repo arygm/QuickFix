@@ -104,11 +104,14 @@ fun QuickFixSlidingWindowWorker(
             Text(
                 text = workerProfile.fieldOfWork,
                 style = MaterialTheme.typography.headlineLarge,
-                color = colorScheme.onBackground)
+                color = colorScheme.onBackground,
+                modifier = Modifier.testTag("sliding_window_worker_category"))
+
             Text(
                 text = workerProfile.location?.name ?: "Unknown Location",
                 style = MaterialTheme.typography.headlineSmall,
-                color = colorScheme.onBackground)
+                color = colorScheme.onBackground,
+                modifier = Modifier.testTag("sliding_window_worker_address"))
           }
 
           // Scrollable Content
@@ -116,7 +119,8 @@ fun QuickFixSlidingWindowWorker(
               modifier =
                   Modifier.fillMaxWidth()
                       .verticalScroll(rememberScrollState())
-                      .background(colorScheme.surface)) {
+                      .background(colorScheme.surface)
+                      .testTag("sliding_window_scrollable_content")) {
                 Spacer(modifier = Modifier.height(screenHeight * 0.02f))
 
                 // Description
@@ -146,33 +150,37 @@ fun QuickFixSlidingWindowWorker(
 
                 // Services Section
                 Row(modifier = Modifier.fillMaxWidth().padding(horizontal = screenWidth * 0.04f)) {
-                  Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Included Services",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = colorScheme.onBackground)
-                    workerProfile.includedServices.forEach { service ->
-                      Text(
-                          text = "• ${service.name}",
-                          style = MaterialTheme.typography.bodySmall,
-                          color = colorScheme.onSurface)
-                    }
-                  }
+                  Column(
+                      modifier =
+                          Modifier.weight(1f).testTag("sliding_window_included_services_column")) {
+                        Text(
+                            text = "Included Services",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = colorScheme.onBackground)
+                        workerProfile.includedServices.forEach { service ->
+                          Text(
+                              text = "• ${service.name}",
+                              style = MaterialTheme.typography.bodySmall,
+                              color = colorScheme.onSurface)
+                        }
+                      }
 
                   Spacer(modifier = Modifier.width(screenWidth * 0.02f))
 
-                  Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Add-On Services",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = colorScheme.primary)
-                    workerProfile.addOnServices.forEach { service ->
-                      Text(
-                          text = "• ${service.name}",
-                          style = MaterialTheme.typography.bodySmall,
-                          color = colorScheme.primary)
-                    }
-                  }
+                  Column(
+                      modifier =
+                          Modifier.weight(1f).testTag("sliding_window_addon_services_column")) {
+                        Text(
+                            text = "Add-On Services",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = colorScheme.primary)
+                        workerProfile.addOnServices.forEach { service ->
+                          Text(
+                              text = "• ${service.name}",
+                              style = MaterialTheme.typography.bodySmall,
+                              color = colorScheme.primary)
+                        }
+                      }
                 }
 
                 Spacer(modifier = Modifier.height(screenHeight * 0.03f))
@@ -198,7 +206,10 @@ fun QuickFixSlidingWindowWorker(
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(screenWidth * 0.02f),
                     verticalArrangement = Arrangement.spacedBy(screenHeight * 0.01f),
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = screenWidth * 0.04f)) {
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .padding(horizontal = screenWidth * 0.04f)
+                            .testTag("sliding_window_tags_flow_row")) {
                       workerProfile.tags.forEach { tag ->
                         Text(
                             text = tag,

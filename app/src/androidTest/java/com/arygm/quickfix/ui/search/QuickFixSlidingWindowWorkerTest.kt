@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
@@ -64,8 +66,9 @@ class QuickFixSlidingWindowWorkerTest {
         .assertIsDisplayed()
 
     // Check each included service
+    composeTestRule.onRoot().printToLog("includedServices")
     includedServices.forEach { service ->
-      composeTestRule.onNodeWithText("• $service").assertExists().assertIsDisplayed()
+      composeTestRule.onNodeWithText("• ${service.name}").assertExists().assertIsDisplayed()
     }
   }
 
@@ -114,7 +117,7 @@ class QuickFixSlidingWindowWorkerTest {
 
     // Check each add-on service
     addOnServices.forEach { service ->
-      composeTestRule.onNodeWithText("• $service").assertExists().assertIsDisplayed()
+      composeTestRule.onNodeWithText("• ${service}").assertExists().assertIsDisplayed()
     }
   }
 

@@ -205,8 +205,7 @@ fun SearchOnBoarding(
                     searchViewModel = searchViewModel,
                     accountViewModel = accountViewModel,
                     listState = listState,
-                    onBookClick = { selectedProfile -> onProfileClick(selectedProfile) },
-                    baseLocation = baseLocation)
+                    onBookClick = { selectedProfile, _ -> onProfileClick(selectedProfile) })
               }
         },
         modifier =
