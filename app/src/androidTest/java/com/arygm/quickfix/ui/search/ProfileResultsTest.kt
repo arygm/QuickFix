@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.search
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -10,6 +11,8 @@ import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -34,6 +37,8 @@ class ProfileResultsTest {
   private lateinit var accountViewModel: AccountViewModel
   private lateinit var categoryViewModel: CategoryViewModel
   private lateinit var navigationActionsRoot: NavigationActions
+  private lateinit var workerRepository: ProfileRepository
+  private lateinit var workerViewModel: ProfileViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -47,6 +52,26 @@ class ProfileResultsTest {
     searchViewModel = SearchViewModel(workerProfileRepo)
     categoryViewModel = CategoryViewModel(categoryRepo)
     accountViewModel = mockk(relaxed = true)
+
+    workerViewModel = mockk(relaxed = true)
+
+    // Mock fetchProfileImageAsBitmap
+    every { workerViewModel.fetchProfileImageAsBitmap(any(), any(), any()) } answers
+        {
+          val onSuccess = arg<(Bitmap) -> Unit>(1)
+          // Provide a dummy bitmap here (e.g. a solid color bitmap or decode from resources)
+          val dummyBitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+          onSuccess(dummyBitmap) // Simulate success callback
+        }
+
+    // Mock fetchBannerImageAsBitmap
+    every { workerViewModel.fetchBannerImageAsBitmap(any(), any(), any()) } answers
+        {
+          val onSuccess = arg<(Bitmap) -> Unit>(1)
+          // Provide another dummy bitmap
+          val dummyBitmap = Bitmap.createBitmap(20, 20, Bitmap.Config.ARGB_8888)
+          onSuccess(dummyBitmap) // Simulate success callback
+        }
   }
 
   @Test
@@ -103,6 +128,7 @@ class ProfileResultsTest {
           listState = rememberLazyListState(),
           searchViewModel = searchViewModel,
           accountViewModel = accountViewModel,
+          workerViewModel = workerViewModel,
           onBookClick = { _, _ -> })
     }
 

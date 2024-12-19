@@ -104,7 +104,7 @@ fun UserModeNavHost(
   val announcementViewModel: AnnouncementViewModel =
       viewModel(
           factory =
-              AnnouncementViewModel.Factory(
+              AnnouncementViewModel.userFactory(
                   announcementRepository = announcementRepository,
                   preferencesRepository = preferencesRepository,
                   userProfileRepository = userProfileRepository))
@@ -211,7 +211,9 @@ fun UserModeNavHost(
                             rootMainNavigationActions,
                             userPreferencesViewModel,
                             appContentNavigationActions,
-                            modeViewModel)
+                            modeViewModel,
+                            userViewModel,
+                            quickFixViewModel)
                       }
                     }
 
@@ -295,7 +297,9 @@ fun ProfileNavHost(
     rootMainNavigationActions: NavigationActions,
     userPreferencesViewModel: PreferencesViewModelUserProfile,
     appContentNavigationActions: NavigationActions,
-    modeViewModel: ModeViewModel
+    modeViewModel: ModeViewModel,
+    userViewModel: ProfileViewModel,
+    quickFixViewModel: QuickFixViewModel,
 ) {
 
   val profileNavController = rememberNavController()
@@ -410,7 +414,8 @@ fun SearchNavHost(
           announcementViewModel,
           categoryViewModel,
           quickFixViewModel,
-          preferencesViewModel)
+          preferencesViewModel,
+          workerViewModel = workerViewModel)
     }
     composable(UserScreen.DISPLAY_UPLOADED_IMAGES) {
       QuickFixDisplayImages(navigationActions, preferencesViewModel, announcementViewModel)
@@ -423,7 +428,7 @@ fun SearchNavHost(
           userViewModel,
           quickFixViewModel,
           preferencesViewModel,
-      )
+          workerViewModel = workerViewModel)
     }
     composable(UserScreen.SEARCH_LOCATION) {
       LocationSearchCustomScreen(

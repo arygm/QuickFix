@@ -43,9 +43,12 @@ class QuickFixFinderScreenTest {
   private lateinit var accountViewModel: AccountViewModel
   private lateinit var categoryViewModel: CategoryViewModel
   private lateinit var quickFixViewModel: QuickFixViewModel
+  private lateinit var workerViewModel: ProfileViewModel
+  private lateinit var workerProfileRepository: ProfileRepository
 
   @Before
   fun setup() {
+    workerProfileRepository = mock(ProfileRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
     navigationActionsRoot = mock(NavigationActions::class.java)
 
@@ -70,6 +73,7 @@ class QuickFixFinderScreenTest {
     categoryViewModel = CategoryViewModel(categoryRepo)
     accountViewModel = mockk(relaxed = true)
     quickFixViewModel = QuickFixViewModel(mock())
+    workerViewModel = ProfileViewModel(workerProfileRepository)
   }
 
   @Test
@@ -85,13 +89,12 @@ class QuickFixFinderScreenTest {
           announcementViewModel = announcementViewModel,
           categoryViewModel = categoryViewModel,
           preferencesViewModel = preferencesViewModel,
-          quickFixViewModel = quickFixViewModel)
+          quickFixViewModel = quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Assert top bar is displayed
     composeTestRule.onNodeWithTag("QuickFixFinderTopBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("QuickFixFinderTopBarTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("QuickFixFinderTopBarTitle").assertTextEquals("Quickfix")
 
     // Assert main content is displayed
     composeTestRule.onNodeWithTag("QuickFixFinderContent").assertIsDisplayed()
@@ -124,7 +127,8 @@ class QuickFixFinderScreenTest {
           announcementViewModel = announcementViewModel,
           categoryViewModel = categoryViewModel,
           preferencesViewModel = preferencesViewModel,
-          quickFixViewModel = quickFixViewModel)
+          quickFixViewModel = quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -149,7 +153,8 @@ class QuickFixFinderScreenTest {
           announcementViewModel = announcementViewModel,
           categoryViewModel = categoryViewModel,
           preferencesViewModel = preferencesViewModel,
-          quickFixViewModel = quickFixViewModel)
+          quickFixViewModel = quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Click on the "Announce" tab
@@ -172,7 +177,8 @@ class QuickFixFinderScreenTest {
           announcementViewModel = announcementViewModel,
           categoryViewModel = categoryViewModel,
           preferencesViewModel = preferencesViewModel,
-          quickFixViewModel = quickFixViewModel)
+          quickFixViewModel = quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Click on the "Search" tab

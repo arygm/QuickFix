@@ -103,10 +103,12 @@ fun AppContentNavGraph(
         composable(AppContentRoute.WORKER_MODE) {
           WorkerModeNavGraph(
               modeViewModel,
+              workerViewModel,
               isOffline,
               appContentNavigationActions,
               preferencesViewModel,
               accountViewModel,
+              categoryViewModel,
               rootNavigationActions,
               userPreferencesViewModel)
         }

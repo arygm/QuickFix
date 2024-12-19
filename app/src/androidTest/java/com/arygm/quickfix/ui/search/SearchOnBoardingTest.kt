@@ -14,6 +14,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
@@ -27,6 +28,8 @@ import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.profile.ProfileRepository
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -54,11 +57,15 @@ class SearchOnBoardingTest {
   private lateinit var categoryViewModel: CategoryViewModel
   private lateinit var navigationActionsRoot: NavigationActions
   private lateinit var quickFixViewModel: QuickFixViewModel
+  private lateinit var workerViewModel: ProfileViewModel
+  private lateinit var workerProfileRepository: ProfileRepository
 
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setup() {
+    workerProfileRepository = mock(ProfileRepository::class.java)
+    workerViewModel = ProfileViewModel(workerProfileRepository)
     navigationActions = mock(NavigationActions::class.java)
     navigationActionsRoot = mock(NavigationActions::class.java)
     workerProfileRepo = mockk(relaxed = true)
@@ -80,7 +87,8 @@ class SearchOnBoardingTest {
           accountViewModel,
           categoryViewModel,
           onProfileClick = { _, _ -> },
-      )
+
+          workerViewModel)
     }
 
     // Check that the search input field is displayed
@@ -101,7 +109,7 @@ class SearchOnBoardingTest {
           accountViewModel,
           categoryViewModel,
           onProfileClick = { _, _ -> },
-      )
+          workerViewModel)
     }
 
     // Input text into the search field
@@ -131,7 +139,7 @@ class SearchOnBoardingTest {
           accountViewModel,
           categoryViewModel,
           onProfileClick = { _, _ -> },
-      )
+          workerViewModel)
     }
 
     // Verify initial state (Categories are displayed)
@@ -152,7 +160,7 @@ class SearchOnBoardingTest {
           accountViewModel,
           categoryViewModel,
           onProfileClick = { _, _ -> },
-      )
+          workerViewModel)
     }
 
     // Input text to simulate non-empty search
@@ -197,7 +205,7 @@ class SearchOnBoardingTest {
           accountViewModel = accountViewModel,
           categoryViewModel = categoryViewModel,
           onProfileClick = { _, _ -> },
-      )
+          workerViewModel)
     }
 
     // Wait for the UI to settle
@@ -272,7 +280,8 @@ class SearchOnBoardingTest {
           accountViewModel = accountViewModel,
           categoryViewModel = categoryViewModel,
           onProfileClick = { _, _ -> },
-      )
+          workerViewModel)
+
     }
 
     // Perform a search query to display filter buttons
@@ -310,7 +319,7 @@ class SearchOnBoardingTest {
           accountViewModel = accountViewModel,
           categoryViewModel = categoryViewModel,
           onProfileClick = { _, _ -> },
-      )
+          workerViewModel)
     }
 
     // Perform a search query to display filter buttons
@@ -323,6 +332,7 @@ class SearchOnBoardingTest {
 
     // Verify the bottom sheet appears
     composeTestRule.waitForIdle()
+      composeTestRule.onRoot().printToLog("root")
     composeTestRule.onNodeWithTag("locationFilterModalSheet").assertIsDisplayed()
   }
 
@@ -336,7 +346,7 @@ class SearchOnBoardingTest {
           accountViewModel,
           categoryViewModel,
           onProfileClick = { _, _ -> },
-      )
+          workerViewModel)
     }
 
     // Click the Cancel button
@@ -360,7 +370,7 @@ class SearchOnBoardingTest {
           accountViewModel,
           categoryViewModel,
           onProfileClick = { _, _ -> },
-      )
+          workerViewModel)
     }
 
     // Perform a search to show filters
@@ -388,7 +398,7 @@ class SearchOnBoardingTest {
           accountViewModel,
           categoryViewModel,
           onProfileClick = { _, _ -> },
-      )
+          workerViewModel)
     }
 
     // Perform a search to show filters
