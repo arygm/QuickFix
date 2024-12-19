@@ -264,6 +264,16 @@ fun MapScreen(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         contentAlignment = Alignment.BottomStart,
     ) {
+      val primaryColor = colorScheme.primary
+      val surfaceColor = colorScheme.surface
+      val subIconColors =
+          listOf(
+              primaryColor,
+              if (locationFilterApplied) surfaceColor else primaryColor,
+              if (priceFilterApplied) surfaceColor else primaryColor,
+              if (availabilityFilterApplied) surfaceColor else primaryColor,
+              if (emergencyFilterApplied) surfaceColor else primaryColor,
+          )
       QuickFixToolboxFloatingButton(
           modifier = Modifier.testTag("FilterButton"),
           mainIcon = Icons.Default.FilterAlt,
@@ -311,7 +321,8 @@ fun MapScreen(
                 }
               }
             }
-          })
+          },
+          subIconColors = subIconColors)
     }
 
     QuickFixAvailabilityBottomSheet(
