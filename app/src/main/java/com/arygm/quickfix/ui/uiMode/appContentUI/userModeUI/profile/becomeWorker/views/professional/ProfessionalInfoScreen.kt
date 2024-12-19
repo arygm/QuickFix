@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -62,7 +63,9 @@ import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
+import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import java.time.LocalTime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -76,7 +79,9 @@ fun ProfessionalInfoScreen(
     addOnServices: MutableState<List<AddOnService>>,
     tags: MutableState<List<String>>,
     categories: List<Category>,
-    formValidatedTest: Boolean = false
+    formValidatedTest: Boolean = false,
+    navigationActions: NavigationActions,
+    workingHours: MutableState<Pair<LocalTime?, LocalTime?>>
 ) {
   val coroutineScope = rememberCoroutineScope()
   val formValidatedIncludedServices = remember { mutableStateOf(false) }
@@ -85,6 +90,9 @@ fun ProfessionalInfoScreen(
   var selectedSubcategory by remember { mutableStateOf(Subcategory()) }
   var expandedDropDownCategory by remember { mutableStateOf(false) }
   var expandedDropDownSubcategory by remember { mutableStateOf(false) }
+  val startTime = remember { mutableStateOf<LocalTime?>(null) }
+  val endTime = remember { mutableStateOf<LocalTime?>(null) }
+  workingHours.value = Pair(startTime.value, endTime.value)
   val (listServices, checkedStatesIncludedServices) =
       remember(selectedSubcategory) {
         val services = selectedSubcategory.setServices
@@ -136,6 +144,7 @@ fun ProfessionalInfoScreen(
   val items =
       listOf(
           "Professional Info",
+          "Working hours",
           "Category",
           "Reference Price",
           "Tags",
@@ -144,6 +153,7 @@ fun ProfessionalInfoScreen(
           "Continue")
   val conditions =
       listOf(
+          true,
           true,
           true,
           selectedCategory.name.isNotEmpty() && selectedSubcategory.name.isNotEmpty(),
@@ -155,6 +165,9 @@ fun ProfessionalInfoScreen(
           formValidatedAddOnServices.value || formValidatedTest)
   val listState = rememberLazyListState() // State for LazyColumn
   val visibleItems = items.zip(conditions).filter { it.second }.map { it.first } // Filtered items
+  val categoryTextStyle =
+      MaterialTheme.typography.labelMedium.copy(
+          fontSize = 10.sp, color = colorScheme.onBackground, fontWeight = FontWeight.Medium)
 
   // Scroll to the last visible item when the visible items list changes
   LaunchedEffect(visibleItems) {
@@ -190,17 +203,48 @@ fun ProfessionalInfoScreen(
                     })
             Spacer(modifier = Modifier.weight(0.2f))
           }
+          Spacer(modifier = Modifier.height(16.dp * heightRatio.value))
+        }
+      }
+      item(key = "Working hours") {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp * widthRatio.value)) {
+          Row() {
+            Box(
+                modifier = Modifier.weight(0.25f).align(Alignment.Bottom),
+            ) {
+              TimeDropdownMenu(
+                  selectedTime = startTime,
+                  dependentTime = endTime, // Pass the dependent time (endTime)
+                  isStartTime = true, // This is the Start Time dropdown
+                  widthRatio = widthRatio,
+                  heightRatio = heightRatio,
+                  tag = "StartTime")
+            }
+            HorizontalDivider(
+                modifier =
+                    Modifier.weight(0.1f)
+                        .align(Alignment.CenterVertically)
+                        .padding(top = 20.dp, end = 12.dp))
+            Box(
+                modifier = Modifier.weight(0.65f).align(Alignment.Bottom),
+            ) {
+              TimeDropdownMenu(
+                  showLabel = false,
+                  selectedTime = endTime,
+                  dependentTime = startTime, // Pass the Start Time as dependency
+                  isStartTime = false, // This is the End Time dropdown
+                  widthRatio = widthRatio,
+                  heightRatio = heightRatio,
+                  startTime = startTime.value ?: LocalTime.of(0, 0), // Default start time
+                  tag = "EndTime")
+            }
+          }
         }
       }
 
       item(key = "Category") {
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp * widthRatio.value)) {
           Row(modifier = Modifier.fillMaxWidth()) {
-            val categoryTextStyle =
-                MaterialTheme.typography.labelMedium.copy(
-                    fontSize = 10.sp,
-                    color = colorScheme.onBackground,
-                    fontWeight = FontWeight.Medium)
 
             // Calculate maximum text width for categories
             val maxCategoryTextWidth =
@@ -373,6 +417,7 @@ fun ProfessionalInfoScreen(
         }
       }
       if (selectedCategory.name.isNotEmpty() && selectedSubcategory.name.isNotEmpty()) {
+
         item(key = "Reference Price") {
           Column(
               modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp * widthRatio.value)) {
@@ -579,7 +624,7 @@ fun ProfessionalInfoScreen(
                                 .padding(start = 5.dp, end = 5.dp, bottom = 8.dp)) {
                           QuickFixButton(
                               buttonText = "Cancel",
-                              onClickAction = {},
+                              onClickAction = { navigationActions.goBack() },
                               buttonColor = colorScheme.surface,
                               textColor = colorScheme.error,
                               modifier =
@@ -604,7 +649,9 @@ fun ProfessionalInfoScreen(
                                       priceError.value.not() &&
                                       selectedCategory.name.isNotEmpty() &&
                                       selectedSubcategory.name.isNotEmpty() &&
-                                      price.doubleValue != 0.0,
+                                      price.doubleValue != 0.0 &&
+                                      workingHours.value.first != null &&
+                                      workingHours.value.second != null,
                               textColor = colorScheme.onPrimary,
                               textStyle =
                                   poppinsTypography.headlineMedium.copy(
@@ -646,7 +693,7 @@ fun calculateMaxTextWidth(texts: List<String>, textStyle: TextStyle): Dp {
 suspend fun smoothScrollToItem(
     listState: LazyListState,
     targetIndex: Int,
-    durationMillis: Int = 5 // Total animation duration
+    durationMillis: Int = 1 // Total animation duration
 ) {
   val startIndex = listState.firstVisibleItemIndex
   val distance = targetIndex - startIndex

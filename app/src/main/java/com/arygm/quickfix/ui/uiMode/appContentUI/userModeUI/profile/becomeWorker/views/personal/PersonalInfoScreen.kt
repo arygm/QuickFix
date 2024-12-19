@@ -58,6 +58,7 @@ import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
+import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.professional.calculateMaxTextWidth
@@ -80,6 +81,7 @@ fun PersonalInfoScreen(
     showBottomSheetBPR: Boolean = false,
     locationViewModel: LocationViewModel,
     locationWorker: MutableState<Location>,
+    navigationActions: NavigationActions
 ) {
   var locationTitle by remember { mutableStateOf("") }
   val locationSuggestions by locationViewModel.locationSuggestions.collectAsState()
@@ -456,7 +458,7 @@ fun PersonalInfoScreen(
       ) {
         QuickFixButton(
             buttonText = "Cancel",
-            onClickAction = {},
+            onClickAction = { navigationActions.goBack() },
             buttonColor = colorScheme.surface,
             textColor = colorScheme.error,
             modifier =

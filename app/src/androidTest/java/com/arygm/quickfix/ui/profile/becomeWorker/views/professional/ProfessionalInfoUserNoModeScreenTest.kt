@@ -29,16 +29,20 @@ import com.arygm.quickfix.ressources.C.Tag.professionalInfoScreenCategoryDropdow
 import com.arygm.quickfix.ressources.C.Tag.professionalInfoScreenCategoryField
 import com.arygm.quickfix.ressources.C.Tag.professionalInfoScreenSubcategoryDropdownMenu
 import com.arygm.quickfix.ressources.C.Tag.professionalInfoScreenSubcategoryField
+import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.professional.ProfessionalInfoScreen
+import java.time.LocalTime
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 
 @RunWith(AndroidJUnit4::class)
 class ProfessionalInfoUserNoModeScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
+  private lateinit var navigationActions: NavigationActions
 
   // Mock data for testing
   private val mockSubcategoriesPlumbing =
@@ -142,6 +146,7 @@ class ProfessionalInfoUserNoModeScreenTest {
       initialPage: Int = 0,
       pagerStateHolder: (PagerState) -> Unit = {}
   ) {
+    navigationActions = mock()
     composeTestRule.setContent {
       val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = initialPage)
       pagerStateHolder(pagerState)
@@ -150,6 +155,7 @@ class ProfessionalInfoUserNoModeScreenTest {
       val includedServices = remember { mutableStateOf(listOf<IncludedService>()) }
       val addOnServices = remember { mutableStateOf(listOf<AddOnService>()) }
       val tags = remember { mutableStateOf(listOf<String>()) }
+      val workingHours = remember { mutableStateOf<Pair<LocalTime?, LocalTime?>>(Pair(null, null)) }
       QuickFixTheme {
         ProfessionalInfoScreen(
             pagerState = pagerState,
@@ -159,7 +165,9 @@ class ProfessionalInfoUserNoModeScreenTest {
             addOnServices = addOnServices,
             tags = tags,
             categories = categories,
-            formValidatedTest = true)
+            formValidatedTest = true,
+            workingHours = workingHours,
+            navigationActions = navigationActions)
       }
     }
   }
