@@ -27,7 +27,7 @@ import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.UserModeNavHost
-import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.WorkerModeNavGraph
+import com.arygm.quickfix.ui.uiMode.workerMode.WorkerModeNavGraph
 import com.arygm.quickfix.utils.loadAppMode
 
 @Composable

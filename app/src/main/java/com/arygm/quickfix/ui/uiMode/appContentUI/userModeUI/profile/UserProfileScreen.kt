@@ -52,7 +52,7 @@ fun UserProfileScreen(
               icon = Icons.Outlined.FavoriteBorder,
               label = "Saved Lists",
               testTag = "SavedLists",
-              action = { /* Action */}))
+              action = {}))
 
   // Define Resources Section
   val resources =

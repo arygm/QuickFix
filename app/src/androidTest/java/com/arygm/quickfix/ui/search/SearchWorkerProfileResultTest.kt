@@ -1,12 +1,12 @@
 package com.arygm.quickfix.ui.search
 
+import android.graphics.Bitmap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.arygm.quickfix.R
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchWorkerProfileResult
 import org.junit.Rule
 import org.junit.Test
@@ -21,7 +21,7 @@ class SearchWorkerProfileResultTest {
   fun testProfileImageIsDisplayed() {
     composeTestRule.setContent {
       SearchWorkerProfileResult(
-          profileImage = R.drawable.placeholder_worker,
+          profileImage = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888),
           name = "Moha Abbes",
           category = "Exterior Painter",
           rating = 4.0,
@@ -41,7 +41,7 @@ class SearchWorkerProfileResultTest {
   fun testProfileDetailsAreDisplayed() {
     composeTestRule.setContent {
       SearchWorkerProfileResult(
-          profileImage = R.drawable.placeholder_worker,
+          profileImage = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888),
           name = "Moha Abbes",
           category = "Exterior Painter",
           rating = 4.0,
@@ -69,7 +69,7 @@ class SearchWorkerProfileResultTest {
     var clicked = false
     composeTestRule.setContent {
       SearchWorkerProfileResult(
-          profileImage = R.drawable.placeholder_worker,
+          profileImage = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888),
           name = "Moha Abbes",
           category = "Exterior Painter",
           rating = 4.0,
