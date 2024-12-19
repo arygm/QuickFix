@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.category.Category
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -18,19 +19,27 @@ class ScrollableRowTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
-  private lateinit var services: List<Service>
-  private lateinit var onServiceClick: (Service) -> Unit
+  private lateinit var services: List<Category>
+  private lateinit var onServiceClick: (Category) -> Unit
 
   @Before
   fun setUp() {
     // Liste des services pour les tests
     services =
         listOf(
-            Service("Painter", R.drawable.worker_image),
-            Service("Gardener", R.drawable.worker_image),
-            Service("Electrician", R.drawable.worker_image),
-            Service("Plumber", R.drawable.worker_image),
-            Service("Mechanic", R.drawable.worker_image))
+            Category(
+                name = "Handyman Services",
+                description = "Mechanic",
+                id = R.drawable.mechanic.toString()),
+            Category(
+                name = "Gardening", description = "Gardener", id = R.drawable.gardener.toString()),
+            Category(
+                name = "Electrical Work",
+                description = "Electrician",
+                id = R.drawable.electrician.toString()),
+            Category(name = "Painting", description = "Paint", id = R.drawable.painter.toString()),
+            Category(
+                name = "Plumbing", description = "Plumber", id = R.drawable.plumber.toString()))
 
     // Mock de la fonction de clic pour tester les interactions
     onServiceClick = mock()
@@ -57,10 +66,10 @@ class ScrollableRowTest {
     // Scroll to the last service card within the LazyRow
     composeTestRule
         .onNodeWithTag("PopularServicesRow")
-        .performScrollToNode(hasTestTag("ServiceCard_${lastService.name}"))
+        .performScrollToNode(hasTestTag("ServiceCard_${lastService.description}"))
 
     // Assert that the last service is displayed
-    composeTestRule.onNodeWithTag("ServiceCard_${lastService.name}").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ServiceCard_${lastService.description}").assertIsDisplayed()
   }
 
   @Test
@@ -73,7 +82,7 @@ class ScrollableRowTest {
     }
 
     // Clique sur la carte de service et vérifie que le clic est bien invoqué avec le bon service
-    composeTestRule.onNodeWithTag("ServiceCard_${testService.name}").performClick()
+    composeTestRule.onNodeWithTag("ServiceCard_${testService.description}").performClick()
     verify(onServiceClick).invoke(testService)
   }
 
@@ -88,11 +97,11 @@ class ScrollableRowTest {
       // Scroll to the service card within the LazyRow
       composeTestRule
           .onNodeWithTag("PopularServicesRow")
-          .performScrollToNode(hasTestTag("ServiceCard_${service.name}"))
+          .performScrollToNode(hasTestTag("ServiceCard_${service.description}"))
 
       // Perform click on the service card
       composeTestRule
-          .onNodeWithTag("ServiceCard_${service.name}")
+          .onNodeWithTag("ServiceCard_${service.description}")
           .assertIsDisplayed()
           .performClick()
 

@@ -54,16 +54,17 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
+import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.model.tools.ai.GeminiViewModel
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.elements.PopularServicesRow
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.QuickFixesWidget
-import com.arygm.quickfix.ui.elements.Service
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
@@ -80,7 +81,8 @@ fun HomeScreen(
     userViewModel: ProfileViewModel,
     workerViewModel: ProfileViewModel,
     quickFixViewModel: QuickFixViewModel,
-    navigationActionsRoot: NavigationActions
+    navigationActionsRoot: NavigationActions,
+    searchViewModel: SearchViewModel
 ) {
   val focusManager = LocalFocusManager.current
   val geminiViewModel = GeminiViewModel()
@@ -88,9 +90,13 @@ fun HomeScreen(
   // Sample data for services and quick fixes
   val services =
       listOf(
-          Service("Painter", R.drawable.painter),
-          Service("Gardener", R.drawable.gardener),
-          Service("Electrician", R.drawable.electrician))
+          Category(name = "Painting", description = "Paint", id = R.drawable.painter.toString()),
+          Category(
+              name = "Gardening", description = "Gardener", id = R.drawable.gardener.toString()),
+          Category(
+              name = "Electrical Work",
+              description = "Electrician",
+              id = R.drawable.electrician.toString()))
 
   var quickFixes by remember { mutableStateOf(emptyList<QuickFix>()) }
   var mode by remember { mutableStateOf("") }
@@ -243,7 +249,10 @@ fun HomeScreen(
                   PopularServicesRow(
                       services = services,
                       modifier = Modifier.testTag("PopularServicesRow"),
-                      onServiceClick = { /* Handle Service Click */})
+                      onServiceClick = {
+                        searchViewModel.setPopularServiceCategory(it)
+                        navigationActionsRoot.navigateTo(UserTopLevelDestinations.SEARCH)
+                      })
 
                   Spacer(modifier = Modifier.weight(0.09f))
 

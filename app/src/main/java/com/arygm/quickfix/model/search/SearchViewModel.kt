@@ -33,6 +33,9 @@ open class SearchViewModel(
   val _searchCategory = MutableStateFlow<Category?>(null)
   val searchCategory: StateFlow<Category?> = _searchCategory
 
+  val _popularServiceCategory = MutableStateFlow<Category?>(null)
+  val popularServiceCategory: StateFlow<Category?> = _popularServiceCategory
+
   val _workerProfiles = MutableStateFlow<List<WorkerProfile>>(emptyList())
   val workerProfiles: StateFlow<List<WorkerProfile>> = _workerProfiles
 
@@ -69,6 +72,10 @@ open class SearchViewModel(
 
   fun setSearchCategory(category: Category) { // Used for test purposes
     _searchCategory.value = category
+  }
+
+  fun setPopularServiceCategory(category: Category?) { // Used for test purposes
+    _popularServiceCategory.value = category
   }
 
   fun setWorkerProfiles(workerProfiles: List<WorkerProfile>) { // Used for test purposes

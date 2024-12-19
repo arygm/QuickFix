@@ -278,7 +278,8 @@ fun HomeNavHost(
           userViewModel,
           workerViewModel,
           quickFixViewModel,
-          navigationActionsRoot)
+          navigationActionsRoot,
+          searchViewModel)
     }
     // Add MessageScreen as a nested composable within Home
     composable(UserScreen.MESSAGES) {
