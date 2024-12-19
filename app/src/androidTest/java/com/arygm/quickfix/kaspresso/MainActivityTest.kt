@@ -386,7 +386,7 @@ class MainActivityTest : TestCase() {
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
       composeTestRule.onNodeWithText("- Withdraw funds").assertIsDisplayed()
-      composeTestRule.onNodeWithText("User Mode").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Worker Mode").assertIsDisplayed()
       composeTestRule.onNodeWithText("Personal Settings").assertIsDisplayed()
       composeTestRule.onNodeWithText("My Account").assertIsDisplayed()
       composeTestRule.onNodeWithText("Preferences").assertIsDisplayed()

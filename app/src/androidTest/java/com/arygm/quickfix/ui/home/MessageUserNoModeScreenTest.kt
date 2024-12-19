@@ -15,12 +15,15 @@ import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.messaging.*
 import com.arygm.quickfix.model.offline.small.PreferencesRepositoryDataStore
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.Profile
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.profile.dataFields.Service
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixRepository
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
-import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.MessageScreen
@@ -48,11 +51,13 @@ class MessageUserNoModeScreenTest {
   private lateinit var quickFixRepository: QuickFixRepository
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var quickFixViewModel: QuickFixViewModel
-  private lateinit var modeViewModel: ModeViewModel
   private lateinit var preferencesViewModel: PreferencesViewModel
   private lateinit var preferencesRepositoryDataStore: PreferencesRepositoryDataStore
   private lateinit var accountRepository: AccountRepository
   private lateinit var accountViewModel: AccountViewModel
+
+  private lateinit var workerProfileRepositoryFirestore: WorkerProfileRepositoryFirestore
+  private lateinit var workerViewModel: ProfileViewModel
 
   // Implémentation de test pour Service
   data class TestService(override val name: String) : Service
@@ -110,11 +115,13 @@ class MessageUserNoModeScreenTest {
     navigationActions = mock(NavigationActions::class.java)
     chatRepository = mock(ChatRepository::class.java)
     quickFixRepository = mock(QuickFixRepository::class.java)
-    modeViewModel = mock(ModeViewModel::class.java)
     preferencesRepositoryDataStore = mock(PreferencesRepositoryDataStore::class.java)
     preferencesViewModel = PreferencesViewModel(preferencesRepositoryDataStore)
     accountRepository = mock(AccountRepository::class.java)
     accountViewModel = AccountViewModel(accountRepository)
+
+    workerProfileRepositoryFirestore = mock(WorkerProfileRepositoryFirestore::class.java)
+    workerViewModel = ProfileViewModel(workerProfileRepositoryFirestore)
 
     // Mock repository init
     whenever(quickFixRepository.init(any())).thenAnswer {
@@ -164,6 +171,13 @@ class MessageUserNoModeScreenTest {
       quickFixViewModel.getQuickFixes()
     }
 
+    doAnswer { invocation ->
+          val onSuccess = invocation.arguments[1] as (Profile?) -> Unit
+          onSuccess(WorkerProfile(displayName = "John the Worker"))
+        }
+        .whenever(workerProfileRepositoryFirestore)
+        .getProfileById(any(), any(), any())
+
     chatViewModel.selectChat(fakeChat)
   }
 
@@ -176,7 +190,9 @@ class MessageUserNoModeScreenTest {
             navigationActions = navigationActions,
             quickFixViewModel = quickFixViewModel,
             preferencesViewModel = preferencesViewModel,
-            accountViewModel = accountViewModel)
+
+            accountViewModel = accountViewModel,
+            workerViewModel = workerViewModel)
       }
     }
 
@@ -185,19 +201,39 @@ class MessageUserNoModeScreenTest {
 
   @Test
   fun testMessagesAreDisplayed() {
-    composeTestRule.setContent {
-      QuickFixTheme {
-        MessageScreen(
-            chatViewModel = chatViewModel,
-            navigationActions = navigationActions,
-            quickFixViewModel = quickFixViewModel,
-            preferencesViewModel = preferencesViewModel,
-            accountViewModel = accountViewModel)
-      }
-    }
 
-    composeTestRule.onNodeWithText("Hello!").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Hi, how can I help you?").assertIsDisplayed()
+    runBlocking {
+      doAnswer { invocation ->
+            val onSuccess = invocation.getArgument<(List<Chat>) -> Unit>(0)
+            // Retourne ce chat modifié
+            onSuccess(listOf(fakeChat))
+            null
+          }
+          .whenever(chatRepository)
+          .getChats(any(), any())
+
+      runBlocking {
+        chatViewModel.getChats()
+        chatViewModel.selectChat(fakeChat)
+        quickFixViewModel.getQuickFixes()
+      }
+      composeTestRule.setContent {
+        QuickFixTheme {
+          MessageScreen(
+              chatViewModel = chatViewModel,
+              navigationActions = navigationActions,
+              quickFixViewModel = quickFixViewModel,
+              preferencesViewModel = preferencesViewModel,
+              accountViewModel = accountViewModel,
+              workerViewModel = workerViewModel)
+        }
+      }
+
+
+      // Vérifie les messages
+      composeTestRule.onNodeWithText("Hello!").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Hi, how can I help you?").assertIsDisplayed()
+    }
   }
 
   @Test
@@ -209,7 +245,9 @@ class MessageUserNoModeScreenTest {
             navigationActions = navigationActions,
             quickFixViewModel = quickFixViewModel,
             preferencesViewModel = preferencesViewModel,
-            accountViewModel = accountViewModel)
+
+            accountViewModel = accountViewModel,
+            workerViewModel = workerViewModel)
       }
     }
 
@@ -241,7 +279,9 @@ class MessageUserNoModeScreenTest {
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
               preferencesViewModel = preferencesViewModel,
-              accountViewModel = accountViewModel)
+
+              accountViewModel = accountViewModel,
+              workerViewModel = workerViewModel)
         }
       }
 
@@ -276,7 +316,9 @@ class MessageUserNoModeScreenTest {
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
               preferencesViewModel = preferencesViewModel,
-              accountViewModel = accountViewModel)
+
+              accountViewModel = accountViewModel,
+              workerViewModel = workerViewModel)
         }
       }
 
@@ -305,7 +347,9 @@ class MessageUserNoModeScreenTest {
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
               preferencesViewModel = preferencesViewModel,
-              accountViewModel = accountViewModel)
+
+              accountViewModel = accountViewModel,
+              workerViewModel = workerViewModel)
         }
       }
 
@@ -342,7 +386,9 @@ class MessageUserNoModeScreenTest {
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
               preferencesViewModel = preferencesViewModel,
-              accountViewModel = accountViewModel)
+
+              accountViewModel = accountViewModel,
+              workerViewModel = workerViewModel)
         }
       }
 
@@ -380,7 +426,9 @@ class MessageUserNoModeScreenTest {
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
               preferencesViewModel = preferencesViewModel,
-              accountViewModel = accountViewModel)
+
+              accountViewModel = accountViewModel,
+              workerViewModel = workerViewModel)
         }
       }
 
@@ -439,7 +487,9 @@ class MessageUserNoModeScreenTest {
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
               preferencesViewModel = preferencesViewModel,
-              accountViewModel = accountViewModel)
+
+              accountViewModel = accountViewModel,
+              workerViewModel = workerViewModel)
         }
       }
 

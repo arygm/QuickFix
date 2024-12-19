@@ -36,11 +36,11 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
-import com.arygm.quickfix.model.account.LoggedInAccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelWorkerProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
@@ -59,6 +59,7 @@ import com.arygm.quickfix.utils.loadLastName
 import com.arygm.quickfix.utils.loadProfilePicture
 import com.arygm.quickfix.utils.loadUserId
 import com.arygm.quickfix.utils.setAccountPreferences
+import com.arygm.quickfix.utils.setWorkerProfilePreferences
 import com.arygm.quickfix.utils.stringToTimestamp
 import com.google.firebase.Timestamp
 
@@ -68,12 +69,12 @@ fun BusinessScreen(
     navigationActions: NavigationActions,
     accountViewModel: AccountViewModel,
     workerProfileViewModel: ProfileViewModel,
-    loggedInAccountViewModel: LoggedInAccountViewModel,
     preferencesViewModel: PreferencesViewModel,
     categoryViewModel: CategoryViewModel,
     locationViewModel: LocationViewModel,
     testBitmapPP: Bitmap? = null,
     testLocation: Location = Location(),
+    workerPreferencesViewModel: PreferencesViewModelWorkerProfile
 ) {
   val locationWorker = remember { mutableStateOf(testLocation) }
   val categories = categoryViewModel.categories.collectAsState().value
@@ -148,6 +149,7 @@ fun BusinessScreen(
                     // Handle the failure case
                     Log.e("AnnouncementViewModel", "Failed to update account: ${e.message}")
                   })
+              setWorkerProfilePreferences(workerPreferencesViewModel, workerProfile)
             },
             onFailure = { e ->
               // Handle the failure case
