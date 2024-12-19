@@ -182,27 +182,21 @@ open class SearchViewModel(
     return sortedWorkers.take(3)
   }
 
-  fun searchEngine(query: String) {
+  fun searchEngine(query: String, workerProfiles: List<WorkerProfile>): List<WorkerProfile> {
     val queryWords = query.split(" ").map { it.lowercase().trim() }
 
-    workerProfileRepo.getProfiles(
-        onSuccess = { profiles ->
-          val workerProfiles = profiles.filterIsInstance<WorkerProfile>()
+    val filteredProfiles =
+        workerProfiles.filter { profile ->
+          queryWords.all { word ->
+            profile.fieldOfWork.lowercase().contains(word) ||
+                profile.description.lowercase().contains(word) ||
+                profile.displayName.lowercase().contains(word) ||
+                profile.tags.any { it.lowercase().contains(word) } ||
+                profile.includedServices.any { it.name.lowercase().contains(word) } ||
+                profile.addOnServices.any { it.name.lowercase().contains(word) }
+          }
+        }
 
-          val filteredProfiles =
-              workerProfiles.filter { profile ->
-                queryWords.all { word ->
-                  profile.fieldOfWork.lowercase().contains(word) ||
-                      profile.description.lowercase().contains(word) ||
-                      profile.displayName.lowercase().contains(word) ||
-                      profile.tags.any { it.lowercase().contains(word) } ||
-                      profile.includedServices.any { it.name.lowercase().contains(word) } ||
-                      profile.addOnServices.any { it.name.lowercase().contains(word) }
-                }
-              }
-
-          _workerProfilesSuggestions.value = filteredProfiles.sortedByDescending { it.rating }
-        },
-        onFailure = { Log.e("SearchViewModel", "Failed to fetch worker profiles.") })
+    return filteredProfiles.sortedByDescending { it.rating }
   }
 }

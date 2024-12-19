@@ -57,7 +57,8 @@ fun SearchOnBoarding(
     quickFixViewModel: QuickFixViewModel,
     workerViewModel: ProfileViewModel
 ) {
-  val profiles = searchViewModel.workerProfilesSuggestions.collectAsState()
+  val profiles by workerViewModel.profiles.collectAsState()
+  var searchedWorkers by remember { mutableStateOf(profiles as List<WorkerProfile>) }
   val focusManager = LocalFocusManager.current
   val categories = categoryViewModel.categories.collectAsState().value
   Log.d("SearchOnBoarding", "Categories: $categories")
@@ -112,7 +113,8 @@ fun SearchOnBoarding(
                           value = searchQuery,
                           onValueChange = {
                             searchQuery = it
-                            searchViewModel.searchEngine(it)
+                            searchedWorkers =
+                                searchViewModel.searchEngine(it, profiles as List<WorkerProfile>)
                           },
                           shape = CircleShape,
                           textStyle = poppinsTypography.bodyMedium,
@@ -155,7 +157,7 @@ fun SearchOnBoarding(
                 } else {
                   // Show Profiles
                   ProfileResults(
-                      profiles = profiles.value,
+                      profiles = searchedWorkers,
                       searchViewModel = searchViewModel,
                       accountViewModel = accountViewModel,
                       listState = listState,
