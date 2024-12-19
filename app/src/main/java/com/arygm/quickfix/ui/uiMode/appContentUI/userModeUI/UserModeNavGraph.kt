@@ -167,7 +167,10 @@ fun UserModeNavHost(
                             userViewModel,
                             workerViewModel,
                             quickFixViewModel,
-                            searchViewModel)
+                            searchViewModel,
+                            locationViewModel,
+                            accountViewModel,
+                            categoryViewModel)
                       }
                       composable(UserRoute.SEARCH) {
                         SearchNavHost(
@@ -249,7 +252,10 @@ fun HomeNavHost(
     userViewModel: ProfileViewModel,
     workerViewModel: ProfileViewModel,
     quickFixViewModel: QuickFixViewModel,
-    searchViewModel: SearchViewModel
+    searchViewModel: SearchViewModel,
+    locationViewModel: LocationViewModel,
+    accountViewModel: AccountViewModel,
+    categoryViewModel: CategoryViewModel
 ) {
   val homeNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(homeNavController) }
@@ -280,16 +286,29 @@ fun HomeNavHost(
           preferencesViewModel = preferencesViewModel,
       )
     }
-      composable(UserScreen.MAP) {
-          MapScreen(
-              workerViewModel,
-              searchViewModel,
-              quickFixViewModel,
-              navigationActions,
-              userViewModel,
-              preferencesViewModel
-          )
-      }
+    composable(UserScreen.MAP) {
+      MapScreen(
+          workerViewModel,
+          searchViewModel,
+          quickFixViewModel,
+          navigationActions,
+          userViewModel,
+          preferencesViewModel)
+    }
+
+    composable(UserScreen.QUICKFIX_ONBOARDING) {
+      QuickFixOnBoarding(
+          navigationActions,
+          modeViewModel,
+          quickFixViewModel,
+          preferencesViewModel,
+          userViewModel,
+          workerViewModel,
+          locationViewModel,
+          accountViewModel,
+          chatViewModel,
+          categoryViewModel)
+    }
   }
 }
 

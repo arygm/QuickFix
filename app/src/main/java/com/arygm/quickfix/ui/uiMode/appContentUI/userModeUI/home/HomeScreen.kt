@@ -107,7 +107,7 @@ fun HomeScreen(
       floatingActionButton = {
         QuickFixToolboxFloatingButton(
             iconList = listOf(Icons.Default.Map, Icons.Default.AutoAwesome, Icons.Default.Create),
-            onIconClick = {index -> if(index == 0) navigationActions.navigateTo(UserScreen.MAP)},
+            onIconClick = { index -> if (index == 0) navigationActions.navigateTo(UserScreen.MAP) },
             modifier = Modifier.padding(16.dp).testTag("ToolboxFloatingButton"))
       },
       topBar = {
