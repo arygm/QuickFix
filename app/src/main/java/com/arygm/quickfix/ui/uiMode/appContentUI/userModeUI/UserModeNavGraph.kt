@@ -105,7 +105,7 @@ fun UserModeNavHost(
   val announcementViewModel: AnnouncementViewModel =
       viewModel(
           factory =
-              AnnouncementViewModel.Factory(
+              AnnouncementViewModel.userFactory(
                   announcementRepository = announcementRepository,
                   preferencesRepository = preferencesRepository,
                   userProfileRepository = userProfileRepository))

@@ -21,6 +21,8 @@ object WorkerScreen {
   const val MESSAGES = "Messages Screen"
   const val PROFILE = "Profile Screen"
   const val ACCOUNT_CONFIGURATION = "Account configuration Screen"
+  const val DISPLAY_IMAGES = "Displayed images Screen"
+  const val ANNOUNCEMENT_DETAIL = "Announcement detail Screen"
 }
 
 object WorkerTopLevelDestinations {

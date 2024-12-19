@@ -372,7 +372,7 @@ fun MapScreen(
       phoneLocation?.let { it1 ->
         QuickFixLocationFilterBottomSheet(
             showLocationBottomSheet,
-            userProfile = it,
+            profile = it,
             phoneLocation = it1,
             selectedLocationIndex = selectedLocationIndex,
             onApplyClick = { location, max ->
