@@ -565,7 +565,7 @@ fun SearchWorkerResult(
     userProfile?.let {
       QuickFixLocationFilterBottomSheet(
           showLocationBottomSheet,
-          userProfile = it,
+          profile = it,
           phoneLocation = phoneLocation,
           selectedLocationIndex = selectedLocationIndex,
           onApplyClick = { location, max ->
