@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard
+package com.arygm.quickfix.ui.dashboard
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
@@ -30,19 +30,20 @@ import androidx.lifecycle.viewModelScope
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.messaging.Chat
-import com.arygm.quickfix.model.messaging.ChatStatus
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.model.search.AnnouncementViewModel
-import com.arygm.quickfix.ui.dashboard.AnnouncementsWidget
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixesWidget
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerScreen
 import com.arygm.quickfix.utils.loadAppMode
 import com.arygm.quickfix.utils.loadUserId
 import kotlinx.coroutines.launch
@@ -67,10 +68,7 @@ fun DashboardScreen(
   LaunchedEffect(Unit) {
     mode = loadAppMode(preferencesViewModel)
     uid = loadUserId(preferencesViewModel)
-    userViewModel.fetchUserProfile(uid) { profile ->
-      if (profile != null) {
-        Log.d("DashboardScreen", "profile quickfixes: ${profile.quickFixes}")
-      }
+    (if (mode == "USER") userViewModel else workerViewModel).fetchUserProfile(uid) { profile ->
       profile?.quickFixes?.forEach { quickFix ->
         quickFixViewModel.fetchQuickFix(quickFix) {
           if (it != null) {
@@ -175,13 +173,27 @@ fun DashboardScreen(
                     }
                   }
                   val buttonTitle = quickFixFilterButtons.firstOrNull { it.isSelected }?.title
+                  var workerProfile by remember { mutableStateOf<WorkerProfile?>(null) }
                   when (buttonTitle) {
                     "Pending" ->
                         QuickFixesWidget(
                             status = "Pending",
                             quickFixList = quickFixes.filter { it.status == Status.PENDING },
                             onShowAllClick = { /* Handle Show All Click */},
-                            onItemClick = { /* Handle QuickFix Item Click */},
+                            onItemClick = {
+                              quickFixViewModel.setUpdateQuickFix(it)
+                              workerViewModel.fetchUserProfile(it.workerId) { profile ->
+                                if (profile != null) {
+                                  workerProfile = profile as WorkerProfile
+                                  quickFixViewModel.setSelectedWorkerProfile(workerProfile!!)
+                                }
+                              }
+                              if (mode == "USER") {
+                                navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
+                              } else {
+                                navigationActions.navigateTo(WorkerScreen.QUIKFIX_ONBOARDING)
+                              }
+                            },
                             modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                             itemsToShowDefault = 3,
                             workerViewModel = workerViewModel,
@@ -191,7 +203,20 @@ fun DashboardScreen(
                           status = "Unpaid",
                           quickFixList = quickFixes.filter { it.status == Status.UNPAID },
                           onShowAllClick = { /* Handle Show All Click */},
-                          onItemClick = { /* Handle QuickFix Item Click */},
+                          onItemClick = {
+                            quickFixViewModel.setUpdateQuickFix(it)
+                            workerViewModel.fetchUserProfile(it.workerId) { profile ->
+                              if (profile != null) {
+                                workerProfile = profile as WorkerProfile
+                                quickFixViewModel.setSelectedWorkerProfile(workerProfile!!)
+                              }
+                            }
+                            if (mode == "USER") {
+                              navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
+                            } else {
+                              navigationActions.navigateTo(WorkerScreen.QUIKFIX_ONBOARDING)
+                            }
+                          },
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
                           workerViewModel = workerViewModel,
@@ -202,7 +227,20 @@ fun DashboardScreen(
                           status = "Paid",
                           quickFixList = quickFixes.filter { it.status == Status.PAID },
                           onShowAllClick = { /* Handle Show All Click */},
-                          onItemClick = { /* Handle QuickFix Item Click */},
+                          onItemClick = {
+                            quickFixViewModel.setUpdateQuickFix(it)
+                            workerViewModel.fetchUserProfile(it.workerId) { profile ->
+                              if (profile != null) {
+                                workerProfile = profile as WorkerProfile
+                                quickFixViewModel.setSelectedWorkerProfile(workerProfile!!)
+                              }
+                            }
+                            if (mode == "USER") {
+                              navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
+                            } else {
+                              navigationActions.navigateTo(WorkerScreen.QUIKFIX_ONBOARDING)
+                            }
+                          },
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
                           workerViewModel = workerViewModel,
@@ -213,7 +251,20 @@ fun DashboardScreen(
                           status = "Upcoming",
                           quickFixList = quickFixes.filter { it.status == Status.UPCOMING },
                           onShowAllClick = { /* Handle Show All Click */},
-                          onItemClick = { /* Handle QuickFix Item Click */},
+                          onItemClick = {
+                            quickFixViewModel.setUpdateQuickFix(it)
+                            workerViewModel.fetchUserProfile(it.workerId) { profile ->
+                              if (profile != null) {
+                                workerProfile = profile as WorkerProfile
+                                quickFixViewModel.setSelectedWorkerProfile(workerProfile!!)
+                              }
+                            }
+                            if (mode == "USER") {
+                              navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
+                            } else {
+                              navigationActions.navigateTo(WorkerScreen.QUIKFIX_ONBOARDING)
+                            }
+                          },
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
                           workerViewModel = workerViewModel,
@@ -224,7 +275,20 @@ fun DashboardScreen(
                           status = "Completed",
                           quickFixList = quickFixes.filter { it.status == Status.COMPLETED },
                           onShowAllClick = { /* Handle Show All Click */},
-                          onItemClick = { /* Handle QuickFix Item Click */},
+                          onItemClick = {
+                            quickFixViewModel.setUpdateQuickFix(it)
+                            workerViewModel.fetchUserProfile(it.workerId) { profile ->
+                              if (profile != null) {
+                                workerProfile = profile as WorkerProfile
+                                quickFixViewModel.setSelectedWorkerProfile(workerProfile!!)
+                              }
+                            }
+                            if (mode == "USER") {
+                              navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
+                            } else {
+                              navigationActions.navigateTo(WorkerScreen.QUIKFIX_ONBOARDING)
+                            }
+                          },
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
                           workerViewModel = workerViewModel,
@@ -235,7 +299,20 @@ fun DashboardScreen(
                           status = "Canceled",
                           quickFixList = quickFixes.filter { it.status == Status.CANCELED },
                           onShowAllClick = { /* Handle Show All Click */},
-                          onItemClick = { /* Handle QuickFix Item Click */},
+                          onItemClick = {
+                            quickFixViewModel.setUpdateQuickFix(it)
+                            workerViewModel.fetchUserProfile(it.workerId) { profile ->
+                              if (profile != null) {
+                                workerProfile = profile as WorkerProfile
+                                quickFixViewModel.setSelectedWorkerProfile(workerProfile!!)
+                              }
+                            }
+                            if (mode == "USER") {
+                              navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
+                            } else {
+                              navigationActions.navigateTo(WorkerScreen.QUIKFIX_ONBOARDING)
+                            }
+                          },
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
                           workerViewModel = workerViewModel,
@@ -245,7 +322,20 @@ fun DashboardScreen(
                       QuickFixesWidget(
                           quickFixList = quickFixes,
                           onShowAllClick = { /* Handle Show All Click */},
-                          onItemClick = { /* Handle QuickFix Item Click */},
+                          onItemClick = {
+                            quickFixViewModel.setUpdateQuickFix(it)
+                            workerViewModel.fetchUserProfile(it.workerId) { profile ->
+                              if (profile != null) {
+                                workerProfile = profile as WorkerProfile
+                                quickFixViewModel.setSelectedWorkerProfile(workerProfile!!)
+                              }
+                            }
+                            if (mode == "USER") {
+                              navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
+                            } else {
+                              navigationActions.navigateTo(WorkerScreen.QUIKFIX_ONBOARDING)
+                            }
+                          },
                           modifier = Modifier.testTag("${buttonTitle}QuickFixes"),
                           itemsToShowDefault = 3,
                           workerViewModel = workerViewModel,
@@ -255,37 +345,57 @@ fun DashboardScreen(
                 }
               }
               item {
-                AnnouncementsWidget(
-                    announcementViewModel = announcementViewModel,
-                    navigationActions = navigationActions,
-                    categoryViewModel = categoryViewModel,
-                    itemsToShowDefault = 3,
-                )
+                if (mode == "USER") {
+                  AnnouncementsWidget(
+                      announcementViewModel = announcementViewModel,
+                      navigationActions = navigationActions,
+                      categoryViewModel = categoryViewModel,
+                      itemsToShowDefault = 3,
+                  )
+                }
               }
 
               item {
                 ChatWidget(
                     chatList =
-                        chats.filter {
-                          it.chatStatus == ChatStatus.ACCEPTED ||
-                              it.chatStatus == ChatStatus.GETTING_SUGGESTIONS
-                        },
-                    onItemClick = { /*Handle Message Item Click*/},
+                        if (mode == "USER") chats.filter { it.workeruid != uid }
+                        else chats.filter { it.useruid != uid },
+                    onItemClick = {
+                      chatViewModel.selectChat(it)
+                      if (mode == "USER") navigationActions.navigateTo(UserScreen.MESSAGES)
+                      else navigationActions.navigateTo(WorkerScreen.MESSAGES)
+                    },
                     onShowAllClick = { /*Handle Show All Click*/},
                     itemsToShowDefault = 3,
                     uid = uid,
                     accountViewModel = accountViewModel,
                     categoryViewModel = categoryViewModel,
                     workerViewModel = workerViewModel,
+                    preferencesViewModel = preferencesViewModel,
                 )
               }
 
               item {
+                var workerProfile by remember { mutableStateOf<WorkerProfile?>(null) }
                 BillsWidget(
                     quickFixes = quickFixes,
-                    onItemClick = { /*Handle Bill Item Click*/},
+                    onItemClick = {
+                      quickFixViewModel.setUpdateQuickFix(it)
+                      workerViewModel.fetchUserProfile(it.workerId) { profile ->
+                        if (profile != null) {
+                          workerProfile = profile as WorkerProfile
+                          quickFixViewModel.setSelectedWorkerProfile(workerProfile!!)
+                        }
+                      }
+                      if (mode == "USER") {
+                        navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
+                      } else {
+                        navigationActions.navigateTo(WorkerScreen.QUIKFIX_ONBOARDING)
+                      }
+                    },
                     onShowAllClick = { /*Handle Show All Click*/},
                     itemsToShowDefault = 2,
+                    workerViewModel = workerViewModel,
                 )
               }
             }
