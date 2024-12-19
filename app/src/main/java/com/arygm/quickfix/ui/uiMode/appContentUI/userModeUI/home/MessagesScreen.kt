@@ -34,7 +34,6 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.switchModes.AppMode
-import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.elements.QuickFixDetailsScreen
 import com.arygm.quickfix.ui.elements.QuickFixSlidingWindowContent
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -50,7 +49,6 @@ fun MessageScreen(
     chatViewModel: ChatViewModel,
     navigationActions: NavigationActions,
     quickFixViewModel: QuickFixViewModel,
-    modeViewModel: ModeViewModel,
     preferencesViewModel: PreferencesViewModel,
 ) {
   var userId by remember { mutableStateOf("") }

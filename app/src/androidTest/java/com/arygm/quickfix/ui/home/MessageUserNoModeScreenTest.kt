@@ -175,7 +175,6 @@ class MessageUserNoModeScreenTest {
             chatViewModel = chatViewModel,
             navigationActions = navigationActions,
             quickFixViewModel = quickFixViewModel,
-            modeViewModel = modeViewModel,
             preferencesViewModel = preferencesViewModel)
       }
     }
@@ -192,7 +191,6 @@ class MessageUserNoModeScreenTest {
             chatViewModel = chatViewModel,
             navigationActions = navigationActions,
             quickFixViewModel = quickFixViewModel,
-            modeViewModel = modeViewModel,
             preferencesViewModel = preferencesViewModel)
       }
     }
@@ -211,7 +209,6 @@ class MessageUserNoModeScreenTest {
             chatViewModel = chatViewModel,
             navigationActions = navigationActions,
             quickFixViewModel = quickFixViewModel,
-            modeViewModel = modeViewModel,
             preferencesViewModel = preferencesViewModel)
       }
     }
@@ -246,7 +243,6 @@ class MessageUserNoModeScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              modeViewModel = modeViewModel,
               preferencesViewModel = preferencesViewModel)
         }
       }
@@ -285,7 +281,6 @@ class MessageUserNoModeScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              modeViewModel = modeViewModel,
               preferencesViewModel = preferencesViewModel)
         }
       }
@@ -322,7 +317,6 @@ class MessageUserNoModeScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              modeViewModel = modeViewModel,
               preferencesViewModel = preferencesViewModel)
         }
       }
@@ -365,7 +359,6 @@ class MessageUserNoModeScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              modeViewModel = modeViewModel,
               preferencesViewModel = preferencesViewModel)
         }
       }
@@ -406,7 +399,6 @@ class MessageUserNoModeScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              modeViewModel = modeViewModel,
               preferencesViewModel = preferencesViewModel)
         }
       }
@@ -474,7 +466,6 @@ class MessageUserNoModeScreenTest {
               chatViewModel = chatViewModel,
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
-              modeViewModel = modeViewModel,
               preferencesViewModel = preferencesViewModel)
         }
       }
