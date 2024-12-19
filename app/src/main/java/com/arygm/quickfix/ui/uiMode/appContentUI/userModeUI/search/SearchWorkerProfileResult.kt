@@ -56,7 +56,7 @@ fun SearchWorkerProfileResult(
       if (location.length <= 9) {
         location
       } else {
-        location.take(9) + "..."
+        location.take(7) + "..."
       }
   val displayName =
       if (name.length <= 25) {
@@ -94,7 +94,7 @@ fun SearchWorkerProfileResult(
                     verticalArrangement = Arrangement.Top,
                 ) {
                   Row(verticalAlignment = Alignment.CenterVertically) {
-                    val roundedRating = String.format(Locale.US,"%.2f", rating).toDouble()
+                    val roundedRating = String.format(Locale.US, "%.2f", rating).toDouble()
                     Text(
                         text = "$roundedRating ★",
                         fontFamily = poppinsFontFamily,
