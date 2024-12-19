@@ -389,7 +389,7 @@ fun SearchWorkerResult(
                 }
               },
               actions = {
-                IconButton(onClick = { /* Handle search */}) {
+                IconButton(onClick = { navigationActions.goBack() }) {
                   Icon(
                       imageVector = Icons.Default.Search,
                       contentDescription = "Search",

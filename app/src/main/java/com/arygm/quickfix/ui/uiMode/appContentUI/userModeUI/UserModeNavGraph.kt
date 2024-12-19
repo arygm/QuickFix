@@ -165,7 +165,12 @@ fun UserModeNavHost(
                             preferencesViewModel,
                             userViewModel,
                             workerViewModel,
-                            quickFixViewModel)
+                            quickFixViewModel,
+                            searchViewModel,
+                            announcementViewModel,
+                            categoryViewModel,
+                            accountViewModel,
+                            userNavigationActions)
                       }
                       composable(UserRoute.SEARCH) {
                         SearchNavHost(
@@ -248,7 +253,12 @@ fun HomeNavHost(
     preferencesViewModel: PreferencesViewModel,
     userViewModel: ProfileViewModel,
     workerViewModel: ProfileViewModel,
-    quickFixViewModel: QuickFixViewModel
+    quickFixViewModel: QuickFixViewModel,
+    searchViewModel: SearchViewModel,
+    announcementViewModel: AnnouncementViewModel,
+    categoryViewModel: CategoryViewModel,
+    accountViewModel: AccountViewModel,
+    navigationActionsRoot: NavigationActions
 ) {
   val homeNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(homeNavController) }
@@ -267,7 +277,8 @@ fun HomeNavHost(
           preferencesViewModel,
           userViewModel,
           workerViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          navigationActionsRoot)
     }
     // Add MessageScreen as a nested composable within Home
     composable(UserScreen.MESSAGES) {
@@ -278,6 +289,20 @@ fun HomeNavHost(
           modeViewModel = modeViewModel,
           preferencesViewModel = preferencesViewModel,
       )
+    }
+    composable(UserScreen.SEARCH) {
+      QuickFixFinderScreen(
+          navigationActions,
+          navigationActionsRoot,
+          true,
+          userViewModel,
+          accountViewModel,
+          searchViewModel,
+          announcementViewModel,
+          categoryViewModel,
+          quickFixViewModel,
+          preferencesViewModel,
+          workerViewModel = workerViewModel)
     }
   }
 }

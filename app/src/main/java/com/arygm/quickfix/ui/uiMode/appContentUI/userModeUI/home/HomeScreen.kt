@@ -4,6 +4,7 @@ import QuickFixToolboxFloatingButton
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -66,6 +67,7 @@ import com.arygm.quickfix.ui.elements.Service
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserTopLevelDestinations
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.tools.ai.QuickFixAIChatScreen
 import com.arygm.quickfix.utils.loadAppMode
 import com.arygm.quickfix.utils.loadUserId
@@ -77,7 +79,8 @@ fun HomeScreen(
     preferencesViewModel: PreferencesViewModel,
     userViewModel: ProfileViewModel,
     workerViewModel: ProfileViewModel,
-    quickFixViewModel: QuickFixViewModel
+    quickFixViewModel: QuickFixViewModel,
+    navigationActionsRoot: NavigationActions
 ) {
   val focusManager = LocalFocusManager.current
   val geminiViewModel = GeminiViewModel()
@@ -181,26 +184,35 @@ fun HomeScreen(
                   ) {
                     Spacer(modifier = Modifier.width((screenWidth * 0.03).dp))
                     Log.d("QuickFixTextFieldCustomHomeScreen", "DISPLAYED")
-                    QuickFixTextFieldCustom(
-                        modifier = Modifier.semantics { testTag = "searchBar" },
-                        showLeadingIcon = { true },
-                        showTrailingIcon = { true },
-                        leadingIcon = Icons.Outlined.Search,
-                        trailingIcon = { Icons.Default.Clear },
-                        descriptionLeadIcon = "Search",
-                        descriptionTrailIcon = "Clear",
-                        placeHolderText = "Find your perfect fix with QuickFix",
-                        shape = CircleShape,
-                        textStyle = poppinsTypography.bodyMedium,
-                        textColor = colorScheme.onBackground,
-                        placeHolderColor = colorScheme.onBackground,
-                        leadIconColor = colorScheme.onBackground,
-                        trailIconColor = colorScheme.onBackground,
-                        widthField = (screenWidth * 0.8).dp,
-                        heightField = (screenHeight * 0.045).dp,
-                        onValueChange = {},
-                        value = "",
-                        debug = "homescreen")
+                    Box {
+                      QuickFixTextFieldCustom(
+                          modifier = Modifier.semantics { testTag = "searchBar" },
+                          showLeadingIcon = { true },
+                          showTrailingIcon = { true },
+                          leadingIcon = Icons.Outlined.Search,
+                          trailingIcon = { Icons.Default.Clear },
+                          descriptionLeadIcon = "Search",
+                          descriptionTrailIcon = "Clear",
+                          placeHolderText = "Find your perfect fix with QuickFix",
+                          shape = CircleShape,
+                          textStyle = poppinsTypography.bodyMedium,
+                          textColor = colorScheme.onBackground,
+                          placeHolderColor = colorScheme.onBackground,
+                          leadIconColor = colorScheme.onBackground,
+                          trailIconColor = colorScheme.onBackground,
+                          widthField = (screenWidth * 0.8).dp,
+                          heightField = (screenHeight * 0.045).dp,
+                          onValueChange = {},
+                          value = "",
+                          debug = "homescreen",
+                          isTextField = true)
+
+                      Box(
+                          modifier =
+                              Modifier.matchParentSize().clickable {
+                                navigationActionsRoot.navigateTo(UserTopLevelDestinations.SEARCH)
+                              })
+                    }
 
                     Spacer(modifier = Modifier.width((screenWidth * 0.04).dp))
 
