@@ -163,7 +163,7 @@ fun SearchWorkerResult(
 
   var selectedWorker by remember { mutableStateOf(WorkerProfile()) }
   var selectedCityName by remember { mutableStateOf<String?>(null) }
-  var showFilterButtons by remember { mutableStateOf(true) }
+  var showFilterButtons by remember { mutableStateOf(false) }
   var showAvailabilityBottomSheet by remember { mutableStateOf(false) }
   var showServicesBottomSheet by remember { mutableStateOf(false) }
   var showPriceRangeBottomSheet by remember { mutableStateOf(false) }

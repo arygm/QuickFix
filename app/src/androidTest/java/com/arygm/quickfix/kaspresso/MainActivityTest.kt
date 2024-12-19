@@ -547,6 +547,37 @@ class MainActivityTest : TestCase() {
     }
   }
 
+    @Test
+    fun FsearchForAWorker() = run {
+        step("Set up the WelcomeScreen and transit to the register") {
+            // Wait for the UI to settle
+            composeTestRule.waitForIdle()
+
+            // Attempt to grant permissions
+            allowPermissionsIfNeeded() // Retry the action until it works with a timeout of 10 seconds
+            composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
+                composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()
+            }
+            composeTestRule.onRoot().printToLog("TAG")
+            onView(withText("Search")) // Match the TextView that has the text "Hello World"
+                .perform(click())
+
+            composeTestRule.waitUntil("find the categories", timeoutMillis = 20000) {
+                composeTestRule.onAllNodesWithText(item.name).fetchSemanticsNodes().isNotEmpty()
+            }
+            composeTestRule.onNodeWithText(item.name).assertIsDisplayed()
+            composeTestRule.onNodeWithText(item.name).performClick()
+            composeTestRule.waitUntil("find the categories", timeoutMillis = 20000) {
+                composeTestRule
+                    .onAllNodesWithText(item.subcategories[0].name)
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+            composeTestRule.onNodeWithText(item.subcategories[0].name).performClick()
+            composeTestRule
+        }
+    }
+
   private fun loginToTestAccount() {
     ComposeScreen.onComposeScreen<WelcomeScreen>(composeTestRule) {
       loginButton {

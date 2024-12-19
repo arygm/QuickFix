@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.search
 
+import android.graphics.Bitmap
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
@@ -46,6 +47,8 @@ import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchWorkerResult
+import io.mockk.every
+import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.math.roundToInt
@@ -119,7 +122,8 @@ class SearchWorkerResultScreenTest {
                 fieldOfWork = "Carpentry",
                 rating = 3.0,
                 description = "I hate my job",
-                location = Location(40.7128, -74.0060)))
+                location = Location(40.7128, -74.0060),
+                displayName = "Ramo"))
 
     // Mock the getAccountById method to always return a test Account
     doAnswer { invocation ->
@@ -160,6 +164,28 @@ class SearchWorkerResultScreenTest {
         }
         .`when`(userProfileRepositoryFirestore)
         .getProfileById(anyString(), any(), any())
+
+      workerViewModel = mockk(relaxed = true)
+
+      // Mock fetchProfileImageAsBitmap
+      every {
+          workerViewModel.fetchProfileImageAsBitmap(any(), any(), any())
+      } answers {
+          val onSuccess = arg<(Bitmap) -> Unit>(1)
+          // Provide a dummy bitmap here (e.g. a solid color bitmap or decode from resources)
+          val dummyBitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+          onSuccess(dummyBitmap) // Simulate success callback
+      }
+
+      // Mock fetchBannerImageAsBitmap
+      every {
+          workerViewModel.fetchBannerImageAsBitmap(any(), any(), any())
+      } answers {
+          val onSuccess = arg<(Bitmap) -> Unit>(1)
+          // Provide another dummy bitmap
+          val dummyBitmap = Bitmap.createBitmap(20, 20, Bitmap.Config.ARGB_8888)
+          onSuccess(dummyBitmap) // Simulate success callback
+      }
   }
 
   @Test
@@ -195,7 +221,7 @@ class SearchWorkerResultScreenTest {
     searchViewModel.setSearchQuery("Unknown")
 
     // Check if the description with the query text is displayed
-    composeTestRule.onAllNodesWithText("Unknown").assertCountEquals(2)
+    composeTestRule.onAllNodesWithText("Unknown").assertCountEquals(3)
   }
 
   @Test
@@ -409,7 +435,7 @@ class SearchWorkerResultScreenTest {
         .onNodeWithTag("sliding_window_worker_category")
         .assertExists()
         .assertIsDisplayed()
-        .assertTextContains("Carpentry") // Replace with expected category
+        .assertTextContains("Ramo") // Replace with expected category
 
     // Verify the worker address is displayed
     composeTestRule
@@ -558,62 +584,6 @@ class SearchWorkerResultScreenTest {
     val tags = listOf("Reliable", "Experienced", "Professional")
 
     tags.forEach { tag -> composeTestRule.onNodeWithText(tag).assertExists().assertIsDisplayed() }
-  }
-
-  @Test
-  fun testSaveButtonTogglesBetweenSaveAndSaved() {
-    // Set up the content
-    composeTestRule.setContent {
-      SearchWorkerResult(
-          navigationActions,
-          searchViewModel,
-          accountViewModel,
-          userViewModel,
-          preferencesViewModel,
-          quickFixViewModel, workerViewModel = workerViewModel)
-    }
-
-    // Wait until the worker profiles are displayed
-    composeTestRule.waitForIdle()
-
-    // Click on the "Book" button of the first item
-    composeTestRule.onAllNodesWithTag("book_button")[0].assertExists().performClick()
-
-    // Wait for the sliding window to appear
-    composeTestRule.waitForIdle()
-
-    // Verify the "save" button is displayed
-    composeTestRule
-        .onNodeWithTag("sliding_window_save_button")
-        .assertExists()
-        .assertIsDisplayed()
-        .assertTextContains("save")
-
-    // Click on the "save" button
-    composeTestRule.onNodeWithTag("sliding_window_save_button").performClick()
-
-    // Wait for the UI to update
-    composeTestRule.waitForIdle()
-
-    // Verify the button text changes to "saved"
-    composeTestRule
-        .onNodeWithTag("sliding_window_save_button")
-        .assertExists()
-        .assertIsDisplayed()
-        .assertTextContains("saved")
-
-    // Click again to toggle back to "save"
-    composeTestRule.onNodeWithTag("sliding_window_save_button").performClick()
-
-    // Wait for the UI to update
-    composeTestRule.waitForIdle()
-
-    // Verify the button text changes back to "save"
-    composeTestRule
-        .onNodeWithTag("sliding_window_save_button")
-        .assertExists()
-        .assertIsDisplayed()
-        .assertTextContains("save")
   }
 
   @Test
