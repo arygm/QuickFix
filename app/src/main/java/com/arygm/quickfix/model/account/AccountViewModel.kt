@@ -1,10 +1,12 @@
 package com.arygm.quickfix.model.account
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +25,9 @@ open class AccountViewModel(private val repository: AccountRepository) : ViewMod
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return AccountViewModel(AccountRepositoryFirestore(Firebase.firestore)) as T
+            return AccountViewModel(
+                AccountRepositoryFirestore(Firebase.firestore, Firebase.storage))
+                as T
           }
         }
   }
@@ -101,5 +105,16 @@ open class AccountViewModel(private val repository: AccountRepository) : ViewMod
           Log.e("AccountViewModel", "Error fetching account: ${e.message}")
           onResult(null)
         })
+  }
+
+  fun uploadAccountImages(
+      accountId: String,
+      images: List<Bitmap>,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    Log.d("UploadingAccountImages", "Uploading ${images.size} images for account: $accountId")
+    repository.uploadAccountImages(
+        accountId = accountId, images = images, onSuccess = onSuccess, onFailure = onFailure)
   }
 }

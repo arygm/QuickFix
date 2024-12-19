@@ -26,7 +26,9 @@ object UserScreen {
   const val SEARCH_WORKER_RESULT = "Search Worker Result Screen"
   const val DISPLAY_UPLOADED_IMAGES = "Displayed images Screen"
   const val SEARCH_LOCATION = "SEARCH_Location Screen"
+  const val ANNOUNCEMENT_DETAIL = "Announcement detail screen"
   const val QUICKFIX_ONBOARDING = "QuickFix OnBoarding Screen"
+  const val QUICKFIX_DISPLAY_IMAGES = "QuickFix Display Images Screen"
 }
 
 object UserTopLevelDestinations {

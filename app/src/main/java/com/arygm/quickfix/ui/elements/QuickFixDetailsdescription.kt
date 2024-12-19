@@ -1,17 +1,8 @@
 package com.arygm.quickfix.ui.elements
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -24,17 +15,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @Composable
 fun QuickFixDetailsScreen(
-    quickFix: QuickFix,
-    onShowMoreToggle: (Boolean) -> Unit,
-    isExpanded: Boolean
+    quickFix: QuickFix, // QuickFix object containing all details
+    onShowMoreToggle: (Boolean) -> Unit, // Callback for toggling description expansion
+    isExpanded: Boolean // Flag indicating whether the description is expanded
 ) {
+  // BoxWithConstraints allows you to get the available width and height
   BoxWithConstraints(
       modifier =
           Modifier.fillMaxWidth()
@@ -43,12 +41,11 @@ fun QuickFixDetailsScreen(
         val screenWidth = maxWidth
         val screenHeight = maxHeight
 
-        // Combine services logic
+        // Select the first 2 services from each list to display
         val includedServicesToShow = quickFix.includedServices.take(2)
         val addOnServicesToShow = quickFix.addOnServices.take(2)
 
-        // If the total number of displayed services is less than 4, fill the remainder with the
-        // other list
+        // If there are still slots left, fill them with additional services
         val extraIncludedServices =
             quickFix.includedServices
                 .drop(2)
@@ -58,29 +55,33 @@ fun QuickFixDetailsScreen(
                 .drop(2)
                 .take(4 - includedServicesToShow.size - addOnServicesToShow.size)
 
+        // Combine all services to show
         val allServicesToShow =
             includedServicesToShow +
                 addOnServicesToShow +
                 extraIncludedServices +
                 extraAddOnServices
 
+        // Layout in a vertical column
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
-          // Images Section
-          ImageSelector(screenWidth, screenHeight * 1.2f, quickFix)
+          // Section for displaying images
+          ImageSelector(screenWidth, screenWidth * 2f, quickFix, {})
 
-          // Selected Services
-          Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+          Spacer(modifier = Modifier.height(8.dp))
 
+          // Title for Selected Services
           Text(
               text = "Selected Services",
               style = poppinsTypography.headlineMedium,
               color = MaterialTheme.colorScheme.onBackground,
-              modifier = Modifier.padding(bottom = screenHeight * 0.01f))
+              modifier = Modifier.padding(bottom = 8.dp))
 
+          // Loop through and display all selected services
           allServicesToShow.forEach { service ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = screenHeight * 0.01f)) {
+                modifier = Modifier.padding(bottom = 4.dp)) {
+                  // Display an icon based on whether the service is included
                   Icon(
                       imageVector =
                           if (quickFix.includedServices.contains(service)) Icons.Default.Check
@@ -99,58 +100,116 @@ fun QuickFixDetailsScreen(
                 }
           }
 
-          // Description Section with "Show More"
-          Spacer(modifier = Modifier.height(screenHeight * 0.02f))
+          // Description Section
+          Spacer(modifier = Modifier.height(8.dp))
           Text(
               text = "Description",
               style = poppinsTypography.headlineMedium,
               color = MaterialTheme.colorScheme.onBackground,
-              modifier = Modifier.padding(bottom = screenHeight * 0.01f))
-          Column {
-            Text(
-                text = if (isExpanded) quickFix.title else quickFix.title.take(250) + "...",
-                style = poppinsTypography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            TextButton(
-                onClick = { onShowMoreToggle(!isExpanded) },
-                modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                  Text(
-                      text = if (isExpanded) "Show less" else "Show more",
-                      style = poppinsTypography.labelMedium,
-                      color = MaterialTheme.colorScheme.primary)
-                }
-          }
+              modifier = Modifier.padding(bottom = 8.dp))
+          // Show the full description or truncate it based on isExpanded
+          Text(
+              text =
+                  if (isExpanded) quickFix.title
+                  else quickFix.title.take(250) + if (quickFix.title.length > 250) "..." else "",
+              style = poppinsTypography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurface)
+
+          // Button for toggling description expansion
+          Column(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                TextButton(
+                    onClick = { onShowMoreToggle(!isExpanded) },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                      Text(
+                          text = if (isExpanded) "Show less" else "Show more",
+                          style = poppinsTypography.labelMedium,
+                          color = MaterialTheme.colorScheme.primary)
+                    }
+              }
         }
       }
 }
 
 @Composable
-fun ImageSelector(screenWidth: Dp, screenHeight: Dp, quickFix: QuickFix) {
+fun ImageSelector(
+    screenWidth: Dp, // Screen width for sizing images
+    screenHeight: Dp, // Screen height for sizing images
+    quickFix: QuickFix, // QuickFix object containing image URLs
+    onViewAllImages: () -> Unit = {} // Callback to view all images
+) {
+  // Row layout to display images
   Row(
       modifier =
           Modifier.fillMaxWidth()
-              .height(screenHeight * 0.23f) // Adjust height as needed
+              .height(screenHeight * 0.23f)
               .clip(RoundedCornerShape(8.dp))
               .background(MaterialTheme.colorScheme.background)
-              .padding(8.dp), // General padding for uniformity
+              .padding(8.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically) {
-        quickFix.imageUrl.take(2).forEach { imageUrl ->
+        val visibleImages = quickFix.imageUrl.take(2) // Show only the first 2 images
+        val remainingImagesCount = quickFix.imageUrl.size - 2 // Count of remaining images
+
+        // Loop through and display each image
+        visibleImages.forEachIndexed { index, imageUrl ->
           Box(
               modifier =
-                  Modifier.weight(1f) // Ensure equal spacing for each image
-                      .height(screenHeight * 0.20f) // Maintain a square aspect ratio
-                      .clip(RoundedCornerShape(8.dp)) // Clip corners
+                  Modifier.testTag("imageCard") // Tag for testing
+                      .weight(1f)
+                      .height(screenHeight * 0.20f)
+                      .clip(RoundedCornerShape(8.dp))
                       .background(MaterialTheme.colorScheme.secondary)
-                      .padding(8.dp), // Specific padding for each image
-              contentAlignment = Alignment.Center) {
-                // Placeholder for an image. Replace with actual image loading logic using Coil or
-                // Glide
-                Text(
-                    text = "Image",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSecondary)
+                      .clickable {
+                        // Navigate to full image view if there are more images
+                        if (index == 1 && remainingImagesCount > 0) {
+                          onViewAllImages()
+                        }
+                      }) {
+                // Display image using SubcomposeAsyncImage
+                SubcomposeAsyncImage(
+                    model = imageUrl,
+                    contentDescription = "QuickFix Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                    loading = {
+                      // Display loading text while image is loading
+                      Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Loading...",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center)
+                      }
+                    },
+                    error = {
+                      // Display error message if image fails to load
+                      Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Error",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Red,
+                            textAlign = TextAlign.Center)
+                      }
+                    },
+                    success = { SubcomposeAsyncImageContent() })
+
+                // Overlay showing remaining image count on the second image
+                if (index == 1 && remainingImagesCount > 0) {
+                  Box(
+                      modifier =
+                          Modifier.fillMaxSize()
+                              .background(Color.Black.copy(alpha = 0.6f))
+                              .align(Alignment.Center),
+                      contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "+$remainingImagesCount",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White,
+                            textAlign = TextAlign.Center)
+                      }
+                }
               }
         }
       }

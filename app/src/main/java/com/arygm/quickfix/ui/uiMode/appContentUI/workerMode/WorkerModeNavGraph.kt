@@ -3,6 +3,8 @@ package com.arygm.quickfix.ui.uiMode.workerMode
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -13,8 +15,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.zIndex
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -25,6 +29,7 @@ import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.getBottomBarIdUser
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.WorkerProfileScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.announcements.AnnouncementsScreen
@@ -64,49 +69,61 @@ fun WorkerModeNavGraph(
       showBottomBar = false
     }
   }
-  Scaffold(
-      topBar = { QuickFixOfflineBar(isVisible = isOffline) },
-      bottomBar = {
-        // Show BottomNavigationMenu only if the route is not part of the login/registration flow
-        AnimatedVisibility(
-            visible = showBottomBar,
-            enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from the bottom
-            exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to the bottom
-            modifier = Modifier.testTag("BNM")) {
-              BottomNavigationMenu(
-                  onTabSelect = { selectedDestination ->
-                    // Use this block to navigate based on the selected tab
-                    workerNavigationActions.navigateTo(selectedDestination)
-                  },
-                  navigationActions = workerNavigationActions,
-                  tabList = WORKER_TOP_LEVEL_DESTINATIONS,
-                  getBottomBarId = getBottomBarIdWorker)
-            }
-      }) { innerPadding ->
-        NavHost(
-            navController = workerNavigationActions.navController,
-            startDestination = startDestination,
-            modifier = Modifier.padding(innerPadding)) {
-              composable(WorkerRoute.HOME) { HomeNavHost(onScreenChange = { currentScreen = it }) }
-              composable(WorkerRoute.MESSAGES) {
-                MessagesNavHost(onScreenChange = { currentScreen = it })
+  Box(modifier = Modifier.fillMaxSize()) {
+    Scaffold(
+        topBar = { QuickFixOfflineBar(isVisible = isOffline) },
+        modifier = Modifier.fillMaxSize()) { innerPadding ->
+          // Main content area
+          Box(
+              modifier = Modifier.fillMaxSize().padding(innerPadding) // Scaffold padding
+              ) {
+                // NavHost for worker routes
+                NavHost(
+                    navController = workerNavigationActions.navController,
+                    startDestination = startDestination,
+                    modifier = Modifier.fillMaxSize()) {
+                      composable(WorkerRoute.HOME) {
+                        HomeNavHost(onScreenChange = { currentScreen = it })
+                      }
+                      composable(WorkerRoute.MESSAGES) {
+                        MessagesNavHost(onScreenChange = { currentScreen = it })
+                      }
+                      composable(WorkerRoute.ANNOUNCEMENT) {
+                        AnnouncementsNavHost(onScreenChange = { currentScreen = it })
+                      }
+                      composable(WorkerRoute.PROFILE) {
+                        ProfileNavHost(
+                            onScreenChange = { currentScreen = it },
+                            appContentNavigationActions,
+                            preferencesViewModel,
+                            modeViewModel,
+                            accountViewModel,
+                            workerNavigationActions,
+                            rootMainNavigationActions,
+                            userPreferencesViewModel)
+                      }
+                    }
+
+                // Bottom navigation bar at the bottom
+                AnimatedVisibility(
+                    visible = showBottomBar,
+                    enter = slideInVertically { fullHeight -> fullHeight }, // Slide in from bottom
+                    exit = slideOutVertically { fullHeight -> fullHeight }, // Slide out to bottom
+                    modifier =
+                        Modifier.align(Alignment.BottomCenter) // Align at bottom of this parent Box
+                            .zIndex(1f)
+                            .testTag("BNM")) {
+                      BottomNavigationMenu(
+                          onTabSelect = { selectedDestination ->
+                            workerNavigationActions.navigateTo(selectedDestination)
+                          },
+                          navigationActions = workerNavigationActions,
+                          tabList = WORKER_TOP_LEVEL_DESTINATIONS,
+                          getBottomBarId = getBottomBarIdWorker)
+                    }
               }
-              composable(WorkerRoute.ANNOUNCEMENT) {
-                AnnouncementsNavHost(onScreenChange = { currentScreen = it })
-              }
-              composable(WorkerRoute.PROFILE) {
-                ProfileNavHost(
-                    onScreenChange = { currentScreen = it },
-                    appContentNavigationActions,
-                    preferencesViewModel,
-                    modeViewModel,
-                    accountViewModel,
-                    workerNavigationActions,
-                    rootMainNavigationActions,
-                    userPreferencesViewModel)
-              }
-            }
-      }
+        }
+  }
 }
 
 @Composable
