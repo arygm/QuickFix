@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -33,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -55,11 +57,14 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.QuickFixSlidi
 import com.arygm.quickfix.utils.GeocoderWrapper
 import com.arygm.quickfix.utils.LocationHelper
 import com.arygm.quickfix.utils.loadUserId
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.GoogleMapComposable
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberMarkerState
 import java.time.LocalDate
@@ -84,6 +89,8 @@ fun MapScreen(
   }
 
   val context = LocalContext.current
+  var currentStyle by remember { mutableStateOf(R.raw.alternate_map_style) }
+  var nightClicked by remember { mutableStateOf(false) }
   var isWindowVisible by remember { mutableStateOf(false) }
   var selectedWorker by remember { mutableStateOf<WorkerProfile?>(null) }
   val locationHelper = LocationHelper(context, MainActivity())
@@ -182,6 +189,9 @@ fun MapScreen(
     GoogleMap(
         modifier = Modifier.fillMaxSize().testTag("mapScreen"),
         cameraPositionState = cameraPositionState,
+        properties =
+            MapProperties(
+                mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, currentStyle)),
         onMapLoaded = { isMapLoaded = true }) {
           filteredWorkers.forEach { profile ->
             profile.location?.let {
@@ -215,23 +225,26 @@ fun MapScreen(
           }
         }
     val maxHeightValue = maxHeight.value
-    Box(modifier = Modifier.padding(16.dp)) {
-      Surface(
-          shape = RoundedCornerShape(20.dp),
-          modifier =
-              Modifier.size((maxHeightValue * 0.07).dp)
-                  .clickable { navigationActions.goBack() }
-                  .testTag("HomeButton"),
-          color = colorScheme.surface,
-          shadowElevation = 5.dp) {
-            Icon(
-                imageVector = Icons.Default.Home,
-                contentDescription = "Home Icon",
-                modifier = Modifier.padding((maxHeightValue * 0.01).dp),
-                tint = colorScheme.primary,
-            )
-          }
-    }
+
+    UtilButton(
+        modifier = Modifier.align(Alignment.TopStart),
+        modifier1 = Modifier.testTag("HomeButton"),
+        imageVector = Icons.Default.Home,
+        clicked = false,
+        maxHeightValue = maxHeightValue) {
+          navigationActions.goBack()
+        }
+
+    UtilButton(
+        modifier = Modifier.align(Alignment.TopEnd),
+        modifier1 = Modifier.testTag("DarkMode"),
+        imageVector = Icons.Default.NightsStay,
+        clicked = nightClicked,
+        maxHeightValue = maxHeightValue) {
+          currentStyle =
+              if (currentStyle == R.raw.map_style) R.raw.alternate_map_style else R.raw.map_style
+          nightClicked = !nightClicked
+        }
 
     if (isWindowVisible) {
       Popup(onDismissRequest = { isWindowVisible = false }, alignment = Alignment.Center) {
@@ -468,4 +481,29 @@ fun customMarkerBitmapDescriptor(
   drawable.draw(canvas)
 
   return BitmapDescriptorFactory.fromBitmap(bitmap)
+}
+
+@Composable
+fun UtilButton(
+    modifier: Modifier,
+    modifier1: Modifier,
+    imageVector: ImageVector,
+    clicked: Boolean,
+    maxHeightValue: Float,
+    onClick: () -> Unit
+) {
+  Box(modifier = modifier.padding(16.dp)) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        modifier = modifier1.size((maxHeightValue * 0.07).dp).clickable { onClick() },
+        color = if (clicked) colorScheme.primary else colorScheme.surface,
+        shadowElevation = 5.dp) {
+          Icon(
+              imageVector = imageVector,
+              contentDescription = "Home Icon",
+              modifier = Modifier.padding((maxHeightValue * 0.01).dp),
+              tint = if (clicked) colorScheme.surface else colorScheme.primary,
+          )
+        }
+  }
 }

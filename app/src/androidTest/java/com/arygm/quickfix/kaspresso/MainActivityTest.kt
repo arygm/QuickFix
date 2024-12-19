@@ -568,6 +568,8 @@ class MainActivityTest : TestCase() {
       composeTestRule.waitForIdle()
       composeTestRule.onNodeWithTag("mapScreen").assertIsDisplayed()
       composeTestRule.onNodeWithTag("FilterButton").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("DarkMode").performClick()
+      Thread.sleep(500)
       composeTestRule.onNodeWithTag("HomeButton").assertIsDisplayed()
       composeTestRule.onNodeWithTag("HomeButton").performClick()
       composeTestRule.onNodeWithTag("ToolboxFloatingButton").assertIsDisplayed()
