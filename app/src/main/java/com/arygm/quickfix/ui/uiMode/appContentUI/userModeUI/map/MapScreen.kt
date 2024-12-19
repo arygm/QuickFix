@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterAlt
-import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Warning
@@ -37,7 +36,6 @@ import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
-import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixLocationFilterBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixPriceRangeBottomSheet
@@ -47,12 +45,18 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.QuickFixSlidi
 import com.arygm.quickfix.utils.GeocoderWrapper
 import com.arygm.quickfix.utils.LocationHelper
 import com.arygm.quickfix.utils.loadUserId
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.GoogleMapComposable
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberMarkerState
 import java.time.LocalDate
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import androidx.annotation.DrawableRes
+import androidx.appcompat.content.res.AppCompatResources
+import com.google.android.gms.maps.model.BitmapDescriptor
 
 
 @Composable
@@ -77,20 +81,17 @@ fun MapScreen(workerViewModel: ProfileViewModel, searchViewModel: SearchViewMode
     var workerAddress by remember { mutableStateOf("") }
 
     var availabilityFilterApplied by remember { mutableStateOf(false) }
-    var servicesFilterApplied by remember { mutableStateOf(false) }
     var priceFilterApplied by remember { mutableStateOf(false) }
     var locationFilterApplied by remember { mutableStateOf(false) }
     var emergencyFilterApplied by remember { mutableStateOf(false) }
 
     var showAvailabilityBottomSheet by remember { mutableStateOf(false) }
-    var showServicesBottomSheet by remember { mutableStateOf(false) }
     var showPriceRangeBottomSheet by remember { mutableStateOf(false) }
     var showLocationBottomSheet by remember { mutableStateOf(false) }
 
     var selectedDays by remember { mutableStateOf(emptyList<LocalDate>()) }
     var selectedHour by remember { mutableStateOf(0) }
     var selectedMinute by remember { mutableStateOf(0) }
-    var selectedServices by remember { mutableStateOf(emptyList<String>()) }
     var selectedPriceStart by remember { mutableStateOf(0) }
     var selectedPriceEnd by remember { mutableStateOf(0) }
     var selectedLocation by remember { mutableStateOf(  Location()) }
@@ -121,7 +122,7 @@ fun MapScreen(workerViewModel: ProfileViewModel, searchViewModel: SearchViewMode
                             location.latitude, location.longitude, "Phone Location")
                     cameraPositionState.position = com.google.android.gms.maps.model.CameraPosition.fromLatLngZoom(
                         LatLng(location.latitude, location.longitude),
-                        10f
+                        5f
                     )
                 } else {
                     Toast.makeText(context, "Unable to fetch location", Toast.LENGTH_SHORT).show()
@@ -140,17 +141,12 @@ fun MapScreen(workerViewModel: ProfileViewModel, searchViewModel: SearchViewMode
     var isMapLoaded by remember { mutableStateOf(false) }
 
     fun reapplyFilters() {
-        Log.d("Chill guy", "entered")
         var updatedProfiles = workerProfiles
 
         if (availabilityFilterApplied) {
             updatedProfiles =
                 searchViewModel.filterWorkersByAvailability(
                     updatedProfiles, selectedDays, selectedHour, selectedMinute)
-        }
-
-        if (servicesFilterApplied) {
-            updatedProfiles = searchViewModel.filterWorkersByServices(updatedProfiles, selectedServices)
         }
 
         if (priceFilterApplied) {
@@ -165,13 +161,10 @@ fun MapScreen(workerViewModel: ProfileViewModel, searchViewModel: SearchViewMode
         }
 
 
-        if(phoneLocation != null){
-            if (emergencyFilterApplied) {
-                updatedProfiles = searchViewModel.emergencyFilter(updatedProfiles, phoneLocation!!)
-            }
+        if (emergencyFilterApplied) {
+            updatedProfiles = searchViewModel.emergencyFilter(updatedProfiles, baseLocation!!)
         }
 
-        Log.d("Chill guy", updatedProfiles.size.toString())
         filteredWorkers = updatedProfiles
     }
 
@@ -207,7 +200,14 @@ fun MapScreen(workerViewModel: ProfileViewModel, searchViewModel: SearchViewMode
                             selectedWorker = profile
                             isWindowVisible = true
                             true
-                        }
+                        },
+                        icon = customMarkerBitmapDescriptor(
+                            iconRes = R.drawable.accountsettingsvector,
+                            iconSizeDp = 24,
+                            iconTintColor = android.graphics.Color.parseColor("#66001A"),
+                            backgroundColor = android.graphics.Color.TRANSPARENT,
+                            backgroundSizeDp = 48
+                        )
                     )
                 }
 
@@ -251,7 +251,7 @@ fun MapScreen(workerViewModel: ProfileViewModel, searchViewModel: SearchViewMode
         ) {
             QuickFixToolboxFloatingButton(
                 mainIcon = Icons.Default.FilterAlt,
-                iconList = listOf(Icons.Default.Clear, Icons.Default.LocationSearching, Icons.Default.MonetizationOn, Icons.Default.CalendarMonth, Icons.Default.Handyman, Icons.Default.Warning),
+                iconList = listOf(Icons.Default.Clear, Icons.Default.LocationSearching, Icons.Default.MonetizationOn, Icons.Default.CalendarMonth, Icons.Default.Warning),
                 onIconClick = { index ->
                     when (index) {
                         0 -> {
@@ -259,33 +259,28 @@ fun MapScreen(workerViewModel: ProfileViewModel, searchViewModel: SearchViewMode
                             availabilityFilterApplied = false
                             priceFilterApplied = false
                             locationFilterApplied = false
-                            servicesFilterApplied = false
                             emergencyFilterApplied = false
                             lastAppliedMaxDist = 200
                             lastAppliedPriceStart = 500
                             lastAppliedPriceEnd = 2500
                             selectedLocationIndex = null
-                            selectedServices = emptyList()
                             baseLocation = phoneLocation
                             cameraPositionState.position = com.google.android.gms.maps.model.CameraPosition.fromLatLngZoom(
                                 LatLng(phoneLocation!!.latitude, phoneLocation!!.longitude),
-                                10f
+                                5f
                             )
                         }
                         1 -> showLocationBottomSheet = true
                         2 -> showPriceRangeBottomSheet = true
                         3 -> showAvailabilityBottomSheet = true
-                        4 -> showServicesBottomSheet = true
-                        5 -> {
+                        4 -> {
                             lastAppliedMaxDist = 200
                             lastAppliedPriceStart = 500
                             lastAppliedPriceEnd = 2500
                             selectedLocationIndex = null
-                            selectedServices = emptyList()
                             availabilityFilterApplied = false
                             priceFilterApplied = false
                             locationFilterApplied = false
-                            servicesFilterApplied = false
                             baseLocation = phoneLocation
                             filteredWorkers = workerProfiles
                             filteredWorkers =
@@ -327,35 +322,6 @@ fun MapScreen(workerViewModel: ProfileViewModel, searchViewModel: SearchViewMode
                 reapplyFilters()
             },
             clearEnabled = availabilityFilterApplied)
-
-//        searchSubcategory?.let {
-//            ChooseServiceTypeSheet(
-//                showServicesBottomSheet,
-//                it.tags,
-//                selectedServices = selectedServices,
-//                onApplyClick = { services ->
-//                    selectedServices = services
-//                    if (servicesFilterApplied) {
-//                        reapplyFilters()
-//                    } else {
-//                        filteredWorkers =
-//                            filteredWorkers?.let {
-//                                searchViewModel.filterWorkersByServices(
-//                                    it,
-//                                    selectedServices
-//                                )
-//                            }
-//                    }
-//                    servicesFilterApplied = true
-//                },
-//                onDismissRequest = { showServicesBottomSheet = false },
-//                onClearClick = {
-//                    selectedServices = emptyList()
-//                    servicesFilterApplied = false
-//                    reapplyFilters()
-//                },
-//                clearEnabled = servicesFilterApplied)
-//        }
 
         QuickFixPriceRangeBottomSheet(
             showPriceRangeBottomSheet,
@@ -418,7 +384,7 @@ fun MapScreen(workerViewModel: ProfileViewModel, searchViewModel: SearchViewMode
                         }
                         cameraPositionState.position = com.google.android.gms.maps.model.CameraPosition.fromLatLngZoom(
                             LatLng(baseLocation!!.latitude, baseLocation!!.longitude),
-                            10f
+                            5f
                         )
                         locationFilterApplied = true
                     },
@@ -432,7 +398,7 @@ fun MapScreen(workerViewModel: ProfileViewModel, searchViewModel: SearchViewMode
                         locationFilterApplied = false
                         cameraPositionState.position = com.google.android.gms.maps.model.CameraPosition.fromLatLngZoom(
                             LatLng(phoneLocation!!.latitude, phoneLocation!!.longitude),
-                            10f
+                            5f
                         )
                         reapplyFilters()
                     },
@@ -442,3 +408,47 @@ fun MapScreen(workerViewModel: ProfileViewModel, searchViewModel: SearchViewMode
         }
     }
 }
+
+@Composable
+fun customMarkerBitmapDescriptor(
+    @DrawableRes iconRes: Int,
+    iconSizeDp: Int = 24,
+    iconTintColor: Int? = null,
+    backgroundColor: Int? = null,
+    backgroundSizeDp: Int = 48 // Adjust this if you need a bigger background
+): BitmapDescriptor {
+    val context = LocalContext.current
+    val drawable = AppCompatResources.getDrawable(context, iconRes) ?: return BitmapDescriptorFactory.defaultMarker()
+
+    val density = context.resources.displayMetrics.density
+    val iconSizePx = (iconSizeDp * density).toInt()
+    val bgSizePx = (backgroundSizeDp * density).toInt()
+
+    // Tint the icon if a color is provided
+    if (iconTintColor != null) {
+        drawable.mutate()
+        drawable.setTint(iconTintColor)
+    }
+
+    val bitmap = Bitmap.createBitmap(bgSizePx, bgSizePx, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+
+    // Draw a background shape (circle) if a backgroundColor is provided
+    backgroundColor?.let { bgColor ->
+        val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            color = bgColor
+            style = android.graphics.Paint.Style.FILL
+        }
+        val radius = bgSizePx / 2f
+        canvas.drawCircle(radius, radius, radius, paint)
+    }
+
+    // Center the icon drawable on the background
+    val left = (bgSizePx - iconSizePx) / 2
+    val top = (bgSizePx - iconSizePx) / 2
+    drawable.setBounds(left, top, left + iconSizePx, top + iconSizePx)
+    drawable.draw(canvas)
+
+    return BitmapDescriptorFactory.fromBitmap(bitmap)
+}
+
