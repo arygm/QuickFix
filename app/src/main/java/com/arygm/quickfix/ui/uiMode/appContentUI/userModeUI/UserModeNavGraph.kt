@@ -49,8 +49,6 @@ import com.arygm.quickfix.ui.elements.QuickFixDisplayImagesScreen
 import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.QuickFixFinderScreen
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchWorkerResult
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixDisplayImages
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.DashboardScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.HomeScreen
@@ -423,8 +421,9 @@ fun SearchNavHost(
           searchViewModel,
           accountViewModel,
           userViewModel,
+          quickFixViewModel,
           preferencesViewModel,
-          quickFixViewModel)
+      )
     }
     composable(UserScreen.SEARCH_LOCATION) {
       LocationSearchCustomScreen(

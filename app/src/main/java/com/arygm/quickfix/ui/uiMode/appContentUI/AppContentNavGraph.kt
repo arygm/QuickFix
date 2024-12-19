@@ -47,70 +47,68 @@ fun AppContentNavGraph(
     chatViewModel: ChatViewModel,
     quickFixViewModel: QuickFixViewModel
 ) {
-    val appContentNavController = rememberNavController()
-    val appContentNavigationActions = remember { NavigationActions(appContentNavController) }
-    var currentAppMode by remember { mutableStateOf(AppMode.USER) }
-    Log.d("userContent", "Current App Mode is empty: $currentAppMode")
-    LaunchedEffect(Unit) {
-        Log.d("userContent", "Loading App Mode")
-        currentAppMode =
-            when (loadAppMode(preferencesViewModel)) {
-                "USER" -> AppMode.USER
-                "WORKER" -> AppMode.WORKER
-                else -> {
-                    AppMode.WORKER
-                }
-            }
-    }
-
-    modeViewModel.switchMode(currentAppMode)
-    Log.d("MainActivity", "$currentAppMode")
-    val startDestination =
-        when (currentAppMode) {
-            AppMode.USER -> AppContentRoute.USER_MODE
-            AppMode.WORKER -> AppContentRoute.WORKER_MODE
+  val appContentNavController = rememberNavController()
+  val appContentNavigationActions = remember { NavigationActions(appContentNavController) }
+  var currentAppMode by remember { mutableStateOf(AppMode.USER) }
+  Log.d("userContent", "Current App Mode is empty: $currentAppMode")
+  LaunchedEffect(Unit) {
+    Log.d("userContent", "Loading App Mode")
+    currentAppMode =
+        when (loadAppMode(preferencesViewModel)) {
+          "USER" -> AppMode.USER
+          "WORKER" -> AppMode.WORKER
+          else -> {
+            AppMode.WORKER
+          }
         }
-    NavHost(
-        navController = appContentNavigationActions.navController,
-        startDestination = startDestination, // Apply padding from the Scaffold
-        enterTransition = {
-            // You can change whatever you want for transitions
-            EnterTransition.None
-        },
-        exitTransition = {
-            // You can change whatever you want for transitions
-            ExitTransition.None
-        }) {
+  }
+
+  modeViewModel.switchMode(currentAppMode)
+  Log.d("MainActivity", "$currentAppMode")
+  val startDestination =
+      when (currentAppMode) {
+        AppMode.USER -> AppContentRoute.USER_MODE
+        AppMode.WORKER -> AppContentRoute.WORKER_MODE
+      }
+  NavHost(
+      navController = appContentNavigationActions.navController,
+      startDestination = startDestination, // Apply padding from the Scaffold
+      enterTransition = {
+        // You can change whatever you want for transitions
+        EnterTransition.None
+      },
+      exitTransition = {
+        // You can change whatever you want for transitions
+        ExitTransition.None
+      }) {
         composable(AppContentRoute.USER_MODE) {
-            UserModeNavHost(
-                testBitmapPP,
-                testLocation,
-                modeViewModel,
-                userViewModel,
-                workerViewModel,
-                accountViewModel,
-                categoryViewModel,
-                locationViewModel,
-                preferencesViewModel,
-                rootNavigationActions,
-                userPreferencesViewModel,
-                appContentNavigationActions,
-                chatViewModel,
-                quickFixViewModel,
-                isOffline
-            )
+          UserModeNavHost(
+              testBitmapPP,
+              testLocation,
+              modeViewModel,
+              userViewModel,
+              workerViewModel,
+              accountViewModel,
+              categoryViewModel,
+              locationViewModel,
+              preferencesViewModel,
+              rootNavigationActions,
+              userPreferencesViewModel,
+              appContentNavigationActions,
+              chatViewModel,
+              quickFixViewModel,
+              isOffline)
         }
 
         composable(AppContentRoute.WORKER_MODE) {
-            WorkerModeNavGraph(
-                modeViewModel,
-                isOffline,
-                appContentNavigationActions,
-                preferencesViewModel,
-                accountViewModel,
-                rootNavigationActions,
-                userPreferencesViewModel
-            )
+          WorkerModeNavGraph(
+              modeViewModel,
+              isOffline,
+              appContentNavigationActions,
+              preferencesViewModel,
+              accountViewModel,
+              rootNavigationActions,
+              userPreferencesViewModel)
         }
-    }
+      }
 }

@@ -1,6 +1,5 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,13 +34,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
-import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.WorkerProfile
-import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
@@ -50,51 +48,46 @@ import com.arygm.quickfix.ui.elements.QuickFixPriceRangeBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserTopLevelDestinations
 
 @Composable
 fun SearchOnBoarding(
-    onSearch: () -> Unit,
-    onSearchEmpty: () -> Unit,
     navigationActions: NavigationActions,
     navigationActionsRoot: NavigationActions,
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
     categoryViewModel: CategoryViewModel,
     onProfileClick: (WorkerProfile) -> Unit,
-    quickFixViewModel: QuickFixViewModel
 ) {
-  val profiles = searchViewModel.workerProfilesSuggestions.collectAsState()
+  val (uiState, setUiState) = remember { mutableStateOf(SearchUIState()) }
+  val workerProfiles by searchViewModel.workerProfilesSuggestions.collectAsState()
+  var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
   val context = LocalContext.current
-  val workerProfiles by searchViewModel.subCategoryWorkerProfiles.collectAsState()
+  val searchSubcategory by searchViewModel.searchSubcategory.collectAsState()
   var userProfile = UserProfile(locations = emptyList(), announcements = emptyList(), uid = "0")
+  var locationFilterApplied by remember { mutableStateOf(false) }
+  var lastAppliedMaxDist by remember { mutableIntStateOf(200) }
   val focusManager = LocalFocusManager.current
+  var selectedLocation by remember { mutableStateOf(Location()) }
   val categories = categoryViewModel.categories.collectAsState().value
-  Log.d("SearchOnBoarding", "Categories: $categories")
   val itemCategories = remember { categories }
   val expandedStates = remember {
     mutableStateListOf(*BooleanArray(itemCategories.size) { false }.toTypedArray())
   }
   val listState = rememberLazyListState()
+  var selectedLocationIndex by remember { mutableStateOf<Int?>(null) }
 
   var searchQuery by remember { mutableStateOf("") }
-  val searchSubcategory by searchViewModel.searchSubcategory.collectAsState()
 
   // Filtering logic
   val filterState = rememberSearchFiltersState()
-  var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
-  var selectedWorker by remember { mutableStateOf<WorkerProfile?>(null) }
+  var baseLocation by remember { mutableStateOf(filterState.phoneLocation) }
+  var maxDistance by remember { mutableIntStateOf(0) }
 
   fun updateFilteredProfiles() {
     filteredWorkerProfiles = filterState.reapplyFilters(workerProfiles, searchViewModel)
   }
 
-  var showFilterButtons by remember { mutableStateOf(false) }
-  var showAvailabilityBottomSheet by remember { mutableStateOf(false) }
-  var showServicesBottomSheet by remember { mutableStateOf(false) }
-  var showPriceRangeBottomSheet by remember { mutableStateOf(false) }
-  var showLocationBottomSheet by remember { mutableStateOf(false) }
   // Build filter buttons
   val listOfButtons =
       filterState.getFilterButtons(
@@ -102,18 +95,14 @@ fun SearchOnBoarding(
           filteredProfiles = filteredWorkerProfiles,
           searchViewModel = searchViewModel,
           onProfilesUpdated = { updated -> filteredWorkerProfiles = updated },
-          onShowAvailabilityBottomSheet = { showAvailabilityBottomSheet = true },
-          onShowServicesBottomSheet = { showServicesBottomSheet = true },
-          onShowPriceRangeBottomSheet = { showPriceRangeBottomSheet = true },
-          onShowLocationBottomSheet = { showLocationBottomSheet = true },
-      )
-  // Variables for WorkerSlidingWindowContent
-  // These will be set when a worker profile is selected
-  var bannerImage by remember { mutableStateOf(R.drawable.moroccan_flag) }
-  var profilePicture by remember { mutableStateOf(R.drawable.placeholder_worker) }
-  var initialSaved by remember { mutableStateOf(false) }
-  var workerAddress by remember { mutableStateOf("") }
-
+          onShowAvailabilityBottomSheet = {
+            setUiState(uiState.copy(showAvailabilityBottomSheet = true))
+          },
+          onShowServicesBottomSheet = { setUiState(uiState.copy(showServicesBottomSheet = true)) },
+          onShowPriceRangeBottomSheet = {
+            setUiState(uiState.copy(showPriceRangeBottomSheet = true))
+          },
+          onShowLocationBottomSheet = { setUiState(uiState.copy(showLocationBottomSheet = true)) })
   BoxWithConstraints {
     val widthRatio = maxWidth.value / 411f
     val heightRatio = maxHeight.value / 860f
@@ -149,16 +138,6 @@ fun SearchOnBoarding(
                           onValueChange = {
                             searchQuery = it
                             searchViewModel.searchEngine(it)
-                            if (it.isEmpty()) {
-                              onSearchEmpty()
-                              // When search is empty, we can reset filteredWorkerProfiles to
-                              // original
-                              filteredWorkerProfiles = workerProfiles
-                            } else {
-                              onSearch()
-                              // If needed, reapply filters here if filters are set
-                              updateFilteredProfiles()
-                            }
                           },
                           shape = CircleShape,
                           textStyle = poppinsTypography.bodyMedium,
@@ -210,40 +189,34 @@ fun SearchOnBoarding(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                       FilterRow(
-                          showFilterButtons = showFilterButtons,
-                          toggleFilterButtons = { showFilterButtons = !showFilterButtons },
+                          showFilterButtons = uiState.showFilterButtons,
+                          toggleFilterButtons = {
+                            setUiState(uiState.copy(showFilterButtons = !uiState.showFilterButtons))
+                          },
                           listOfButtons = listOfButtons,
                           modifier = Modifier.padding(bottom = screenHeight * 0.01f),
                           screenWidth = screenWidth,
                           screenHeight = screenHeight)
                     }
-
-                      ProfileResults(
-                          profiles = profiles.value,
-                          searchViewModel = searchViewModel,
-                          accountViewModel = accountViewModel,
-                          listState = listState,
-                          heightRatio = heightRatio,
-                          onBookClick = { selectedProfile, locName ->
-                              selectedWorker = selectedProfile as WorkerProfile
-                              // Set up variables for WorkerSlidingWindowContent
-                              bannerImage = R.drawable.moroccan_flag
-                              profilePicture = R.drawable.placeholder_worker
-                              initialSaved = false
-                              workerAddress = locName
-                              isWindowVisible = true
-                          })
+                  }
                 }
+                ProfileResults(
+                    profiles = filteredWorkerProfiles,
+                    searchViewModel = searchViewModel,
+                    accountViewModel = accountViewModel,
+                    listState = listState,
+                    onBookClick = { selectedProfile -> onProfileClick(selectedProfile) },
+                    baseLocation = baseLocation)
               }
-        }},
+        },
         modifier =
             Modifier.pointerInput(Unit) {
               detectTapGestures(onTap = { focusManager.clearFocus() })
             })
 
     QuickFixAvailabilityBottomSheet(
-        showAvailabilityBottomSheet,
-        onDismissRequest = { showAvailabilityBottomSheet = false },
+        uiState.showAvailabilityBottomSheet,
+        onDismissRequest = { setUiState(uiState.copy(showAvailabilityBottomSheet = false)) },
         onOkClick = { days, hour, minute ->
           filterState.selectedDays = days
           filterState.selectedHour = hour
@@ -260,32 +233,34 @@ fun SearchOnBoarding(
         },
         clearEnabled = filterState.availabilityFilterApplied)
 
-    ChooseServiceTypeSheet(
-        showServicesBottomSheet,
-        emptyList(),
-        selectedServices = filterState.selectedServices,
-        onApplyClick = { services ->
-          filterState.selectedServices = services
-          filterState.servicesFilterApplied = true
-          updateFilteredProfiles()
-        },
-        onDismissRequest = { showServicesBottomSheet = false },
-        onClearClick = {
-          filterState.selectedServices = emptyList()
-          filterState.servicesFilterApplied = false
-          updateFilteredProfiles()
-        },
-        clearEnabled = filterState.servicesFilterApplied)
+    searchSubcategory?.let {
+      ChooseServiceTypeSheet(
+          uiState.showServicesBottomSheet,
+          it.tags,
+          selectedServices = filterState.selectedServices,
+          onApplyClick = { services ->
+            filterState.selectedServices = services
+            filterState.servicesFilterApplied = true
+            updateFilteredProfiles()
+          },
+          onDismissRequest = { setUiState(uiState.copy(showServicesBottomSheet = false)) },
+          onClearClick = {
+            filterState.selectedServices = emptyList()
+            filterState.servicesFilterApplied = false
+            updateFilteredProfiles()
+          },
+          clearEnabled = filterState.servicesFilterApplied)
+    }
 
     QuickFixPriceRangeBottomSheet(
-        showPriceRangeBottomSheet,
+        uiState.showPriceRangeBottomSheet,
         onApplyClick = { start, end ->
           filterState.selectedPriceStart = start
           filterState.selectedPriceEnd = end
           filterState.priceFilterApplied = true
           updateFilteredProfiles()
         },
-        onDismissRequest = { showPriceRangeBottomSheet = false },
+        onDismissRequest = { setUiState(uiState.copy(showPriceRangeBottomSheet = false)) },
         onClearClick = {
           filterState.selectedPriceStart = 0
           filterState.selectedPriceEnd = 0
@@ -295,25 +270,39 @@ fun SearchOnBoarding(
         clearEnabled = filterState.priceFilterApplied)
 
     QuickFixLocationFilterBottomSheet(
-        showLocationBottomSheet,
+        uiState.showLocationBottomSheet,
         userProfile = userProfile,
         phoneLocation = filterState.phoneLocation,
+        selectedLocationIndex = selectedLocationIndex,
         onApplyClick = { location, max ->
-          filterState.selectedLocation = location
-          if (location == com.arygm.quickfix.model.locations.Location(0.0, 0.0, "Default")) {
+          selectedLocation = location
+          lastAppliedMaxDist = max
+          baseLocation = location
+          maxDistance = max
+          selectedLocationIndex = userProfile.locations.indexOf(location) + 1
+
+          if (location == Location(0.0, 0.0, "Default")) {
             Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
           }
-          filterState.baseLocation = location
-          filterState.maxDistance = max
-          filterState.locationFilterApplied = true
-          updateFilteredProfiles()
+          if (locationFilterApplied) {
+            updateFilteredProfiles()
+          } else {
+            filteredWorkerProfiles =
+                searchViewModel.filterWorkersByDistance(filteredWorkerProfiles, location, max)
+          }
+          locationFilterApplied = true
         },
-        onDismissRequest = { showLocationBottomSheet = false },
+        onDismissRequest = { setUiState(uiState.copy(showLocationBottomSheet = false)) },
         onClearClick = {
-          filterState.baseLocation = filterState.phoneLocation
-          filterState.selectedLocation = com.arygm.quickfix.model.locations.Location()
-          filterState.maxDistance = 0
-          filterState.locationFilterApplied = false
+          baseLocation = filterState.phoneLocation
+          lastAppliedMaxDist = 200
+          selectedLocation = Location()
+          maxDistance = 0
+          selectedLocationIndex = null
+          locationFilterApplied = false
           updateFilteredProfiles()
         },
-        clearEnabled = filterState.locationFilterApplied)}}
+        clearEnabled = locationFilterApplied,
+        end = lastAppliedMaxDist)
+  }
+}

@@ -10,6 +10,7 @@ import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -103,7 +104,8 @@ class ProfileResultsTest {
           listState = rememberLazyListState(),
           searchViewModel = searchViewModel,
           accountViewModel = accountViewModel,
-          onBookClick = { _, _ -> })
+          onBookClick = { _ -> },
+          baseLocation = mock(Location::class.java))
     }
 
     // Allow coroutines to complete
