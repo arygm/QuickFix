@@ -66,7 +66,6 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
         profile = profile,
         onSuccess = {
           getProfiles()
-
           onSuccess()
           // fetchUserProfile(profile.uid) { loggedInProfileViewModel.setLoggedInProfile(profile) }
         },
@@ -112,5 +111,21 @@ open class ProfileViewModel(private val repository: ProfileRepository) : ViewMod
         images = images,
         onSuccess = { onSuccess(it) },
         onFailure = { e -> onFailure(e) })
+  }
+
+  fun fetchProfileImageAsBitmap(
+      accountId: String,
+      onSuccess: (Bitmap) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    repository.fetchProfileImageAsBitmap(accountId, onSuccess, onFailure)
+  }
+
+  fun fetchBannerImageAsBitmap(
+      accountId: String,
+      onSuccess: (Bitmap) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    repository.fetchBannerImageAsBitmap(accountId, onSuccess, onFailure)
   }
 }

@@ -49,6 +49,7 @@ import com.arygm.quickfix.ui.elements.QuickFixDisplayImagesScreen
 import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixDisplayImages
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.DashboardScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.HomeScreen
@@ -62,7 +63,6 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.UserProfileS
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.BusinessScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixOnBoarding
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.AnnouncementDetailScreen
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchWorkerResult
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -211,7 +211,9 @@ fun UserModeNavHost(
                             rootMainNavigationActions,
                             userPreferencesViewModel,
                             appContentNavigationActions,
-                            modeViewModel)
+                            modeViewModel,
+                            userViewModel,
+                            quickFixViewModel)
                       }
                     }
 
@@ -295,7 +297,9 @@ fun ProfileNavHost(
     rootMainNavigationActions: NavigationActions,
     userPreferencesViewModel: PreferencesViewModelUserProfile,
     appContentNavigationActions: NavigationActions,
-    modeViewModel: ModeViewModel
+    modeViewModel: ModeViewModel,
+    userViewModel: ProfileViewModel,
+    quickFixViewModel: QuickFixViewModel,
 ) {
 
   val profileNavController = rememberNavController()
@@ -410,7 +414,8 @@ fun SearchNavHost(
           announcementViewModel,
           categoryViewModel,
           quickFixViewModel,
-          preferencesViewModel)
+          preferencesViewModel,
+          workerViewModel = workerViewModel)
     }
     composable(UserScreen.DISPLAY_UPLOADED_IMAGES) {
       QuickFixDisplayImages(navigationActions, preferencesViewModel, announcementViewModel)
@@ -422,7 +427,8 @@ fun SearchNavHost(
           accountViewModel,
           userViewModel,
           preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          workerViewModel = workerViewModel)
     }
     composable(UserScreen.SEARCH_LOCATION) {
       LocationSearchCustomScreen(
