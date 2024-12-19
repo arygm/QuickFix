@@ -115,7 +115,7 @@ fun MapScreen(
   var lastAppliedPriceEnd by remember { mutableStateOf(2500) }
   var lastAppliedMaxDist by remember { mutableStateOf(200) }
 
-  var phoneLocation by remember { mutableStateOf<Location?>(null) }
+  var phoneLocation by remember { mutableStateOf<Location?>(Location()) }
   val cameraPositionState = remember { com.google.maps.android.compose.CameraPositionState() }
 
   var userProfile by remember { mutableStateOf<UserProfile?>(null) }
