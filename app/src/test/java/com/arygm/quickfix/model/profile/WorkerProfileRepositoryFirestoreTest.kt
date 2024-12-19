@@ -19,7 +19,6 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -31,7 +30,6 @@ import junit.framework.TestCase.fail
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -41,9 +39,7 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.MockedStatic
 import org.mockito.Mockito.any
-import org.mockito.Mockito.anyDouble
 import org.mockito.Mockito.doNothing
-import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.mockStatic
 import org.mockito.Mockito.verify
@@ -76,6 +72,9 @@ class WorkerProfileRepositoryFirestoreTest {
   @Mock private lateinit var storageRef1: StorageReference
   @Mock private lateinit var storageRef2: StorageReference
   @Mock private lateinit var workerProfileFolderRef: StorageReference
+
+  private lateinit var mockImageRef: StorageReference
+  private lateinit var repository: WorkerProfileRepositoryFirestore
 
   private lateinit var profileRepositoryFirestore: WorkerProfileRepositoryFirestore
 
@@ -136,10 +135,14 @@ class WorkerProfileRepositoryFirestoreTest {
     firebaseAuthMockedStatic = mockStatic(FirebaseAuth::class.java)
     mockFirebaseAuth = mock(FirebaseAuth::class.java)
     mockStorage = mock(FirebaseStorage::class.java)
+    mockFirestore = mock(FirebaseFirestore::class.java)
     // Mock FirebaseAuth.getInstance() to return the mockFirebaseAuth
     firebaseAuthMockedStatic
         .`when`<FirebaseAuth> { FirebaseAuth.getInstance() }
         .thenReturn(mockFirebaseAuth)
+
+    mockCollectionReference = mock(CollectionReference::class.java)
+    mockDocumentReference = mock(DocumentReference::class.java)
 
     whenever(mockStorage.reference).thenReturn(storageRef)
     whenever(storageRef.child(anyString())).thenReturn(storageRef1)
@@ -151,6 +154,8 @@ class WorkerProfileRepositoryFirestoreTest {
     `when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
     `when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
+
+    mockImageRef = mock(StorageReference::class.java)
   }
 
   @After
@@ -350,80 +355,6 @@ class WorkerProfileRepositoryFirestoreTest {
   // ----- getProfileById Tests -----
 
   @Test
-  fun getProfileById_whenDocumentExists_callsOnSuccessWithWorkerProfile() {
-    val uid = "1"
-
-    val taskCompletionSource = TaskCompletionSource<DocumentSnapshot>()
-    `when`(mockDocumentReference.get()).thenReturn(taskCompletionSource.task)
-    `when`(mockDocumentSnapshot.exists()).thenReturn(true)
-
-    // Mocking the data returned from Firestore
-    `when`(mockDocumentSnapshot.id).thenReturn(profile.uid)
-    `when`(mockDocumentSnapshot.getString("rating")).thenReturn(profile.rating.toString())
-    `when`(mockDocumentSnapshot.get("reviews")).thenReturn(profile.reviews)
-    `when`(mockDocumentSnapshot.getString("description")).thenReturn(profile.description)
-    `when`(mockDocumentSnapshot.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
-    `when`(mockDocumentSnapshot.getDouble("price")).thenReturn(profile.price)
-    `when`(mockDocumentSnapshot.get("location"))
-        .thenReturn(
-            mapOf(
-                "latitude" to profile.location!!.latitude,
-                "longitude" to profile.location!!.longitude,
-                "name" to profile.location!!.name))
-    `when`(mockDocumentSnapshot.getString("displayName")).thenReturn(profile.displayName)
-    `when`(mockDocumentSnapshot.get("includedServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile.includedServices[0].name),
-                mapOf("name" to profile.includedServices[0].name)))
-    `when`(mockDocumentSnapshot.get("addOnServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile.addOnServices[0].name),
-                mapOf("name" to profile.addOnServices[0].name)))
-    `when`(mockDocumentSnapshot.getString("bannerImageUrl")).thenReturn(profile.bannerPicture)
-    `when`(mockDocumentSnapshot.getString("profileImageUrl")).thenReturn(profile.profilePicture)
-    `when`(mockDocumentSnapshot.get("workingHours"))
-        .thenReturn(
-            mapOf(
-                "start" to profile.workingHours.first.toString(),
-                "end" to profile.workingHours.second.toString()))
-    `when`(mockDocumentSnapshot.get("unavailability_list"))
-        .thenReturn(
-            listOf(
-                profile.unavailability_list[0].toString(),
-                profile.unavailability_list[1].toString()))
-    `when`(mockDocumentSnapshot.get("tags")).thenReturn(profile.tags)
-    `when`(mockDocumentSnapshot.get("quickFixes")).thenReturn(profile.quickFixes)
-    `when`(mockDocumentSnapshot.get("reviews"))
-        .thenReturn(
-            listOf(
-                mapOf(
-                    "username" to profile.reviews[0].username,
-                    "review" to profile.reviews[0].review,
-                    "rating" to profile.reviews[0].rating),
-                mapOf(
-                    "username" to profile.reviews[1].username,
-                    "review" to profile.reviews[1].review,
-                    "rating" to profile.reviews[1].rating)))
-
-    var callbackCalled = false
-
-    profileRepositoryFirestore.getProfileById(
-        uid = uid,
-        onSuccess = { foundProfile ->
-          callbackCalled = true
-          assertEquals(profile, foundProfile)
-        },
-        onFailure = { fail("Failure callback should not be called") })
-
-    taskCompletionSource.setResult(mockDocumentSnapshot)
-    shadowOf(Looper.getMainLooper()).idle()
-
-    assertTrue(callbackCalled)
-  }
-
-  @Test
   fun getProfileById_whenDocumentDoesNotExist_callsOnSuccessWithNull() {
     val uid = "nonexistent"
 
@@ -474,139 +405,6 @@ class WorkerProfileRepositoryFirestoreTest {
   // ----- getProfiles Tests -----
 
   @Test
-  fun getProfiles_whenSuccess_callsOnSuccessWithWorkerProfiles() {
-    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
-
-    val document1 = mock(DocumentSnapshot::class.java)
-    val document2 = mock(DocumentSnapshot::class.java)
-
-    val documents = listOf(document1, document2)
-    `when`(mockQuerySnapshot.documents).thenReturn(documents)
-
-    // Mock data for first document
-    // Mocking the data returned from Firestore
-    `when`(document1.id).thenReturn(profile.uid)
-    `when`(document1.getString("rating")).thenReturn(profile.rating.toString())
-    `when`(document1.get("reviews")).thenReturn(profile.reviews)
-    `when`(document1.getString("description")).thenReturn(profile.description)
-    `when`(document1.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
-    `when`(document1.getDouble("price")).thenReturn(profile.price)
-    `when`(document1.get("location"))
-        .thenReturn(
-            mapOf(
-                "latitude" to profile.location!!.latitude,
-                "longitude" to profile.location!!.longitude,
-                "name" to profile.location!!.name))
-    `when`(document1.getString("displayName")).thenReturn(profile.displayName)
-    `when`(document1.get("includedServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile.includedServices[0].name),
-                mapOf("name" to profile.includedServices[0].name)))
-    `when`(document1.get("addOnServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile.addOnServices[0].name),
-                mapOf("name" to profile.addOnServices[0].name)))
-    `when`(document1.getString("bannerImageUrl")).thenReturn(profile.bannerPicture)
-    `when`(document1.getString("profileImageUrl")).thenReturn(profile.profilePicture)
-    `when`(document1.get("workingHours"))
-        .thenReturn(
-            mapOf(
-                "start" to profile.workingHours.first.toString(),
-                "end" to profile.workingHours.second.toString()))
-    `when`(document1.get("unavailability_list"))
-        .thenReturn(
-            listOf(
-                profile.unavailability_list[0].toString(),
-                profile.unavailability_list[1].toString()))
-    `when`(document1.get("tags")).thenReturn(profile.tags)
-    `when`(document1.get("quickFixes")).thenReturn(profile.quickFixes)
-    `when`(document1.get("reviews"))
-        .thenReturn(
-            listOf(
-                mapOf(
-                    "username" to profile.reviews[0].username,
-                    "review" to profile.reviews[0].review,
-                    "rating" to profile.reviews[0].rating),
-                mapOf(
-                    "username" to profile.reviews[1].username,
-                    "review" to profile.reviews[1].review,
-                    "rating" to profile.reviews[1].rating)))
-
-    // Mock data for second document
-    // Mocking the data returned from Firestore
-    `when`(document2.id).thenReturn(profile2.uid)
-    `when`(document2.getString("rating")).thenReturn(profile2.rating.toString())
-    `when`(document2.get("reviews")).thenReturn(profile2.reviews)
-    `when`(document2.getString("description")).thenReturn(profile2.description)
-    `when`(document2.getString("fieldOfWork")).thenReturn(profile2.fieldOfWork)
-    `when`(document2.getDouble("price")).thenReturn(profile2.price)
-    `when`(document2.get("location"))
-        .thenReturn(
-            mapOf(
-                "latitude" to profile2.location!!.latitude,
-                "longitude" to profile2.location!!.longitude,
-                "name" to profile2.location!!.name))
-    `when`(document2.getString("displayName")).thenReturn(profile2.displayName)
-    `when`(document2.get("includedServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile2.includedServices[0].name),
-                mapOf("name" to profile2.includedServices[0].name)))
-    `when`(document2.get("addOnServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile2.addOnServices[0].name),
-                mapOf("name" to profile2.addOnServices[0].name)))
-    `when`(document2.getString("bannerImageUrl")).thenReturn(profile2.bannerPicture)
-    `when`(document2.getString("profileImageUrl")).thenReturn(profile2.profilePicture)
-    `when`(document2.get("workingHours"))
-        .thenReturn(
-            mapOf(
-                "start" to profile2.workingHours.first.toString(),
-                "end" to profile2.workingHours.second.toString()))
-    `when`(document2.get("unavailability_list"))
-        .thenReturn(
-            listOf(
-                profile2.unavailability_list[0].toString(),
-                profile2.unavailability_list[1].toString()))
-    `when`(document2.get("tags")).thenReturn(profile2.tags)
-    `when`(document2.get("quickFixes")).thenReturn(profile2.quickFixes)
-    `when`(document2.get("reviews"))
-        .thenReturn(
-            listOf(
-                mapOf(
-                    "username" to profile2.reviews[0].username,
-                    "review" to profile2.reviews[0].review,
-                    "rating" to profile2.reviews[0].rating),
-                mapOf(
-                    "username" to profile2.reviews[1].username,
-                    "review" to profile2.reviews[1].review,
-                    "rating" to profile2.reviews[1].rating)))
-
-    var callbackCalled = false
-    var returnedProfiles: List<Profile>? = null
-
-    profileRepositoryFirestore.getProfiles(
-        onSuccess = { profiles ->
-          callbackCalled = true
-          returnedProfiles = profiles
-        },
-        onFailure = { fail("Failure callback should not be called") })
-
-    taskCompletionSource.setResult(mockQuerySnapshot)
-    shadowOf(Looper.getMainLooper()).idle()
-
-    assertTrue(callbackCalled)
-    assertNotNull(returnedProfiles)
-    assertEquals(2, returnedProfiles!!.size)
-    assertEquals(profile, returnedProfiles!![0])
-    assertEquals(profile2, returnedProfiles!![1])
-  }
-
-  @Test
   fun getProfiles_whenFailure_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
     `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
@@ -631,67 +429,6 @@ class WorkerProfileRepositoryFirestoreTest {
   }
 
   // ----- documentToWorker Tests -----
-
-  @Test
-  fun documentToWorker_whenAllFieldsArePresent_returnsWorkerProfile() {
-    // Arrange
-    val document = mock(DocumentSnapshot::class.java)
-    `when`(document.id).thenReturn(profile.uid)
-    `when`(document.getString("rating")).thenReturn(profile.rating.toString())
-    `when`(document.get("reviews")).thenReturn(profile.reviews)
-    `when`(document.getString("description")).thenReturn(profile.description)
-    `when`(document.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
-    `when`(document.getDouble("price")).thenReturn(profile.price)
-    `when`(document.get("location"))
-        .thenReturn(
-            mapOf(
-                "latitude" to profile.location!!.latitude,
-                "longitude" to profile.location!!.longitude,
-                "name" to profile.location!!.name))
-    `when`(document.getString("displayName")).thenReturn(profile.displayName)
-    `when`(document.get("includedServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile.includedServices[0].name),
-                mapOf("name" to profile.includedServices[0].name)))
-    `when`(document.get("addOnServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile.addOnServices[0].name),
-                mapOf("name" to profile.addOnServices[0].name)))
-    `when`(document.getString("bannerImageUrl")).thenReturn(profile.bannerPicture)
-    `when`(document.getString("profileImageUrl")).thenReturn(profile.profilePicture)
-    `when`(document.get("workingHours"))
-        .thenReturn(
-            mapOf(
-                "start" to profile.workingHours.first.toString(),
-                "end" to profile.workingHours.second.toString()))
-    `when`(document.get("unavailability_list"))
-        .thenReturn(
-            listOf(
-                profile.unavailability_list[0].toString(),
-                profile.unavailability_list[1].toString()))
-    `when`(document.get("tags")).thenReturn(profile.tags)
-    `when`(document.get("quickFixes")).thenReturn(profile.quickFixes)
-    `when`(document.get("reviews"))
-        .thenReturn(
-            listOf(
-                mapOf(
-                    "username" to profile.reviews[0].username,
-                    "review" to profile.reviews[0].review,
-                    "rating" to profile.reviews[0].rating),
-                mapOf(
-                    "username" to profile.reviews[1].username,
-                    "review" to profile.reviews[1].review,
-                    "rating" to profile.reviews[1].rating)))
-
-    // Act
-    val result = invokeDocumentToWorker(document)
-
-    // Assert
-    assertNotNull(result)
-    assertEquals(profile, result)
-  }
 
   @Test
   fun documentToWorker_whenEssentialFieldsAreMissing_returnsNull() {
@@ -838,442 +575,6 @@ class WorkerProfileRepositoryFirestoreTest {
   }
 
   // ----- filterWorkers Tests -----
-
-  @Test
-  fun filterWorkers_withFieldOfWork_callsOnSuccess() {
-    // Create mocks for the chained methods
-    val mockQueryAfterFieldOfWork = mock(Query::class.java)
-
-    // Mock method chaining
-    `when`(mockCollectionReference.whereEqualTo(eq("fieldOfWork"), eq("Plumber")))
-        .thenReturn(mockQueryAfterFieldOfWork)
-
-    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-    `when`(mockQueryAfterFieldOfWork.get()).thenReturn(taskCompletionSource.task)
-
-    // Mock query result to return one worker profile
-    // Mock query result to return one worker profile
-    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
-
-    // Mock data for first document
-    `when`(mockDocumentSnapshot.id).thenReturn(profile.uid)
-    `when`(mockDocumentSnapshot.getString("rating")).thenReturn(profile.rating.toString())
-    `when`(mockDocumentSnapshot.get("reviews")).thenReturn(profile.reviews)
-    `when`(mockDocumentSnapshot.getString("description")).thenReturn(profile.description)
-    `when`(mockDocumentSnapshot.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
-    `when`(mockDocumentSnapshot.getDouble("price")).thenReturn(profile.price)
-    `when`(mockDocumentSnapshot.get("location"))
-        .thenReturn(
-            mapOf(
-                "latitude" to profile.location!!.latitude,
-                "longitude" to profile.location!!.longitude,
-                "name" to profile.location!!.name))
-    `when`(mockDocumentSnapshot.getString("displayName")).thenReturn(profile.displayName)
-    `when`(mockDocumentSnapshot.get("includedServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile.includedServices[0].name),
-                mapOf("name" to profile.includedServices[0].name)))
-    `when`(mockDocumentSnapshot.get("addOnServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile.addOnServices[0].name),
-                mapOf("name" to profile.addOnServices[0].name)))
-    `when`(mockDocumentSnapshot.getString("bannerImageUrl")).thenReturn(profile.bannerPicture)
-    `when`(mockDocumentSnapshot.getString("profileImageUrl")).thenReturn(profile.profilePicture)
-    `when`(mockDocumentSnapshot.get("workingHours"))
-        .thenReturn(
-            mapOf(
-                "start" to profile.workingHours.first.toString(),
-                "end" to profile.workingHours.second.toString()))
-    `when`(mockDocumentSnapshot.get("unavailability_list"))
-        .thenReturn(
-            listOf(
-                profile.unavailability_list[0].toString(),
-                profile.unavailability_list[1].toString()))
-    `when`(mockDocumentSnapshot.get("tags")).thenReturn(profile.tags)
-    `when`(mockDocumentSnapshot.get("quickFixes")).thenReturn(profile.quickFixes)
-    `when`(mockDocumentSnapshot.get("reviews"))
-        .thenReturn(
-            listOf(
-                mapOf(
-                    "username" to profile.reviews[0].username,
-                    "review" to profile.reviews[0].review,
-                    "rating" to profile.reviews[0].rating),
-                mapOf(
-                    "username" to profile.reviews[1].username,
-                    "review" to profile.reviews[1].review,
-                    "rating" to profile.reviews[1].rating)))
-
-    var callbackCalled = false
-    var returnedProfiles: List<WorkerProfile>? = null
-
-    profileRepositoryFirestore.filterWorkers(
-        rating = null,
-        reviews = null,
-        fieldOfWork = "Plumber",
-        price = null,
-        location = null,
-        radiusInKm = null,
-        onSuccess = { profiles ->
-          callbackCalled = true
-          returnedProfiles = profiles
-        },
-        onFailure = { fail("Failure callback should not be called") })
-
-    // Simulate Firestore success
-    taskCompletionSource.setResult(mockQuerySnapshot)
-    shadowOf(Looper.getMainLooper()).idle()
-
-    // Assert that the success callback was called and the profile matches
-    assertTrue(callbackCalled)
-    assertNotNull(returnedProfiles)
-    assertEquals(1, returnedProfiles!!.size)
-    assertEquals(profile, returnedProfiles!![0])
-  }
-
-  @Test
-  fun filterWorkers_withHourlyRateThreshold_callsOnSuccess() {
-    // Create mocks for the chained methods
-    val mockQueryAfterHourlyRate = mock(Query::class.java)
-
-    // Mock method chaining
-    `when`(mockCollectionReference.whereLessThan(eq("price"), eq(30.0)))
-        .thenReturn(mockQueryAfterHourlyRate)
-
-    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-    `when`(mockQueryAfterHourlyRate.get()).thenReturn(taskCompletionSource.task)
-
-    // Mock query result to return one worker profile
-    // Mock query result to return one worker profile
-    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
-
-    // Mock data for first document
-    `when`(mockDocumentSnapshot.id).thenReturn(profile.uid)
-    `when`(mockDocumentSnapshot.getString("rating")).thenReturn(profile.rating.toString())
-    `when`(mockDocumentSnapshot.get("reviews")).thenReturn(profile.reviews)
-    `when`(mockDocumentSnapshot.getString("description")).thenReturn(profile.description)
-    `when`(mockDocumentSnapshot.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
-    `when`(mockDocumentSnapshot.getDouble("price")).thenReturn(profile.price)
-    `when`(mockDocumentSnapshot.get("location"))
-        .thenReturn(
-            mapOf(
-                "latitude" to profile.location!!.latitude,
-                "longitude" to profile.location!!.longitude,
-                "name" to profile.location!!.name))
-    `when`(mockDocumentSnapshot.getString("displayName")).thenReturn(profile.displayName)
-    `when`(mockDocumentSnapshot.get("includedServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile.includedServices[0].name),
-                mapOf("name" to profile.includedServices[0].name)))
-    `when`(mockDocumentSnapshot.get("addOnServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile.addOnServices[0].name),
-                mapOf("name" to profile.addOnServices[0].name)))
-    `when`(mockDocumentSnapshot.getString("bannerImageUrl")).thenReturn(profile.bannerPicture)
-    `when`(mockDocumentSnapshot.getString("profileImageUrl")).thenReturn(profile.profilePicture)
-    `when`(mockDocumentSnapshot.get("workingHours"))
-        .thenReturn(
-            mapOf(
-                "start" to profile.workingHours.first.toString(),
-                "end" to profile.workingHours.second.toString()))
-    `when`(mockDocumentSnapshot.get("unavailability_list"))
-        .thenReturn(
-            listOf(
-                profile.unavailability_list[0].toString(),
-                profile.unavailability_list[1].toString()))
-    `when`(mockDocumentSnapshot.get("tags")).thenReturn(profile.tags)
-    `when`(mockDocumentSnapshot.get("quickFixes")).thenReturn(profile.quickFixes)
-    `when`(mockDocumentSnapshot.get("reviews"))
-        .thenReturn(
-            listOf(
-                mapOf(
-                    "username" to profile.reviews[0].username,
-                    "review" to profile.reviews[0].review,
-                    "rating" to profile.reviews[0].rating),
-                mapOf(
-                    "username" to profile.reviews[1].username,
-                    "review" to profile.reviews[1].review,
-                    "rating" to profile.reviews[1].rating)))
-
-    var callbackCalled = false
-    var returnedProfiles: List<WorkerProfile>? = null
-
-    profileRepositoryFirestore.filterWorkers(
-        rating = null,
-        reviews = null,
-        price = 30.0,
-        fieldOfWork = null,
-        location = null,
-        radiusInKm = null,
-        onSuccess = { profiles ->
-          callbackCalled = true
-          returnedProfiles = profiles
-        },
-        onFailure = { fail("Failure callback should not be called") })
-
-    // Simulate Firestore success
-    taskCompletionSource.setResult(mockQuerySnapshot)
-    shadowOf(Looper.getMainLooper()).idle()
-
-    // Assert that the success callback was called and the profile matches
-    assertTrue(callbackCalled)
-    assertNotNull(returnedProfiles)
-    assertEquals(1, returnedProfiles!!.size)
-    assertEquals(profile, returnedProfiles!![0])
-  }
-
-  @Test
-  fun filterWorkers_withFieldOfWorkAndHourlyRateThreshold_callsOnSuccess() {
-    // Create mocks for the chained methods
-    val mockQueryAfterFieldOfWork = mock(Query::class.java)
-    val mockQueryAfterHourlyRate = mock(Query::class.java)
-
-    // Mock method chaining
-    `when`(mockCollectionReference.whereEqualTo(eq("fieldOfWork"), eq("Plumber")))
-        .thenReturn(mockQueryAfterFieldOfWork)
-    `when`(mockQueryAfterFieldOfWork.whereLessThan(eq("price"), eq(30.0)))
-        .thenReturn(mockQueryAfterHourlyRate)
-
-    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-    `when`(mockQueryAfterHourlyRate.get()).thenReturn(taskCompletionSource.task)
-
-    // Mock query result to return one worker profile
-    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
-
-    // Mock data for first document
-    `when`(mockDocumentSnapshot.id).thenReturn(profile.uid)
-    `when`(mockDocumentSnapshot.getString("rating")).thenReturn(profile.rating.toString())
-    `when`(mockDocumentSnapshot.get("reviews")).thenReturn(profile.reviews)
-    `when`(mockDocumentSnapshot.getString("description")).thenReturn(profile.description)
-    `when`(mockDocumentSnapshot.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
-    `when`(mockDocumentSnapshot.getDouble("price")).thenReturn(profile.price)
-    `when`(mockDocumentSnapshot.get("location"))
-        .thenReturn(
-            mapOf(
-                "latitude" to profile.location!!.latitude,
-                "longitude" to profile.location!!.longitude,
-                "name" to profile.location!!.name))
-    `when`(mockDocumentSnapshot.getString("displayName")).thenReturn(profile.displayName)
-    `when`(mockDocumentSnapshot.get("includedServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile.includedServices[0].name),
-                mapOf("name" to profile.includedServices[0].name)))
-    `when`(mockDocumentSnapshot.get("addOnServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile.addOnServices[0].name),
-                mapOf("name" to profile.addOnServices[0].name)))
-    `when`(mockDocumentSnapshot.getString("bannerImageUrl")).thenReturn(profile.bannerPicture)
-    `when`(mockDocumentSnapshot.getString("profileImageUrl")).thenReturn(profile.profilePicture)
-    `when`(mockDocumentSnapshot.get("workingHours"))
-        .thenReturn(
-            mapOf(
-                "start" to profile.workingHours.first.toString(),
-                "end" to profile.workingHours.second.toString()))
-    `when`(mockDocumentSnapshot.get("unavailability_list"))
-        .thenReturn(
-            listOf(
-                profile.unavailability_list[0].toString(),
-                profile.unavailability_list[1].toString()))
-    `when`(mockDocumentSnapshot.get("tags")).thenReturn(profile.tags)
-    `when`(mockDocumentSnapshot.get("quickFixes")).thenReturn(profile.quickFixes)
-    `when`(mockDocumentSnapshot.get("reviews"))
-        .thenReturn(
-            listOf(
-                mapOf(
-                    "username" to profile.reviews[0].username,
-                    "review" to profile.reviews[0].review,
-                    "rating" to profile.reviews[0].rating),
-                mapOf(
-                    "username" to profile.reviews[1].username,
-                    "review" to profile.reviews[1].review,
-                    "rating" to profile.reviews[1].rating)))
-
-    var callbackCalled = false
-    var returnedProfiles: List<WorkerProfile>? = null
-
-    profileRepositoryFirestore.filterWorkers(
-        rating = null,
-        reviews = null,
-        price = 30.0,
-        fieldOfWork = "Plumber",
-        location = null,
-        radiusInKm = null,
-        onSuccess = { profiles ->
-          callbackCalled = true
-          returnedProfiles = profiles
-        },
-        onFailure = { fail("Failure callback should not be called") })
-
-    // Simulate Firestore success
-    taskCompletionSource.setResult(mockQuerySnapshot)
-    shadowOf(Looper.getMainLooper()).idle()
-
-    // Assert that the success callback was called and the profile matches
-    assertTrue(callbackCalled)
-    assertNotNull(returnedProfiles)
-    assertEquals(1, returnedProfiles!!.size)
-    assertEquals(profile, returnedProfiles!![0])
-  }
-
-  @Test
-  fun filterWorkers_withLocationAndRadius_callsOnSuccess() {
-    // Create mocks for the chained methods
-    val mockQueryAfterLatitudeMin = mock(Query::class.java)
-    val mockQueryAfterLatitudeMax = mock(Query::class.java)
-    val mockQueryAfterLongitudeMin = mock(Query::class.java)
-    val mockQueryAfterLongitudeMax = mock(Query::class.java)
-
-    val location = Location(latitude = 37.7749, longitude = -122.4194, name = "Home")
-
-    // Starting from the collection reference
-    val query = mockCollectionReference as Query
-
-    // Mock whereGreaterThanOrEqualTo for latitude
-    `when`(query.whereGreaterThanOrEqualTo(eq("location.latitude"), anyDouble()))
-        .thenReturn(mockQueryAfterLatitudeMin)
-
-    // Mock whereLessThanOrEqualTo for latitude
-    `when`(mockQueryAfterLatitudeMin.whereLessThanOrEqualTo(eq("location.latitude"), anyDouble()))
-        .thenReturn(mockQueryAfterLatitudeMax)
-
-    // Mock whereGreaterThanOrEqualTo for longitude
-    `when`(
-            mockQueryAfterLatitudeMax.whereGreaterThanOrEqualTo(
-                eq("location.longitude"), anyDouble()))
-        .thenReturn(mockQueryAfterLongitudeMin)
-
-    // Mock whereLessThanOrEqualTo for longitude
-    `when`(mockQueryAfterLongitudeMin.whereLessThanOrEqualTo(eq("location.longitude"), anyDouble()))
-        .thenReturn(mockQueryAfterLongitudeMax)
-
-    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-    `when`(mockQueryAfterLongitudeMax.get()).thenReturn(taskCompletionSource.task)
-
-    // Mock query result to return one worker profile
-    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
-
-    // Mock data for first document
-    `when`(mockDocumentSnapshot.id).thenReturn(profile.uid)
-    `when`(mockDocumentSnapshot.getString("rating")).thenReturn(profile.rating.toString())
-    `when`(mockDocumentSnapshot.get("reviews")).thenReturn(profile.reviews)
-    `when`(mockDocumentSnapshot.getString("description")).thenReturn(profile.description)
-    `when`(mockDocumentSnapshot.getString("fieldOfWork")).thenReturn(profile.fieldOfWork)
-    `when`(mockDocumentSnapshot.getDouble("price")).thenReturn(profile.price)
-    `when`(mockDocumentSnapshot.get("location"))
-        .thenReturn(
-            mapOf(
-                "latitude" to profile.location!!.latitude,
-                "longitude" to profile.location!!.longitude,
-                "name" to profile.location!!.name))
-    `when`(mockDocumentSnapshot.getString("displayName")).thenReturn(profile.displayName)
-    `when`(mockDocumentSnapshot.get("includedServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile.includedServices[0].name),
-                mapOf("name" to profile.includedServices[0].name)))
-    `when`(mockDocumentSnapshot.get("addOnServices"))
-        .thenReturn(
-            listOf(
-                mapOf("name" to profile.addOnServices[0].name),
-                mapOf("name" to profile.addOnServices[0].name)))
-    `when`(mockDocumentSnapshot.getString("bannerImageUrl")).thenReturn(profile.bannerPicture)
-    `when`(mockDocumentSnapshot.getString("profileImageUrl")).thenReturn(profile.profilePicture)
-    `when`(mockDocumentSnapshot.get("workingHours"))
-        .thenReturn(
-            mapOf(
-                "start" to profile.workingHours.first.toString(),
-                "end" to profile.workingHours.second.toString()))
-    `when`(mockDocumentSnapshot.get("unavailability_list"))
-        .thenReturn(
-            listOf(
-                profile.unavailability_list[0].toString(),
-                profile.unavailability_list[1].toString()))
-    `when`(mockDocumentSnapshot.get("tags")).thenReturn(profile.tags)
-    `when`(mockDocumentSnapshot.get("quickFixes")).thenReturn(profile.quickFixes)
-    `when`(mockDocumentSnapshot.get("reviews"))
-        .thenReturn(
-            listOf(
-                mapOf(
-                    "username" to profile.reviews[0].username,
-                    "review" to profile.reviews[0].review,
-                    "rating" to profile.reviews[0].rating),
-                mapOf(
-                    "username" to profile.reviews[1].username,
-                    "review" to profile.reviews[1].review,
-                    "rating" to profile.reviews[1].rating)))
-
-    var callbackCalled = false
-    var returnedProfiles: List<WorkerProfile>? = null
-
-    profileRepositoryFirestore.filterWorkers(
-        rating = null,
-        reviews = null,
-        price = null,
-        fieldOfWork = null,
-        location = location,
-        radiusInKm = 50.0,
-        onSuccess = { profiles ->
-          callbackCalled = true
-          returnedProfiles = profiles
-        },
-        onFailure = { fail("Failure callback should not be called") })
-
-    // Simulate Firestore success
-    taskCompletionSource.setResult(mockQuerySnapshot)
-    shadowOf(Looper.getMainLooper()).idle()
-
-    // Assert that the success callback was called and the profile matches
-    assertTrue(callbackCalled)
-    assertNotNull(returnedProfiles)
-    assertEquals(1, returnedProfiles!!.size)
-    assertEquals(profile, returnedProfiles!![0])
-  }
-
-  @Test
-  fun filterWorkers_onFailure_callsOnFailure() {
-    // Create mocks for the chained methods
-    val mockQueryAfterFieldOfWork = mock(Query::class.java)
-    val mockQueryAfterHourlyRate = mock(Query::class.java)
-
-    // Mock method chaining
-    `when`(mockCollectionReference.whereEqualTo(eq("fieldOfWork"), eq("Plumber")))
-        .thenReturn(mockQueryAfterFieldOfWork)
-    `when`(mockQueryAfterFieldOfWork.whereLessThan(eq("price"), eq(30.0)))
-        .thenReturn(mockQueryAfterHourlyRate)
-
-    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-    `when`(mockQueryAfterHourlyRate.get()).thenReturn(taskCompletionSource.task)
-
-    val exception = Exception("Test exception")
-    var callbackCalled = false
-    var returnedException: Exception? = null
-
-    profileRepositoryFirestore.filterWorkers(
-        rating = null,
-        reviews = null,
-        price = 30.0,
-        fieldOfWork = "Plumber",
-        location = null,
-        radiusInKm = null,
-        onSuccess = { fail("Success callback should not be called") },
-        onFailure = { e ->
-          callbackCalled = true
-          returnedException = e
-        })
-
-    // Simulate Firestore failure
-    taskCompletionSource.setException(exception)
-    shadowOf(Looper.getMainLooper()).idle()
-
-    // Assert that the failure callback was called and the exception matches
-    assertTrue(callbackCalled)
-    assertEquals(exception, returnedException)
-  }
 
   @Test
   fun uploadWorkerProfileImages_success() {
