@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
@@ -69,6 +70,10 @@ fun QuickFixFinderScreen(
   val colorBackground =
       if (pagerState.currentPage == 0) colorScheme.background else colorScheme.surface
   val colorButton = if (pagerState.currentPage == 1) colorScheme.background else colorScheme.surface
+  var bannerImage by remember { mutableStateOf(R.drawable.moroccan_flag) }
+  var profilePicture by remember { mutableStateOf(R.drawable.placeholder_worker) }
+  var initialSaved by remember { mutableStateOf(false) }
+  var workerAddress by remember { mutableStateOf("") }
 
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     val screenHeight = maxHeight
@@ -133,7 +138,14 @@ fun QuickFixFinderScreen(
                               searchViewModel,
                               accountViewModel,
                               categoryViewModel,
-                              onProfileClick = { profile -> selectedWorker = profile })
+                              onProfileClick = { profile, locName ->
+                                selectedWorker = profile
+                                bannerImage = R.drawable.moroccan_flag
+                                profilePicture = R.drawable.placeholder_worker
+                                initialSaved = false
+                                workerAddress = locName
+                                isWindowVisible = true
+                              })
                         }
                         1 -> {
                           AnnouncementScreen(
@@ -160,7 +172,17 @@ fun QuickFixFinderScreen(
           quickFixViewModel.setSelectedWorkerProfile(selectedWorker)
           navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
         },
-        workerProfile = selectedWorker,
+        bannerImage = bannerImage,
+        profilePicture = profilePicture,
+        initialSaved = initialSaved,
+        workerCategory = selectedWorker.fieldOfWork,
+        workerAddress = workerAddress,
+        description = selectedWorker.description,
+        includedServices = selectedWorker.includedServices.map { it.name },
+        addonServices = selectedWorker.addOnServices.map { it.name },
+        workerRating = selectedWorker.reviews.map { it1 -> it1.rating }.average(),
+        tags = selectedWorker.tags,
+        reviews = selectedWorker.reviews.map { it.review },
     )
   }
 }

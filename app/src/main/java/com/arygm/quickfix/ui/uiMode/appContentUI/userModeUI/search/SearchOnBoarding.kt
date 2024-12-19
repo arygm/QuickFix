@@ -57,15 +57,15 @@ fun SearchOnBoarding(
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
     categoryViewModel: CategoryViewModel,
-    onProfileClick: (WorkerProfile) -> Unit,
+    onProfileClick: (WorkerProfile, String) -> Unit,
 ) {
   val (uiState, setUiState) = remember { mutableStateOf(SearchUIState()) }
   val workerProfiles by searchViewModel.workerProfilesSuggestions.collectAsState()
   var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
   val context = LocalContext.current
   val searchSubcategory by searchViewModel.searchSubcategory.collectAsState()
-  var userProfile = UserProfile(locations = emptyList(), announcements = emptyList(), uid = "0")
   var locationFilterApplied by remember { mutableStateOf(false) }
+  var userProfile by remember { mutableStateOf<UserProfile?>(null) }
   var lastAppliedMaxDist by remember { mutableIntStateOf(200) }
   val focusManager = LocalFocusManager.current
   var selectedLocation by remember { mutableStateOf(Location()) }
@@ -205,7 +205,7 @@ fun SearchOnBoarding(
                     searchViewModel = searchViewModel,
                     accountViewModel = accountViewModel,
                     listState = listState,
-                    onBookClick = { selectedProfile, _ -> onProfileClick(selectedProfile) })
+                    onBookClick = { selectedProfile, loc -> onProfileClick(selectedProfile, loc) })
               }
         },
         modifier =
@@ -268,40 +268,42 @@ fun SearchOnBoarding(
         },
         clearEnabled = filterState.priceFilterApplied)
 
-    QuickFixLocationFilterBottomSheet(
-        uiState.showLocationBottomSheet,
-        userProfile = userProfile,
-        phoneLocation = filterState.phoneLocation,
-        selectedLocationIndex = selectedLocationIndex,
-        onApplyClick = { location, max ->
-          selectedLocation = location
-          lastAppliedMaxDist = max
-          baseLocation = location
-          maxDistance = max
-          selectedLocationIndex = userProfile.locations.indexOf(location) + 1
+    userProfile?.let {
+      QuickFixLocationFilterBottomSheet(
+          uiState.showLocationBottomSheet,
+          userProfile = it,
+          phoneLocation = filterState.phoneLocation,
+          selectedLocationIndex = selectedLocationIndex,
+          onApplyClick = { location, max ->
+            selectedLocation = location
+            lastAppliedMaxDist = max
+            baseLocation = location
+            maxDistance = max
+            selectedLocationIndex = it.locations.indexOf(location) + 1
 
-          if (location == Location(0.0, 0.0, "Default")) {
-            Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
-          }
-          if (locationFilterApplied) {
+            if (location == Location(0.0, 0.0, "Default")) {
+              Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
+            }
+            if (locationFilterApplied) {
+              updateFilteredProfiles()
+            } else {
+              filteredWorkerProfiles =
+                  searchViewModel.filterWorkersByDistance(filteredWorkerProfiles, location, max)
+            }
+            locationFilterApplied = true
+          },
+          onDismissRequest = { setUiState(uiState.copy(showLocationBottomSheet = false)) },
+          onClearClick = {
+            baseLocation = filterState.phoneLocation
+            lastAppliedMaxDist = 200
+            selectedLocation = Location()
+            maxDistance = 0
+            selectedLocationIndex = null
+            locationFilterApplied = false
             updateFilteredProfiles()
-          } else {
-            filteredWorkerProfiles =
-                searchViewModel.filterWorkersByDistance(filteredWorkerProfiles, location, max)
-          }
-          locationFilterApplied = true
-        },
-        onDismissRequest = { setUiState(uiState.copy(showLocationBottomSheet = false)) },
-        onClearClick = {
-          baseLocation = filterState.phoneLocation
-          lastAppliedMaxDist = 200
-          selectedLocation = Location()
-          maxDistance = 0
-          selectedLocationIndex = null
-          locationFilterApplied = false
-          updateFilteredProfiles()
-        },
-        clearEnabled = locationFilterApplied,
-        end = lastAppliedMaxDist)
+          },
+          clearEnabled = locationFilterApplied,
+          end = lastAppliedMaxDist)
+    }
   }
 }

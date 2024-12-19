@@ -40,61 +40,64 @@ fun ProfileResults(
         ?: addresses?.firstOrNull()?.adminArea
   }
 
-  LazyColumn(modifier = modifier.fillMaxWidth(), state = listState) {
-    items(profiles.size) { index ->
-      val profile = profiles[index]
-      var account by remember { mutableStateOf<Account?>(null) }
-      var distance by remember { mutableStateOf<Int?>(null) }
+  LazyColumn(
+      modifier = modifier.fillMaxWidth().testTag("worker_profiles_list"), state = listState) {
+        items(profiles.size) { index ->
+          val profile = profiles[index]
+          var account by remember { mutableStateOf<Account?>(null) }
+          var distance by remember { mutableStateOf<Int?>(null) }
 
-      // Get user's current location and calculate distance
-      val locationHelper = LocationHelper(LocalContext.current, MainActivity())
-      locationHelper.getCurrentLocation { location ->
-        location?.let {
-          distance =
-              profile.location?.let { workerLocation ->
-                searchViewModel
-                    .calculateDistance(
-                        workerLocation.latitude,
-                        workerLocation.longitude,
-                        it.latitude,
-                        it.longitude)
-                    .toInt()
+          // Get user's current location and calculate distance
+          val locationHelper = LocationHelper(LocalContext.current, MainActivity())
+          locationHelper.getCurrentLocation { location ->
+            location?.let {
+              distance =
+                  profile.location?.let { workerLocation ->
+                    searchViewModel
+                        .calculateDistance(
+                            workerLocation.latitude,
+                            workerLocation.longitude,
+                            it.latitude,
+                            it.longitude)
+                        .toInt()
+                  }
+            }
+          }
+
+          // Fetch user account details
+          LaunchedEffect(profile.uid) {
+            accountViewModel.fetchUserAccount(profile.uid) { fetchedAccount ->
+              account = fetchedAccount
+            }
+          }
+
+          // Render profile card if account data is available
+          account?.let { acc ->
+            var cityName by remember { mutableStateOf<String?>(null) }
+            profile.location.let {
+              cityName =
+                  profile.location?.let { it1 ->
+                    getCityNameFromCoordinates(it1.latitude, profile.location.longitude)
+                  }
+              val displayLoc = if (cityName != null) cityName else "Unknown"
+              if (displayLoc != null) {
+                SearchWorkerProfileResult(
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .testTag("worker_profile_result_$index")
+                            .clickable {},
+                    profileImage = R.drawable.placeholder_worker,
+                    name = "${acc.firstName} ${acc.lastName}",
+                    category = profile.fieldOfWork,
+                    rating = profile.rating,
+                    reviewCount = profile.reviews.size,
+                    location = displayLoc,
+                    price = profile.price.roundToInt().toString(),
+                    distance = distance,
+                    onBookClick = { onBookClick(profile, displayLoc) })
               }
-        }
-      }
-
-      // Fetch user account details
-      LaunchedEffect(profile.uid) {
-        accountViewModel.fetchUserAccount(profile.uid) { fetchedAccount ->
-          account = fetchedAccount
-        }
-      }
-
-      // Render profile card if account data is available
-      account?.let { acc ->
-        var cityName by remember { mutableStateOf<String?>(null) }
-        profile.location.let {
-          cityName =
-              profile.location?.let { it1 ->
-                getCityNameFromCoordinates(it1.latitude, profile.location.longitude)
-              }
-          val displayLoc = if (cityName != null) cityName else "Unknown"
-          if (displayLoc != null) {
-            SearchWorkerProfileResult(
-                modifier =
-                    Modifier.fillMaxWidth().testTag("worker_profile_result_$index").clickable {},
-                profileImage = R.drawable.placeholder_worker,
-                name = "${acc.firstName} ${acc.lastName}",
-                category = profile.fieldOfWork,
-                rating = profile.rating,
-                reviewCount = profile.reviews.size,
-                location = displayLoc,
-                price = profile.price.roundToInt().toString(),
-                distance = distance,
-                onBookClick = { onBookClick(profile, displayLoc) })
+            }
           }
         }
       }
-    }
-  }
 }

@@ -13,12 +13,12 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.filter
-import androidx.compose.ui.test.hasAnyChild
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -29,6 +29,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.printToLog
 import androidx.core.app.ActivityCompat
 import androidx.datastore.preferences.core.Preferences
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -134,7 +135,8 @@ class SearchWorkerResultScreenTest {
                 fieldOfWork = "Carpentry",
                 rating = 3.0,
                 description = "I hate my job",
-                location = Location(40.7128, -74.0060)))
+                location = Location(40.7128, -74.0060, "Ecublens, VD"),
+            ))
 
     // Mock the getAccountById method to always return a test Account
     doAnswer { invocation ->
@@ -424,14 +426,14 @@ class SearchWorkerResultScreenTest {
         .onNodeWithTag("sliding_window_worker_category")
         .assertExists()
         .assertIsDisplayed()
-        .assertTextContains("Exterior Painter") // Replace with expected category
+        .assertTextContains("Carpentry") // Replace with expected category
 
     // Verify the worker address is displayed
     composeTestRule
         .onNodeWithTag("sliding_window_worker_address")
         .assertExists()
         .assertIsDisplayed()
-        .assertTextContains("Ecublens, VD") // Replace with expected address
+        .assertTextContains("New York") // Replace with expected address
   }
 
   @Test
@@ -462,7 +464,7 @@ class SearchWorkerResultScreenTest {
         .assertExists()
         .assertIsDisplayed()
     // Check for each included service
-    val includedServices = listOf("Painting")
+    val includedServices = listOf("Basic Consultation", "Service Inspection")
 
     includedServices.forEach { service ->
       composeTestRule.onNodeWithText("• $service").assertExists().assertIsDisplayed()
@@ -498,7 +500,7 @@ class SearchWorkerResultScreenTest {
         .assertIsDisplayed()
 
     // Check for each add-on service
-    val addOnServices = listOf("Window Cleaning", "Furniture Assembly")
+    val addOnServices = listOf("Express Delivery", "Premium Materials")
 
     addOnServices.forEach { service ->
       composeTestRule.onNodeWithText("• $service").assertExists().assertIsDisplayed()
@@ -567,9 +569,8 @@ class SearchWorkerResultScreenTest {
 
     // Verify the tags section is displayed
     composeTestRule.onNodeWithTag("sliding_window_tags_flow_row").assertExists().assertIsDisplayed()
-
     // Check for each tag
-    val tags = listOf("Painter", "Gardener")
+    val tags = listOf("Reliable", "Experienced", "Professional")
 
     tags.forEach { tag -> composeTestRule.onNodeWithText(tag).assertExists().assertIsDisplayed() }
   }
@@ -1350,7 +1351,12 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("locationFilterModalSheet").assertIsDisplayed()
 
     // Select "Home" location
-    composeTestRule.onNodeWithTag("locationOptionRow1").performClick()
+    val roots = composeTestRule.onAllNodes(isRoot())
+    roots.fetchSemanticsNodes().forEachIndexed { index, _ ->
+      println("Root Node $index Hierarchy:")
+      composeTestRule.onAllNodes(isRoot())[index].printToLog("RootNode$index")
+    }
+    composeTestRule.onNodeWithText("Home").performClick()
 
     // Click Apply
     composeTestRule.onNodeWithTag("applyButton").performClick()
@@ -2032,7 +2038,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(5)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(5)
     // Click on the "Price Range" filter button
     composeTestRule.onNodeWithText("Emergency").performClick()
 
@@ -2046,8 +2052,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(
-          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
+      workerNodes[index].assert(hasText("${worker.price.roundToInt()}", substring = true))
     }
 
     composeTestRule.onNodeWithText("Emergency").performClick()
@@ -2059,8 +2064,7 @@ class SearchWorkerResultScreenTest {
     workerNodes1.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers1.forEachIndexed { index, worker ->
-      workerNodes[index].assert(
-          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
+      workerNodes[index].assert(hasText("${worker.price.roundToInt()}", substring = true))
     }
   }
 }

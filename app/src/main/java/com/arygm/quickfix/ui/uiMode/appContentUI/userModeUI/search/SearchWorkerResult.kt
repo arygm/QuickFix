@@ -1,6 +1,5 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -34,11 +33,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.MainActivity
+import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
@@ -74,21 +73,11 @@ fun SearchWorkerResult(
   var selectedWorkerProfile by remember { mutableStateOf(WorkerProfile()) }
   val filterState = rememberSearchFiltersState()
   var baseLocation by remember { mutableStateOf(filterState.phoneLocation) }
-  var userProfile = UserProfile(locations = emptyList(), announcements = emptyList(), uid = "0")
+  var userProfile by remember { mutableStateOf<UserProfile?>(null) }
   var uid by remember { mutableStateOf("Loading...") }
   val searchSubcategory by searchViewModel.searchSubcategory.collectAsState()
 
   // Fetch user and set base location
-  LaunchedEffect(Unit) {
-    uid = loadUserId(preferencesViewModel)
-    userProfileViewModel.fetchUserProfile(uid) { profile ->
-      if (profile is UserProfile) {
-        userProfile = profile
-      } else {
-        Log.e("SearchWorkerResult", "Fetched a worker profile from a user profile repo.")
-      }
-    }
-  }
 
   LaunchedEffect(Unit) {
     if (locationHelper.checkPermissions()) {
@@ -103,6 +92,8 @@ fun SearchWorkerResult(
     } else {
       Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
     }
+    uid = loadUserId(preferencesViewModel)
+    userProfileViewModel.fetchUserProfile(uid) { profile -> userProfile = profile as UserProfile }
   }
 
   val workerProfiles by searchViewModel.subCategoryWorkerProfiles.collectAsState()
@@ -113,6 +104,10 @@ fun SearchWorkerResult(
   var selectedLocation by remember { mutableStateOf(Location()) }
   var maxDistance by remember { mutableIntStateOf(0) }
   var selectedLocationIndex by remember { mutableStateOf<Int?>(null) }
+  var bannerImage by remember { mutableStateOf(R.drawable.moroccan_flag) }
+  var profilePicture by remember { mutableStateOf(R.drawable.placeholder_worker) }
+  var initialSaved by remember { mutableStateOf(false) }
+  var workerAddress by remember { mutableStateOf("") }
 
   var lastAppliedMaxDist by remember { mutableIntStateOf(200) }
 
@@ -195,8 +190,7 @@ fun SearchWorkerResult(
                         Modifier.fillMaxWidth()
                             .padding(top = screenHeight * 0.02f, bottom = screenHeight * 0.01f)
                             .padding(horizontal = screenWidth * 0.02f)
-                            .wrapContentHeight()
-                            .testTag("filter_buttons_row"),
+                            .wrapContentHeight(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                   FilterRow(
@@ -215,7 +209,11 @@ fun SearchWorkerResult(
                     searchViewModel = searchViewModel,
                     accountViewModel = accountViewModel,
                     listState = listState,
-                    onBookClick = { selectedProfile, _ ->
+                    onBookClick = { selectedProfile, locName ->
+                      bannerImage = R.drawable.moroccan_flag
+                      profilePicture = R.drawable.placeholder_worker
+                      initialSaved = false
+                      workerAddress = locName
                       isWindowVisible = true
                       selectedWorkerProfile = selectedProfile
                     },
@@ -279,41 +277,43 @@ fun SearchWorkerResult(
         },
         clearEnabled = filterState.priceFilterApplied)
 
-    QuickFixLocationFilterBottomSheet(
-        uiState.showLocationBottomSheet,
-        userProfile = userProfile,
-        phoneLocation = filterState.phoneLocation,
-        selectedLocationIndex = selectedLocationIndex,
-        onApplyClick = { location, max ->
-          selectedLocation = location
-          lastAppliedMaxDist = max
-          baseLocation = location
-          maxDistance = max
-          selectedLocationIndex = userProfile.locations.indexOf(location) + 1
+    userProfile?.let {
+      QuickFixLocationFilterBottomSheet(
+          uiState.showLocationBottomSheet,
+          userProfile = it,
+          phoneLocation = filterState.phoneLocation,
+          selectedLocationIndex = selectedLocationIndex,
+          onApplyClick = { location, max ->
+            selectedLocation = location
+            lastAppliedMaxDist = max
+            baseLocation = location
+            maxDistance = max
+            selectedLocationIndex = it.locations.indexOf(location) + 1
 
-          if (location == Location(0.0, 0.0, "Default")) {
-            Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
-          }
-          if (locationFilterApplied) {
+            if (location == Location(0.0, 0.0, "Default")) {
+              Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
+            }
+            if (locationFilterApplied) {
+              updateFilteredProfiles()
+            } else {
+              filteredWorkerProfiles =
+                  searchViewModel.filterWorkersByDistance(filteredWorkerProfiles, location, max)
+            }
+            locationFilterApplied = true
+          },
+          onDismissRequest = { setUiState(uiState.copy(showLocationBottomSheet = false)) },
+          onClearClick = {
+            baseLocation = filterState.phoneLocation
+            lastAppliedMaxDist = 200
+            selectedLocation = Location()
+            maxDistance = 0
+            selectedLocationIndex = null
+            locationFilterApplied = false
             updateFilteredProfiles()
-          } else {
-            filteredWorkerProfiles =
-                searchViewModel.filterWorkersByDistance(filteredWorkerProfiles, location, max)
-          }
-          locationFilterApplied = true
-        },
-        onDismissRequest = { setUiState(uiState.copy(showLocationBottomSheet = false)) },
-        onClearClick = {
-          baseLocation = filterState.phoneLocation
-          lastAppliedMaxDist = 200
-          selectedLocation = Location()
-          maxDistance = 0
-          selectedLocationIndex = null
-          locationFilterApplied = false
-          updateFilteredProfiles()
-        },
-        clearEnabled = locationFilterApplied,
-        end = lastAppliedMaxDist)
+          },
+          clearEnabled = locationFilterApplied,
+          end = lastAppliedMaxDist)
+    }
     QuickFixSlidingWindowWorker(
         isVisible = isWindowVisible,
         onDismiss = { isWindowVisible = false },
@@ -323,7 +323,17 @@ fun SearchWorkerResult(
           quickFixViewModel.setSelectedWorkerProfile(selectedWorkerProfile)
           navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
         },
-        workerProfile = selectedWorkerProfile,
+        bannerImage = bannerImage,
+        profilePicture = profilePicture,
+        initialSaved = initialSaved,
+        workerCategory = selectedWorkerProfile.fieldOfWork,
+        workerAddress = workerAddress,
+        description = selectedWorkerProfile.description,
+        includedServices = selectedWorkerProfile.includedServices.map { it.name },
+        addonServices = selectedWorkerProfile.addOnServices.map { it.name },
+        workerRating = selectedWorkerProfile.reviews.map { it1 -> it1.rating }.average(),
+        tags = selectedWorkerProfile.tags,
+        reviews = selectedWorkerProfile.reviews.map { it.review },
     )
   }
 }

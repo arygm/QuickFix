@@ -79,7 +79,7 @@ class SearchOnBoardingTest {
           searchViewModel,
           accountViewModel,
           categoryViewModel,
-          onProfileClick = { _ -> },
+          onProfileClick = { _, _ -> },
       )
     }
 
@@ -100,7 +100,7 @@ class SearchOnBoardingTest {
           searchViewModel,
           accountViewModel,
           categoryViewModel,
-          onProfileClick = { _ -> },
+          onProfileClick = { _, _ -> },
       )
     }
 
@@ -130,7 +130,7 @@ class SearchOnBoardingTest {
           searchViewModel,
           accountViewModel,
           categoryViewModel,
-          onProfileClick = { _ -> },
+          onProfileClick = { _, _ -> },
       )
     }
 
@@ -151,7 +151,7 @@ class SearchOnBoardingTest {
           searchViewModel,
           accountViewModel,
           categoryViewModel,
-          onProfileClick = { _ -> },
+          onProfileClick = { _, _ -> },
       )
     }
 
@@ -196,7 +196,7 @@ class SearchOnBoardingTest {
           searchViewModel = searchViewModel,
           accountViewModel = accountViewModel,
           categoryViewModel = categoryViewModel,
-          onProfileClick = { _ -> },
+          onProfileClick = { _, _ -> },
       )
     }
 
@@ -271,7 +271,7 @@ class SearchOnBoardingTest {
           searchViewModel = searchViewModel,
           accountViewModel = accountViewModel,
           categoryViewModel = categoryViewModel,
-          onProfileClick = { _ -> },
+          onProfileClick = { _, _ -> },
       )
     }
 
@@ -309,7 +309,7 @@ class SearchOnBoardingTest {
           searchViewModel = searchViewModel,
           accountViewModel = accountViewModel,
           categoryViewModel = categoryViewModel,
-          onProfileClick = { _ -> },
+          onProfileClick = { _, _ -> },
       )
     }
 
@@ -335,7 +335,7 @@ class SearchOnBoardingTest {
           searchViewModel,
           accountViewModel,
           categoryViewModel,
-          onProfileClick = { _ -> },
+          onProfileClick = { _, _ -> },
       )
     }
 
@@ -359,7 +359,7 @@ class SearchOnBoardingTest {
           searchViewModel,
           accountViewModel,
           categoryViewModel,
-          onProfileClick = { _ -> },
+          onProfileClick = { _, _ -> },
       )
     }
 
@@ -387,7 +387,7 @@ class SearchOnBoardingTest {
           searchViewModel,
           accountViewModel,
           categoryViewModel,
-          onProfileClick = { _ -> },
+          onProfileClick = { _, _ -> },
       )
     }
 
