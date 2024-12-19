@@ -301,7 +301,7 @@ fun HomeNavHost(
     }
 
     composable(WorkerScreen.QUICKFIX_BILLING) {
-      QuickFixBilling(quickFixViewModel, navigationActions)
+      QuickFixBilling(quickFixViewModel, navigationActions, navigationActionsRoot)
     }
 
     composable(WorkerScreen.MESSAGES) {

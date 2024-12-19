@@ -10,7 +10,11 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixThi
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerScreen
 
 @Composable
-fun QuickFixBilling(quickFixViewModel: QuickFixViewModel, navigationActions: NavigationActions) {
+fun QuickFixBilling(
+    quickFixViewModel: QuickFixViewModel,
+    navigationActions: NavigationActions,
+    navigationActionsRoot: NavigationActions
+) {
   val workerProfile by quickFixViewModel.selectedWorkerProfile.collectAsState()
 
   QuickFixThirdStep(
@@ -22,5 +26,5 @@ fun QuickFixBilling(quickFixViewModel: QuickFixViewModel, navigationActions: Nav
       },
       onQuickFixPay = {},
       mode = AppMode.WORKER,
-  )
+      navigationActionsRoot = navigationActionsRoot)
 }

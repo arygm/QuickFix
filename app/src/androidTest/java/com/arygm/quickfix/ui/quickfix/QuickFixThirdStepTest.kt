@@ -151,7 +151,8 @@ class QuickFixThirdStepTest {
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Act: Click on Add Bill Field Button
@@ -169,7 +170,8 @@ class QuickFixThirdStepTest {
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Add a bill field
@@ -196,7 +198,8 @@ class QuickFixThirdStepTest {
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
@@ -221,7 +224,8 @@ class QuickFixThirdStepTest {
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
@@ -246,7 +250,8 @@ class QuickFixThirdStepTest {
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
@@ -271,7 +276,8 @@ class QuickFixThirdStepTest {
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
@@ -295,7 +301,8 @@ class QuickFixThirdStepTest {
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* Verify changes if needed */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Act:
@@ -360,7 +367,8 @@ class QuickFixThirdStepTest {
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Act: Add a bill field and enter incomplete data (only description)
@@ -388,7 +396,8 @@ class QuickFixThirdStepTest {
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Act: Open Suggested Dates Dialog and select the first date
@@ -410,7 +419,8 @@ class QuickFixThirdStepTest {
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Act: Add two more bill fields

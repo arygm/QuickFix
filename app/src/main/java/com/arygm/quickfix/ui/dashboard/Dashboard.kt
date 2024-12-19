@@ -357,7 +357,9 @@ fun DashboardScreen(
 
               item {
                 ChatWidget(
-                    chatList = chats,
+                    chatList =
+                        if (mode == "USER") chats.filter { it.workeruid != uid }
+                        else chats.filter { it.useruid != uid },
                     onItemClick = {
                       chatViewModel.selectChat(it)
                       if (mode == "USER") navigationActions.navigateTo(UserScreen.MESSAGES)
@@ -374,9 +376,23 @@ fun DashboardScreen(
               }
 
               item {
+                var workerProfile by remember { mutableStateOf<WorkerProfile?>(null) }
                 BillsWidget(
                     quickFixes = quickFixes,
-                    onItemClick = { /*Handle Bill Item Click*/},
+                    onItemClick = {
+                      quickFixViewModel.setUpdateQuickFix(it)
+                      workerViewModel.fetchUserProfile(it.workerId) { profile ->
+                        if (profile != null) {
+                          workerProfile = profile as WorkerProfile
+                          quickFixViewModel.setSelectedWorkerProfile(workerProfile!!)
+                        }
+                      }
+                      if (mode == "USER") {
+                        navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
+                      } else {
+                        navigationActions.navigateTo(WorkerScreen.QUIKFIX_ONBOARDING)
+                      }
+                    },
                     onShowAllClick = { /*Handle Show All Click*/},
                     itemsToShowDefault = 2,
                     workerViewModel = workerViewModel,

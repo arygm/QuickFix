@@ -498,25 +498,23 @@ fun QuickFixLastStep(
                       }
                 }
 
-                if (!showReview && quickFix.status == Status.FINISHED) {
-                  QuickFixButton(
-                      buttonText = "Go back home",
-                      buttonColor = colorScheme.surface,
-                      textStyle =
-                          poppinsTypography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                      textColor = colorScheme.primary,
-                      onClickAction = {
-                        navigationActionsRoot.navigateTo(
-                            if (mode == AppMode.USER) USER_TOP_LEVEL_DESTINATIONS[0].route
-                            else WORKER_TOP_LEVEL_DESTINATIONS[0].route)
-                      },
-                      leadingIcon = Icons.Outlined.Home,
-                      leadingIconTint = colorScheme.primary,
-                      modifier =
-                          Modifier.padding(top = 16.dp * heightRatio.value)
-                              .fillMaxWidth()
-                              .testTag("ConsultDiscussionButton"))
-                }
+                QuickFixButton(
+                    buttonText = "Go back home",
+                    buttonColor = colorScheme.surface,
+                    textStyle =
+                        poppinsTypography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                    textColor = colorScheme.primary,
+                    onClickAction = {
+                      navigationActionsRoot.navigateTo(
+                          if (mode == AppMode.USER) USER_TOP_LEVEL_DESTINATIONS[0].route
+                          else WORKER_TOP_LEVEL_DESTINATIONS[0].route)
+                    },
+                    leadingIcon = Icons.Outlined.Home,
+                    leadingIconTint = colorScheme.primary,
+                    modifier =
+                        Modifier.padding(top = 16.dp * heightRatio.value)
+                            .fillMaxWidth()
+                            .testTag("GoBackHomeButton"))
               }
             }
       }

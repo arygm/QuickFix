@@ -45,7 +45,7 @@ fun BillsWidget(
     quickFixes: List<QuickFix>,
     onShowAllClick: () -> Unit,
     workerViewModel: ProfileViewModel,
-    onItemClick: (List<BillField>) -> Unit,
+    onItemClick: (QuickFix) -> Unit,
     modifier: Modifier = Modifier,
     itemsToShowDefault: Int = 3
 ) {
@@ -116,7 +116,7 @@ fun BillsWidget(
                   workerProfile?.let {
                     BillItem(
                         billFields = bill,
-                        onClick = { onItemClick(bill) },
+                        onClick = { onItemClick(quickFix) },
                         quickFix = quickFix,
                         workerProfile = it)
                   }

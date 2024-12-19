@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -65,7 +66,10 @@ import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
+import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
+import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTINATIONS
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -73,6 +77,7 @@ import java.util.Locale
 @Composable
 fun QuickFixThirdStep(
     quickFixViewModel: QuickFixViewModel,
+    navigationActionsRoot: NavigationActions,
     workerProfile: WorkerProfile,
     onQuickFixChange: (QuickFix) -> Unit,
     onQuickFixPay: (QuickFix) -> Unit,
@@ -677,6 +682,26 @@ fun QuickFixThirdStep(
                 } else if (mode == AppMode.WORKER) {
                   false
                 } else true)
+      }
+
+      item {
+        QuickFixButton(
+            buttonText = "Go back home",
+            buttonColor = colorScheme.surface,
+            textStyle = poppinsTypography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            textColor = colorScheme.onSurface,
+            height = 75.dp * heightRatio.value,
+            onClickAction = {
+              navigationActionsRoot.navigateTo(
+                  if (mode == AppMode.USER) USER_TOP_LEVEL_DESTINATIONS[0].route
+                  else WORKER_TOP_LEVEL_DESTINATIONS[0].route)
+            },
+            leadingIcon = Icons.Outlined.Home,
+            leadingIconTint = colorScheme.onSurface,
+            modifier =
+                Modifier.padding(top = 16.dp * heightRatio.value)
+                    .fillMaxWidth()
+                    .testTag("GoBackHomeButton"))
       }
     }
   }
