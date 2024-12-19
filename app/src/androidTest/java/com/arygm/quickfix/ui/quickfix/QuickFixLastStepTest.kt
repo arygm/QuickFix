@@ -11,6 +11,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -29,6 +30,7 @@ import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixLastStep
 import com.google.firebase.Timestamp
 import io.mockk.Runs
@@ -186,6 +188,39 @@ class QuickFixLastStepTest {
         .assertIsDisplayed()
         .assertHasClickAction()
     composeTestRule.onNodeWithTag("CancelButton").assertIsDisplayed().assertHasClickAction()
+  }
+
+  @Test
+  fun testQuickFixLastStepDisplaysGoBackButton() {
+    // Arrange
+    every { runBlocking { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } } answers
+        {
+          secondArg<(Category?) -> Unit>().invoke(sampleCategory)
+        }
+    quickFixViewModel.setUpdateQuickFix(sampleQuickFix)
+
+    // Act
+    composeTestRule.setContent {
+      QuickFixLastStep(
+          workerProfile = sampleWorkerProfile,
+          categoryViewModel = categoryViewModel,
+          quickFixViewModel = quickFixViewModel,
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
+    }
+
+    composeTestRule.onNodeWithTag("QuickFixLastStep_LazyColumn").performScrollToIndex(3)
+
+    // Assert
+    composeTestRule
+        .onNodeWithTag("GoBackHomeButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
+    verify { navigationActions.navigateTo(USER_TOP_LEVEL_DESTINATIONS[0].route) }
   }
 
   @Test

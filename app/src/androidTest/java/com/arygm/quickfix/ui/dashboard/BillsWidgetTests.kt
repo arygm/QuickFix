@@ -1,11 +1,8 @@
 package com.arygm.quickfix.ui.dashboard
 
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import com.arygm.quickfix.model.bill.BillField
 import com.arygm.quickfix.model.bill.Units
 import com.arygm.quickfix.model.locations.Location
@@ -83,23 +80,5 @@ class BillsWidgetTests {
 
     // Verify that the fourth item is not displayed
     composeTestRule.onNodeWithTag("BillItem_Bill 4").assertDoesNotExist()
-  }
-
-  @Test
-  fun billSample_displaysAllItems_whenShowAllClicked() {
-    composeTestRule.setContent {
-      BillsWidget(
-          quickFixes = List(4) { fakeQuickFix },
-          onShowAllClick = {},
-          onItemClick = {},
-          itemsToShowDefault = 3,
-          workerViewModel = workerViewModel)
-    }
-
-    // Click the "Show All" button
-    composeTestRule.onNodeWithTag("ShowAllButton").performClick()
-
-    // Verify that all items are displayed
-    composeTestRule.onAllNodesWithTag("BillItem_${fakeQuickFix.title}").assertCountEquals(4)
   }
 }

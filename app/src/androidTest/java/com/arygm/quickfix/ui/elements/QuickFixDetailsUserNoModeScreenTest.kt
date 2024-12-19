@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.elements
 
+import android.graphics.Bitmap
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.arygm.quickfix.model.locations.Location
@@ -15,6 +16,9 @@ import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.whenever
 
 class QuickFixDetailsUserNoModeScreenTest {
 
@@ -134,6 +138,20 @@ class QuickFixDetailsUserNoModeScreenTest {
 
   @Test
   fun quickFixDetailsScreen_displaysImages() {
+    quickFixViewModel.setUpdateQuickFix(quickFixMock)
+    doAnswer { invocation ->
+          val onSuccess = invocation.arguments[1] as (List<Pair<String, Bitmap>>) -> Unit
+          onSuccess(
+              listOf(
+                  Pair(
+                      "https://via.placeholder.com/120",
+                      Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)),
+                  Pair(
+                      "https://via.placeholder.com/120",
+                      Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888))))
+        }
+        .whenever(quickFixRepository)
+        .fetchQuickFixAsBitmaps(any(), any(), any())
     composeTestRule.setContent {
       QuickFixDetailsScreen(
           quickFix = quickFixMock, onShowMoreToggle = {}, isExpanded = false, quickFixViewModel)

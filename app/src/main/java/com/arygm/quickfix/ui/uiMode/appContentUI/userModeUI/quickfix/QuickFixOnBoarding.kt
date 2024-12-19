@@ -116,6 +116,7 @@ fun QuickFixOnBoarding(
                     navigationActionsRoot = navigationActionsRoot)
               }
               2 -> {
+                BackHandler(enabled = true) { navigationActionsRoot.goBack() }
                 QuickFixThirdStep(
                     quickFixViewModel = quickFixViewModel,
                     workerProfile = workerProfile,
@@ -129,6 +130,7 @@ fun QuickFixOnBoarding(
                     mode = mode)
               }
               3 -> {
+                BackHandler(enabled = true) { navigationActionsRoot.goBack() }
                 QuickFixLastStep(
                     workerProfile = workerProfile,
                     onQuickFixChange = { updatedQuickFix ->
@@ -142,6 +144,7 @@ fun QuickFixOnBoarding(
                     navigationActionsRoot = navigationActionsRoot)
               }
               4 -> {
+                BackHandler(enabled = true) { navigationActionsRoot.goBack() }
                 QuickFixLastStep(
                     workerProfile = workerProfile,
                     onQuickFixChange = { updatedQuickFix ->
