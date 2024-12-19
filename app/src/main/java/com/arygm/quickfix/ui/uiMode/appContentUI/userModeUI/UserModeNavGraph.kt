@@ -53,6 +53,7 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixDispl
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.DashboardScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.HomeScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.MessageScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.map.MapScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
@@ -165,7 +166,8 @@ fun UserModeNavHost(
                             preferencesViewModel,
                             userViewModel,
                             workerViewModel,
-                            quickFixViewModel)
+                            quickFixViewModel,
+                            searchViewModel)
                       }
                       composable(UserRoute.SEARCH) {
                         SearchNavHost(
@@ -246,7 +248,8 @@ fun HomeNavHost(
     preferencesViewModel: PreferencesViewModel,
     userViewModel: ProfileViewModel,
     workerViewModel: ProfileViewModel,
-    quickFixViewModel: QuickFixViewModel
+    quickFixViewModel: QuickFixViewModel,
+    searchViewModel: SearchViewModel
 ) {
   val homeNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(homeNavController) }
@@ -277,6 +280,16 @@ fun HomeNavHost(
           preferencesViewModel = preferencesViewModel,
       )
     }
+      composable(UserScreen.MAP) {
+          MapScreen(
+              workerViewModel,
+              searchViewModel,
+              quickFixViewModel,
+              navigationActions,
+              userViewModel,
+              preferencesViewModel
+          )
+      }
   }
 }
 
