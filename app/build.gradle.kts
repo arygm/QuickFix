@@ -33,6 +33,7 @@ android {
 
     val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
     val sonarToken: String = localProperties.getProperty("SONAR_TOKEN") ?: ""
+    val geminiApiKey: String = localProperties.getProperty("GEMINI_API_KEY") ?: ""
 
     defaultConfig {
         applicationId = "com.arygm.quickfix"
@@ -47,6 +48,12 @@ android {
         }
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
         manifestPlaceholders["SONAR_TOKEN"] = sonarToken
+        manifestPlaceholders["GEMINI_API_KEY"] = geminiApiKey
+
+        buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
+        buildConfigField("String", "SONAR_TOKEN", "\"$sonarToken\"")
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+
     }
 
     signingConfigs {
@@ -185,7 +192,7 @@ dependencies {
     testImplementation(libs.json)
     implementation(libs.gson)
 
-
+    implementation(libs.generativeai.v070)
 
     implementation(libs.androidx.core.ktx)
     implementation(files("libs/meow-bottom-navigation-java-1.2.0.aar"))
@@ -204,6 +211,7 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
+    testImplementation(libs.androidx.core.testing) // or latest version
     globalTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)

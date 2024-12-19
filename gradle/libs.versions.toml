@@ -2,8 +2,12 @@
 agp = "8.6.1"
 calendar = "1.3.0"
 composeRatingbar = "1.3.12"
+coreTesting = "2.2.0"
 databindingRuntime = "8.7.0"
 datastorePreferencesCore = "1.1.1"
+generativeai = "0.9.0"
+generativeaiVersion = "VERSION"
+googleGenerativeai = "0.7.0"
 kotlin = "2.0.21"
 coreKtx = "1.13.1"
 gms = "4.4.2"
@@ -58,7 +62,9 @@ firebaseAppcheckPlayintegrity = "18.0.0"
 
 
 [libraries]
+ai-generativeai = { module = "com.google.ai:generativeai", version.ref = "generativeaiVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-databinding-runtime = { module = "androidx.databinding:databinding-runtime", version.ref = "databindingRuntime" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferencesCore" }
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastorePreferencesCore" }
@@ -69,6 +75,8 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRunt
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 calendar = { module = "com.maxkeppeler.sheets-compose-dialogs:calendar", version.ref = "calendar" }
 compose-ratingbar = { module = "com.github.a914-gowtham:compose-ratingbar", version.ref = "composeRatingbar" }
+generativeai = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeai" }
+generativeai-v070 = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "googleGenerativeai" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 json = { module = "org.json:json", version.ref = "json" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
