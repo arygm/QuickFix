@@ -31,4 +31,16 @@ interface ProfileRepository {
       onSuccess: (List<String>) -> Unit,
       onFailure: (Exception) -> Unit
   )
+
+  fun fetchProfileImageAsBitmap(
+      accountId: String,
+      onSuccess: (Bitmap) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun fetchBannerImageAsBitmap(
+      accountId: String,
+      onSuccess: (Bitmap) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 }

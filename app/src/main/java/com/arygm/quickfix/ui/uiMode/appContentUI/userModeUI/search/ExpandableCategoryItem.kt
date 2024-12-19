@@ -132,7 +132,6 @@ fun ExpandableCategoryItem(
                                           testTag = "${C.Tag.subCategoryName}_${it.name}"
                                         }
                                         .clickable {
-                                          searchViewModel.updateSearchQuery(it.name)
                                           searchViewModel.setSearchSubcategory(it)
                                           searchViewModel.filterWorkersBySubcategory(it.name) {
                                             navigationActions.navigateTo(

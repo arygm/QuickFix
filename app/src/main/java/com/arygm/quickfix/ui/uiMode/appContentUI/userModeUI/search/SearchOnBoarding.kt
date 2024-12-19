@@ -36,6 +36,7 @@ import androidx.compose.ui.window.Popup
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -53,7 +54,8 @@ fun SearchOnBoarding(
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
     categoryViewModel: CategoryViewModel,
-    quickFixViewModel: QuickFixViewModel
+    quickFixViewModel: QuickFixViewModel,
+    workerViewModel: ProfileViewModel
 ) {
   val profiles = searchViewModel.workerProfilesSuggestions.collectAsState()
   val focusManager = LocalFocusManager.current
@@ -166,7 +168,8 @@ fun SearchOnBoarding(
                         initialSaved = false
                         workerAddress = locName
                         isWindowVisible = true
-                      })
+                      },
+                      workerViewModel = workerViewModel)
 
                   if (isWindowVisible) {
                     Popup(

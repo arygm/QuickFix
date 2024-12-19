@@ -1,8 +1,9 @@
-package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
+package com.arygm.quickfix.ui.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -37,6 +38,8 @@ import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.AnnouncementScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchOnBoarding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -53,7 +56,8 @@ fun QuickFixFinderScreen(
     categoryViewModel: CategoryViewModel =
         viewModel(factory = CategoryViewModel.Factory(LocalContext.current)),
     quickFixViewModel: QuickFixViewModel,
-    preferencesViewModel: PreferencesViewModel
+    preferencesViewModel: PreferencesViewModel,
+    workerViewModel: ProfileViewModel
 ) {
   val pagerState = rememberPagerState(pageCount = { 2 })
   val colorBackground =
@@ -65,11 +69,29 @@ fun QuickFixFinderScreen(
       topBar = {
         TopAppBar(
             title = {
-              Text(
-                  text = "Quickfix",
-                  color = colorScheme.primary,
-                  style = MaterialTheme.typography.headlineLarge,
-                  modifier = Modifier.testTag("QuickFixFinderTopBarTitle"))
+              val coroutineScope = rememberCoroutineScope()
+              Row(
+                  horizontalArrangement = Arrangement.Center,
+                  verticalAlignment = Alignment.CenterVertically,
+                  modifier = Modifier.fillMaxSize().padding(end = 20.dp)) {
+                    Surface(
+                        color = colorButton,
+                        shape = RoundedCornerShape(20.dp),
+                        modifier =
+                            Modifier.padding(horizontal = 40.dp).clip(RoundedCornerShape(20.dp))) {
+                          TabRow(
+                              selectedTabIndex = pagerState.currentPage,
+                              containerColor = Color.Transparent,
+                              divider = {},
+                              indicator = {},
+                              modifier =
+                                  Modifier.padding(horizontal = 1.dp, vertical = 1.dp)
+                                      .testTag("quickFixSearchTabRow")) {
+                                QuickFixScreenTab(pagerState, coroutineScope, 0, "Search")
+                                QuickFixScreenTab(pagerState, coroutineScope, 1, "Announce")
+                              }
+                        }
+                  }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorBackground),
             modifier = Modifier.testTag("QuickFixFinderTopBar"))
@@ -79,26 +101,6 @@ fun QuickFixFinderScreen(
             modifier = Modifier.fillMaxSize().testTag("QuickFixFinderContent").padding(padding),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
-              val coroutineScope = rememberCoroutineScope()
-
-              Surface(
-                  color = colorButton,
-                  shape = RoundedCornerShape(20.dp),
-                  modifier = Modifier.padding(horizontal = 40.dp).clip(RoundedCornerShape(20.dp))) {
-                    TabRow(
-                        selectedTabIndex = pagerState.currentPage,
-                        containerColor = Color.Transparent,
-                        divider = {},
-                        indicator = {},
-                        modifier =
-                            Modifier.padding(horizontal = 1.dp, vertical = 1.dp)
-                                .align(Alignment.CenterHorizontally)
-                                .testTag("quickFixSearchTabRow")) {
-                          QuickFixScreenTab(pagerState, coroutineScope, 0, "Search")
-                          QuickFixScreenTab(pagerState, coroutineScope, 1, "Announce")
-                        }
-                  }
-
               HorizontalPager(
                   state = pagerState,
                   userScrollEnabled = false,
@@ -111,7 +113,8 @@ fun QuickFixFinderScreen(
                               searchViewModel,
                               accountViewModel,
                               categoryViewModel,
-                              quickFixViewModel)
+                              quickFixViewModel,
+                              workerViewModel)
                       1 ->
                           AnnouncementScreen(
                               announcementViewModel,
