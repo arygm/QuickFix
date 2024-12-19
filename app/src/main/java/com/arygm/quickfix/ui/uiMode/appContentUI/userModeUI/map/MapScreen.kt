@@ -287,9 +287,6 @@ fun MapScreen(
                 lastAppliedPriceEnd = 2500
                 selectedLocationIndex = null
                 baseLocation = phoneLocation
-                cameraPositionState.position =
-                    com.google.android.gms.maps.model.CameraPosition.fromLatLngZoom(
-                        LatLng(phoneLocation!!.latitude, phoneLocation!!.longitude), 5f)
               }
               1 -> showLocationBottomSheet = true
               2 -> showPriceRangeBottomSheet = true
