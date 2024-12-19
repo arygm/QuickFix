@@ -15,6 +15,7 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.announcements.Announ
 import com.google.firebase.Timestamp
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -50,7 +51,9 @@ class AnnouncementCardTest {
   @Test
   fun announcementCard_withImage_andCategory_andAccount() {
     // Mock category found
-    every { categoryViewModel.getCategoryBySubcategoryId(eq("testSubCat"), any()) } answers
+    every {
+      runBlocking { categoryViewModel.getCategoryBySubcategoryId(eq("testSubCat"), any()) }
+    } answers
         {
           val onSuccess = arg<(Category?) -> Unit>(1)
           onSuccess(
@@ -125,7 +128,9 @@ class AnnouncementCardTest {
   @Test
   fun announcementCard_noImage_noCategory_noAccount_noLocation() {
     // Mock category returns null
-    every { categoryViewModel.getCategoryBySubcategoryId(eq("testSubCat"), any()) } answers
+    every {
+      runBlocking { categoryViewModel.getCategoryBySubcategoryId(eq("testSubCat"), any()) }
+    } answers
         {
           val onSuccess = arg<(Category?) -> Unit>(1)
           onSuccess(null)
@@ -194,7 +199,9 @@ class AnnouncementCardTest {
         }
 
     // category found scenario
-    every { categoryViewModel.getCategoryBySubcategoryId(eq("testSubCat"), any()) } answers
+    every {
+      runBlocking { categoryViewModel.getCategoryBySubcategoryId(eq("testSubCat"), any()) }
+    } answers
         {
           val onSuccess = arg<(Category?) -> Unit>(1)
           onSuccess(
@@ -240,7 +247,9 @@ class AnnouncementCardTest {
           onResult(laterAccount)
         }
 
-    every { categoryViewModel.getCategoryBySubcategoryId(eq("testSubCat"), any()) } answers
+    every {
+      runBlocking { categoryViewModel.getCategoryBySubcategoryId(eq("testSubCat"), any()) }
+    } answers
         {
           val onSuccess = arg<(Category?) -> Unit>(1)
           onSuccess(
@@ -272,7 +281,9 @@ class AnnouncementCardTest {
   @Test
   fun announcementCard_noCategoryInitially_showsDefaultIcon() {
     // Initially return null category
-    every { categoryViewModel.getCategoryBySubcategoryId(eq("testSubCat"), any()) } answers
+    every {
+      runBlocking { categoryViewModel.getCategoryBySubcategoryId(eq("testSubCat"), any()) }
+    } answers
         {
           val onSuccess = arg<(Category?) -> Unit>(1)
           onSuccess(null)
@@ -304,7 +315,9 @@ class AnnouncementCardTest {
 
   @Test
   fun announcementCard_categoryFetchedInitially_showsCategoryIcon() {
-    every { categoryViewModel.getCategoryBySubcategoryId(eq("testSubCat"), any()) } answers
+    every {
+      runBlocking { categoryViewModel.getCategoryBySubcategoryId(eq("testSubCat"), any()) }
+    } answers
         {
           val onSuccess = arg<(Category?) -> Unit>(1)
           onSuccess(
