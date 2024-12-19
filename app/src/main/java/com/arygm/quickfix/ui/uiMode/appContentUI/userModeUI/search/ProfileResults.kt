@@ -30,7 +30,6 @@ fun ProfileResults(
     listState: LazyListState,
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
-    heightRatio: Float,
     geocoderWrapper: GeocoderWrapper = GeocoderWrapper(LocalContext.current),
     onBookClick: (WorkerProfile, String) -> Unit
 ) {

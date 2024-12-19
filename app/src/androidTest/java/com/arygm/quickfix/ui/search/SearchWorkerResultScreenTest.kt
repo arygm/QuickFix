@@ -186,8 +186,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
     // Verify that Back and Search icons are present in the top bar
     composeTestRule.onNodeWithContentDescription("Back").assertExists().assertIsDisplayed()
@@ -203,8 +203,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
     // Set the search query and verify that the title and description match the query
     searchViewModel.setSearchQuery("Unknown")
@@ -222,8 +222,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Wait for the UI to settle
@@ -231,7 +231,7 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
     // Verify that the LazyRow for filter buttons is visible
-    val filterButtonsRow = composeTestRule.onNodeWithTag("lazy_filter_row")
+    val filterButtonsRow = composeTestRule.onNodeWithTag("filter_buttons_row")
     filterButtonsRow.assertExists().assertIsDisplayed()
 
     // Define the expected button texts
@@ -261,8 +261,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
     // Verify that the filter icon button is displayed and has a click action
     composeTestRule
@@ -281,8 +281,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
     // Scroll through the LazyColumn and verify each profile result is displayed
     val workerProfilesList = composeTestRule.onNodeWithTag("worker_profiles_list")
@@ -305,8 +305,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
     // Perform click on the back button and verify goBack() is called
     composeTestRule.onNodeWithContentDescription("Back").performClick()
@@ -322,8 +322,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Wait for the UI to settle
@@ -351,8 +351,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -377,8 +377,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -406,8 +406,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -424,14 +424,14 @@ class SearchWorkerResultScreenTest {
         .onNodeWithTag("sliding_window_worker_category")
         .assertExists()
         .assertIsDisplayed()
-        .assertTextContains("Carpentry") // Replace with expected category
+        .assertTextContains("Exterior Painter") // Replace with expected category
 
     // Verify the worker address is displayed
     composeTestRule
         .onNodeWithTag("sliding_window_worker_address")
         .assertExists()
         .assertIsDisplayed()
-        .assertTextContains("New York") // Replace with expected address
+        .assertTextContains("Ecublens, VD") // Replace with expected address
   }
 
   @Test
@@ -443,8 +443,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -461,9 +461,8 @@ class SearchWorkerResultScreenTest {
         .onNodeWithTag("sliding_window_included_services_column")
         .assertExists()
         .assertIsDisplayed()
-
     // Check for each included service
-    val includedServices = listOf("Basic Consultation", "Service Inspection")
+    val includedServices = listOf("Painting")
 
     includedServices.forEach { service ->
       composeTestRule.onNodeWithText("• $service").assertExists().assertIsDisplayed()
@@ -479,8 +478,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -499,7 +498,7 @@ class SearchWorkerResultScreenTest {
         .assertIsDisplayed()
 
     // Check for each add-on service
-    val addOnServices = listOf("Express Delivery", "Premium Materials")
+    val addOnServices = listOf("Window Cleaning", "Furniture Assembly")
 
     addOnServices.forEach { service ->
       composeTestRule.onNodeWithText("• $service").assertExists().assertIsDisplayed()
@@ -515,8 +514,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -553,8 +552,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -570,7 +569,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("sliding_window_tags_flow_row").assertExists().assertIsDisplayed()
 
     // Check for each tag
-    val tags = listOf("Reliable", "Experienced", "Professional")
+    val tags = listOf("Painter", "Gardener")
 
     tags.forEach { tag -> composeTestRule.onNodeWithText(tag).assertExists().assertIsDisplayed() }
   }
@@ -584,8 +583,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Wait until the worker profiles are displayed
@@ -671,8 +670,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Initially, all workers should be displayed
@@ -682,7 +681,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
     // Simulate clicking the "Availability" filter button
     composeTestRule.onNodeWithText("Availability").performClick()
 
@@ -763,8 +762,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Initially, all workers should be displayed
@@ -774,7 +773,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
     // Simulate clicking the "Availability" filter button
     composeTestRule.onNodeWithText("Availability").performClick()
 
@@ -855,8 +854,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Initially, all workers should be displayed
@@ -866,7 +865,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
     // Simulate clicking the "Availability" filter button
     composeTestRule.onNodeWithText("Availability").performClick()
 
@@ -939,12 +938,12 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(1)
     // Click on the "Service Type" filter button
     composeTestRule.onNodeWithText("Service Type").performClick()
 
@@ -1006,13 +1005,13 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
     // Scroll to the "Highest Rating" button in the LazyRow
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
 
     // Click on the "Highest Rating" filter button
     composeTestRule.onNodeWithText("Highest Rating").performClick()
@@ -1026,8 +1025,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(
-          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
+      workerNodes[index].assert(hasText("${worker.price.roundToInt()}", substring = true))
     }
   }
 
@@ -1074,12 +1072,12 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(1)
     // Apply Service Type filter
     composeTestRule.onNodeWithText("Service Type").performClick()
     composeTestRule.waitForIdle()
@@ -1088,7 +1086,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.waitForIdle()
 
     // Scroll to the "Highest Rating" button in the LazyRow
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
 
     // Apply Highest Rating filter
     composeTestRule.onNodeWithText("Highest Rating").performClick()
@@ -1102,8 +1100,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(filteredWorkers.size)
 
     filteredWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(
-          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
+      workerNodes[index].assert(hasText("${worker.price.roundToInt()}", substring = true))
     }
   }
 
@@ -1144,12 +1141,12 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(1)
 
     // Apply Service Type filter for a tag that doesn't exist
     composeTestRule.onNodeWithText("Service Type").performClick()
@@ -1171,12 +1168,12 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(4)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(4)
     // Click on the "Price Range" filter button
     composeTestRule.onNodeWithText("Price Range").performClick()
 
@@ -1220,12 +1217,12 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(4)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(4)
     // Click on the "Price Range" filter button
     composeTestRule.onNodeWithText("Price Range").performClick()
 
@@ -1243,8 +1240,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(
-          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
+      workerNodes[index].assert(hasText("${worker.price.roundToInt()}", substring = true))
     }
   }
 
@@ -1281,12 +1277,12 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(4)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(4)
     // Click on the "Price Range" filter button
     composeTestRule.onNodeWithText("Price Range").performClick()
 
@@ -1304,8 +1300,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(
-          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
+      workerNodes[index].assert(hasText("${worker.price.roundToInt()}", substring = true))
     }
   }
 
@@ -1335,8 +1330,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Initially, both workers should be displayed
@@ -1345,7 +1340,7 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
     // Scroll to the "Location" button in the LazyRow if needed
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(1)
 
     // Open the Location filter bottom sheet
     composeTestRule.onNodeWithText("Location").performClick()
@@ -1355,7 +1350,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("locationFilterModalSheet").assertIsDisplayed()
 
     // Select "Home" location
-    composeTestRule.onNodeWithText("Home").performClick()
+    composeTestRule.onNodeWithTag("locationOptionRow1").performClick()
 
     // Click Apply
     composeTestRule.onNodeWithTag("applyButton").performClick()
@@ -1365,7 +1360,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(1)
 
     // Open Location filter again to clear
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(1)
     composeTestRule.onNodeWithText("Location").performClick()
     composeTestRule.waitForIdle()
 
@@ -1413,8 +1408,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -1422,7 +1417,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(1)
     // Apply Service Type filter = "Interior Painter"
     composeTestRule.onNodeWithText("Service Type").performClick()
     composeTestRule.waitForIdle()
@@ -1435,7 +1430,7 @@ class SearchWorkerResultScreenTest {
 
     // Apply Location filter to get even more specific (Assume "Home")
     composeTestRule
-        .onNodeWithTag("lazy_filter_row")
+        .onNodeWithTag("filter_buttons_row")
         .performScrollToIndex(1) // scroll to "Location" if needed
     composeTestRule.onNodeWithText("Location").performClick()
     composeTestRule.waitForIdle()
@@ -1447,7 +1442,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(1)
 
     // Now clear the Location filter but keep the Service Type filter
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(1)
     composeTestRule.onNodeWithText("Location").performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("resetButton").performClick()
@@ -1485,8 +1480,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -1494,7 +1489,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
     // Apply Availability filter for today at 10:00 (both should be available)
     composeTestRule.onNodeWithText("Availability").performClick()
     composeTestRule.waitForIdle()
@@ -1568,8 +1563,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -1577,7 +1572,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("tuneButton").performClick()
 
     // Apply Highest Rating filter
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
     composeTestRule.onNodeWithText("Highest Rating").performClick()
     composeTestRule.waitForIdle()
 
@@ -1585,9 +1580,9 @@ class SearchWorkerResultScreenTest {
     val workerNodes = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
     workerNodes.assertCountEquals(workers.size)
     // Verify order by rating text
-    workerNodes[0].assert(hasAnyChild(hasText("4.5 ★", substring = true)))
-    workerNodes[1].assert(hasAnyChild(hasText("3.0 ★", substring = true)))
-    workerNodes[2].assert(hasAnyChild(hasText("2.0 ★", substring = true)))
+    workerNodes[0].assert(hasText("4.5 ★", substring = true))
+    workerNodes[1].assert(hasText("3.0 ★", substring = true))
+    workerNodes[2].assert(hasText("2.0 ★", substring = true))
 
     // Click again to remove Highest Rating filter
     composeTestRule.onNodeWithText("Highest Rating").performClick()
@@ -1599,10 +1594,9 @@ class SearchWorkerResultScreenTest {
     // Check that the initial worker (w1) is now first again.
 
     val workerNodesAfterRevert = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
-    workerNodesAfterRevert[0].assert(
-        hasAnyChild(hasText("3.0 ★", substring = true))) // w1 first again
-    workerNodesAfterRevert[1].assert(hasAnyChild(hasText("4.5 ★", substring = true)))
-    workerNodesAfterRevert[2].assert(hasAnyChild(hasText("2.0 ★", substring = true)))
+    workerNodesAfterRevert[0].assert(hasText("3.0 ★", substring = true)) // w1 first again
+    workerNodesAfterRevert[1].assert(hasText("4.5 ★", substring = true))
+    workerNodesAfterRevert[2].assert(hasText("2.0 ★", substring = true))
   }
 
   @Test
@@ -1616,23 +1610,23 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.waitForIdle()
 
-    // Initially, the lazy_filter_row might not be visible until we click the tune button
-    composeTestRule.onNodeWithTag("lazy_filter_row").assertDoesNotExist()
+    // Initially, the filter_buttons_row might not be visible until we click the tune button
+    composeTestRule.onNodeWithTag("filter_buttons_row").assertDoesNotExist()
 
     // Click the tune button to show filter buttons
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("filter_buttons_row").assertIsDisplayed()
 
     // Click the tune button again to hide filter buttons
     composeTestRule.onNodeWithTag("tuneButton").performClick()
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag("lazy_filter_row").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("filter_buttons_row").assertDoesNotExist()
   }
 
   @Test
@@ -1648,8 +1642,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.waitForIdle()
@@ -1657,7 +1651,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("tuneButton").performClick()
 
     // Attempt to open the Service Type filter
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(1)
     composeTestRule.onNodeWithText("Service Type").performClick()
 
     composeTestRule.waitForIdle()
@@ -1699,12 +1693,12 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(1)
     // Click on the "Service Type" filter button
     composeTestRule.onNodeWithText("Service Type").performClick()
 
@@ -1744,8 +1738,7 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(
-          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
+      workerNodes[index].assert(hasText("${worker.price.roundToInt()}", substring = true))
     }
   }
 
@@ -1789,8 +1782,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Initially, all workers should be displayed
@@ -1800,7 +1793,7 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(3)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(3)
     // Simulate clicking the "Availability" filter button
     composeTestRule.onNodeWithText("Availability").performClick()
 
@@ -1896,8 +1889,8 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          preferencesViewModel)
     }
 
     // Initially, both workers should be displayed
@@ -1906,7 +1899,7 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
     // Scroll to the "Location" button in the LazyRow if needed
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(1)
 
     // Open the Location filter bottom sheet
     composeTestRule.onNodeWithText("Location").performClick()
@@ -1918,17 +1911,16 @@ class SearchWorkerResultScreenTest {
     composeTestRule.onNodeWithTag("applyButton").assertIsNotEnabled()
 
     // Select "Home" location
-    composeTestRule.onNodeWithText("Home").performClick()
+    composeTestRule.onNodeWithTag("locationOptionRow1").performClick()
 
     // Click Apply
     composeTestRule.onNodeWithTag("applyButton").performClick()
-    composeTestRule.waitForIdle()
 
     // Verify that only the worker at "Home" is displayed (worker1)
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(1)
 
     // Open Location filter again to clear
-    composeTestRule.onNodeWithTag("lazy_filter_row").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("filter_buttons_row").performScrollToIndex(1)
     composeTestRule.onNodeWithText("Location").performClick()
     composeTestRule.waitForIdle()
 
@@ -1937,7 +1929,7 @@ class SearchWorkerResultScreenTest {
 
     composeTestRule.onNodeWithTag("applyButton").assertIsEnabled()
 
-    composeTestRule.onNodeWithText("Home").performClick()
+    composeTestRule.onNodeWithTag("locationOptionRow0").performClick()
 
     // Clear the filter
     composeTestRule.onNodeWithTag("resetButton").performClick()
@@ -2032,9 +2024,9 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-          preferencesViewModel,
           quickFixViewModel,
-          locationHelper = locationHelper)
+          preferencesViewModel,
+      )
     }
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(3)

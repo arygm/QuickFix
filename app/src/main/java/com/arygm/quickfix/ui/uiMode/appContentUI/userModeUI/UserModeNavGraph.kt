@@ -421,8 +421,9 @@ fun SearchNavHost(
           searchViewModel,
           accountViewModel,
           userViewModel,
+          quickFixViewModel,
           preferencesViewModel,
-          quickFixViewModel)
+      )
     }
     composable(UserScreen.SEARCH_LOCATION) {
       LocationSearchCustomScreen(

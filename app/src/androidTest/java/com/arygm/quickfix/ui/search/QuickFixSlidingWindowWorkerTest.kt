@@ -4,8 +4,13 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.unit.dp
-import com.arygm.quickfix.R
+import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.profile.dataFields.AddOnService
+import com.arygm.quickfix.model.profile.dataFields.IncludedService
+import com.arygm.quickfix.model.profile.dataFields.Review
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.QuickFixSlidingWindowWorker
 import org.junit.Rule
 import org.junit.Test
@@ -19,38 +24,39 @@ class QuickFixSlidingWindowWorkerTest {
     // Mock data
     val includedServices =
         listOf(
-            "Initial Consultation",
-            "Basic Surface Preparation",
-            "Priming of Surfaces",
-            "High-Quality Paint Application",
-            "Two Coats of Paint",
-            "Professional Cleanup")
+                "Initial Consultation",
+                "Basic Surface Preparation",
+                "Priming of Surfaces",
+                "High-Quality Paint Application",
+                "Two Coats of Paint",
+                "Professional Cleanup")
+            .map { IncludedService(it) }
 
     val addonServices =
         listOf(
-            "Detailed Color Consultation", "Premium Paint Upgrade", "Extensive Surface Preparation")
+                "Detailed Color Consultation",
+                "Premium Paint Upgrade",
+                "Extensive Surface Preparation")
+            .map { AddOnService(it) }
 
     val reviews =
-        listOf("Great service!", "Very professional and clean.", "Would highly recommend.")
+        ArrayDeque(
+            listOf("Great service!", "Very professional and clean.", "Would highly recommend.")
+                .map { Review("bob", it, 4.0) })
 
     composeTestRule.setContent {
       QuickFixSlidingWindowWorker(
           isVisible = true,
           onDismiss = { /* No-op */},
-          bannerImage = R.drawable.moroccan_flag,
-          profilePicture = R.drawable.placeholder_worker,
-          initialSaved = false,
-          workerCategory = "Painter",
-          workerAddress = "123 Main Street",
-          description = "Sample description for the worker.",
-          includedServices = includedServices,
-          addonServices = addonServices,
-          workerRating = 4.5,
-          tags = listOf("Exterior Painting", "Interior Painting"),
-          reviews = reviews,
           screenHeight = 800.dp,
           screenWidth = 400.dp,
-          onContinueClick = { /* No-op */})
+          onContinueClick = { /* No-op */},
+          workerProfile =
+              WorkerProfile(
+                  includedServices = includedServices,
+                  addOnServices = addonServices,
+                  reviews = reviews),
+      )
     }
 
     // Verify the included services section is displayed
@@ -60,8 +66,9 @@ class QuickFixSlidingWindowWorkerTest {
         .assertIsDisplayed()
 
     // Check each included service
+    composeTestRule.onRoot().printToLog("includedServices")
     includedServices.forEach { service ->
-      composeTestRule.onNodeWithText("• $service").assertExists().assertIsDisplayed()
+      composeTestRule.onNodeWithText("• ${service.name}").assertExists().assertIsDisplayed()
     }
   }
 
@@ -92,17 +99,11 @@ class QuickFixSlidingWindowWorkerTest {
       QuickFixSlidingWindowWorker(
           isVisible = true,
           onDismiss = { /* No-op */},
-          bannerImage = R.drawable.moroccan_flag,
-          profilePicture = R.drawable.placeholder_worker,
-          initialSaved = false,
-          workerCategory = "Painter",
-          workerAddress = "123 Main Street",
-          description = "Sample description for the worker.",
-          includedServices = includedServices,
-          addonServices = addOnServices,
-          workerRating = 4.5,
-          tags = listOf("Exterior Painting", "Interior Painting"),
-          reviews = reviews,
+          workerProfile =
+              WorkerProfile(
+                  includedServices = includedServices.map { IncludedService(it) },
+                  addOnServices = addOnServices.map { AddOnService(it) },
+                  reviews = ArrayDeque(reviews.map { Review("bob", it, 4.0) })),
           screenHeight = 800.dp,
           screenWidth = 400.dp,
           onContinueClick = { /* No-op */})
@@ -116,7 +117,7 @@ class QuickFixSlidingWindowWorkerTest {
 
     // Check each add-on service
     addOnServices.forEach { service ->
-      composeTestRule.onNodeWithText("• $service").assertExists().assertIsDisplayed()
+      composeTestRule.onNodeWithText("• ${service}").assertExists().assertIsDisplayed()
     }
   }
 
@@ -155,17 +156,12 @@ class QuickFixSlidingWindowWorkerTest {
       QuickFixSlidingWindowWorker(
           isVisible = true,
           onDismiss = { /* No-op */},
-          bannerImage = R.drawable.moroccan_flag,
-          profilePicture = R.drawable.placeholder_worker,
-          initialSaved = false,
-          workerCategory = "Painter",
-          workerAddress = "123 Main Street",
-          description = "Sample description for the worker.",
-          includedServices = includedServices,
-          addonServices = addOnServices,
-          workerRating = 4.5,
-          tags = tags,
-          reviews = reviews,
+          workerProfile =
+              WorkerProfile(
+                  includedServices = includedServices.map { IncludedService(it) },
+                  addOnServices = addOnServices.map { AddOnService(it) },
+                  tags = tags,
+                  reviews = ArrayDeque(reviews.map { Review("bob", it, 4.0) })),
           screenHeight = 800.dp,
           screenWidth = 400.dp,
           onContinueClick = { /* No-op */})
