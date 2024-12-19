@@ -46,7 +46,7 @@ class QuickFixLocationFilterBottomSheetTest {
       QuickFixTheme {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = true,
-            userProfile = userProfile,
+            profile = userProfile,
             phoneLocation = phoneLocation,
             onApplyClick = onApplyClick,
             onDismissRequest = onDismissRequest,
@@ -64,7 +64,7 @@ class QuickFixLocationFilterBottomSheetTest {
       QuickFixTheme {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = false,
-            userProfile = userProfile,
+            profile = userProfile,
             phoneLocation = phoneLocation,
             onApplyClick = onApplyClick,
             onDismissRequest = onDismissRequest,
@@ -82,7 +82,7 @@ class QuickFixLocationFilterBottomSheetTest {
       QuickFixTheme {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = true,
-            userProfile = userProfile,
+            profile = userProfile,
             phoneLocation = phoneLocation,
             onApplyClick = onApplyClick,
             onDismissRequest = onDismissRequest,
@@ -113,7 +113,7 @@ class QuickFixLocationFilterBottomSheetTest {
       QuickFixTheme {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = true,
-            userProfile = userProfile,
+            profile = userProfile,
             phoneLocation = phoneLocation,
             onApplyClick = onApplyClick,
             onDismissRequest = onDismissRequest,
@@ -147,7 +147,7 @@ class QuickFixLocationFilterBottomSheetTest {
       QuickFixTheme {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = true,
-            userProfile = userProfile,
+            profile = userProfile,
             phoneLocation = phoneLocation,
             onApplyClick = { loc, r ->
               appliedLocation = loc
@@ -183,7 +183,7 @@ class QuickFixLocationFilterBottomSheetTest {
       QuickFixTheme {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = true,
-            userProfile = userProfile,
+            profile = userProfile,
             phoneLocation = phoneLocation,
             onApplyClick = onApplyClick,
             onDismissRequest = onDismissRequest,
@@ -206,7 +206,7 @@ class QuickFixLocationFilterBottomSheetTest {
       QuickFixTheme {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = true,
-            userProfile = userProfile,
+            profile = userProfile,
             phoneLocation = phoneLocation,
             onApplyClick = onApplyClick,
             onDismissRequest = { dismissCalled = true },
@@ -238,7 +238,7 @@ class QuickFixLocationFilterBottomSheetTest {
       QuickFixTheme {
         QuickFixLocationFilterBottomSheet(
             showModalBottomSheet = true,
-            userProfile = userProfile,
+            profile = userProfile,
             phoneLocation = phoneLocation,
             onApplyClick = onApplyClick,
             onDismissRequest = { dismissCalled = true },

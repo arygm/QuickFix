@@ -41,14 +41,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuickFixLocationFilterBottomSheet(
     showModalBottomSheet: Boolean,
-    userProfile: UserProfile,
+    profile: Profile,
     phoneLocation: Location,
     selectedLocationIndex: Int? = null,
     onApplyClick: (Location, Int) -> Unit,
@@ -97,7 +99,12 @@ fun QuickFixLocationFilterBottomSheet(
                   Spacer(modifier = Modifier.height(verticalSpacing))
 
                   val locationOptions = mutableListOf("Use my Current Location")
-                  userProfile.locations.forEach { loc -> locationOptions += loc.name }
+                  if (profile is UserProfile) {
+                    profile.locations.forEach { loc -> locationOptions += loc.name }
+                  } else if (profile is WorkerProfile) {
+                    locationOptions += profile.location!!.name
+                  }
+
                   val selectedOption = remember { mutableStateOf<Int?>(selectedLocationIndex) }
 
                   val maxListHeight = heightRatio * 800 * 0.5f
@@ -234,7 +241,12 @@ fun QuickFixLocationFilterBottomSheet(
                           onApplyClick(phoneLocation, range)
                         } else {
                           onApplyClick(
-                              userProfile.locations[selectedOption.value!!.minus(1)], range)
+                              if (profile is UserProfile) {
+                                profile.locations[selectedOption.value!!.minus(1)]
+                              } else if (profile is WorkerProfile) {
+                                profile.location!!
+                              } else Location(0.0, 0.0, "shouldn't happpen"),
+                              range)
                         }
                         onDismissRequest()
                       },

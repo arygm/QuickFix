@@ -15,6 +15,12 @@ interface AnnouncementRepository {
       onFailure: (Exception) -> Unit
   )
 
+  fun getAnnouncementsByCategory(
+      category: String,
+      onSuccess: (List<Announcement>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   fun announce(announcement: Announcement, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
   fun uploadAnnouncementImages(

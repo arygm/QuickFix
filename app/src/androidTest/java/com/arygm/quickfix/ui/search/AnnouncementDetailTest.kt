@@ -106,7 +106,7 @@ class AnnouncementDetailTest {
         AnnouncementViewModel(
             announcementRepository = mockAnnouncementRepository,
             preferencesRepository = mockPreferencesRepository,
-            userProfileRepository = mockProfileRepository)
+            profileRepository = mockProfileRepository)
 
     // Select the sample announcement
     announcementViewModel.selectAnnouncement(sampleAnnouncement)

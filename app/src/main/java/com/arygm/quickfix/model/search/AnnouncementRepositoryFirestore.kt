@@ -78,6 +78,22 @@ class AnnouncementRepositoryFirestore(
         }
   }
 
+  override fun getAnnouncementsByCategory(
+      category: String,
+      onSuccess: (List<Announcement>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath)
+        .whereEqualTo("category", category) // Query for matching category
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val announcements =
+              querySnapshot.documents.mapNotNull { document -> documentToAnnouncement(document) }
+          onSuccess(announcements)
+        }
+        .addOnFailureListener { exception -> onFailure(exception) }
+  }
+
   override fun announce(
       announcement: Announcement,
       onSuccess: () -> Unit,

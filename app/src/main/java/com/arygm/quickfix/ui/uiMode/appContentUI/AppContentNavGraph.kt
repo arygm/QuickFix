@@ -27,7 +27,7 @@ import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.UserModeNavHost
-import com.arygm.quickfix.ui.uiMode.workerMode.WorkerModeNavGraph
+import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.WorkerModeNavGraph
 import com.arygm.quickfix.utils.loadAppMode
 
 @Composable
@@ -103,10 +103,12 @@ fun AppContentNavGraph(
         composable(AppContentRoute.WORKER_MODE) {
           WorkerModeNavGraph(
               modeViewModel,
+              workerViewModel,
               isOffline,
               appContentNavigationActions,
               preferencesViewModel,
               accountViewModel,
+              categoryViewModel,
               rootNavigationActions,
               chatViewModel,
               userPreferencesViewModel,

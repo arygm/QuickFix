@@ -5,10 +5,18 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.profile.UserProfileRepositoryFirestore
+import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.utils.UID_KEY
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +25,7 @@ import kotlinx.coroutines.launch
 open class AnnouncementViewModel(
     private val announcementRepository: AnnouncementRepository,
     private val preferencesRepository: PreferencesRepository,
-    private val userProfileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
   private val announcementsForUser_ = MutableStateFlow<List<Announcement>>(emptyList())
@@ -38,15 +46,20 @@ open class AnnouncementViewModel(
   val selectedAnnouncement: StateFlow<Announcement?> = selectedAnnouncement_.asStateFlow()
 
   init {
-    announcementRepository.init { getAnnouncementsForCurrentUser() }
+    if (profileRepository is UserProfileRepositoryFirestore) {
+      announcementRepository.init { getAnnouncementsForCurrentUser() }
+    }
+    if (profileRepository is WorkerProfileRepositoryFirestore) {
+      announcementRepository.init { getAnnouncementsForCurrentWorker() }
+    }
   }
 
   // create factory
   companion object {
-    fun Factory(
+    fun userFactory(
         announcementRepository: AnnouncementRepository,
         preferencesRepository: PreferencesRepository,
-        userProfileRepository: ProfileRepository
+        userProfileRepository: UserProfileRepositoryFirestore
     ): ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
@@ -54,6 +67,21 @@ open class AnnouncementViewModel(
 
             return AnnouncementViewModel(
                 announcementRepository, preferencesRepository, userProfileRepository)
+                as T
+          }
+        }
+
+    fun workerFactory(
+        announcementRepository: AnnouncementRepository,
+        preferencesRepository: PreferencesRepository,
+        workerProfileRepository: WorkerProfileRepositoryFirestore
+    ): ViewModelProvider.Factory =
+        object : ViewModelProvider.Factory {
+          @Suppress("UNCHECKED_CAST")
+          override fun <T : ViewModel> create(modelClass: Class<T>): T {
+
+            return AnnouncementViewModel(
+                announcementRepository, preferencesRepository, workerProfileRepository)
                 as T
           }
         }
@@ -94,6 +122,17 @@ open class AnnouncementViewModel(
         })
   }
 
+  /** Fetches announcements by category. */
+  fun getAnnouncementsByCategory(category: String) {
+    announcementRepository.getAnnouncementsByCategory(
+        category,
+        onSuccess = { filteredAnnouncements ->
+          announcements_.value =
+              filteredAnnouncements // Update announcements with the filtered list
+        },
+        onFailure = { e -> Log.e("Failed to fetch announcements by category", e.toString()) })
+  }
+
   fun getAnnouncementsForCurrentUser() {
     viewModelScope.launch {
       try {
@@ -105,7 +144,7 @@ open class AnnouncementViewModel(
           }
 
           // Step 2: Fetch the user profile using the user ID
-          userProfileRepository.getProfileById(
+          profileRepository.getProfileById(
               uid = userId,
               onSuccess = { profile ->
                 if (profile is UserProfile) {
@@ -116,6 +155,38 @@ open class AnnouncementViewModel(
                   }
                 } else {
                   Log.e("AnnouncementViewModel", "No profile found for user ID: $userId")
+                }
+              },
+              onFailure = { e ->
+                Log.e("AnnouncementViewModel", "Error fetching profile for user ID: $userId", e)
+              })
+        }
+      } catch (e: Exception) {
+        Log.e("AnnouncementViewModel", "Error getting announcements for current user", e)
+      }
+    }
+  }
+
+  fun getAnnouncementsForCurrentWorker() {
+    viewModelScope.launch {
+      try {
+        // Step 1: Load the user ID from preferences
+        preferencesRepository.getPreferenceByKey(UID_KEY).collect { userId ->
+          if (userId.isNullOrEmpty()) {
+            Log.e("AnnouncementViewModel", "Failed to load user ID")
+            return@collect
+          }
+
+          // Step 2: Fetch the user profile using the user ID
+          profileRepository.getProfileById(
+              uid = userId,
+              onSuccess = { profile ->
+                if (profile is WorkerProfile) {
+                  Log.d("AnnouncementViewModel", profile.fieldOfWork)
+                  // Step 3: Fetch all announcements with the same category field
+                  getAnnouncementsByCategory(profile.fieldOfWork)
+                } else {
+                  Log.e("AnnouncementViewModel", "Not a worker profile found for user ID: $userId")
                 }
               },
               onFailure = { e ->
@@ -225,7 +296,7 @@ open class AnnouncementViewModel(
                 }
 
                 // Fetch the user profile
-                userProfileRepository.getProfileById(
+                profileRepository.getProfileById(
                     uid = userId,
                     onSuccess = { profile ->
                       if (profile is UserProfile) {
@@ -243,7 +314,7 @@ open class AnnouncementViewModel(
                                   profile.quickFixes)
 
                           // Update the profile
-                          userProfileRepository.updateProfile(
+                          this@AnnouncementViewModel.profileRepository.updateProfile(
                               profile = updatedProfile,
                               onSuccess = {
                                 // Remove the announcement from the local cached lists
@@ -332,5 +403,40 @@ open class AnnouncementViewModel(
    */
   fun setAnnouncementImagesMap(updatedMap: MutableMap<String, List<Pair<String, Bitmap>>>) {
     announcementImagesMap_.value = updatedMap
+  }
+
+  /**
+   * updates the map between announcements and images.
+   *
+   * @param announcements The announcements to filter.
+   */
+  fun filterAnnouncementsByDistance(
+      announcements: List<Announcement>,
+      userLocation: Location,
+      maxDistance: Int
+  ): List<Announcement> {
+    return announcements.filter { announcement ->
+      val distance =
+          calculateDistance(
+              userLocation.latitude,
+              userLocation.longitude,
+              announcement.location!!.latitude,
+              announcement.location.longitude)
+      distance <= maxDistance
+    }
+  }
+
+  /** Calculates the distance between two distinct locations */
+  fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+    val earthRadius = 6371.0 // Radius of the Earth in kilometers
+    val dLat = Math.toRadians(lat2 - lat1)
+    val dLon = Math.toRadians(lon2 - lon1)
+
+    val a =
+        sin(dLat / 2) * sin(dLat / 2) +
+            cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2) * sin(dLon / 2)
+
+    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return earthRadius * c
   }
 }

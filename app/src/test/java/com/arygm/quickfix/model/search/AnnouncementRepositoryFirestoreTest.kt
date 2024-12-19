@@ -16,6 +16,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -50,7 +51,7 @@ class AnnouncementRepositoryFirestoreTest {
   @Mock private lateinit var mockCollectionReference: CollectionReference
   @Mock private lateinit var mockDocumentReference: DocumentReference
   @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
-  @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
+  @Mock private lateinit var mockQuery: Query
 
   // Mocks for FirebaseStorage
   @Mock private lateinit var mockStorage: FirebaseStorage
@@ -81,17 +82,20 @@ class AnnouncementRepositoryFirestoreTest {
       FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
     }
 
+    // Mock storage
+    whenever(mockStorage.reference).thenReturn(storageRef)
+    whenever(storageRef.child(anyString())).thenReturn(announcementFolderRef)
+    announcementRepositoryFirestore = AnnouncementRepositoryFirestore(mockFirestore, mockStorage)
+
     // Mock the Firestore structure
     whenever(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     whenever(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
     whenever(mockCollectionReference.document()).thenReturn(mockDocumentReference)
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
 
-    // Mock storage
-    whenever(mockStorage.reference).thenReturn(storageRef)
-    whenever(storageRef.child(anyString())).thenReturn(announcementFolderRef)
-
-    // Initialize the repository with mocked Firestore and Storage
-    announcementRepositoryFirestore = AnnouncementRepositoryFirestore(mockFirestore, mockStorage)
+    `when`(mockCollectionReference.whereEqualTo(eq("category"), any<String>()))
+        .thenReturn(mockQuery)
+    `when`(mockQuery.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
   }
 
   @Test
@@ -613,5 +617,114 @@ class AnnouncementRepositoryFirestoreTest {
 
     assertTrue(failureCalled)
     assertEquals(exception, exceptionReceived)
+  }
+
+  @Test
+  fun getAnnouncementsByCategory_whenNonEmpty_callsOnSuccessWithAnnouncements() {
+    val category = "Plumbing"
+
+    // Set up mock documents
+    val mockDoc1 = mock(DocumentSnapshot::class.java)
+    val mockDoc2 = mock(DocumentSnapshot::class.java)
+
+    // Mock Firestore behavior for a non-empty result
+    `when`(mockCollectionReference.whereEqualTo("category", category)).thenReturn(mockQuery)
+    `when`(mockQuery.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
+    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDoc1, mockDoc2))
+
+    // Mock document fields
+    `when`(mockDoc1.id).thenReturn("doc1")
+    `when`(mockDoc1.getString("userId")).thenReturn("userId1")
+    `when`(mockDoc1.getString("title")).thenReturn("Title 1")
+    `when`(mockDoc1.getString("category")).thenReturn("Plumbing")
+    `when`(mockDoc1.getString("description")).thenReturn("Desc 1")
+    `when`(mockDoc1.get("location"))
+        .thenReturn(mapOf("latitude" to 1.0, "longitude" to 2.0, "name" to "Location1"))
+    `when`(mockDoc1.get("availability")).thenReturn(emptyList<Map<String, Any>>())
+    `when`(mockDoc1.get("quickFixImages")).thenReturn(emptyList<String>())
+
+    `when`(mockDoc2.id).thenReturn("doc2")
+    `when`(mockDoc2.getString("userId")).thenReturn("userId2")
+    `when`(mockDoc2.getString("title")).thenReturn("Title 2")
+    `when`(mockDoc2.getString("category")).thenReturn("Plumbing")
+    `when`(mockDoc2.getString("description")).thenReturn("Desc 2")
+    `when`(mockDoc2.get("location"))
+        .thenReturn(mapOf("latitude" to 3.0, "longitude" to 4.0, "name" to "Location2"))
+    `when`(mockDoc2.get("availability")).thenReturn(emptyList<Map<String, Any>>())
+    `when`(mockDoc2.get("quickFixImages")).thenReturn(emptyList<String>())
+
+    var successCalled = false
+    var announcementsReceived: List<Announcement>? = null
+
+    announcementRepositoryFirestore.getAnnouncementsByCategory(
+        category,
+        onSuccess = {
+          successCalled = true
+          announcementsReceived = it
+        },
+        onFailure = { fail("Failure should not be called") })
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assertTrue(successCalled)
+    assertNotNull(announcementsReceived)
+    assertEquals(2, announcementsReceived!!.size)
+    assertEquals("Title 1", announcementsReceived!![0].title)
+    assertEquals("Title 2", announcementsReceived!![1].title)
+  }
+
+  @Test
+  fun getAnnouncementsByCategory_whenEmpty_callsOnSuccessWithEmptyList() {
+    val category = "Gardening"
+
+    // Mock Firestore behavior for empty result
+    `when`(mockCollectionReference.whereEqualTo("category", category)).thenReturn(mockQuery)
+    `when`(mockQuery.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
+    `when`(mockQuerySnapshot.isEmpty).thenReturn(true)
+    `when`(mockQuerySnapshot.documents).thenReturn(emptyList())
+
+    var successCalled = false
+    var announcementsReceived: List<Announcement>? = null
+
+    announcementRepositoryFirestore.getAnnouncementsByCategory(
+        category,
+        onSuccess = {
+          successCalled = true
+          announcementsReceived = it
+        },
+        onFailure = { fail("Failure should not be called") })
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assertTrue(successCalled)
+    assertNotNull(announcementsReceived)
+    assertTrue(announcementsReceived!!.isEmpty())
+  }
+
+  @Test
+  fun getAnnouncementsByCategory_whenFailure_callsOnFailure() {
+    val category = "Plumbing"
+    val exception = Exception("Firestore error")
+
+    // Mock Firestore query failure
+    `when`(mockQuery.get()).thenReturn(Tasks.forException(exception))
+
+    var callbackCalled = false
+    var receivedException: Exception? = null
+
+    // Act
+    announcementRepositoryFirestore.getAnnouncementsByCategory(
+        category = category,
+        onSuccess = { fail("Success callback should not be called") },
+        onFailure = { e ->
+          callbackCalled = true
+          receivedException = e
+        })
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Assert
+    assertTrue(callbackCalled)
+    assertEquals(exception, receivedException)
   }
 }
