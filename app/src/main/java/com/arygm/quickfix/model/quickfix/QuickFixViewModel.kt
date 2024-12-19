@@ -1,5 +1,6 @@
 package com.arygm.quickfix.model.quickfix
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -7,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,6 +25,9 @@ open class QuickFixViewModel(private val repository: QuickFixRepository) : ViewM
   private val selectedWorkerProfile_ = MutableStateFlow(WorkerProfile())
   val selectedWorkerProfile: StateFlow<WorkerProfile> = selectedWorkerProfile_.asStateFlow()
 
+  private val uploadedImages_ = MutableStateFlow<List<Bitmap>>(emptyList())
+  val uploadedImages: StateFlow<List<Bitmap>> = uploadedImages_.asStateFlow()
+
   init {
     repository.init { getQuickFixes() }
   }
@@ -32,7 +37,9 @@ open class QuickFixViewModel(private val repository: QuickFixRepository) : ViewM
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return QuickFixViewModel(QuickFixRepositoryFirestore(Firebase.firestore)) as T
+            return QuickFixViewModel(
+                QuickFixRepositoryFirestore(Firebase.firestore, Firebase.storage))
+                as T
           }
         }
   }
@@ -93,6 +100,19 @@ open class QuickFixViewModel(private val repository: QuickFixRepository) : ViewM
         })
   }
 
+  fun uploadQuickFixImages(
+      quickFixId: String,
+      images: List<Bitmap>, // List of image file paths as strings
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    repository.uploadQuickFixImages(
+        quickFixId = quickFixId,
+        images = images,
+        onSuccess = { onSuccess(it) },
+        onFailure = { e -> onFailure(e) })
+  }
+
   fun getRandomUid(): String {
     return repository.getRandomUid()
   }
@@ -111,5 +131,35 @@ open class QuickFixViewModel(private val repository: QuickFixRepository) : ViewM
 
   fun resetCurrentQuickFix() {
     viewModelScope.launch { currentQuickFix_.value = QuickFix() }
+  }
+
+  fun addUploadedImage(image: Bitmap) {
+    uploadedImages_.value += image
+  }
+
+  fun deleteUploadedImages(images: List<Bitmap>) {
+    uploadedImages_.value = uploadedImages_.value.filterNot { it in images }
+  }
+
+  fun clearUploadedImages() {
+    uploadedImages_.value = emptyList()
+  }
+
+  fun fetchQuickFixImageUrls(
+      quickFixId: String,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    repository.fetchQuickFixImageUrls(
+        quickFixId = quickFixId, onSuccess = { onSuccess(it) }, onFailure = { e -> onFailure(e) })
+  }
+
+  fun fetchQuickFixAsBitmaps(
+      quickFixId: String,
+      onSuccess: (List<Pair<String, Bitmap>>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    repository.fetchQuickFixAsBitmaps(
+        quickFixId = quickFixId, onSuccess = { onSuccess(it) }, onFailure = { e -> onFailure(e) })
   }
 }

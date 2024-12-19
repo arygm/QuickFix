@@ -430,6 +430,13 @@ fun DashBoardNavHost(
     composable(UserScreen.DISPLAY_UPLOADED_IMAGES) {
       QuickFixDisplayImages(navigationActions, preferencesViewModel, announcementViewModel)
     }
+
+    composable(UserScreen.QUICKFIX_DISPLAY_IMAGES) {
+      QuickFixDisplayImagesScreen(
+          navigationActions = navigationActions,
+          chatViewModel = chatViewModel,
+          quickFixViewModel = quickFixViewModel)
+    }
   }
 }
 

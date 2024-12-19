@@ -2,6 +2,7 @@ package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -20,12 +21,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -58,7 +60,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -68,8 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.PopupProperties
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.SubcomposeAsyncImageContent
+import coil.compose.rememberAsyncImagePainter
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
@@ -81,7 +81,6 @@ import com.arygm.quickfix.model.profile.dataFields.Service
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
-import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixCheckedListElement
 import com.arygm.quickfix.ui.elements.QuickFixDateTimePicker
@@ -89,7 +88,7 @@ import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.dashedBorder
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.personal.CameraBottomSheet
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixUploadImageSheet
 import com.arygm.quickfix.utils.loadUserId
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.firebase.Timestamp
@@ -161,7 +160,8 @@ fun QuickFixFirstStep(
   val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
 
   var cameraBottomSheet by remember { mutableStateOf(false) }
-  var listOfImagePath by remember { mutableStateOf(emptyList<String>()) }
+  val uploadedImages by quickFixViewModel.uploadedImages.collectAsState()
+  var listImages by remember { mutableStateOf(emptyList<String>()) }
   val stepDone by remember {
     derivedStateOf {
       quickFixTile.isNotEmpty() &&
@@ -171,6 +171,7 @@ fun QuickFixFirstStep(
     }
   }
   var editingDateIndex by remember { mutableStateOf<Int?>(null) }
+  val sheetState = rememberModalBottomSheetState()
 
   BoxWithConstraints(
       modifier =
@@ -206,16 +207,12 @@ fun QuickFixFirstStep(
           }
         }
 
-        if (cameraBottomSheet) {
-
-          CameraBottomSheet(
-              onDismissRequest = { cameraBottomSheet = false },
-              modifier = Modifier.fillMaxWidth(),
-              onActionRequest = { imagePath -> listOfImagePath = listOfImagePath + imagePath },
-              onShowBottomSheetChange = { cameraBottomSheet = false },
-              sheetState = rememberModalBottomSheetState(),
-          )
-        }
+        QuickFixUploadImageSheet(
+            sheetState = sheetState,
+            showModalBottomSheet = cameraBottomSheet,
+            onDismissRequest = { cameraBottomSheet = false },
+            onShowBottomSheetChange = { cameraBottomSheet = it },
+            onActionRequest = { value -> quickFixViewModel.addUploadedImage(value) })
 
         LazyColumn(
             modifier =
@@ -552,56 +549,55 @@ fun QuickFixFirstStep(
               }
 
               item {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                      items(listOfImagePath.size) { index ->
-                        SubcomposeAsyncImage(
-                            model = listOfImagePath[index].takeIf { it.isNotEmpty() },
-                            contentDescription = "Profile Picture",
-                            modifier =
-                                Modifier.fillMaxSize().semantics {
-                                  testTag = C.Tag.personalInfoScreenprofilePicture
-                                },
-                            contentScale = ContentScale.FillBounds,
-                            alignment = Alignment.Center,
-                            loading = {
-                              Box(
-                                  contentAlignment = Alignment.Center,
-                                  modifier = Modifier.fillMaxSize()) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.CameraAlt,
-                                        contentDescription = "Placeholder",
-                                        tint = colorScheme.onBackground,
-                                        modifier = Modifier.size(30.dp))
-                                  }
-                            },
-                            error = {
-                              Box(
-                                  contentAlignment = Alignment.Center,
-                                  modifier = Modifier.fillMaxSize()) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.CameraAlt,
-                                        contentDescription = "Error",
-                                        tint = colorScheme.onBackground,
-                                        modifier = Modifier.size(30.dp))
-                                  }
-                            },
-                            success = {
-                              SubcomposeAsyncImageContent(
-                                  modifier =
-                                      Modifier.padding(bottom = 16.dp)
-                                          .size(120.dp)
-                                          .clip(RoundedCornerShape(10.dp)))
-                            })
+                if (uploadedImages.isNotEmpty()) {
+                  LazyRow(
+                      modifier = Modifier.fillMaxWidth().height(150.dp * heightRatio.value),
+                      horizontalArrangement = Arrangement.spacedBy(8.dp * widthRatio.value),
+                      verticalAlignment = Alignment.CenterVertically) {
+                        items(uploadedImages.size) { index ->
+                          Box(
+                              modifier =
+                                  Modifier.padding(4.dp)
+                                      .size(150.dp * heightRatio.value)
+                                      .clip(RoundedCornerShape(8.dp))
+                                      .testTag("uploadedImageCard$index")) {
+                                Image(
+                                    painter = rememberAsyncImagePainter(uploadedImages[index]),
+                                    contentDescription = "Image $index",
+                                    modifier =
+                                        Modifier.fillMaxSize().testTag("uploadedImage$index"),
+                                    contentScale = ContentScale.Crop)
+
+                                IconButton(
+                                    onClick = {
+                                      quickFixViewModel.deleteUploadedImages(
+                                          listOf(uploadedImages[index]))
+                                    },
+                                    modifier =
+                                        Modifier.align(Alignment.TopEnd)
+                                            .padding(4.dp)
+                                            .size(24.dp)
+                                            .clip(CircleShape)
+                                            .testTag("deleteImageButton$index")) {
+                                      Icon(
+                                          imageVector = Icons.Filled.Close,
+                                          contentDescription = "Remove Image",
+                                          tint = Color.White,
+                                          modifier =
+                                              Modifier.background(
+                                                  color = Color.Black.copy(alpha = 0.6f),
+                                                  shape = CircleShape))
+                                    }
+                              }
+                        }
                       }
-                    }
+                }
               }
               item {
                 Box(
                     modifier =
                         Modifier.fillMaxWidth().padding(top = 4.dp).let {
-                          if (listOfImagePath.isEmpty()) {
+                          if (uploadedImages.isEmpty()) {
                             it.height(100.dp)
                                 .dashedBorder(
                                     width = 1.5.dp,
@@ -616,7 +612,7 @@ fun QuickFixFirstStep(
                             it
                           }
                         }) {
-                      if (listOfImagePath.isEmpty()) {
+                      if (uploadedImages.isEmpty()) {
                         QuickFixButton(
                             buttonText = "Upload Pictures",
                             buttonColor = colorScheme.background,
@@ -676,7 +672,6 @@ fun QuickFixFirstStep(
                                 QuickFix(
                                     uid = quickFixViewModel.getRandomUid(),
                                     status = Status.PENDING,
-                                    imageUrl = listOfImagePath,
                                     date =
                                         listDates.map {
                                           Timestamp(it.atZone(ZoneId.systemDefault()).toInstant())
@@ -702,47 +697,103 @@ fun QuickFixFirstStep(
                                     chatUid = chatViewModel.getRandomUid(),
                                     bill = emptyList(),
                                     location = locationQuickFix)
-                            quickFixViewModel.addQuickFix(
-                                createdQuickFix,
-                                onSuccess = {
-                                  user
-                                      ?.apply { quickFixes = quickFixes + createdQuickFix.uid }
-                                      ?.let {
-                                        userViewModel.updateProfile(
-                                            it,
-                                            onSuccess = {
-                                              worker
-                                                  ?.apply {
-                                                    quickFixes = quickFixes + createdQuickFix.uid
-                                                  }
-                                                  ?.let { it1 ->
-                                                    workerViewModel.updateProfile(
-                                                        it1,
-                                                        onSuccess = {
-                                                          onQuickFixChange(createdQuickFix)
-                                                          Toast.makeText(
-                                                                  context,
-                                                                  "QuickFix added",
-                                                                  Toast.LENGTH_SHORT)
-                                                              .show()
-                                                        },
-                                                        onFailure = {
-                                                          Log.d(
-                                                              "QuickFixFirstStep",
-                                                              "Failed to update worker profile")
-                                                        })
-                                                  }
-                                            },
-                                            onFailure = {
-                                              Log.d(
-                                                  "QuickFixFirstStep",
-                                                  "Failed to update user profile")
-                                            })
-                                      }
-                                },
-                                onFailure = {
-                                  Log.d("QuickFixFirstStep", "Failed to add quick fix")
-                                })
+                            if (uploadedImages.isEmpty()) {
+                              quickFixViewModel.addQuickFix(
+                                  createdQuickFix,
+                                  onSuccess = {
+                                    user
+                                        ?.apply { quickFixes = quickFixes + createdQuickFix.uid }
+                                        ?.let {
+                                          userViewModel.updateProfile(
+                                              it,
+                                              onSuccess = {
+                                                worker
+                                                    ?.apply {
+                                                      quickFixes = quickFixes + createdQuickFix.uid
+                                                    }
+                                                    ?.let { it1 ->
+                                                      workerViewModel.updateProfile(
+                                                          it1,
+                                                          onSuccess = {
+                                                            onQuickFixChange(createdQuickFix)
+                                                            Toast.makeText(
+                                                                    context,
+                                                                    "QuickFix added",
+                                                                    Toast.LENGTH_SHORT)
+                                                                .show()
+                                                          },
+                                                          onFailure = {
+                                                            Log.d(
+                                                                "QuickFixFirstStep",
+                                                                "Failed to update worker profile")
+                                                          })
+                                                    }
+                                              },
+                                              onFailure = {
+                                                Log.d(
+                                                    "QuickFixFirstStep",
+                                                    "Failed to update user profile")
+                                              })
+                                        }
+                                  },
+                                  onFailure = {
+                                    Log.d("QuickFixFirstStep", "Failed to add quick fix")
+                                  })
+                            } else {
+                              quickFixViewModel.uploadQuickFixImages(
+                                  createdQuickFix.uid,
+                                  uploadedImages,
+                                  onSuccess = { urls ->
+                                    listImages = urls
+                                    quickFixViewModel.addQuickFix(
+                                        createdQuickFix.copy(imageUrl = listImages),
+                                        onSuccess = {
+                                          user
+                                              ?.apply {
+                                                quickFixes = quickFixes + createdQuickFix.uid
+                                              }
+                                              ?.let {
+                                                userViewModel.updateProfile(
+                                                    it,
+                                                    onSuccess = {
+                                                      worker
+                                                          ?.apply {
+                                                            quickFixes =
+                                                                quickFixes + createdQuickFix.uid
+                                                          }
+                                                          ?.let { it1 ->
+                                                            workerViewModel.updateProfile(
+                                                                it1,
+                                                                onSuccess = {
+                                                                  onQuickFixChange(createdQuickFix)
+                                                                  Toast.makeText(
+                                                                          context,
+                                                                          "QuickFix added",
+                                                                          Toast.LENGTH_SHORT)
+                                                                      .show()
+                                                                },
+                                                                onFailure = {
+                                                                  Log.d(
+                                                                      "QuickFixFirstStep",
+                                                                      "Failed to update worker profile")
+                                                                })
+                                                          }
+                                                    },
+                                                    onFailure = {
+                                                      Log.d(
+                                                          "QuickFixFirstStep",
+                                                          "Failed to update user profile")
+                                                    })
+                                              }
+                                        },
+                                        onFailure = {
+                                          Log.d("QuickFixFirstStep", "Failed to add quick fix")
+                                        })
+                                  },
+                                  onFailure = {
+                                    Log.d("QuickFixFirstStep", "Failed to upload images")
+                                  })
+                            }
                           },
                           modifier = Modifier.weight(0.5f).testTag("continueButton"),
                           textColor = colorScheme.onPrimary,

@@ -260,7 +260,8 @@ fun MessageScreen(
                                         QuickFixDetailsScreen(
                                             quickFix = quickFix!!,
                                             isExpanded = false,
-                                            onShowMoreToggle = { isSlidingWindowVisible = it })
+                                            onShowMoreToggle = { isSlidingWindowVisible = it },
+                                            quickFixViewModel = quickFixViewModel)
                                       }
                                 }
                           }
@@ -469,7 +470,8 @@ fun MessageScreen(
               isVisible = isSlidingWindowVisible,
               onDismiss = { isSlidingWindowVisible = false },
               navigationActions = navigationActions,
-              accountViewModel = accountViewModel)
+              accountViewModel = accountViewModel,
+              quickFixViewModel = quickFixViewModel)
         }
       }
 }

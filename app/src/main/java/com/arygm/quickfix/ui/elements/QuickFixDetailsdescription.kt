@@ -1,5 +1,7 @@
 package com.arygm.quickfix.ui.elements
 
+import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,6 +14,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,15 +31,18 @@ import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.arygm.quickfix.model.quickfix.QuickFix
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
 @Composable
 fun QuickFixDetailsScreen(
     quickFix: QuickFix, // QuickFix object containing all details
     onShowMoreToggle: (Boolean) -> Unit, // Callback for toggling description expansion
-    isExpanded: Boolean // Flag indicating whether the description is expanded
+    isExpanded: Boolean, // Flag indicating whether the description is expanded
+    quickFixViewModel: QuickFixViewModel
 ) {
   // BoxWithConstraints allows you to get the available width and height
+  Log.d("QuickFixDetailsScreen", "quickFix: ${quickFix.uid}]")
   BoxWithConstraints(
       modifier =
           Modifier.fillMaxWidth()
@@ -65,7 +75,7 @@ fun QuickFixDetailsScreen(
         // Layout in a vertical column
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
           // Section for displaying images
-          ImageSelector(screenWidth, screenWidth * 2f, quickFix, {})
+          ImageSelector(screenWidth, screenWidth * 2f, quickFix, {}, quickFixViewModel)
 
           Spacer(modifier = Modifier.height(8.dp))
 
@@ -137,7 +147,8 @@ fun ImageSelector(
     screenWidth: Dp, // Screen width for sizing images
     screenHeight: Dp, // Screen height for sizing images
     quickFix: QuickFix, // QuickFix object containing image URLs
-    onViewAllImages: () -> Unit = {} // Callback to view all images
+    onViewAllImages: () -> Unit = {}, // Callback to view all images
+    quickFixViewModel: QuickFixViewModel
 ) {
   // Row layout to display images
   Row(
@@ -149,8 +160,17 @@ fun ImageSelector(
               .padding(8.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically) {
-        val visibleImages = quickFix.imageUrl.take(2) // Show only the first 2 images
-        val remainingImagesCount = quickFix.imageUrl.size - 2 // Count of remaining images
+        var quickFixImages by remember { mutableStateOf<List<Bitmap>>(emptyList()) }
+        LaunchedEffect(Unit) {
+          quickFixViewModel.fetchQuickFixAsBitmaps(
+              quickFix.uid,
+              onSuccess = { quickFixImages = it.map { it.second } },
+              onFailure = {
+                Log.e("QuickFixDetailsScreen", "Failed to fetch images: ${it.message}")
+              })
+        }
+        val visibleImages = quickFixImages.take(2) // Show only the first 2 images
+        val remainingImagesCount = quickFixImages.size - 2 // Count of remaining images
 
         // Loop through and display each image
         visibleImages.forEachIndexed { index, imageUrl ->

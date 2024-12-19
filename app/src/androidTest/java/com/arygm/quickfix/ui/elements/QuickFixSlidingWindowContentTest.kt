@@ -10,6 +10,8 @@ import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.profile.dataFields.Service
 import com.arygm.quickfix.model.quickfix.QuickFix
+import com.arygm.quickfix.model.quickfix.QuickFixRepository
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
@@ -29,6 +31,8 @@ class QuickFixSlidingWindowContentTest {
   @get:Rule val composeTestRule = createComposeRule()
   private lateinit var accountRepository: AccountRepository
   private lateinit var accountViewModel: AccountViewModel
+  private lateinit var quickFixRepository: QuickFixRepository
+  private lateinit var quickFixViewModel: QuickFixViewModel
 
   private val quickFixMock =
       QuickFix(
@@ -67,6 +71,8 @@ class QuickFixSlidingWindowContentTest {
     navigationActions = mock(NavigationActions::class.java)
     accountRepository = mock(AccountRepository::class.java)
     accountViewModel = AccountViewModel(accountRepository)
+    quickFixRepository = mock(QuickFixRepository::class.java)
+    quickFixViewModel = QuickFixViewModel(quickFixRepository)
     doAnswer { invocation ->
           val onSuccess = invocation.arguments[1] as (Account?) -> Unit
           onSuccess(
@@ -89,7 +95,8 @@ class QuickFixSlidingWindowContentTest {
           onDismiss = {},
           isVisible = true,
           navigationActions,
-          accountViewModel)
+          accountViewModel,
+          quickFixViewModel)
     }
 
     composeTestRule.onNodeWithText("Name Last Name's QuickFix request").assertIsDisplayed()
@@ -103,7 +110,8 @@ class QuickFixSlidingWindowContentTest {
           onDismiss = {},
           isVisible = true,
           navigationActions,
-          accountViewModel)
+          accountViewModel,
+          quickFixViewModel)
     }
 
     quickFixMock.includedServices.forEach { service ->
@@ -122,7 +130,8 @@ class QuickFixSlidingWindowContentTest {
           onDismiss = {},
           isVisible = true,
           navigationActions,
-          accountViewModel)
+          accountViewModel,
+          quickFixViewModel)
     }
 
     val appointmentTime = quickFixMock.time.toDate().toString().split(" ")[3]

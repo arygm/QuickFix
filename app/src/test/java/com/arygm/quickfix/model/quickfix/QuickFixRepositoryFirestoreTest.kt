@@ -19,6 +19,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.storage.FirebaseStorage
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
@@ -45,6 +46,8 @@ import org.robolectric.Shadows.shadowOf
 class QuickFixRepositoryFirestoreTest {
 
   @Mock private lateinit var mockFirestore: FirebaseFirestore
+
+  @Mock private lateinit var mockFirebaseStorage: FirebaseStorage
 
   @Mock private lateinit var mockDocumentReference: DocumentReference
 
@@ -104,7 +107,7 @@ class QuickFixRepositoryFirestoreTest {
         .`when`<FirebaseAuth> { FirebaseAuth.getInstance() }
         .thenReturn(mockFirebaseAuth)
 
-    quickFixRepositoryFirestore = QuickFixRepositoryFirestore(mockFirestore)
+    quickFixRepositoryFirestore = QuickFixRepositoryFirestore(mockFirestore, mockFirebaseStorage)
 
     whenever(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     whenever(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)

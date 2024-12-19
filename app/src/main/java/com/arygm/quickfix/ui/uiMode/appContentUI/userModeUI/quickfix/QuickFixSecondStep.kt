@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -10,13 +11,13 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
@@ -25,10 +26,12 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,19 +39,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.Account
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.messaging.Chat
 import com.arygm.quickfix.model.messaging.ChatViewModel
-import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -71,13 +77,13 @@ fun QuickFixSecondStep(
     chatViewModel: ChatViewModel,
     navigationActions: NavigationActions,
     onQuickFixMakeBill: () -> Unit,
-    quickFix: QuickFix,
     mode: AppMode
 ) {
   val dateFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM")
   val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
   var userAccount by remember { mutableStateOf<Account?>(null) }
   var workerAccount by remember { mutableStateOf<Account?>(null) }
+  val quickFix by quickFixViewModel.currentQuickFix.collectAsState()
   LaunchedEffect(Unit) {
     accountViewModel.fetchUserAccount(quickFix.userId) { userAccount = it }
     accountViewModel.fetchUserAccount(quickFix.workerId) { workerAccount = it }
@@ -266,32 +272,54 @@ fun QuickFixSecondStep(
       }
 
       item {
-        Column(
+        var quickFixImages by remember { mutableStateOf<List<Pair<String, Bitmap>>>(emptyList()) }
+        LaunchedEffect(Unit) {
+          quickFixViewModel.fetchQuickFixAsBitmaps(
+              quickFix.uid,
+              onSuccess = { quickFixImages = it },
+              onFailure = { Log.d("QuickFixSecondStep", "Failed to fetch images") })
+        }
+        LazyRow(
             modifier =
                 Modifier.clip(RoundedCornerShape(5.dp))
                     .background(colorScheme.background)
-                    .testTag("ImagesLazyColumn")) {
-              quickFix.imageUrl.forEachIndexed { index, _ ->
-                Box(
-                    modifier =
-                        Modifier.clip(RoundedCornerShape(5.dp))
-                            .fillMaxWidth()
-                            .height(this@BoxWithConstraints.maxHeight * 0.20f)
-                            .testTag("ImageBox_$index")) {
-                      Image(
-                          painter =
-                              painterResource(
-                                  id =
-                                      R.drawable.electrician), // to change when we can fetch iamges
-                          contentDescription = quickFix.imageUrl[index],
-                          contentScale = ContentScale.FillBounds,
+                    .testTag("ImagesLazyColumn")
+                    .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center) {
+              items(quickFixImages.size) { index ->
+                SubcomposeAsyncImage(
+                    model = quickFixImages[index].second,
+                    contentDescription = quickFixImages[index].first,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.clip(RoundedCornerShape(8.dp)).testTag("Image_$index"),
+                    loading = {
+                      // Display loading text while image is loading
+                      Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Loading...",
+                            style = poppinsTypography.bodySmall,
+                            color = colorScheme.onSurface,
+                            textAlign = TextAlign.Center)
+                      }
+                    },
+                    error = {
+                      // Display error message if image fails to load
+                      Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Error",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Red,
+                            textAlign = TextAlign.Center)
+                      }
+                    },
+                    success = {
+                      SubcomposeAsyncImageContent(
                           modifier =
-                              Modifier.fillMaxSize()
-                                  .padding(8.dp * widthRatio.value, 16.dp * heightRatio.value)
-                                  .clip(RoundedCornerShape(5.dp))
-                                  .testTag("Image_$index") // Apply clipping here
-                          )
-                    }
+                              Modifier.clip(RoundedCornerShape(8.dp))
+                                  .testTag("ImageContent_$index")
+                                  .padding(8.dp * heightRatio.value)
+                                  .size(160.dp * widthRatio.value))
+                    })
               }
             }
       }
@@ -320,38 +348,44 @@ fun QuickFixSecondStep(
                   chatViewModel.getChatByChatUid(
                       chat!!.chatId,
                       onSuccess = {
-                        chatViewModel.selectChat(it!!)
-                        navigationActions.navigateTo(UserScreen.MESSAGES)
-                      },
-                      onFailure = {
-                        chatViewModel.viewModelScope.launch {
-                          chatViewModel.addChat(
-                              chat!!,
-                              onSuccess = {
-                                chatViewModel.selectChat(chat!!)
-                                accountViewModel.updateAccount(
-                                    userAccount!!.copy(
-                                        activeChats = userAccount!!.activeChats + chat!!.chatId),
-                                    onSuccess = {
-                                      accountViewModel.updateAccount(
-                                          workerAccount!!.copy(
-                                              activeChats =
-                                                  workerAccount!!.activeChats + chat!!.chatId),
-                                          onSuccess = {
-                                            navigationActions.navigateTo(UserScreen.MESSAGES)
-                                            Log.d("QuickFixSecondStep", "Chat added to user")
-                                          },
-                                          onFailure = {
-                                            Log.d("QuickFixSecondStep", "Chat not added to worker")
-                                          })
-                                    },
-                                    onFailure = {
-                                      Log.d("QuickFixSecondStep", "Chat not added to user")
-                                    })
-                              },
-                              onFailure = { Log.d("QuickFixSecondStep", "Chat not added") })
+                        if (it != null) {
+                          chatViewModel.selectChat(it)
+                          Log.d(
+                              "QuickFixSecondStep",
+                              "Chat already exists, ${it.chatId}, ${it.quickFixUid}")
+                          navigationActions.navigateTo(UserScreen.MESSAGES)
+                        } else {
+                          chatViewModel.viewModelScope.launch {
+                            chatViewModel.addChat(
+                                chat!!,
+                                onSuccess = {
+                                  chatViewModel.selectChat(chat!!)
+                                  accountViewModel.updateAccount(
+                                      userAccount!!.copy(
+                                          activeChats = userAccount!!.activeChats + chat!!.chatId),
+                                      onSuccess = {
+                                        accountViewModel.updateAccount(
+                                            workerAccount!!.copy(
+                                                activeChats =
+                                                    workerAccount!!.activeChats + chat!!.chatId),
+                                            onSuccess = {
+                                              navigationActions.navigateTo(UserScreen.MESSAGES)
+                                              Log.d("QuickFixSecondStep", "Chat added to user")
+                                            },
+                                            onFailure = {
+                                              Log.d(
+                                                  "QuickFixSecondStep", "Chat not added to worker")
+                                            })
+                                      },
+                                      onFailure = {
+                                        Log.d("QuickFixSecondStep", "Chat not added to user")
+                                      })
+                                },
+                                onFailure = { Log.d("QuickFixSecondStep", "Chat not added") })
+                          }
                         }
-                      })
+                      },
+                      onFailure = { Log.d("QuickFixSecondStep", "Chat not added") })
                 }
               },
               buttonColor = colorScheme.surface,
