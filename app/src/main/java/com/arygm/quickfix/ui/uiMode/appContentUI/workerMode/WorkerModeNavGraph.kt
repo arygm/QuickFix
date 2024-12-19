@@ -43,10 +43,12 @@ import com.arygm.quickfix.ui.dashboard.DashboardScreen
 import com.arygm.quickfix.ui.elements.QuickFixOfflineBar
 import com.arygm.quickfix.ui.navigation.BottomNavigationMenu
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixDisplayImages
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.MessageScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.getBottomBarIdUser
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfigurationScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixOnBoarding
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.AnnouncementDetailScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.announcements.AnnouncementsScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.messages.MessagesScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.profile.WorkerProfileScreen
@@ -92,14 +94,16 @@ fun WorkerModeNavGraph(
                   announcementRepository = announcementRepository,
                   preferencesRepository = preferencesRepository,
                   workerProfileRepository = workerProfileRepository))
-
   var currentScreen by remember { mutableStateOf<String?>(null) }
   val shouldShowBottomBar by remember {
     derivedStateOf {
       currentScreen?.let { it != WorkerScreen.ACCOUNT_CONFIGURATION } ?: true &&
           currentScreen?.let { it != WorkerScreen.MESSAGES } ?: true &&
           currentScreen?.let { it != WorkerScreen.QUIKFIX_ONBOARDING } ?: true &&
-          currentScreen?.let { it != WorkerScreen.QUICKFIX_BILLING } ?: true
+          currentScreen?.let { it != WorkerScreen.QUICKFIX_BILLING } ?: true &&
+          currentScreen?.let {
+            it != WorkerScreen.ANNOUNCEMENT_DETAIL && it != WorkerScreen.DISPLAY_IMAGES
+          } ?: true
     }
   }
   val startDestination by modeViewModel.onSwitchStartDestWorker.collectAsState()
@@ -146,7 +150,13 @@ fun WorkerModeNavGraph(
                         MessagesNavHost(onScreenChange = { currentScreen = it })
                       }
                       composable(WorkerRoute.ANNOUNCEMENT) {
-                        AnnouncementsNavHost(onScreenChange = { currentScreen = it })
+                        AnnouncementsNavHost(
+                            announcementViewModel = announcementViewModel,
+                            preferencesViewModel = preferencesViewModel,
+                            workerProfileViewModel = workerViewModel,
+                            categoryViewModel = categoryViewModel,
+                            accountViewModel = accountViewModel,
+                            onScreenChange = { currentScreen = it })
                       }
                       composable(WorkerRoute.PROFILE) {
                         ProfileNavHost(
@@ -199,6 +209,11 @@ fun MessagesNavHost(onScreenChange: (String) -> Unit) {
 
 @Composable
 fun AnnouncementsNavHost(
+    announcementViewModel: AnnouncementViewModel,
+    preferencesViewModel: PreferencesViewModel,
+    workerProfileViewModel: ProfileViewModel,
+    categoryViewModel: CategoryViewModel,
+    accountViewModel: AccountViewModel,
     onScreenChange: (String) -> Unit,
 ) {
   val announcementsNavController = rememberNavController()
@@ -211,7 +226,25 @@ fun AnnouncementsNavHost(
       navController = announcementsNavController,
       startDestination = WorkerScreen.ANNOUNCEMENT,
   ) {
-    composable(WorkerScreen.ANNOUNCEMENT) { AnnouncementsScreen() }
+    composable(WorkerScreen.ANNOUNCEMENT) {
+      AnnouncementsScreen(
+          announcementViewModel,
+          preferencesViewModel,
+          workerProfileViewModel,
+          categoryViewModel,
+          accountViewModel,
+          navigationActions)
+    }
+    composable(WorkerScreen.DISPLAY_IMAGES) {
+      QuickFixDisplayImages(
+          navigationActions = navigationActions,
+          preferencesViewModel = preferencesViewModel,
+          announcementViewModel = announcementViewModel)
+    }
+    composable(WorkerScreen.ANNOUNCEMENT_DETAIL) {
+      AnnouncementDetailScreen(
+          announcementViewModel, categoryViewModel, preferencesViewModel, navigationActions)
+    }
   }
 }
 
