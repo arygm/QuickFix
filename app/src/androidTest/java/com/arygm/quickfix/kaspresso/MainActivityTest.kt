@@ -104,6 +104,40 @@ class MainActivityTest : TestCase() {
                               "Renovations and Additions",
                               "Demolition and Removal",
                               "Insulation Installation",
+                              "Clean-Up")),
+                  Subcategory(
+                      id = "furniture_carpentry",
+                      name = "Furniture Carpentry",
+                      category = "Carpentry",
+                      tags =
+                          listOf(
+                              "Custom Furniture",
+                              "Restoration",
+                              "Handcrafted Woodwork",
+                              "Modern Designs",
+                              "Wooden Art Pieces",
+                              "Bespoke Joinery"),
+                      scale =
+                          Scale(
+                              longScale =
+                                  "Prices are displayed relative to the cost of crafting a custom piece of furniture.",
+                              shortScale = "Custom furniture equivalent"),
+                      setServices =
+                          listOf(
+                              "Custom Furniture Design",
+                              "Furniture Restoration",
+                              "Cabinet Making",
+                              "Shelving Units",
+                              "Built-In Closets",
+                              "Table and Chair Construction",
+                              "Antique Repair",
+                              "Wood Finishing and Staining",
+                              "Upholstery Services",
+                              "Furniture Assembly",
+                              "Outdoor Furniture",
+                              "Furniture Modification",
+                              "Wood Carving",
+                              "Veneer Work",
                               "Clean-Up"))))
 
   fun allowPermissionsIfNeeded() {
@@ -260,7 +294,7 @@ class MainActivityTest : TestCase() {
 
       // Select the first subcategory
       composeTestRule
-          .onNodeWithTag(C.Tag.professionalInfoScreenSubcategoryDropdownMenuItem + 0)
+          .onNodeWithTag(C.Tag.professionalInfoScreenSubcategoryDropdownMenuItem + 1)
           .performClick()
 
       composeTestRule.onNodeWithTag(C.Tag.professionalInfoScreenPriceField).performTextInput("100")
@@ -353,7 +387,7 @@ class MainActivityTest : TestCase() {
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
       composeTestRule.onNodeWithText("- Withdraw funds").assertIsDisplayed()
-      composeTestRule.onNodeWithText("User Mode").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Worker Mode").assertIsDisplayed()
       composeTestRule.onNodeWithText("Personal Settings").assertIsDisplayed()
       composeTestRule.onNodeWithText("My Account").assertIsDisplayed()
       composeTestRule.onNodeWithText("Preferences").assertIsDisplayed()

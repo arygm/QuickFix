@@ -58,6 +58,7 @@ accompanist = "0.24.13-rc"
 coil = "2.4.0"
 firebaseStorageKtx = "21.0.1"
 gson = "2.10.1"
+firebaseAppcheckPlayintegrity = "18.0.0"
 
 
 [libraries]
@@ -134,6 +135,7 @@ accompanist-permissions = { group = "com.google.accompanist", name = "accompanis
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 sheets-compose-dialogs-date-time = { module = "com.maxkeppeler.sheets-compose-dialogs:date-time", version.ref = "calendar" }
+firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity", version.ref = "firebaseAppcheckPlayintegrity" }
 
 
 [plugins]

@@ -1,6 +1,7 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,9 +27,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -36,12 +38,13 @@ import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.theme.poppinsFontFamily
 import com.arygm.quickfix.ui.theme.poppinsTypography
+import java.util.Locale
 
 @SuppressLint("DefaultLocale")
 @Composable
 fun SearchWorkerProfileResult(
     modifier: Modifier = Modifier,
-    profileImage: Int,
+    profileImage: Bitmap,
     name: String,
     category: String,
     rating: Double,
@@ -55,7 +58,7 @@ fun SearchWorkerProfileResult(
       if (location.length <= 9) {
         location
       } else {
-        location.take(9) + "..."
+        location.take(7) + "..."
       }
   val displayName =
       if (name.length <= 25) {
@@ -78,7 +81,7 @@ fun SearchWorkerProfileResult(
             modifier = Modifier.fillMaxWidth().padding(8.dp),
             verticalAlignment = Alignment.CenterVertically) {
               Image(
-                  painter = painterResource(id = profileImage),
+                  painter = BitmapPainter(profileImage.asImageBitmap()),
                   contentDescription = "Profile image of $name, $category",
                   modifier = Modifier.clip(RoundedCornerShape(8.dp)).size(100.dp).aspectRatio(1f),
                   contentScale = ContentScale.FillBounds)
@@ -93,7 +96,7 @@ fun SearchWorkerProfileResult(
                     verticalArrangement = Arrangement.Top,
                 ) {
                   Row(verticalAlignment = Alignment.CenterVertically) {
-                    val roundedRating = String.format("%.2f", rating).toDouble()
+                    val roundedRating = String.format(Locale.US, "%.2f", rating).toDouble()
                     Text(
                         text = "$roundedRating ★",
                         fontFamily = poppinsFontFamily,
@@ -137,12 +140,6 @@ fun SearchWorkerProfileResult(
                       lineHeight = 20.sp,
                       color = colorScheme.onBackground,
                       modifier = Modifier.testTag("price"))
-                  Text(
-                      text = "/Hour",
-                      fontSize = 13.sp,
-                      fontWeight = FontWeight.SemiBold,
-                      lineHeight = 20.sp,
-                      color = colorScheme.onSurface)
                 }
               }
 

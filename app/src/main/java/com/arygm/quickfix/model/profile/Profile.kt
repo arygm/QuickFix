@@ -24,12 +24,14 @@ open class Profile(
 }
 
 class UserProfile(
+    // String of uid that will represents the uid of the saved lists
     val locations: List<Location>,
     val announcements: List<String>, // Each string correspond to an announcement id.
     val wallet: Double = 0.0,
     uid: String,
     quickFixes: List<String> =
         emptyList(), // String of uid that will represents the uid of the QuickFixes
+    val savedList: List<String> = emptyList(),
 ) : Profile(uid, quickFixes) {
   // quickFixes: List<String>, // String of uid that will represents the uid of the QuickFixes
   override fun equals(other: Any?): Boolean {
@@ -37,11 +39,36 @@ class UserProfile(
     if (other !is UserProfile) return false
     if (!super.equals(other)) return false
 
-    return locations == other.locations
+    return locations == other.locations &&
+        announcements == other.announcements &&
+        wallet == other.wallet &&
+        savedList == other.savedList
   }
 
   override fun hashCode(): Int {
-    return listOf(super.hashCode(), locations).hashCode()
+    var result = super.hashCode()
+    result = 31 * result + locations.hashCode()
+    result = 31 * result + announcements.hashCode()
+    result = 31 * result + wallet.hashCode()
+    result = 31 * result + savedList.hashCode()
+    return result
+  }
+
+  fun copy(
+      locations: List<Location> = this.locations,
+      announcements: List<String> = this.announcements,
+      wallet: Double = this.wallet,
+      uid: String = this.uid,
+      quickFixes: List<String> = this.quickFixes,
+      savedList: List<String> = this.savedList
+  ): UserProfile {
+    return UserProfile(
+        locations = locations,
+        announcements = announcements,
+        wallet = wallet,
+        uid = uid,
+        quickFixes = quickFixes,
+        savedList = savedList)
   }
 }
 
@@ -74,6 +101,7 @@ class WorkerProfile(
     uid: String = "", // Default UID
     val tags: List<String> = listOf("Reliable", "Experienced", "Professional"), // Default tags
     val rating: Double = reviews.map { it.rating }.average(),
+    val wallet: Double = 0.0,
 ) : Profile(uid, quickFixes) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -83,11 +111,36 @@ class WorkerProfile(
     return fieldOfWork == other.fieldOfWork &&
         description == other.description &&
         location == other.location &&
-        reviews == other.reviews
+        includedServices == other.includedServices &&
+        addOnServices == other.addOnServices &&
+        reviews == other.reviews &&
+        profilePicture == other.profilePicture &&
+        bannerPicture == other.bannerPicture &&
+        price == other.price &&
+        displayName == other.displayName &&
+        unavailability_list == other.unavailability_list &&
+        workingHours == other.workingHours &&
+        tags == other.tags &&
+        rating == other.rating
   }
 
   override fun hashCode(): Int {
-    return listOf(super.hashCode(), fieldOfWork, description, location, reviews).hashCode()
+    var result = super.hashCode()
+    result = 31 * result + fieldOfWork.hashCode()
+    result = 31 * result + description.hashCode()
+    result = 31 * result + (location?.hashCode() ?: 0)
+    result = 31 * result + includedServices.hashCode()
+    result = 31 * result + addOnServices.hashCode()
+    result = 31 * result + reviews.hashCode()
+    result = 31 * result + profilePicture.hashCode()
+    result = 31 * result + bannerPicture.hashCode()
+    result = 31 * result + price.hashCode()
+    result = 31 * result + displayName.hashCode()
+    result = 31 * result + unavailability_list.hashCode()
+    result = 31 * result + workingHours.hashCode()
+    result = 31 * result + tags.hashCode()
+    result = 31 * result + rating.hashCode()
+    return result
   }
 
   fun toFirestoreMap(): Map<String, Any?> {
