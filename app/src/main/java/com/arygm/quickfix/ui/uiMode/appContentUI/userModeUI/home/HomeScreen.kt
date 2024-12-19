@@ -32,10 +32,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,6 +65,7 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
+import com.arygm.quickfix.model.tools.ai.GeminiViewModel
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.elements.PopularServicesRow
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -73,6 +76,7 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.tools.ai.QuickFixAIChatScreen
 import com.arygm.quickfix.utils.loadAppMode
 import com.arygm.quickfix.utils.loadUserId
 
@@ -89,6 +93,8 @@ fun HomeScreen(
   val focusManager = LocalFocusManager.current
   val scrollState = rememberScrollState()
 
+  val geminiViewModel = GeminiViewModel()
+  val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
   // Sample data for services and quick fixes
   val services =
       listOf(
@@ -100,6 +106,7 @@ fun HomeScreen(
   var mode by remember { mutableStateOf("") }
   var uid by remember { mutableStateOf("") }
 
+  var isChatVisible by remember { mutableStateOf(false) }
   LaunchedEffect(Unit) {
     mode = loadAppMode(preferencesViewModel)
     uid = loadUserId(preferencesViewModel)
@@ -117,6 +124,19 @@ fun HomeScreen(
   BoxWithConstraints {
     val screenHeight = maxHeight.value
     val screenWidth = maxWidth.value
+
+    // Modal Bottom Sheet
+    if (isChatVisible) {
+      ModalBottomSheet(
+          onDismissRequest = {
+            isChatVisible = false
+            geminiViewModel.clearMessages() // Clear messages when the chat is closed
+          },
+          sheetState = sheetState) {
+            QuickFixAIChatScreen(viewModel = geminiViewModel)
+          }
+    }
+
     Scaffold(
         modifier =
             Modifier.pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
@@ -125,7 +145,11 @@ fun HomeScreen(
         floatingActionButton = {
           QuickFixToolboxFloatingButton(
               iconList = listOf(Icons.Default.Map, Icons.Default.AutoAwesome, Icons.Default.Create),
-              onIconClick = {},
+              onIconClick = { index ->
+                if (index == 1) { // Assuming you want to handle the second icon
+                  isChatVisible = true
+                }
+              },
               modifier =
                   Modifier.padding(bottom = (screenHeight * 0.07).dp)
                       .testTag("ToolboxFloatingButton"))
