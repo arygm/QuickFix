@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -68,7 +69,6 @@ import java.util.Locale
 
 @Composable
 fun QuickFixLastStep(
-    quickFix: QuickFix,
     workerProfile: WorkerProfile,
     categoryViewModel: CategoryViewModel,
     quickFixViewModel: QuickFixViewModel,
@@ -82,6 +82,7 @@ fun QuickFixLastStep(
 
   var rating by remember { mutableDoubleStateOf(0.0) }
   var feedback by remember { mutableStateOf("") }
+  val quickFix by quickFixViewModel.currentQuickFix.collectAsState()
 
   var category by remember { mutableStateOf(Category()) }
   LaunchedEffect(Unit) {

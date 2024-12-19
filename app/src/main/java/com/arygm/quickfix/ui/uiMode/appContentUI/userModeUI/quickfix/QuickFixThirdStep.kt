@@ -38,6 +38,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -72,7 +73,6 @@ import java.util.Locale
 @Composable
 fun QuickFixThirdStep(
     quickFixViewModel: QuickFixViewModel,
-    quickFix: QuickFix,
     workerProfile: WorkerProfile,
     onQuickFixChange: (QuickFix) -> Unit,
     onQuickFixPay: (QuickFix) -> Unit,
@@ -80,6 +80,7 @@ fun QuickFixThirdStep(
 ) {
   val focusManager = LocalFocusManager.current
   val dateFormatter = SimpleDateFormat("EEE, dd MMM", Locale.getDefault())
+  val quickFix by quickFixViewModel.currentQuickFix.collectAsState()
   val timeFormatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
   var listDates by remember { mutableStateOf(emptyList<Timestamp>()) }
   var listBillFields by remember { mutableStateOf(emptyList<BillField>()) }

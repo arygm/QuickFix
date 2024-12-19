@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.quickfix.QuickFix
+import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
@@ -49,7 +50,8 @@ fun QuickFixSlidingWindowContent(
     onDismiss: () -> Unit,
     isVisible: Boolean = true,
     navigationActions: NavigationActions,
-    accountViewModel: AccountViewModel
+    accountViewModel: AccountViewModel,
+    quickFixViewModel: QuickFixViewModel
 ) {
   var userName by remember { mutableStateOf("") }
   accountViewModel.fetchUserAccount(
@@ -100,7 +102,8 @@ fun QuickFixSlidingWindowContent(
                       screenWidth,
                       screenHeight * 0.9f,
                       quickFix,
-                      { navigationActions.navigateTo(UserScreen.QUICKFIX_DISPLAY_IMAGES) })
+                      { navigationActions.navigateTo(UserScreen.QUICKFIX_DISPLAY_IMAGES) },
+                      quickFixViewModel)
                 }
 
                 // Spacer

@@ -244,64 +244,67 @@ fun HomeScreen(
                       )
                     }
                   } else {
-                    Box(modifier = Modifier.fillMaxWidth().weight(1.5f)) {
-                      Column(
-                          modifier =
-                              Modifier.fillMaxWidth()
-                                  .padding(horizontal = 16.dp)
-                                  .wrapContentHeight()
-                                  .clip(RoundedCornerShape(10.dp))
-                                  .background(colorScheme.surface),
-                          verticalArrangement = Arrangement.spacedBy((-64).dp),
-                          horizontalAlignment = Alignment.CenterHorizontally) {
-                            Image(
-                                painter = painterResource(id = R.drawable.noquickfix),
-                                contentDescription = "No QuickFixes Background",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.size(180.dp).alpha(1f))
+                    Box(
+                        modifier =
+                            Modifier.fillMaxWidth().weight(1.5f).testTag("NoQuickFixesBox")) {
+                          Column(
+                              modifier =
+                                  Modifier.fillMaxWidth()
+                                      .padding(horizontal = 16.dp)
+                                      .wrapContentHeight()
+                                      .clip(RoundedCornerShape(10.dp))
+                                      .background(colorScheme.surface),
+                              verticalArrangement = Arrangement.spacedBy((-64).dp),
+                              horizontalAlignment = Alignment.CenterHorizontally) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.noquickfix),
+                                    contentDescription = "No QuickFixes Background",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.size(180.dp).alpha(1f))
 
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Bottom,
-                                modifier = Modifier.fillMaxWidth()) {
-                                  Text(
-                                      text = "No QuickFixes found",
-                                      style =
-                                          poppinsTypography.bodyMedium.copy(
-                                              fontWeight = FontWeight.Bold,
-                                              color = colorScheme.onBackground,
-                                              fontSize = 14.sp),
-                                      textAlign = TextAlign.Center,
-                                      modifier = Modifier.padding(vertical = 8.dp))
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Bottom,
+                                    modifier = Modifier.fillMaxWidth()) {
+                                      Text(
+                                          text = "No QuickFixes found",
+                                          style =
+                                              poppinsTypography.bodyMedium.copy(
+                                                  fontWeight = FontWeight.Bold,
+                                                  color = colorScheme.onBackground,
+                                                  fontSize = 14.sp),
+                                          textAlign = TextAlign.Center,
+                                          modifier = Modifier.padding(vertical = 8.dp))
 
-                                  Text(
-                                      text =
-                                          "You have not yet created any QuickFixes. Create one now!",
-                                      style =
-                                          poppinsTypography.bodyMedium.copy(
-                                              fontWeight = FontWeight.Medium,
-                                              color = colorScheme.onSurface,
-                                              fontSize = 10.sp),
-                                      textAlign = TextAlign.Center,
-                                  )
+                                      Text(
+                                          text =
+                                              "You have not yet created any QuickFixes. Create one now!",
+                                          style =
+                                              poppinsTypography.bodyMedium.copy(
+                                                  fontWeight = FontWeight.Medium,
+                                                  color = colorScheme.onSurface,
+                                                  fontSize = 10.sp),
+                                          textAlign = TextAlign.Center,
+                                      )
 
-                                  QuickFixButton(
-                                      buttonText = "Book a QuickFix",
-                                      buttonColor = colorScheme.primary,
-                                      textColor = colorScheme.onPrimary,
-                                      onClickAction = {
-                                        navigationActionsRoot.navigateTo(
-                                            USER_TOP_LEVEL_DESTINATIONS[1])
-                                      },
-                                      textStyle =
-                                          MaterialTheme.typography.labelMedium.copy(
-                                              fontWeight = FontWeight.SemiBold, fontSize = 14.sp),
-                                      modifier = Modifier.padding(vertical = 8.dp),
-                                      leadingIcon = Icons.Outlined.Search,
-                                      leadingIconTint = colorScheme.onPrimary)
-                                }
-                          }
-                    }
+                                      QuickFixButton(
+                                          buttonText = "Book a QuickFix",
+                                          buttonColor = colorScheme.primary,
+                                          textColor = colorScheme.onPrimary,
+                                          onClickAction = {
+                                            navigationActionsRoot.navigateTo(
+                                                USER_TOP_LEVEL_DESTINATIONS[1])
+                                          },
+                                          textStyle =
+                                              MaterialTheme.typography.labelMedium.copy(
+                                                  fontWeight = FontWeight.SemiBold,
+                                                  fontSize = 14.sp),
+                                          modifier = Modifier.padding(vertical = 8.dp),
+                                          leadingIcon = Icons.Outlined.Search,
+                                          leadingIconTint = colorScheme.onPrimary)
+                                    }
+                              }
+                        }
                   }
                 }
           }
