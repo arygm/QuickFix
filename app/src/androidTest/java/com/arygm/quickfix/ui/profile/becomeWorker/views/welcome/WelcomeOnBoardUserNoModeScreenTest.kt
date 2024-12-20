@@ -7,10 +7,12 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
+import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.profile.FakePreferencesRepository
 import com.arygm.quickfix.ui.theme.QuickFixTheme
+import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.welcome.WelcomeOnBoardScreen
 import com.arygm.quickfix.utils.IS_WORKER_KEY
@@ -36,9 +38,11 @@ class WelcomeOnBoardUserNoModeScreenTest {
   // Initialize ViewModels
   private lateinit var preferencesViewModel: PreferencesViewModel
   private lateinit var userPreferencesViewModel: PreferencesViewModelUserProfile
+  private lateinit var modeViewModel: ModeViewModel
 
   @Before
   fun setup() {
+    modeViewModel = ModeViewModel()
     // Initialize Mockito mocks for NavigationActions
     navigationActions = mock(NavigationActions::class.java)
     rootMainNavigationActions = mock(NavigationActions::class.java)
@@ -61,7 +65,11 @@ class WelcomeOnBoardUserNoModeScreenTest {
     composeTestRule.setContent {
       QuickFixTheme {
         WelcomeOnBoardScreen(
-            navigationActions = navigationActions, preferencesViewModel = preferencesViewModel)
+            navigationActions = navigationActions,
+            preferencesViewModel = preferencesViewModel,
+            modeViewModel = modeViewModel,
+            testingFlag = true,
+            appContentNavigationActions = appContentNavigationActions)
       }
     }
 
@@ -79,7 +87,9 @@ class WelcomeOnBoardUserNoModeScreenTest {
         WelcomeOnBoardScreen(
             navigationActions = navigationActions,
             preferencesViewModel = preferencesViewModel,
-            testingFlag = true)
+            modeViewModel = modeViewModel,
+            testingFlag = true,
+            appContentNavigationActions = appContentNavigationActions)
       }
     }
     runBlocking { preferencesRepository.setPreference(IS_WORKER_KEY, true) }
@@ -97,7 +107,9 @@ class WelcomeOnBoardUserNoModeScreenTest {
         WelcomeOnBoardScreen(
             navigationActions = navigationActions,
             preferencesViewModel = preferencesViewModel,
-            testingFlag = true)
+            modeViewModel = modeViewModel,
+            testingFlag = true,
+            appContentNavigationActions = appContentNavigationActions)
       }
     }
     runBlocking { preferencesRepository.setPreference(IS_WORKER_KEY, true) }
@@ -105,6 +117,6 @@ class WelcomeOnBoardUserNoModeScreenTest {
     composeTestRule.onNodeWithTag(C.Tag.welcomeOnBoardScreenSwitchWorkerButton).performClick()
 
     // Verify navigation to UserScreen.PROFILE
-    verify(navigationActions).navigateTo(UserScreen.PROFILE)
+    verify(appContentNavigationActions).navigateTo(AppContentRoute.WORKER_MODE)
   }
 }

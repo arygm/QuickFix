@@ -45,6 +45,7 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
+import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
@@ -76,7 +77,9 @@ fun BusinessScreen(
     locationViewModel: LocationViewModel,
     testBitmapPP: Bitmap? = null,
     testLocation: Location = Location(),
-    workerPreferencesViewModel: PreferencesViewModelWorkerProfile
+    workerPreferencesViewModel: PreferencesViewModelWorkerProfile,
+    appContentNavigationActions: NavigationActions,
+    modeViewModel: ModeViewModel
 ) {
   val locationWorker = remember { mutableStateOf(testLocation) }
   val categories = categoryViewModel.categories.collectAsState().value
@@ -252,7 +255,11 @@ fun BusinessScreen(
                       workingHours = workingHours)
                 }
                 2 -> {
-                  WelcomeOnBoardScreen(navigationActions, preferencesViewModel)
+                  WelcomeOnBoardScreen(
+                      appContentNavigationActions,
+                      navigationActions,
+                      preferencesViewModel,
+                      modeViewModel = modeViewModel)
                 }
               }
             }

@@ -1524,7 +1524,6 @@ class SearchWorkerResultScreenTest {
         .filter(!hasTestTag("filter_button_Clear"))[0]
         .performClick()
     composeTestRule.waitForIdle()
-
     // With availability cleared and no other filters applied, we should still see 2 workers
     composeTestRule.onNodeWithTag("worker_profiles_list").onChildren().assertCountEquals(2)
   }

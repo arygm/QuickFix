@@ -32,6 +32,7 @@ import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepositoryDataStore
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelWorkerProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
@@ -75,7 +76,8 @@ fun WorkerModeNavGraph(
     workerViewModel: ProfileViewModel,
     quickFixViewModel: QuickFixViewModel,
     chatViewModel: ChatViewModel,
-    categoryViewModel: CategoryViewModel
+    categoryViewModel: CategoryViewModel,
+    userPreferencesViewModel: PreferencesViewModelUserProfile
 ) {
   val context = LocalContext.current
   val workerNavController = rememberNavController()
@@ -167,7 +169,8 @@ fun WorkerModeNavGraph(
                             accountViewModel,
                             workerNavigationActions,
                             rootMainNavigationActions,
-                            workerPreferenceViewModel)
+                            workerPreferenceViewModel,
+                            userPreferencesViewModel)
                       }
                     }
 
@@ -325,7 +328,8 @@ fun ProfileNavHost(
     accountViewModel: AccountViewModel,
     workerNavigationActions: NavigationActions,
     rootMainNavigationActions: NavigationActions,
-    workerPreferenceViewModel: PreferencesViewModelWorkerProfile
+    workerPreferenceViewModel: PreferencesViewModelWorkerProfile,
+    userPreferencesViewModel: PreferencesViewModelUserProfile
 ) {
   val profileNavController = rememberNavController()
   val profileNavigationActions = remember { NavigationActions(profileNavController) }
@@ -343,7 +347,8 @@ fun ProfileNavHost(
           preferencesViewModel,
           workerPreferenceViewModel,
           appContentNavigationActions,
-          modeViewModel)
+          modeViewModel,
+          userPreferencesViewModel)
     }
     composable(WorkerScreen.ACCOUNT_CONFIGURATION) {
       AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)

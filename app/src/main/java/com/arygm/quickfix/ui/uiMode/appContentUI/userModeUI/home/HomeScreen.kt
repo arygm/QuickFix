@@ -74,6 +74,7 @@ import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.QuickFixesWidget
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.theme.BackgroundSecondary
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
@@ -305,11 +306,19 @@ fun HomeScreen(
                                       .background(colorScheme.surface),
                               verticalArrangement = Arrangement.spacedBy((-64).dp),
                               horizontalAlignment = Alignment.CenterHorizontally) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.noquickfix),
-                                    contentDescription = "No QuickFixes Background",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.size(180.dp).alpha(1f))
+                                if (colorScheme.surface == BackgroundSecondary) {
+                                  Image(
+                                      painter = painterResource(id = R.drawable.noquickfix),
+                                      contentDescription = "No QuickFixes Background",
+                                      contentScale = ContentScale.Crop,
+                                      modifier = Modifier.size(180.dp).alpha(1f))
+                                } else {
+                                  Image(
+                                      painter = painterResource(id = R.drawable.noquickfixdark),
+                                      contentDescription = "No QuickFixes Background",
+                                      contentScale = ContentScale.Crop,
+                                      modifier = Modifier.size(180.dp).alpha(1f))
+                                }
 
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,

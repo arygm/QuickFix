@@ -233,7 +233,7 @@ fun QuickFixProfileScreenElement(
                                               .clip(RoundedCornerShape(buttonCornerRadius))
                                               .testTag("AddFundsButton")
                                               .background(
-                                                  color = colorScheme.onPrimary,
+                                                  color = colorScheme.surface,
                                                   shape = RoundedCornerShape(buttonCornerRadius))
                                               .weight(0.35f),
                                   ) {
@@ -364,7 +364,7 @@ fun QuickFixProfileScreenElement(
                     },
                     shape = RoundedCornerShape(screenWidth * 0.04f),
                     border = BorderStroke(borderStrokeWidth, colorScheme.onBackground),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.onPrimary),
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.surface),
                     modifier = Modifier.testTag("LogoutButton")) {
                       Text(
                           text = "Log out",

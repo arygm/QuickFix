@@ -38,7 +38,10 @@ private val LightColorScheme =
         surfaceVariant = ButtonQuaternary, // Fourth button color
         onSurfaceVariant = TextButtonQuaternary, // Text color for the quaternary button,
         onSecondaryContainer = TextDisabled,
-        tertiaryContainer = ButtonDisabled)
+        tertiaryContainer = ButtonDisabled,
+        scrim = LightRegisterColor,
+        surfaceDim = DarkTextPrimary,
+        surfaceContainerLowest = TextButtonPrimary)
 
 private val DarkColorScheme =
     darkColorScheme(
@@ -58,7 +61,10 @@ private val DarkColorScheme =
         surfaceVariant = DarkButtonQuaternary, // Fourth button color
         onSurfaceVariant = DarkTextButtonQuaternary, // Text color for the quaternary button
         onSecondaryContainer = DarkTextDisabled,
-        tertiaryContainer = DarkButtonDisabled)
+        tertiaryContainer = DarkButtonDisabled,
+        scrim = DarkRegisterColor,
+        surfaceDim = TextPrimary,
+        surfaceContainerLowest = TextSecondary)
 val poppinsFontFamily =
     FontFamily(
         Font(R.font.poppins_black, FontWeight.Black, FontStyle.Normal),

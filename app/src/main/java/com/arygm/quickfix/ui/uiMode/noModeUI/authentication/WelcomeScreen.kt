@@ -45,7 +45,6 @@ import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.navigation.RootRoute
-import com.arygm.quickfix.ui.theme.ButtonPrimary
 import com.arygm.quickfix.ui.uiMode.noModeUI.navigation.NoModeRoute
 import com.arygm.quickfix.ui.uiMode.noModeUI.navigation.NoModeScreen
 import com.arygm.quickfix.utils.loadIsSignIn
@@ -155,7 +154,7 @@ fun WelcomeScreen(
               painter = painterResource(id = com.arygm.quickfix.R.drawable.quickfix),
               contentDescription = null,
               contentScale = ContentScale.Crop,
-              colorFilter = ColorFilter.tint(colorScheme.background),
+              colorFilter = ColorFilter.tint(Color.White),
               modifier =
                   Modifier.fillMaxWidth(0.7f)
                       .graphicsLayer(rotationZ = 4.57f, alpha = elementsAlpha)
@@ -165,7 +164,7 @@ fun WelcomeScreen(
           Text(
               text = "QuickFix",
               style = MaterialTheme.typography.titleLarge,
-              color = colorScheme.background,
+              color = Color.White,
               modifier =
                   Modifier.padding(bottom = screenHeight * 0.01f) // Space between text and buttons
                       .graphicsLayer(alpha = elementsAlpha)
@@ -179,7 +178,7 @@ fun WelcomeScreen(
               },
               buttonColor = MaterialTheme.colorScheme.tertiary,
               modifier = Modifier.graphicsLayer(alpha = elementsAlpha).testTag("logInButton"),
-              textColor = colorScheme.background)
+              textColor = colorScheme.onPrimary)
 
           QuickFixButton(
               buttonText = "REGISTER TO QUICKFIX",
@@ -187,10 +186,10 @@ fun WelcomeScreen(
                 targetScreen = NoModeRoute.REGISTER
                 startAnimation = true
               },
-              buttonColor = colorScheme.background,
+              buttonColor = colorScheme.surfaceDim,
               modifier =
                   Modifier.graphicsLayer(alpha = elementsAlpha).testTag("RegistrationButton"),
-              textColor = ButtonPrimary)
+              textColor = colorScheme.scrim)
 
           QuickFixButton(
               onClickAction = {
@@ -203,15 +202,15 @@ fun WelcomeScreen(
                 launcher.launch(googleSignInClient.signInIntent)
               },
               buttonColor = Color.Transparent,
-              border = BorderStroke(2.dp, colorScheme.background),
+              border = BorderStroke(2.dp, colorScheme.surfaceContainerLowest),
               modifier =
                   Modifier.fillMaxWidth(0.8f)
                       .graphicsLayer(alpha = elementsAlpha)
                       .testTag("googleButton"),
               buttonText = "CONTINUE WITH GOOGLE",
-              textColor = colorScheme.background,
+              textColor = colorScheme.surfaceContainerLowest,
               leadingIcon = ImageVector.vectorResource(id = R.drawable.google),
-              leadingIconTint = colorScheme.background)
+              leadingIconTint = colorScheme.surfaceContainerLowest)
         }
   }
 }
