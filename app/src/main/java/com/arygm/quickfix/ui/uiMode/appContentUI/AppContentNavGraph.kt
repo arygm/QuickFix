@@ -118,7 +118,7 @@ fun AppContentNavGraph(
               workerViewModel,
               quickFixViewModel,
               chatViewModel,
-              categoryViewModel)
+              categoryViewModel, userPreferencesViewModel)
         }
       }
 }

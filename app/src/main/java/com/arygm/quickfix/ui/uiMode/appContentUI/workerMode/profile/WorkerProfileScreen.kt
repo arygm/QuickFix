@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelWorkerProfile
 import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.model.switchModes.ModeViewModel
@@ -29,7 +30,8 @@ fun WorkerProfileScreen(
     preferencesViewModel: PreferencesViewModel,
     workerPreferencesViewModel: PreferencesViewModelWorkerProfile,
     appContentNavigationActions: NavigationActions,
-    modeViewModel: ModeViewModel
+    modeViewModel: ModeViewModel,
+    userPreferencesViewModel: PreferencesViewModelUserProfile
 ) {
   val isWorker by preferencesViewModel.isWorkerFlow.collectAsState(initial = false)
 
@@ -71,6 +73,7 @@ fun WorkerProfileScreen(
     val screenWidth = maxWidth
     val screenHeight = maxHeight
     QuickFixProfileScreenElement(
+        userPreferencesViewModel = userPreferencesViewModel,
         modeNavigationActions = workerNavigationActions,
         navigationActions = navigationActions,
         rootMainNavigationActions = rootMainNavigationActions,
