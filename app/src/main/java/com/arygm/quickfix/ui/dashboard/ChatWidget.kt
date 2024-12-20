@@ -236,7 +236,8 @@ fun ChatItem(
                       (chat.chatStatus == ChatStatus.WAITING_FOR_RESPONSE ||
                           chat.chatStatus == ChatStatus.GETTING_SUGGESTIONS)) {
                     "Await confirmation from ${workerProfile.displayName}"
-                  } else chat.messages.last().content, // Removed leading comma for clarity
+                  } else if (chat.messages.isNotEmpty()) chat.messages.last().content
+                  else "", // Removed leading comma for clarity
               modifier =
                   Modifier.testTag(
                       if (chat.messages.isEmpty()) "No messages"
