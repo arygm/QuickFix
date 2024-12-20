@@ -57,6 +57,7 @@ import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
 import com.arygm.quickfix.ui.elements.QuickFixAvailabilityBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixLocationFilterBottomSheet
 import com.arygm.quickfix.ui.elements.QuickFixPriceRangeBottomSheet
+import com.arygm.quickfix.ui.elements.defaultBitmap
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
@@ -80,8 +81,6 @@ fun SearchWorkerResult(
   val locationHelper = LocationHelper(context, MainActivity())
   var selectedWorkerProfile by remember { mutableStateOf(WorkerProfile()) }
   val filterState = rememberSearchFiltersState()
-  val defaultBitmap =
-      Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888) // Example default Bitmap
 
   var profilePicture by remember { mutableStateOf(defaultBitmap) }
   var bannerPicture by remember { mutableStateOf(defaultBitmap) }
@@ -100,6 +99,7 @@ fun SearchWorkerResult(
         if (location != null) {
           val userLoc = Location(location.latitude, location.longitude, "Phone Location")
           filterState.phoneLocation = userLoc
+          baseLocation = userLoc
         } else {
           Toast.makeText(context, "Unable to fetch location", Toast.LENGTH_SHORT).show()
         }

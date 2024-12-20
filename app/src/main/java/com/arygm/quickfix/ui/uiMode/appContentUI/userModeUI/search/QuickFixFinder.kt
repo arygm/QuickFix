@@ -1,6 +1,5 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -35,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
@@ -45,6 +43,7 @@ import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
+import com.arygm.quickfix.ui.elements.defaultBitmap
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
 import kotlinx.coroutines.CoroutineScope
@@ -74,8 +73,6 @@ fun QuickFixFinderScreen(
   val colorBackground =
       if (pagerState.currentPage == 0) colorScheme.background else colorScheme.surface
   val colorButton = if (pagerState.currentPage == 1) colorScheme.background else colorScheme.surface
-  val defaultBitmap =
-      Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888) // Example default Bitmap
 
   var profilePicture by remember { mutableStateOf(defaultBitmap) }
   var bannerPicture by remember { mutableStateOf(defaultBitmap) }
@@ -94,20 +91,22 @@ fun QuickFixFinderScreen(
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxSize().padding(end = 20.dp)) {
+                    modifier = Modifier.fillMaxSize().padding(end = screenWidth * 0.05f)) {
                       Surface(
                           color = colorButton,
-                          shape = RoundedCornerShape(20.dp),
+                          shape = RoundedCornerShape(screenWidth * 0.05f),
                           modifier =
-                              Modifier.padding(horizontal = 40.dp)
-                                  .clip(RoundedCornerShape(20.dp))) {
+                              Modifier.padding(horizontal = screenWidth * 0.1f)
+                                  .clip(RoundedCornerShape(screenWidth * 0.05f))) {
                             TabRow(
                                 selectedTabIndex = pagerState.currentPage,
                                 containerColor = Color.Transparent,
                                 divider = {},
                                 indicator = {},
                                 modifier =
-                                    Modifier.padding(horizontal = 1.dp, vertical = 1.dp)
+                                    Modifier.padding(
+                                            horizontal = screenWidth * 0.01f,
+                                            vertical = screenWidth * 0.01f)
                                         .testTag("quickFixSearchTabRow")) {
                                   QuickFixScreenTab(
                                       pagerState, coroutineScope, 0, "Search", screenWidth)

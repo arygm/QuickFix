@@ -76,8 +76,6 @@ fun SearchOnBoarding(
     locationHelper: LocationHelper = LocationHelper(LocalContext.current, MainActivity())
 ) {
   val (uiState, setUiState) = remember { mutableStateOf(SearchUIState()) }
-  val workerProfiles by searchViewModel.workerProfilesSuggestions.collectAsState()
-  var filteredWorkerProfiles by remember { mutableStateOf(workerProfiles) }
   val context = LocalContext.current
   val searchSubcategory by searchViewModel.searchSubcategory.collectAsState()
   var locationFilterApplied by remember { mutableStateOf(false) }
@@ -121,16 +119,16 @@ fun SearchOnBoarding(
     userProfileViewModel.fetchUserProfile(uid) { profile -> userProfile = profile as UserProfile }
   }
   fun updateFilteredProfiles() {
-    filteredWorkerProfiles = filterState.reapplyFilters(workerProfiles, searchViewModel)
+    searchedWorkers = filterState.reapplyFilters(profiles as List<WorkerProfile>, searchViewModel)
   }
 
   // Build filter buttons
   val listOfButtons =
       filterState.getFilterButtons(
-          workerProfiles = workerProfiles,
-          filteredProfiles = filteredWorkerProfiles,
+          workerProfiles = profiles as List<WorkerProfile>,
+          filteredProfiles = searchedWorkers,
           searchViewModel = searchViewModel,
-          onProfilesUpdated = { updated -> filteredWorkerProfiles = updated },
+          onProfilesUpdated = { updated -> searchedWorkers = updated },
           onShowAvailabilityBottomSheet = {
             setUiState(uiState.copy(showAvailabilityBottomSheet = true))
           },
@@ -144,17 +142,18 @@ fun SearchOnBoarding(
   val bannerImagesMap by remember { mutableStateOf(mutableMapOf<String, Bitmap?>()) }
   var loading by remember { mutableStateOf(true) }
   // Tracks if data is loading
-  LaunchedEffect(workerProfiles) {
-    if (workerProfiles.isNotEmpty()) {
-      workerProfiles.forEach { profile ->
+  LaunchedEffect(profiles) {
+    if (profiles.isNotEmpty()) {
+      searchedWorkers.forEach { profile ->
         // Fetch profile images
         workerViewModel.fetchProfileImageAsBitmap(
             profile.uid,
             onSuccess = { bitmap ->
               profileImagesMap[profile.uid] = bitmap
-              checkIfLoadingComplete(workerProfiles, profileImagesMap, bannerImagesMap) {
-                loading = false
-              }
+              checkIfLoadingComplete(
+                  profiles as List<WorkerProfile>, profileImagesMap, bannerImagesMap) {
+                    loading = false
+                  }
             },
             onFailure = { Log.e("ProfileResults", "Failed to fetch profile image") })
 
@@ -163,9 +162,10 @@ fun SearchOnBoarding(
             profile.uid,
             onSuccess = { bitmap ->
               bannerImagesMap[profile.uid] = bitmap
-              checkIfLoadingComplete(workerProfiles, profileImagesMap, bannerImagesMap) {
-                loading = false
-              }
+              checkIfLoadingComplete(
+                  profiles as List<WorkerProfile>, profileImagesMap, bannerImagesMap) {
+                    loading = false
+                  }
             },
             onFailure = { Log.e("ProfileResults", "Failed to fetch banner image") })
       }
@@ -177,8 +177,8 @@ fun SearchOnBoarding(
     val widthRatio = maxWidth.value / 411f
     val heightRatio = maxHeight.value / 860f
     val sizeRatio = minOf(widthRatio, heightRatio)
-    val screenHeight = maxHeight
-    val screenWidth = maxWidth
+    val screenHeight = maxHeight.value
+    val screenWidth = maxWidth.value
 
     Scaffold(
         containerColor = colorScheme.background,
@@ -221,8 +221,8 @@ fun SearchOnBoarding(
                             textColor = colorScheme.onBackground,
                             placeHolderColor = colorScheme.onBackground,
                             leadIconColor = colorScheme.onBackground,
-                            widthField = 300.dp * widthRatio,
-                            heightField = 40.dp * heightRatio,
+                            widthField = (screenWidth * 0.8).dp,
+                            heightField = (screenHeight * 0.045).dp,
                             moveContentHorizontal = 10.dp * widthRatio,
                             moveContentBottom = 0.dp,
                             moveContentTop = 0.dp,
@@ -262,8 +262,9 @@ fun SearchOnBoarding(
                           modifier =
                               Modifier.fillMaxWidth()
                                   .padding(
-                                      top = screenHeight * 0.02f, bottom = screenHeight * 0.01f)
-                                  .padding(horizontal = screenWidth * 0.02f),
+                                      top = screenHeight.dp * 0.02f,
+                                      bottom = screenHeight.dp * 0.01f)
+                                  .padding(horizontal = screenWidth.dp * 0.02f),
                           verticalAlignment = Alignment.CenterVertically,
                       ) {
                         FilterRow(
@@ -273,9 +274,9 @@ fun SearchOnBoarding(
                                   uiState.copy(showFilterButtons = !uiState.showFilterButtons))
                             },
                             listOfButtons = listOfButtons,
-                            modifier = Modifier.padding(bottom = screenHeight * 0.01f),
-                            screenWidth = screenWidth,
-                            screenHeight = screenHeight)
+                            modifier = Modifier.padding(bottom = screenHeight.dp * 0.01f),
+                            screenWidth = screenWidth.dp,
+                            screenHeight = screenHeight.dp)
                       }
                     }
                   }
@@ -289,7 +290,7 @@ fun SearchOnBoarding(
                       profileImagesMap = profileImagesMap,
                       bannerImagesMap = bannerImagesMap,
                       baseLocation = baseLocation,
-                      screenHeight = screenHeight)
+                      screenHeight = screenHeight.dp)
                 }
           }
         },
@@ -372,8 +373,8 @@ fun SearchOnBoarding(
             if (locationFilterApplied) {
               updateFilteredProfiles()
             } else {
-              filteredWorkerProfiles =
-                  searchViewModel.filterWorkersByDistance(filteredWorkerProfiles, location, max)
+              searchedWorkers =
+                  searchViewModel.filterWorkersByDistance(searchedWorkers, location, max)
             }
             locationFilterApplied = true
           },
