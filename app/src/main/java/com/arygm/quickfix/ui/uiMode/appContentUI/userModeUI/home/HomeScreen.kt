@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Search
@@ -152,7 +151,7 @@ fun HomeScreen(
         containerColor = colorScheme.background,
         floatingActionButton = {
           QuickFixToolboxFloatingButton(
-              iconList = listOf(Icons.Default.Map, Icons.Default.AutoAwesome, Icons.Default.Create),
+              iconList = listOf(Icons.Default.Map, Icons.Default.AutoAwesome),
               onIconClick = { index ->
                 if (index == 0) {
                   navigationActions.navigateTo(UserScreen.MAP)
