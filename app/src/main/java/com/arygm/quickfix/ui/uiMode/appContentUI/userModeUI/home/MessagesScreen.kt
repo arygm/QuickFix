@@ -27,20 +27,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.messaging.ChatStatus
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.messaging.Message
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.switchModes.AppMode
-import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.elements.QuickFixDetailsScreen
 import com.arygm.quickfix.ui.elements.QuickFixSlidingWindowContent
 import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.theme.poppinsFontFamily
 import com.arygm.quickfix.utils.loadAppMode
 import com.arygm.quickfix.utils.loadUserId
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlinx.coroutines.launch
@@ -50,8 +54,9 @@ fun MessageScreen(
     chatViewModel: ChatViewModel,
     navigationActions: NavigationActions,
     quickFixViewModel: QuickFixViewModel,
-    modeViewModel: ModeViewModel,
     preferencesViewModel: PreferencesViewModel,
+    workerViewModel: ProfileViewModel,
+    accountViewModel: AccountViewModel
 ) {
   var userId by remember { mutableStateOf("") }
   var mode by remember { mutableStateOf("") }
@@ -69,6 +74,8 @@ fun MessageScreen(
   }
   // Assigning the non-null value of activeChat
   val chat = activeChat
+  var chatStatus by remember { mutableStateOf(chat.chatStatus) }
+  var messages by remember { mutableStateOf(chat.messages) } // État local des messages
 
   var quickFix by remember { mutableStateOf<QuickFix?>(null) }
   // Finding the associated QuickFix for the selected chat
@@ -86,7 +93,6 @@ fun MessageScreen(
   val coroutineScope = rememberCoroutineScope()
 
   // Retrieve chat status and prepare suggestions based on user role (User or Worker)
-  val chatStatus = chat.chatStatus
   val suggestions =
       if (mode == AppMode.USER.name) {
         listOf(
@@ -96,6 +102,48 @@ fun MessageScreen(
       } else {
         listOf("How is it going?", "This time doesn’t work for me 🤔", "Yo wassup G")
       }
+  DisposableEffect(chatId) {
+    val db = FirebaseFirestore.getInstance()
+    val chatRef = db.collection("chats").document(chatId)
+
+    val listener =
+        chatRef.addSnapshotListener { snapshot, e ->
+          if (e != null) {
+            Log.e("MessageScreen", "Listen failed: ${e.message}")
+            return@addSnapshotListener
+          }
+          if (snapshot != null && snapshot.exists()) {
+            // Mise à jour des messages
+            val messagesList = snapshot.get("messages") as? List<Map<String, Any>> ?: emptyList()
+            val newMessages =
+                messagesList.mapNotNull { messageData ->
+                  try {
+                    Message(
+                        messageId = messageData["messageId"] as? String ?: "",
+                        senderId = messageData["senderId"] as? String ?: "",
+                        content = messageData["content"] as? String ?: "",
+                        timestamp =
+                            messageData["timestamp"] as? com.google.firebase.Timestamp
+                                ?: com.google.firebase.Timestamp.now())
+                  } catch (ex: Exception) {
+                    Log.e("MessageScreen", "Error parsing message: ${ex.message}")
+                    null
+                  }
+                }
+
+            // Fusionne les nouveaux messages avec l'existant en évitant les doublons
+            messages = (messages + newMessages).distinctBy { it.messageId }
+
+            // Mise à jour du chatStatus
+            val statusString =
+                snapshot.getString("chatStatus") ?: ChatStatus.WAITING_FOR_RESPONSE.name
+            chatStatus = ChatStatus.valueOf(statusString)
+          }
+        }
+
+    // Nettoyer le listener lorsque le composant est détruit
+    onDispose { listener.remove() }
+  }
   val listState = rememberLazyListState()
 
   // Fetch chats and QuickFixes when relevant keys change
@@ -104,13 +152,16 @@ fun MessageScreen(
     quickFixViewModel.getQuickFixes()
   }
   // Automatically scroll to the last message when new messages are added
-  LaunchedEffect(chat.messages) {
-    chat.messages.let {
+  LaunchedEffect(messages) {
+    messages.let {
       if (it.isNotEmpty()) {
         listState.animateScrollToItem(it.size - 1)
       }
     }
   }
+
+  var displayNameHeader by remember { mutableStateOf("") }
+  var workerProfileDisplayName by remember { mutableStateOf("") }
 
   BoxWithConstraints(
       modifier =
@@ -120,8 +171,29 @@ fun MessageScreen(
 
         Scaffold(
             topBar = {
+              if (mode == AppMode.USER.name) {
+                workerViewModel.fetchUserProfile(
+                    chat.workeruid,
+                    onResult = {
+                      if (it != null) {
+                        displayNameHeader = (it as WorkerProfile).displayName
+                        workerProfileDisplayName = it.displayName
+                      }
+                    })
+              } else {
+                accountViewModel.fetchUserAccount(
+                    chat.useruid,
+                    onResult = {
+                      if (it != null) {
+                        displayNameHeader = it.firstName.plus(" ").plus(it.lastName)
+                      }
+                    })
+              }
               // Header section with a back button
-              Header(navigationActions, modifier = Modifier.testTag("backButton"))
+              Header(
+                  navigationActions,
+                  modifier = Modifier.testTag("backButton"),
+                  displayName = displayNameHeader)
             },
             bottomBar = {
               // Bottom input bar for entering and sending messages
@@ -133,6 +205,7 @@ fun MessageScreen(
                           .background(colorScheme.background)) {
                     // Message input field and send button
                     MessageInput(
+                        chatStatus = chatStatus,
                         messageText = messageText,
                         onMessageChange = { messageText = it },
                         onSendMessage = {
@@ -187,7 +260,8 @@ fun MessageScreen(
                                         QuickFixDetailsScreen(
                                             quickFix = quickFix!!,
                                             isExpanded = false,
-                                            onShowMoreToggle = { isSlidingWindowVisible = it })
+                                            onShowMoreToggle = { isSlidingWindowVisible = it },
+                                            quickFixViewModel = quickFixViewModel)
                                       }
                                 }
                           }
@@ -197,14 +271,22 @@ fun MessageScreen(
                               ChatStatus.WAITING_FOR_RESPONSE -> {
                                 // UI for waiting for response
                                 if (mode == AppMode.USER.name) {
-                                  Text(
-                                      text = "Awaiting confirmation from ${quickFix!!.workerId}...",
-                                      style = MaterialTheme.typography.bodyMedium,
-                                      color = colorScheme.onBackground,
-                                      textAlign = TextAlign.Center,
+                                  Column(
+                                      horizontalAlignment = Alignment.CenterHorizontally,
                                       modifier =
-                                          Modifier.padding(vertical = maxHeight * 0.02f)
-                                              .testTag("awaitingConfirmationText"))
+                                          Modifier.fillMaxWidth()
+                                              .padding(horizontal = maxWidth * 0.04f)
+                                              .testTag("userResponseContainer")) {
+                                        Text(
+                                            text =
+                                                "Awaiting confirmation from $workerProfileDisplayName...",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = colorScheme.onBackground,
+                                            textAlign = TextAlign.Center,
+                                            modifier =
+                                                Modifier.padding(vertical = maxHeight * 0.02f)
+                                                    .testTag("awaitingConfirmationText"))
+                                      }
                                 } else {
                                   // Worker response options
                                   Column(
@@ -292,7 +374,7 @@ fun MessageScreen(
                                       Text(
                                           text =
                                               if (mode == AppMode.USER.name) {
-                                                "${quickFix!!.workerId} has accepted the QuickFix! 🎉"
+                                                "$workerProfileDisplayName has accepted the QuickFix! 🎉"
                                               } else {
                                                 "You have accepted this request! 🎉"
                                               },
@@ -337,7 +419,7 @@ fun MessageScreen(
                                 Text(
                                     text =
                                         if (mode == AppMode.USER.name) {
-                                          "${quickFix!!.workerId} has rejected the QuickFix. No big deal! Contact another worker from the search screen! 😊"
+                                          "$workerProfileDisplayName has rejected the QuickFix. No big deal! Contact another worker from the search screen! 😊"
                                         } else {
                                           "You have rejected this request. Find your next client on the announcement screen! 😊"
                                         },
@@ -353,7 +435,7 @@ fun MessageScreen(
                             }
                           }
                           // Display chat messages with date dividers
-                          chat.messages.let { messages ->
+                          messages.let { messages ->
                             itemsIndexed(messages) { index, message ->
                               val previousMessage = if (index > 0) messages[index - 1] else null
 
@@ -387,13 +469,19 @@ fun MessageScreen(
               quickFix = quickFix!!,
               isVisible = isSlidingWindowVisible,
               onDismiss = { isSlidingWindowVisible = false },
-              navigationActions = navigationActions)
+              navigationActions = navigationActions,
+              accountViewModel = accountViewModel,
+              quickFixViewModel = quickFixViewModel)
         }
       }
 }
 
 @Composable
-fun Header(navigationActions: NavigationActions, modifier: Modifier = Modifier) {
+fun Header(
+    navigationActions: NavigationActions,
+    modifier: Modifier = Modifier,
+    displayName: String
+) {
   Box(modifier = Modifier.fillMaxWidth().background(colorScheme.surface).padding(vertical = 8.dp)) {
     // Back button aligned to the start (left)
     IconButton(
@@ -415,9 +503,10 @@ fun Header(navigationActions: NavigationActions, modifier: Modifier = Modifier) 
                       .background(Color.Black, CircleShape)
                       .testTag("profilePicture"))
           Text(
-              text = "Moha",
+              text = displayName,
               fontWeight = FontWeight.Bold,
               fontSize = 20.sp,
+              fontFamily = poppinsFontFamily,
               color = colorScheme.onBackground,
               modifier = Modifier.testTag("chatPartnerName").padding(vertical = 4.dp))
         }
@@ -440,8 +529,11 @@ fun MessageBubble(message: Message, isSent: Boolean, modifier: Modifier = Modifi
                     .testTag(if (isSent) "sentMessage" else "receivedMessage")) {
               Text(
                   text = message.content,
+                  fontFamily = poppinsFontFamily,
                   color = if (isSent) Color.White else Color.Black,
-                  fontSize = 16.sp)
+                  fontSize = 16.sp,
+                  fontWeight = FontWeight.Medium,
+              )
             }
       }
 }
@@ -451,6 +543,7 @@ fun MessageBubble(message: Message, isSent: Boolean, modifier: Modifier = Modifi
 fun DateDivider(timestamp: Timestamp, modifier: Modifier = Modifier) {
   Text(
       text = formatDate(timestamp),
+      fontFamily = poppinsFontFamily,
       color = Color.Gray,
       fontSize = 12.sp,
       fontWeight = FontWeight.Bold,
@@ -462,7 +555,8 @@ fun DateDivider(timestamp: Timestamp, modifier: Modifier = Modifier) {
 fun MessageInput(
     messageText: String,
     onMessageChange: (String) -> Unit,
-    onSendMessage: () -> Unit
+    onSendMessage: () -> Unit,
+    chatStatus: ChatStatus
 ) {
   Row(
       modifier =
@@ -475,6 +569,8 @@ fun MessageInput(
       verticalAlignment = Alignment.CenterVertically) {
         // Message input text field
         TextField(
+            enabled =
+                (chatStatus == ChatStatus.ACCEPTED || chatStatus == ChatStatus.GETTING_SUGGESTIONS),
             value = messageText,
             onValueChange = onMessageChange,
             placeholder = { Text("Message") },
@@ -494,6 +590,8 @@ fun MessageInput(
         // Send button
         IconButton(
             onClick = { onSendMessage() },
+            enabled =
+                (chatStatus == ChatStatus.ACCEPTED || chatStatus == ChatStatus.GETTING_SUGGESTIONS),
             modifier =
                 Modifier.weight(0.1f)
                     .aspectRatio(1f)

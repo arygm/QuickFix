@@ -17,8 +17,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -30,7 +28,6 @@ import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
-import com.arygm.quickfix.model.switchModes.AppMode
 import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.elements.QuickFixStepper
 import com.arygm.quickfix.ui.navigation.NavigationActions
@@ -38,6 +35,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun QuickFixOnBoarding(
+    navigationActionsRoot: NavigationActions,
     navigationActions: NavigationActions,
     modeViewModel: ModeViewModel,
     quickFixViewModel: QuickFixViewModel,
@@ -49,12 +47,15 @@ fun QuickFixOnBoarding(
     chatViewModel: ChatViewModel,
     categoryViewModel: CategoryViewModel
 ) {
+  BackHandler { navigationActions.goBack() }
   val workerProfile by quickFixViewModel.selectedWorkerProfile.collectAsState()
   val quickFix by quickFixViewModel.currentQuickFix.collectAsState()
-  var step by remember { mutableIntStateOf(0) }
   val mode by modeViewModel.currentMode.collectAsState()
   val coroutineScope = rememberCoroutineScope()
-  val pagerState = rememberPagerState(initialPage = step, pageCount = { 4 })
+  val pagerState =
+      rememberPagerState(
+          initialPage = if (quickFix.title.isEmpty()) 0 else quickFix.status.ordinal + 1,
+          pageCount = { 4 })
 
   BoxWithConstraints {
     val widthRatio = maxWidth / 411
@@ -88,7 +89,6 @@ fun QuickFixOnBoarding(
           ) {
             when (it) {
               0 -> {
-                step = 0
                 QuickFixFirstStep(
                     workerProfile = workerProfile,
                     quickFixViewModel = quickFixViewModel,
@@ -97,7 +97,6 @@ fun QuickFixOnBoarding(
                     onQuickFixChange = { updatedQuickFix ->
                       quickFixViewModel.setUpdateQuickFix(updatedQuickFix)
                       coroutineScope.launch { pagerState.animateScrollToPage(1) }
-                      step++
                     },
                     userViewModel = userViewModel,
                     workerViewModel = workerViewModel,
@@ -106,43 +105,57 @@ fun QuickFixOnBoarding(
                 )
               }
               1 -> {
-                BackHandler(enabled = true) {}
+                BackHandler(enabled = true) { navigationActionsRoot.goBack() }
                 QuickFixSecondStep(
-                    quickFix = quickFix,
                     mode = mode,
-                    onQuickFixMakeBill = {
-                      if (mode == AppMode.WORKER) {
-                        step++
-                      }
-                    },
+                    onQuickFixMakeBill = {},
                     navigationActions = navigationActions,
                     chatViewModel = chatViewModel,
                     quickFixViewModel = quickFixViewModel,
-                    accountViewModel = accountViewModel)
+                    accountViewModel = accountViewModel,
+                    navigationActionsRoot = navigationActionsRoot)
               }
               2 -> {
+                BackHandler(enabled = true) { navigationActionsRoot.goBack() }
                 QuickFixThirdStep(
-                    quickFix = quickFix,
                     quickFixViewModel = quickFixViewModel,
                     workerProfile = workerProfile,
                     onQuickFixChange = { updatedQuickFix ->
                       quickFixViewModel.setUpdateQuickFix(updatedQuickFix)
                     },
-                    onQuickFixPay = { step++ },
-                    mode = mode)
+                    onQuickFixPay = { updatedQuickFix ->
+                      quickFixViewModel.setUpdateQuickFix(updatedQuickFix)
+                      coroutineScope.launch { pagerState.animateScrollToPage(3) }
+                    },
+                    mode = mode,
+                    navigationActionsRoot = navigationActionsRoot)
               }
               3 -> {
+                BackHandler(enabled = true) { navigationActionsRoot.goBack() }
                 QuickFixLastStep(
-                    quickFix = quickFix,
                     workerProfile = workerProfile,
                     onQuickFixChange = { updatedQuickFix ->
                       quickFixViewModel.setUpdateQuickFix(updatedQuickFix)
-                      step++
+                      coroutineScope.launch { pagerState.animateScrollToPage(4) }
                     },
                     mode = mode,
                     quickFixViewModel = quickFixViewModel,
                     workerViewModel = workerViewModel,
-                    categoryViewModel = categoryViewModel)
+                    categoryViewModel = categoryViewModel,
+                    navigationActionsRoot = navigationActionsRoot)
+              }
+              4 -> {
+                BackHandler(enabled = true) { navigationActionsRoot.goBack() }
+                QuickFixLastStep(
+                    workerProfile = workerProfile,
+                    onQuickFixChange = { updatedQuickFix ->
+                      quickFixViewModel.setUpdateQuickFix(updatedQuickFix)
+                    },
+                    mode = mode,
+                    quickFixViewModel = quickFixViewModel,
+                    workerViewModel = workerViewModel,
+                    categoryViewModel = categoryViewModel,
+                    navigationActionsRoot = navigationActionsRoot)
               }
             }
           }

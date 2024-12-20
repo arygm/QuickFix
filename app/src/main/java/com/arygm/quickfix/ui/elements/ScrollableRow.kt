@@ -28,9 +28,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.R
 import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.ui.theme.QuickFixTheme
+import com.arygm.quickfix.ui.theme.poppinsTypography
 
 // Data class to represent a service
 data class Service(val name: String, val imageResId: Int)
@@ -56,19 +58,20 @@ fun ServiceCard(service: Category, modifier: Modifier = Modifier, onClick: () ->
                   modifier =
                       Modifier.fillMaxWidth()
                           .weight(0.7f) // Allocate 70% of card height to the image
-                          .testTag("ServiceImage_${service.description}"),
+                          .testTag("ServiceImage_${service.name}"),
                   contentScale = androidx.compose.ui.layout.ContentScale.Crop)
               Text(
                   text = service.description,
                   color = MaterialTheme.colorScheme.onBackground,
-                  textAlign = TextAlign.Center,
-                  style = MaterialTheme.typography.headlineMedium,
+                  textAlign = TextAlign.Start,
+                  style = poppinsTypography.headlineMedium.copy(fontSize = 20.sp),
                   maxLines = 1,
                   modifier =
                       Modifier.fillMaxWidth()
                           .weight(0.3f) // Allocate 30% of card height to the text
                           .wrapContentHeight(Alignment.CenterVertically)
-                          .testTag("ServiceName_${service.description}"))
+                          .testTag("ServiceName_${service.description}")
+                          .padding(start = 4.dp))
             }
       }
 }
@@ -125,9 +128,14 @@ fun MainContent() {
         Text(
             text = "Popular services",
             color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.headlineMedium,
+            style =
+                poppinsTypography.headlineMedium.copy(
+                    fontSize = 20.sp,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
             modifier =
-                Modifier.padding(start = 15.dp).testTag("PopularServicesTitle").fillMaxWidth())
+                Modifier.padding(start = 15.dp, bottom = 12.dp)
+                    .testTag("PopularServicesTitle")
+                    .fillMaxWidth())
         PopularServicesRow(
             services = services,
             onServiceClick = { service ->

@@ -18,6 +18,7 @@ import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.locations.LocationRepository
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.ressources.C
+import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.becomeWorker.views.personal.PersonalInfoScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +36,7 @@ class PersonalInfoUserNoModeScreenTest {
 
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var locationRepo: LocationRepository
+  private lateinit var navigationActions: NavigationActions
 
   @Before
   fun setup() {
@@ -61,6 +63,7 @@ class PersonalInfoUserNoModeScreenTest {
                 }
           }
         }
+    navigationActions = mock(NavigationActions::class.java)
   }
   // Helper function to set up the screen
   private fun setUpPersonalInfoScreen(
@@ -92,7 +95,8 @@ class PersonalInfoUserNoModeScreenTest {
           showBottomSheetPPR = showBottomSheetPPR,
           showBottomSheetBPR = showBottomSheetBPR,
           locationViewModel = locationViewModel,
-          locationWorker = locationWorker)
+          locationWorker = locationWorker,
+          navigationActions)
     }
   }
 
