@@ -144,7 +144,7 @@ fun HomeScreen(
         containerColor = colorScheme.background,
         floatingActionButton = {
           QuickFixToolboxFloatingButton(
-              iconList = listOf(Icons.Default.Map, Icons.Default.AutoAwesome, Icons.Default.Create),
+              iconList = listOf(Icons.Default.Map, Icons.Default.AutoAwesome),
               onIconClick = { index ->
                 if (index == 0) {
                   navigationActions.navigateTo(UserScreen.MAP)
