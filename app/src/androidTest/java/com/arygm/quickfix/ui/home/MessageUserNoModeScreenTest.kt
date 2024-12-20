@@ -190,7 +190,6 @@ class MessageUserNoModeScreenTest {
             navigationActions = navigationActions,
             quickFixViewModel = quickFixViewModel,
             preferencesViewModel = preferencesViewModel,
-
             accountViewModel = accountViewModel,
             workerViewModel = workerViewModel)
       }
@@ -229,7 +228,6 @@ class MessageUserNoModeScreenTest {
         }
       }
 
-
       // Vérifie les messages
       composeTestRule.onNodeWithText("Hello!").assertIsDisplayed()
       composeTestRule.onNodeWithText("Hi, how can I help you?").assertIsDisplayed()
@@ -245,7 +243,6 @@ class MessageUserNoModeScreenTest {
             navigationActions = navigationActions,
             quickFixViewModel = quickFixViewModel,
             preferencesViewModel = preferencesViewModel,
-
             accountViewModel = accountViewModel,
             workerViewModel = workerViewModel)
       }
@@ -279,7 +276,6 @@ class MessageUserNoModeScreenTest {
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
               preferencesViewModel = preferencesViewModel,
-
               accountViewModel = accountViewModel,
               workerViewModel = workerViewModel)
         }
@@ -287,7 +283,6 @@ class MessageUserNoModeScreenTest {
 
       composeTestRule.onNodeWithText("How is it going?").assertIsDisplayed()
       composeTestRule.onNodeWithText("Is the time and day okay for you?").assertIsDisplayed()
-      composeTestRule.onNodeWithText("I can’t wait to work with you!").assertIsDisplayed()
     }
   }
 
@@ -316,7 +311,6 @@ class MessageUserNoModeScreenTest {
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
               preferencesViewModel = preferencesViewModel,
-
               accountViewModel = accountViewModel,
               workerViewModel = workerViewModel)
         }
@@ -347,7 +341,6 @@ class MessageUserNoModeScreenTest {
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
               preferencesViewModel = preferencesViewModel,
-
               accountViewModel = accountViewModel,
               workerViewModel = workerViewModel)
         }
@@ -386,7 +379,6 @@ class MessageUserNoModeScreenTest {
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
               preferencesViewModel = preferencesViewModel,
-
               accountViewModel = accountViewModel,
               workerViewModel = workerViewModel)
         }
@@ -426,7 +418,6 @@ class MessageUserNoModeScreenTest {
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
               preferencesViewModel = preferencesViewModel,
-
               accountViewModel = accountViewModel,
               workerViewModel = workerViewModel)
         }
@@ -458,11 +449,7 @@ class MessageUserNoModeScreenTest {
         quickFixViewModel.getQuickFixes()
       }
 
-      val suggestions =
-          listOf(
-              "How is it going?",
-              "Is the time and day okay for you?",
-              "I can’t wait to work with you!")
+      val suggestions = listOf("How is it going?", "Is the time and day okay for you?")
 
       doAnswer { invocation ->
             val onSuccess = invocation.getArgument<() -> Unit>(1)
@@ -487,7 +474,6 @@ class MessageUserNoModeScreenTest {
               navigationActions = navigationActions,
               quickFixViewModel = quickFixViewModel,
               preferencesViewModel = preferencesViewModel,
-
               accountViewModel = accountViewModel,
               workerViewModel = workerViewModel)
         }

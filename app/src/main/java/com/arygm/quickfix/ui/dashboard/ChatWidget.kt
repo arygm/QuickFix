@@ -1,6 +1,7 @@
 package com.arygm.quickfix.ui.dashboard
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,15 +33,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.category.getCategoryIcon
@@ -162,6 +162,19 @@ fun ChatItem(
       image = it?.let { it1 -> getCategoryIcon(it1) }
     }
   }
+  var otherUserId = chat.useruid
+  if (mode == AppMode.USER) {
+    otherUserId = chat.workeruid
+  }
+
+  var otherProfileBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+  LaunchedEffect(otherUserId) {
+    accountViewModel.fetchAccountProfileImageAsBitmap(
+        accountId = otherUserId,
+        onSuccess = { bitmap -> otherProfileBitmap = bitmap },
+        onFailure = {})
+  }
   Row(
       modifier =
           Modifier.fillMaxWidth()
@@ -170,17 +183,20 @@ fun ChatItem(
               .testTag("MessageItem_${chat.chatId}"), // Added testTag
       verticalAlignment = Alignment.CenterVertically) {
         Column(modifier = Modifier.weight(0.15f)) {
+          val imageModifier =
+              Modifier.size(40.dp)
+                  .clip(CircleShape)
+                  .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+          if (otherProfileBitmap != null) {
+            Image(
+                bitmap = otherProfileBitmap!!.asImageBitmap(),
+                contentDescription = "Profile Picture",
+                contentScale = ContentScale.Crop,
+                modifier = imageModifier)
+          } else {
+            Box(modifier = imageModifier)
+          }
           // Profile image placeholder
-          Image(
-              painter =
-                  painterResource(
-                      id = R.drawable.placeholder_worker), // Replace with an actual drawable
-              contentDescription = "Profile Picture",
-              contentScale = ContentScale.Crop,
-              modifier =
-                  Modifier.size(40.dp)
-                      .clip(CircleShape)
-                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
         }
 
         // Text information

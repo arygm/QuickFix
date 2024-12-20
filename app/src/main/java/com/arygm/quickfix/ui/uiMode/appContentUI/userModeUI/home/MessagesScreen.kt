@@ -212,10 +212,7 @@ fun MessageScreen(
               Header(
                   navigationActions = navigationActions,
                   modifier = Modifier.testTag("backButton"),
-                  otherProfileBitmap = otherProfileBitmap),
-                  displayName = displayNameHeader
-                  navigationActions,
-                  modifier = Modifier.testTag("backButton"),
+                  otherProfileBitmap = otherProfileBitmap,
                   displayName = displayNameHeader)
             },
             bottomBar = {

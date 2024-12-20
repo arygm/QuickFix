@@ -10,6 +10,5 @@ data class Account(
     val birthDate: Timestamp,
     val isWorker: Boolean = false,
     val activeChats: List<String> = emptyList(),
-    val profilePicture: String =
-        "https://example.com/default-profile-pic.jpg" // Default profile picture URL
+    val profilePicture: String = "" // Default profile picture URL
 )

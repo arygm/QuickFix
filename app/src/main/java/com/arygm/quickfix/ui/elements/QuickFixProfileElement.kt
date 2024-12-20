@@ -25,7 +25,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
 import androidx.compose.material.icons.outlined.CameraAlt
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.WorkOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -80,9 +79,9 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerRoute
 import com.arygm.quickfix.utils.clearPreferences
 import com.arygm.quickfix.utils.clearUserProfilePreferences
-import com.arygm.quickfix.utils.loadUserId
 import com.arygm.quickfix.utils.clearWorkerProfilePreferences
 import com.arygm.quickfix.utils.loadAppMode
+import com.arygm.quickfix.utils.loadUserId
 import com.arygm.quickfix.utils.loadWallet
 import com.arygm.quickfix.utils.setAppMode
 import com.google.firebase.auth.ktx.auth

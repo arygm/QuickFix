@@ -109,6 +109,7 @@ fun UserProfileScreen(
                       cardCornerRadius = 16.dp,
                       showConditionalItem = !isWorker,
                       conditionalItem = conditionalWorkerSection)
-                }),accountViewModel = accountViewModel)
+                }),
+        accountViewModel = accountViewModel)
   }
 }

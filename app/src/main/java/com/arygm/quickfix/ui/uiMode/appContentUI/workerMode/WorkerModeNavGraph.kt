@@ -28,11 +28,11 @@ import androidx.navigation.compose.rememberNavController
 import com.arygm.quickfix.dataStore
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
-
 import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepositoryDataStore
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelWorkerProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
@@ -51,8 +51,6 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixOnB
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.AnnouncementDetailScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.announcements.AnnouncementsScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.messages.ChatsScreen
-import com.arygm.quickfix.ui.uiMode.workerMode.home.HomeScreen
-import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.messages.MessagesScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.profile.WorkerProfileScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.quickfix.QuickFixBilling
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTINATIONS
@@ -72,7 +70,6 @@ fun WorkerModeNavGraph(
     preferencesViewModel: PreferencesViewModel,
     accountViewModel: AccountViewModel,
     rootMainNavigationActions: NavigationActions,
-
     workerPreferenceViewModel: PreferencesViewModelWorkerProfile,
     locationViewModel: LocationViewModel,
     userViewModel: ProfileViewModel,
@@ -102,7 +99,6 @@ fun WorkerModeNavGraph(
   var currentScreen by remember { mutableStateOf<String?>(null) }
   val shouldShowBottomBar by remember {
     derivedStateOf {
-
       currentScreen?.let { it != WorkerScreen.ACCOUNT_CONFIGURATION } ?: true &&
           currentScreen?.let { it != WorkerScreen.MESSAGES } ?: true &&
           currentScreen?.let { it != WorkerScreen.QUIKFIX_ONBOARDING } ?: true &&
@@ -229,7 +225,13 @@ fun MessagesNavHost(
       ChatsScreen(navigationActions, accountViewModel, chatViewModel, pre)
     }
     composable(WorkerScreen.MESSAGES) {
-      MessageScreen(chatViewModel, navigationActions, quickFixViewModel, pre,workerViewModel,accountViewModel)
+      MessageScreen(
+          chatViewModel,
+          navigationActions,
+          quickFixViewModel,
+          pre,
+          workerViewModel,
+          accountViewModel)
     }
   }
 }

@@ -168,10 +168,10 @@ fun UserModeNavHost(
                             userViewModel,
                             workerViewModel,
                             quickFixViewModel,
-                            accountViewModel,
                             userNavigationActions,
                             searchViewModel)
                       }
+
                       composable(UserRoute.SEARCH) {
                         SearchNavHost(
                             isUser,
@@ -258,8 +258,6 @@ fun HomeNavHost(
     userViewModel: ProfileViewModel,
     workerViewModel: ProfileViewModel,
     quickFixViewModel: QuickFixViewModel,
-    accountViewModel: AccountViewModel,
-
     navigationActionsRoot: NavigationActions,
     searchViewModel: SearchViewModel
 ) {
@@ -307,7 +305,6 @@ fun HomeNavHost(
           navigationActions = navigationActions,
           quickFixViewModel = quickFixViewModel,
           preferencesViewModel = preferencesViewModel,
-
           accountViewModel = accountViewModel,
           workerViewModel = workerViewModel)
     }
@@ -540,7 +537,6 @@ fun SearchNavHost(
           navigationActions = navigationActions,
           quickFixViewModel = quickFixViewModel,
           preferencesViewModel = preferencesViewModel,
-
           accountViewModel = accountViewModel,
           workerViewModel = workerViewModel)
     }
