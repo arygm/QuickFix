@@ -255,7 +255,11 @@ fun BusinessScreen(
                       workingHours = workingHours)
                 }
                 2 -> {
-                  WelcomeOnBoardScreen(appContentNavigationActions, navigationActions, preferencesViewModel, modeViewModel = modeViewModel)
+                  WelcomeOnBoardScreen(
+                      appContentNavigationActions,
+                      navigationActions,
+                      preferencesViewModel,
+                      modeViewModel = modeViewModel)
                 }
               }
             }

@@ -381,7 +381,9 @@ fun ProfileNavHost(
           locationViewModel,
           testBitmapPP,
           testLocation,
-          workerPreferencesViewModel, appContentNavigationActions, modeViewModel)
+          workerPreferencesViewModel,
+          appContentNavigationActions,
+          modeViewModel)
     }
   }
 }

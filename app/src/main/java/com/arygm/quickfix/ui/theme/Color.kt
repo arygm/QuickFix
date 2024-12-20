@@ -72,3 +72,6 @@ val DarkTitlePrimary = Color(0xFF66001A)
 
 /* Time selector */
 val TimeSelectorUnselectedContainerColor = Color(0xFFE9E0E0)
+
+val DarkRegisterColor = Color(0xFFB78080)
+val LightRegisterColor = ButtonPrimary

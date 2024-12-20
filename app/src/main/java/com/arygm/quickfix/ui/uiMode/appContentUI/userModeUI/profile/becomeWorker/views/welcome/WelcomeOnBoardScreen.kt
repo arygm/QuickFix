@@ -39,7 +39,6 @@ import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
-import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WorkerScreen
 
 @Composable
 fun WelcomeOnBoardScreen(
@@ -57,18 +56,18 @@ fun WelcomeOnBoardScreen(
     // If the user chooses "Switch Worker Mode," we set this to true and show a loader until
     // isWorker == true
     var isWaitingForWorkerMode by remember { mutableStateOf(false) }
-      var switchToWorkerProfile by remember { mutableStateOf(false) }
-      var switchToUserProfile by remember { mutableStateOf(false) }
+    var switchToWorkerProfile by remember { mutableStateOf(false) }
+    var switchToUserProfile by remember { mutableStateOf(false) }
 
     // When isWorker changes, if we're waiting for worker mode and it's now true, navigate
     LaunchedEffect(isWorker) {
       if (isWaitingForWorkerMode && isWorker) {
-          if (switchToWorkerProfile) {
-              modeViewModel.switchMode(AppMode.WORKER)
-              appContentNavigationActions.navigateTo(AppContentRoute.WORKER_MODE)
-          } else if (switchToUserProfile) {
-              navigationActions.navigateTo(UserScreen.PROFILE)
-          }
+        if (switchToWorkerProfile) {
+          modeViewModel.switchMode(AppMode.WORKER)
+          appContentNavigationActions.navigateTo(AppContentRoute.WORKER_MODE)
+        } else if (switchToUserProfile) {
+          navigationActions.navigateTo(UserScreen.PROFILE)
+        }
       }
     }
     if (isWaitingForWorkerMode) {
@@ -111,7 +110,7 @@ fun WelcomeOnBoardScreen(
               onClickAction = {
                 if (!testingFlag) {
                   isWaitingForWorkerMode = true
-                    switchToUserProfile = true
+                  switchToUserProfile = true
                 } else {
                   navigationActions.navigateTo(UserScreen.PROFILE)
                 }
@@ -132,9 +131,9 @@ fun WelcomeOnBoardScreen(
               onClickAction = {
                 if (!testingFlag) {
                   isWaitingForWorkerMode = true
-                    switchToWorkerProfile = true
+                  switchToWorkerProfile = true
                 } else {
-                  navigationActions.navigateTo(AppContentRoute.WORKER_MODE)
+                  appContentNavigationActions.navigateTo(AppContentRoute.WORKER_MODE)
                 }
               },
               buttonColor = colorScheme.onPrimary,

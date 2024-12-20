@@ -169,7 +169,8 @@ fun WorkerModeNavGraph(
                             accountViewModel,
                             workerNavigationActions,
                             rootMainNavigationActions,
-                            workerPreferenceViewModel, userPreferencesViewModel)
+                            workerPreferenceViewModel,
+                            userPreferencesViewModel)
                       }
                     }
 
@@ -346,7 +347,8 @@ fun ProfileNavHost(
           preferencesViewModel,
           workerPreferenceViewModel,
           appContentNavigationActions,
-          modeViewModel, userPreferencesViewModel)
+          modeViewModel,
+          userPreferencesViewModel)
     }
     composable(WorkerScreen.ACCOUNT_CONFIGURATION) {
       AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)

@@ -194,14 +194,6 @@ fun MapScreen(
                 mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, currentStyle)),
         onMapLoaded = { isMapLoaded = true }) {
           filteredWorkers.forEach { profile ->
-            profile.location?.let {
-              val cityName = getCityNameFromCoordinates(it.latitude, profile.location.longitude)
-              if (cityName != null) {
-                workerAddress = cityName
-              } else {
-                workerAddress = profile.location.name
-              }
-            }
             profile.location
                 ?.let { LatLng(it.latitude, it.longitude) }
                 ?.let { rememberMarkerState(position = it) }
@@ -249,6 +241,17 @@ fun MapScreen(
     if (isWindowVisible) {
       Popup(onDismissRequest = { isWindowVisible = false }, alignment = Alignment.Center) {
         selectedWorker?.let {
+          selectedWorker!!.location?.let {
+            val cityName =
+                selectedWorker!!.location?.let { it1 ->
+                  getCityNameFromCoordinates(it.latitude, it1.longitude)
+                }
+            if (cityName != null) {
+              workerAddress = cityName
+            } else {
+              workerAddress = selectedWorker!!.location!!.name
+            }
+          }
           QuickFixSlidingWindowWorker(
               isVisible = isWindowVisible,
               onDismiss = { isWindowVisible = false },
