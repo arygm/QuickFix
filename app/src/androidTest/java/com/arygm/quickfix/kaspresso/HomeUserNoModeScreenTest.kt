@@ -48,7 +48,6 @@ class HomeUserNoModeScreenTest : TestCase() {
   private lateinit var quickFixRepository: QuickFixRepository
   private lateinit var quickFixViewModel: QuickFixViewModel
   private lateinit var searchViewModel: SearchViewModel
-  private lateinit var navigationActionsRoot: NavigationActions
 
   @Before
   fun setUp() {
@@ -62,7 +61,6 @@ class HomeUserNoModeScreenTest : TestCase() {
     quickFixRepository = mock(QuickFixRepository::class.java)
     quickFixViewModel = QuickFixViewModel(quickFixRepository)
     searchViewModel = SearchViewModel(mock())
-    navigationActionsRoot = mock(NavigationActions::class.java)
     // Mock getPreferenceByKey for user_id
     val userIdKey = stringPreferencesKey("user_id")
     whenever(preferencesRepositoryDataStore.getPreferenceByKey(userIdKey)).thenReturn(userIdFlow)
@@ -78,7 +76,6 @@ class HomeUserNoModeScreenTest : TestCase() {
       composeTestRule.setContent {
         HomeScreen(
             navigationActions,
-            navigationActionsRoot,
             preferencesViewModel,
             userViewModel,
             workerViewModel,

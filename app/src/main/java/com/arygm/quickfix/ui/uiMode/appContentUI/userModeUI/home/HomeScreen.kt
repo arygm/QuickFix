@@ -66,15 +66,14 @@ import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
-import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.model.quickfix.Status
+import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.model.tools.ai.GeminiViewModel
 import com.arygm.quickfix.ressources.C
 import com.arygm.quickfix.ui.elements.PopularServicesRow
 import com.arygm.quickfix.ui.elements.QuickFixButton
 import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.elements.QuickFixesWidget
-import com.arygm.quickfix.ui.elements.Service
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS

@@ -579,11 +579,12 @@ class MainActivityTest : TestCase() {
 
       composeTestRule.waitForIdle()
       // Navigate to search
-      onView(withText("Search")).perform(click())
-      onView(withText("Search")).perform(click())
+      composeTestRule.onNodeWithTag("ServiceCard_Paint").performClick()
+      composeTestRule.waitForIdle()
       composeTestRule.waitUntil("find the categories", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithText("Carpentry").fetchSemanticsNodes().isNotEmpty()
       }
+      composeTestRule.onNodeWithText("Commercial Painting").assertIsDisplayed()
       composeTestRule.onNodeWithTag("searchContent").performTextInput("Framing")
       composeTestRule.waitForIdle()
       composeTestRule.waitUntil("find the worker", timeoutMillis = 20000) {

@@ -58,7 +58,7 @@ fun ServiceCard(service: Category, modifier: Modifier = Modifier, onClick: () ->
                   modifier =
                       Modifier.fillMaxWidth()
                           .weight(0.7f) // Allocate 70% of card height to the image
-                          .testTag("ServiceImage_${service.name}"),
+                          .testTag("ServiceImage_${service.description}"),
                   contentScale = androidx.compose.ui.layout.ContentScale.Crop)
               Text(
                   text = service.description,
