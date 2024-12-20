@@ -66,6 +66,11 @@ fun SearchOnBoarding(
   val expandedStates = remember {
     mutableStateListOf(*BooleanArray(itemCategories.size) { false }.toTypedArray())
   }
+  val expandedCategory by searchViewModel.popularServiceCategory.collectAsState()
+  if (expandedCategory != null) {
+    expandedStates[itemCategories.indexOfFirst { it.name == expandedCategory?.name }] = true
+    searchViewModel.setPopularServiceCategory(null)
+  }
   val listState = rememberLazyListState()
 
   var searchQuery by remember { mutableStateOf("") }

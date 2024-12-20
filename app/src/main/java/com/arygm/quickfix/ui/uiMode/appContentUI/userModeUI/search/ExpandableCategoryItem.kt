@@ -133,6 +133,7 @@ fun ExpandableCategoryItem(
                                         }
                                         .clickable {
                                           searchViewModel.setSearchSubcategory(it)
+                                          searchViewModel.setSearchCategory(item)
                                           searchViewModel.filterWorkersBySubcategory(it.name) {
                                             navigationActions.navigateTo(
                                                 UserScreen.SEARCH_WORKER_RESULT)

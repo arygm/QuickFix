@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arygm.quickfix.R
+import com.arygm.quickfix.model.category.Category
 import com.arygm.quickfix.ui.theme.QuickFixTheme
 import com.arygm.quickfix.ui.theme.poppinsTypography
 
@@ -38,29 +39,29 @@ data class Service(val name: String, val imageResId: Int)
 
 // ServiceCard composable with onClick handler and modifier for width control
 @Composable
-fun ServiceCard(service: Service, modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun ServiceCard(service: Category, modifier: Modifier = Modifier, onClick: () -> Unit) {
   Card(
       modifier =
           modifier
               .aspectRatio(0.9f) // Maintain a consistent aspect ratio for height
               // .fillMaxHeight()
               .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp))
-              .testTag("ServiceCard_${service.name}"),
+              .testTag("ServiceCard_${service.description}"),
       shape = RoundedCornerShape(8.dp),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
       onClick = onClick) {
         Column(
             modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
               Image(
-                  painter = painterResource(id = service.imageResId),
-                  contentDescription = service.name,
+                  painter = painterResource(id = service.id.toInt()),
+                  contentDescription = service.description,
                   modifier =
                       Modifier.fillMaxWidth()
                           .weight(0.7f) // Allocate 70% of card height to the image
-                          .testTag("ServiceImage_${service.name}"),
+                          .testTag("ServiceImage_${service.description}"),
                   contentScale = androidx.compose.ui.layout.ContentScale.Crop)
               Text(
-                  text = service.name,
+                  text = service.description,
                   color = MaterialTheme.colorScheme.onBackground,
                   textAlign = TextAlign.Start,
                   style = poppinsTypography.headlineMedium.copy(fontSize = 20.sp),
@@ -69,7 +70,7 @@ fun ServiceCard(service: Service, modifier: Modifier = Modifier, onClick: () -> 
                       Modifier.fillMaxWidth()
                           .weight(0.3f) // Allocate 30% of card height to the text
                           .wrapContentHeight(Alignment.CenterVertically)
-                          .testTag("ServiceName_${service.name}")
+                          .testTag("ServiceName_${service.description}")
                           .padding(start = 4.dp))
             }
       }
@@ -78,8 +79,8 @@ fun ServiceCard(service: Service, modifier: Modifier = Modifier, onClick: () -> 
 // PopularServicesRow composable with percentage-based card width and consistent padding
 @Composable
 fun PopularServicesRow(
-    services: List<Service>,
-    onServiceClick: (Service) -> Unit,
+    services: List<Category>,
+    onServiceClick: (Category) -> Unit,
     modifier: Modifier = Modifier
 ) {
   BoxWithConstraints {
@@ -106,12 +107,18 @@ fun MainContent() {
 
   val services =
       listOf(
-          Service("Mechanic", R.drawable.mechanic),
-          Service("Gardener", R.drawable.gardener),
-          Service("Electrician", R.drawable.electrician),
-          Service("Painter", R.drawable.painter),
-          Service("Plumber", R.drawable.plumber),
-      )
+          Category(
+              name = "Handyman Services",
+              description = "Mechanic",
+              id = R.drawable.mechanic.toString()),
+          Category(
+              name = "Gardening", description = "Gardener", id = R.drawable.gardener.toString()),
+          Category(
+              name = "Electrical Work",
+              description = "Electrician",
+              id = R.drawable.electrician.toString()),
+          Category(name = "Painting", description = "Paint", id = R.drawable.painter.toString()),
+          Category(name = "Plumbing", description = "Plumber", id = R.drawable.plumber.toString()))
 
   Column(
       modifier =

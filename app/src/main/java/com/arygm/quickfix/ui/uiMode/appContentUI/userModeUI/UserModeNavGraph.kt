@@ -170,7 +170,9 @@ fun UserModeNavHost(
                             workerViewModel,
                             quickFixViewModel,
                             userNavigationActions,
-                            searchViewModel)
+                            searchViewModel,
+                            announcementViewModel,
+                            isUser)
                       }
                       composable(UserRoute.SEARCH) {
                         SearchNavHost(
@@ -259,7 +261,9 @@ fun HomeNavHost(
     workerViewModel: ProfileViewModel,
     quickFixViewModel: QuickFixViewModel,
     navigationActionsRoot: NavigationActions,
-    searchViewModel: SearchViewModel
+    searchViewModel: SearchViewModel,
+    announcementViewModel: AnnouncementViewModel,
+    isUser: Boolean
 ) {
   val homeNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(homeNavController) }
@@ -277,11 +281,12 @@ fun HomeNavHost(
     composable(UserScreen.HOME) {
       HomeScreen(
           navigationActions,
-          navigationActionsRoot,
           preferencesViewModel,
           userViewModel,
           workerViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          navigationActionsRoot,
+          searchViewModel)
     }
 
     composable(UserScreen.QUICKFIX_ONBOARDING) {
@@ -327,6 +332,20 @@ fun HomeNavHost(
           navigationActions,
           userViewModel,
           preferencesViewModel)
+    }
+    composable(UserScreen.SEARCH) {
+      QuickFixFinderScreen(
+          navigationActions,
+          navigationActionsRoot,
+          isUser,
+          userViewModel,
+          accountViewModel,
+          searchViewModel,
+          announcementViewModel,
+          categoryViewModel,
+          quickFixViewModel,
+          preferencesViewModel,
+          workerViewModel = workerViewModel)
     }
   }
 }

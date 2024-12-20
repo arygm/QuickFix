@@ -579,8 +579,8 @@ class MainActivityTest : TestCase() {
 
       composeTestRule.waitForIdle()
       // Navigate to search
-      onView(withText("Search")).perform(click())
-      onView(withText("Search")).perform(click())
+      composeTestRule.onNodeWithTag("ServiceCard_Paint").performClick()
+      composeTestRule.waitForIdle()
       composeTestRule.waitUntil("find the categories", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithText("Carpentry").fetchSemanticsNodes().isNotEmpty()
       }
