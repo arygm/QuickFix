@@ -146,7 +146,9 @@ fun HomeScreen(
           QuickFixToolboxFloatingButton(
               iconList = listOf(Icons.Default.Map, Icons.Default.AutoAwesome, Icons.Default.Create),
               onIconClick = { index ->
-                if (index == 1) { // Assuming you want to handle the second icon
+                if (index == 0) {
+                  navigationActions.navigateTo(UserScreen.MAP)
+                } else if (index == 1) { // Assuming you want to handle the second icon
                   isChatVisible = true
                 }
               },

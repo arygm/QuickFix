@@ -9,6 +9,12 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.filter
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasParent
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -50,6 +56,7 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.storage.FirebaseStorage
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen
+import java.time.LocalDate
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.FixMethodOrder
@@ -502,6 +509,73 @@ class MainActivityTest : TestCase() {
       composeTestRule.waitUntil("find the BottomNavMenu", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag("BNM").fetchSemanticsNodes().isNotEmpty()
       }
+
+      composeTestRule.waitForIdle()
+
+      composeTestRule.onNodeWithTag("ToolboxFloatingButton").performClick()
+      composeTestRule.waitForIdle()
+      composeTestRule.onNodeWithTag("subIcon0").performClick()
+      composeTestRule.waitUntil("Wait for the map to load", timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithTag("mapScreen").fetchSemanticsNodes().isNotEmpty()
+      }
+      composeTestRule.onNodeWithTag("FilterButton").performClick()
+      composeTestRule.waitForIdle()
+      composeTestRule.onNodeWithTag("subIcon1").performClick()
+      composeTestRule.waitForIdle()
+      Thread.sleep(500)
+      composeTestRule.onNodeWithTag("locationOptionRow0").performClick()
+      composeTestRule.onNodeWithText("Apply").performClick()
+      composeTestRule.waitForIdle()
+      composeTestRule.onNodeWithTag("subIcon2").performClick()
+      composeTestRule.waitForIdle()
+      composeTestRule.onNodeWithText("Apply").performClick()
+      composeTestRule.waitForIdle()
+      composeTestRule.onNodeWithTag("subIcon3").performClick()
+      composeTestRule.waitForIdle()
+      val day = LocalDate.now().dayOfMonth
+      val textFields =
+          composeTestRule.onAllNodes(hasSetTextAction()).filter(hasParent(hasTestTag("timeInput")))
+
+      assert(textFields.fetchSemanticsNodes().size >= 2)
+
+      textFields[0].performTextReplacement("07")
+      textFields[1].performTextReplacement("00")
+
+      composeTestRule.onNode(hasText(day.toString()) and hasClickAction()).performClick()
+
+      composeTestRule.onNodeWithText("OK").performClick()
+      composeTestRule.waitForIdle()
+      Thread.sleep(500)
+
+      composeTestRule.onNodeWithTag("subIcon1").performClick()
+      composeTestRule.waitForIdle()
+      composeTestRule.onNode(hasText("Clear") and hasClickAction()).performClick()
+      Thread.sleep(500)
+      composeTestRule.onNodeWithTag("subIcon2").performClick()
+      composeTestRule.waitForIdle()
+      composeTestRule.onNode(hasText("Clear") and hasClickAction()).performClick()
+      composeTestRule.waitForIdle()
+      Thread.sleep(500)
+      composeTestRule.onNodeWithTag("subIcon3").performClick()
+      composeTestRule.waitForIdle()
+      composeTestRule.onNode(hasText("Clear") and hasClickAction()).performClick()
+      composeTestRule.waitForIdle()
+      Thread.sleep(500)
+      composeTestRule.onNodeWithTag("subIcon4").performClick()
+      composeTestRule.waitForIdle()
+      composeTestRule.onNodeWithTag("subIcon4").performClick()
+      composeTestRule.waitForIdle()
+      composeTestRule.onNodeWithTag("subIcon4").performClick()
+      composeTestRule.waitForIdle()
+      composeTestRule.onNodeWithTag("subIcon0").performClick()
+      composeTestRule.waitForIdle()
+      composeTestRule.onNodeWithTag("mapScreen").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("FilterButton").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("DarkMode").performClick()
+      Thread.sleep(500)
+      composeTestRule.onNodeWithTag("HomeButton").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("HomeButton").performClick()
+      composeTestRule.onNodeWithTag("ToolboxFloatingButton").assertIsDisplayed()
 
       composeTestRule.waitForIdle()
       // Navigate to search

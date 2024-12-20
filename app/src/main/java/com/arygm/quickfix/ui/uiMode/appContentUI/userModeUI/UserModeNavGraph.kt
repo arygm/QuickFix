@@ -55,6 +55,7 @@ import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixDisplayImages
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.HomeScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.MessageScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.map.MapScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
@@ -317,6 +318,15 @@ fun HomeNavHost(
           preferencesViewModel,
           quickFixViewModel,
           workerViewModel = workerViewModel)
+    }
+    composable(UserScreen.MAP) {
+      MapScreen(
+          workerViewModel,
+          searchViewModel,
+          quickFixViewModel,
+          navigationActions,
+          userViewModel,
+          preferencesViewModel)
     }
   }
 }
