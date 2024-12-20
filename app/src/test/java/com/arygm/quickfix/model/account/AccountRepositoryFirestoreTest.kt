@@ -780,4 +780,63 @@ class AccountRepositoryFirestoreTest {
 
     assertFalse(callbackCalled)
   }
+
+  @Test
+  fun fetchAccountProfileImageAsBitmap_emptyUrl_returnsDefaultBitmap() {
+    val accountId = "someAccountId"
+    val documentId = "profilePicture"
+
+    // Mock Firestore document get
+    val tcs = TaskCompletionSource<DocumentSnapshot>()
+    `when`(mockCollectionReference.document(accountId)).thenReturn(mockDocumentReference)
+    `when`(mockDocumentReference.get()).thenReturn(tcs.task)
+    `when`(mockDocumentSnapshot.exists()).thenReturn(true)
+    `when`(mockDocumentSnapshot.get(documentId)).thenReturn("")
+    tcs.setResult(mockDocumentSnapshot)
+
+    var onSuccessCalled = false
+    var returnedBitmap: Bitmap? = null
+
+    accountRepositoryFirestore.fetchAccountProfileImageAsBitmap(
+        profilePictureUrl = accountId,
+        onSuccess = {
+          onSuccessCalled = true
+          returnedBitmap = it
+        },
+        onFailure = { fail("Should not fail with empty URL") })
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assertTrue(onSuccessCalled)
+    assertNotNull(returnedBitmap)
+    // On ne vérifie pas exactement le bitmap, mais on s'assure qu'il n'est pas null
+  }
+
+  @Test
+  fun fetchAccountProfileImageAsBitmap_firestoreFails_callsOnFailure() {
+    val accountId = "someAccountId"
+    val documentId = "profilePicture"
+    val firestoreException = Exception("Firestore error")
+
+    val tcsDoc = TaskCompletionSource<DocumentSnapshot>()
+    `when`(mockCollectionReference.document(accountId)).thenReturn(mockDocumentReference)
+    `when`(mockDocumentReference.get()).thenReturn(tcsDoc.task)
+
+    var onFailureCalled = false
+
+    accountRepositoryFirestore.fetchAccountProfileImageAsBitmap(
+        profilePictureUrl = accountId,
+        onSuccess = { fail("Should not succeed") },
+        onFailure = {
+          onFailureCalled = true
+          assertEquals(firestoreException.message, it.message)
+        })
+
+    // Simuler une erreur Firestore
+    tcsDoc.setException(firestoreException)
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    assertTrue(onFailureCalled)
+  }
 }

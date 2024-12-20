@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.elements
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -18,10 +19,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
+import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.WorkOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -51,15 +54,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arygm.quickfix.R
+import coil.compose.SubcomposeAsyncImage
+import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelWorkerProfile
@@ -75,6 +81,7 @@ import com.arygm.quickfix.utils.clearPreferences
 import com.arygm.quickfix.utils.clearUserProfilePreferences
 import com.arygm.quickfix.utils.clearWorkerProfilePreferences
 import com.arygm.quickfix.utils.loadAppMode
+import com.arygm.quickfix.utils.loadUserId
 import com.arygm.quickfix.utils.loadWallet
 import com.arygm.quickfix.utils.setAppMode
 import com.google.firebase.auth.ktx.auth
@@ -94,6 +101,7 @@ fun QuickFixProfileScreenElement(
     initialState: Boolean,
     switchMode: AppMode,
     sections: List<@Composable (Modifier) -> Unit>, // Dynamic sections
+    accountViewModel: AccountViewModel // Added AccountViewModel for fetching profile picture
 ) {
   val firstName by preferencesViewModel.firstName.collectAsState(initial = "")
   val lastName by preferencesViewModel.lastName.collectAsState(initial = "")
@@ -109,7 +117,22 @@ fun QuickFixProfileScreenElement(
   // Compute display name using the collected first and last names
   val displayName = capitalizeName(firstName, lastName)
   var isChecked by remember { mutableStateOf(initialState) } // State to track the switch state
+  val context = LocalContext.current
+  // State for profile image bitmap
+  var profileBitmap by remember { mutableStateOf<Bitmap?>(null) }
+  var userId by remember { mutableStateOf("") }
+  LaunchedEffect(Unit) {
+    // Load the user ID
+    userId = loadUserId(preferencesViewModel)
 
+    // Fetch the profile image from the backend
+    accountViewModel.fetchAccountProfileImageAsBitmap(
+        accountId = userId,
+        onSuccess = { bitmap -> profileBitmap = bitmap },
+        onFailure = {
+          // Leave profileBitmap as null if fetching fails
+        })
+  }
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     val screenWidth = maxWidth
     val screenHeight = maxHeight
@@ -148,11 +171,36 @@ fun QuickFixProfileScreenElement(
                         Modifier.padding(end = screenWidth * 0.05f, top = screenHeight * 0.02f)
                             .size(screenWidth * 0.2f)
                             .testTag("ProfilePicture")) {
-                      Image(
-                          painter = painterResource(id = R.drawable.placeholder_worker),
-                          contentDescription = "Profile Picture",
-                          modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(50)),
-                          contentScale = ContentScale.Crop)
+                      // Display the fetched profile image or placeholder
+                      if (profileBitmap != null) {
+                        profileBitmap?.let {
+                          Image(
+                              bitmap = it.asImageBitmap(),
+                              contentDescription = "Profile Image",
+                              modifier = Modifier.fillMaxSize().clip(CircleShape),
+                              contentScale = ContentScale.Crop)
+                        }
+                            ?: SubcomposeAsyncImage(
+                                model = "https://example.com/default-profile-pic.jpg",
+                                contentDescription = "Profile Image",
+                                modifier = Modifier.fillMaxSize().clip(CircleShape),
+                                contentScale = ContentScale.Crop,
+                                error = {
+                                  Icon(
+                                      Icons.Outlined.CameraAlt,
+                                      contentDescription = "Placeholder",
+                                      tint = Color.Gray)
+                                },
+                            )
+                      } else {
+                        Box(
+                            modifier =
+                                Modifier.padding(
+                                        end = screenWidth * 0.05f, top = screenHeight * 0.02f)
+                                    .size(screenWidth * 0.2f)
+                                    .background(Color.Gray, CircleShape)
+                                    .testTag("ProfilePicture"))
+                      }
                     }
               },
               colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))

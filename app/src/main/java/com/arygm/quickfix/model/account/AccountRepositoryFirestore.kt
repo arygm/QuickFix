@@ -1,6 +1,7 @@
 package com.arygm.quickfix.model.account
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import com.arygm.quickfix.utils.performFirestoreOperation
 import com.google.firebase.Firebase
@@ -180,5 +181,58 @@ open class AccountRepositoryFirestore(
           }
           .addOnFailureListener { exception -> onFailure(exception) }
     }
+  }
+
+  override fun fetchAccountProfileImageAsBitmap(
+      profilePictureUrl: String,
+      onSuccess: (Bitmap) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    fetchProfileImageUrl(
+        accountId = profilePictureUrl,
+        onSuccess = { url ->
+          Log.e("AccountRepositoryFirestore", "url: $url")
+          if (url.isEmpty() || url == "https://example.com/default-profile-pic.jpg") {
+            val defaultProfileBitmap =
+                createSolidColorBitmap(width = 200, height = 200, color = 0xFF66001A.toInt())
+            onSuccess(defaultProfileBitmap)
+          } else {
+            val imageRef = FirebaseStorage.getInstance().getReferenceFromUrl(url)
+            imageRef
+                .getBytes(Long.MAX_VALUE)
+                .addOnSuccessListener { bytes ->
+                  val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                  onSuccess(bitmap)
+                }
+                .addOnFailureListener { exception -> onFailure(exception) }
+          }
+        },
+        onFailure = onFailure,
+        documentId = "profilePicture" // Le champ Firestore où est stockée l’URL
+        )
+  }
+
+  private fun fetchProfileImageUrl(
+      accountId: String,
+      onSuccess: (String) -> Unit,
+      onFailure: (Exception) -> Unit,
+      documentId: String
+  ) {
+    val firestore = db
+    val collection = firestore.collection(collectionPath)
+    collection
+        .document(accountId)
+        .get()
+        .addOnSuccessListener { document ->
+          val imageUrl = document[documentId] as? String ?: ""
+          onSuccess(imageUrl)
+        }
+        .addOnFailureListener { onFailure(it) }
+  }
+
+  fun createSolidColorBitmap(width: Int, height: Int, color: Int): Bitmap {
+    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    bitmap.eraseColor(color)
+    return bitmap
   }
 }

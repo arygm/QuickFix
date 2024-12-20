@@ -12,11 +12,7 @@ import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.bill.BillField
 import com.arygm.quickfix.model.bill.Units
 import com.arygm.quickfix.model.locations.Location
-import com.arygm.quickfix.model.messaging.Chat
-import com.arygm.quickfix.model.messaging.ChatRepository
-import com.arygm.quickfix.model.messaging.ChatStatus
-import com.arygm.quickfix.model.messaging.ChatViewModel
-import com.arygm.quickfix.model.messaging.Message
+import com.arygm.quickfix.model.messaging.*
 import com.arygm.quickfix.model.offline.small.PreferencesRepositoryDataStore
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.Profile
@@ -59,13 +55,13 @@ class MessageUserNoModeScreenTest {
   private lateinit var preferencesRepositoryDataStore: PreferencesRepositoryDataStore
   private lateinit var accountRepository: AccountRepository
   private lateinit var accountViewModel: AccountViewModel
+
   private lateinit var workerProfileRepositoryFirestore: WorkerProfileRepositoryFirestore
   private lateinit var workerViewModel: ProfileViewModel
 
   // Implémentation de test pour Service
   data class TestService(override val name: String) : Service
 
-  // Class-level flows
   private val appModeFlow = MutableStateFlow("USER")
   private val userIdFlow = MutableStateFlow("testUserId")
 
@@ -123,10 +119,11 @@ class MessageUserNoModeScreenTest {
     preferencesViewModel = PreferencesViewModel(preferencesRepositoryDataStore)
     accountRepository = mock(AccountRepository::class.java)
     accountViewModel = AccountViewModel(accountRepository)
+
     workerProfileRepositoryFirestore = mock(WorkerProfileRepositoryFirestore::class.java)
     workerViewModel = ProfileViewModel(workerProfileRepositoryFirestore)
 
-    // Mock repository methods
+    // Mock repository init
     whenever(quickFixRepository.init(any())).thenAnswer {
       val onSuccess = it.getArgument<() -> Unit>(0)
       onSuccess()
@@ -150,7 +147,7 @@ class MessageUserNoModeScreenTest {
           .whenever(chatRepository)
           .getChats(any(), any())
 
-      // Mock getQuickFixByUid to return fakeQuickFix when called with fakeQuickFixUid
+      // Mock getQuickFixByUid to return fakeQuickFix
       doAnswer { invocation ->
             val uid = invocation.getArgument<String>(0)
             val onResult = invocation.getArgument<(QuickFix?) -> Unit>(1)
@@ -165,13 +162,13 @@ class MessageUserNoModeScreenTest {
           .getQuickFixById(any(), any(), any())
     }
 
-    // Initialize ViewModels with mocked repositories
+    // Initialize ViewModels
     chatViewModel = ChatViewModel(chatRepository)
     quickFixViewModel = QuickFixViewModel(quickFixRepository)
 
     runBlocking {
-      chatViewModel.getChats() // Load chats
-      quickFixViewModel.getQuickFixes() // Load QuickFixes if necessary
+      chatViewModel.getChats()
+      quickFixViewModel.getQuickFixes()
     }
 
     doAnswer { invocation ->
@@ -186,7 +183,6 @@ class MessageUserNoModeScreenTest {
 
   @Test
   fun testQuickFixDetailsAreDisplayed() {
-    // Ensure the QuickFixViewModel has the QuickFix data
     composeTestRule.setContent {
       QuickFixTheme {
         MessageScreen(
@@ -199,12 +195,12 @@ class MessageUserNoModeScreenTest {
       }
     }
 
-    // Verify the display of quickFixDetails
     composeTestRule.onNodeWithTag("quickFixDetails").assertIsDisplayed()
   }
 
   @Test
   fun testMessagesAreDisplayed() {
+
     runBlocking {
       doAnswer { invocation ->
             val onSuccess = invocation.getArgument<(List<Chat>) -> Unit>(0)
@@ -240,7 +236,6 @@ class MessageUserNoModeScreenTest {
 
   @Test
   fun testAcceptedStatusShowsActiveConversationText() {
-    // Le statut du chat est ACCEPTED par défaut
     composeTestRule.setContent {
       QuickFixTheme {
         MessageScreen(
@@ -259,11 +254,9 @@ class MessageUserNoModeScreenTest {
   @Test
   fun testGettingSuggestionsShowsSuggestions() {
     runBlocking {
-      // Arrange: On modifie le chat pour qu'il ait le statut GETTING_SUGGESTIONS
       val gettingSuggestionsChat = fakeChat.copy(chatStatus = ChatStatus.GETTING_SUGGESTIONS)
       doAnswer { invocation ->
             val onSuccess = invocation.getArgument<(List<Chat>) -> Unit>(0)
-            // Retourne ce chat modifié
             onSuccess(listOf(gettingSuggestionsChat))
             null
           }
@@ -276,7 +269,6 @@ class MessageUserNoModeScreenTest {
         quickFixViewModel.getQuickFixes()
       }
 
-      // Act
       composeTestRule.setContent {
         QuickFixTheme {
           MessageScreen(
@@ -289,21 +281,17 @@ class MessageUserNoModeScreenTest {
         }
       }
 
-      // Assert : Vérifier que les suggestions sont affichées
       composeTestRule.onNodeWithText("How is it going?").assertIsDisplayed()
       composeTestRule.onNodeWithText("Is the time and day okay for you?").assertIsDisplayed()
-      composeTestRule.onNodeWithText("I can’t wait to work with you!").assertIsDisplayed()
     }
   }
 
   @Test
   fun testWorkerRefusedStatusShowsRefusalMessage() {
     runBlocking {
-      // Arrange: On modifie le chat pour qu'il ait le statut WORKER_REFUSED
       val refusedChat = fakeChat.copy(chatStatus = ChatStatus.WORKER_REFUSED)
       doAnswer { invocation ->
             val onSuccess = invocation.getArgument<(List<Chat>) -> Unit>(0)
-            // Retourne ce chat refusé
             onSuccess(listOf(refusedChat))
             null
           }
@@ -316,7 +304,6 @@ class MessageUserNoModeScreenTest {
         quickFixViewModel.getQuickFixes()
       }
 
-      // Act
       composeTestRule.setContent {
         QuickFixTheme {
           MessageScreen(
@@ -329,7 +316,6 @@ class MessageUserNoModeScreenTest {
         }
       }
 
-      // Assert : Vérifier que le message de refus est affiché
       composeTestRule
           .onNodeWithText(
               "John the Worker has rejected the QuickFix. No big deal! Contact another worker from the search screen! 😊")
@@ -340,21 +326,14 @@ class MessageUserNoModeScreenTest {
   @Test
   fun testSendingMessageWhenAcceptedWorks() {
     runBlocking {
-      // Arrange: Le statut est ACCEPTED par défaut dans fakeChat
-      // On veut vérifier que l'envoi de message fonctionne. On va moquer sendMessage pour vérifier
-      // qu'il est appelé.
       doAnswer { invocation ->
-            val chat = invocation.getArgument<Chat>(0)
-            val message = invocation.getArgument<Message>(1)
             val onSuccess = invocation.getArgument<() -> Unit>(2)
-            // Simule le succès
             onSuccess()
             null
           }
           .whenever(chatRepository)
           .sendMessage(any(), any(), any(), any())
 
-      // Act
       composeTestRule.setContent {
         QuickFixTheme {
           MessageScreen(
@@ -367,13 +346,9 @@ class MessageUserNoModeScreenTest {
         }
       }
 
-      // On entre un texte dans le champ de message
       composeTestRule.onNodeWithTag("messageTextField").performTextInput("Hello from test!")
-      // On clique sur le bouton d'envoi
       composeTestRule.onNodeWithTag("sendButton").performClick()
 
-      // Assert
-      // Vérifier que sendMessage a été appelé avec le message "Hello from test!"
       verify(chatRepository)
           .sendMessage(eq(fakeChat), argThat { content == "Hello from test!" }, any(), any())
     }
@@ -382,7 +357,6 @@ class MessageUserNoModeScreenTest {
   @Test
   fun testWaitingForResponseStatusAsUserShowsAwaitingConfirmation() {
     runBlocking {
-      // Arrange: On modifie le chat pour qu'il ait le statut WAITING_FOR_RESPONSE
       val waitingChat = fakeChat.copy(chatStatus = ChatStatus.WAITING_FOR_RESPONSE)
       doAnswer { invocation ->
             val onSuccess = invocation.getArgument<(List<Chat>) -> Unit>(0)
@@ -398,7 +372,6 @@ class MessageUserNoModeScreenTest {
         quickFixViewModel.getQuickFixes()
       }
 
-      // Act
       composeTestRule.setContent {
         QuickFixTheme {
           MessageScreen(
@@ -411,7 +384,6 @@ class MessageUserNoModeScreenTest {
         }
       }
 
-      // Assert : Vérifier le texte d'attente
       composeTestRule
           .onNodeWithText("Awaiting confirmation from John the Worker...")
           .assertIsDisplayed()
@@ -421,7 +393,6 @@ class MessageUserNoModeScreenTest {
   @Test
   fun testWaitingForResponseStatusAsWorkerShowsAcceptRejectButtons() {
     runBlocking {
-      // Arrange: On modifie le chat pour qu'il ait le statut WAITING_FOR_RESPONSE
       val waitingChat = fakeChat.copy(chatStatus = ChatStatus.WAITING_FOR_RESPONSE)
       doAnswer { invocation ->
             val onSuccess = invocation.getArgument<(List<Chat>) -> Unit>(0)
@@ -440,7 +411,6 @@ class MessageUserNoModeScreenTest {
         quickFixViewModel.getQuickFixes()
       }
 
-      // Act
       composeTestRule.setContent {
         QuickFixTheme {
           MessageScreen(
@@ -453,7 +423,6 @@ class MessageUserNoModeScreenTest {
         }
       }
 
-      // Assert : Vérifier les boutons accept/reject
       composeTestRule
           .onNodeWithText("Would you like to accept this QuickFix request?")
           .assertIsDisplayed()
@@ -465,10 +434,7 @@ class MessageUserNoModeScreenTest {
   @Test
   fun testClickingOnSuggestionSendsMessageAndUpdatesChat() {
     runBlocking {
-      // Arrange: On modifie le chat pour qu'il ait le statut GETTING_SUGGESTIONS
       val gettingSuggestionsChat = fakeChat.copy(chatStatus = ChatStatus.GETTING_SUGGESTIONS)
-
-      // On force le repository à retourner ce chat
       doAnswer { invocation ->
             val onSuccess = invocation.getArgument<(List<Chat>) -> Unit>(0)
             onSuccess(listOf(gettingSuggestionsChat))
@@ -483,16 +449,8 @@ class MessageUserNoModeScreenTest {
         quickFixViewModel.getQuickFixes()
       }
 
-      // Comme isUser = true, on a les suggestions côté user : "How is it going?", etc.
-      val suggestions =
-          listOf(
-              "How is it going?",
-              "Is the time and day okay for you?",
-              "I can’t wait to work with you!")
+      val suggestions = listOf("How is it going?", "Is the time and day okay for you?")
 
-      // On veut vérifier que lorsque l'utilisateur clique sur une suggestion, updateChat et
-      // sendMessage sont appelés.
-      // On va mocker sendMessage et updateChat pour capturer leurs arguments.
       doAnswer { invocation ->
             val onSuccess = invocation.getArgument<() -> Unit>(1)
             onSuccess()
@@ -509,7 +467,6 @@ class MessageUserNoModeScreenTest {
           .whenever(chatRepository)
           .sendMessage(any(), any(), any(), any())
 
-      // Act
       composeTestRule.setContent {
         QuickFixTheme {
           MessageScreen(
@@ -522,19 +479,15 @@ class MessageUserNoModeScreenTest {
         }
       }
 
-      // Assert: Les suggestions doivent être affichées
       suggestions.forEach { suggestion ->
         composeTestRule.onNodeWithText(suggestion).assertIsDisplayed()
       }
 
-      // On clique sur la première suggestion par exemple
       val chosenSuggestion = suggestions.first()
       composeTestRule.onNodeWithText(chosenSuggestion).performClick()
 
-      // Vérifier que updateChat a été appelé pour passer le statut en ACCEPTED
       verify(chatRepository).updateChat(argThat { chatStatus == ChatStatus.ACCEPTED }, any(), any())
 
-      // Vérifier que sendMessage a été appelé avec le message "How is it going?"
       verify(chatRepository)
           .sendMessage(
               argThat { chatId == gettingSuggestionsChat.chatId },

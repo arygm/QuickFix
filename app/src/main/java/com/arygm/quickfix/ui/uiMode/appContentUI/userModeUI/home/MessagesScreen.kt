@@ -1,6 +1,8 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home
 
+import android.graphics.Bitmap
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,13 +22,18 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.messaging.ChatStatus
 import com.arygm.quickfix.model.messaging.ChatViewModel
@@ -58,12 +65,7 @@ fun MessageScreen(
     workerViewModel: ProfileViewModel,
     accountViewModel: AccountViewModel
 ) {
-  var userId by remember { mutableStateOf("") }
-  var mode by remember { mutableStateOf("") }
-  LaunchedEffect(Unit) {
-    userId = loadUserId(preferencesViewModel)
-    mode = loadAppMode(preferencesViewModel)
-  }
+
   // Collecting the selected chat from the ViewModel as state
   val activeChat = chatViewModel.selectedChat.collectAsState().value
 
@@ -74,9 +76,17 @@ fun MessageScreen(
   }
   // Assigning the non-null value of activeChat
   val chat = activeChat
+  var userId by remember { mutableStateOf("") }
+  var mode by remember { mutableStateOf("") }
+  var otherUserId by remember { mutableStateOf("") }
   var chatStatus by remember { mutableStateOf(chat.chatStatus) }
   var messages by remember { mutableStateOf(chat.messages) } // État local des messages
 
+  LaunchedEffect(Unit) {
+    userId = loadUserId(preferencesViewModel)
+    mode = loadAppMode(preferencesViewModel)
+    otherUserId = if (userId == chat.workeruid) chat.useruid else chat.workeruid
+  }
   var quickFix by remember { mutableStateOf<QuickFix?>(null) }
   // Finding the associated QuickFix for the selected chat
   quickFixViewModel.fetchQuickFix(chat.quickFixUid, onResult = { quickFix = it })
@@ -87,11 +97,20 @@ fun MessageScreen(
   }
   val chatId = chat.chatId
 
+  var otherProfileBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
   // Mutable states to manage input text and sliding window visibility
   var messageText by remember { mutableStateOf("") }
   var isSlidingWindowVisible by remember { mutableStateOf(false) }
   val coroutineScope = rememberCoroutineScope()
-
+  LaunchedEffect(otherUserId) {
+    accountViewModel.fetchAccountProfileImageAsBitmap(
+        accountId = otherUserId,
+        onSuccess = { bitmap -> otherProfileBitmap = bitmap },
+        onFailure = {
+          // En cas d'erreur, on laisse otherProfileBitmap = null (placeholder)
+        })
+  }
   // Retrieve chat status and prepare suggestions based on user role (User or Worker)
   val suggestions =
       if (mode == AppMode.USER.name) {
@@ -191,8 +210,9 @@ fun MessageScreen(
               }
               // Header section with a back button
               Header(
-                  navigationActions,
+                  navigationActions = navigationActions,
                   modifier = Modifier.testTag("backButton"),
+                  otherProfileBitmap = otherProfileBitmap,
                   displayName = displayNameHeader)
             },
             bottomBar = {
@@ -480,6 +500,8 @@ fun MessageScreen(
 fun Header(
     navigationActions: NavigationActions,
     modifier: Modifier = Modifier,
+    otherProfileBitmap: Bitmap?,
+    widthRatio: Float = 1.0f,
     displayName: String
 ) {
   Box(modifier = Modifier.fillMaxWidth().background(colorScheme.surface).padding(vertical = 8.dp)) {
@@ -497,11 +519,25 @@ fun Header(
     Column(
         modifier = Modifier.align(Alignment.Center),
         horizontalAlignment = Alignment.CenterHorizontally) {
-          Box(
-              modifier =
-                  Modifier.size(40.dp)
-                      .background(Color.Black, CircleShape)
-                      .testTag("profilePicture"))
+          val imageModifier =
+              Modifier.size(40.dp * widthRatio).clip(CircleShape).background(Color.Gray)
+          if (otherProfileBitmap != null) {
+            Log.e("hhaha", "kkhaawi  ${otherProfileBitmap}")
+            Image(
+                bitmap = otherProfileBitmap.asImageBitmap(),
+                contentDescription = "Profile Picture",
+                contentScale = ContentScale.Crop,
+                modifier = imageModifier)
+          } else {
+            Log.e("hhaha", "kkhaawi")
+
+            Text("allo")
+            Image(
+                painter = painterResource(id = R.drawable.placeholder_worker),
+                contentDescription = "Profile Picture",
+                contentScale = ContentScale.Crop,
+                modifier = imageModifier)
+          }
           Text(
               text = displayName,
               fontWeight = FontWeight.Bold,

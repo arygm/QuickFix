@@ -291,6 +291,7 @@ class MainActivityTest : TestCase() {
       composeTestRule.onNodeWithTag("TimeDropdownMenuFieldEndTime").performClick()
       composeTestRule.onNodeWithTag("TimeDropdownMenuItem_00:45").performClick()
       composeTestRule.onNodeWithTag(professionalInfoScreenCategoryField).performClick()
+      Log.e("TestLog", "debut test")
 
       // Select the first category
       composeTestRule
@@ -389,8 +390,9 @@ class MainActivityTest : TestCase() {
           .perform(click())
       onView(withText("Announcement")) // Match the TextView that has the text "Hello World"
           .perform(click())
-      onView(withText("Messages")) // Match the TextView that has the text "Hello World"
+      onView(withText("Chats")) // Match the TextView that has the text "Hello World"
           .perform(click())
+
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
       composeTestRule.onNodeWithText("- Withdraw funds").assertIsDisplayed()
@@ -403,19 +405,25 @@ class MainActivityTest : TestCase() {
       composeTestRule.onNodeWithText("Support").assertIsDisplayed()
       composeTestRule.onNodeWithText("Legal").assertIsDisplayed()
       composeTestRule.onNodeWithText("Log out").assertIsDisplayed()
+      Log.e("TestLog", "avant probbleme")
+
       composeTestRule.waitUntil("find the AccountConfigurationOption", timeoutMillis = 20000) {
         composeTestRule
             .onAllNodesWithTag("AccountConfigurationOption")
             .fetchSemanticsNodes()
             .isNotEmpty()
       }
+
       updateAccountConfigurationAndVerify(
           composeTestRule, "Rame", "Hatime", "28/10/2004", "Rame Hatime", 2)
       composeTestRule.waitUntil("find the switch", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithTag(C.Tag.buttonSwitch).fetchSemanticsNodes().isNotEmpty()
       }
+      Log.e("TestLog", "apres probbleme")
+
       composeTestRule.onNodeWithTag(C.Tag.buttonSwitch, useUnmergedTree = true).performClick()
     }
+    Log.e("TestLog", "fin test")
   }
 
   @Test

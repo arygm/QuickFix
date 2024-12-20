@@ -50,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import com.arygm.quickfix.model.account.Account
@@ -73,7 +74,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.firebase.Timestamp
 import java.util.GregorianCalendar
 
-@SuppressLint("StateFlowValueCalledInComposition")
+@SuppressLint("StateFlowValueCalledInComposition", "UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun AccountConfigurationScreen(
@@ -92,6 +93,7 @@ fun AccountConfigurationScreen(
     mutableStateOf("https://example.com/default-profile-pic.jpg")
   }
   var imageChanged by remember { mutableStateOf(false) }
+  var userAccount by remember { mutableStateOf<Account?>(null) }
 
   // State for input fields
   var inputFirstName by remember { mutableStateOf("Loading...") }
@@ -107,6 +109,10 @@ fun AccountConfigurationScreen(
 
   var isUploading by remember { mutableStateOf(false) }
 
+  val context = LocalContext.current
+  var emailError by remember { mutableStateOf(false) }
+  var birthDateError by remember { mutableStateOf(false) }
+
   LaunchedEffect(Unit) {
     // Load saved data
     uid = loadUserId(preferencesViewModel)
@@ -116,6 +122,7 @@ fun AccountConfigurationScreen(
     savedBirthDate = loadBirthDate(preferencesViewModel)
     savedProfilePicture = loadProfilePicture(preferencesViewModel)
     isWorker = loadIsWorker(preferencesViewModel)
+    accountViewModel.fetchUserAccount(uid) { userAccount = it }
 
     // Initialize input fields with saved data
     inputFirstName = savedFirstName
@@ -123,17 +130,21 @@ fun AccountConfigurationScreen(
     inputEmail = savedEmail
     inputBirthDate = savedBirthDate
     inputProfilePicture = savedProfilePicture
+
+    // Fetch le bitmap depuis le backend en utilisant accountViewModel
+    accountViewModel.fetchAccountProfileImageAsBitmap(
+        accountId = uid,
+        onSuccess = { bitmap -> profileBitmap = bitmap },
+        onFailure = {
+          // En cas d'erreur, laissez profileBitmap à null - le placeholder sera affiché
+        })
   }
 
-  var emailError by remember { mutableStateOf(false) }
-  var birthDateError by remember { mutableStateOf(false) }
-
-  val context = LocalContext.current
+  val screenWidth = with(LocalContext.current.resources.displayMetrics) { widthPixels.dp / density }
+  val screenHeight =
+      with(LocalContext.current.resources.displayMetrics) { heightPixels.dp / density }
 
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-    val screenWidth = maxWidth
-    val screenHeight = maxHeight
-
     Column(
         modifier =
             Modifier.fillMaxSize()
@@ -171,14 +182,13 @@ fun AccountConfigurationScreen(
                               bitmap = it.asImageBitmap(),
                               contentDescription = "Profile Image",
                               modifier = Modifier.fillMaxSize().clip(CircleShape),
-                              contentScale = ContentScale.Crop // Fit image inside the circle
-                              )
+                              contentScale = ContentScale.Crop)
                         }
                             ?: SubcomposeAsyncImage(
                                 model = savedProfilePicture,
                                 contentDescription = "Profile Image",
                                 modifier = Modifier.fillMaxSize().clip(CircleShape),
-                                contentScale = ContentScale.Crop, // Fit image inside the circle
+                                contentScale = ContentScale.Crop,
                                 error = {
                                   Icon(
                                       Icons.Outlined.CameraAlt,
@@ -313,9 +323,9 @@ fun AccountConfigurationScreen(
                       images = listOf(profileBitmap!!),
                       onSuccess = { imageUrls ->
                         val newProfilePicture = imageUrls.first()
-                        val updatedAccount =
-                            Account(
-                                uid = uid,
+                        val newAccount =
+                            userAccount?.copy(
+                                profilePicture = newProfilePicture,
                                 firstName = inputFirstName,
                                 lastName = inputLastName,
                                 email = inputEmail,
@@ -326,26 +336,29 @@ fun AccountConfigurationScreen(
                                                 inputBirthDate.split("/")[1].toInt() - 1,
                                                 inputBirthDate.split("/")[0].toInt())
                                             .time),
-                                isWorker = isWorker,
-                                profilePicture = newProfilePicture)
+                                isWorker = isWorker)
 
-                        accountViewModel.updateAccount(
-                            updatedAccount,
-                            onSuccess = {
-                              setAccountPreferences(preferencesViewModel, updatedAccount)
-                              isUploading = false
-                              Toast.makeText(context, "Profile updated!", Toast.LENGTH_SHORT).show()
-                              savedFirstName = inputFirstName
-                              savedLastName = inputLastName
-                              savedEmail = inputEmail
-                              savedBirthDate = inputBirthDate
-                              savedProfilePicture = newProfilePicture
-                              imageChanged = false
-                            },
-                            onFailure = {
-                              isUploading = false
-                              Toast.makeText(context, "Update failed!", Toast.LENGTH_SHORT).show()
-                            })
+                        if (newAccount != null) {
+                          accountViewModel.updateAccount(
+                              newAccount,
+                              onSuccess = {
+                                setAccountPreferences(preferencesViewModel, newAccount)
+                                isUploading = false
+                                Toast.makeText(context, "Profile updated!", Toast.LENGTH_SHORT)
+                                    .show()
+                                savedFirstName = inputFirstName
+                                savedLastName = inputLastName
+                                savedEmail = inputEmail
+                                savedBirthDate = inputBirthDate
+                                savedProfilePicture = newProfilePicture
+                                imageChanged = false
+                                navigationActions.goBack()
+                              },
+                              onFailure = {
+                                isUploading = false
+                                Toast.makeText(context, "Update failed!", Toast.LENGTH_SHORT).show()
+                              })
+                        }
                       },
                       onFailure = {
                         isUploading = false
@@ -353,9 +366,8 @@ fun AccountConfigurationScreen(
                       })
                 } else {
                   // Update without changing the image
-                  val updatedAccount =
-                      Account(
-                          uid = uid,
+                  val newAccount =
+                      userAccount?.copy(
                           firstName = inputFirstName,
                           lastName = inputLastName,
                           email = inputEmail,
@@ -366,24 +378,25 @@ fun AccountConfigurationScreen(
                                           inputBirthDate.split("/")[1].toInt() - 1,
                                           inputBirthDate.split("/")[0].toInt())
                                       .time),
-                          isWorker = isWorker,
-                          profilePicture = savedProfilePicture)
-                  accountViewModel.updateAccount(
-                      updatedAccount,
-                      onSuccess = {
-                        setAccountPreferences(preferencesViewModel, updatedAccount)
-                        Toast.makeText(context, "Profile updated!", Toast.LENGTH_SHORT).show()
-                        savedFirstName = inputFirstName
-                        savedLastName = inputLastName
-                        savedEmail = inputEmail
-                        savedBirthDate = inputBirthDate
-                        imageChanged = false
-                      },
-                      onFailure = {
-                        Toast.makeText(context, "Update failed!", Toast.LENGTH_SHORT).show()
-                      })
+                          isWorker = isWorker)
+                  if (newAccount != null) {
+                    accountViewModel.updateAccount(
+                        newAccount,
+                        onSuccess = {
+                          setAccountPreferences(preferencesViewModel, newAccount)
+                          Toast.makeText(context, "Profile updated!", Toast.LENGTH_SHORT).show()
+                          savedFirstName = inputFirstName
+                          savedLastName = inputLastName
+                          savedEmail = inputEmail
+                          savedBirthDate = inputBirthDate
+                          imageChanged = false
+                          navigationActions.goBack()
+                        },
+                        onFailure = {
+                          Toast.makeText(context, "Update failed!", Toast.LENGTH_SHORT).show()
+                        })
+                  }
                 }
-                navigationActions.goBack()
               },
               enabled = isModified && !emailError && !birthDateError,
               colors =

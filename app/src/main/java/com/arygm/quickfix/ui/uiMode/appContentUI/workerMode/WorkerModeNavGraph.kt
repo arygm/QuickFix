@@ -32,6 +32,7 @@ import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesRepositoryDataStore
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelWorkerProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
@@ -49,7 +50,7 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.profile.AccountConfi
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixOnBoarding
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.AnnouncementDetailScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.announcements.AnnouncementsScreen
-import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.messages.MessagesScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.messages.ChatsScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.profile.WorkerProfileScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.quickfix.QuickFixBilling
 import com.arygm.quickfix.ui.uiMode.workerMode.navigation.WORKER_TOP_LEVEL_DESTINATIONS
@@ -75,7 +76,8 @@ fun WorkerModeNavGraph(
     workerViewModel: ProfileViewModel,
     quickFixViewModel: QuickFixViewModel,
     chatViewModel: ChatViewModel,
-    categoryViewModel: CategoryViewModel
+    categoryViewModel: CategoryViewModel,
+    userPreferencesViewModel: PreferencesViewModelUserProfile
 ) {
   val context = LocalContext.current
   val workerNavController = rememberNavController()
@@ -118,6 +120,7 @@ fun WorkerModeNavGraph(
       showBottomBar = false
     }
   }
+
   Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
         topBar = { QuickFixOfflineBar(isVisible = isOffline) },
@@ -146,8 +149,15 @@ fun WorkerModeNavGraph(
                             announcementViewModel,
                             categoryViewModel)
                       }
-                      composable(WorkerRoute.MESSAGES) {
-                        MessagesNavHost(onScreenChange = { currentScreen = it })
+                      composable(WorkerRoute.CHATS) {
+                        MessagesNavHost(
+                            onScreenChange = { currentScreen = it },
+                            preferencesViewModel,
+                            workerNavigationActions,
+                            chatViewModel,
+                            quickFixViewModel,
+                            accountViewModel,
+                            workerViewModel)
                       }
                       composable(WorkerRoute.ANNOUNCEMENT) {
                         AnnouncementsNavHost(
@@ -194,7 +204,15 @@ fun WorkerModeNavGraph(
 }
 
 @Composable
-fun MessagesNavHost(onScreenChange: (String) -> Unit) {
+fun MessagesNavHost(
+    onScreenChange: (String) -> Unit,
+    pre: PreferencesViewModel,
+    workerNavigationActions: NavigationActions,
+    chatViewModel: ChatViewModel,
+    quickFixViewModel: QuickFixViewModel,
+    accountViewModel: AccountViewModel,
+    workerViewModel: ProfileViewModel
+) {
   val dashboardNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(dashboardNavController) }
 
@@ -202,8 +220,19 @@ fun MessagesNavHost(onScreenChange: (String) -> Unit) {
   LaunchedEffect(navigationActions.currentScreen) {
     onScreenChange(navigationActions.currentScreen)
   }
-  NavHost(navController = dashboardNavController, startDestination = WorkerScreen.MESSAGES) {
-    composable(WorkerScreen.MESSAGES) { MessagesScreen() }
+  NavHost(navController = dashboardNavController, startDestination = WorkerScreen.CHATS) {
+    composable(WorkerScreen.CHATS) {
+      ChatsScreen(navigationActions, accountViewModel, chatViewModel, pre)
+    }
+    composable(WorkerScreen.MESSAGES) {
+      MessageScreen(
+          chatViewModel,
+          navigationActions,
+          quickFixViewModel,
+          pre,
+          workerViewModel,
+          accountViewModel)
+    }
   }
 }
 
@@ -343,7 +372,8 @@ fun ProfileNavHost(
           preferencesViewModel,
           workerPreferenceViewModel,
           appContentNavigationActions,
-          modeViewModel)
+          modeViewModel,
+          accountViewModel)
     }
     composable(WorkerScreen.ACCOUNT_CONFIGURATION) {
       AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)

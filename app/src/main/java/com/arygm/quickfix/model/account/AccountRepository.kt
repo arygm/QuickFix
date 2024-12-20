@@ -28,4 +28,10 @@ interface AccountRepository {
       onSuccess: (List<String>) -> Unit,
       onFailure: (Exception) -> Unit
   )
+
+  fun fetchAccountProfileImageAsBitmap(
+      profilePictureUrl: String,
+      onSuccess: (Bitmap) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 }

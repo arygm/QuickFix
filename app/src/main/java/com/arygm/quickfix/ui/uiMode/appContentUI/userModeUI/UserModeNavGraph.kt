@@ -174,6 +174,7 @@ fun UserModeNavHost(
                             announcementViewModel,
                             isUser)
                       }
+
                       composable(UserRoute.SEARCH) {
                         SearchNavHost(
                             isUser,
@@ -385,7 +386,8 @@ fun ProfileNavHost(
           preferencesViewModel,
           userPreferencesViewModel,
           appContentNavigationActions,
-          modeViewModel)
+          modeViewModel,
+          accountViewModel)
     }
     composable(UserScreen.ACCOUNT_CONFIGURATION) {
       AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)
