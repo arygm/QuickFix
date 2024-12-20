@@ -55,6 +55,7 @@ import com.arygm.quickfix.ui.search.QuickFixFinderScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.camera.QuickFixDisplayImages
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.HomeScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.MessageScreen
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.map.MapScreen
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserRoute
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
@@ -169,7 +170,9 @@ fun UserModeNavHost(
                             workerViewModel,
                             quickFixViewModel,
                             userNavigationActions,
-                            searchViewModel)
+                            searchViewModel,
+                            announcementViewModel,
+                            isUser)
                       }
 
                       composable(UserRoute.SEARCH) {
@@ -259,7 +262,9 @@ fun HomeNavHost(
     workerViewModel: ProfileViewModel,
     quickFixViewModel: QuickFixViewModel,
     navigationActionsRoot: NavigationActions,
-    searchViewModel: SearchViewModel
+    searchViewModel: SearchViewModel,
+    announcementViewModel: AnnouncementViewModel,
+    isUser: Boolean
 ) {
   val homeNavController = rememberNavController()
   val navigationActions = remember { NavigationActions(homeNavController) }
@@ -277,11 +282,12 @@ fun HomeNavHost(
     composable(UserScreen.HOME) {
       HomeScreen(
           navigationActions,
-          navigationActionsRoot,
           preferencesViewModel,
           userViewModel,
           workerViewModel,
-          quickFixViewModel)
+          quickFixViewModel,
+          navigationActionsRoot,
+          searchViewModel)
     }
 
     composable(UserScreen.QUICKFIX_ONBOARDING) {
@@ -317,6 +323,29 @@ fun HomeNavHost(
           userViewModel,
           preferencesViewModel,
           quickFixViewModel,
+          workerViewModel = workerViewModel)
+    }
+    composable(UserScreen.MAP) {
+      MapScreen(
+          workerViewModel,
+          searchViewModel,
+          quickFixViewModel,
+          navigationActions,
+          userViewModel,
+          preferencesViewModel)
+    }
+    composable(UserScreen.SEARCH) {
+      QuickFixFinderScreen(
+          navigationActions,
+          navigationActionsRoot,
+          isUser,
+          userViewModel,
+          accountViewModel,
+          searchViewModel,
+          announcementViewModel,
+          categoryViewModel,
+          quickFixViewModel,
+          preferencesViewModel,
           workerViewModel = workerViewModel)
     }
   }

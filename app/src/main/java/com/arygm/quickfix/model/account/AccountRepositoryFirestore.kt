@@ -191,7 +191,8 @@ open class AccountRepositoryFirestore(
     fetchProfileImageUrl(
         accountId = profilePictureUrl,
         onSuccess = { url ->
-          if (url.isEmpty()) {
+          Log.e("AccountRepositoryFirestore", "url: $url")
+          if (url.isEmpty() || url == "https://example.com/default-profile-pic.jpg") {
             val defaultProfileBitmap =
                 createSolidColorBitmap(width = 200, height = 200, color = 0xFF66001A.toInt())
             onSuccess(defaultProfileBitmap)

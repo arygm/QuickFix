@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -33,7 +34,8 @@ fun QuickFixToolboxFloatingButton(
     mainIcon: ImageVector = Icons.Default.Work,
     iconList: List<ImageVector>,
     onIconClick: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    subIconColors: List<Color> = List(iconList.size) { colorScheme.primary }
 ) {
   var expanded by remember { mutableStateOf(false) }
 
@@ -55,13 +57,15 @@ fun QuickFixToolboxFloatingButton(
                             Modifier.size((screenHeight * 0.06).dp)
                                 .clickable { onIconClick(index) }
                                 .testTag("subIcon$index"),
-                        color = colorScheme.surface,
+                        color =
+                            if (subIconColors[index] == colorScheme.primary) colorScheme.surface
+                            else colorScheme.primary,
                         shadowElevation = 5.dp) {
                           Icon(
                               imageVector = icon,
                               contentDescription = "Sub Icon $index",
                               modifier = Modifier.padding((screenHeight * 0.012).dp),
-                              tint = colorScheme.primary)
+                              tint = subIconColors[index])
                         }
                   }
                 }

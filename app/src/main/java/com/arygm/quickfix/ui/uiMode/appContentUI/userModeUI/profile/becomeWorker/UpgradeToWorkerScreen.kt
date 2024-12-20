@@ -62,6 +62,8 @@ import com.arygm.quickfix.utils.setAccountPreferences
 import com.arygm.quickfix.utils.setWorkerProfilePreferences
 import com.arygm.quickfix.utils.stringToTimestamp
 import com.google.firebase.Timestamp
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,6 +103,7 @@ fun BusinessScreen(
     mutableStateOf("https://example.com/default-profile-pic.jpg")
   }
 
+  val workingHours = remember { mutableStateOf<Pair<LocalTime?, LocalTime?>>(Pair(null, null)) }
   LaunchedEffect(Unit) {
     workerId = loadUserId(preferencesViewModel)
     firstName = loadFirstName(preferencesViewModel)
@@ -116,6 +119,10 @@ fun BusinessScreen(
         // Make the announcement
         val workerProfile =
             WorkerProfile(
+                workingHours =
+                    if (workingHours.value.first == null || workingHours.value.second == null)
+                        Pair(LocalTime.of(0, 0), LocalTime.of(0, 0))
+                    else workingHours.value,
                 location = locationWorker.value,
                 fieldOfWork = fieldOfWork.value,
                 description = description.value,
@@ -127,9 +134,14 @@ fun BusinessScreen(
                 profilePicture = uploadedImageUrls[0],
                 bannerPicture = if (uploadedImageUrls.size > 1) uploadedImageUrls[1] else "",
                 uid = accountId)
+        // Define the time formatter
+        val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+        // Convert to string
+        val workingHoursString =
+            "${workingHours.value.first?.format(timeFormatter)} - ${workingHours.value.second?.format(timeFormatter)}"
         Log.d(
             "UpgradeToWorkerScreen",
-            "workerProfile: ${locationWorker.value.name} ${fieldOfWork.value} ${description.value} ${price.doubleValue} ${displayName.value} ${includedServices.value} ${addOnServices.value} ${tags.value} ${uploadedImageUrls[0]} ${if (uploadedImageUrls.size > 1) uploadedImageUrls[1] else ""} $accountId")
+            "workerProfile: ${locationWorker.value.name} ${fieldOfWork.value} ${description.value} ${price.doubleValue} ${displayName.value} ${includedServices.value} ${addOnServices.value} ${tags.value} ${uploadedImageUrls[0]} ${if (uploadedImageUrls.size > 1) uploadedImageUrls[1] else ""} $accountId $workingHoursString")
         workerProfileViewModel.addProfile(
             workerProfile,
             onSuccess = {
@@ -224,7 +236,8 @@ fun BusinessScreen(
                       descriptionError = descriptionError,
                       onDescriptionErrorChange = { descriptionError = it },
                       locationViewModel = locationViewModel,
-                      locationWorker = locationWorker)
+                      locationWorker = locationWorker,
+                      navigationActions = navigationActions)
                 }
                 1 -> {
                   ProfessionalInfoScreen(
@@ -234,7 +247,9 @@ fun BusinessScreen(
                       includedServices,
                       addOnServices,
                       tags,
-                      categories)
+                      categories,
+                      navigationActions = navigationActions,
+                      workingHours = workingHours)
                 }
                 2 -> {
                   WelcomeOnBoardScreen(navigationActions, preferencesViewModel)

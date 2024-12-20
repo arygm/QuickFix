@@ -49,10 +49,7 @@ fun CategoryContent(
                 ExpandableCategoryItem(
                     item = item,
                     isExpanded = expandedStates[index],
-                    onExpandedChange = {
-                      expandedStates[index] = it
-                      searchViewModel.setSearchCategory(itemCategories[index])
-                    },
+                    onExpandedChange = { expandedStates[index] = it },
                     searchViewModel = searchViewModel,
                     navigationActions = navigationActions,
                 )

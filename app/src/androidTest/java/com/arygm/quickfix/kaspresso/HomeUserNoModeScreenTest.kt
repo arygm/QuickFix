@@ -16,6 +16,7 @@ import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFixRepository
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
+import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.home.HomeScreen
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -46,6 +47,7 @@ class HomeUserNoModeScreenTest : TestCase() {
   private lateinit var workerViewModel: ProfileViewModel
   private lateinit var quickFixRepository: QuickFixRepository
   private lateinit var quickFixViewModel: QuickFixViewModel
+  private lateinit var searchViewModel: SearchViewModel
 
   @Before
   fun setUp() {
@@ -58,6 +60,7 @@ class HomeUserNoModeScreenTest : TestCase() {
     workerViewModel = ProfileViewModel(profileRepository)
     quickFixRepository = mock(QuickFixRepository::class.java)
     quickFixViewModel = QuickFixViewModel(quickFixRepository)
+    searchViewModel = SearchViewModel(mock())
     // Mock getPreferenceByKey for user_id
     val userIdKey = stringPreferencesKey("user_id")
     whenever(preferencesRepositoryDataStore.getPreferenceByKey(userIdKey)).thenReturn(userIdFlow)
@@ -73,11 +76,12 @@ class HomeUserNoModeScreenTest : TestCase() {
       composeTestRule.setContent {
         HomeScreen(
             navigationActions,
-            navigationActionsRoot,
             preferencesViewModel,
             userViewModel,
             workerViewModel,
-            quickFixViewModel)
+            quickFixViewModel,
+            navigationActionsRoot,
+            searchViewModel)
       }
     }
 
