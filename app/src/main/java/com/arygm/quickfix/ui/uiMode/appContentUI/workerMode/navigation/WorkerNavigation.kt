@@ -21,6 +21,8 @@ object WorkerScreen {
   const val MESSAGES = "Messages Screen"
   const val PROFILE = "Profile Screen"
   const val ACCOUNT_CONFIGURATION = "Account configuration Screen"
+  const val QUIKFIX_ONBOARDING = "QuickFix Onboarding Screen"
+  const val QUICKFIX_BILLING = "QuickFix Billing Screen"
   const val DISPLAY_IMAGES = "Displayed images Screen"
   const val ANNOUNCEMENT_DETAIL = "Announcement detail Screen"
 }

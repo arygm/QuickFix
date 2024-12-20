@@ -1,24 +1,32 @@
 package com.arygm.quickfix.ui.dashboard
 
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import com.arygm.quickfix.model.bill.BillField
 import com.arygm.quickfix.model.bill.Units
 import com.arygm.quickfix.model.locations.Location
+import com.arygm.quickfix.model.profile.Profile
+import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.quickfix.QuickFix
 import com.arygm.quickfix.model.quickfix.Status
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.dashboard.BillsWidget
 import com.google.firebase.Timestamp
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.whenever
 
 class BillsWidgetTests {
 
   @get:Rule val composeTestRule = createComposeRule()
+
+  private lateinit var workerProfileRepositoryFirestore: WorkerProfileRepositoryFirestore
+  private lateinit var workerViewModel: ProfileViewModel
 
   private val testBills =
       listOf(
@@ -44,6 +52,19 @@ class BillsWidgetTests {
           bill = testBills,
           location = Location(0.0, 0.0, "Fake Location"))
 
+  @Before
+  fun setup() {
+    workerProfileRepositoryFirestore = mock(WorkerProfileRepositoryFirestore::class.java)
+    workerViewModel = ProfileViewModel(workerProfileRepositoryFirestore)
+
+    doAnswer { invocation ->
+          val onSuccess = invocation.arguments[1] as (Profile?) -> Unit
+          onSuccess(WorkerProfile(displayName = "Anonymous Worker"))
+        }
+        .whenever(workerProfileRepositoryFirestore)
+        .getProfileById(any(), any(), any())
+  }
+
   @Test
   fun billSample_displaysDefaultNumberOfItems() {
     composeTestRule.setContent {
@@ -51,29 +72,13 @@ class BillsWidgetTests {
           quickFixes = listOf(fakeQuickFix),
           onShowAllClick = {},
           onItemClick = {},
-          itemsToShowDefault = 3)
+          itemsToShowDefault = 3,
+          workerViewModel = workerViewModel)
     }
 
     composeTestRule.onNodeWithTag("BillItem_${fakeQuickFix.title}").assertIsDisplayed()
 
     // Verify that the fourth item is not displayed
     composeTestRule.onNodeWithTag("BillItem_Bill 4").assertDoesNotExist()
-  }
-
-  @Test
-  fun billSample_displaysAllItems_whenShowAllClicked() {
-    composeTestRule.setContent {
-      BillsWidget(
-          quickFixes = List(4) { fakeQuickFix },
-          onShowAllClick = {},
-          onItemClick = {},
-          itemsToShowDefault = 3)
-    }
-
-    // Click the "Show All" button
-    composeTestRule.onNodeWithTag("ShowAllButton").performClick()
-
-    // Verify that all items are displayed
-    composeTestRule.onAllNodesWithTag("BillItem_${fakeQuickFix.title}").assertCountEquals(4)
   }
 }

@@ -6,10 +6,13 @@ import androidx.datastore.preferences.core.Preferences
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.category.CategoryViewModel
+import com.arygm.quickfix.model.locations.Location
 import com.arygm.quickfix.model.offline.small.PreferencesRepository
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.AnnouncementRepository
@@ -38,6 +41,7 @@ class QuickFixFinderScreenTest {
   private lateinit var profileViewModel: ProfileViewModel
   private lateinit var announcementViewModel: AnnouncementViewModel
   private lateinit var workerProfileRepo: WorkerProfileRepositoryFirestore
+  private lateinit var userProfileRepositoryFirestore: ProfileRepository
   private lateinit var categoryRepo: CategoryRepositoryFirestore
   private lateinit var searchViewModel: SearchViewModel
   private lateinit var accountViewModel: AccountViewModel
@@ -52,6 +56,8 @@ class QuickFixFinderScreenTest {
     navigationActions = mock(NavigationActions::class.java)
     navigationActionsRoot = mock(NavigationActions::class.java)
 
+    userProfileRepositoryFirestore = mock(ProfileRepository::class.java)
+
     preferencesRepository = mock(PreferencesRepository::class.java)
     announcementRepository = mock(AnnouncementRepository::class.java)
     userProfileRepository = mock(ProfileRepository::class.java)
@@ -65,7 +71,26 @@ class QuickFixFinderScreenTest {
     announcementViewModel =
         AnnouncementViewModel(announcementRepository, preferencesRepository, userProfileRepository)
 
-    profileViewModel = mock(ProfileViewModel::class.java)
+    org.mockito.kotlin
+        .doAnswer { invocation ->
+          val uid = invocation.arguments[0] as String
+          val onSuccess = invocation.arguments[1] as (Profile?) -> Unit
+          val onFailure = invocation.arguments[2] as (Exception) -> Unit
+
+          // Return a user profile with a "Home" location
+          val testUserProfile =
+              UserProfile(
+                  locations = listOf(Location(latitude = 40.0, longitude = -74.0, name = "Home")),
+                  announcements = emptyList(),
+                  uid = uid)
+          onSuccess(testUserProfile)
+          null
+        }
+        .`when`(userProfileRepositoryFirestore)
+        .getProfileById(anyString(), org.mockito.kotlin.any(), org.mockito.kotlin.any())
+
+    profileViewModel = ProfileViewModel(userProfileRepositoryFirestore)
+    workerViewModel = mockk(relaxed = true)
 
     workerProfileRepo = mockk(relaxed = true)
     categoryRepo = mockk(relaxed = true)

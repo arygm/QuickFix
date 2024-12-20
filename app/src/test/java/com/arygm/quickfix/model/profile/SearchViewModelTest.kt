@@ -288,18 +288,9 @@ class SearchViewModelTest {
                 location = Location(47.0, 7.0, "Location C"),
                 rating = 4.2))
 
-    // Mock repository behavior to call onSuccess with the workers list
-    doAnswer { invocation ->
-          val onSuccess = invocation.getArgument<(List<WorkerProfile>) -> Unit>(0)
-          onSuccess(workers)
-          null
-        }
-        .`when`(mockRepository)
-        .getProfiles(any(), any())
-
     // Act: Call ViewModel's searchEngine function with a query
     val query = "plumbing certified"
-    viewModel.searchEngine(query)
+    val results = viewModel.searchEngine(query, workers)
 
     // Advance coroutine until idle to ensure callbacks are executed
     testDispatcher.scheduler.advanceUntilIdle()
@@ -308,7 +299,7 @@ class SearchViewModelTest {
     val expectedFiltered =
         listOf(workers[0]) // Only worker_1 matches both "plumbing" and "certified"
 
-    assertEquals(expectedFiltered, viewModel.workerProfilesSuggestions.value)
+    assertEquals(expectedFiltered, results)
   }
 
   @Test
@@ -348,18 +339,9 @@ class SearchViewModelTest {
                 location = Location(46.5, 6.5, "Location B"),
                 rating = 4.8))
 
-    // Mock repository behavior to call onSuccess with the workers list
-    doAnswer { invocation ->
-          val onSuccess = invocation.getArgument<(List<WorkerProfile>) -> Unit>(0)
-          onSuccess(workers)
-          null
-        }
-        .`when`(mockRepository)
-        .getProfiles(any(), any())
-
     // Act: Call ViewModel's searchEngine function with a partial match query
     val query = "certified plumber"
-    viewModel.searchEngine(query)
+    val results = viewModel.searchEngine(query, workers)
 
     // Advance coroutine until idle to ensure callbacks are executed
     testDispatcher.scheduler.advanceUntilIdle()
@@ -368,7 +350,7 @@ class SearchViewModelTest {
     val expectedFiltered =
         emptyList<WorkerProfile>() // No worker matches both "certified" and "plumber"
 
-    assertEquals(expectedFiltered, viewModel.workerProfilesSuggestions.value)
+    assertEquals(expectedFiltered, results)
   }
 
   @Test
@@ -392,18 +374,9 @@ class SearchViewModelTest {
                 location = Location(46.0, 6.0, "Location A"),
                 rating = 4.5))
 
-    // Mock repository behavior to call onSuccess with the workers list
-    doAnswer { invocation ->
-          val onSuccess = invocation.getArgument<(List<WorkerProfile>) -> Unit>(0)
-          onSuccess(workers)
-          null
-        }
-        .`when`(mockRepository)
-        .getProfiles(any(), any())
-
     // Act: Call ViewModel's searchEngine function with different casing
     val query = "PlUmBiNg"
-    viewModel.searchEngine(query)
+    val results = viewModel.searchEngine(query, workers)
 
     // Advance coroutine until idle to ensure callbacks are executed
     testDispatcher.scheduler.advanceUntilIdle()
@@ -411,31 +384,7 @@ class SearchViewModelTest {
     // Assert: Check that the workerProfilesSuggestions state is updated correctly
     val expectedFiltered = listOf(workers[0])
 
-    assertEquals(expectedFiltered, viewModel.workerProfilesSuggestions.value)
-  }
-
-  @Test
-  fun testSearchEngineFailure() = runTest {
-    // Arrange: Simulate repository failure with an exception
-    val errorMessage = "Failed to fetch profiles"
-
-    doAnswer { invocation ->
-          val onFailure = invocation.getArgument<(Exception) -> Unit>(1)
-          onFailure(Exception(errorMessage))
-          null
-        }
-        .`when`(mockRepository)
-        .getProfiles(any(), any())
-
-    // Act: Call ViewModel's searchEngine function
-    val query = "plumbing"
-    viewModel.searchEngine(query)
-
-    // Advance coroutine until idle to ensure callbacks are executed
-    testDispatcher.scheduler.advanceUntilIdle()
-
-    // Assert: Ensure that workerProfilesSuggestions is empty
-    assertTrue(viewModel.workerProfilesSuggestions.value.isEmpty())
+    assertEquals(expectedFiltered, results)
   }
 
   @Test
@@ -493,18 +442,9 @@ class SearchViewModelTest {
                 location = Location(47.0, 7.0, "Location C"),
                 rating = 4.2))
 
-    // Mock repository behavior to call onSuccess with the workers list
-    doAnswer { invocation ->
-          val onSuccess = invocation.getArgument<(List<WorkerProfile>) -> Unit>(0)
-          onSuccess(workers)
-          null
-        }
-        .`when`(mockRepository)
-        .getProfiles(any(), any())
-
     // Act: Call ViewModel's searchEngine function with a query that matches multiple fields
     val query = "plumbing express delivery"
-    viewModel.searchEngine(query)
+    val results = viewModel.searchEngine(query, workers)
 
     // Advance coroutine until idle to ensure callbacks are executed
     testDispatcher.scheduler.advanceUntilIdle()
@@ -513,6 +453,6 @@ class SearchViewModelTest {
     // service
     val expectedFiltered = listOf(workers[0], workers[2])
 
-    assertEquals(expectedFiltered, viewModel.workerProfilesSuggestions.value)
+    assertEquals(expectedFiltered, results)
   }
 }

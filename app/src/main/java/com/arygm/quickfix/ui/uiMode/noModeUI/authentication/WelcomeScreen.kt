@@ -11,19 +11,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,12 +29,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
@@ -197,8 +192,8 @@ fun WelcomeScreen(
                   Modifier.graphicsLayer(alpha = elementsAlpha).testTag("RegistrationButton"),
               textColor = ButtonPrimary)
 
-          Button(
-              onClick = {
+          QuickFixButton(
+              onClickAction = {
                 val gso =
                     GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                         .requestIdToken(token)
@@ -207,37 +202,16 @@ fun WelcomeScreen(
                 val googleSignInClient = GoogleSignIn.getClient(context, gso)
                 launcher.launch(googleSignInClient.signInIntent)
               },
-              colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+              buttonColor = Color.Transparent,
               border = BorderStroke(2.dp, colorScheme.background),
               modifier =
                   Modifier.fillMaxWidth(0.8f)
-                      .height(screenHeight * 0.054f)
                       .graphicsLayer(alpha = elementsAlpha)
                       .testTag("googleButton"),
-              shape = RoundedCornerShape(10.dp)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start,
-                    modifier = Modifier.fillMaxWidth().padding(start = 0.dp)) {
-                      Image(
-                          painter =
-                              painterResource(
-                                  id = com.arygm.quickfix.R.drawable.google,
-                              ),
-                          contentDescription = "Google Logo",
-                          colorFilter = ColorFilter.tint(colorScheme.background),
-                          modifier = Modifier.size(30.dp).offset(x = (-3).dp).testTag("googleLogo"))
-
-                      Spacer(modifier = Modifier.width(screenWidth * 0.04f))
-
-                      // Button Text
-                      Text(
-                          text = "CONTINUE WITH GOOGLE",
-                          color = colorScheme.background,
-                          style = MaterialTheme.typography.labelMedium,
-                      )
-                    }
-              }
+              buttonText = "CONTINUE WITH GOOGLE",
+              textColor = colorScheme.background,
+              leadingIcon = ImageVector.vectorResource(id = R.drawable.google),
+              leadingIconTint = colorScheme.background)
         }
   }
 }

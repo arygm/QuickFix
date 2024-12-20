@@ -20,6 +20,7 @@ import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelWorkerProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.switchModes.AppMode
@@ -27,7 +28,7 @@ import com.arygm.quickfix.model.switchModes.ModeViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.navigation.AppContentRoute
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.UserModeNavHost
-import com.arygm.quickfix.ui.uiMode.workerMode.WorkerModeNavGraph
+import com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.WorkerModeNavGraph
 import com.arygm.quickfix.utils.loadAppMode
 
 @Composable
@@ -41,12 +42,14 @@ fun AppContentNavGraph(
     rootNavigationActions: NavigationActions,
     modeViewModel: ModeViewModel,
     userPreferencesViewModel: PreferencesViewModelUserProfile,
+    workerPreferencesViewModel: PreferencesViewModelWorkerProfile,
     workerViewModel: ProfileViewModel,
     categoryViewModel: CategoryViewModel,
     locationViewModel: LocationViewModel,
     chatViewModel: ChatViewModel,
-    quickFixViewModel: QuickFixViewModel
+    quickFixViewModel: QuickFixViewModel,
 ) {
+
   val appContentNavController = rememberNavController()
   val appContentNavigationActions = remember { NavigationActions(appContentNavController) }
   var currentAppMode by remember { mutableStateOf(AppMode.USER) }
@@ -94,6 +97,7 @@ fun AppContentNavGraph(
               preferencesViewModel,
               rootNavigationActions,
               userPreferencesViewModel,
+              workerPreferencesViewModel,
               appContentNavigationActions,
               chatViewModel,
               quickFixViewModel,
@@ -103,14 +107,18 @@ fun AppContentNavGraph(
         composable(AppContentRoute.WORKER_MODE) {
           WorkerModeNavGraph(
               modeViewModel,
-              workerViewModel,
               isOffline,
               appContentNavigationActions,
               preferencesViewModel,
               accountViewModel,
-              categoryViewModel,
               rootNavigationActions,
-              userPreferencesViewModel)
+              workerPreferencesViewModel,
+              locationViewModel,
+              userViewModel,
+              workerViewModel,
+              quickFixViewModel,
+              chatViewModel,
+              categoryViewModel)
         }
       }
 }

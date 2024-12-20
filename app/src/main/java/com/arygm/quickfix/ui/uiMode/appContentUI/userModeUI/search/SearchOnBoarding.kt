@@ -83,6 +83,8 @@ fun SearchOnBoarding(
   var locationFilterApplied by remember { mutableStateOf(false) }
   var userProfile by remember { mutableStateOf<UserProfile?>(null) }
   var lastAppliedMaxDist by remember { mutableIntStateOf(200) }
+  val profiles by workerViewModel.profiles.collectAsState()
+  var searchedWorkers by remember { mutableStateOf(profiles as List<WorkerProfile>) }
   val focusManager = LocalFocusManager.current
   var selectedLocation by remember { mutableStateOf(Location()) }
   val categories = categoryViewModel.categories.collectAsState().value
@@ -212,7 +214,7 @@ fun SearchOnBoarding(
                             value = searchQuery,
                             onValueChange = {
                               searchQuery = it
-                              searchViewModel.searchEngine(it)
+                              searchViewModel.searchEngine(it, profiles as List<WorkerProfile>)
                             },
                             shape = CircleShape,
                             textStyle = poppinsTypography.bodyMedium,
@@ -278,7 +280,7 @@ fun SearchOnBoarding(
                     }
                   }
                   ProfileResults(
-                      profiles = filteredWorkerProfiles,
+                      profiles = searchedWorkers,
                       searchViewModel = searchViewModel,
                       accountViewModel = accountViewModel,
                       onBookClick = { selectedProfile, loc, profile, banner ->
