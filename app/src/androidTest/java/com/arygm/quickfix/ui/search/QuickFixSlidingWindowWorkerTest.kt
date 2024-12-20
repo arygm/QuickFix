@@ -1,11 +1,11 @@
 package com.arygm.quickfix.ui.search
 
+import android.graphics.Bitmap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
-import com.arygm.quickfix.R
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.QuickFixSlidingWindowWorker
 import org.junit.Rule
 import org.junit.Test
@@ -37,11 +37,11 @@ class QuickFixSlidingWindowWorkerTest {
       QuickFixSlidingWindowWorker(
           isVisible = true,
           onDismiss = { /* No-op */},
-          bannerImage = R.drawable.moroccan_flag,
-          profilePicture = R.drawable.placeholder_worker,
+          bannerImage = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888),
+          profilePicture = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888),
           initialSaved = false,
           workerCategory = "Painter",
-          workerAddress = "123 Main Street",
+          selectedCityName = "123 Main Street",
           description = "Sample description for the worker.",
           includedServices = includedServices,
           addonServices = addonServices,
@@ -92,11 +92,11 @@ class QuickFixSlidingWindowWorkerTest {
       QuickFixSlidingWindowWorker(
           isVisible = true,
           onDismiss = { /* No-op */},
-          bannerImage = R.drawable.moroccan_flag,
-          profilePicture = R.drawable.placeholder_worker,
+          bannerImage = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888),
+          profilePicture = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888),
           initialSaved = false,
           workerCategory = "Painter",
-          workerAddress = "123 Main Street",
+          selectedCityName = "123 Main Street",
           description = "Sample description for the worker.",
           includedServices = includedServices,
           addonServices = addOnServices,
@@ -155,11 +155,11 @@ class QuickFixSlidingWindowWorkerTest {
       QuickFixSlidingWindowWorker(
           isVisible = true,
           onDismiss = { /* No-op */},
-          bannerImage = R.drawable.moroccan_flag,
-          profilePicture = R.drawable.placeholder_worker,
+          bannerImage = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888),
+          profilePicture = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888),
           initialSaved = false,
           workerCategory = "Painter",
-          workerAddress = "123 Main Street",
+          selectedCityName = "123 Main Street",
           description = "Sample description for the worker.",
           includedServices = includedServices,
           addonServices = addOnServices,

@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -39,9 +40,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arygm.quickfix.ui.elements.QuickFixButton
@@ -53,11 +55,11 @@ import com.arygm.quickfix.ui.elements.RatingBar
 fun QuickFixSlidingWindowWorker(
     isVisible: Boolean,
     onDismiss: () -> Unit,
-    bannerImage: Int,
-    profilePicture: Int,
+    bannerImage: Bitmap?,
+    profilePicture: Bitmap?,
     initialSaved: Boolean,
     workerCategory: String,
-    workerAddress: String,
+    selectedCityName: String?,
     description: String,
     includedServices: List<String>,
     addonServices: List<String>,
@@ -88,7 +90,7 @@ fun QuickFixSlidingWindowWorker(
                       .testTag("sliding_window_top_bar")) {
                 // Banner Image
                 Image(
-                    painter = painterResource(id = bannerImage),
+                    painter = BitmapPainter(bannerImage!!.asImageBitmap()),
                     contentDescription = "Banner",
                     modifier =
                         Modifier.fillMaxWidth()
@@ -113,7 +115,7 @@ fun QuickFixSlidingWindowWorker(
 
                 // Profile picture overlapping the banner image
                 Image(
-                    painter = painterResource(id = profilePicture),
+                    painter = BitmapPainter(profilePicture!!.asImageBitmap()),
                     contentDescription = "Profile Picture",
                     modifier =
                         Modifier.size(screenHeight * 0.1f)
@@ -135,11 +137,13 @@ fun QuickFixSlidingWindowWorker(
                     style = MaterialTheme.typography.headlineLarge,
                     color = colorScheme.onBackground,
                     modifier = Modifier.testTag("sliding_window_worker_category"))
-                Text(
-                    text = workerAddress,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = colorScheme.onBackground,
-                    modifier = Modifier.testTag("sliding_window_worker_address"))
+                selectedCityName?.let {
+                  Text(
+                      text = it,
+                      style = MaterialTheme.typography.headlineSmall,
+                      color = colorScheme.onBackground,
+                      modifier = Modifier.testTag("sliding_window_worker_address"))
+                }
               }
 
           // Main content should be scrollable

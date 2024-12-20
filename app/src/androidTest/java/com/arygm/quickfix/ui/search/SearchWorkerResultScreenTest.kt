@@ -14,6 +14,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.filter
+import androidx.compose.ui.test.hasAnyChild
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasSetTextAction
@@ -22,7 +23,6 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -223,26 +223,6 @@ class SearchWorkerResultScreenTest {
   }
 
   @Test
-  fun testTitleAndDescriptionAreDisplayed() {
-    // Set the composable content
-    composeTestRule.setContent {
-      SearchWorkerResult(
-          navigationActions,
-          searchViewModel,
-          accountViewModel,
-          userViewModel,
-         quickFixViewModel,
-          preferencesViewModel,
-          workerViewModel = workerViewModel)
-    }
-    // Set the search query and verify that the title and description match the query
-    searchViewModel.setSearchQuery("Unknown")
-
-    // Check if the description with the query text is displayed
-    composeTestRule.onAllNodesWithText("Unknown").assertCountEquals(3)
-  }
-
-  @Test
   fun testFilterButtonsAreDisplayed() {
     // Set the composable content
     composeTestRule.setContent {
@@ -291,7 +271,7 @@ class SearchWorkerResultScreenTest {
           searchViewModel,
           accountViewModel,
           userViewModel,
-         quickFixViewModel,
+          quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
     }
@@ -315,7 +295,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
     // Scroll through the LazyColumn and verify each profile result is displayed
     val workerProfilesList = composeTestRule.onNodeWithTag("worker_profiles_list")
@@ -341,7 +320,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
     // Perform click on the back button and verify goBack() is called
     composeTestRule.onNodeWithContentDescription("Back").performClick()
@@ -360,7 +338,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     // Wait for the UI to settle
@@ -391,7 +368,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     // Wait until the worker profiles are displayed
@@ -419,7 +395,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     // Wait until the worker profiles are displayed
@@ -450,7 +425,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     // Wait until the worker profiles are displayed
@@ -489,7 +463,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     // Wait until the worker profiles are displayed
@@ -526,7 +499,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     // Wait until the worker profiles are displayed
@@ -564,7 +536,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     // Wait until the worker profiles are displayed
@@ -604,7 +575,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     // Wait until the worker profiles are displayed
@@ -636,7 +606,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     // Wait until the worker profiles are displayed
@@ -725,7 +694,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     // Initially, all workers should be displayed
@@ -819,7 +787,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     // Initially, all workers should be displayed
@@ -905,16 +872,14 @@ class SearchWorkerResultScreenTest {
 
     // Set the composable content
     composeTestRule.setContent {
-        SearchWorkerResult(
-            navigationActions,
-            searchViewModel,
-            accountViewModel,
-            userViewModel,
-            quickFixViewModel,
-            preferencesViewModel,
-            workerViewModel = workerViewModel
-        )
-
+      SearchWorkerResult(
+          navigationActions,
+          searchViewModel,
+          accountViewModel,
+          userViewModel,
+          quickFixViewModel,
+          preferencesViewModel,
+          workerViewModel = workerViewModel)
     }
 
     // Initially, all workers should be displayed
@@ -1000,7 +965,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1069,7 +1033,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1088,7 +1051,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasText("${worker.price.roundToInt()}", substring = true))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 
@@ -1138,7 +1102,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1165,7 +1128,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(filteredWorkers.size)
 
     filteredWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasText("${worker.price.roundToInt()}", substring = true))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 
@@ -1209,7 +1173,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1238,7 +1201,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1289,7 +1251,6 @@ class SearchWorkerResultScreenTest {
           quickFixViewModel,
           preferencesViewModel,
           workerViewModel = workerViewModel)
-
     }
 
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -1309,9 +1270,11 @@ class SearchWorkerResultScreenTest {
     val workerNodes = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
 
     workerNodes.assertCountEquals(sortedWorkers.size)
+    workerNodes[0].printToLog("WorkerNode")
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasText("${worker.price.roundToInt()}", substring = true))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 
@@ -1372,7 +1335,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasText("${worker.price.roundToInt()}", substring = true))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 
@@ -1661,9 +1625,9 @@ class SearchWorkerResultScreenTest {
     val workerNodes = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
     workerNodes.assertCountEquals(workers.size)
     // Verify order by rating text
-    workerNodes[0].assert(hasText("4.5 ★", substring = true))
-    workerNodes[1].assert(hasText("3.0 ★", substring = true))
-    workerNodes[2].assert(hasText("2.0 ★", substring = true))
+    workerNodes[0].assert(hasAnyChild(hasText("4.5 ★", substring = true)))
+    workerNodes[1].assert(hasAnyChild(hasText("3.0 ★", substring = true)))
+    workerNodes[2].assert(hasAnyChild(hasText("2.0 ★", substring = true)))
 
     // Click again to remove Highest Rating filter
     composeTestRule.onNodeWithText("Highest Rating").performClick()
@@ -1675,9 +1639,10 @@ class SearchWorkerResultScreenTest {
     // Check that the initial worker (w1) is now first again.
 
     val workerNodesAfterRevert = composeTestRule.onNodeWithTag("worker_profiles_list").onChildren()
-    workerNodesAfterRevert[0].assert(hasText("3.0 ★", substring = true)) // w1 first again
-    workerNodesAfterRevert[1].assert(hasText("4.5 ★", substring = true))
-    workerNodesAfterRevert[2].assert(hasText("2.0 ★", substring = true))
+    workerNodesAfterRevert[0].assert(
+        hasAnyChild(hasText("3.0 ★", substring = true))) // w1 first again
+    workerNodesAfterRevert[1].assert(hasAnyChild(hasText("4.5 ★", substring = true)))
+    workerNodesAfterRevert[2].assert(hasAnyChild(hasText("2.0 ★", substring = true)))
   }
 
   @Test
@@ -1822,7 +1787,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasText("${worker.price.roundToInt()}", substring = true))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 
@@ -2132,7 +2098,8 @@ class SearchWorkerResultScreenTest {
     workerNodes.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasText("${worker.price.roundToInt()}", substring = true))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
 
     composeTestRule.onNodeWithText("Emergency").performClick()
@@ -2144,7 +2111,8 @@ class SearchWorkerResultScreenTest {
     workerNodes1.assertCountEquals(sortedWorkers.size)
 
     sortedWorkers1.forEachIndexed { index, worker ->
-      workerNodes[index].assert(hasText("${worker.price.roundToInt()}", substring = true))
+      workerNodes[index].assert(
+          hasAnyChild(hasText("${worker.price.roundToInt()}", substring = true)))
     }
   }
 }

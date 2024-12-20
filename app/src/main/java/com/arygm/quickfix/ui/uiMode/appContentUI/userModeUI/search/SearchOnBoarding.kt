@@ -41,11 +41,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.arygm.quickfix.MainActivity
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.locations.Location
-import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
 import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.elements.ChooseServiceTypeSheet
@@ -57,6 +59,8 @@ import com.arygm.quickfix.ui.elements.QuickFixTextFieldCustom
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.theme.poppinsTypography
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserTopLevelDestinations
+import com.arygm.quickfix.utils.LocationHelper
+import com.arygm.quickfix.utils.loadUserId
 
 @Composable
 fun SearchOnBoarding(
@@ -64,9 +68,12 @@ fun SearchOnBoarding(
     navigationActionsRoot: NavigationActions,
     searchViewModel: SearchViewModel,
     accountViewModel: AccountViewModel,
+    preferencesViewModel: PreferencesViewModel,
+    userProfileViewModel: ProfileViewModel,
     categoryViewModel: CategoryViewModel,
-    onProfileClick: (WorkerProfile, String) -> Unit,
-    workerViewModel: ProfileViewModel
+    onBookClick: (WorkerProfile, String, Bitmap, Bitmap) -> Unit,
+    workerViewModel: ProfileViewModel,
+    locationHelper: LocationHelper = LocationHelper(LocalContext.current, MainActivity())
 ) {
   val (uiState, setUiState) = remember { mutableStateOf(SearchUIState()) }
   val workerProfiles by searchViewModel.workerProfilesSuggestions.collectAsState()
@@ -80,6 +87,8 @@ fun SearchOnBoarding(
   var selectedLocation by remember { mutableStateOf(Location()) }
   val categories = categoryViewModel.categories.collectAsState().value
   val itemCategories = remember { categories }
+  var uid by remember { mutableStateOf("Loading...") }
+
   val expandedStates = remember {
     mutableStateListOf(*BooleanArray(itemCategories.size) { false }.toTypedArray())
   }
@@ -93,6 +102,22 @@ fun SearchOnBoarding(
   var baseLocation by remember { mutableStateOf(filterState.phoneLocation) }
   var maxDistance by remember { mutableIntStateOf(0) }
 
+  LaunchedEffect(Unit) {
+    if (locationHelper.checkPermissions()) {
+      locationHelper.getCurrentLocation { location ->
+        if (location != null) {
+          val userLoc = Location(location.latitude, location.longitude, "Phone Location")
+          filterState.phoneLocation = userLoc
+        } else {
+          Toast.makeText(context, "Unable to fetch location", Toast.LENGTH_SHORT).show()
+        }
+      }
+    } else {
+      Toast.makeText(context, "Enable Location In Settings", Toast.LENGTH_SHORT).show()
+    }
+    uid = loadUserId(preferencesViewModel)
+    userProfileViewModel.fetchUserProfile(uid) { profile -> userProfile = profile as UserProfile }
+  }
   fun updateFilteredProfiles() {
     filteredWorkerProfiles = filterState.reapplyFilters(workerProfiles, searchViewModel)
   }
@@ -113,39 +138,39 @@ fun SearchOnBoarding(
           },
           onShowLocationBottomSheet = { setUiState(uiState.copy(showLocationBottomSheet = true)) })
 
-    val profileImagesMap by remember { mutableStateOf(mutableMapOf<String, Bitmap?>()) }
-    val bannerImagesMap by remember { mutableStateOf(mutableMapOf<String, Bitmap?>()) }
-    var loading by remember { mutableStateOf(true) }
-    // Tracks if data is loading
-    LaunchedEffect(workerProfiles) {
-        if (workerProfiles.isNotEmpty()) {
-            workerProfiles.forEach { profile ->
-                // Fetch profile images
-                workerViewModel.fetchProfileImageAsBitmap(
-                    profile.uid,
-                    onSuccess = { bitmap ->
-                        profileImagesMap[profile.uid] = bitmap
-                        checkIfLoadingComplete(workerProfiles, profileImagesMap, bannerImagesMap) {
-                            loading = false
-                        }
-                    },
-                    onFailure = { Log.e("ProfileResults", "Failed to fetch profile image") })
+  val profileImagesMap by remember { mutableStateOf(mutableMapOf<String, Bitmap?>()) }
+  val bannerImagesMap by remember { mutableStateOf(mutableMapOf<String, Bitmap?>()) }
+  var loading by remember { mutableStateOf(true) }
+  // Tracks if data is loading
+  LaunchedEffect(workerProfiles) {
+    if (workerProfiles.isNotEmpty()) {
+      workerProfiles.forEach { profile ->
+        // Fetch profile images
+        workerViewModel.fetchProfileImageAsBitmap(
+            profile.uid,
+            onSuccess = { bitmap ->
+              profileImagesMap[profile.uid] = bitmap
+              checkIfLoadingComplete(workerProfiles, profileImagesMap, bannerImagesMap) {
+                loading = false
+              }
+            },
+            onFailure = { Log.e("ProfileResults", "Failed to fetch profile image") })
 
-                // Fetch banner images
-                workerViewModel.fetchBannerImageAsBitmap(
-                    profile.uid,
-                    onSuccess = { bitmap ->
-                        bannerImagesMap[profile.uid] = bitmap
-                        checkIfLoadingComplete(workerProfiles, profileImagesMap, bannerImagesMap) {
-                            loading = false
-                        }
-                    },
-                    onFailure = { Log.e("ProfileResults", "Failed to fetch banner image") })
-            }
-        } else {
-            loading = false // No profiles to load
-        }
+        // Fetch banner images
+        workerViewModel.fetchBannerImageAsBitmap(
+            profile.uid,
+            onSuccess = { bitmap ->
+              bannerImagesMap[profile.uid] = bitmap
+              checkIfLoadingComplete(workerProfiles, profileImagesMap, bannerImagesMap) {
+                loading = false
+              }
+            },
+            onFailure = { Log.e("ProfileResults", "Failed to fetch banner image") })
+      }
+    } else {
+      loading = false // No profiles to load
     }
+  }
   BoxWithConstraints {
     val widthRatio = maxWidth.value / 411f
     val heightRatio = maxHeight.value / 860f
@@ -156,40 +181,38 @@ fun SearchOnBoarding(
     Scaffold(
         containerColor = colorScheme.background,
         content = { padding ->
-            if (loading) {
-                // Display a loader
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(
-                        color = colorScheme.primary, modifier = Modifier.size(64.dp))
-                }
-            } else {
-                Column(
-                    modifier =
+          if (loading) {
+            // Display a loader
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+              CircularProgressIndicator(
+                  color = colorScheme.primary, modifier = Modifier.size(64.dp))
+            }
+          } else {
+            Column(
+                modifier =
                     Modifier.fillMaxWidth().padding(padding).padding(top = 40.dp * heightRatio),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 0.dp * heightRatio),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                  Row(
+                      modifier = Modifier.fillMaxWidth().padding(bottom = 0.dp * heightRatio),
+                      horizontalArrangement = Arrangement.Center) {
                         QuickFixTextFieldCustom(
                             modifier = Modifier.testTag("searchContent"),
                             showLeadingIcon = { true },
                             leadingIcon = Icons.Outlined.Search,
                             showTrailingIcon = { searchQuery.isNotEmpty() },
                             trailingIcon = {
-                                Icon(
-                                    imageVector = Icons.Filled.Clear,
-                                    contentDescription = "Clear search query",
-                                    tint = colorScheme.onBackground,
-                                    modifier = Modifier.testTag("clearSearchIcon"),
-                                )
+                              Icon(
+                                  imageVector = Icons.Filled.Clear,
+                                  contentDescription = "Clear search query",
+                                  tint = colorScheme.onBackground,
+                                  modifier = Modifier.testTag("clearSearchIcon"),
+                              )
                             },
                             placeHolderText = "Find your perfect fix with QuickFix",
                             value = searchQuery,
                             onValueChange = {
-                                searchQuery = it
-                                searchViewModel.searchEngine(it)
+                              searchQuery = it
+                              searchViewModel.searchEngine(it)
                             },
                             shape = CircleShape,
                             textStyle = poppinsTypography.bodyMedium,
@@ -213,63 +236,61 @@ fun SearchOnBoarding(
                             buttonOpacity = 1f,
                             textStyle = poppinsTypography.labelSmall,
                             onClickAction = {
-                                navigationActionsRoot.navigateTo(UserTopLevelDestinations.HOME)
+                              navigationActionsRoot.navigateTo(UserTopLevelDestinations.HOME)
                             },
                             contentPadding = PaddingValues(0.dp),
                         )
-                    }
-                    if (searchQuery.isEmpty()) {
-                        // Show Categories
-                        CategoryContent(
-                            navigationActions = navigationActions,
-                            searchViewModel = searchViewModel,
-                            listState = listState,
-                            expandedStates = expandedStates,
-                            itemCategories = itemCategories,
-                            widthRatio = widthRatio,
-                            heightRatio = heightRatio,
-                        )
-                    } else {
-                        // Show Profiles
-                        // Insert filter buttons here (only when searchQuery is not empty)
-                        Column {
-                            Row(
-                                modifier =
-                                Modifier.fillMaxWidth()
-                                    .padding(
-                                        top = screenHeight * 0.02f,
-                                        bottom = screenHeight * 0.01f
-                                    )
-                                    .padding(horizontal = screenWidth * 0.02f),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                FilterRow(
-                                    showFilterButtons = uiState.showFilterButtons,
-                                    toggleFilterButtons = {
-                                        setUiState(uiState.copy(showFilterButtons = !uiState.showFilterButtons))
-                                    },
-                                    listOfButtons = listOfButtons,
-                                    modifier = Modifier.padding(bottom = screenHeight * 0.01f),
-                                    screenWidth = screenWidth,
-                                    screenHeight = screenHeight
-                                )
-                            }
-                        }
-                    }
-                    ProfileResults(
-                        profiles = filteredWorkerProfiles,
+                      }
+                  if (searchQuery.isEmpty()) {
+                    // Show Categories
+                    CategoryContent(
+                        navigationActions = navigationActions,
                         searchViewModel = searchViewModel,
-                        accountViewModel = accountViewModel,
                         listState = listState,
-                        onBookClick = { selectedProfile, loc ->
-                            onProfileClick(
-                                selectedProfile,
-                                loc
-                            )
-                        }, workerViewModel = workerViewModel
+                        expandedStates = expandedStates,
+                        itemCategories = itemCategories,
+                        widthRatio = widthRatio,
+                        heightRatio = heightRatio,
                     )
+                  } else {
+                    // Show Profiles
+                    // Insert filter buttons here (only when searchQuery is not empty)
+                    Column {
+                      Row(
+                          modifier =
+                              Modifier.fillMaxWidth()
+                                  .padding(
+                                      top = screenHeight * 0.02f, bottom = screenHeight * 0.01f)
+                                  .padding(horizontal = screenWidth * 0.02f),
+                          verticalAlignment = Alignment.CenterVertically,
+                      ) {
+                        FilterRow(
+                            showFilterButtons = uiState.showFilterButtons,
+                            toggleFilterButtons = {
+                              setUiState(
+                                  uiState.copy(showFilterButtons = !uiState.showFilterButtons))
+                            },
+                            listOfButtons = listOfButtons,
+                            modifier = Modifier.padding(bottom = screenHeight * 0.01f),
+                            screenWidth = screenWidth,
+                            screenHeight = screenHeight)
+                      }
+                    }
+                  }
+                  ProfileResults(
+                      profiles = filteredWorkerProfiles,
+                      searchViewModel = searchViewModel,
+                      accountViewModel = accountViewModel,
+                      onBookClick = { selectedProfile, loc, profile, banner ->
+                        onBookClick(selectedProfile, loc, profile, banner)
+                      },
+                      profileImagesMap = profileImagesMap,
+                      bannerImagesMap = bannerImagesMap,
+                      baseLocation = baseLocation,
+                      screenHeight = screenHeight)
                 }
-            }},
+          }
+        },
         modifier =
             Modifier.pointerInput(Unit) {
               detectTapGestures(onTap = { focusManager.clearFocus() })

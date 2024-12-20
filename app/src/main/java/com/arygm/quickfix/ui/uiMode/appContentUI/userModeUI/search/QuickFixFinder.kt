@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -36,7 +37,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arygm.quickfix.R
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
@@ -47,8 +47,6 @@ import com.arygm.quickfix.model.search.AnnouncementViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
 import com.arygm.quickfix.ui.navigation.NavigationActions
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.UserScreen
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.AnnouncementScreen
-import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchOnBoarding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -69,78 +67,87 @@ fun QuickFixFinderScreen(
     workerViewModel: ProfileViewModel
 ) {
   var isWindowVisible by remember { mutableStateOf(false) }
-  var pager by remember { mutableStateOf(true) }
+  var selectedCityName by remember { mutableStateOf<String?>(null) }
+
   var selectedWorker by remember { mutableStateOf(WorkerProfile()) }
   val pagerState = rememberPagerState(pageCount = { 2 })
   val colorBackground =
       if (pagerState.currentPage == 0) colorScheme.background else colorScheme.surface
   val colorButton = if (pagerState.currentPage == 1) colorScheme.background else colorScheme.surface
-  var bannerImage by remember { mutableStateOf(R.drawable.moroccan_flag) }
-  var profilePicture by remember { mutableStateOf(R.drawable.placeholder_worker) }
-  var initialSaved by remember { mutableStateOf(false) }
-  var workerAddress by remember { mutableStateOf("") }
+  val defaultBitmap =
+      Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888) // Example default Bitmap
 
+  var profilePicture by remember { mutableStateOf(defaultBitmap) }
+  var bannerPicture by remember { mutableStateOf(defaultBitmap) }
+
+  var initialSaved by remember { mutableStateOf(false) }
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     val screenHeight = maxHeight
     val screenWidth = maxWidth
 
-  Scaffold(
-      containerColor = colorBackground,
-      topBar = {
-        TopAppBar(
-            title = {
-              val coroutineScope = rememberCoroutineScope()
-              Row(
-                  horizontalArrangement = Arrangement.Center,
-                  verticalAlignment = Alignment.CenterVertically,
-                  modifier = Modifier.fillMaxSize().padding(end = 20.dp)) {
-                    Surface(
-                        color = colorButton,
-                        shape = RoundedCornerShape(20.dp),
-                        modifier =
-                            Modifier.padding(horizontal = 40.dp).clip(RoundedCornerShape(20.dp))) {
-                          TabRow(
-                              selectedTabIndex = pagerState.currentPage,
-                              containerColor = Color.Transparent,
-                              divider = {},
-                              indicator = {},
-                              modifier =
-                                  Modifier.padding(horizontal = 1.dp, vertical = 1.dp)
-                                      .testTag("quickFixSearchTabRow")) {
-                                QuickFixScreenTab(pagerState, coroutineScope, 0, "Search", screenWidth)
-                                QuickFixScreenTab(pagerState, coroutineScope, 1, "Announce", screenWidth)
-                              }
-                        }
-                  }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorBackground),
-            modifier = Modifier.testTag("QuickFixFinderTopBar"))
-      },
-      content = { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().testTag("QuickFixFinderContent").padding(padding),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              HorizontalPager(
-                  state = pagerState,
-                  userScrollEnabled = false,
-                  modifier = Modifier.testTag("quickFixSearchPager")) { page ->
-                    when (page) {
-                      0 -> {
+    Scaffold(
+        containerColor = colorBackground,
+        topBar = {
+          TopAppBar(
+              title = {
+                val coroutineScope = rememberCoroutineScope()
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxSize().padding(end = 20.dp)) {
+                      Surface(
+                          color = colorButton,
+                          shape = RoundedCornerShape(20.dp),
+                          modifier =
+                              Modifier.padding(horizontal = 40.dp)
+                                  .clip(RoundedCornerShape(20.dp))) {
+                            TabRow(
+                                selectedTabIndex = pagerState.currentPage,
+                                containerColor = Color.Transparent,
+                                divider = {},
+                                indicator = {},
+                                modifier =
+                                    Modifier.padding(horizontal = 1.dp, vertical = 1.dp)
+                                        .testTag("quickFixSearchTabRow")) {
+                                  QuickFixScreenTab(
+                                      pagerState, coroutineScope, 0, "Search", screenWidth)
+                                  QuickFixScreenTab(
+                                      pagerState, coroutineScope, 1, "Announce", screenWidth)
+                                }
+                          }
+                    }
+              },
+              colors = TopAppBarDefaults.topAppBarColors(containerColor = colorBackground),
+              modifier = Modifier.testTag("QuickFixFinderTopBar"))
+        },
+        content = { padding ->
+          Column(
+              modifier = Modifier.fillMaxSize().testTag("QuickFixFinderContent").padding(padding),
+              verticalArrangement = Arrangement.Center,
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                HorizontalPager(
+                    state = pagerState,
+                    userScrollEnabled = false,
+                    modifier = Modifier.testTag("quickFixSearchPager")) { page ->
+                      when (page) {
+                        0 -> {
                           SearchOnBoarding(
                               navigationActions,
                               navigationActionsRoot,
                               searchViewModel,
                               accountViewModel,
+                              preferencesViewModel,
+                              profileViewModel,
                               categoryViewModel,
-                              onProfileClick = { profile, locName ->
-                                selectedWorker = profile
-                                bannerImage = R.drawable.moroccan_flag
-                                profilePicture = R.drawable.placeholder_worker
+                              onBookClick = { selectedProfile, locName, profile, banner ->
+                                bannerPicture = banner
+                                profilePicture = profile
                                 initialSaved = false
-                                workerAddress = locName
+                                selectedCityName = locName
                                 isWindowVisible = true
-                              }, workerViewModel = workerViewModel)
+                                selectedWorker = selectedProfile
+                              },
+                              workerViewModel = workerViewModel)
                         }
                         1 -> {
                           AnnouncementScreen(
@@ -167,11 +174,11 @@ fun QuickFixFinderScreen(
           quickFixViewModel.setSelectedWorkerProfile(selectedWorker)
           navigationActions.navigateTo(UserScreen.QUICKFIX_ONBOARDING)
         },
-        bannerImage = bannerImage,
+        bannerImage = bannerPicture,
         profilePicture = profilePicture,
         initialSaved = initialSaved,
         workerCategory = selectedWorker.fieldOfWork,
-        workerAddress = workerAddress,
+        selectedCityName = selectedCityName,
         description = selectedWorker.description,
         includedServices = selectedWorker.includedServices.map { it.name },
         addonServices = selectedWorker.addOnServices.map { it.name },

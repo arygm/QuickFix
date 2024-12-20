@@ -14,22 +14,26 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.text.AnnotatedString
+import androidx.datastore.preferences.core.Preferences
 import com.arygm.quickfix.model.account.AccountRepositoryFirestore
 import com.arygm.quickfix.model.account.AccountViewModel
 import com.arygm.quickfix.model.category.CategoryRepositoryFirestore
 import com.arygm.quickfix.model.category.CategoryViewModel
 import com.arygm.quickfix.model.category.Subcategory
 import com.arygm.quickfix.model.locations.Location
-import com.arygm.quickfix.model.profile.WorkerProfile
+import com.arygm.quickfix.model.offline.small.PreferencesRepository
+import com.arygm.quickfix.model.offline.small.PreferencesViewModel
+import com.arygm.quickfix.model.profile.Profile
 import com.arygm.quickfix.model.profile.ProfileRepository
 import com.arygm.quickfix.model.profile.ProfileViewModel
+import com.arygm.quickfix.model.profile.UserProfile
+import com.arygm.quickfix.model.profile.WorkerProfile
 import com.arygm.quickfix.model.profile.WorkerProfileRepositoryFirestore
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.search.SearchViewModel
@@ -40,11 +44,16 @@ import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.search.SearchOnBoard
 import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalTime
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 
 class SearchOnBoardingTest {
 
@@ -55,7 +64,11 @@ class SearchOnBoardingTest {
   private lateinit var searchViewModel: SearchViewModel
   private lateinit var accountViewModel: AccountViewModel
   private lateinit var categoryViewModel: CategoryViewModel
+  private lateinit var userViewModel: ProfileViewModel
+  private lateinit var preferencesViewModel: PreferencesViewModel
   private lateinit var navigationActionsRoot: NavigationActions
+  private lateinit var preferencesRepositoryDataStore: PreferencesRepository
+  private lateinit var userProfileRepositoryFirestore: ProfileRepository
   private lateinit var quickFixViewModel: QuickFixViewModel
   private lateinit var workerViewModel: ProfileViewModel
   private lateinit var workerProfileRepository: ProfileRepository
@@ -72,9 +85,34 @@ class SearchOnBoardingTest {
     categoryRepo = mockk(relaxed = true)
     accountRepositoryFirestore = mock(AccountRepositoryFirestore::class.java)
     searchViewModel = SearchViewModel(workerProfileRepo)
+    userProfileRepositoryFirestore = mock(ProfileRepository::class.java)
     categoryViewModel = CategoryViewModel(categoryRepo)
     accountViewModel = mockk(relaxed = true)
     quickFixViewModel = QuickFixViewModel(mock())
+    userViewModel = ProfileViewModel(userProfileRepositoryFirestore)
+
+    preferencesRepositoryDataStore = mock(PreferencesRepository::class.java)
+
+    val mockedPreferenceFlow = MutableStateFlow<Any?>(null)
+    whenever(preferencesRepositoryDataStore.getPreferenceByKey(any<Preferences.Key<Any>>()))
+        .thenReturn(mockedPreferenceFlow)
+    preferencesViewModel = PreferencesViewModel(preferencesRepositoryDataStore)
+    doAnswer { invocation ->
+          val uid = invocation.arguments[0] as String
+          val onSuccess = invocation.arguments[1] as (Profile?) -> Unit
+          val onFailure = invocation.arguments[2] as (Exception) -> Unit
+
+          // Return a user profile with a "Home" location
+          val testUserProfile =
+              UserProfile(
+                  locations = listOf(Location(latitude = 40.0, longitude = -74.0, name = "Home")),
+                  announcements = emptyList(),
+                  uid = uid)
+          onSuccess(testUserProfile)
+          null
+        }
+        .`when`(userProfileRepositoryFirestore)
+        .getProfileById(anyString(), any(), any())
   }
 
   @Test
@@ -85,9 +123,10 @@ class SearchOnBoardingTest {
           navigationActionsRoot,
           searchViewModel,
           accountViewModel,
+          preferencesViewModel,
+          userViewModel,
           categoryViewModel,
-          onProfileClick = { _, _ -> },
-
+          onBookClick = { _, _, _, _ -> },
           workerViewModel)
     }
 
@@ -107,8 +146,10 @@ class SearchOnBoardingTest {
           navigationActionsRoot,
           searchViewModel,
           accountViewModel,
+          preferencesViewModel,
+          userViewModel,
           categoryViewModel,
-          onProfileClick = { _, _ -> },
+          onBookClick = { _, _, _, _ -> },
           workerViewModel)
     }
 
@@ -137,8 +178,10 @@ class SearchOnBoardingTest {
           navigationActionsRoot,
           searchViewModel,
           accountViewModel,
+          preferencesViewModel,
+          userViewModel,
           categoryViewModel,
-          onProfileClick = { _, _ -> },
+          onBookClick = { _, _, _, _ -> },
           workerViewModel)
     }
 
@@ -158,8 +201,10 @@ class SearchOnBoardingTest {
           navigationActionsRoot,
           searchViewModel,
           accountViewModel,
+          preferencesViewModel,
+          userViewModel,
           categoryViewModel,
-          onProfileClick = { _, _ -> },
+          onBookClick = { _, _, _, _ -> },
           workerViewModel)
     }
 
@@ -199,12 +244,14 @@ class SearchOnBoardingTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchOnBoarding(
-          navigationActions = navigationActions,
-          navigationActionsRoot = navigationActionsRoot,
-          searchViewModel = searchViewModel,
-          accountViewModel = accountViewModel,
-          categoryViewModel = categoryViewModel,
-          onProfileClick = { _, _ -> },
+          navigationActions,
+          navigationActionsRoot,
+          searchViewModel,
+          accountViewModel,
+          preferencesViewModel,
+          userViewModel,
+          categoryViewModel,
+          onBookClick = { _, _, _, _ -> },
           workerViewModel)
     }
 
@@ -274,16 +321,16 @@ class SearchOnBoardingTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchOnBoarding(
-          navigationActions = navigationActions,
-          navigationActionsRoot = navigationActionsRoot,
-          searchViewModel = searchViewModel,
-          accountViewModel = accountViewModel,
-          categoryViewModel = categoryViewModel,
-          onProfileClick = { _, _ -> },
+          navigationActions,
+          navigationActionsRoot,
+          searchViewModel,
+          accountViewModel,
+          preferencesViewModel,
+          userViewModel,
+          categoryViewModel,
+          onBookClick = { _, _, _, _ -> },
           workerViewModel)
-
     }
-
     // Perform a search query to display filter buttons
     composeTestRule.onNodeWithTag("searchContent").performTextInput("Painter")
     composeTestRule.onNodeWithTag("tuneButton").performClick()
@@ -313,12 +360,14 @@ class SearchOnBoardingTest {
     // Set the composable content
     composeTestRule.setContent {
       SearchOnBoarding(
-          navigationActions = navigationActions,
-          navigationActionsRoot = navigationActionsRoot,
-          searchViewModel = searchViewModel,
-          accountViewModel = accountViewModel,
-          categoryViewModel = categoryViewModel,
-          onProfileClick = { _, _ -> },
+          navigationActions,
+          navigationActionsRoot,
+          searchViewModel,
+          accountViewModel,
+          preferencesViewModel,
+          userViewModel,
+          categoryViewModel,
+          onBookClick = { _, _, _, _ -> },
           workerViewModel)
     }
 
@@ -331,8 +380,6 @@ class SearchOnBoardingTest {
     composeTestRule.onNodeWithText("Location").performClick()
 
     // Verify the bottom sheet appears
-    composeTestRule.waitForIdle()
-      composeTestRule.onRoot().printToLog("root")
     composeTestRule.onNodeWithTag("locationFilterModalSheet").assertIsDisplayed()
   }
 
@@ -344,8 +391,10 @@ class SearchOnBoardingTest {
           navigationActionsRoot,
           searchViewModel,
           accountViewModel,
+          preferencesViewModel,
+          userViewModel,
           categoryViewModel,
-          onProfileClick = { _, _ -> },
+          onBookClick = { _, _, _, _ -> },
           workerViewModel)
     }
 
@@ -368,8 +417,10 @@ class SearchOnBoardingTest {
           navigationActionsRoot,
           searchViewModel,
           accountViewModel,
+          preferencesViewModel,
+          userViewModel,
           categoryViewModel,
-          onProfileClick = { _, _ -> },
+          onBookClick = { _, _, _, _ -> },
           workerViewModel)
     }
 
@@ -396,8 +447,10 @@ class SearchOnBoardingTest {
           navigationActionsRoot,
           searchViewModel,
           accountViewModel,
+          preferencesViewModel,
+          userViewModel,
           categoryViewModel,
-          onProfileClick = { _, _ -> },
+          onBookClick = { _, _, _, _ -> },
           workerViewModel)
     }
 
