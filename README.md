@@ -42,7 +42,6 @@ For workers, QuickFix provides a platform to:
 - Verified Worker Profiles: Ensure trust and quality through detailed worker reviews and ratings.
 - Diverse Services: A one-stop shop for a range of home repair and maintenance needs.
 - Real-Time Booking: Schedule appointments with minimal effort.
-- Secure Payments: Integrated payment system for hassle-free transactions.
 - Job History: Track past services for future reference.
 
 ---
@@ -70,7 +69,83 @@ You can check out the Figma design of the
 app [here](https://www.figma.com/design/7PM5DUw0LOVGuODVoBtFEk/QuickFix?node-id=0-1&t=RP7Bd3AlO4wHatx8-1).
 
 ---
+# **QuickFix Workflow Tutorial**
 
+---
+
+## **1. Set Up Your Worker Profile**
+### **On Phone 1 (Worker Account):**
+1. Log in to your account on the first phone.
+2. Navigate to the **Profile Screen**.
+3. Press the **"Become a Worker"** button.
+4. Complete the form to create your worker profile.
+5. toggle the switch button to go the worker mode
+6. Congratulations! You are now a worker.
+
+---
+
+## **2. Set Up a User Account**
+### **On Phone 2 (User Account):**
+1. Log in to a different account on the second phone.
+2. Ensure this account is set up as a **user**.
+
+---
+
+## **3. Create a QuickFix as a User**
+### **On Phone 2 (User Account):**
+1. Navigate to the **Search Screen**.
+2. Select a **subcategory** that matches the type of QuickFix you need.
+3. Choose a **worker** from the list (select the worker you created on Phone 1).
+4. Press the **"Continue"** button.
+5. Follow the onboarding process to create the QuickFix.
+
+---
+
+## **4. Worker Receives the QuickFix**
+### **On Phone 1 (Worker Account):**
+1. Go to the **Home Screen**.
+2. Check the **QuickFix Widget** under the **"All" section**.
+3. Locate the new QuickFix and press it.
+4. Consult the **discussion** and accept the QuickFix.
+
+---
+
+## **5. Communicate with the User**
+### **On Phone 1 (Worker Account):**
+1. Once the QuickFix is accepted, you can chat with the user.
+
+---
+
+## **6. Make the Bill**
+### **On Phone 1 (Worker Account):**
+1. Go back to the QuickFix in the **Dashboard**.
+2. Press the **"Make the Bill"** button.
+3. Fill out the billing details.
+
+---
+
+## **7. User Pays the QuickFix**
+### **On Phone 2 (User Account):**
+1. Open the QuickFix in the **Home Screen**.
+2. Complete the payment process.
+
+---
+
+## **8. Worker Completes the QuickFix**
+### **On Phone 1 (Worker Account):**
+1. Renter the quickfix from the home screen and mark the QuickFix as **completed** in the Dashboard.
+
+---
+
+## **9. User Leaves a Review**
+### **On Phone 2 (User Account):**
+1. Re-enter the QuickFix from the **Home Screen**.
+2. Leave a review for the worker.
+
+---
+
+## **Summary**
+This workflow enables a seamless interaction between the user and the worker, from creating a QuickFix to completing it, including billing and leaving a review. Follow these steps to ensure a smooth process!
 *More details will be added to this README as the app gets developed. Stay tuned for future
 updates!*
 
