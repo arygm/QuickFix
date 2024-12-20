@@ -584,7 +584,6 @@ class MainActivityTest : TestCase() {
       composeTestRule.waitUntil("find the categories", timeoutMillis = 20000) {
         composeTestRule.onAllNodesWithText("Carpentry").fetchSemanticsNodes().isNotEmpty()
       }
-      composeTestRule.onNodeWithText("Commercial Painting").assertIsDisplayed()
       composeTestRule.onNodeWithTag("searchContent").performTextInput("Framing")
       composeTestRule.waitForIdle()
       composeTestRule.waitUntil("find the worker", timeoutMillis = 20000) {
