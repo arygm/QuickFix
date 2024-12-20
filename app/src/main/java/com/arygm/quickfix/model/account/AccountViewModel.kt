@@ -117,4 +117,12 @@ open class AccountViewModel(private val repository: AccountRepository) : ViewMod
     repository.uploadAccountImages(
         accountId = accountId, images = images, onSuccess = onSuccess, onFailure = onFailure)
   }
+
+  fun fetchAccountProfileImageAsBitmap(
+      accountId: String,
+      onSuccess: (Bitmap) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    repository.fetchAccountProfileImageAsBitmap(accountId, onSuccess, onFailure)
+  }
 }

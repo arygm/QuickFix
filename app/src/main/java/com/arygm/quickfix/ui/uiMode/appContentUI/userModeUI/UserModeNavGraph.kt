@@ -169,6 +169,7 @@ fun UserModeNavHost(
                             userViewModel,
                             workerViewModel,
                             quickFixViewModel,
+                            accountViewModel,
                             userNavigationActions,
                             searchViewModel)
                       }
@@ -258,6 +259,8 @@ fun HomeNavHost(
     userViewModel: ProfileViewModel,
     workerViewModel: ProfileViewModel,
     quickFixViewModel: QuickFixViewModel,
+    accountViewModel: AccountViewModel,
+
     navigationActionsRoot: NavigationActions,
     searchViewModel: SearchViewModel
 ) {
@@ -305,6 +308,7 @@ fun HomeNavHost(
           navigationActions = navigationActions,
           quickFixViewModel = quickFixViewModel,
           preferencesViewModel = preferencesViewModel,
+
           accountViewModel = accountViewModel,
           workerViewModel = workerViewModel)
     }
@@ -366,7 +370,8 @@ fun ProfileNavHost(
           preferencesViewModel,
           userPreferencesViewModel,
           appContentNavigationActions,
-          modeViewModel)
+          modeViewModel,
+          accountViewModel)
     }
     composable(UserScreen.ACCOUNT_CONFIGURATION) {
       AccountConfigurationScreen(profileNavigationActions, accountViewModel, preferencesViewModel)
@@ -545,6 +550,7 @@ fun SearchNavHost(
           navigationActions = navigationActions,
           quickFixViewModel = quickFixViewModel,
           preferencesViewModel = preferencesViewModel,
+
           accountViewModel = accountViewModel,
           workerViewModel = workerViewModel)
     }
