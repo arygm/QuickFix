@@ -198,10 +198,9 @@ fun QuickFixTextFieldCustom(
                                     C.Tag.icon_custom_text_field) // Space between icon and text
                         )
                   }
+                  Spacer(Modifier.padding(horizontal = spaceBetweenLeadIconText))
                 }
-                Spacer(
-                    Modifier.padding(
-                        horizontal = spaceBetweenLeadIconText)) // Space between icon and text
+                // Space between icon and text
                 Box(modifier = Modifier.weight(1f)) {
                   BasicTextField(
                       value = updatedValue,

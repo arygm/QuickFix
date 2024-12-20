@@ -1,4 +1,4 @@
-package com.arygm.quickfix.ui.uiMode.workerMode.home
+package com.arygm.quickfix.ui.uiMode.appContentUI.workerMode.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

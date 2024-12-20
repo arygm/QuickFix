@@ -147,12 +147,12 @@ class QuickFixThirdStepTest {
     // Arrange: Set the composable content
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Act: Click on Add Bill Field Button
@@ -166,12 +166,12 @@ class QuickFixThirdStepTest {
   fun deleteBillField_removesFromList() = runTest {
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix,
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Add a bill field
@@ -194,12 +194,12 @@ class QuickFixThirdStepTest {
     // Arrange: Add a bill field
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
@@ -220,12 +220,12 @@ class QuickFixThirdStepTest {
     // Arrange: Add a bill field
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
@@ -246,12 +246,12 @@ class QuickFixThirdStepTest {
     // Arrange: Add a bill field
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
@@ -272,12 +272,12 @@ class QuickFixThirdStepTest {
     // Arrange: Add a bill field
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("AddBillFieldButton").performClick()
@@ -294,14 +294,15 @@ class QuickFixThirdStepTest {
 
   @Test
   fun addAndSubmitQuickFix_success() = runTest {
+    quickFixViewModel.setUpdateQuickFix(fakeQuickFix)
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix,
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* Verify changes if needed */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Act:
@@ -362,12 +363,12 @@ class QuickFixThirdStepTest {
     // Arrange: Initialize QuickFix with no bill fields
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix.copy(bill = emptyList()),
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Act: Add a bill field and enter incomplete data (only description)
@@ -388,14 +389,15 @@ class QuickFixThirdStepTest {
     val date2 = Timestamp(1234567890, 0)
     val testQuickFix = fakeQuickFix.copy(date = listOf(date1, date2))
 
+    quickFixViewModel.setUpdateQuickFix(testQuickFix)
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = testQuickFix,
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Act: Open Suggested Dates Dialog and select the first date
@@ -413,12 +415,12 @@ class QuickFixThirdStepTest {
   fun overallTotal_calculatesCorrectly() = runTest {
     composeTestRule.setContent {
       QuickFixThirdStep(
-          quickFix = fakeQuickFix,
           quickFixViewModel = quickFixViewModel,
           workerProfile = mockWorkerProfile,
           onQuickFixChange = { /* No-op for testing */},
           onQuickFixPay = { /* No-op for testing */},
-          mode = AppMode.WORKER)
+          mode = AppMode.WORKER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Act: Add two more bill fields

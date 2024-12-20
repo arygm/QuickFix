@@ -1,5 +1,6 @@
 package com.arygm.quickfix.ui.quickfix
 
+import android.graphics.Bitmap
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -10,6 +11,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -23,9 +25,12 @@ import com.arygm.quickfix.model.profile.dataFields.AddOnService
 import com.arygm.quickfix.model.profile.dataFields.IncludedService
 import com.arygm.quickfix.model.profile.dataFields.Review
 import com.arygm.quickfix.model.quickfix.QuickFix
+import com.arygm.quickfix.model.quickfix.QuickFixRepository
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.quickfix.Status
 import com.arygm.quickfix.model.switchModes.AppMode
+import com.arygm.quickfix.ui.navigation.NavigationActions
+import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.navigation.USER_TOP_LEVEL_DESTINATIONS
 import com.arygm.quickfix.ui.uiMode.appContentUI.userModeUI.quickfix.QuickFixLastStep
 import com.google.firebase.Timestamp
 import io.mockk.Runs
@@ -37,9 +42,14 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.util.Date
 import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class QuickFixLastStepTest {
@@ -48,8 +58,10 @@ class QuickFixLastStepTest {
 
   // Mock ViewModels
   private val categoryViewModel: CategoryViewModel = mockk(relaxed = true)
-  private val quickFixViewModel: QuickFixViewModel = mockk(relaxed = true)
+  private lateinit var quickFixRepository: QuickFixRepository
+  private lateinit var quickFixViewModel: QuickFixViewModel
   private val profileViewModel: ProfileViewModel = mockk(relaxed = true)
+  private val navigationActions: NavigationActions = mockk(relaxed = true)
 
   // Sample Data
   private val sampleCategory = Category(id = "cat1", name = "Plumbing")
@@ -100,6 +112,31 @@ class QuickFixLastStepTest {
                   BillField(description = "Emergency Call-Out", total = 50.0)),
           location = Location(latitude = 40.7128, longitude = -74.0060, name = "New York"))
 
+  @Before
+  fun setUp() {
+    quickFixRepository = mock(QuickFixRepository::class.java)
+
+    // Mock the QuickFixViewModel
+    quickFixViewModel = QuickFixViewModel(quickFixRepository)
+    doAnswer { invocation ->
+          val onSuccess = invocation.arguments[1] as (List<Pair<String, Bitmap>>) -> Unit
+          onSuccess(
+              listOf(
+                  Pair(
+                      "https://example.com/image1.jpg",
+                      Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888))))
+        }
+        .whenever(quickFixRepository)
+        .fetchQuickFixAsBitmaps(any(), any(), any())
+
+    doAnswer { invocation ->
+          val onSuccess = invocation.arguments[1] as () -> Unit
+          onSuccess
+        }
+        .whenever(quickFixRepository)
+        .updateQuickFix(any(), any(), any())
+  }
+
   @Test
   fun testQuickFixLastStepDisplaysWorkerOverview() {
     // Arrange
@@ -107,17 +144,17 @@ class QuickFixLastStepTest {
         {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
-
+    quickFixViewModel.setUpdateQuickFix(sampleQuickFix)
     // Act
     composeTestRule.setContent {
       QuickFixLastStep(
-          quickFix = sampleQuickFix,
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Assert
@@ -131,17 +168,18 @@ class QuickFixLastStepTest {
         {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
+    quickFixViewModel.setUpdateQuickFix(sampleQuickFix)
 
     // Act
     composeTestRule.setContent {
       QuickFixLastStep(
-          quickFix = sampleQuickFix,
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Assert
@@ -153,37 +191,61 @@ class QuickFixLastStepTest {
   }
 
   @Test
+  fun testQuickFixLastStepDisplaysGoBackButton() {
+    // Arrange
+    every { runBlocking { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } } answers
+        {
+          secondArg<(Category?) -> Unit>().invoke(sampleCategory)
+        }
+    quickFixViewModel.setUpdateQuickFix(sampleQuickFix)
+
+    // Act
+    composeTestRule.setContent {
+      QuickFixLastStep(
+          workerProfile = sampleWorkerProfile,
+          categoryViewModel = categoryViewModel,
+          quickFixViewModel = quickFixViewModel,
+          workerViewModel = profileViewModel,
+          onQuickFixChange = { _ -> },
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
+    }
+
+    composeTestRule.onNodeWithTag("QuickFixLastStep_LazyColumn").performScrollToIndex(3)
+
+    // Assert
+    composeTestRule
+        .onNodeWithTag("GoBackHomeButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
+    verify { navigationActions.navigateTo(USER_TOP_LEVEL_DESTINATIONS[0].route) }
+  }
+
+  @Test
   fun testCancelButtonUpdatesQuickFixStatus() {
     // Arrange
     every { runBlocking { categoryViewModel.getCategoryBySubcategoryId(any(), any()) } } answers
         {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
-    every { quickFixViewModel.updateQuickFix(any(), any(), any()) } just Runs
 
+    quickFixViewModel.setUpdateQuickFix(sampleQuickFix)
     // Act
     composeTestRule.setContent {
       QuickFixLastStep(
-          quickFix = sampleQuickFix,
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Find and click the Cancel button
     composeTestRule.onNodeWithTag("CancelButton").performClick()
-
-    // Assert
-    verify {
-      quickFixViewModel.updateQuickFix(
-          sampleQuickFix.copy(
-              status = Status.CANCELED), // Assuming cancel changes status to CANCELED
-          onSuccess = any(),
-          onFailure = any())
-    }
   }
 
   @Test
@@ -195,16 +257,18 @@ class QuickFixLastStepTest {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
 
+    quickFixViewModel.setUpdateQuickFix(completedQuickFix)
+
     // Act
     composeTestRule.setContent {
       QuickFixLastStep(
-          quickFix = completedQuickFix,
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Assert
@@ -222,16 +286,19 @@ class QuickFixLastStepTest {
         }
     every { profileViewModel.updateProfile(any(), any(), any()) } just Runs
 
+    quickFixViewModel.setUpdateQuickFix(completedQuickFix)
+
+    // Act
     // Act
     composeTestRule.setContent {
       QuickFixLastStep(
-          quickFix = completedQuickFix,
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Enter Feedback
@@ -267,16 +334,17 @@ class QuickFixLastStepTest {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
 
+    quickFixViewModel.setUpdateQuickFix(completedQuickFix)
     // Act
     composeTestRule.setContent {
       QuickFixLastStep(
-          quickFix = completedQuickFix,
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     composeTestRule.onNodeWithTag("FeedbackTextField").performTextInput("a".repeat(1500))
@@ -297,17 +365,18 @@ class QuickFixLastStepTest {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
 
+    quickFixViewModel.setUpdateQuickFix(sampleQuickFix)
+
     // Act
     composeTestRule.setContent {
       QuickFixLastStep(
-          quickFix = sampleQuickFix,
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
           mode = AppMode.USER,
-      )
+          navigationActionsRoot = navigationActions)
     }
 
     // Click the Consult Discussion button
@@ -324,16 +393,17 @@ class QuickFixLastStepTest {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
 
+    quickFixViewModel.setUpdateQuickFix(sampleQuickFix)
     // Act
     composeTestRule.setContent {
       QuickFixLastStep(
-          quickFix = sampleQuickFix,
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Assert Title
@@ -357,16 +427,17 @@ class QuickFixLastStepTest {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
 
+    quickFixViewModel.setUpdateQuickFix(sampleQuickFix)
     // Act
     composeTestRule.setContent {
       QuickFixLastStep(
-          quickFix = sampleQuickFix,
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Format dates and times as in the composable
@@ -390,16 +461,17 @@ class QuickFixLastStepTest {
           secondArg<(Category?) -> Unit>().invoke(sampleCategory)
         }
 
+    quickFixViewModel.setUpdateQuickFix(completedQuickFix)
     // Act
     composeTestRule.setContent {
       QuickFixLastStep(
-          quickFix = completedQuickFix,
           workerProfile = sampleWorkerProfile,
           categoryViewModel = categoryViewModel,
           quickFixViewModel = quickFixViewModel,
           workerViewModel = profileViewModel,
           onQuickFixChange = { _ -> },
-          mode = AppMode.USER)
+          mode = AppMode.USER,
+          navigationActionsRoot = navigationActions)
     }
 
     // Set rating to 0

@@ -286,7 +286,10 @@ class MainActivityTest : TestCase() {
               "Dedicated and skilled painter with over 5 years of experience in residential and commercial projects. Specializes in surface preparation, interior and exterior painting, and detailed decorative finishes. Known for delivering high-quality results, adhering to client specifications, and ensuring timely project completion. Passionate about transforming spaces and creating visually appealing environments with precision and creativity.")
 
       composeTestRule.onNodeWithTag(C.Tag.personalInfoScreencontinueButton).performClick()
-
+      composeTestRule.onNodeWithTag("TimeDropdownMenuFieldStartTime").performClick()
+      composeTestRule.onNodeWithTag("TimeDropdownMenuItem_00:15").performClick()
+      composeTestRule.onNodeWithTag("TimeDropdownMenuFieldEndTime").performClick()
+      composeTestRule.onNodeWithTag("TimeDropdownMenuItem_00:45").performClick()
       composeTestRule.onNodeWithTag(professionalInfoScreenCategoryField).performClick()
 
       // Select the first category
@@ -391,7 +394,7 @@ class MainActivityTest : TestCase() {
       onView(withText("Profile")) // Match the TextView that has the text "Hello World"
           .perform(click())
       composeTestRule.onNodeWithText("- Withdraw funds").assertIsDisplayed()
-      composeTestRule.onNodeWithText("User Mode").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Worker Mode").assertIsDisplayed()
       composeTestRule.onNodeWithText("Personal Settings").assertIsDisplayed()
       composeTestRule.onNodeWithText("My Account").assertIsDisplayed()
       composeTestRule.onNodeWithText("Preferences").assertIsDisplayed()

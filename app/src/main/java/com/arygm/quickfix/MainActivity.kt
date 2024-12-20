@@ -34,6 +34,7 @@ import com.arygm.quickfix.model.locations.LocationViewModel
 import com.arygm.quickfix.model.messaging.ChatViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModel
 import com.arygm.quickfix.model.offline.small.PreferencesViewModelUserProfile
+import com.arygm.quickfix.model.offline.small.PreferencesViewModelWorkerProfile
 import com.arygm.quickfix.model.profile.ProfileViewModel
 import com.arygm.quickfix.model.quickfix.QuickFixViewModel
 import com.arygm.quickfix.model.switchModes.ModeViewModel
@@ -123,6 +124,8 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
       viewModel(factory = PreferencesViewModel.Factory(LocalContext.current.dataStore))
   val userPreferencesViewModel: PreferencesViewModelUserProfile =
       viewModel(factory = PreferencesViewModelUserProfile.Factory(LocalContext.current.dataStore))
+  val workerPreferenceViewModel: PreferencesViewModelWorkerProfile =
+      viewModel(factory = PreferencesViewModelWorkerProfile.Factory(LocalContext.current.dataStore))
 
   val workerViewModel: ProfileViewModel =
       viewModel(key = "workerViewModel", factory = ProfileViewModel.WorkerFactory)
@@ -174,6 +177,7 @@ fun QuickFixApp(testBitmapPP: Bitmap?, testLocation: Location = Location()) {
               navigationActionsRoot,
               modeViewModel,
               userPreferencesViewModel,
+              workerPreferenceViewModel,
               workerViewModel,
               categoryViewModel,
               locationViewModel,

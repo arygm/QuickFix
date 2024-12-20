@@ -74,6 +74,7 @@ fun AnnouncementsScreen(
     workerProfileViewModel.fetchUserProfile(uid) { profile ->
       workerProfile = profile as WorkerProfile
     }
+    announcementViewModel.getAnnouncementsForCurrentWorker()
   }
 
   val announcements by announcementViewModel.announcements.collectAsState()
